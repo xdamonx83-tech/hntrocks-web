@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\ApiFeedController;
 use App\Http\Controllers\Api\V1\ApiFeedEngagementController;
 use App\Http\Controllers\Api\V1\ApiGifController;
 use App\Http\Controllers\Api\V1\ApiHallOfFameController;
+use App\Http\Controllers\Api\V1\ApiHashtagController;
 use App\Http\Controllers\Api\V1\ApiLfgController;
 use App\Http\Controllers\Api\V1\ApiLoadoutChallengesController;
 use App\Http\Controllers\Api\V1\ApiMembersController;
@@ -90,6 +91,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/feed/comments/{comment}/delete', [ApiFeedEngagementController::class, 'destroyComment'])->name('feed.comments.destroy');
         Route::post('/feed/comments/{comment}/reaction', [ApiFeedEngagementController::class, 'toggleCommentReaction'])->name('feed.comments.reactions.toggle');
         Route::post('/feed/comments/{comment}/translation', [FeedTranslationController::class, 'comment'])->name('feed.comments.translation');
+
+        Route::get('/hashtags/{tag}', [ApiHashtagController::class, 'show'])
+            ->where('tag', '[A-Za-z0-9_\-]+')
+            ->name('hashtags.show');
 
         Route::get('/members', [ApiMembersController::class, 'index'])->name('members.index');
         Route::get('/friends', [ApiMembersController::class, 'friends'])->name('friends.index');
