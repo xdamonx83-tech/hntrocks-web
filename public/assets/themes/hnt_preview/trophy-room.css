@@ -1,0 +1,1166 @@
+/* Patch 739: isolated virtual trophy room prototype + interaction polish */
+.trophy-room-window {
+    grid-template-columns: 260px minmax(0, 1fr) 320px;
+}
+
+.trophy-room-main {
+    padding: 32px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.trophy-room-shell {
+    width: min(calc(100% - 64px), 760px);
+    margin: 0 auto;
+}
+
+.trophy-room-hero,
+.trophy-room-stage-card,
+.trophy-room-side-card {
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(32, 32, 30, 0.66);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+}
+
+.trophy-room-hero {
+    position: relative;
+    min-height: 196px;
+    padding: 28px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: end;
+    background:
+        radial-gradient(circle at 90% 0%, rgba(214, 168, 79, 0.16), transparent 28%),
+        radial-gradient(circle at 8% 12%, rgba(155, 228, 71, 0.10), transparent 32%),
+        linear-gradient(135deg, rgba(18, 20, 20, 0.96), rgba(34, 28, 18, 0.72));
+}
+
+.trophy-room-hero::after {
+    content: "";
+    position: absolute;
+    right: -90px;
+    bottom: -150px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, rgba(214, 168, 79, 0.14) 0 6deg, transparent 6deg 15deg);
+    opacity: 0.28;
+    pointer-events: none;
+}
+
+.trophy-room-hero-copy,
+.trophy-room-hero-actions {
+    position: relative;
+    z-index: 1;
+}
+
+.trophy-room-kicker,
+.trophy-room-side-kicker,
+.trophy-room-stage-top span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-primary);
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.trophy-room-kicker .ph {
+    font-size: 17px;
+}
+
+.trophy-room-hero h1 {
+    margin: 18px 0 12px;
+    color: var(--text-main);
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 0.96;
+    letter-spacing: -0.065em;
+    font-weight: 950;
+}
+
+.trophy-room-hero p {
+    max-width: 560px;
+    margin: 0;
+    color: #D8CDBE;
+    font-size: 15px;
+    line-height: 1.58;
+    font-weight: 700;
+}
+
+.trophy-room-hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 190px;
+}
+
+.trophy-room-soft-link {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 10px;
+    color: var(--text-main);
+    background: rgba(20, 20, 18, 0.72);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.trophy-room-soft-link .ph,
+.trophy-room-hero-actions .btn-create .ph {
+    font-size: 17px;
+}
+
+.trophy-room-stage-card {
+    padding: 18px;
+    background:
+        radial-gradient(circle at 50% 100%, rgba(155, 228, 71, 0.08), transparent 34%),
+        rgba(19, 20, 19, 0.78);
+}
+
+.trophy-room-stage-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 14px;
+}
+
+.trophy-room-stage-top h2 {
+    margin: 7px 0 0;
+    color: var(--text-main);
+    font-size: 22px;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    font-weight: 950;
+}
+
+.trophy-room-stage-status {
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #D8CDBE;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 12px;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.trophy-room-stage-status .ph {
+    color: var(--accent-primary);
+    font-size: 16px;
+}
+
+.trophy-room-canvas-wrap {
+    position: relative;
+    min-height: 560px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(214, 168, 79, 0.14);
+    background:
+        radial-gradient(circle at 50% 0%, rgba(214, 168, 79, 0.12), transparent 38%),
+        radial-gradient(circle at 78% 88%, rgba(155, 228, 71, 0.055), transparent 35%),
+        #10100f;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.025), 0 24px 70px rgba(0,0,0,0.22);
+}
+
+.trophy-room-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 560px;
+    touch-action: none;
+}
+
+.trophy-room-reset {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    min-height: 38px;
+    padding: 0 13px;
+    border: 0;
+    border-radius: 999px;
+    color: var(--text-main);
+    background: rgba(20, 20, 18, 0.82);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+}
+
+.trophy-room-reset .ph {
+    font-size: 16px;
+    color: var(--accent-primary);
+}
+
+.trophy-room-fallback {
+    position: absolute;
+    inset: 18px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 8px;
+    padding: 22px;
+    border-radius: 10px;
+    color: var(--text-main);
+    background: rgba(20, 20, 18, 0.86);
+    text-align: center;
+}
+
+.trophy-room-fallback[hidden] {
+    display: none;
+}
+
+.trophy-room-fallback .ph {
+    color: var(--accent-danger);
+    font-size: 34px;
+}
+
+.trophy-room-fallback span {
+    color: var(--text-muted);
+    max-width: 360px;
+    line-height: 1.45;
+}
+
+.trophy-room-mobile-hint {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.trophy-room-mobile-hint .ph {
+    color: var(--accent-primary);
+    font-size: 18px;
+}
+
+.trophy-room-side {
+    padding: 32px 24px 32px 0;
+    overflow-y: auto;
+}
+
+.trophy-room-side-card {
+    --trophy-accent: var(--accent-primary);
+    padding: 22px;
+    margin-bottom: 18px;
+    background:
+        radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--trophy-accent) 18%, transparent), transparent 32%),
+        rgba(32, 32, 30, 0.72);
+}
+
+.trophy-room-side-card h2 {
+    margin: 11px 0 10px;
+    color: var(--text-main);
+    font-size: 21px;
+    line-height: 1.1;
+    letter-spacing: -0.045em;
+    font-weight: 950;
+}
+
+.trophy-room-side-card p {
+    margin: 0;
+    color: #D8CDBE;
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 700;
+}
+
+.trophy-room-detail-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.trophy-room-detail-list div {
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.trophy-room-detail-list dt {
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 950;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.trophy-room-detail-list dd {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.35;
+}
+
+.trophy-room-side-card.compact {
+    background: rgba(19, 20, 19, 0.62);
+}
+
+.trophy-room-control-list {
+    display: grid;
+    gap: 12px;
+    margin: 18px 0 0;
+    list-style: none;
+}
+
+.trophy-room-control-list li {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    color: #D8CDBE;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.trophy-room-control-list .ph {
+    color: var(--accent-primary);
+    font-size: 20px;
+}
+
+
+
+.trophy-room-inline-detail {
+    display: none;
+}
+
+.trophy-room-detail-list dd {
+    transition: color 0.18s ease;
+}
+
+.trophy-room-side-card[data-trophy-detail-panel],
+.trophy-room-inline-detail[data-trophy-detail-panel] {
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.trophy-room-side-card[data-trophy-detail-panel] {
+    border-color: color-mix(in srgb, var(--trophy-accent) 24%, rgba(255,255,255,0.08));
+}
+
+.trophy-room-side-card[data-trophy-detail-panel] h2,
+.trophy-room-inline-detail[data-trophy-detail-panel] h2 {
+    text-wrap: balance;
+}
+
+.trophy-room-canvas-wrap::before,
+.trophy-room-canvas-wrap::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.trophy-room-canvas-wrap::before {
+    inset: 0;
+    background: radial-gradient(circle at 50% 40%, transparent 0 52%, rgba(0,0,0,0.28) 100%);
+}
+
+.trophy-room-canvas-wrap::after {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(214,168,79,0.28), transparent);
+    opacity: 0.75;
+}
+
+.trophy-room-canvas,
+.trophy-room-reset,
+.trophy-room-fallback {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 1200px) {
+    .trophy-room-window {
+        grid-template-columns: 240px minmax(0, 1fr) 300px;
+    }
+
+    .trophy-room-shell {
+        width: min(calc(100% - 48px), 720px);
+    }
+}
+
+@media (max-width: 992px) {
+    .trophy-room-window {
+        grid-template-columns: 220px minmax(0, 1fr);
+    }
+
+    .trophy-room-side {
+        display: none;
+    }
+
+    .trophy-room-inline-detail {
+        display: block;
+        margin-top: 16px;
+        padding: 18px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, var(--trophy-accent) 18%, rgba(255,255,255,0.08));
+        background:
+            radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--trophy-accent) 14%, transparent), transparent 34%),
+            rgba(32, 32, 30, 0.66);
+    }
+
+    .trophy-room-shell {
+        width: min(calc(100% - 48px), 760px);
+    }
+}
+
+@media (max-width: 768px) {
+    .trophy-room-main {
+        width: 100%;
+        max-width: 100vw;
+        padding: 16px 0 28px;
+    }
+
+    .trophy-room-shell {
+        width: 100%;
+        max-width: 620px;
+        padding: 0 16px;
+        min-width: 0;
+    }
+
+    .trophy-room-hero {
+        grid-template-columns: 1fr;
+        min-height: 0;
+        padding: 22px 18px;
+    }
+
+    .trophy-room-hero h1 {
+        font-size: 36px;
+    }
+
+    .trophy-room-hero-actions {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .trophy-room-stage-card {
+        padding: 14px;
+    }
+
+    .trophy-room-inline-detail h2 {
+        font-size: 20px;
+    }
+
+    .trophy-room-inline-detail .trophy-room-detail-list {
+        grid-template-columns: 1fr;
+    }
+
+    .trophy-room-stage-top {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .trophy-room-canvas-wrap,
+    .trophy-room-canvas {
+        min-height: 470px;
+    }
+
+    .trophy-room-mobile-hint {
+        display: flex;
+    }
+
+    .trophy-room-reset {
+        right: 10px;
+        bottom: 10px;
+    }
+}
+
+@media (max-width: 420px) {
+    .trophy-room-shell {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .trophy-room-hero h1 {
+        font-size: 32px;
+    }
+
+    .trophy-room-canvas-wrap,
+    .trophy-room-canvas {
+        min-height: 430px;
+    }
+}
+
+
+/* Patch 740: keep the virtual trophy room inside the visible app viewport */
+@media (min-width: 993px) {
+    .trophy-room-main {
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+
+    .trophy-room-shell {
+        width: min(calc(100% - 56px), 760px);
+    }
+
+    .trophy-room-hero {
+        min-height: 150px;
+        padding: 22px 24px;
+        margin-bottom: 16px;
+        align-items: center;
+    }
+
+    .trophy-room-hero h1 {
+        margin-top: 12px;
+        margin-bottom: 8px;
+        font-size: clamp(34px, 4.25vw, 48px);
+    }
+
+    .trophy-room-hero p {
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    .trophy-room-hero-actions {
+        min-width: 176px;
+    }
+
+    .trophy-room-stage-card {
+        padding: 16px;
+        min-height: 0;
+    }
+
+    .trophy-room-stage-top {
+        margin-bottom: 12px;
+    }
+
+    .trophy-room-canvas-wrap {
+        min-height: 0;
+        height: clamp(420px, calc(100vh - 390px), 520px);
+    }
+
+    .trophy-room-canvas {
+        min-height: 0;
+        height: 100%;
+    }
+
+    .trophy-room-side {
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .trophy-room-canvas-wrap,
+    .trophy-room-canvas {
+        min-height: 0;
+    }
+
+    .trophy-room-canvas-wrap {
+        height: min(52vh, 470px);
+    }
+
+    .trophy-room-canvas {
+        height: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .trophy-room-canvas-wrap {
+        height: min(50vh, 430px);
+    }
+}
+
+/* Patch 746: First-person trophy room controls */
+.trophy-room-canvas-wrap {
+    cursor: grab;
+}
+
+.trophy-room-shell.is-pointer-locked .trophy-room-canvas-wrap {
+    cursor: none;
+}
+
+.trophy-room-enter-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 12px;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(214, 168, 79, 0.14), transparent 26%),
+        linear-gradient(180deg, rgba(10, 10, 9, 0.18), rgba(10, 10, 9, 0.56));
+    pointer-events: none;
+    text-align: center;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.trophy-room-enter-overlay[hidden],
+.trophy-room-shell.is-pointer-locked .trophy-room-enter-overlay {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.trophy-room-enter-overlay .btn-create {
+    pointer-events: auto;
+    min-height: 46px;
+    padding: 0 20px;
+}
+
+.trophy-room-enter-overlay span {
+    max-width: 420px;
+    color: #D8CDBE;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 800;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+}
+
+.trophy-room-crosshair {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 3;
+    width: 18px;
+    height: 18px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.16s ease;
+}
+
+.trophy-room-crosshair::before,
+.trophy-room-crosshair::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background: rgba(242, 232, 216, 0.86);
+    box-shadow: 0 0 10px rgba(214, 168, 79, 0.30);
+    border-radius: 99px;
+}
+
+.trophy-room-crosshair::before {
+    width: 18px;
+    height: 2px;
+    transform: translate(-50%, -50%);
+}
+
+.trophy-room-crosshair::after {
+    width: 2px;
+    height: 18px;
+    transform: translate(-50%, -50%);
+}
+
+.trophy-room-shell.is-pointer-locked .trophy-room-crosshair {
+    opacity: 0.86;
+}
+
+.trophy-room-shell.is-pointer-locked .trophy-room-stage-status {
+    color: var(--text-main);
+    background: rgba(214, 168, 79, 0.12);
+}
+
+@media (min-width: 993px) {
+    .trophy-room-canvas-wrap {
+        height: clamp(460px, calc(100vh - 360px), 580px);
+    }
+}
+
+@media (max-width: 768px) {
+    .trophy-room-enter-overlay {
+        display: none;
+    }
+}
+
+
+/* Patch 748: in-game trophy hover card + spotlight feedback */
+.trophy-room-ingame-card {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 34px);
+    z-index: 5;
+    width: min(320px, calc(100% - 34px));
+    padding: 13px 15px 12px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--trophy-accent, #D6A84F) 42%, rgba(255, 255, 255, 0.08));
+    background:
+        radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--trophy-accent, #D6A84F) 22%, transparent), transparent 48%),
+        rgba(20, 20, 18, 0.88);
+    color: var(--text-main);
+    box-shadow: 0 20px 54px rgba(0, 0, 0, 0.42), 0 0 24px color-mix(in srgb, var(--trophy-accent, #D6A84F) 18%, transparent);
+    backdrop-filter: blur(16px);
+    transform: translate(-50%, 12px) scale(0.96);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.trophy-room-ingame-card:not([hidden]) {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.trophy-room-ingame-kicker,
+.trophy-room-ingame-card em {
+    display: block;
+    color: var(--trophy-accent, #D6A84F);
+    font-size: 10px;
+    line-height: 1.1;
+    font-weight: 950;
+    letter-spacing: 0.075em;
+    text-transform: uppercase;
+    font-style: normal;
+}
+
+.trophy-room-ingame-card strong {
+    display: block;
+    margin-top: 7px;
+    color: var(--text-main);
+    font-size: 17px;
+    line-height: 1.15;
+    font-weight: 950;
+    letter-spacing: -0.035em;
+}
+
+.trophy-room-ingame-card small {
+    display: block;
+    margin-top: 6px;
+    color: #D8CDBE;
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 750;
+}
+
+.trophy-room-ingame-card em {
+    margin-top: 10px;
+    color: #A79C8E;
+}
+
+.trophy-room-shell.has-ingame-trophy-hover .trophy-room-crosshair::before,
+.trophy-room-shell.has-ingame-trophy-hover .trophy-room-crosshair::after {
+    background: var(--trophy-accent, #D6A84F);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--trophy-accent, #D6A84F) 58%, transparent);
+}
+
+@media (max-width: 768px) {
+    .trophy-room-ingame-card {
+        display: none;
+    }
+}
+
+
+/* Patch 767: mobile trophy-room layout + fullscreen canvas polish */
+.trophy-room-stage-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.trophy-room-canvas-wrap:fullscreen,
+.trophy-room-canvas-wrap:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    border-radius: 0;
+    border: 0;
+    background: #10100f;
+}
+
+.trophy-room-canvas-wrap:fullscreen .trophy-room-canvas,
+.trophy-room-canvas-wrap:-webkit-full-screen .trophy-room-canvas {
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+}
+
+.trophy-room-canvas-wrap:fullscreen .trophy-room-reset,
+.trophy-room-canvas-wrap:-webkit-full-screen .trophy-room-reset {
+    right: max(18px, env(safe-area-inset-right));
+    bottom: max(18px, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 768px) {
+    .trophy-room-window {
+        display: block !important;
+        grid-template-columns: 1fr !important;
+        width: 100vw !important;
+        height: auto !important;
+        min-height: 100dvh !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    .trophy-room-main {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: calc(var(--hnt-mobile-topbar-height, 72px) + 14px) 0 calc(var(--hnt-mobile-bottom-height, 78px) + env(safe-area-inset-bottom) + 22px) !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+    }
+
+    .trophy-room-shell {
+        width: 100% !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        padding: 0 14px !important;
+        margin: 0 auto !important;
+    }
+
+    .trophy-room-hero,
+    .trophy-room-stage-card,
+    .trophy-room-inline-detail {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .trophy-room-hero {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 18px;
+        padding: 18px 16px;
+        margin-bottom: 16px;
+        overflow: hidden;
+    }
+
+    .trophy-room-hero h1 {
+        max-width: 100%;
+        margin-top: 12px;
+        font-size: clamp(34px, 12vw, 46px);
+        line-height: 0.95;
+        letter-spacing: -0.075em;
+        overflow-wrap: anywhere;
+    }
+
+    .trophy-room-hero p {
+        max-width: 100%;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .trophy-room-hero-actions {
+        width: 100%;
+        min-width: 0 !important;
+    }
+
+    .trophy-room-hero-actions .btn-create,
+    .trophy-room-hero-actions .trophy-room-soft-link {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        margin-right: 0;
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .trophy-room-stage-card {
+        padding: 14px 12px;
+    }
+
+    .trophy-room-stage-top {
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .trophy-room-stage-actions {
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    .trophy-room-stage-status {
+        min-height: 38px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .trophy-room-stage-top h2 {
+        font-size: 28px;
+    }
+
+    .trophy-room-canvas-wrap {
+        width: 100%;
+        height: min(62vh, 560px);
+        min-height: 420px;
+        border-radius: 10px;
+    }
+
+    .trophy-room-canvas {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .trophy-room-mobile-hint {
+        display: flex;
+        align-items: flex-start;
+        padding: 0 2px;
+        line-height: 1.35;
+    }
+
+    .trophy-room-inline-detail {
+        margin-top: 14px;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 420px) {
+    .trophy-room-shell {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    .trophy-room-hero h1 {
+        font-size: clamp(32px, 11vw, 40px);
+    }
+
+    .trophy-room-canvas-wrap {
+        height: min(58vh, 500px);
+        min-height: 390px;
+    }
+}
+
+
+/* Patch 768: mobile touch controls for the first-person trophy room */
+.trophy-room-touch-controls {
+    display: none;
+}
+
+.trophy-room-shell.has-touch-controls .trophy-room-enter-overlay {
+    display: none;
+}
+
+.trophy-room-shell.has-touch-controls .trophy-room-crosshair {
+    opacity: 1;
+}
+
+.trophy-room-canvas-wrap:fullscreen .trophy-room-touch-controls,
+.trophy-room-canvas-wrap:-webkit-full-screen .trophy-room-touch-controls {
+    position: absolute;
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+    .trophy-room-shell.has-touch-controls .trophy-room-mobile-hint {
+        display: flex;
+    }
+
+    .trophy-room-shell.has-touch-controls .trophy-room-touch-controls {
+        display: block;
+        position: absolute;
+        inset: 0;
+        z-index: 12;
+        pointer-events: none;
+        touch-action: none;
+    }
+
+    .trophy-room-touch-look {
+        position: absolute;
+        inset: 0 0 0 38%;
+        pointer-events: auto;
+        touch-action: none;
+        cursor: grab;
+    }
+
+    .trophy-room-touch-joystick {
+        position: absolute;
+        left: max(18px, env(safe-area-inset-left));
+        bottom: max(22px, env(safe-area-inset-bottom));
+        width: 112px;
+        height: 112px;
+        border-radius: 999px;
+        border: 1px solid rgba(214, 168, 79, 0.38);
+        background:
+            radial-gradient(circle at center, rgba(214, 168, 79, 0.14), transparent 58%),
+            rgba(15, 15, 13, 0.62);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42), inset 0 0 18px rgba(214, 168, 79, 0.08);
+        pointer-events: auto;
+        touch-action: none;
+        backdrop-filter: blur(8px);
+    }
+
+    .trophy-room-touch-joystick span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #e2b758, #a87923);
+        border: 1px solid rgba(255, 238, 184, 0.55);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+    }
+
+    .trophy-room-touch-action {
+        position: absolute;
+        right: max(18px, env(safe-area-inset-right));
+        bottom: max(28px, env(safe-area-inset-bottom));
+        min-width: 118px;
+        min-height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(214, 168, 79, 0.52);
+        background: linear-gradient(135deg, #e2b758, #c59636);
+        color: #17140f;
+        font-weight: 900;
+        font-size: 13px;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+        pointer-events: auto;
+        touch-action: manipulation;
+    }
+
+    .trophy-room-touch-action .ph {
+        font-size: 20px;
+    }
+
+    .trophy-room-canvas-wrap:fullscreen .trophy-room-touch-joystick,
+    .trophy-room-canvas-wrap:-webkit-full-screen .trophy-room-touch-joystick {
+        left: max(24px, env(safe-area-inset-left));
+        bottom: max(28px, env(safe-area-inset-bottom));
+    }
+
+    .trophy-room-canvas-wrap:fullscreen .trophy-room-touch-action,
+    .trophy-room-canvas-wrap:-webkit-full-screen .trophy-room-touch-action {
+        right: max(24px, env(safe-area-inset-right));
+        bottom: max(34px, env(safe-area-inset-bottom));
+    }
+}
+
+
+/* Patch 769: loading screen for large Godot GLB trophy rooms */
+.trophy-room-loading-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 28px;
+    color: var(--text-main);
+    text-align: center;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(214, 168, 79, 0.18), transparent 34%),
+        radial-gradient(circle at 50% 72%, rgba(155, 228, 71, 0.08), transparent 42%),
+        rgba(12, 12, 10, 0.96);
+    backdrop-filter: blur(10px);
+}
+
+.trophy-room-loading-screen[hidden] {
+    display: none;
+}
+
+.trophy-room-shell.is-loading-room .trophy-room-canvas {
+    opacity: 0.18;
+}
+
+.trophy-room-shell.is-loading-room .trophy-room-crosshair,
+.trophy-room-shell.is-loading-room .trophy-room-touch-controls,
+.trophy-room-shell.is-loading-room .trophy-room-reset,
+.trophy-room-shell.is-loading-room .trophy-room-enter-overlay {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.trophy-room-loading-mark {
+    width: 62px;
+    height: 62px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(214, 168, 79, 0.42);
+    background: rgba(214, 168, 79, 0.13);
+    box-shadow: 0 0 42px rgba(214, 168, 79, 0.20);
+}
+
+.trophy-room-loading-mark .ph {
+    font-size: 28px;
+    color: var(--accent-primary);
+    animation: trophyRoomLoadingPulse 1.2s ease-in-out infinite;
+}
+
+.trophy-room-loading-screen strong {
+    font-size: clamp(22px, 4vw, 34px);
+    font-weight: 950;
+    line-height: 1;
+}
+
+.trophy-room-loading-screen span {
+    max-width: 440px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.trophy-room-loading-track {
+    width: min(360px, 78vw);
+    height: 9px;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(214, 168, 79, 0.18);
+    overflow: hidden;
+}
+
+.trophy-room-loading-track span {
+    display: block;
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #9BE447, #D6A84F);
+    box-shadow: 0 0 22px rgba(214, 168, 79, 0.32);
+    transition: width 180ms ease;
+}
+
+.trophy-room-loading-screen em {
+    color: var(--accent-primary);
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+@keyframes trophyRoomLoadingPulse {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.84;
+    }
+    50% {
+        transform: rotate(10deg) scale(1.08);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .trophy-room-loading-screen {
+        padding: 22px;
+    }
+
+    .trophy-room-loading-mark {
+        width: 54px;
+        height: 54px;
+    }
+}

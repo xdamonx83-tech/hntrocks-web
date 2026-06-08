@@ -1,0 +1,63 @@
+User-agent: *
+Allow: /
+
+# Private/authenticated application areas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /overview
+Disallow: /overview/
+Disallow: /account
+Disallow: /account/
+Disallow: /settings
+Disallow: /settings/
+Disallow: /messages
+Disallow: /messages/
+Disallow: /notifications
+Disallow: /notifications/
+Disallow: /media
+Disallow: /media/
+Disallow: /profile
+Disallow: /profile/
+Disallow: /feed
+Disallow: /feed/
+Disallow: /teams
+Disallow: /teams/
+Disallow: /lfg
+Disallow: /lfg/
+Disallow: /team-lfg
+Disallow: /team-lfg/
+Disallow: /moments
+Disallow: /moments/
+Disallow: /referrals
+Disallow: /referrals/
+Disallow: /gamification
+Disallow: /gamification/
+Disallow: /contracts
+Disallow: /contracts/
+Disallow: /cup-feedback
+Disallow: /cup-feedback/
+
+# Technical, preview and redirect areas
+Disallow: /design
+Disallow: /design/
+Disallow: /out
+Disallow: /out/
+Disallow: /go/
+Disallow: /language/
+Disallow: /auth/
+Disallow: /password
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /reports
+Disallow: /mentions
+Disallow: /storage/
+Disallow: /uploads/
+
+# Public cup, profile, ideas, moment-of-week and loadout pages are intentionally crawlable. Private actions stay blocked.
+Disallow: /cups/create
+Disallow: /cups/*/edit
+Disallow: /cups/*/join/
+Disallow: /cups/*/submissions/
+Disallow: /loadout-challenges/*/submissions
+
+Sitemap: https://hnt.rocks/sitemap.xml

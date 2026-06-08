@@ -1,0 +1,121 @@
+/* HNT Socialite bridge: keep Socialite as the visual base while old feed components remain functional. */
+.hh-socialite-html,
+.hh-socialite-body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.hh-socialite-body {
+  --m-top: 76px;
+  --w-side: 288px;
+  --w-side-sm: 88px;
+  background: #f1f5f9;
+  color: #111827;
+}
+.hh-socialite-body a { text-decoration: none; }
+.hh-socialite-header { box-shadow: 0 1px 2px rgba(15, 23, 42, .05); }
+.hh-socialite-search { position: relative; }
+.hh-socialite-search input { border: 0 !important; outline: none !important; box-shadow: none !important; }
+.hh-socialite-topnav a {
+  display: inline-flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+}
+.hh-socialite-topnav a.active,
+.hh-socialite-topnav a:hover { background: #eef2ff; color: #2563eb; }
+.hh-socialite-icon-btn { color: #0f172a; display: inline-grid; place-items: center; }
+.hh-socialite-sidebar { background: rgba(255,255,255,.78); }
+.hh-socialite-menu a {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  border-radius: 14px;
+  color: #334155;
+}
+.hh-socialite-menu a ion-icon { font-size: 23px; }
+.hh-socialite-menu a.active,
+.hh-socialite-menu a:hover { background: #e0edff; color: #1d4ed8; }
+.hh-socialite-filter-nav a {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 1px 2px rgba(15,23,42,.04);
+  white-space: nowrap;
+}
+.hh-socialite-filter-nav a.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+.hh-socialite-composer textarea,
+.hh-socialite-composer input { font-family: inherit; }
+.hh-socialite-main .hh-vk-feed-post,
+.hh-socialite-main .widget-box.no-padding.hh-vk-feed-post {
+  border-radius: 18px !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,.04) !important;
+  overflow: hidden;
+  padding: 0 !important;
+}
+.hh-socialite-main .hh-vk-feed-post .widget-box-status { padding: 18px 18px 0 !important; }
+.hh-socialite-main .hh-vk-feed-post .widget-box-status-text {
+  color: #1f2937 !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+.hh-socialite-main .hh-vk-feed-post .user-status-title,
+.hh-socialite-main .hh-vk-feed-post .user-status-title a { color: #111827 !important; }
+.hh-socialite-main .hh-vk-feed-post .user-status-text,
+.hh-socialite-main .hh-vk-feed-post .user-status-timestamp { color: #64748b !important; }
+.hh-socialite-main .hh-vk-feed-media { margin-top: 16px !important; border-radius: 0 !important; }
+.hh-socialite-main .hh-vk-feed-media img,
+.hh-socialite-main .hh-vk-feed-media video { object-fit: cover; }
+.hh-socialite-main .post-options,
+.hh-socialite-main .post-option-wrap,
+.hh-socialite-main .post-comment-list,
+.hh-socialite-main .post-comment-form,
+.hh-socialite-main .post-comment-form-wrap { background: #fff !important; }
+.hh-socialite-main .post-option {
+  border-radius: 999px !important;
+  min-height: 42px;
+}
+.hh-socialite-main .post-option:hover { background: #f1f5f9 !important; }
+.hh-socialite-main .post-comment,
+.hh-socialite-main .post-comment-form { border-top-color: #eef2f7 !important; }
+.hh-socialite-main .button,
+.hh-socialite-main button.button { border-radius: 12px !important; }
+.hh-socialite-main .simple-dropdown {
+  border-radius: 14px !important;
+  box-shadow: 0 18px 35px rgba(15,23,42,.16) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+.hh-socialite-main .form-textarea textarea,
+.hh-socialite-main textarea,
+.hh-socialite-main input[type="text"] {
+  border-color: #e2e8f0;
+}
+.hh-socialite-main .hh-feed-text-background-card { border-radius: 18px !important; }
+.hh-socialite-main .hh-feed-poll-card,
+.hh-socialite-main .hh-feed-gif-card,
+.hh-socialite-main .hh-feed-translation {
+  border-radius: 16px !important;
+  border-color: #e2e8f0 !important;
+}
+@media (max-width: 1279px) {
+  .hh-socialite-body { --w-side-sm: 0px; }
+  .hh-socialite-main { margin-left: 0 !important; }
+}
+@media (max-width: 767px) {
+  .hh-socialite-body { --m-top: 68px; }
+  .hh-socialite-main { padding: 10px !important; }
+  .hh-socialite-hero-card .text-3xl { font-size: 1.55rem; }
+}

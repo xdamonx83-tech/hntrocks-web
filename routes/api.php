@@ -1,0 +1,173 @@
+<?php
+
+use App\Http\Controllers\Api\V1\ApiBootstrapController;
+use App\Http\Controllers\Api\V1\ApiCupsController;
+use App\Http\Controllers\Api\V1\ApiCrownsController;
+use App\Http\Controllers\Api\V1\ApiCupFeedbackController;
+use App\Http\Controllers\Api\V1\ApiContractsController;
+use App\Http\Controllers\Api\V1\ApiCupIdeasController;
+use App\Http\Controllers\Api\V1\ApiFeedController;
+use App\Http\Controllers\Api\V1\ApiFeedEngagementController;
+use App\Http\Controllers\Api\V1\ApiGifController;
+use App\Http\Controllers\Api\V1\ApiHallOfFameController;
+use App\Http\Controllers\Api\V1\ApiLfgController;
+use App\Http\Controllers\Api\V1\ApiLoadoutChallengesController;
+use App\Http\Controllers\Api\V1\ApiMembersController;
+use App\Http\Controllers\Api\V1\ApiMessageController;
+use App\Http\Controllers\Api\V1\ApiMomentsController;
+use App\Http\Controllers\Api\V1\ApiMomentOfWeekController;
+use App\Http\Controllers\Api\V1\ApiNotificationController;
+use App\Http\Controllers\Api\V1\ApiPushDeviceController;
+use App\Http\Controllers\Api\V1\ApiTeamLfgController;
+use App\Http\Controllers\Api\V1\ApiTeamsController;
+use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
+use App\Http\Controllers\Feed\FeedTranslationController;
+use App\Http\Controllers\Reports\ReportController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/v1/health', function (): array {
+    return [
+        'ok' => true,
+        'app' => config('app.name'),
+        'version' => 'v1',
+    ];
+})->name('api.health');
+
+Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    Route::post('/auth/register', [ApiAuthController::class, 'register'])->name('auth.register');
+    Route::post('/auth/login', [ApiAuthController::class, 'login'])->name('auth.login');
+    Route::post('/auth/2fa/challenge', [ApiAuthController::class, 'completeTwoFactorChallenge'])->name('auth.two-factor.challenge');
+    Route::post('/auth/social/exchange', [ApiAuthController::class, 'exchangeSocialLoginCode'])->name('auth.social.exchange');
+    Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
+
+    Route::middleware('api.token')->group(function (): void {
+        Route::get('/bootstrap', ApiBootstrapController::class)->name('bootstrap');
+        Route::get('/me', [ApiAuthController::class, 'me'])->name('me');
+        Route::get('/me/profile-sections/{section}', [ApiMembersController::class, 'meSection'])->name('me.profile-sections.show');
+        Route::post('/me/profile', [ApiAuthController::class, 'updateProfile'])->name('me.profile.update');
+        Route::get('/me/privacy', [ApiAuthController::class, 'privacy'])->name('me.privacy.show');
+        Route::post('/me/privacy', [ApiAuthController::class, 'updatePrivacy'])->name('me.privacy.update');
+        Route::post('/me/password', [ApiAuthController::class, 'updatePassword'])->name('me.password.update');
+        Route::get('/me/2fa', [ApiAuthController::class, 'twoFactorStatus'])->name('me.two-factor.show');
+        Route::post('/me/2fa/setup', [ApiAuthController::class, 'startTwoFactorSetup'])->name('me.two-factor.setup');
+        Route::post('/me/2fa/enable', [ApiAuthController::class, 'enableTwoFactor'])->name('me.two-factor.enable');
+        Route::post('/me/2fa/disable', [ApiAuthController::class, 'disableTwoFactor'])->name('me.two-factor.disable');
+        Route::post('/me/2fa/recovery-codes', [ApiAuthController::class, 'regenerateTwoFactorRecoveryCodes'])->name('me.two-factor.recovery-codes');
+        Route::get('/me/data', [ApiAuthController::class, 'dataProtection'])->name('me.data.show');
+        Route::get('/me/data/export', [ApiAuthController::class, 'dataExport'])->name('me.data.export');
+        Route::post('/me/deletion/request', [ApiAuthController::class, 'requestDeletion'])->name('me.deletion.request');
+        Route::post('/me/deletion/cancel', [ApiAuthController::class, 'cancelDeletion'])->name('me.deletion.cancel');
+        Route::get('/me/sessions', [ApiAuthController::class, 'sessions'])->name('me.sessions.index');
+        Route::post('/me/sessions/{token}/revoke', [ApiAuthController::class, 'revokeSession'])->name('me.sessions.revoke');
+        Route::get('/me/notifications', [ApiNotificationController::class, 'settings'])->name('me.notifications.show');
+        Route::post('/me/notifications', [ApiNotificationController::class, 'updateSettings'])->name('me.notifications.update');
+        Route::get('/push/devices', [ApiPushDeviceController::class, 'index'])->name('push.devices.index');
+        Route::post('/push/devices', [ApiPushDeviceController::class, 'store'])->name('push.devices.store');
+        Route::post('/push/devices/remove', [ApiPushDeviceController::class, 'destroy'])->name('push.devices.remove');
+        Route::post('/push/test', [ApiPushDeviceController::class, 'test'])->name('push.test');
+        Route::post('/me/avatar', [ApiAuthController::class, 'updateAvatar'])->name('me.avatar.update');
+        Route::post('/me/cover', [ApiAuthController::class, 'updateCover'])->name('me.cover.update');
+        Route::post('/auth/logout', [ApiAuthController::class, 'logout'])->name('auth.logout');
+
+        Route::get('/gifs/trending', [ApiGifController::class, 'trending'])->name('gifs.trending');
+        Route::get('/gifs/search', [ApiGifController::class, 'search'])->name('gifs.search');
+
+        Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:8,1')->name('reports.store');
+
+        Route::get('/feed', [ApiFeedController::class, 'index'])->name('feed.index');
+        Route::post('/feed', [ApiFeedController::class, 'store'])->name('feed.store');
+        Route::get('/feed/{post}', [ApiFeedController::class, 'show'])->name('feed.show');
+        Route::post('/feed/{post}/update', [ApiFeedController::class, 'update'])->name('feed.update');
+        Route::post('/feed/{post}/delete', [ApiFeedController::class, 'destroy'])->name('feed.destroy');
+        Route::post('/feed/{post}/share', [ApiFeedController::class, 'share'])->name('feed.share');
+        Route::post('/feed/{post}/translation', [FeedTranslationController::class, 'post'])->name('feed.translation.post');
+        Route::get('/feed/{post}/comments', [ApiFeedEngagementController::class, 'comments'])->name('feed.comments.index');
+        Route::post('/feed/{post}/comments', [ApiFeedEngagementController::class, 'storeComment'])->name('feed.comments.store');
+        Route::post('/feed/{post}/reaction', [ApiFeedEngagementController::class, 'toggleReaction'])->name('feed.reactions.toggle');
+        Route::get('/feed/{post}/reactions', [ApiFeedEngagementController::class, 'reactions'])->name('feed.reactions.index');
+        Route::post('/feed/{post}/poll/vote', [ApiFeedController::class, 'votePoll'])->name('feed.poll.vote');
+        Route::post('/feed/comments/{comment}/update', [ApiFeedEngagementController::class, 'updateComment'])->name('feed.comments.update');
+        Route::post('/feed/comments/{comment}/delete', [ApiFeedEngagementController::class, 'destroyComment'])->name('feed.comments.destroy');
+        Route::post('/feed/comments/{comment}/reaction', [ApiFeedEngagementController::class, 'toggleCommentReaction'])->name('feed.comments.reactions.toggle');
+        Route::post('/feed/comments/{comment}/translation', [FeedTranslationController::class, 'comment'])->name('feed.comments.translation');
+
+        Route::get('/members', [ApiMembersController::class, 'index'])->name('members.index');
+        Route::get('/friends', [ApiMembersController::class, 'friends'])->name('friends.index');
+        Route::get('/me/blocks', [ApiMembersController::class, 'blockedUsers'])->name('me.blocks.index');
+        Route::get('/users/{user:username}', [ApiMembersController::class, 'show'])->name('users.show');
+        Route::get('/users/{user:username}/profile-sections/{section}', [ApiMembersController::class, 'userSection'])->name('users.profile-sections.show');
+        Route::post('/users/{user:username}/friend', [ApiMembersController::class, 'requestFriend'])->name('users.friend.request');
+        Route::post('/users/{user:username}/block', [ApiMembersController::class, 'blockUser'])->name('users.block');
+        Route::post('/users/{user:username}/unblock', [ApiMembersController::class, 'unblockUser'])->name('users.unblock');
+        Route::post('/friends/{friendship}/accept', [ApiMembersController::class, 'acceptFriend'])->name('friends.accept');
+        Route::post('/friends/{friendship}/decline', [ApiMembersController::class, 'declineFriend'])->name('friends.decline');
+        Route::post('/friends/{friendship}/remove', [ApiMembersController::class, 'removeFriend'])->name('friends.remove');
+        Route::get('/teams', [ApiTeamsController::class, 'index'])->name('teams.index');
+        Route::post('/teams', [ApiTeamsController::class, 'store'])->name('teams.store');
+        Route::get('/teams/{team:slug}', [ApiTeamsController::class, 'show'])->name('teams.show');
+        Route::post('/teams/{team:slug}', [ApiTeamsController::class, 'update'])->name('teams.update');
+        Route::post('/teams/{team:slug}/join', [ApiTeamsController::class, 'join'])->name('teams.join');
+        Route::post('/teams/{team:slug}/members/{member}/accept', [ApiTeamsController::class, 'acceptJoinRequest'])->name('teams.members.accept');
+        Route::post('/teams/{team:slug}/members/{member}/reject', [ApiTeamsController::class, 'rejectJoinRequest'])->name('teams.members.reject');
+        Route::post('/teams/{team:slug}/leave', [ApiTeamsController::class, 'leave'])->name('teams.leave');
+        Route::post('/teams/{team:slug}/archive', [ApiTeamsController::class, 'archive'])->name('teams.archive');
+        Route::post('/teams/{team:slug}/members/{member}/promote', [ApiTeamsController::class, 'promoteMember'])->name('teams.members.promote');
+        Route::post('/teams/{team:slug}/members/{member}/demote', [ApiTeamsController::class, 'demoteMember'])->name('teams.members.demote');
+        Route::post('/teams/{team:slug}/members/{member}/remove', [ApiTeamsController::class, 'removeMember'])->name('teams.members.remove');
+        Route::post('/teams/{team:slug}/avatar', [ApiTeamsController::class, 'updateAvatar'])->name('teams.avatar.update');
+        Route::post('/teams/{team:slug}/cover', [ApiTeamsController::class, 'updateCover'])->name('teams.cover.update');
+        Route::get('/lfg', [ApiLfgController::class, 'index'])->name('lfg.index');
+        Route::post('/lfg', [ApiLfgController::class, 'store'])->name('lfg.store');
+        Route::get('/lfg/{post}', [ApiLfgController::class, 'show'])->name('lfg.show');
+        Route::post('/lfg/{post}/apply', [ApiLfgController::class, 'apply'])->name('lfg.apply');
+        Route::post('/lfg/{post}/applications/{application}/accept', [ApiLfgController::class, 'acceptApplication'])->name('lfg.applications.accept');
+        Route::post('/lfg/{post}/applications/{application}/reject', [ApiLfgController::class, 'rejectApplication'])->name('lfg.applications.reject');
+        Route::get('/team-lfg', [ApiTeamLfgController::class, 'index'])->name('team-lfg.index');
+        Route::get('/team-lfg/manageable-teams', [ApiTeamLfgController::class, 'manageableTeams'])->name('team-lfg.manageable-teams');
+        Route::post('/team-lfg', [ApiTeamLfgController::class, 'store'])->name('team-lfg.store');
+        Route::get('/team-lfg/{post}', [ApiTeamLfgController::class, 'show'])->name('team-lfg.show');
+        Route::post('/team-lfg/{post}/apply', [ApiTeamLfgController::class, 'apply'])->name('team-lfg.apply');
+        Route::post('/team-lfg/{post}/applications/{application}/accept', [ApiTeamLfgController::class, 'acceptApplication'])->name('team-lfg.applications.accept');
+        Route::post('/team-lfg/{post}/applications/{application}/reject', [ApiTeamLfgController::class, 'rejectApplication'])->name('team-lfg.applications.reject');
+        Route::get('/messages', [ApiMessageController::class, 'index'])->name('messages.index');
+        Route::post('/messages/with/{user:username}', [ApiMessageController::class, 'withUser'])->name('messages.with-user');
+        Route::get('/messages/{conversation}', [ApiMessageController::class, 'show'])->name('messages.show');
+        Route::post('/messages/{conversation}', [ApiMessageController::class, 'store'])->name('messages.store');
+        Route::post('/messages/{conversation}/read', [ApiMessageController::class, 'read'])->name('messages.read');
+        Route::post('/messages/{conversation}/clear', [ApiMessageController::class, 'clear'])->name('messages.clear');
+        Route::get('/moments', [ApiMomentsController::class, 'index'])->name('moments.index');
+        Route::post('/moments', [ApiMomentsController::class, 'store'])->name('moments.store');
+        Route::get('/moments/{moment}', [ApiMomentsController::class, 'show'])->name('moments.show');
+        Route::post('/moments/{moment}/like', [ApiMomentsController::class, 'toggleLike'])->name('moments.like.toggle');
+        Route::post('/moments/{moment}/bookmark', [ApiMomentsController::class, 'toggleBookmark'])->name('moments.bookmark.toggle');
+        Route::get('/moments/{moment}/comments', [ApiMomentsController::class, 'comments'])->name('moments.comments.index');
+        Route::post('/moments/{moment}/comments', [ApiMomentsController::class, 'storeComment'])->name('moments.comments.store');
+        Route::patch('/moments/comments/{comment}', [ApiMomentsController::class, 'updateComment'])->name('moments.comments.update');
+        Route::post('/moments/comments/{comment}/like', [ApiMomentsController::class, 'toggleCommentLike'])->name('moments.comments.like.toggle');
+        Route::delete('/moments/comments/{comment}', [ApiMomentsController::class, 'destroyComment'])->name('moments.comments.destroy');
+        Route::get('/cup-feedback', [ApiCupFeedbackController::class, 'index'])->name('cup-feedback.index');
+        Route::post('/cup-feedback', [ApiCupFeedbackController::class, 'store'])->middleware('throttle:6,1')->name('cup-feedback.store');
+        Route::get('/cup-ideas', [ApiCupIdeasController::class, 'index'])->name('cup-ideas.index');
+        Route::post('/cup-ideas', [ApiCupIdeasController::class, 'store'])->middleware('throttle:6,1')->name('cup-ideas.store');
+        Route::post('/cup-ideas/{idea}/vote', [ApiCupIdeasController::class, 'vote'])->middleware('throttle:20,1')->name('cup-ideas.vote');
+        Route::get('/loadout-challenges', [ApiLoadoutChallengesController::class, 'index'])->name('loadout-challenges.index');
+        Route::get('/loadout-challenges/{challenge:slug}', [ApiLoadoutChallengesController::class, 'show'])->name('loadout-challenges.show');
+        Route::post('/loadout-challenges/{challenge:slug}/submissions', [ApiLoadoutChallengesController::class, 'storeSubmission'])->middleware('throttle:6,1')->name('loadout-challenges.submissions.store');
+        Route::get('/contracts', [ApiContractsController::class, 'index'])->name('contracts.index');
+        Route::get('/hall-of-fame', [ApiHallOfFameController::class, 'index'])->name('hall-of-fame.index');
+        Route::get('/moment-of-week', [ApiMomentOfWeekController::class, 'index'])->name('moment-of-week.index');
+        Route::get('/crowns', [ApiCrownsController::class, 'index'])->name('crowns.index');
+        Route::post('/crowns/collect', [ApiCrownsController::class, 'collect'])->middleware('throttle:20,1')->name('crowns.collect');
+        Route::post('/crowns/dismiss', [ApiCrownsController::class, 'dismiss'])->middleware('throttle:20,1')->name('crowns.dismiss');
+        Route::post('/crowns/shop/{item:key}/purchase', [ApiCrownsController::class, 'purchase'])->middleware('throttle:12,1')->name('crowns.shop.purchase');
+        Route::post('/crowns/inventory/{inventoryItem}/equip', [ApiCrownsController::class, 'equip'])->middleware('throttle:20,1')->name('crowns.inventory.equip');
+        Route::post('/crowns/inventory/slots/{slot}/unequip', [ApiCrownsController::class, 'unequip'])->middleware('throttle:20,1')->name('crowns.inventory.unequip');
+        Route::get('/cups', [ApiCupsController::class, 'index'])->name('cups.index');
+        Route::get('/cups/{cup:slug}', [ApiCupsController::class, 'show'])->name('cups.show');
+        Route::post('/cups/{cup:slug}/register', [ApiCupsController::class, 'register'])->name('cups.register');
+        Route::post('/cups/{cup:slug}/submissions', [ApiCupsController::class, 'submit'])->name('cups.submissions.store');
+        Route::get('/notifications', [ApiNotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/read-all', [ApiNotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::post('/notifications/{notification}/read', [ApiNotificationController::class, 'read'])->name('notifications.read');
+    });
+});

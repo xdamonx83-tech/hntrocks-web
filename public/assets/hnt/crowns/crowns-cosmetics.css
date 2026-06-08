@@ -1,0 +1,400 @@
+/* Patch 566: Crowns cosmetics for the Socialite theme.
+   This file is loaded by themes/socialite/partials/head.blade.php.
+   Crowns are a virtual, non-cash activity reward system. */
+
+.hh-crowns-avatar-wrap,
+.hh-crowns-avatar-inline {
+  position: relative !important;
+  overflow: visible !important;
+  border-radius: 9999px !important;
+  isolation: isolate !important;
+}
+
+.hh-crowns-avatar-wrap {
+  display: block !important;
+}
+
+.hh-crowns-avatar-inline {
+  display: inline-grid !important;
+  place-items: center !important;
+  line-height: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.hh-crowns-avatar-wrap > div:first-child,
+.hh-crowns-avatar-inline > div:first-child,
+.hh-crowns-avatar-wrap > img,
+.hh-crowns-avatar-inline > img,
+.hh-crowns-avatar-wrap picture,
+.hh-crowns-avatar-inline picture,
+.hh-crowns-avatar-wrap svg,
+.hh-crowns-avatar-inline svg {
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+.hh-crowns-avatar-wrap > a,
+.hh-crowns-avatar-wrap > .absolute {
+  z-index: 7 !important;
+}
+
+.hh-crowns-avatar-wrap::before,
+.hh-crowns-avatar-wrap::after,
+.hh-crowns-avatar-inline::before,
+.hh-crowns-avatar-inline::after {
+  content: "" !important;
+  position: absolute !important;
+  border-radius: 9999px !important;
+  pointer-events: none !important;
+}
+
+.hh-crowns-avatar-wrap::before {
+  inset: -12px !important;
+  z-index: 1 !important;
+}
+
+.hh-crowns-avatar-wrap::after {
+  inset: -5px !important;
+  z-index: 2 !important;
+}
+
+.hh-crowns-avatar-inline::before {
+  inset: -6px !important;
+  z-index: 1 !important;
+}
+
+.hh-crowns-avatar-inline::after {
+  inset: -2px !important;
+  z-index: 2 !important;
+}
+
+.hh-crowns-avatar-frame-bayou-iron {
+  box-shadow: 0 0 0 3px rgba(171,119,51,.45), 0 0 24px rgba(143,81,25,.32) !important;
+}
+
+.hh-crowns-avatar-frame-bayou-iron::before {
+  background: conic-gradient(from 225deg, rgba(54,42,31,.98), rgba(205,150,70,.98), rgba(17,14,12,.98), rgba(116,31,25,.78), rgba(54,42,31,.98)) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.8), 0 16px 32px rgba(0,0,0,.42), inset 0 0 20px rgba(255,218,145,.18) !important;
+}
+
+.hh-crowns-avatar-frame-bayou-iron::after {
+  border: 1px solid rgba(224,174,92,.68) !important;
+  box-shadow: 0 0 20px rgba(128,66,24,.3), inset 0 0 11px rgba(255,209,121,.18) !important;
+}
+
+.hh-crowns-avatar-frame-blood-crown {
+  box-shadow: 0 0 0 3px rgba(147,16,13,.55), 0 0 30px rgba(162,13,8,.42), 0 0 0 5px rgba(220,167,80,.22) !important;
+}
+
+.hh-crowns-avatar-frame-blood-crown::before {
+  background: conic-gradient(from 180deg, rgba(83,8,8,.98), rgba(229,184,105,.98), rgba(28,10,8,.98), rgba(176,22,16,.98), rgba(229,184,105,.98), rgba(83,8,8,.98)) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.9), 0 0 34px rgba(151,13,9,.52), 0 18px 38px rgba(0,0,0,.52) !important;
+}
+
+.hh-crowns-avatar-frame-blood-crown::after {
+  border: 1px solid rgba(229,184,105,.76) !important;
+  background: radial-gradient(circle at 50% 0%, rgba(235,190,97,.46), transparent 24%), radial-gradient(circle at 18% 18%, rgba(155,18,13,.4), transparent 28%), radial-gradient(circle at 82% 18%, rgba(155,18,13,.4), transparent 28%) !important;
+  box-shadow: 0 0 20px rgba(130,8,6,.5), inset 0 0 12px rgba(255,220,143,.16) !important;
+}
+
+.hh-crowns-avatar-inline.hh-crowns-avatar-frame-bayou-iron,
+.hh-crowns-avatar-inline.hh-crowns-avatar-frame-blood-crown {
+  margin: 4px !important;
+}
+
+.hh-crowns-avatar-comment.hh-crowns-avatar-frame-bayou-iron,
+.hh-crowns-avatar-comment.hh-crowns-avatar-frame-blood-crown {
+  margin: 3px 4px 3px 3px !important;
+}
+
+.hh-crowns-avatar-reply.hh-crowns-avatar-frame-bayou-iron,
+.hh-crowns-avatar-reply.hh-crowns-avatar-frame-blood-crown {
+  margin: 3px !important;
+}
+
+.hh-crowns-username-ember {
+  color: #ffc76d !important;
+  text-shadow: 0 0 7px rgba(242,133,37,.9), 0 0 18px rgba(166,55,18,.72), 0 1px 0 rgba(0,0,0,.75) !important;
+}
+
+.hh-crowns-username-bloodmarked {
+  color: #ffe2c0 !important;
+  text-shadow: 0 0 7px rgba(156,0,0,.98), 0 0 20px rgba(204,24,14,.86), 0 1px 0 rgba(0,0,0,.82) !important;
+  position: relative !important;
+}
+
+.hh-crowns-username-bloodmarked::after {
+  content: "" !important;
+  display: block !important;
+  width: min(210px, 70%) !important;
+  height: 3px !important;
+  margin: 7px auto 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, transparent, rgba(147,9,6,.92), rgba(216,54,31,.78), transparent) !important;
+  box-shadow: 0 0 14px rgba(132,5,5,.68) !important;
+}
+
+.hh-crowns-profile-title,
+.hh-crowns-author-title {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  border: 1px solid rgba(216,164,57,.4) !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, rgba(23,18,13,.92), rgba(92,26,18,.64)) !important;
+  color: #f6d28a !important;
+  font-weight: 900 !important;
+  letter-spacing: .07em !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.2), inset 0 0 15px rgba(218,154,55,.08) !important;
+}
+
+.hh-crowns-profile-title {
+  gap: 7px !important;
+  margin: 10px auto 0 !important;
+  padding: 6px 13px !important;
+  font-size: 12px !important;
+}
+
+.hh-crowns-author-title {
+  gap: 4px !important;
+  margin-top: 3px !important;
+  padding: 2px 7px !important;
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+}
+
+.hh-crowns-profile-title::before,
+.hh-crowns-author-title::before {
+  content: "♛" !important;
+  color: #d9a43a !important;
+  line-height: 1 !important;
+}
+
+.hh-crowns-profile-banner-dark-bayou::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 9 !important;
+  background: radial-gradient(circle at 83% 36%, rgba(178,30,18,.3), transparent 28%), linear-gradient(90deg, rgba(0,0,0,.08), rgba(22,10,7,.24), rgba(95,14,10,.28)), repeating-linear-gradient(135deg, rgba(255,255,255,.035) 0, rgba(255,255,255,.035) 1px, transparent 1px, transparent 12px) !important;
+}
+
+/* Patch 567: Crowns cosmetics inside Socialite feed and comments. */
+.hh-crowns-avatar-feed.hh-crowns-avatar-frame-bayou-iron,
+.hh-crowns-avatar-feed.hh-crowns-avatar-frame-blood-crown {
+  margin: 2px 3px 2px 2px !important;
+}
+
+.hh-crowns-avatar-feed::before {
+  inset: -7px !important;
+}
+
+.hh-crowns-avatar-feed::after {
+  inset: -3px !important;
+}
+
+.hh-crowns-avatar-comment::before {
+  inset: -5px !important;
+}
+
+.hh-crowns-avatar-comment::after {
+  inset: -2px !important;
+}
+
+.hh-crowns-avatar-reply::before {
+  inset: -4px !important;
+}
+
+.hh-crowns-avatar-reply::after {
+  inset: -1px !important;
+}
+
+.hh-crowns-feed-author-title {
+  margin-top: 2px !important;
+  margin-bottom: 1px !important;
+}
+
+.hh-crowns-comment-author-title {
+  margin-top: 3px !important;
+  margin-bottom: 2px !important;
+  padding: 1px 6px !important;
+  font-size: 9px !important;
+}
+
+.socialite-live-comment .hh-crowns-username-bloodmarked::after {
+  width: 100% !important;
+  height: 2px !important;
+  margin: 3px 0 0 !important;
+}
+
+.socialite-live-comment .hh-crowns-username-ember,
+.socialite-live-comment .hh-crowns-username-bloodmarked {
+  display: inline-block !important;
+}
+
+
+/* Patch 570: keep bloodmarked underline anchored below the actual username text.
+   In the feed, the username element also has Tailwind's truncate utility, which makes
+   it behave like a full-width block. Without this override the red underline is centered
+   across the whole header row instead of the username. */
+.hh-crowns-username-bloodmarked,
+a.hh-crowns-username-bloodmarked,
+.hh-crowns-username-bloodmarked.truncate,
+a .hh-crowns-username-bloodmarked {
+  display: inline-block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  vertical-align: top !important;
+}
+
+.hh-crowns-username-bloodmarked::after {
+  width: 100% !important;
+  max-width: 120px !important;
+  margin: 5px 0 0 !important;
+}
+
+.socialite-live-comment .hh-crowns-username-bloodmarked::after,
+[data-socialite-comment-bubble] .hh-crowns-username-bloodmarked::after {
+  width: 100% !important;
+  max-width: 96px !important;
+  height: 2px !important;
+  margin: 3px 0 0 !important;
+}
+
+/* Patch 571: additional Crowns shop cosmetics. */
+.hh-crowns-avatar-frame-bone-hunter {
+  box-shadow: 0 0 0 3px rgba(205,196,164,.46), 0 0 26px rgba(116,97,67,.36), 0 0 0 5px rgba(0,0,0,.25) !important;
+}
+
+.hh-crowns-avatar-frame-bone-hunter::before {
+  background: conic-gradient(from 210deg, rgba(34,27,21,.98), rgba(232,217,176,.94), rgba(77,62,44,.98), rgba(149,119,73,.88), rgba(34,27,21,.98)) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.88), 0 16px 32px rgba(0,0,0,.48), inset 0 0 18px rgba(255,240,198,.18) !important;
+}
+
+.hh-crowns-avatar-frame-bone-hunter::after {
+  border: 1px solid rgba(236,220,169,.72) !important;
+  box-shadow: 0 0 16px rgba(226,198,123,.28), inset 0 0 12px rgba(255,247,212,.13) !important;
+}
+
+.hh-crowns-avatar-frame-swamp-relic {
+  box-shadow: 0 0 0 3px rgba(71,105,70,.42), 0 0 28px rgba(45,87,54,.34), 0 0 0 5px rgba(165,119,47,.18) !important;
+}
+
+.hh-crowns-avatar-frame-swamp-relic::before {
+  background: conic-gradient(from 180deg, rgba(19,31,22,.98), rgba(122,111,58,.92), rgba(49,75,45,.98), rgba(18,15,12,.98), rgba(155,107,48,.82), rgba(19,31,22,.98)) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.88), 0 0 30px rgba(49,96,53,.36), inset 0 0 18px rgba(177,149,76,.14) !important;
+}
+
+.hh-crowns-avatar-frame-swamp-relic::after {
+  border: 1px solid rgba(151,139,77,.68) !important;
+  background: radial-gradient(circle at 30% 18%, rgba(97,148,83,.34), transparent 30%), radial-gradient(circle at 76% 82%, rgba(151,83,34,.22), transparent 34%) !important;
+}
+
+.hh-crowns-avatar-frame-gilded-bounty {
+  box-shadow: 0 0 0 3px rgba(230,183,82,.68), 0 0 34px rgba(218,157,49,.5), 0 0 0 6px rgba(88,45,12,.3) !important;
+}
+
+.hh-crowns-avatar-frame-gilded-bounty::before {
+  background: conic-gradient(from 180deg, rgba(102,59,18,.98), rgba(255,222,124,.98), rgba(175,111,33,.98), rgba(55,25,9,.98), rgba(252,200,88,.95), rgba(102,59,18,.98)) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.9), 0 0 38px rgba(222,160,50,.42), 0 18px 38px rgba(0,0,0,.55), inset 0 0 22px rgba(255,239,172,.2) !important;
+}
+
+.hh-crowns-avatar-frame-gilded-bounty::after {
+  border: 1px solid rgba(255,229,141,.8) !important;
+  background: radial-gradient(circle at 50% 0%, rgba(255,232,139,.46), transparent 24%), radial-gradient(circle at 82% 22%, rgba(196,110,21,.3), transparent 26%) !important;
+}
+
+.hh-crowns-avatar-frame-black-ritual {
+  box-shadow: 0 0 0 3px rgba(97,6,6,.7), 0 0 38px rgba(155,0,0,.48), 0 0 0 6px rgba(0,0,0,.55) !important;
+}
+
+.hh-crowns-avatar-frame-black-ritual::before {
+  background: conic-gradient(from 225deg, rgba(5,5,5,.98), rgba(147,16,12,.98), rgba(30,8,7,.98), rgba(194,135,62,.72), rgba(5,5,5,.98)) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.95), 0 0 42px rgba(135,6,6,.58), 0 20px 42px rgba(0,0,0,.6) !important;
+}
+
+.hh-crowns-avatar-frame-black-ritual::after {
+  border: 1px solid rgba(211,42,27,.65) !important;
+  background: radial-gradient(circle at 50% 0%, rgba(211,42,27,.45), transparent 24%), radial-gradient(circle at 18% 70%, rgba(232,176,83,.18), transparent 24%), radial-gradient(circle at 82% 70%, rgba(232,176,83,.18), transparent 24%) !important;
+}
+
+.hh-crowns-avatar-inline.hh-crowns-avatar-frame-bone-hunter,
+.hh-crowns-avatar-inline.hh-crowns-avatar-frame-swamp-relic,
+.hh-crowns-avatar-inline.hh-crowns-avatar-frame-gilded-bounty,
+.hh-crowns-avatar-inline.hh-crowns-avatar-frame-black-ritual {
+  margin: 4px !important;
+}
+
+.hh-crowns-avatar-feed.hh-crowns-avatar-frame-bone-hunter,
+.hh-crowns-avatar-feed.hh-crowns-avatar-frame-swamp-relic,
+.hh-crowns-avatar-feed.hh-crowns-avatar-frame-gilded-bounty,
+.hh-crowns-avatar-feed.hh-crowns-avatar-frame-black-ritual,
+.hh-crowns-avatar-comment.hh-crowns-avatar-frame-bone-hunter,
+.hh-crowns-avatar-comment.hh-crowns-avatar-frame-swamp-relic,
+.hh-crowns-avatar-comment.hh-crowns-avatar-frame-gilded-bounty,
+.hh-crowns-avatar-comment.hh-crowns-avatar-frame-black-ritual,
+.hh-crowns-avatar-reply.hh-crowns-avatar-frame-bone-hunter,
+.hh-crowns-avatar-reply.hh-crowns-avatar-frame-swamp-relic,
+.hh-crowns-avatar-reply.hh-crowns-avatar-frame-gilded-bounty,
+.hh-crowns-avatar-reply.hh-crowns-avatar-frame-black-ritual {
+  margin: 3px !important;
+}
+
+.hh-crowns-username-effect-soulfire {
+  color: #d7f7ff !important;
+  text-shadow: 0 0 7px rgba(80,202,255,.92), 0 0 20px rgba(49,117,255,.56), 0 1px 0 rgba(0,0,0,.84) !important;
+}
+
+.hh-crowns-username-effect-bounty-gold {
+  color: #ffe39b !important;
+  text-shadow: 0 0 8px rgba(238,178,55,.95), 0 0 22px rgba(173,103,22,.7), 0 1px 0 rgba(0,0,0,.86) !important;
+}
+
+.hh-crowns-username-effect-moonlit {
+  color: #e7ecff !important;
+  text-shadow: 0 0 7px rgba(169,188,255,.78), 0 0 18px rgba(93,117,186,.58), 0 1px 0 rgba(0,0,0,.82) !important;
+}
+
+.hh-crowns-username-effect-cursed-red {
+  color: #ffd1c4 !important;
+  text-shadow: 0 0 8px rgba(202,20,15,.98), 0 0 24px rgba(147,0,0,.88), 0 0 34px rgba(83,0,0,.65), 0 1px 0 rgba(0,0,0,.9) !important;
+  position: relative !important;
+}
+
+.hh-crowns-username-effect-cursed-red::after {
+  content: "" !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 105px !important;
+  height: 2px !important;
+  margin-top: 4px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, rgba(158,0,0,.1), rgba(222,37,25,.92), rgba(255,160,105,.58), rgba(158,0,0,.1)) !important;
+  box-shadow: 0 0 12px rgba(180,0,0,.72) !important;
+}
+
+.hh-crowns-profile-banner-swamp-fog::after,
+.hh-crowns-profile-banner-blood-moon::after,
+.hh-crowns-profile-banner-ritual-mark::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 9 !important;
+}
+
+.hh-crowns-profile-banner-swamp-fog::after {
+  background: radial-gradient(circle at 15% 80%, rgba(202,181,113,.15), transparent 28%), radial-gradient(circle at 75% 20%, rgba(102,137,103,.22), transparent 35%), linear-gradient(90deg, rgba(0,0,0,.12), rgba(38,55,38,.18), rgba(0,0,0,.16)), repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 1px, transparent 1px, transparent 10px) !important;
+}
+
+.hh-crowns-profile-banner-blood-moon::after {
+  background: radial-gradient(circle at 82% 28%, rgba(195,35,23,.42), transparent 22%), radial-gradient(circle at 84% 28%, rgba(255,177,108,.16), transparent 12%), linear-gradient(90deg, rgba(0,0,0,.08), rgba(78,7,7,.24), rgba(0,0,0,.28)), repeating-linear-gradient(135deg, rgba(210,36,24,.06) 0, rgba(210,36,24,.06) 1px, transparent 1px, transparent 13px) !important;
+}
+
+.hh-crowns-profile-banner-ritual-mark::after {
+  background: radial-gradient(circle at 50% 48%, rgba(174,13,10,.3), transparent 30%), linear-gradient(90deg, rgba(0,0,0,.15), rgba(60,5,5,.22), rgba(0,0,0,.2)), repeating-linear-gradient(45deg, rgba(225,42,26,.07) 0, rgba(225,42,26,.07) 1px, transparent 1px, transparent 16px), repeating-linear-gradient(-45deg, rgba(225,42,26,.04) 0, rgba(225,42,26,.04) 1px, transparent 1px, transparent 18px) !important;
+  box-shadow: inset 0 0 70px rgba(0,0,0,.5) !important;
+}

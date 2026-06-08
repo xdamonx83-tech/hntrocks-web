@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo 'No Vite build configured yet.'",
+    "dev": "echo 'No Vite dev server configured yet.'"
+  }
+}
