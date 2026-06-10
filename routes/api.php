@@ -142,6 +142,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/messages/{conversation}/clear', [ApiMessageController::class, 'clear'])->name('messages.clear');
         Route::get('/moments', [ApiMomentsController::class, 'index'])->name('moments.index');
         Route::post('/moments', [ApiMomentsController::class, 'store'])->name('moments.store');
+        Route::get('/moments/studio/{project}/status', [ApiMomentsController::class, 'studioStatus'])->name('moments.studio.status');
         Route::get('/moments/{moment}', [ApiMomentsController::class, 'show'])->name('moments.show');
         Route::post('/moments/{moment}/like', [ApiMomentsController::class, 'toggleLike'])->name('moments.like.toggle');
         Route::post('/moments/{moment}/bookmark', [ApiMomentsController::class, 'toggleBookmark'])->name('moments.bookmark.toggle');
