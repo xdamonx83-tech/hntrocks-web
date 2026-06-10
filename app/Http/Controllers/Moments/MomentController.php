@@ -469,7 +469,7 @@ class MomentController extends Controller
                 'queued' => __('ui.moment_studio_processing_message_queued'),
                 'rendering' => __('ui.moment_studio_processing_message_rendering'),
                 'published' => __('ui.moment_studio_processing_message_published'),
-                'failed' => __('ui.moment_studio_processing_message_failed'),
+                'failed' => $project->error_message ?: __('ui.moment_studio_processing_message_failed'),
                 default => __('ui.moment_studio_processing_message_preparing'),
             },
             'redirect_url' => $redirectUrl,
@@ -584,6 +584,27 @@ class MomentController extends Controller
             'smoke',
             'shine',
             'spread',
+        ];
+    }
+
+    private function normalizeStudioTransition(mixed $value): string
+    {
+        $transition = strtolower(trim((string) $value));
+
+        return in_array($transition, $this->allowedStudioTransitions(), true) ? $transition : 'none';
+    }
+
+    /** @return array<int, string> */
+    private function allowedStudioTransitions(): array
+    {
+        return [
+            'none',
+            'crossfade',
+            'fadeblack',
+            'fadewhite',
+            'slideleft',
+            'slideright',
+            'smoothleft',
         ];
     }
 
