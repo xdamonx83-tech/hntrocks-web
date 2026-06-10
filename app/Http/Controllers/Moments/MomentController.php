@@ -587,6 +587,27 @@ class MomentController extends Controller
         ];
     }
 
+    private function normalizeStudioTransition(mixed $value): string
+    {
+        $transition = strtolower(trim((string) $value));
+
+        return in_array($transition, $this->allowedStudioTransitions(), true) ? $transition : 'none';
+    }
+
+    /** @return array<int, string> */
+    private function allowedStudioTransitions(): array
+    {
+        return [
+            'none',
+            'crossfade',
+            'fadeblack',
+            'fadewhite',
+            'slideleft',
+            'slideright',
+            'smoothleft',
+        ];
+    }
+
     /** @return array<string, int> */
     private function normalizeStudioColors(mixed $value): array
     {
