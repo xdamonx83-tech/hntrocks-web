@@ -12,6 +12,7 @@ use App\Models\MomentStudioProject;
 use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\MediaService;
+use App\Services\MomentStudioProjectService;
 use App\Services\Economy\CrownsService;
 use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
@@ -306,10 +307,11 @@ class MomentController extends Controller
         return $payload !== '' && $request->hasFile('studio_videos') && count(Arr::wrap($request->file('studio_videos'))) >= 1;
     }
 
-    private function storeStudioProject(Request $request, MediaService $mediaService): RedirectResponse|JsonResponse
+    private function storeStudioProject(Request $request, MediaService $mediaService, ?MomentStudioProjectService $studioProjects = null): RedirectResponse|JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
+        $studioProjects ??= app(MomentStudioProjectService::class);
 
         $validated = $request->validate([
             'studio_videos' => ['required', 'array', 'min:1', 'max:5'],
@@ -320,75 +322,12 @@ class MomentController extends Controller
             'visibility' => ['required', 'in:public,registered,private'],
         ]);
 
-        $payload = json_decode((string) $validated['studio_payload'], true);
-        if (! is_array($payload)) {
-            throw ValidationException::withMessages([
-                'studio_payload' => 'Studio-Daten konnten nicht gelesen werden.',
-            ]);
-        }
-
         $files = array_values(Arr::wrap($request->file('studio_videos')));
-        $clips = $this->normalizedStudioClips($payload, count($files));
-        $totalDuration = array_sum(array_map(static fn (array $clip): float => (float) $clip['duration'], $clips));
-        $textLayers = $this->normalizedStudioTextLayers($payload, $totalDuration);
-
-        $this->assertStudioProFeaturesAllowed($user, $clips);
-
-        if ($totalDuration <= 0 || $totalDuration > 60.05) {
-            throw ValidationException::withMessages([
-                'studio_payload' => 'Das fertige Moment muss zwischen 1 und 60 Sekunden lang sein.',
-            ]);
-        }
-
-        $project = null;
-        $sourceAssets = [];
-
-        try {
-            DB::transaction(function () use (&$project, &$sourceAssets, $user, $validated, $files, $clips, $textLayers, $mediaService): void {
-                $project = MomentStudioProject::create([
-                    'user_id' => $user->id,
-                    'status' => 'uploading',
-                    'visibility' => $validated['visibility'],
-                    'caption' => $validated['caption'] ?? null,
-                    'description' => $validated['description'] ?? null,
-                    'timeline' => ['clips' => $clips, 'text_layers' => $textLayers],
-                    'source_media_asset_ids' => [],
-                    'total_duration_seconds' => (int) ceil(array_sum(array_map(static fn (array $clip): float => (float) $clip['duration'], $clips))),
-                    'expires_at' => now()->addDay(),
-                ]);
-
-                foreach ($files as $index => $file) {
-                    $mediaService->assertAllowed($file, $user, 'moments');
-                    $asset = $mediaService->store($file, $user, 'moment_studio_source', [
-                        'visibility' => 'private',
-                        'attachable' => $project,
-                        'metadata' => [
-                            'source' => 'moment_studio_source',
-                            'studio_project_id' => $project->id,
-                            'clip_index' => $index,
-                            'trim_start_seconds' => $clips[$index]['start'],
-                            'trim_end_seconds' => $clips[$index]['end'],
-                            'duration_seconds' => $clips[$index]['duration'],
-                        ],
-                    ]);
-                    $sourceAssets[] = $asset;
-                }
-
-                $project->update([
-                    'status' => 'queued',
-                    'source_media_asset_ids' => array_map(static fn ($asset): int => (int) $asset->id, $sourceAssets),
-                    'queued_at' => now(),
-                ]);
-            });
-        } catch (ValidationException $exception) {
-            throw $exception;
-        } catch (\Throwable $exception) {
-            foreach ($sourceAssets as $asset) {
-                $this->deleteStudioSourceAsset($asset);
-            }
-
-            throw $exception;
-        }
+        $project = $studioProjects->createQueuedProject($user, $files, (string) $validated['studio_payload'], [
+            'visibility' => $validated['visibility'],
+            'caption' => $validated['caption'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ], $mediaService);
 
         if ($project) {
             RenderMomentStudioProject::dispatchAfterResponse($project->id);

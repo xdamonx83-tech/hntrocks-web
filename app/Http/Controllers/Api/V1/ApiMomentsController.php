@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\MomentCommentResource;
 use App\Http\Resources\Api\MomentResource;
+use App\Jobs\RenderMomentStudioProject;
 use App\Models\Moment;
 use App\Models\MomentComment;
+use App\Models\MomentStudioProject;
 use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\MediaService;
+use App\Services\MomentStudioProjectService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Arr;
 
 class ApiMomentsController extends Controller
 {
@@ -52,8 +56,12 @@ class ApiMomentsController extends Controller
         return new MomentResource($moment);
     }
 
-    public function store(Request $request, MediaService $mediaService, GamificationService $gamification): JsonResponse
+    public function store(Request $request, MediaService $mediaService, GamificationService $gamification, MomentStudioProjectService $studioProjects): JsonResponse
     {
+        if ($this->isStudioMultiClipRequest($request)) {
+            return $this->storeStudioProject($request, $mediaService, $studioProjects);
+        }
+
         /** @var User $user */
         $user = $request->user();
 
@@ -127,6 +135,48 @@ class ApiMomentsController extends Controller
                 : 'Moment wurde veröffentlicht.',
             'data' => new MomentResource($moment),
         ], 201);
+    }
+
+    public function studioStatus(Request $request, MomentStudioProject $project): JsonResponse
+    {
+        abort_unless((int) $project->user_id === (int) $request->user()->id, 404);
+
+        $project->refresh();
+        $message = match ($project->status) {
+            'queued' => 'Studio-Projekt ist in der Warteschlange.',
+            'rendering' => 'Studio-Projekt wird gerendert.',
+            'published' => 'Moment wurde veröffentlicht.',
+            'failed' => $project->error_message ?: 'Studio-Render ist fehlgeschlagen.',
+            default => 'Studio-Projekt wird vorbereitet.',
+        };
+
+        $payload = [
+            'project_id' => $project->id,
+            'status' => $project->status,
+            'message' => $message,
+        ];
+
+        if ($project->status === 'failed') {
+            $payload['error_message'] = $project->error_message ?: $message;
+        }
+
+        if ($project->status === 'published' && $project->moment_id) {
+            $moment = Moment::query()
+                ->with([
+                    'user.profile',
+                    'media',
+                    'cover',
+                    'reactions' => fn ($query) => $query->where('user_id', $request->user()->id)->where('type', 'like'),
+                    'bookmarks' => fn ($query) => $query->where('user_id', $request->user()->id),
+                ])
+                ->find($project->moment_id);
+
+            if ($moment) {
+                $payload['data'] = new MomentResource($moment);
+            }
+        }
+
+        return response()->json($payload);
     }
 
     public function toggleLike(Request $request, Moment $moment, GamificationService $gamification, NotificationService $notifications): JsonResponse
@@ -430,5 +480,41 @@ class ApiMomentsController extends Controller
             || $moment->canBeManagedBy($request->user()),
             404
         );
+    }
+
+    private function isStudioMultiClipRequest(Request $request): bool
+    {
+        $payload = trim((string) $request->input('studio_payload', ''));
+
+        return $payload !== '' && $request->hasFile('studio_videos') && count(Arr::wrap($request->file('studio_videos'))) >= 1;
+    }
+
+    private function storeStudioProject(Request $request, MediaService $mediaService, MomentStudioProjectService $studioProjects): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'studio_videos' => ['required', 'array', 'min:1', 'max:5'],
+            'studio_videos.*' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime,video/webm', 'max:'.config('hunthub.upload_limits.moment_video_kb', 204800)],
+            'studio_payload' => ['required', 'string', 'max:20000'],
+            'caption' => ['nullable', 'string', 'max:220'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'visibility' => ['nullable', 'in:public,registered,private'],
+        ]);
+
+        $project = $studioProjects->createQueuedProject($user, array_values(Arr::wrap($request->file('studio_videos'))), (string) $validated['studio_payload'], [
+            'visibility' => (string) ($validated['visibility'] ?? 'public'),
+            'caption' => $validated['caption'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ], $mediaService);
+
+        RenderMomentStudioProject::dispatchAfterResponse($project->id);
+
+        return response()->json([
+            'message' => 'Studio-Projekt wurde erstellt und wird gerendert.',
+            'project_id' => $project->id,
+            'status' => $project->status,
+        ], 202);
     }
 }
