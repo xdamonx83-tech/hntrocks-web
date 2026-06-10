@@ -34,6 +34,9 @@ class RenderMomentStudioProject implements ShouldQueue
 
     public function handle(GamificationService $gamification): void
     {
+        $project = null;
+
+        try {
         /** @var MomentStudioProject|null $project */
         $project = MomentStudioProject::query()->with('user')->find($this->projectId);
 
@@ -164,6 +167,33 @@ class RenderMomentStudioProject implements ShouldQueue
 
         $gamification->award($project->user, 'moment_created', source: $moment, description: 'Moment veröffentlicht');
         $this->deleteSourceAssets($orderedAssets);
+        } catch (Throwable $exception) {
+            if ($project instanceof MomentStudioProject) {
+                $this->markFailed(
+                    $project,
+                    'Studio render crashed: '.Str::limit($exception->getMessage(), 800)
+                );
+            }
+
+            Log::error('Moment studio render crashed.', [
+                'project_id' => $this->projectId,
+                'error' => $exception->getMessage(),
+                'exception' => $exception,
+            ]);
+        }
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        $project = MomentStudioProject::query()->find($this->projectId);
+        if (! $project instanceof MomentStudioProject) {
+            return;
+        }
+
+        $this->markFailed(
+            $project,
+            'Studio render job failed: '.Str::limit($exception->getMessage(), 800)
+        );
     }
 
     /** @param array<int, MediaAsset> $assets @param array<int, array<string, mixed>> $clips @param array<int, array<string, mixed>> $textLayers */

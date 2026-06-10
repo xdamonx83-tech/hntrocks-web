@@ -469,7 +469,7 @@ class MomentController extends Controller
                 'queued' => __('ui.moment_studio_processing_message_queued'),
                 'rendering' => __('ui.moment_studio_processing_message_rendering'),
                 'published' => __('ui.moment_studio_processing_message_published'),
-                'failed' => __('ui.moment_studio_processing_message_failed'),
+                'failed' => $project->error_message ?: __('ui.moment_studio_processing_message_failed'),
                 default => __('ui.moment_studio_processing_message_preparing'),
             },
             'redirect_url' => $redirectUrl,
