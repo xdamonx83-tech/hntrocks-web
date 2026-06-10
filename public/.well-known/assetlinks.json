@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "rocks.hnt.app",
+      "sha256_cert_fingerprints": [
+        "8B:CA:47:BB:D9:E8:BC:B4:34:94:94:EB:77:84:02:F7:BA:5D:A8:A8:50:52:91:1D:6C:DB:92:08:76:8F:0C:90"
+      ]
+    }
+  }
+]
