@@ -78,7 +78,7 @@
     const textOverlay = studio.querySelector('[data-hnt-studio-text-overlay]');
     const textTrack = studio.querySelector('[data-hnt-studio-text-track]');
     const textEmpty = studio.querySelector('[data-hnt-studio-text-empty]');
-    const maxDuration = Number(studio.dataset.maxDuration || 60);
+    const maxDuration = Number(studio.dataset.maxDuration || 120);
     const maxMedia = Number(studio.dataset.maxMedia || 5);
     const minClipDuration = 1;
     const mediaItems = [];
@@ -1322,7 +1322,7 @@
         }
         if (totalDuration() > maxDuration + 0.05) {
             studio.classList.add('is-over-duration');
-            if (status) status.textContent = t('moment_studio_over_duration', 'Endvideo ist länger als 60 Sekunden.');
+            if (status) status.textContent = t('moment_studio_over_duration', 'Endvideo ist länger als 120 Sekunden.');
             return false;
         }
         updatePublishSummary();
@@ -1484,7 +1484,7 @@
         } else if (!hasTimeline) {
             status.textContent = t('moment_studio_drag_to_timeline', 'Ziehe Clips aus Meine Medien in die Timeline.');
         } else if (overDuration) {
-            status.textContent = t('moment_studio_over_duration', 'Endvideo ist länger als 60 Sekunden.');
+            status.textContent = t('moment_studio_over_duration', 'Endvideo ist länger als 120 Sekunden.');
         } else if (timelineCount() > 1) {
             status.textContent = t('moment_studio_render_started', 'Mehrfachclip bereit; Veröffentlichung rendert ein finales Video.');
         } else {
@@ -2175,7 +2175,7 @@
         if (totalDuration() > maxDuration + 0.05) {
             publishConfirmed = false;
             studio.classList.add('is-over-duration');
-            if (status) status.textContent = t('moment_studio_over_duration', 'Endvideo ist länger als 60 Sekunden.');
+            if (status) status.textContent = t('moment_studio_over_duration', 'Endvideo ist länger als 120 Sekunden.');
             return false;
         }
         const shouldRenderStudioProject = ordered.length > 1 || textLayers.length > 0 || hasStudioEffects();

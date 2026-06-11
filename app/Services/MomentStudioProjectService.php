@@ -33,9 +33,9 @@ class MomentStudioProjectService
 
         $this->assertStudioProFeaturesAllowed($user, $clips);
 
-        if ($totalDuration <= 0 || $totalDuration > 60.05) {
+        if ($totalDuration <= 0 || $totalDuration > 120.05) {
             throw ValidationException::withMessages([
-                'studio_payload' => 'Das fertige Moment muss zwischen 1 und 60 Sekunden lang sein.',
+                'studio_payload' => 'Das fertige Moment muss zwischen 1 und 120 Sekunden lang sein.',
             ]);
         }
 
@@ -125,7 +125,7 @@ class MomentStudioProjectService
                 throw ValidationException::withMessages(['studio_payload' => 'Ein Clip hat ungültige Start-/Endzeiten.']);
             }
 
-            $duration = min(60.0, max(0.1, $end - $start));
+            $duration = min(120.0, max(0.1, $end - $start));
             $normalized[] = [
                 'file_index' => $index,
                 'start' => round($start, 3),
