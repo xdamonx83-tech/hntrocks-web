@@ -444,7 +444,7 @@ class MomentController extends Controller
                 throw ValidationException::withMessages(['studio_payload' => 'Ein Clip hat ungültige Start-/Endzeiten.']);
             }
 
-            $duration = min(60.0, max(0.1, $end - $start));
+            $duration = min(120.0, max(0.1, $end - $start));
             $normalized[] = [
                 'file_index' => $index,
                 'start' => round($start, 3),
