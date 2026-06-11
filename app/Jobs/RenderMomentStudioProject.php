@@ -412,9 +412,6 @@ class RenderMomentStudioProject implements ShouldQueue
             $options[] = 'fontcolor='.$color;
             $options[] = 'borderw=3';
             $options[] = 'bordercolor=black@0.72';
-            $options[] = 'box=1';
-            $options[] = 'boxcolor=black@0.38';
-            $options[] = 'boxborderw=14';
             $options[] = 'shadowx=0';
             $options[] = 'shadowy=3';
             $options[] = 'shadowcolor=black@0.55';
