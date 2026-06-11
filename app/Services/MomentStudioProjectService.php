@@ -242,7 +242,7 @@ class MomentStudioProjectService
         ];
     }
 
-    /** @return array<int, array<string, float|string>> */
+    /** @return array<int, array<string, bool|float|string>> */
     public function normalizedStudioTextLayers(array $payload, float $totalDuration): array
     {
         $layers = $payload['text_layers'] ?? [];
@@ -275,6 +275,10 @@ class MomentStudioProjectService
                 'end' => round($end, 3),
                 'x' => round(min(95, max(5, (float) ($layer['x'] ?? 50))), 2),
                 'y' => round(min(92, max(7, (float) ($layer['y'] ?? 78))), 2),
+                'color' => $this->normalizeStudioTextColor($layer['color'] ?? null),
+                'bold' => filter_var($layer['bold'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'italic' => filter_var($layer['italic'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'underline' => filter_var($layer['underline'] ?? false, FILTER_VALIDATE_BOOLEAN),
             ];
 
             if (count($normalized) >= 5) {
@@ -283,6 +287,16 @@ class MomentStudioProjectService
         }
 
         return $normalized;
+    }
+
+    private function normalizeStudioTextColor(mixed $value): string
+    {
+        $color = trim((string) $value);
+        if (! preg_match('/\A#?([0-9a-f]{6})\z/i', $color, $matches)) {
+            return '#ffffff';
+        }
+
+        return '#'.strtolower($matches[1]);
     }
 
     /** @param array<int, array<string, mixed>> $clips */

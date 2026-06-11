@@ -398,6 +398,7 @@ class RenderMomentStudioProject implements ShouldQueue
             $end = max($start + 0.1, (float) ($layer['end'] ?? ($start + 4.0)));
             $xPercent = min(95.0, max(5.0, (float) ($layer['x'] ?? 50)));
             $yPercent = min(92.0, max(7.0, (float) ($layer['y'] ?? 78)));
+            $color = $this->drawTextColor($layer['color'] ?? null);
             $outputLabel = 'txtv'.$index;
 
             $options = [];
@@ -408,7 +409,7 @@ class RenderMomentStudioProject implements ShouldQueue
             $options[] = 'x='.$this->escapeDrawTextExpression(sprintf('min(max(0,(w*%.5F)-(text_w/2)),w-text_w)', $xPercent / 100));
             $options[] = 'y='.$this->escapeDrawTextExpression(sprintf('min(max(0,(h*%.5F)-(text_h/2)),h-text_h)', $yPercent / 100));
             $options[] = 'fontsize='.$fontSize;
-            $options[] = 'fontcolor=white';
+            $options[] = 'fontcolor='.$color;
             $options[] = 'borderw=3';
             $options[] = 'bordercolor=black@0.72';
             $options[] = 'box=1';
@@ -424,6 +425,16 @@ class RenderMomentStudioProject implements ShouldQueue
         }
 
         return $inputLabel;
+    }
+
+    private function drawTextColor(mixed $value): string
+    {
+        $color = trim((string) $value);
+        if (! preg_match('/\A#?([0-9a-f]{6})\z/i', $color, $matches)) {
+            return 'white';
+        }
+
+        return '0x'.strtolower($matches[1]);
     }
 
     private function drawTextFontFile(): ?string
