@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\ApiMomentsController;
 use App\Http\Controllers\Api\V1\ApiMomentOfWeekController;
 use App\Http\Controllers\Api\V1\ApiNotificationController;
 use App\Http\Controllers\Api\V1\ApiPushDeviceController;
+use App\Http\Controllers\Api\V1\ApiSearchController;
 use App\Http\Controllers\Api\V1\ApiTeamLfgController;
 use App\Http\Controllers\Api\V1\ApiTeamsController;
 use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
@@ -74,6 +75,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
 
         Route::get('/gifs/trending', [ApiGifController::class, 'trending'])->name('gifs.trending');
         Route::get('/gifs/search', [ApiGifController::class, 'search'])->name('gifs.search');
+        Route::get('/search', ApiSearchController::class)->name('search');
 
         Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:8,1')->name('reports.store');
 

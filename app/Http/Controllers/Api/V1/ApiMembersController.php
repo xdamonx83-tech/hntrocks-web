@@ -17,43 +17,19 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\NotificationService;
 use App\Services\SecurityLogService;
+use App\Services\Search\PlayerSearchQuery;
 use Illuminate\Support\Facades\Storage;
 
 class ApiMembersController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, PlayerSearchQuery $playerSearch): JsonResponse
     {
         $viewer = $request->user();
         $search = trim((string) $request->input('q', ''));
         $platform = trim((string) $request->input('platform', ''));
         $playstyle = trim((string) $request->input('playstyle', ''));
 
-        $members = User::query()
-            ->with('profile')
-            ->where('status', 'active')
-            ->where(function ($query) use ($viewer): void {
-                $query->where('id', $viewer->id)
-                    ->orWhereDoesntHave('profile')
-                    ->orWhereHas('profile', function ($profileQuery): void {
-                        $profileQuery->whereNull('profile_visibility')
-                            ->orWhere('profile_visibility', '!=', 'private');
-                    });
-            })
-            ->when($search !== '', function ($query) use ($search): void {
-                $term = '%'.$search.'%';
-                $query->where(function ($subQuery) use ($term): void {
-                    $subQuery->where('name', 'like', $term)
-                        ->orWhere('username', 'like', $term)
-                        ->orWhereHas('profile', fn ($profileQuery) => $profileQuery
-                            ->where('headline', 'like', $term)
-                            ->orWhere('bio', 'like', $term)
-                            ->orWhere('platform', 'like', $term)
-                            ->orWhere('playstyle', 'like', $term)
-                            ->orWhere('region', 'like', $term));
-                });
-            })
-            ->when($platform !== '', fn ($query) => $query->whereHas('profile', fn ($profile) => $profile->where('platform', $platform)))
-            ->when($playstyle !== '', fn ($query) => $query->whereHas('profile', fn ($profile) => $profile->where('playstyle', $playstyle)))
+        $members = $playerSearch->build($viewer, $search, $platform, $playstyle)
             ->orderByRaw('id = ? desc', [$viewer->id])
             ->latest()
             ->paginate(24);
