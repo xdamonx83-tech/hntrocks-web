@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\ApiPushDeviceController;
 use App\Http\Controllers\Api\V1\ApiTeamLfgController;
 use App\Http\Controllers\Api\V1\ApiTeamsController;
 use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
+use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Reports\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,7 @@ Route::get('/v1/health', function (): array {
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('/auth/register', [ApiAuthController::class, 'register'])->name('auth.register');
     Route::post('/auth/login', [ApiAuthController::class, 'login'])->name('auth.login');
+    Route::post('/auth/forgot-password', ApiPasswordResetLinkController::class)->middleware('throttle:6,1')->name('auth.password.forgot');
     Route::post('/auth/2fa/challenge', [ApiAuthController::class, 'completeTwoFactorChallenge'])->name('auth.two-factor.challenge');
     Route::post('/auth/social/exchange', [ApiAuthController::class, 'exchangeSocialLoginCode'])->name('auth.social.exchange');
     Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
