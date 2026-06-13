@@ -232,7 +232,7 @@ class ApiSearchController extends Controller
             'cup',
             $cup->title,
             collect([$cup->platform, $cup->statusLabel()])->filter()->implode(' · '),
-            $cup->cover_path ? $cup->coverUrl() : null,
+            $cup->coverUrl(),
             route('cups.show', $cup),
             ['name' => 'cup', 'slug' => $cup->slug],
             ['status' => $cup->status, 'badge' => strtoupper($cup->status)]
@@ -324,10 +324,23 @@ class ApiSearchController extends Controller
             'type' => $type,
             'title' => $title,
             'subtitle' => $subtitle,
-            'image_url' => $imageUrl,
+            'image_url' => $this->absoluteImageUrl($imageUrl),
             'target_url' => $targetUrl,
             'route_data' => $routeData,
         ], $extra);
+    }
+
+    private function absoluteImageUrl(?string $imageUrl): ?string
+    {
+        $imageUrl = trim((string) $imageUrl);
+        if ($imageUrl === '') {
+            return null;
+        }
+        if (preg_match('#^https?://#i', $imageUrl)) {
+            return $imageUrl;
+        }
+
+        return url($imageUrl);
     }
 
     private function wants(string $requested, string $type): bool
