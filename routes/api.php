@@ -187,6 +187,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::patch('/cups/{cup:slug}/teams/{team}/recruiting', [ApiCupTeamsController::class, 'updateRecruiting'])->name('cups.teams.recruiting');
         Route::post('/cups/{cup:slug}/teams/{team}/leave', [ApiCupTeamsController::class, 'leave'])->name('cups.teams.leave');
         Route::post('/cups/{cup:slug}/submissions', [ApiCupsController::class, 'submit'])->name('cups.submissions.store');
+        Route::get('/cups/{cup:slug}/submissions/{submission}/screenshot', [ApiCupsController::class, 'screenshot'])->name('cups.submissions.screenshot');
         Route::get('/notifications', [ApiNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/read-all', [ApiNotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::post('/notifications/{notification}/read', [ApiNotificationController::class, 'read'])->name('notifications.read');
