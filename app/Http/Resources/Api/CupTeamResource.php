@@ -12,6 +12,13 @@ class CupTeamResource extends JsonResource
         $members = $this->relationLoaded('members')
             ? $this->members->where('status', 'active')->values()
             : collect();
+        $cup = $this->relationLoaded('cup') ? $this->cup : null;
+        $canInvite = $cup
+            && $this->hasMember($request->user())
+            && $this->isCaptain($request->user())
+            && ! $this->isRosterLocked()
+            && $this->slotsOpen() > 0
+            && filled($this->join_token);
 
         return [
             'id' => (int) $this->id,
@@ -35,6 +42,9 @@ class CupTeamResource extends JsonResource
             'viewer_is_member' => $this->hasMember($request->user()),
             'viewer_is_captain' => $this->isCaptain($request->user()),
             'viewer_can_submit' => $this->canSubmitForCup($request->user()),
+            'invite_url' => $canInvite
+                ? route('cups.teams.join', [$cup, $this->join_token])
+                : null,
             'owner' => $this->relationLoaded('owner') && $this->owner
                 ? new UserResource($this->owner)
                 : null,
