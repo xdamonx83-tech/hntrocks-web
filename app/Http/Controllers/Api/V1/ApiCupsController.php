@@ -17,7 +17,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ApiCupsController extends Controller
 {
@@ -219,6 +221,18 @@ class ApiCupsController extends Controller
             ], 422);
         }
 
+        $maxUploads = $cup->maxSubmissionsPerParticipant();
+        if ($maxUploads !== null && $team->submissions()->count() >= $maxUploads) {
+            $message = __('ui.cup_submission_error_limit_reached', ['count' => $maxUploads]);
+
+            return response()->json([
+                'message' => $message,
+                'errors' => [
+                    'submission' => [$message],
+                ],
+            ], 422);
+        }
+
         $cooldownMinutes = max(0, (int) config('hunthub.cups.submission_cooldown_minutes', 30));
         if ($cooldownMinutes > 0 && $team->last_submission_at && $team->last_submission_at->gt(now()->subMinutes($cooldownMinutes))) {
             return response()->json([
@@ -232,6 +246,9 @@ class ApiCupsController extends Controller
         }
 
         $validated = $request->validate([
+            'kills' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'bounty_tokens' => ['nullable', 'integer', 'min:0', 'max:4'],
+            'extracted' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string', 'max:1200'],
             'screenshot' => ['required', 'image', 'max:'.config('hunthub.upload_limits.cup_submission_screenshot_kb', 10240)],
         ]);
@@ -281,6 +298,15 @@ class ApiCupsController extends Controller
                 'kills' => (int) ($analysis['kills'] ?? 0),
                 'bounty_tokens' => min(4, (int) ($analysis['bounty_tokens'] ?? 0)),
                 'extracted' => (bool) ($analysis['extracted'] ?? false),
+                'reported_kills' => array_key_exists('kills', $validated)
+                    ? (int) $validated['kills']
+                    : null,
+                'reported_bounty_tokens' => array_key_exists('bounty_tokens', $validated)
+                    ? (int) $validated['bounty_tokens']
+                    : null,
+                'reported_extracted' => array_key_exists('extracted', $validated)
+                    ? (bool) $validated['extracted']
+                    : null,
                 'points' => (int) ($analysis['points'] ?? 0),
                 'status' => (string) ($analysis['status'] ?? 'review_required'),
                 'note' => $validated['note'] ?? null,
@@ -315,7 +341,7 @@ class ApiCupsController extends Controller
             return $submission;
         });
 
-        $submission->loadMissing(['team.owner.profile', 'submitter.profile']);
+        $submission->loadMissing(['cup', 'team.owner.profile', 'submitter.profile']);
         $gamification->award($request->user(), 'cup_submission_created', source: $submission, description: __('ui.cup_submission_gamification_created'));
 
         if ($submission->status === 'review_required') {
@@ -344,11 +370,36 @@ class ApiCupsController extends Controller
             'viewer' => [
                 'registered' => true,
                 'team' => new CupLeaderboardEntryResource($team),
-                'can_submit' => $team->status === 'active' && $cup->status === 'active' && $team->canSubmitForCup($request->user()),
+                'can_submit' => $team->status === 'active' && $cup->isSubmissionOpen() && $team->canSubmitForCup($request->user()),
                 'submission_cooldown_minutes' => $cooldownMinutes,
                 'submissions' => CupSubmissionResource::collection($this->viewerSubmissions($cup, $team, 10)),
             ],
         ], 201);
+    }
+
+    public function screenshot(Request $request, Cup $cup, CupSubmission $submission): StreamedResponse
+    {
+        abort_unless((int) $submission->cup_id === (int) $cup->id, 404);
+
+        $submission->loadMissing(['team.members', 'screenshot']);
+        $asset = $submission->screenshot;
+
+        abort_unless($asset && $asset->status === 'ready', 404);
+        abort_unless($this->canViewSubmissionScreenshot($request, $cup, $submission), 403);
+
+        $disk = filled($asset->disk) ? (string) $asset->disk : 'public';
+        $path = ltrim((string) $asset->path, '/');
+        abort_unless($path !== '' && Storage::disk($disk)->exists($path), 404);
+
+        $extension = trim((string) $asset->extension) ?: pathinfo($path, PATHINFO_EXTENSION);
+        $filename = 'cup-submission-'.$submission->id.($extension ? '.'.$extension : '');
+        $mimeType = $asset->mime_type ?: (Storage::disk($disk)->mimeType($path) ?: 'application/octet-stream');
+
+        return Storage::disk($disk)->response($path, $filename, [
+            'Content-Type' => $mimeType,
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ], 'inline');
     }
 
     private function leaderboardFor(Cup $cup)
@@ -367,11 +418,26 @@ class ApiCupsController extends Controller
     private function viewerSubmissions(Cup $cup, CupTeam $team, int $limit)
     {
         return CupSubmission::query()
+            ->with('cup')
             ->where('cup_id', $cup->id)
             ->where('cup_team_id', $team->id)
             ->latest('submitted_at')
             ->limit($limit)
             ->get();
+    }
+
+    private function canViewSubmissionScreenshot(Request $request, Cup $cup, CupSubmission $submission): bool
+    {
+        $user = $request->user();
+        if (! $user) {
+            return false;
+        }
+
+        if ($cup->canManage($user) || (int) $submission->submitted_by === (int) $user->id) {
+            return true;
+        }
+
+        return $submission->team?->hasMember($user) === true;
     }
 
 

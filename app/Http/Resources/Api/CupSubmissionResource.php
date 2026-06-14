@@ -21,6 +21,9 @@ class CupSubmissionResource extends JsonResource
             'kills' => (int) $this->kills,
             'bounty_tokens' => (int) $this->bounty_tokens,
             'extracted' => (bool) $this->extracted,
+            'reported_kills' => $this->reported_kills !== null ? (int) $this->reported_kills : null,
+            'reported_bounty_tokens' => $this->reported_bounty_tokens !== null ? (int) $this->reported_bounty_tokens : null,
+            'reported_extracted' => $this->reported_extracted !== null ? (bool) $this->reported_extracted : null,
             'points' => (int) $this->points,
             'score_breakdown' => [
                 'points_per_bounty_token' => $pointsPerBountyToken,
@@ -32,8 +35,19 @@ class CupSubmissionResource extends JsonResource
             'status_label' => $this->statusLabel(),
             'result_summary' => $this->resultSummary(),
             'invalid_reason' => $this->invalidReasonLabel(),
+            'ai_status' => match ($this->status) {
+                'processed', 'approved', 'approved_manual' => 'accepted',
+                'invalid', 'rejected', 'rejected_manual' => 'rejected',
+                'review_required' => 'manual_review',
+                default => 'pending',
+            },
+            'ai_hint' => $this->resultSummary(),
             'note' => $this->note,
             'review_note' => $this->review_note,
+            'has_screenshot' => $this->screenshot_media_asset_id !== null,
+            'screenshot_path' => $this->screenshot_media_asset_id !== null
+                ? route('api.v1.cups.submissions.screenshot', [$this->cup, $this->resource], false)
+                : null,
             'ai' => [
                 'screen_type' => $this->screen_type,
                 'valid_extract' => (bool) $this->ai_valid_extract,

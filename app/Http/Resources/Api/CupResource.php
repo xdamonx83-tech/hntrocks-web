@@ -42,6 +42,7 @@ class CupResource extends JsonResource
             'registration_open' => $this->isRegistrationOpen(),
             'submission_open' => $this->isSubmissionOpen(),
             'submission_closed_reason' => $this->isSubmissionOpen() ? null : $this->submissionClosedReason(),
+            'requires_first_trophy_extraction' => $this->usesSummerFirstTrophyScoring(),
             'scoring' => [
                 'points_per_bounty_token' => (int) config('hunthub.cups.points_per_bounty_token', 2),
                 'points_per_kill' => (int) config('hunthub.cups.points_per_kill', 1),

@@ -14,7 +14,8 @@ class CupSubmission extends Model
 
     protected $fillable = [
         'cup_id', 'cup_team_id', 'submitted_by', 'reviewed_by', 'screenshot_media_asset_id',
-        'kills', 'bounty_tokens', 'extracted', 'points', 'status', 'note', 'review_note',
+        'kills', 'bounty_tokens', 'extracted', 'reported_kills', 'reported_bounty_tokens',
+        'reported_extracted', 'points', 'status', 'note', 'review_note',
         'screen_type', 'ai_valid_extract', 'ai_kills', 'ai_bounty_tokens', 'ai_confidence',
         'ai_complete_screenshot', 'ai_kills_source', 'ai_ambiguous_kills', 'ai_suspected_tampering',
         'ai_gamertag', 'ai_gamertag_normalized', 'ai_gamertag_confidence', 'ai_gamertag_mismatch',
@@ -25,7 +26,9 @@ class CupSubmission extends Model
     protected function casts(): array
     {
         return [
-            'kills' => 'integer', 'bounty_tokens' => 'integer', 'extracted' => 'boolean', 'points' => 'integer',
+            'kills' => 'integer', 'bounty_tokens' => 'integer', 'extracted' => 'boolean',
+            'reported_kills' => 'integer', 'reported_bounty_tokens' => 'integer',
+            'reported_extracted' => 'boolean', 'points' => 'integer',
             'ai_valid_extract' => 'boolean', 'ai_kills' => 'integer', 'ai_bounty_tokens' => 'integer',
             'ai_confidence' => 'float', 'ai_complete_screenshot' => 'boolean', 'ai_ambiguous_kills' => 'boolean',
             'ai_suspected_tampering' => 'boolean', 'ai_gamertag_confidence' => 'float',
