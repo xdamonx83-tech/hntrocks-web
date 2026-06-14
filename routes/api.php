@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\ApiBootstrapController;
 use App\Http\Controllers\Api\V1\ApiCupsController;
+use App\Http\Controllers\Api\V1\ApiCupTeamsController;
 use App\Http\Controllers\Api\V1\ApiCrownsController;
 use App\Http\Controllers\Api\V1\ApiCupFeedbackController;
 use App\Http\Controllers\Api\V1\ApiContractsController;
@@ -174,7 +175,13 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/crowns/inventory/slots/{slot}/unequip', [ApiCrownsController::class, 'unequip'])->middleware('throttle:20,1')->name('crowns.inventory.unequip');
         Route::get('/cups', [ApiCupsController::class, 'index'])->name('cups.index');
         Route::get('/cups/{cup:slug}', [ApiCupsController::class, 'show'])->name('cups.show');
+        Route::get('/cups/{cup:slug}/teams', [ApiCupTeamsController::class, 'index'])->name('cups.teams.index');
         Route::post('/cups/{cup:slug}/register', [ApiCupsController::class, 'register'])->name('cups.register');
+        Route::post('/cups/{cup:slug}/teams/{team}/join', [ApiCupTeamsController::class, 'join'])->name('cups.teams.join');
+        Route::post('/cups/{cup:slug}/team-finder', [ApiCupTeamsController::class, 'storeFinderPost'])->middleware('throttle:6,1')->name('cups.team-finder.store');
+        Route::delete('/cups/{cup:slug}/team-finder', [ApiCupTeamsController::class, 'closeFinderPost'])->middleware('throttle:12,1')->name('cups.team-finder.close');
+        Route::patch('/cups/{cup:slug}/teams/{team}/recruiting', [ApiCupTeamsController::class, 'updateRecruiting'])->name('cups.teams.recruiting');
+        Route::post('/cups/{cup:slug}/teams/{team}/leave', [ApiCupTeamsController::class, 'leave'])->name('cups.teams.leave');
         Route::post('/cups/{cup:slug}/submissions', [ApiCupsController::class, 'submit'])->name('cups.submissions.store');
         Route::get('/notifications', [ApiNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/read-all', [ApiNotificationController::class, 'readAll'])->name('notifications.read-all');
