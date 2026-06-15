@@ -59,6 +59,7 @@ class RenderMomentStudioProject implements ShouldQueue
         $timeline = is_array($project->timeline) ? $project->timeline : [];
         $clips = array_values((array) ($timeline['clips'] ?? []));
         $textLayers = array_values((array) ($timeline['text_layers'] ?? []));
+        $format = $this->normalizeFormat($timeline['format'] ?? null);
 
         if (count($sourceIds) < 1 || count($clips) !== count($sourceIds)) {
             $this->markFailed($project, 'Studio-Projekt hat keine gültige Clip-Liste.');
@@ -89,7 +90,7 @@ class RenderMomentStudioProject implements ShouldQueue
 
         @unlink($outputFullPath);
 
-        $command = $this->buildRenderCommand($orderedAssets, $clips, $textLayers, $outputFullPath);
+        $command = $this->buildRenderCommand($orderedAssets, $clips, $textLayers, $format, $outputFullPath);
         $output = [];
         $exitCode = 1;
         @exec($command, $output, $exitCode);
@@ -100,7 +101,7 @@ class RenderMomentStudioProject implements ShouldQueue
             return;
         }
 
-        $profile = $this->profile();
+        $profile = $this->profile($format);
         $probe = $this->probeVideo($outputFullPath, $profile);
         $thumbnailPath = $this->generateThumbnail($outputPath, $outputFullPath, $profile);
 
@@ -126,13 +127,16 @@ class RenderMomentStudioProject implements ShouldQueue
                 'studio_project_id' => $project->id,
                 'source_media_asset_ids' => $sourceIds,
                 'timeline' => $project->timeline,
+                'format' => $format,
+                'aspect_ratio_label' => $format,
+                'aspect_ratio' => $this->aspectRatioValue($format),
                 'width' => $probe['width'] ?? null,
                 'height' => $probe['height'] ?? null,
                 'duration_seconds' => $probe['duration_seconds'] ?? null,
                 'crf' => $profile['crf'],
                 'preset' => $profile['preset'],
                 'fps' => $profile['fps'],
-                'profile' => 'moment_studio_concat_9_16',
+                'profile' => 'moment_studio_concat_'.str_replace(':', '_', $format),
                 'text_layer_count' => count($textLayers),
                 'filter_count' => count(array_filter($clips, fn (array $clip): bool => ($clip['filter'] ?? 'none') !== 'none')),
                 'color_adjustment_count' => count(array_filter($clips, fn (array $clip): bool => $this->hasColorAdjustments($clip['colors'] ?? []))),
@@ -197,9 +201,9 @@ class RenderMomentStudioProject implements ShouldQueue
     }
 
     /** @param array<int, MediaAsset> $assets @param array<int, array<string, mixed>> $clips @param array<int, array<string, mixed>> $textLayers */
-    private function buildRenderCommand(array $assets, array $clips, array $textLayers, string $outputFullPath): string
+    private function buildRenderCommand(array $assets, array $clips, array $textLayers, string $format, string $outputFullPath): string
     {
-        $profile = $this->profile();
+        $profile = $this->profile($format);
         $ffmpeg = (string) $profile['ffmpeg_binary'];
         $width = (int) $profile['width'];
         $height = (int) $profile['height'];
@@ -244,20 +248,21 @@ class RenderMomentStudioProject implements ShouldQueue
             $audioInput = (int) ($audioInputIndexes[$index] ?? $index);
 
             $videoColorFilters = $this->clipFilterVideoFilters($clip);
-            $videoEffectFilters = $this->clipEffectVideoFilters($clip);
+            $videoEffectFilters = $this->clipEffectVideoFilters($clip, $width, $height);
             $videoFadeFilters = $this->clipFadeVideoFilters($clip, $duration);
             $videoColorAdjustmentFilters = $this->clipColorAdjustmentVideoFilters($clip);
             $audioFadeFilters = $this->clipFadeAudioFilters($clip, $duration);
 
+            $frameFilter = $format === '9:16'
+                ? sprintf('scale=%d:%d:force_original_aspect_ratio=increase,crop=%d:%d', $width, $height, $width, $height)
+                : sprintf('scale=%d:%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2:black', $width, $height, $width, $height);
+
             $filters[] = sprintf(
-                '[%d:v:0]trim=start=%s:end=%s,setpts=PTS-STARTPTS,scale=%d:%d:force_original_aspect_ratio=increase,crop=%d:%d,fps=%d%s%s%s%s,format=yuv420p,setsar=1[v%d]',
+                '[%d:v:0]trim=start=%s:end=%s,setpts=PTS-STARTPTS,%s,fps=%d%s%s%s%s,format=yuv420p,setsar=1[v%d]',
                 $this->videoInputIndex($index, $audioInputIndexes),
                 $this->ffmpegNumber($start),
                 $this->ffmpegNumber($end),
-                $width,
-                $height,
-                $width,
-                $height,
+                $frameFilter,
                 $fps,
                 $videoColorFilters,
                 $videoEffectFilters,
@@ -526,21 +531,23 @@ class RenderMomentStudioProject implements ShouldQueue
     }
 
     /** @param array<string, mixed> $clip */
-    private function clipEffectVideoFilters(array $clip): string
+    private function clipEffectVideoFilters(array $clip, int $width, int $height): string
     {
         $effect = strtolower(trim((string) ($clip['effect'] ?? 'none')));
 
-        $zoomPulse = "scale=w='trunc(1080*(1+0.026*sin(8*t))/2)*2':h='trunc(1920*(1+0.026*sin(8*t))/2)*2':eval=frame,crop=1080:1920";
-        $fastZoom = "scale=w='trunc(1080*(1+0.055*sin(10*t))/2)*2':h='trunc(1920*(1+0.055*sin(10*t))/2)*2':eval=frame,crop=1080:1920";
-        $slowZoom = "scale=w='trunc(1080*(1+0.004*t)/2)*2':h='trunc(1920*(1+0.004*t)/2)*2':eval=frame,crop=1080:1920";
-        $randomZoom = "scale=w='trunc(1080*(1.035+0.022*sin(0.8*t)+0.014*sin(2.7*t))/2)*2':h='trunc(1920*(1.035+0.022*sin(0.8*t)+0.014*sin(2.7*t))/2)*2':eval=frame,crop=1080:1920";
+        $zoomPulse = "scale=w='trunc({$width}*(1+0.026*sin(8*t))/2)*2':h='trunc({$height}*(1+0.026*sin(8*t))/2)*2':eval=frame,crop={$width}:{$height}";
+        $fastZoom = "scale=w='trunc({$width}*(1+0.055*sin(10*t))/2)*2':h='trunc({$height}*(1+0.055*sin(10*t))/2)*2':eval=frame,crop={$width}:{$height}";
+        $slowZoom = "scale=w='trunc({$width}*(1+0.004*t)/2)*2':h='trunc({$height}*(1+0.004*t)/2)*2':eval=frame,crop={$width}:{$height}";
+        $randomZoom = "scale=w='trunc({$width}*(1.035+0.022*sin(0.8*t)+0.014*sin(2.7*t))/2)*2':h='trunc({$height}*(1.035+0.022*sin(0.8*t)+0.014*sin(2.7*t))/2)*2':eval=frame,crop={$width}:{$height}";
+        $retroWidth = max(2, (int) round($width / 8));
+        $retroHeight = max(2, (int) round($height / 8));
 
         $effects = [
             // Real movement/time-based effects. Keep each chain label-free so it can be
             // appended safely inside the existing per-clip filter chain.
             'flash' => "eq=brightness='0.08*gt(sin(24*t),0.94)':contrast=1.10",
             'impulse' => $zoomPulse.',eq=contrast=1.06:saturation=1.04',
-            'rotate' => "rotate='0.018*sin(3*t)':ow=1080:oh=1920:c=black",
+            'rotate' => "rotate='0.018*sin(3*t)':ow={$width}:oh={$height}:c=black",
             'vhs' => "noise=alls=18:allf=t+u,eq=saturation=0.82:contrast=1.12,hue=h='2*sin(9*t)'",
             'vaporwave' => "hue=h='285+28*sin(1.6*t)':s=1.42,eq=contrast=1.08",
             'chromatic' => 'rgbashift=rh=3:bh=-3,eq=contrast=1.12:saturation=1.16',
@@ -552,7 +559,7 @@ class RenderMomentStudioProject implements ShouldQueue
             'glitch' => 'rgbashift=rh=4:bh=-4,noise=alls=12:allf=t+u,eq=contrast=1.18:saturation=1.22',
             'disco' => "hue=h='120*sin(2*t)':s=1.45",
             'comic' => 'eq=contrast=1.55:saturation=0.88,edgedetect=low=0.08:high=0.22',
-            'retro' => 'scale=135:240,scale=1080:1920:flags=neighbor,eq=contrast=1.16:saturation=0.90',
+            'retro' => "scale={$retroWidth}:{$retroHeight},scale={$width}:{$height}:flags=neighbor,eq=contrast=1.16:saturation=0.90",
             'smoke' => 'boxblur=1.2:1,eq=brightness=0.02:contrast=0.94:saturation=0.86,noise=alls=6:allf=t+u',
             'shine' => "eq=brightness='0.035+0.035*sin(4*t)':contrast=1.06:saturation=1.06",
             'spread' => 'boxblur=2.2:1,noise=alls=8:allf=t+u',
@@ -857,13 +864,37 @@ class RenderMomentStudioProject implements ShouldQueue
         ]);
     }
 
-    private function profile(): array
+    private function normalizeFormat(mixed $value): string
     {
+        $format = trim((string) $value);
+
+        return in_array($format, ['9:16', '16:9', '1:1'], true) ? $format : '9:16';
+    }
+
+    private function aspectRatioValue(string $format): float
+    {
+        return match ($this->normalizeFormat($format)) {
+            '16:9' => round(16 / 9, 6),
+            '1:1' => 1.0,
+            default => round(9 / 16, 6),
+        };
+    }
+
+    private function profile(string $format = '9:16'): array
+    {
+        $portraitWidth = (int) config('hunthub.moment_video_transcoding.width', 720);
+        $portraitHeight = (int) config('hunthub.moment_video_transcoding.height', 1280);
+        [$width, $height] = match ($this->normalizeFormat($format)) {
+            '16:9' => [$portraitHeight, $portraitWidth],
+            '1:1' => [min($portraitWidth, $portraitHeight), min($portraitWidth, $portraitHeight)],
+            default => [$portraitWidth, $portraitHeight],
+        };
+
         return [
             'ffmpeg_binary' => (string) config('hunthub.moment_video_transcoding.ffmpeg_binary', 'ffmpeg'),
             'ffprobe_binary' => (string) config('hunthub.moment_video_transcoding.ffprobe_binary', 'ffprobe'),
-            'width' => (int) config('hunthub.moment_video_transcoding.width', 720),
-            'height' => (int) config('hunthub.moment_video_transcoding.height', 1280),
+            'width' => $width,
+            'height' => $height,
             'fps' => (int) config('hunthub.moment_video_transcoding.fps', 30),
             'crf' => (int) config('hunthub.moment_video_transcoding.crf', 24),
             'preset' => (string) config('hunthub.moment_video_transcoding.preset', 'medium'),

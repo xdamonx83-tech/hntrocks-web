@@ -9,6 +9,17 @@
     $videoMime = $moment->media?->mime_type ?: 'video/mp4';
     $videoPoster = $moment->cover?->thumbnailUrl() ?: ($moment->media?->thumbnail_path ? $moment->media->thumbnailUrl() : null);
     $canManageMoment = $moment->canBeManagedBy($viewer);
+    $mediaMetadata = is_array($moment->media?->metadata) ? $moment->media->metadata : [];
+    $aspectRatioLabel = $mediaMetadata['aspect_ratio_label'] ?? $mediaMetadata['format'] ?? null;
+    if (! in_array($aspectRatioLabel, ['9:16', '16:9', '1:1'], true)) {
+        $mediaWidth = (int) ($moment->media?->width ?? 0);
+        $mediaHeight = (int) ($moment->media?->height ?? 0);
+        $aspectRatioLabel = $mediaWidth > 0 && $mediaHeight > 0 && abs(($mediaWidth / $mediaHeight) - 1) <= 0.08
+            ? '1:1'
+            : ($mediaWidth > $mediaHeight ? '16:9' : '9:16');
+    }
+    $isLandscape = $aspectRatioLabel === '16:9';
+    $isContained = $aspectRatioLabel !== '9:16';
 @endphp
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -143,12 +154,29 @@
             box-shadow: 0 32px 90px rgba(0, 0, 0, .72);
         }
 
+        .hh-socialite-moment-shell.is-landscape {
+            grid-template-columns: minmax(64px, 1fr) minmax(520px, 960px) minmax(96px, 1fr);
+        }
+
+        .hh-socialite-moment-stage.is-landscape {
+            width: min(960px, calc(100vw - 160px));
+            aspect-ratio: 16 / 9;
+        }
+
+        .hh-socialite-moment-stage.is-square {
+            aspect-ratio: 1 / 1;
+        }
+
         .hh-socialite-moment-video {
             width: 100%;
             height: 100%;
             display: block;
             object-fit: cover;
             background: #000;
+        }
+
+        .hh-socialite-moment-video.is-contained {
+            object-fit: contain;
         }
 
         .hh-socialite-moment-video::-webkit-media-controls,
@@ -638,6 +666,13 @@
                 border-radius: 0;
             }
 
+            .hh-socialite-moment-stage.is-landscape,
+            .hh-socialite-moment-stage.is-square {
+                display: grid;
+                place-items: center;
+                aspect-ratio: auto;
+            }
+
             .hh-socialite-moment-side-nav {
                 display: none !important;
             }
@@ -689,7 +724,7 @@
     </style>
 </head>
 <body>
-    <main class="hh-socialite-moment-shell" data-socialite-moment-viewer>
+    <main class="hh-socialite-moment-shell {{ $isLandscape ? 'is-landscape' : '' }}" data-socialite-moment-viewer>
         <div class="hh-socialite-moment-topbar">
             <a class="hh-socialite-moment-back" href="{{ route('feed.index') }}" data-socialite-moment-back aria-label="{{ __('ui.back') }}">
                 <ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>
@@ -709,8 +744,8 @@
             </div>
         </div>
 
-        <section class="hh-socialite-moment-stage" aria-label="{{ __('ui.moment_reel_aria') }}">
-            <video class="hh-socialite-moment-video" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" @if ($videoPoster) poster="{{ $videoPoster }}" @endif data-socialite-moment-video>
+        <section class="hh-socialite-moment-stage {{ $isLandscape ? 'is-landscape' : ($aspectRatioLabel === '1:1' ? 'is-square' : '') }}" aria-label="{{ __('ui.moment_reel_aria') }}">
+            <video class="hh-socialite-moment-video {{ $isContained ? 'is-contained' : '' }}" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" @if ($videoPoster) poster="{{ $videoPoster }}" @endif data-socialite-moment-video>
                 <source src="{{ $videoUrl }}" type="{{ $videoMime }}">
                 {{ __('ui.moment_video_not_supported') }}
             </video>
