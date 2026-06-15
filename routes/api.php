@@ -131,6 +131,9 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/lfg', [ApiLfgController::class, 'index'])->name('lfg.index');
         Route::post('/lfg', [ApiLfgController::class, 'store'])->name('lfg.store');
         Route::get('/lfg/{post}', [ApiLfgController::class, 'show'])->name('lfg.show');
+        Route::post('/lfg/{post}/update', [ApiLfgController::class, 'update'])->name('lfg.update');
+        Route::post('/lfg/{post}/close', [ApiLfgController::class, 'close'])->name('lfg.close');
+        Route::post('/lfg/{post}/delete', [ApiLfgController::class, 'destroy'])->name('lfg.destroy');
         Route::post('/lfg/{post}/apply', [ApiLfgController::class, 'apply'])->name('lfg.apply');
         Route::post('/lfg/{post}/applications/{application}/accept', [ApiLfgController::class, 'acceptApplication'])->name('lfg.applications.accept');
         Route::post('/lfg/{post}/applications/{application}/reject', [ApiLfgController::class, 'rejectApplication'])->name('lfg.applications.reject');
