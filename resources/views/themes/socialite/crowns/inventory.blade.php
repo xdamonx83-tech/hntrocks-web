@@ -51,7 +51,7 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <p class="text-sm font-semibold text-yellow-600 uppercase tracking-wide">{{ __('ui.crowns_inventory_kicker') }}</p>
-                <h2 class="mt-1 text-xl font-bold text-black dark:text-white">{{ number_format($balance, 0, ',', '.') }} Crowns</h2>
+                <h2 class="mt-1 text-xl font-bold text-black dark:text-white">{{ number_format($balance, 0, ',', '.') }} Bounty Marks</h2>
                 <p class="mt-1 text-sm text-gray-500 dark:text-white/60">{{ __('ui.crowns_inventory_notice') }}</p>
             </div>
         </div>

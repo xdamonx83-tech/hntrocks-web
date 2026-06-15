@@ -36,8 +36,8 @@
     <section class="crowns-hero">
         <div class="crowns-hero-glow" aria-hidden="true"></div>
         <div class="crowns-hero-copy">
-            <span class="crowns-kicker">♛ HNT Crowns</span>
-            <h1>{{ number_format($balance, 0, ',', '.') }} Crowns</h1>
+            <span class="crowns-kicker">♛ HNT Bounty Marks</span>
+            <h1>{{ number_format($balance, 0, ',', '.') }} Bounty Marks</h1>
             <p>{{ $nonCashNotice ?: __('ui.preview_crowns_default_notice') }}</p>
         </div>
 

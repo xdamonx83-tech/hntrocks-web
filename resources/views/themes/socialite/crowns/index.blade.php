@@ -64,14 +64,14 @@
                                 <i class="ph ph-crown" aria-hidden="true"></i>
                                 {{ __('ui.crowns_kicker') }}
                             </span>
-                            <h2 class="mt-4 text-3xl sm:text-4xl font-black text-white drop-shadow">{{ number_format($balance, 0, ',', '.') }} Crowns</h2>
+                            <h2 class="mt-4 text-3xl sm:text-4xl font-black text-white drop-shadow">{{ number_format($balance, 0, ',', '.') }} Bounty Marks</h2>
                             <p class="mt-3 max-w-2xl text-sm text-white/75 drop-shadow">{{ __('ui.crowns_intro') }}</p>
                         </div>
                         @if($pendingTotal > 0)
                             <form method="POST" action="{{ route('crowns.collect') }}">
                                 @csrf
                                 <button type="submit" class="button bg-primary text-white shadow-lg">
-                                    +{{ number_format($pendingTotal, 0, ',', '.') }} Crowns abholen
+                                    +{{ number_format($pendingTotal, 0, ',', '.') }} Bounty Marks abholen
                                 </button>
                             </form>
                         @else

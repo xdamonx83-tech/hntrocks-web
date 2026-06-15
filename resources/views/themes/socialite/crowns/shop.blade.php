@@ -52,7 +52,7 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <p class="text-sm font-semibold text-yellow-600 uppercase tracking-wide">{{ __('ui.crowns_shop_kicker') }}</p>
-                <h2 class="mt-1 text-xl font-bold text-black dark:text-white">{{ number_format($balance, 0, ',', '.') }} Crowns</h2>
+                <h2 class="mt-1 text-xl font-bold text-black dark:text-white">{{ number_format($balance, 0, ',', '.') }} Bounty Marks</h2>
                 <p class="mt-1 text-sm text-gray-500 dark:text-white/60">{{ __('ui.crowns_shop_notice') }}</p>
             </div>
             <span class="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-200">
