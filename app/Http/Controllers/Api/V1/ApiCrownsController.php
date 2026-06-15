@@ -30,7 +30,7 @@ class ApiCrownsController extends Controller
         $count = $crowns->collectPending($request->user());
 
         return response()->json([
-            'message' => $count > 0 ? 'Crowns wurden eingesammelt.' : 'Keine offenen Crowns vorhanden.',
+            'message' => $count > 0 ? 'Bounty Marks wurden eingesammelt.' : 'Keine offenen Bounty Marks vorhanden.',
             'collected_count' => $count,
             'data' => $this->payload($request, $crowns),
         ]);
@@ -41,7 +41,7 @@ class ApiCrownsController extends Controller
         $count = $crowns->dismissPendingCollection($request->user());
 
         return response()->json([
-            'message' => 'Crowns-Hinweis wurde ausgeblendet.',
+            'message' => 'Bounty-Marks-Hinweis wurde ausgeblendet.',
             'dismissed_count' => $count,
             'data' => $this->payload($request, $crowns),
         ]);
@@ -52,7 +52,7 @@ class ApiCrownsController extends Controller
         $user = $request->user();
 
         if (! $this->shopTablesReady()) {
-            return response()->json(['message' => 'Crowns-Shop ist noch nicht bereit.'], 503);
+            return response()->json(['message' => 'Marks-Shop ist noch nicht bereit.'], 503);
         }
 
         if (! $this->isPurchasable($item)) {
@@ -101,7 +101,7 @@ class ApiCrownsController extends Controller
         });
 
         if (! $inventoryItem) {
-            return response()->json(['message' => 'Nicht genug Crowns oder Item bereits gekauft.'], 422);
+            return response()->json(['message' => 'Nicht genug Bounty Marks oder Item bereits gekauft.'], 422);
         }
 
         return response()->json([
@@ -260,7 +260,7 @@ class ApiCrownsController extends Controller
                     'action' => (string) ($transaction->action ?? ''),
                     'amount' => (int) $transaction->amount,
                     'balance_after' => (int) $transaction->balance_after,
-                    'description' => (string) ($transaction->description ?: $transaction->action ?: 'Crowns'),
+                    'description' => (string) ($transaction->description ?: $transaction->action ?: 'Bounty Marks'),
                     'is_credit' => $isCredit,
                     'is_spend' => (string) $transaction->type === 'debit' || (int) $transaction->amount < 0,
                     'is_pending' => $isPending,

@@ -2,8 +2,8 @@
 
 return [
     'enabled' => env('HNT_CROWNS_ENABLED', true),
-    'name' => 'Crowns',
-    'non_cash_notice' => 'Crowns sind ein rein virtuelles HNT.rocks-Guthaben ohne Echtgeldwert, Auszahlung, Handel oder Übertragbarkeit.',
+    'name' => 'Bounty Marks',
+    'non_cash_notice' => 'Bounty Marks sind ein rein virtuelles HNT.rocks-Guthaben ohne Echtgeldwert, Auszahlung, Handel oder Übertragbarkeit.',
 
     'rewards' => [
         'daily_login' => [
