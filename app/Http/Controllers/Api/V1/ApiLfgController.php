@@ -58,20 +58,7 @@ class ApiLfgController extends Controller
         MentionService $mentions,
         NotificationService $notifications
     ): JsonResponse {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:120'],
-            'body' => ['nullable', 'string', 'max:2800'],
-            'platform' => ['nullable', 'string', 'max:40'],
-            'playstyle' => ['nullable', 'string', 'max:60'],
-            'region' => ['nullable', 'string', 'max:60'],
-            'language' => ['nullable', 'string', 'max:40'],
-            'preferred_time' => ['nullable', 'string', 'max:80'],
-            'experience_level' => ['nullable', 'string', 'max:60'],
-            'voice_required' => ['nullable', 'boolean'],
-            'slots_total' => ['required', 'integer', 'min:2', 'max:4'],
-            'visibility' => ['required', 'string', 'in:public,private'],
-            'expires_at' => ['nullable', 'date', 'after:now'],
-        ]);
+        $validated = $this->validatedPostData($request);
 
         $user = $request->user();
 
@@ -89,10 +76,75 @@ class ApiLfgController extends Controller
         $post->load(['user.profile', 'pendingApplications.user.profile']);
 
         return response()->json([
-            'message' => 'LFG post created.',
+            'message' => __('ui.lfg_created_status'),
             'lfg' => new LfgPostResource($post),
             'data' => new LfgPostResource($post),
         ], 201);
+    }
+
+    public function update(
+        Request $request,
+        LfgPost $post,
+        MentionService $mentions,
+        NotificationService $notifications
+    ): JsonResponse {
+        abort_unless($post->canManage($request->user()), 403);
+
+        $validated = $this->validatedPostData($request);
+        if ((int) $post->slots_filled > (int) $validated['slots_total']) {
+            return response()->json([
+                'message' => __('ui.lfg_error_slots_filled_too_high'),
+            ], 422);
+        }
+
+        $post->fill([
+            ...$validated,
+            'voice_required' => $request->boolean('voice_required'),
+        ]);
+
+        if ($post->status === 'open' && $post->slots_filled >= $post->slots_total) {
+            $post->status = 'full';
+        } elseif ($post->status === 'full' && $post->slots_filled < $post->slots_total) {
+            $post->status = 'open';
+        }
+
+        $post->save();
+        $mentions->syncForLfgPost($post, $request->user(), (string) ($post->body ?? ''), $notifications);
+
+        $freshPost = $this->freshPostForResponse($post, $request);
+
+        return response()->json([
+            'message' => __('ui.lfg_saved_status'),
+            'lfg' => new LfgPostResource($freshPost),
+            'data' => new LfgPostResource($freshPost),
+        ]);
+    }
+
+    public function close(Request $request, LfgPost $post): JsonResponse
+    {
+        abort_unless($post->canManage($request->user()), 403);
+
+        $post->update(['status' => 'closed']);
+        $freshPost = $this->freshPostForResponse($post, $request);
+
+        return response()->json([
+            'message' => __('ui.lfg_closed_status'),
+            'lfg' => new LfgPostResource($freshPost),
+            'data' => new LfgPostResource($freshPost),
+        ]);
+    }
+
+    public function destroy(Request $request, LfgPost $post): JsonResponse
+    {
+        abort_unless($post->canDelete($request->user()), 403);
+
+        $post->update(['status' => 'archived']);
+        $post->delete();
+
+        return response()->json([
+            'message' => __('ui.lfg_deleted_status'),
+            'data' => null,
+        ]);
     }
 
     public function apply(
@@ -159,7 +211,7 @@ class ApiLfgController extends Controller
         abort_unless((int) $application->lfg_post_id === (int) $post->id, 404);
 
         if ($application->status !== 'pending') {
-            return response()->json(['message' => 'Diese LFG-Anfrage ist nicht mehr offen.'], 422);
+            return response()->json(['message' => __('ui.lfg_error_application_not_pending')], 422);
         }
 
         if (! $post->isOpen()) {
@@ -216,7 +268,7 @@ class ApiLfgController extends Controller
         abort_unless((int) $application->lfg_post_id === (int) $post->id, 404);
 
         if ($application->status !== 'pending') {
-            return response()->json(['message' => 'Diese LFG-Anfrage ist nicht mehr offen.'], 422);
+            return response()->json(['message' => __('ui.lfg_error_application_not_pending')], 422);
         }
 
         $application->update([
@@ -256,6 +308,24 @@ class ApiLfgController extends Controller
                 'pendingApplications.user.profile',
             ])
             ->findOrFail($post->id);
+    }
+
+    private function validatedPostData(Request $request): array
+    {
+        return $request->validate([
+            'title' => ['required', 'string', 'max:120'],
+            'body' => ['nullable', 'string', 'max:2800'],
+            'platform' => ['nullable', 'string', 'max:40'],
+            'playstyle' => ['nullable', 'string', 'max:60'],
+            'region' => ['nullable', 'string', 'max:60'],
+            'language' => ['nullable', 'string', 'max:40'],
+            'preferred_time' => ['nullable', 'string', 'max:80'],
+            'experience_level' => ['nullable', 'string', 'max:60'],
+            'voice_required' => ['nullable', 'boolean'],
+            'slots_total' => ['required', 'integer', 'min:2', 'max:4'],
+            'visibility' => ['required', 'string', 'in:public,private'],
+            'expires_at' => ['nullable', 'date', 'after:now'],
+        ]);
     }
 
     private function applicationPayload(?LfgApplication $application): ?array
