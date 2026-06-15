@@ -30,6 +30,7 @@ class MomentStudioProjectService
         $clips = $this->normalizedStudioClips($payload, count($files));
         $totalDuration = array_sum(array_map(static fn (array $clip): float => (float) $clip['duration'], $clips));
         $textLayers = $this->normalizedStudioTextLayers($payload, $totalDuration);
+        $format = $this->normalizeStudioFormat($payload['format'] ?? $payload['aspect_ratio'] ?? null);
 
         $this->assertStudioProFeaturesAllowed($user, $clips);
 
@@ -43,14 +44,14 @@ class MomentStudioProjectService
         $sourceAssets = [];
 
         try {
-            DB::transaction(function () use (&$project, &$sourceAssets, $user, $attributes, $files, $clips, $textLayers, $mediaService): void {
+            DB::transaction(function () use (&$project, &$sourceAssets, $user, $attributes, $files, $clips, $textLayers, $format, $mediaService): void {
                 $project = MomentStudioProject::create([
                     'user_id' => $user->id,
                     'status' => 'uploading',
                     'visibility' => $attributes['visibility'],
                     'caption' => $attributes['caption'] ?? null,
                     'description' => $attributes['description'] ?? null,
-                    'timeline' => ['clips' => $clips, 'text_layers' => $textLayers],
+                    'timeline' => ['format' => $format, 'clips' => $clips, 'text_layers' => $textLayers],
                     'source_media_asset_ids' => [],
                     'total_duration_seconds' => (int) ceil(array_sum(array_map(static fn (array $clip): float => (float) $clip['duration'], $clips))),
                     'expires_at' => now()->addDay(),
@@ -96,6 +97,13 @@ class MomentStudioProjectService
         }
 
         return $project;
+    }
+
+    public function normalizeStudioFormat(mixed $value): string
+    {
+        $format = trim((string) $value);
+
+        return in_array($format, ['9:16', '16:9', '1:1'], true) ? $format : '9:16';
     }
 
     /** @return array<int, array<string, mixed>> */
