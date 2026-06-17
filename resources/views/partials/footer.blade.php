@@ -85,3 +85,31 @@
     window.HH_I18N = {!! json_encode($hhI18n, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
 </script>
 <script src="{{ asset('assets/vikinger/js/hunthub-start.js') }}" defer></script>
+@auth
+    @php
+        $hhRealtimeConfig = config('hnt-realtime');
+        $hhRealtimeEnabled = (bool) ($hhRealtimeConfig['enabled'] ?? false)
+            && filled($hhRealtimeConfig['app_key'] ?? null)
+            && filled($hhRealtimeConfig['host'] ?? null);
+        $hhRealtimePayload = [
+            'enabled' => $hhRealtimeEnabled,
+            'appKey' => $hhRealtimeConfig['app_key'] ?? null,
+            'host' => $hhRealtimeConfig['host'] ?? null,
+            'port' => (int) ($hhRealtimeConfig['port'] ?? 443),
+            'scheme' => $hhRealtimeConfig['scheme'] ?? 'https',
+            'userId' => auth()->id(),
+            'authEndpoint' => $hhRealtimeConfig['auth_endpoint'] ?? '/broadcasting/auth',
+            'csrfToken' => csrf_token(),
+            'endpoints' => [
+                'badges' => route('socialite.header.live-badges'),
+                'notifications' => route('socialite.header.notifications'),
+                'messages' => route('socialite.header.messages'),
+                'friendRequests' => route('socialite.header.friend-requests'),
+            ],
+        ];
+    @endphp
+    <script>
+        window.HH_REALTIME = {!! json_encode($hhRealtimePayload, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
+    </script>
+    <script src="{{ asset('assets/vikinger/js/hnt-realtime.js') }}?v=1" defer></script>
+@endauth
