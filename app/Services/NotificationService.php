@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Services\Notifications\PushPayloadResolver;
 use App\Services\Push\FcmPushService;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -98,13 +99,7 @@ class NotificationService
                 $title,
                 $body,
                 $notification->actionUrl(),
-                [
-                    'type' => $notification->type,
-                    'target' => 'notification',
-                    'notification_id' => (string) $notification->id,
-                    'action_url' => (string) $notification->actionUrl(),
-                    'actor_id' => (string) ($notification->actor_id ?? ''),
-                ]
+                app(PushPayloadResolver::class)->forNotification($notification)
             );
         } catch (Throwable $error) {
             Log::warning('Push dispatch for user notification failed.', [
