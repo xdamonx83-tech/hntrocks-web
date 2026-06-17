@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
 use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Reports\ReportController;
+use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/v1/health', function (): array {
@@ -48,6 +49,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
 
     Route::middleware('api.token')->group(function (): void {
+        Route::post('/broadcasting/auth', [BroadcastController::class, 'authenticate'])->name('broadcasting.auth');
         Route::get('/bootstrap', ApiBootstrapController::class)->name('bootstrap');
         Route::get('/me', [ApiAuthController::class, 'me'])->name('me');
         Route::get('/me/profile-sections/{section}', [ApiMembersController::class, 'meSection'])->name('me.profile-sections.show');
