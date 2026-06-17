@@ -88,8 +88,7 @@
 @auth
     @php
         $hhRealtimeConfig = config('hnt-realtime');
-        $hhRealtimeEnabled = (bool) ($hhRealtimeConfig['enabled'] ?? false)
-            && filled($hhRealtimeConfig['app_key'] ?? null)
+        $hhRealtimeEnabled = filled($hhRealtimeConfig['app_key'] ?? null)
             && filled($hhRealtimeConfig['host'] ?? null);
         $hhRealtimePayload = [
             'enabled' => $hhRealtimeEnabled,

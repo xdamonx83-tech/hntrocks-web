@@ -65,7 +65,6 @@
 
     if (selector === '[data-hh-message-count]') {
       ensureBadge('[data-hh-chat-dock-open="list"]', selector, 'hh-action-badge');
-      ensureBadge('.hh-mobile-alert-actions a.hh-mobile-alert-link[href*="/messages"]', selector, 'hh-mobile-alert-badge');
     }
   };
 
@@ -108,18 +107,6 @@
     return response.json();
   };
 
-  const replaceHtml = (selectors, html) => {
-    if (typeof html !== 'string') {
-      return;
-    }
-
-    selectors.forEach((selector) => {
-      document.querySelectorAll(selector).forEach((node) => {
-        node.innerHTML = html;
-      });
-    });
-  };
-
   const refreshHeader = async () => {
     if (refreshRunning) {
       refreshAgain = true;
@@ -130,42 +117,17 @@
     refreshAgain = false;
 
     try {
+      if (window.HNT_PREVIEW_LIVE_BADGES && window.HNT_PREVIEW_LIVE_BADGES.endpoint) {
+        document.dispatchEvent(new CustomEvent('hnt:preview-live-badges-refresh'));
+        return;
+      }
+
       const badges = await fetchJson(endpoints.badges);
 
       if (badges && badges.authenticated !== false) {
         setHeaderBadge('[data-hh-notification-count]', badges.notifications_unread);
         setHeaderBadge('[data-hh-message-count]', badges.messages_unread);
         setHeaderBadge('[data-hh-friend-request-count]', badges.friend_request_count);
-      }
-
-      const [notifications, messages, friendRequests] = await Promise.allSettled([
-        fetchJson(endpoints.notifications),
-        fetchJson(endpoints.messages),
-        fetchJson(endpoints.friendRequests)
-      ]);
-
-      if (notifications.status === 'fulfilled' && notifications.value?.authenticated !== false) {
-        setHeaderBadge('[data-hh-notification-count]', notifications.value.unread_count);
-        replaceHtml([
-          '[data-hnt-notification-shell-list]',
-          '[data-hh-realtime-notifications]'
-        ], notifications.value.html);
-      }
-
-      if (messages.status === 'fulfilled' && messages.value?.authenticated !== false) {
-        setHeaderBadge('[data-hh-message-count]', messages.value.unread_count);
-        replaceHtml([
-          '[data-hnt-message-shell-list]',
-          '[data-hh-realtime-messages]'
-        ], messages.value.html);
-      }
-
-      if (friendRequests.status === 'fulfilled' && friendRequests.value?.authenticated !== false) {
-        setHeaderBadge('[data-hh-friend-request-count]', friendRequests.value.count);
-        replaceHtml([
-          '[data-hnt-friend-request-shell-list]',
-          '[data-hh-realtime-friend-requests]'
-        ], friendRequests.value.html);
       }
     } catch (error) {
       debug('Header refresh skipped', error);

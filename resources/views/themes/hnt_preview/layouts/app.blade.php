@@ -142,7 +142,36 @@
             chatTabInterval: 4500,
         };
     </script>
+    @auth
+        @php
+            $hhRealtimeConfig = config('hnt-realtime');
+            $hhRealtimeEnabled = filled($hhRealtimeConfig['app_key'] ?? null)
+                && filled($hhRealtimeConfig['host'] ?? null);
+            $hhRealtimePayload = [
+                'enabled' => $hhRealtimeEnabled,
+                'appKey' => $hhRealtimeConfig['app_key'] ?? null,
+                'host' => $hhRealtimeConfig['host'] ?? null,
+                'port' => (int) ($hhRealtimeConfig['port'] ?? 443),
+                'scheme' => $hhRealtimeConfig['scheme'] ?? 'https',
+                'userId' => auth()->id(),
+                'authEndpoint' => $hhRealtimeConfig['auth_endpoint'] ?? '/broadcasting/auth',
+                'csrfToken' => csrf_token(),
+                'endpoints' => [
+                    'badges' => \Illuminate\Support\Facades\Route::has('socialite.header.live-badges') ? route('socialite.header.live-badges') : null,
+                    'notifications' => \Illuminate\Support\Facades\Route::has('socialite.header.notifications') ? route('socialite.header.notifications') : null,
+                    'messages' => \Illuminate\Support\Facades\Route::has('socialite.header.messages') ? route('socialite.header.messages') : null,
+                    'friendRequests' => \Illuminate\Support\Facades\Route::has('socialite.header.friend-requests') ? route('socialite.header.friend-requests') : null,
+                ],
+            ];
+        @endphp
+        <script>
+            window.HH_REALTIME = {!! json_encode($hhRealtimePayload, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
+        </script>
+    @endauth
     <script src="{{ asset('assets/themes/hnt_preview/preview-shell.js') }}?v=765" defer></script>
+    @auth
+        <script src="{{ asset('assets/vikinger/js/hnt-realtime.js') }}?v=1" defer></script>
+    @endauth
     @stack('scripts')
 </body>
 </html>
