@@ -20,6 +20,9 @@
 
 /storage/
 
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+
 .env
 .env.*
 !.env.example
