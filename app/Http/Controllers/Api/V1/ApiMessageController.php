@@ -8,6 +8,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserBlock;
+use App\Services\MessageBroadcastService;
 use App\Services\MessagePushService;
 use App\Services\MediaService;
 use Illuminate\Http\JsonResponse;
@@ -109,7 +110,7 @@ class ApiMessageController extends Controller
         ]);
     }
 
-    public function store(Request $request, Conversation $conversation, MessagePushService $messagePush, MediaService $mediaService): JsonResponse
+    public function store(Request $request, Conversation $conversation, MessagePushService $messagePush, MediaService $mediaService, MessageBroadcastService $messageBroadcast): JsonResponse
     {
         $user = $request->user();
         abort_unless($conversation->isParticipant($user), 403);
@@ -154,6 +155,7 @@ class ApiMessageController extends Controller
         $conversation->touch();
         $conversation->markReadFor($user);
         $messagePush->sendForMessage($message);
+        $messageBroadcast->broadcastCreated($message);
         $conversation->loadMissing(['users.profile']);
         $message->loadMissing(['user.profile', 'attachments']);
 

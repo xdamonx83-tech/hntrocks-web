@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\MessageBroadcastService;
 use App\Services\MessagePushService;
 use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
@@ -163,7 +164,7 @@ class MessageController extends Controller
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
-    public function start(Request $request, MessagePushService $messagePush): RedirectResponse
+    public function start(Request $request, MessagePushService $messagePush, MessageBroadcastService $messageBroadcast): RedirectResponse
     {
         $validated = $request->validate([
             'recipient_id' => ['required', 'integer', 'exists:users,id'],
@@ -191,11 +192,12 @@ class MessageController extends Controller
         $conversation->touch();
         $conversation->markReadFor($sender);
         $messagePush->sendForMessage($message);
+        $messageBroadcast->broadcastCreated($message);
 
         return redirect()->route('messages.show', $conversation)->with('status', __('ui.message_sent'));
     }
 
-    public function store(Request $request, Conversation $conversation, MessagePushService $messagePush): RedirectResponse|JsonResponse
+    public function store(Request $request, Conversation $conversation, MessagePushService $messagePush, MessageBroadcastService $messageBroadcast): RedirectResponse|JsonResponse
     {
         abort_unless($conversation->isParticipant($request->user()), 403);
 
@@ -220,6 +222,7 @@ class MessageController extends Controller
         $conversation->touch();
         $conversation->markReadFor($request->user());
         $messagePush->sendForMessage($message);
+        $messageBroadcast->broadcastCreated($message);
 
         if ($request->expectsJson()) {
             return response()->json([

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\UserNotificationCreated;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Services\Notifications\PushPayloadResolver;
@@ -37,6 +38,7 @@ class NotificationService
         ]);
 
         $this->dispatchPush($notification);
+        $this->dispatchBroadcast($notification);
 
         return $notification;
     }
@@ -103,6 +105,20 @@ class NotificationService
             );
         } catch (Throwable $error) {
             Log::warning('Push dispatch for user notification failed.', [
+                'notification_id' => $notification->id,
+                'user_id' => $notification->user_id,
+                'type' => $notification->type,
+                'error' => $error->getMessage(),
+            ]);
+        }
+    }
+
+    private function dispatchBroadcast(UserNotification $notification): void
+    {
+        try {
+            event(new UserNotificationCreated($notification));
+        } catch (Throwable $error) {
+            Log::warning('Broadcast dispatch for user notification failed.', [
                 'notification_id' => $notification->id,
                 'user_id' => $notification->user_id,
                 'type' => $notification->type,
