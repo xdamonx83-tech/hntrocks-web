@@ -387,9 +387,6 @@
 @endsection
 
 @push('scripts')
-@if ($selectedConversation && ! $selectedConversation->isLfgConversation())
-    <script src="{{ asset('assets/socialite/js/hnt-socialite-message-typing.js') }}?v=172ed" defer></script>
-@endif
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.querySelector('[data-socialite-message-search]');

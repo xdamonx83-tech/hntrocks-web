@@ -1,12 +1,16 @@
 (() => {
-  const forms = document.querySelectorAll('[data-hh-message-typing-form]');
-
-  if (!forms.length) {
-    return;
-  }
-
+  const formSelector = '[data-hh-message-typing-form]';
+  const inputSelector = '[data-hh-message-typing-input], textarea[name="body"], input[name="body"]';
   const trueThrottleMs = 2000;
   const states = new WeakMap();
+
+  const stateFor = (form) => {
+    if (!states.has(form)) {
+      states.set(form, { isTyping: false, lastTrueAt: 0 });
+    }
+
+    return states.get(form);
+  };
 
   const csrfFor = (form) => (
     form.getAttribute('data-csrf-token')
@@ -51,51 +55,69 @@
   };
 
   const sendFalse = (form, keepalive = false) => {
-    const state = states.get(form);
-
-    if (state) {
-      state.isTyping = false;
-    }
+    const state = stateFor(form);
+    state.isTyping = false;
 
     postTyping(form, false, { keepalive });
   };
 
-  forms.forEach((form) => {
-    const textarea = form.querySelector('[data-hh-message-typing-input], textarea[name="body"]');
+  const formForEventTarget = (target) => {
+    const field = target?.closest?.(inputSelector);
+    const form = field?.closest?.(formSelector);
 
-    if (!textarea) {
+    if (!field || !form || !form.contains(field)) {
+      return null;
+    }
+
+    return { form, field };
+  };
+
+  document.addEventListener('input', (event) => {
+    const target = formForEventTarget(event.target);
+
+    if (!target) {
       return;
     }
 
-    const state = { isTyping: false, lastTrueAt: 0 };
-    states.set(form, state);
+    const { form, field } = target;
+    const state = stateFor(form);
+    const hasBody = field.value.trim() !== '';
 
-    textarea.addEventListener('input', () => {
-      const hasBody = textarea.value.trim() !== '';
-
-      if (!hasBody) {
-        if (state.isTyping) {
-          sendFalse(form);
-        }
-
-        return;
+    if (!hasBody) {
+      if (state.isTyping) {
+        sendFalse(form);
       }
 
-      const now = Date.now();
+      return;
+    }
 
-      if (!state.isTyping || now - state.lastTrueAt >= trueThrottleMs) {
-        state.isTyping = true;
-        state.lastTrueAt = now;
-        postTyping(form, true);
-      }
-    });
+    const now = Date.now();
 
-    textarea.addEventListener('blur', () => sendFalse(form));
-    form.addEventListener('submit', () => sendFalse(form));
+    if (!state.isTyping || now - state.lastTrueAt >= trueThrottleMs) {
+      state.isTyping = true;
+      state.lastTrueAt = now;
+      postTyping(form, true);
+    }
+  });
+
+  document.addEventListener('blur', (event) => {
+    const target = formForEventTarget(event.target);
+
+    if (target) {
+      sendFalse(target.form);
+    }
+  }, true);
+
+  document.addEventListener('submit', (event) => {
+    const form = event.target?.closest?.(formSelector);
+
+    if (form) {
+      sendFalse(form);
+    }
   });
 
   const flushTyping = () => {
-    forms.forEach((form) => sendFalse(form, true));
+    document.querySelectorAll(formSelector).forEach((form) => sendFalse(form, true));
   };
 
   window.addEventListener('pagehide', flushTyping);
