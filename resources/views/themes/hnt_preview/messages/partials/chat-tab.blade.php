@@ -38,9 +38,15 @@
             ])
         </div>
 
-        <form method="post" action="{{ route('messages.store', $conversation) }}" class="hnt-chat-tab__form" data-hnt-chat-tab-form>
+        <form method="post" action="{{ route('messages.store', $conversation) }}" class="hnt-chat-tab__form" data-hnt-chat-tab-form
+            @if ($conversation->type === 'private')
+                data-hh-message-typing-form
+                data-conversation-id="{{ $conversation->id }}"
+                data-typing-url="{{ route('messages.typing', $conversation) }}"
+                data-csrf-token="{{ csrf_token() }}"
+            @endif>
             @csrf
-            <input type="text" name="body" maxlength="3000" autocomplete="off" placeholder="{{ __('ui.write_message') }}" required>
+            <input type="text" name="body" maxlength="3000" autocomplete="off" placeholder="{{ __('ui.write_message') }}" required @if ($conversation->type === 'private') data-hh-message-typing-input @endif>
             <button type="submit" aria-label="{{ __('ui.send') }}">
                 <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
             </button>
