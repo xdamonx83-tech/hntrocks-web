@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,7 @@ class UserResource extends JsonResource
             'level' => (int) ($this->level ?? 1),
             'xp_total' => (int) ($this->xp_total ?? 0),
             'trust_score' => (int) ($this->trust_score ?? 0),
+            'presence' => $this->presencePayload($request),
             'profile' => $this->whenLoaded('profile', fn () => [
                 'headline' => $profile?->headline,
                 'bio' => $profile?->bio,
@@ -38,6 +40,19 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at?->toISOString(),
         ];
     }
+
+    private function presencePayload(Request $request): array
+    {
+        $onlineStatusVisible = $this->resource->allowsOnlineStatusVisibility($request->user());
+
+        return [
+            'online_status_visible' => $onlineStatusVisible,
+            'is_online' => $onlineStatusVisible ? $this->resource->isOnline() : false,
+            'last_seen_at' => $onlineStatusVisible ? $this->last_seen_at?->toISOString() : null,
+            'online_window_seconds' => User::ONLINE_WINDOW_SECONDS,
+        ];
+    }
+
     private function crownsPayload(): array
     {
         $cosmetics = CrownCosmetics::forUser($this->resource);

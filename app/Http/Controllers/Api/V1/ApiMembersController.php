@@ -57,7 +57,7 @@ class ApiMembersController extends Controller
 
     private function memberSearchItem(Request $request, User $member, User $viewer): array
     {
-        $member->loadMissing('profile');
+        $member->loadMissing(['profile', 'privacySettings']);
         $isOwnProfile = (int) $viewer->id === (int) $member->id;
 
         return [
@@ -117,7 +117,7 @@ class ApiMembersController extends Controller
         $viewer = $request->user();
 
         $blocks = UserBlock::query()
-            ->with('blockedUser.profile')
+            ->with(['blockedUser.profile', 'blockedUser.privacySettings'])
             ->where('user_id', $viewer->id)
             ->whereHas('blockedUser', fn ($query) => $query->where('status', 'active'))
             ->latest()
@@ -157,7 +157,7 @@ class ApiMembersController extends Controller
         abort_unless($user->status === 'active', 404);
 
         $viewer = $request->user();
-        $user->loadMissing('profile');
+        $user->loadMissing(['profile', 'privacySettings']);
 
         if (! $user->profile) {
             $user->profile()->create([
@@ -994,7 +994,7 @@ class ApiMembersController extends Controller
     {
         abort_unless($profileUser && $profileUser->status === 'active', 404);
 
-        $profileUser->loadMissing('profile');
+        $profileUser->loadMissing(['profile', 'privacySettings']);
 
         $isOwnProfile = (int) $request->user()->id === (int) $profileUser->id;
 

@@ -26,7 +26,7 @@ class ApiMessageController extends Controller
         $conversations = Conversation::query()
             ->forUser($user)
             ->whereIn('type', $this->typesFor($type))
-            ->with(['users.profile', 'latestMessage.user.profile'])
+            ->with(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings'])
             ->latest('updated_at')
             ->paginate(30);
 
@@ -52,10 +52,10 @@ class ApiMessageController extends Controller
         abort_unless($conversation->isParticipant($user), 403);
 
         $conversation->markReadFor($user);
-        $conversation->loadMissing(['users.profile', 'latestMessage.user.profile']);
+        $conversation->loadMissing(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings']);
 
         $messages = $this->visibleMessagesQuery($conversation, $user)
-            ->with(['user.profile', 'attachments'])
+            ->with(['user.profile', 'user.privacySettings', 'attachments'])
             ->oldest('created_at')
             ->limit(120)
             ->get()
@@ -89,10 +89,10 @@ class ApiMessageController extends Controller
 
         $conversation = $this->privateConversationFor($sender, $user);
         $conversation->markReadFor($sender);
-        $conversation->loadMissing(['users.profile', 'latestMessage.user.profile']);
+        $conversation->loadMissing(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings']);
 
         $messages = $this->visibleMessagesQuery($conversation, $sender)
-            ->with(['user.profile', 'attachments'])
+            ->with(['user.profile', 'user.privacySettings', 'attachments'])
             ->oldest('created_at')
             ->limit(120)
             ->get()
@@ -156,13 +156,13 @@ class ApiMessageController extends Controller
         $conversation->markReadFor($user);
         $messagePush->sendForMessage($message);
         $messageBroadcast->broadcastCreated($message);
-        $conversation->loadMissing(['users.profile']);
-        $message->loadMissing(['user.profile', 'attachments']);
+        $conversation->loadMissing(['users.profile', 'users.privacySettings']);
+        $message->loadMissing(['user.profile', 'user.privacySettings', 'attachments']);
 
         return response()->json([
             'message' => 'Message sent.',
             'data' => [
-                'conversation' => $this->conversationPayload($request, $conversation->fresh(['users.profile', 'latestMessage.user.profile']), $user),
+                'conversation' => $this->conversationPayload($request, $conversation->fresh(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings']), $user),
                 'message' => $this->messagePayload($request, $message, $user, $conversation),
             ],
             'counts' => $this->counts($user),
@@ -225,7 +225,7 @@ class ApiMessageController extends Controller
             'cleared_at' => now(),
             'last_read_at' => now(),
         ]);
-        $conversation->loadMissing(['users.profile', 'latestMessage.user.profile']);
+        $conversation->loadMissing(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings']);
 
         return response()->json([
             'message' => 'Conversation cleared.',
@@ -239,10 +239,10 @@ class ApiMessageController extends Controller
 
     private function conversationPayload(Request $request, Conversation $conversation, User $user): array
     {
-        $conversation->loadMissing(['users.profile', 'latestMessage.user.profile']);
+        $conversation->loadMissing(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings']);
         $partner = $conversation->otherParticipant($user);
         $latest = $this->visibleMessagesQuery($conversation, $user)
-            ->with(['user.profile', 'attachments'])
+            ->with(['user.profile', 'user.privacySettings', 'attachments'])
             ->latest('created_at')
             ->first();
         $title = $conversation->displayTitleFor($user);
@@ -274,7 +274,7 @@ class ApiMessageController extends Controller
 
     private function messagePayload(Request $request, Message $message, User $user, ?Conversation $conversation = null): array
     {
-        $message->loadMissing(['user.profile', 'attachments']);
+        $message->loadMissing(['user.profile', 'user.privacySettings', 'attachments']);
         $conversation ??= $message->conversation;
         $readByPartner = $this->isReadByPartner($conversation, $message, $user);
 
