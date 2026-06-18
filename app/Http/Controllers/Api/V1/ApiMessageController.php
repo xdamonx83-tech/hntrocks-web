@@ -183,6 +183,39 @@ class ApiMessageController extends Controller
         ]);
     }
 
+    public function typing(Request $request, Conversation $conversation, MessageBroadcastService $messageBroadcast): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless($user instanceof User, 401);
+        abort_unless($conversation->isParticipant($user), 403);
+        abort_unless($conversation->type === 'private', 403);
+
+        if (! $this->canMessage($conversation, $user)) {
+            abort(403, __('ui.message_blocked_unavailable'));
+        }
+
+        $validator = Validator::make($request->all(), [
+            'is_typing' => ['sometimes', 'boolean'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $isTyping = $request->has('is_typing') ? $request->boolean('is_typing') : true;
+
+        $conversation->loadMissing('users');
+        $messageBroadcast->broadcastTyping($conversation, $user, $isTyping);
+
+        return response()->json([
+            'message' => 'Typing broadcasted.',
+            'conversation_id' => $conversation->id,
+        ]);
+    }
+
     public function clear(Request $request, Conversation $conversation): JsonResponse
     {
         $user = $request->user();
