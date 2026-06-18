@@ -15959,10 +15959,10 @@ body.hnt-preview-body {
 }
 
 .hnt-message-shell-avatar {
+    position: relative;
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    overflow: hidden;
     background: var(--tag-bg);
     display: block;
 }
@@ -15972,6 +15972,13 @@ body.hnt-preview-body {
     height: 100%;
     object-fit: cover;
     display: block;
+    border-radius: 50%;
+}
+
+.hnt-message-shell-presence {
+    position: absolute;
+    right: 0;
+    bottom: 0;
 }
 
 .hnt-message-shell-copy {
@@ -16189,6 +16196,12 @@ body.hnt-preview-body {
     min-width: 0;
 }
 
+.hnt-chat-tab__avatar-wrap {
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+}
+
 .hnt-chat-tab__avatar,
 .hnt-chat-tab__message-avatar {
     object-fit: cover;
@@ -16199,6 +16212,12 @@ body.hnt-preview-body {
 .hnt-chat-tab__avatar {
     width: 34px;
     height: 34px;
+}
+
+.hnt-chat-tab__presence {
+    position: absolute;
+    right: 0;
+    bottom: 0;
 }
 
 .hnt-chat-tab__meta {

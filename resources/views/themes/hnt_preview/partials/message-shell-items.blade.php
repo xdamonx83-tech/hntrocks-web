@@ -13,8 +13,9 @@
        data-hnt-chat-tab-open
        data-hnt-chat-tab-url="{{ route('messages.chat-tab', $conversation) }}"
        data-hnt-chat-conversation-id="{{ $conversation->id }}">
-        <span class="hnt-message-shell-avatar" aria-hidden="true">
+        <span class="hnt-message-shell-avatar">
             <img src="{{ $avatarUrl }}" alt="">
+            @include('partials.presence-indicator', ['user' => $other, 'viewer' => $previewMessageUser, 'size' => 'xs', 'class' => 'hnt-message-shell-presence'])
         </span>
         <span class="hnt-message-shell-copy">
             <span class="hnt-message-shell-title-row">

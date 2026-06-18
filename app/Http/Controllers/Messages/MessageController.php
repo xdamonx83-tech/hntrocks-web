@@ -39,7 +39,7 @@ class MessageController extends Controller
         $activeMessageType = $this->conversationCategory($conversation);
 
         $conversation->markReadFor($request->user());
-        $conversation->load(['users.profile', 'messages.user.profile']);
+        $conversation->load(['users.profile', 'users.privacySettings', 'messages.user.profile']);
 
         return view(HntTheme::resolve('messages.index'), [
             'conversations' => $this->conversationList($request->user(), $activeMessageType),
@@ -113,7 +113,7 @@ class MessageController extends Controller
         abort_unless($conversation->type === 'private', 404);
 
         $conversation->markReadFor($request->user());
-        $conversation->load(['users.profile']);
+        $conversation->load(['users.profile', 'users.privacySettings']);
 
         $messages = $this->visibleMessagesQuery($conversation, $request->user())
             ->with('user.profile')
@@ -142,7 +142,7 @@ class MessageController extends Controller
         abort_unless($conversation->type === 'private', 404);
 
         $conversation->markReadFor($request->user());
-        $conversation->load(['users.profile']);
+        $conversation->load(['users.profile', 'users.privacySettings']);
 
         $messages = $this->visibleMessagesQuery($conversation, $request->user())
             ->with('user.profile')
@@ -289,7 +289,7 @@ class MessageController extends Controller
         return Conversation::query()
             ->forUser($user)
             ->whereIn('type', $this->conversationTypesFor($messageType))
-            ->with(['users.profile', 'latestMessage.user'])
+            ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
             ->latest('updated_at')
             ->paginate(12)
             ->appends(['type' => $messageType]);

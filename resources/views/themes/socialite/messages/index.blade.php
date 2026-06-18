@@ -124,9 +124,9 @@
                         <a href="{{ route('messages.show', $conversation) }}" class="relative flex items-center gap-4 p-2 duration-200 rounded-xl hover:bg-secondery {{ $selectedConversation?->id === $conversation->id ? 'bg-secondery dark:bg-white/10' : '' }}" data-socialite-message-row data-search-text="{{ Str::lower($conversationTitle.' '.($other?->username ?? '').' '.($latestBody ?? '')) }}">
                             <div class="relative w-14 h-14 shrink-0">
                                 <img src="{{ $other?->avatarUrl() ?? asset('assets/vikinger/img/default-avatar.svg') }}" alt="{{ $conversationTitle }}" class="object-cover w-full h-full rounded-full">
-                                @if ($selectedConversation?->id === $conversation->id)
-                                    <div class="w-4 h-4 absolute bottom-0 right-0 bg-green-500 rounded-full border border-white dark:border-slate-800"></div>
-                                @endif
+                                @unless ($conversation->isLfgConversation())
+                                    @include('partials.presence-indicator', ['user' => $other, 'viewer' => $viewer, 'size' => 'sm', 'class' => 'absolute bottom-0 right-0'])
+                                @endunless
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1.5">
@@ -176,7 +176,9 @@
                         @if ($selectedOther)
                             <div class="relative cursor-pointer max-md:hidden" uk-toggle="target: .rightt ; cls: hidden">
                                 <img src="{{ $selectedOther->avatarUrl() }}" alt="{{ $selectedOther->name }}" class="w-8 h-8 rounded-full shadow">
-                                <div class="w-2 h-2 bg-teal-500 rounded-full absolute right-0 bottom-0 m-px"></div>
+                                @unless ($selectedConversation->isLfgConversation())
+                                    @include('partials.presence-indicator', ['user' => $selectedOther, 'viewer' => $viewer, 'size' => 'xs', 'class' => 'absolute right-0 bottom-0 m-px'])
+                                @endunless
                             </div>
                         @endif
                         <div class="cursor-pointer" uk-toggle="target: .rightt ; cls: hidden">
@@ -189,6 +191,11 @@
                             <div class="text-xs text-gray-500 font-semibold dark:text-white/70">
                                 {{ $selectedOther ? '@'.$selectedOther->username : __('ui.private_conversation') }}
                             </div>
+                            @if ($selectedOther && ! $selectedConversation->isLfgConversation())
+                                <div class="mt-1">
+                                    @include('partials.presence-indicator', ['user' => $selectedOther, 'viewer' => $viewer, 'showLabel' => true, 'size' => 'xs'])
+                                </div>
+                            @endif
                         </div>
                     </div>
 
