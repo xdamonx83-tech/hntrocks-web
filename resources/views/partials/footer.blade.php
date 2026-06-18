@@ -111,4 +111,5 @@
         window.HH_REALTIME = {!! json_encode($hhRealtimePayload, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
     </script>
     <script src="{{ asset('assets/vikinger/js/hnt-realtime.js') }}?v=172ee-typing" defer></script>
+    <script src="{{ asset('assets/socialite/js/hnt-presence-heartbeat.js') }}?v=172f-a" defer></script>
 @endauth

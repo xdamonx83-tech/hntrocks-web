@@ -17,6 +17,8 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
 
+    public const ONLINE_WINDOW_SECONDS = 90;
+
     protected $fillable = [
         'name',
         'username',
@@ -52,6 +54,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_xp_at' => 'datetime',
+            'last_seen_at' => 'datetime',
             'is_admin' => 'boolean',
             'suspended_at' => 'datetime',
             'last_login_at' => 'datetime',
@@ -388,6 +391,12 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
+    }
+
+    public function isOnline(): bool
+    {
+        return $this->last_seen_at !== null
+            && $this->last_seen_at->greaterThanOrEqualTo(now()->subSeconds(self::ONLINE_WINDOW_SECONDS));
     }
 
     public function isSuspended(): bool

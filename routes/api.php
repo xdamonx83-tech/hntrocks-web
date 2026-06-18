@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\ApiTeamsController;
 use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
 use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
+use App\Http\Controllers\Presence\PresenceHeartbeatController;
 use App\Http\Controllers\Reports\ReportController;
 use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
 
     Route::middleware('api.token')->group(function (): void {
         Route::post('/broadcasting/auth', [BroadcastController::class, 'authenticate'])->name('broadcasting.auth');
+        Route::post('/presence/heartbeat', PresenceHeartbeatController::class)->middleware('throttle:20,1')->name('presence.heartbeat');
         Route::get('/bootstrap', ApiBootstrapController::class)->name('bootstrap');
         Route::get('/me', [ApiAuthController::class, 'me'])->name('me');
         Route::get('/me/profile-sections/{section}', [ApiMembersController::class, 'meSection'])->name('me.profile-sections.show');

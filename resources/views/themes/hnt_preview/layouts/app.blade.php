@@ -172,6 +172,7 @@
     @auth
         <script src="{{ asset('assets/socialite/js/hnt-socialite-message-typing.js') }}?v=172ee-typing" defer></script>
         <script src="{{ asset('assets/vikinger/js/hnt-realtime.js') }}?v=172ee-typing" defer></script>
+        <script src="{{ asset('assets/socialite/js/hnt-presence-heartbeat.js') }}?v=172f-a" defer></script>
     @endauth
     @stack('scripts')
 </body>
