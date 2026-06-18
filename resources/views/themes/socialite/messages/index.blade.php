@@ -283,7 +283,13 @@
                 </div>
 
                 <!-- sending message area -->
-                <form method="post" action="{{ route('messages.store', $selectedConversation) }}" class="flex items-center md:gap-4 gap-2 md:p-3 p-2 overflow-hidden border-t dark:border-slate-700">
+                <form method="post" action="{{ route('messages.store', $selectedConversation) }}" class="flex items-center md:gap-4 gap-2 md:p-3 p-2 overflow-hidden border-t dark:border-slate-700"
+                    @if (! $selectedConversation->isLfgConversation())
+                        data-hh-message-typing-form
+                        data-conversation-id="{{ $selectedConversation->id }}"
+                        data-typing-url="{{ route('api.v1.messages.typing', $selectedConversation) }}"
+                        data-csrf-token="{{ csrf_token() }}"
+                    @endif>
                     @csrf
                     <div id="message__wrap" class="flex items-center gap-2 h-full dark:text-white -mt-1.5">
                         <button type="button" class="shrink-0" aria-hidden="true" tabindex="-1">
@@ -292,7 +298,7 @@
                     </div>
 
                     <div class="relative flex-1">
-                        <textarea name="body" placeholder="{{ __('ui.message_write_placeholder') }}" rows="1" class="w-full resize-none bg-secondery rounded-full px-4 p-2 pr-11 dark:bg-white/10" maxlength="3000" required></textarea>
+                        <textarea name="body" placeholder="{{ __('ui.message_write_placeholder') }}" rows="1" class="w-full resize-none bg-secondery rounded-full px-4 p-2 pr-11 dark:bg-white/10" maxlength="3000" required @if (! $selectedConversation->isLfgConversation()) data-hh-message-typing-input @endif></textarea>
                         <button type="submit" class="text-white shrink-0 p-2 absolute right-0.5 top-0 bg-blue-600 rounded-full" aria-label="{{ __('ui.send') }}">
                             <ion-icon class="text-xl flex" name="send-outline"></ion-icon>
                         </button>
@@ -381,6 +387,9 @@
 @endsection
 
 @push('scripts')
+@if ($selectedConversation && ! $selectedConversation->isLfgConversation())
+    <script src="{{ asset('assets/socialite/js/hnt-socialite-message-typing.js') }}?v=172ed" defer></script>
+@endif
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.querySelector('[data-socialite-message-search]');
