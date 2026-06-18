@@ -63,6 +63,7 @@ use App\Http\Controllers\Moments\MomentOfWeekController;
 use App\Http\Controllers\Moments\MomentReactionController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Outbound\ApprovedOutboundLinkController;
+use App\Http\Controllers\Presence\PresenceHeartbeatController;
 use App\Http\Controllers\Socialite\HeaderLiveController;
 use App\Http\Controllers\Referrals\ReferralController;
 use App\Http\Controllers\Profile\ProfileController;
@@ -353,6 +354,7 @@ Route::get('/u/{user:username}', [ProfileController::class, 'show'])->name('prof
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::post('/presence/heartbeat', PresenceHeartbeatController::class)->middleware('throttle:20,1')->name('presence.heartbeat');
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
     Route::get('/mentions/search', [MentionController::class, 'search'])->name('mentions.search');
     Route::get('/socialite/header/live-badges', [HeaderLiveController::class, 'badges'])->name('socialite.header.live-badges');

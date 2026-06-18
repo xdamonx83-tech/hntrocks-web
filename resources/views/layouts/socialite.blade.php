@@ -108,6 +108,9 @@
     window.HH_I18N = {!! json_encode($hhI18n, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
 </script>
 <script src="{{ asset('assets/vikinger/js/hunthub-start.js') }}" defer></script>
+@auth
+    <script src="{{ asset('assets/socialite/js/hnt-presence-heartbeat.js') }}?v=172f-a" defer></script>
+@endauth
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
