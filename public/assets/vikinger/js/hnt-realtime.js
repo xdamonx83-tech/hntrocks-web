@@ -153,6 +153,49 @@
     socket.send(JSON.stringify(payload));
   };
 
+  const parseEventData = (data) => {
+    if (!data) {
+      return {};
+    }
+
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        return {};
+      }
+    }
+
+    if (typeof data === 'object') {
+      return data;
+    }
+
+    return {};
+  };
+
+  const isOwnUser = (userId) => String(userId || '') === String(config.userId || '');
+
+  const parseBoolean = (value) => value === true || value === 1 || value === '1' || String(value).toLowerCase() === 'true';
+
+  const dispatchTypingEvent = (data) => {
+    const payload = parseEventData(data);
+
+    if (!payload || isOwnUser(payload.user_id)) {
+      return;
+    }
+
+    document.dispatchEvent(new CustomEvent('hnt:conversation-typing', {
+      detail: {
+        conversationId: payload.conversation_id,
+        userId: payload.user_id,
+        username: payload.username || '',
+        displayName: payload.display_name || '',
+        isTyping: parseBoolean(payload.is_typing),
+        expiresInSeconds: payload.expires_in_seconds
+      }
+    }));
+  };
+
   const authorizeAndSubscribe = async () => {
     if (!socketId || !csrfToken || !config.authEndpoint) {
       return;
@@ -217,6 +260,12 @@
     }
 
     const eventName = String(message.event || '').toLowerCase();
+
+    if (eventName === 'conversation.typing') {
+      dispatchTypingEvent(message.data);
+      return;
+    }
+
     const shouldRefresh = eventName === 'user.notification.created'
       || eventName === 'conversation.message.created'
       || eventName.includes('notification')
