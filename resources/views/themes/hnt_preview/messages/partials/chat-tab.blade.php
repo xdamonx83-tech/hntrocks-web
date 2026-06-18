@@ -9,7 +9,12 @@
 <section class="hnt-chat-tab" data-hnt-chat-tab="{{ $conversation->id }}" data-conversation-id="{{ $conversation->id }}" data-hnt-chat-tab-messages-url="{{ route('messages.chat-tab.messages', $conversation) }}" aria-label="{{ $conversationTitle }}">
     <header class="hnt-chat-tab__header" data-hnt-chat-tab-toggle>
         <div class="hnt-chat-tab__person">
-            <img src="{{ $partnerAvatar }}" alt="{{ $conversationTitle }}" class="hnt-chat-tab__avatar">
+            <span class="hnt-chat-tab__avatar-wrap">
+                <img src="{{ $partnerAvatar }}" alt="{{ $conversationTitle }}" class="hnt-chat-tab__avatar">
+                @if ($conversation->type === 'private')
+                    @include('partials.presence-indicator', ['user' => $partner, 'viewer' => $viewer, 'size' => 'xs', 'class' => 'hnt-chat-tab__presence'])
+                @endif
+            </span>
             <div class="hnt-chat-tab__meta">
                 <strong>{{ $conversationTitle }}</strong>
                 <span>{{ $partnerHandle }}</span>

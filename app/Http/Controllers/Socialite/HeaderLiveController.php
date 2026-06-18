@@ -84,7 +84,7 @@ class HeaderLiveController extends Controller
         $conversations = Conversation::query()
             ->forUser($user)
             ->where('type', 'private')
-            ->with(['users.profile', 'latestMessage.user'])
+            ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
             ->latest('updated_at')
             ->limit(40)
             ->get();

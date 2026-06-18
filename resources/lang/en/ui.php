@@ -89,6 +89,8 @@ return [
     'back_to_messages' => 'Back to messages',
     'chat_offline_hint' => 'Open your private chats from the right rail.',
     'online' => 'Online',
+    'presence_online' => 'Online',
+    'presence_offline' => 'Offline',
     'achievement_unlocked' => 'Achievement unlocked',
     'achievement_badge_unlocked' => 'Badge unlocked',
     'achievement_quest_completed' => 'Quest completed',

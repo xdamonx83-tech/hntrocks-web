@@ -89,6 +89,8 @@ return [
     'back_to_messages' => 'Zurück zu Nachrichten',
     'chat_offline_hint' => 'Öffne deine privaten Chats direkt über die rechte Leiste.',
     'online' => 'Online',
+    'presence_online' => 'Online',
+    'presence_offline' => 'Offline',
     'achievement_unlocked' => 'Achievement freigeschaltet',
     'achievement_badge_unlocked' => 'Badge freigeschaltet',
     'achievement_quest_completed' => 'Quest abgeschlossen',

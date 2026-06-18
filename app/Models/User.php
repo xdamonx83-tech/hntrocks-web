@@ -399,6 +399,13 @@ class User extends Authenticatable
             && $this->last_seen_at->greaterThanOrEqualTo(now()->subSeconds(self::ONLINE_WINDOW_SECONDS));
     }
 
+    public function allowsOnlineStatusVisibility(?User $viewer = null): bool
+    {
+        $this->loadMissing('privacySettings');
+
+        return $this->privacySettings?->show_online_status !== false;
+    }
+
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
