@@ -287,7 +287,7 @@
                     @if (! $selectedConversation->isLfgConversation())
                         data-hh-message-typing-form
                         data-conversation-id="{{ $selectedConversation->id }}"
-                        data-typing-url="{{ route('api.v1.messages.typing', $selectedConversation) }}"
+                        data-typing-url="{{ route('messages.typing', $selectedConversation) }}"
                         data-csrf-token="{{ csrf_token() }}"
                     @endif>
                     @csrf

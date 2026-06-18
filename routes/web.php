@@ -474,6 +474,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/messages/{conversation}/chat-tab/messages', [MessageController::class, 'chatTabMessages'])->name('messages.chat-tab.messages');
     Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{conversation}/read', [MessageController::class, 'read'])->name('messages.read');
+    Route::post('/messages/{conversation}/typing', [MessageController::class, 'typing'])->middleware('throttle:30,1')->name('messages.typing');
     Route::post('/messages/{conversation}', [MessageController::class, 'store'])->name('messages.store');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
