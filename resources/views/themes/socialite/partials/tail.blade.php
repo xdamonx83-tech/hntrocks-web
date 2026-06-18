@@ -2273,7 +2273,7 @@
             };
         </script>
         <script src="/assets/socialite/js/hnt-header-live-badges.js?v=445"></script>
-        <script src="/assets/socialite/js/hnt-socialite-message-typing.js?v=172ed-tabs" defer></script>
+        <script src="/assets/socialite/js/hnt-socialite-message-typing.js?v=172ee-typing" defer></script>
         <script src="/assets/socialite/js/hnt-socialite-chat-tabs.js?v=489"></script>
     @endauth
  
