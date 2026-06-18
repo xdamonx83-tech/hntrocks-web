@@ -150,6 +150,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/messages/with/{user:username}', [ApiMessageController::class, 'withUser'])->name('messages.with-user');
         Route::get('/messages/{conversation}', [ApiMessageController::class, 'show'])->name('messages.show');
         Route::post('/messages/{conversation}', [ApiMessageController::class, 'store'])->name('messages.store');
+        Route::post('/messages/{conversation}/typing', [ApiMessageController::class, 'typing'])->middleware('throttle:30,1')->name('messages.typing');
         Route::post('/messages/{conversation}/read', [ApiMessageController::class, 'read'])->name('messages.read');
         Route::post('/messages/{conversation}/clear', [ApiMessageController::class, 'clear'])->name('messages.clear');
         Route::get('/moments', [ApiMomentsController::class, 'index'])->name('moments.index');

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Events\ConversationMessageCreated;
+use App\Events\ConversationTyping;
 use App\Events\UserNotificationCreated;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -68,5 +69,28 @@ class BroadcastEventPayloadTest extends TestCase
         $this->assertSame('Damon', $payload['sender_name']);
         $this->assertSame('Hello there, this is a message.', $payload['body_preview']);
         $this->assertArrayNotHasKey('attachments', $payload);
+    }
+
+    public function test_typing_event_payload_uses_safe_user_fields(): void
+    {
+        $sender = new User([
+            'name' => 'Damon',
+            'username' => 'xdamo',
+            'email' => 'damon@example.test',
+        ]);
+        $sender->id = 3;
+
+        $conversation = new Conversation(['type' => 'private']);
+        $conversation->id = 9;
+
+        $payload = (new ConversationTyping($conversation, $sender, true))->broadcastWith();
+
+        $this->assertSame(9, $payload['conversation_id']);
+        $this->assertSame(3, $payload['user_id']);
+        $this->assertSame('xdamo', $payload['username']);
+        $this->assertSame('Damon', $payload['display_name']);
+        $this->assertTrue($payload['is_typing']);
+        $this->assertSame(4, $payload['expires_in_seconds']);
+        $this->assertArrayNotHasKey('email', $payload);
     }
 }
