@@ -10,7 +10,7 @@ class PlayerSearchQuery
     public function build(User $viewer, string $search = '', string $platform = '', string $playstyle = ''): Builder
     {
         return User::query()
-            ->with('profile')
+            ->with(['profile', 'privacySettings'])
             ->where('status', 'active')
             ->where(function (Builder $query) use ($viewer): void {
                 $query->where('id', $viewer->id)
