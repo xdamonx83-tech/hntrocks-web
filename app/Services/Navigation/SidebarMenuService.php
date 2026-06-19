@@ -27,6 +27,7 @@ class SidebarMenuService
             ->orderBy('id')
             ->get()
             ->filter(fn (SidebarMenuItem $item): bool => ! $item->admin_only || $user->isAdmin())
+            ->filter(fn (SidebarMenuItem $item): bool => ! $this->isTrophyRoomItem($item))
             ->map(fn (SidebarMenuItem $item): ?array => $this->normaliseItem($item))
             ->filter()
             ->values()
@@ -133,6 +134,26 @@ class SidebarMenuService
             'external' => $isRouteItem ? false : $this->isExternalUrl($url),
             'section' => $item->section ?: 'main',
         ];
+    }
+
+    private function isTrophyRoomItem(SidebarMenuItem $item): bool
+    {
+        $haystack = Str::lower(implode(' ', array_filter([
+            $item->menu_key,
+            $item->label,
+            $item->label_key,
+            $item->route_name,
+            $item->match_pattern,
+            $item->url,
+        ])));
+
+        foreach (['trophäenraum', 'trophaenraum', 'trophyroom', 'trophy-room', 'trophy_room', '/trophy'] as $needle) {
+            if (Str::contains($haystack, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function isExternalUrl(string $url): bool
