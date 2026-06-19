@@ -2096,6 +2096,135 @@ document.addEventListener('DOMContentLoaded', function () {
         return postModal ? postModal.querySelector('[data-hnt-comment-textarea]') : postModalCommentTextarea;
     }
 
+    function getCommentFormStatus(form) {
+        if (!form) return null;
+        return form.querySelector('[data-hnt-comment-status], [data-hnt-comment-reply-status]');
+    }
+
+    function setCommentFormStatus(form, message, isError) {
+        const status = getCommentFormStatus(form);
+        if (!status) return;
+        status.textContent = message || '';
+        status.hidden = !message;
+        status.classList.toggle('is-error', Boolean(isError));
+    }
+
+    function commentFormHasTextOrMedia(form) {
+        if (!form) return false;
+        const textarea = form.querySelector('[data-hnt-comment-textarea], [data-hnt-comment-reply-textarea]');
+        const fileInput = form.querySelector('[data-hnt-comment-media-input]');
+        const hasText = textarea && textarea.value.trim().length > 0;
+        const hasMedia = fileInput && fileInput.files && fileInput.files.length > 0;
+        return Boolean(hasText || hasMedia);
+    }
+
+    function updateCommentSubmitState(form) {
+        if (!form) return;
+        const submit = form.querySelector('[data-hnt-comment-submit], [data-hnt-comment-reply-submit]');
+        if (!submit || submit.classList.contains('is-loading')) return;
+        submit.disabled = false;
+    }
+
+    function setCommentMediaFiles(input, files) {
+        if (!input) return;
+        const selectedFiles = Array.from(files || []).slice(0, 4);
+
+        if (typeof DataTransfer === 'undefined') {
+            if (!selectedFiles.length) input.value = '';
+            return;
+        }
+
+        const transfer = new DataTransfer();
+        selectedFiles.forEach(function (file) {
+            transfer.items.add(file);
+        });
+        input.files = transfer.files;
+    }
+
+    function renderCommentMediaPreview(form) {
+        if (!form) return;
+        const input = form.querySelector('[data-hnt-comment-media-input]');
+        const preview = form.querySelector('[data-hnt-comment-media-preview]');
+        if (!input || !preview) return;
+
+        const files = Array.from(input.files || []).slice(0, 4);
+        preview.innerHTML = '';
+        preview.hidden = files.length === 0;
+
+        files.forEach(function (file, index) {
+            const item = document.createElement('span');
+            item.className = 'hnt-comment-media-preview-item';
+
+            const image = document.createElement('img');
+            image.alt = t('preview_comment_image_preview', 'Bildvorschau');
+            image.src = URL.createObjectURL(file);
+            image.addEventListener('load', function () {
+                URL.revokeObjectURL(image.src);
+            }, { once: true });
+
+            const name = document.createElement('span');
+            name.textContent = file.name || t('preview_comment_image_preview', 'Bildvorschau');
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.setAttribute('data-hnt-comment-media-remove', String(index));
+            remove.setAttribute('aria-label', t('preview_comment_clear_images', 'Bildauswahl entfernen'));
+            remove.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+
+            item.appendChild(image);
+            item.appendChild(name);
+            item.appendChild(remove);
+            preview.appendChild(item);
+        });
+
+        if (files.length > 0) {
+            const clear = document.createElement('button');
+            clear.type = 'button';
+            clear.className = 'hnt-comment-media-clear';
+            clear.setAttribute('data-hnt-comment-media-clear', '1');
+            clear.textContent = t('preview_comment_clear_images', 'Bildauswahl entfernen');
+            preview.appendChild(clear);
+        }
+    }
+
+    function clearCommentMediaPreview(form) {
+        if (!form) return;
+        const input = form.querySelector('[data-hnt-comment-media-input]');
+        const preview = form.querySelector('[data-hnt-comment-media-preview]');
+        if (input) input.value = '';
+        if (preview) {
+            preview.innerHTML = '';
+            preview.hidden = true;
+        }
+        updateCommentSubmitState(form);
+    }
+
+    function handleCommentMediaSelection(input) {
+        if (!input) return;
+        const form = input.closest('[data-hnt-comment-form], [data-hnt-comment-reply-form]');
+        const files = Array.from(input.files || []);
+
+        if (files.length > 4) {
+            setCommentMediaFiles(input, files.slice(0, 4));
+            setCommentFormStatus(form, t('preview_comment_media_limit', 'Maximal 4 Bilder.'), true);
+        } else {
+            setCommentFormStatus(form, '', false);
+        }
+
+        renderCommentMediaPreview(form);
+        updateCommentSubmitState(form);
+    }
+
+    function initCommentMediaInputs(scope) {
+        const root = scope || document;
+        root.querySelectorAll('[data-hnt-comment-form], [data-hnt-comment-reply-form]').forEach(function (form) {
+            if (form.dataset.hntCommentMediaReady === '1') return;
+            form.dataset.hntCommentMediaReady = '1';
+            renderCommentMediaPreview(form);
+            updateCommentSubmitState(form);
+        });
+    }
+
     function prefillPostModalComment(commentTemplate, focusComposer) {
         const textarea = getPostModalCommentTextarea();
         const template = typeof commentTemplate === 'string' ? commentTemplate.trim() : '';
@@ -2151,6 +2280,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 initReadMore(postModalContent);
                 initMediaCarousels(postModalContent);
                 initVideoPlayers(postModalContent);
+                initCommentMediaInputs(postModal);
                 prefillPostModalComment(commentTemplate, focusComposer);
             })
             .catch(function (error) {
@@ -2456,7 +2586,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function setCommentReplyBusy(form, busy) {
         const textarea = form ? form.querySelector('[data-hnt-comment-reply-textarea]') : null;
         const submit = form ? form.querySelector('[data-hnt-comment-reply-submit]') : null;
+        const fileInput = form ? form.querySelector('[data-hnt-comment-media-input]') : null;
+        const mediaButton = form ? form.querySelector('[data-hnt-comment-media-trigger]') : null;
         if (textarea) textarea.disabled = Boolean(busy);
+        if (fileInput) fileInput.disabled = Boolean(busy);
+        if (mediaButton) mediaButton.disabled = Boolean(busy);
         if (submit) {
             submit.disabled = Boolean(busy);
             submit.classList.toggle('is-loading', Boolean(busy));
@@ -2473,6 +2607,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function submitCommentReply(form) {
         if (!form || !form.action) return;
+        if (!commentFormHasTextOrMedia(form)) {
+            setCommentReplyStatus(form, t('preview_comment_body_or_media_required', 'Kommentar braucht Text oder Bild.'), true);
+            return;
+        }
+
         const formData = new FormData(form);
         setCommentReplyBusy(form, true);
         setCommentReplyStatus(form, '', false);
@@ -2499,6 +2638,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function (payload) {
                 const textarea = form.querySelector('[data-hnt-comment-reply-textarea]');
                 if (textarea) textarea.value = '';
+                clearCommentMediaPreview(form);
                 if (payload && typeof payload.comment_count_delta !== 'undefined') {
                     const current = Number((postModal && postModal.querySelector('[data-hnt-modal-comment-count]') || {}).textContent || 0) || 0;
                     updateModalCommentCount(current + Number(payload.comment_count_delta || 0));
@@ -2870,6 +3010,54 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    document.addEventListener('click', function (event) {
+        const mediaTrigger = event.target.closest('[data-hnt-comment-media-trigger]');
+        if (mediaTrigger) {
+            event.preventDefault();
+            const form = mediaTrigger.closest('[data-hnt-comment-form], [data-hnt-comment-reply-form]');
+            const input = form ? form.querySelector('[data-hnt-comment-media-input]') : null;
+            if (input && !input.disabled) input.click();
+            return;
+        }
+
+        const clearButton = event.target.closest('[data-hnt-comment-media-clear]');
+        if (clearButton) {
+            event.preventDefault();
+            clearCommentMediaPreview(clearButton.closest('[data-hnt-comment-form], [data-hnt-comment-reply-form]'));
+            return;
+        }
+
+        const removeButton = event.target.closest('[data-hnt-comment-media-remove]');
+        if (!removeButton) return;
+
+        event.preventDefault();
+        const form = removeButton.closest('[data-hnt-comment-form], [data-hnt-comment-reply-form]');
+        const input = form ? form.querySelector('[data-hnt-comment-media-input]') : null;
+        const removeIndex = Number.parseInt(removeButton.dataset.hntCommentMediaRemove || '-1', 10);
+        if (!input || removeIndex < 0) return;
+
+        const nextFiles = Array.from(input.files || []).filter(function (_file, index) {
+            return index !== removeIndex;
+        });
+        setCommentMediaFiles(input, nextFiles);
+        renderCommentMediaPreview(form);
+        updateCommentSubmitState(form);
+    });
+
+    document.addEventListener('change', function (event) {
+        const input = event.target.closest('[data-hnt-comment-media-input]');
+        if (!input) return;
+        handleCommentMediaSelection(input);
+    });
+
+    document.addEventListener('input', function (event) {
+        const textarea = event.target.closest('[data-hnt-comment-textarea], [data-hnt-comment-reply-textarea]');
+        if (!textarea) return;
+        const form = textarea.closest('[data-hnt-comment-form], [data-hnt-comment-reply-form]');
+        if (commentFormHasTextOrMedia(form)) setCommentFormStatus(form, '', false);
+        updateCommentSubmitState(form);
+    });
+
     document.addEventListener('submit', function (event) {
         const likeForm = event.target.closest('[data-hnt-simple-like-form]');
         if (!likeForm) return;
@@ -3093,11 +3281,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function setCommentBusy(busy) {
         if (!postModalCommentForm) return;
         const submitButton = postModalCommentForm.querySelector('[data-hnt-comment-submit]');
+        const fileInput = postModalCommentForm.querySelector('[data-hnt-comment-media-input]');
+        const mediaButton = postModalCommentForm.querySelector('[data-hnt-comment-media-trigger]');
         if (submitButton) {
             submitButton.disabled = busy;
             submitButton.classList.toggle('is-loading', busy);
         }
         if (postModalCommentTextarea) postModalCommentTextarea.disabled = busy;
+        if (fileInput) fileInput.disabled = busy;
+        if (mediaButton) mediaButton.disabled = busy;
     }
 
     if (postModalCommentForm) {
@@ -3105,6 +3297,15 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
 
             if (!postModalCommentForm.action || postModalCommentForm.action === '#') return;
+
+            if (!commentFormHasTextOrMedia(postModalCommentForm)) {
+                if (postModalCommentStatus) {
+                    postModalCommentStatus.textContent = t('preview_comment_body_or_media_required', 'Kommentar braucht Text oder Bild.');
+                    postModalCommentStatus.classList.add('is-error');
+                    postModalCommentStatus.hidden = false;
+                }
+                return;
+            }
 
             const formData = new FormData(postModalCommentForm);
             setCommentBusy(true);
@@ -3135,6 +3336,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .then(function () {
                     if (postModalCommentTextarea) postModalCommentTextarea.value = '';
+                    clearCommentMediaPreview(postModalCommentForm);
                     if (postModalCommentStatus) {
                         postModalCommentStatus.textContent = t('preview_comment_sent', 'Kommentar wurde gepostet.');
                         postModalCommentStatus.hidden = false;
@@ -3666,6 +3868,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initReadMore(document);
     initMediaCarousels(document);
     initVideoPlayers(document);
+    initCommentMediaInputs(document);
 
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {

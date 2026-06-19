@@ -16,6 +16,9 @@
     $canDeleteComment = $isOwnComment || $viewerIsAdmin || ($viewerId > 0 && isset($post) && (int) $post->user_id === $viewerId);
     $isReplyComment = ! empty($comment->parent_id);
     $commentDepth = (int) ($commentDepth ?? ($isReplyComment ? 1 : 0));
+    $commentMediaItems = $comment->relationLoaded('media')
+        ? $comment->media->filter(fn ($media) => $media->isImage())->take(4)->values()
+        : collect();
 @endphp
 
 <div class="post-comment hnt-comment-modal-item {{ $isReplyComment ? 'is-reply' : 'is-root' }}" id="comment-{{ $comment->id }}" data-hnt-comment-item="{{ $comment->id }}" data-hnt-comment-depth="{{ $commentDepth }}">
@@ -31,6 +34,19 @@
                 <span>{{ optional($comment->created_at)->diffForHumans() }}</span>
             </div>
             <div class="hnt-comment-modal-body" data-hnt-comment-body>{!! \App\Support\FeedTextRenderer::render($comment->body) !!}</div>
+            @if($commentMediaItems->isNotEmpty())
+                <div class="hnt-comment-media-grid hnt-comment-media-count-{{ $commentMediaItems->count() }}" data-hnt-lightbox-scope>
+                    @foreach($commentMediaItems as $media)
+                        @php
+                            $mediaUrl = $media->url();
+                            $mediaAlt = $media->original_name ?: __('ui.preview_comment_image_preview');
+                        @endphp
+                        <a class="hnt-comment-media-thumb" href="{{ $mediaUrl }}" data-hnt-lightbox-trigger data-hnt-lightbox-src="{{ $mediaUrl }}" data-hnt-lightbox-alt="{{ $mediaAlt }}" aria-label="{{ $mediaAlt }}">
+                            <img src="{{ $mediaUrl }}" alt="{{ $mediaAlt }}" loading="lazy">
+                        </a>
+                    @endforeach
+                </div>
+            @endif
             @if($isOwnComment)
                 <form class="hnt-comment-edit-form" action="{{ route('feed.comments.update', $comment) }}" method="post" data-hnt-comment-edit-form hidden>
                     @csrf
@@ -91,7 +107,12 @@
                 @csrf
                 <input type="hidden" name="parent_id" value="{{ $comment->id }}">
                 <div class="hnt-comment-reply-input">
-                    <textarea name="body" rows="2" maxlength="50000" placeholder="{{ __('ui.reply_to_user', ['name' => $commentUserName]) }}" required data-hnt-comment-reply-textarea></textarea>
+                    <textarea name="body" rows="2" maxlength="50000" placeholder="{{ __('ui.reply_to_user', ['name' => $commentUserName]) }}" data-hnt-comment-reply-textarea></textarea>
+                    <input type="file" name="media[]" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden data-hnt-comment-media-input>
+                    <div class="hnt-comment-media-preview hnt-comment-reply-media-preview" data-hnt-comment-media-preview hidden></div>
+                    <button class="hnt-comment-media-button hnt-comment-reply-media-button" type="button" data-hnt-comment-media-trigger aria-label="{{ __('ui.preview_comment_add_image') }}" title="{{ __('ui.preview_comment_add_image') }}">
+                        <i class="ph ph-image-square" aria-hidden="true"></i>
+                    </button>
                     <button class="post-modal-send hnt-comment-reply-submit" type="submit" aria-label="{{ __('ui.preview_post_modal_send_aria') }}" data-hnt-comment-reply-submit>
                         <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
                     </button>
