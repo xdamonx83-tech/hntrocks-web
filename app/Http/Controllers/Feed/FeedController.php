@@ -598,6 +598,7 @@ class FeedController extends Controller
             'sharedPost.media.mediaAsset',
             'media.mediaAsset',
             'comments.user.profile',
+            'comments.media.mediaAsset',
             'comments.reactions',
             'comments.viewerReaction',
             'reactions',

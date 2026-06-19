@@ -30,8 +30,11 @@
                 @endif
             </span>
             <div class="post-modal-input">
-                <textarea name="body" maxlength="50000" placeholder="{{ __('ui.preview_post_modal_comment_placeholder', ['name' => $displayName]) }}" required data-hnt-comment-textarea></textarea>
+                <textarea name="body" maxlength="50000" placeholder="{{ __('ui.preview_post_modal_comment_placeholder', ['name' => $displayName]) }}" data-hnt-comment-textarea></textarea>
+                <input type="file" name="media[]" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden data-hnt-comment-media-input>
+                <div class="hnt-comment-media-preview" data-hnt-comment-media-preview hidden></div>
                 <div class="post-modal-tools">
+                    <button class="hnt-comment-media-button" type="button" data-hnt-comment-media-trigger aria-label="{{ __('ui.preview_comment_add_image') }}" title="{{ __('ui.preview_comment_add_image') }}"><i class="ph ph-image-square" aria-hidden="true"></i></button>
                     <button class="hnt-emoji-input-button" type="button" data-hnt-emoji-trigger data-hnt-emoji-target="post-comment" aria-label="{{ __('ui.preview_emoji_button') }}" title="{{ __('ui.preview_emoji_button') }}"><i class="ph ph-smiley" aria-hidden="true"></i></button>
                     <button class="post-modal-send" type="submit" aria-label="{{ __('ui.preview_post_modal_send_aria') }}" data-hnt-comment-submit>
                         <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
