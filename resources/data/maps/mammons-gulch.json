@@ -1,0 +1,12 @@
+{
+  "markers": [
+    {"type": "compound", "x": 360, "y": 310, "label": {"de": "Westliches Anwesen", "en": "Western Estate"}},
+    {"type": "compound", "x": 1020, "y": 360, "label": {"de": "Minenlager", "en": "Mining Camp"}},
+    {"type": "boss", "x": 785, "y": 515, "label": {"de": "Boss-Areal", "en": "Boss Area"}},
+    {"type": "spawn", "x": 180, "y": 720, "label": {"de": "Suedwestlicher Spawn", "en": "Southwest Spawn"}},
+    {"type": "spawn", "x": 1390, "y": 240, "label": {"de": "Nordost-Spawn", "en": "Northeast Spawn"}},
+    {"type": "supply", "x": 570, "y": 690, "label": {"de": "Vorratspunkt", "en": "Supply Point"}},
+    {"type": "extract", "x": 1310, "y": 790, "label": {"de": "Oestlicher Ausgang", "en": "Eastern Extraction"}},
+    {"type": "cash", "x": 930, "y": 710, "label": {"de": "Kassen-Fundort", "en": "Cash Register"}}
+  ]
+}
