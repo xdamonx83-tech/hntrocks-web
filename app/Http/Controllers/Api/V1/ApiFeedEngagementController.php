@@ -9,12 +9,14 @@ use App\Models\FeedComment;
 use App\Models\FeedPost;
 use App\Models\FeedReaction;
 use App\Services\GamificationService;
+use App\Services\MediaService;
 use App\Services\MentionService;
 use App\Services\NotificationService;
 use App\Services\Translation\FeedTranslationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class ApiFeedEngagementController extends Controller
 {
@@ -53,10 +55,11 @@ class ApiFeedEngagementController extends Controller
         $comments = $post->comments()
             ->with([
                 'user.profile',
+                'media.mediaAsset',
                 'viewerReaction',
                 'replies' => function ($query): void {
                     $query
-                        ->with(['user.profile', 'viewerReaction'])
+                        ->with(['user.profile', 'media.mediaAsset', 'viewerReaction'])
                         ->withCount('reactions')
                         ->oldest();
                 },
@@ -74,15 +77,37 @@ class ApiFeedEngagementController extends Controller
         FeedPost $post,
         NotificationService $notifications,
         GamificationService $gamification,
+        MediaService $mediaService,
         MentionService $mentions,
         FeedTranslationService $translations
     ): JsonResponse {
         abort_unless($this->canUsePost($request, $post), 403);
 
         $validated = $request->validate([
-            'body' => ['required', 'string', 'max:50000'],
+            'body' => ['nullable', 'string', 'max:50000'],
             'parent_id' => ['nullable', 'integer', 'exists:feed_comments,id'],
+            'media' => ['nullable', 'array', 'max:'.config('hunthub.upload_limits.comment_media_count', 4)],
+            'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif', 'max:'.config('hunthub.upload_limits.comment_media_kb', 10240)],
         ]);
+
+        $files = $request->file('media', []);
+        if ($files && ! is_array($files)) {
+            $files = [$files];
+        }
+
+        foreach ($files as $file) {
+            $mediaService->assertAllowed($file, $request->user(), 'feed');
+        }
+
+        $body = trim((string) ($validated['body'] ?? ''));
+        if ($body === '' && count($files) === 0) {
+            return response()->json([
+                'message' => __('ui.comment_body_or_media_required'),
+                'errors' => [
+                    'body' => [__('ui.comment_body_or_media_required')],
+                ],
+            ], 422);
+        }
 
         $parentId = null;
         $parent = null;
@@ -96,12 +121,34 @@ class ApiFeedEngagementController extends Controller
             }
         }
 
-        $comment = $post->comments()->create([
-            'user_id' => $request->user()->id,
-            'parent_id' => $parentId,
-            'body' => $validated['body'],
-            'source_language' => $translations->detectLanguage($validated['body']),
-        ]);
+        $comment = DB::transaction(function () use ($post, $request, $parentId, $body, $translations, $files, $mediaService): FeedComment {
+            $comment = $post->comments()->create([
+                'user_id' => $request->user()->id,
+                'parent_id' => $parentId,
+                'body' => $body !== '' ? $body : null,
+                'source_language' => $translations->detectLanguage($body !== '' ? $body : null),
+            ]);
+
+            foreach ($files as $index => $file) {
+                $asset = $mediaService->store($file, $request->user(), 'feed', [
+                    'attachable' => $comment,
+                    'visibility' => $post->visibility,
+                ]);
+
+                $comment->media()->create([
+                    'user_id' => $request->user()->id,
+                    'media_asset_id' => $asset->id,
+                    'disk' => $asset->disk,
+                    'path' => $asset->path,
+                    'mime_type' => $asset->mime_type,
+                    'original_name' => $asset->original_name,
+                    'size_bytes' => $asset->size_bytes,
+                    'sort_order' => $index,
+                ]);
+            }
+
+            return $comment;
+        });
 
         try {
             $gamification->award($request->user(), 'feed_comment_created', source: $comment);
@@ -111,13 +158,15 @@ class ApiFeedEngagementController extends Controller
                 $gamification->award($post->user, 'feed_comment_received', source: $comment);
             }
 
-            $mentions->syncForFeedComment($comment, $request->user(), $comment->body, $notifications);
+            if (filled($comment->body)) {
+                $mentions->syncForFeedComment($comment, $request->user(), $comment->body, $notifications);
+            }
             $this->sendCommentNotifications($post, $comment, $request->user(), $notifications);
         } catch (\Throwable $exception) {
             report($exception);
         }
 
-        $comment->loadMissing(['user.profile', 'viewerReaction']);
+        $comment->loadMissing(['user.profile', 'viewerReaction', 'media.mediaAsset']);
         $comment->loadCount('reactions');
         $post->loadCount(['comments', 'reactions', 'bookmarks']);
         $post->loadCount('sharedByPosts as shares_count');
@@ -158,7 +207,7 @@ class ApiFeedEngagementController extends Controller
         $comment->translations()->delete();
         $mentions->syncForFeedComment($comment, $request->user(), $comment->body, $notifications);
 
-        $comment->loadMissing(['user.profile', 'viewerReaction']);
+        $comment->loadMissing(['user.profile', 'viewerReaction', 'media.mediaAsset']);
         $comment->loadCount('reactions');
         $post->loadMissing(['user.profile', 'media.mediaAsset', 'viewerReaction', 'viewerBookmark']);
         $post->loadCount(['comments', 'reactions', 'bookmarks']);
@@ -288,7 +337,7 @@ class ApiFeedEngagementController extends Controller
 
         if ($reaction && $mode !== 'set') {
             $reaction->delete();
-            $comment->loadMissing(['user.profile', 'viewerReaction']);
+            $comment->loadMissing(['user.profile', 'viewerReaction', 'media.mediaAsset']);
             $comment->loadCount('reactions');
             $post->loadMissing(['user.profile', 'media.mediaAsset', 'viewerReaction', 'viewerBookmark']);
             $post->loadCount(['comments', 'reactions', 'bookmarks']);
@@ -329,7 +378,7 @@ class ApiFeedEngagementController extends Controller
             }
         }
 
-        $comment->loadMissing(['user.profile', 'viewerReaction']);
+        $comment->loadMissing(['user.profile', 'viewerReaction', 'media.mediaAsset']);
         $comment->loadCount('reactions');
         $post->loadMissing(['user.profile', 'media.mediaAsset', 'viewerReaction', 'viewerBookmark']);
         $post->loadCount(['comments', 'reactions', 'bookmarks']);

@@ -197,6 +197,8 @@ return [
         'team_cover_kb' => $uploadMb('HH_UPLOAD_TEAM_COVER_MB', 4),
         'feed_media_kb' => $uploadMb('HH_UPLOAD_FEED_MEDIA_MB', 100),
         'feed_media_count' => $uploadCount('HH_UPLOAD_FEED_MEDIA_COUNT', 12),
+        'comment_media_kb' => 10 * 1024,
+        'comment_media_count' => 4,
         'team_feed_media_kb' => $uploadMb('HH_UPLOAD_TEAM_FEED_MEDIA_MB', 100),
         'team_feed_media_count' => $uploadCount('HH_UPLOAD_TEAM_FEED_MEDIA_COUNT', 12),
         'media_library_file_kb' => $uploadMb('HH_UPLOAD_MEDIA_LIBRARY_FILE_MB', 50),

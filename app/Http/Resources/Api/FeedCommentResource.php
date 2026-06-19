@@ -18,6 +18,7 @@ class FeedCommentResource extends JsonResource
             'source_language' => $this->source_language,
             'translation' => $this->translationPayload($request),
             'author' => new UserResource($this->whenLoaded('user')),
+            'media' => FeedCommentMediaResource::collection($this->whenLoaded('media')),
             'reactions_count' => (int) ($this->reactions_count ?? 0),
             'replies_count' => $this->whenLoaded('replies', fn () => $this->replies->count()),
             'replies' => FeedCommentResource::collection($this->whenLoaded('replies')),

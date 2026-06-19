@@ -729,6 +729,7 @@ return [
     'activity_cover' => 'Titelbild',
     'activity_avatar' => 'Profilbild',
     'feed_body_or_media_required' => 'Schreibe etwas oder hänge ein Bild/Video an.',
+    'comment_body_or_media_required' => 'Schreibe einen Kommentar oder hänge ein Bild an.',
     'feed_post_published' => 'Beitrag wurde veröffentlicht.',
     'feed_public_only_share' => 'Nur öffentliche Beiträge können geteilt werden.',
     'feed_private_team_not_shareable' => 'Private Team-Beiträge können nicht geteilt werden.',

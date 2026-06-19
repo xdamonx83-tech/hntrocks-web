@@ -729,6 +729,7 @@ return [
     'activity_cover' => 'cover image',
     'activity_avatar' => 'profile picture',
     'feed_body_or_media_required' => 'Write something or attach an image/video.',
+    'comment_body_or_media_required' => 'Write a comment or attach an image.',
     'feed_post_published' => 'Post has been published.',
     'feed_public_only_share' => 'Only public posts can be shared.',
     'feed_private_team_not_shareable' => 'Private team posts cannot be shared.',
