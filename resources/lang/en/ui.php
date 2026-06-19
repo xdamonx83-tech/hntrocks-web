@@ -80,6 +80,7 @@ return [
     'mobile_profile_language_text' => 'Switch the language for this interface.',
     'login' => 'Login',
     'register' => 'Register',
+    'guest_sidebar_text' => 'Sign in to use the feed, LFG, Moments and community features.',
     'messages_chat' => 'Messages / Chat',
     'open_messages' => 'Open messages',
     'all_messages' => 'All messages',

@@ -22,11 +22,12 @@
 @endphp
 
 <header class="hnt-mobile-topbar" aria-label="{{ __('ui.preview_mobile_topbar') }}">
-    <a class="hnt-mobile-brand" href="{{ $safeRoute('feed.index', '/feed') }}" aria-label="HNT.rocks">
+    <a class="hnt-mobile-brand" href="{{ $currentUser ? $safeRoute('feed.index', '/feed') : $safeRoute('cups.index', '/cups') }}" aria-label="HNT.rocks">
         <i class="ph ph-star" aria-hidden="true"></i>
         <span>HNT.rocks</span>
     </a>
     <div class="hnt-mobile-top-actions">
+        @auth
         <button class="hnt-mobile-icon-btn" type="button" data-hnt-messages-open aria-controls="hntMessageShell" aria-expanded="false" aria-label="{{ __('ui.preview_nav_messages') }}">
             <i class="ph ph-chat-circle-text" aria-hidden="true"></i>
             <span class="hnt-mobile-badge" data-hnt-message-count aria-live="polite" @if($mobileUnreadMessages <= 0) hidden @endif>{{ $mobileUnreadMessages > 99 ? '99+' : $mobileUnreadMessages }}</span>
@@ -38,10 +39,16 @@
         <button class="hnt-mobile-icon-btn is-primary" type="button" data-hnt-composer-open aria-label="{{ __('ui.preview_nav_create_post') }}">
             <i class="ph ph-plus" aria-hidden="true"></i>
         </button>
+        @else
+        <a class="hnt-mobile-icon-btn is-primary" href="{{ $safeRoute('login', '/login') }}" aria-label="{{ __('ui.login_submit') }}">
+            <i class="ph ph-sign-in" aria-hidden="true"></i>
+        </a>
+        @endauth
     </div>
 </header>
 
 <nav class="hnt-mobile-bottom-bar" aria-label="{{ __('ui.preview_mobile_bottom_nav') }}">
+    @auth
     <a href="{{ $safeRoute('feed.index', '/feed') }}" @class(['hnt-mobile-bottom-item', 'active' => $isActive(['feed.*'])])>
         <i class="ph ph-list" aria-hidden="true"></i>
         <span>{{ __('ui.preview_nav_feed') }}</span>
@@ -62,6 +69,24 @@
         <i class="ph ph-list" aria-hidden="true"></i>
         <span>{{ __('ui.preview_nav_menu') }}</span>
     </button>
+    @else
+    <a href="{{ $safeRoute('cups.index', '/cups') }}" @class(['hnt-mobile-bottom-item', 'active' => $isActive(['cups.*'])])>
+        <i class="ph ph-trophy" aria-hidden="true"></i>
+        <span>{{ __('ui.preview_nav_cups') }}</span>
+    </a>
+    <a href="{{ $safeRoute('login', '/login') }}" class="hnt-mobile-bottom-item">
+        <i class="ph ph-sign-in" aria-hidden="true"></i>
+        <span>{{ __('ui.login_submit') }}</span>
+    </a>
+    <a href="{{ $safeRoute('register', '/register') }}" class="hnt-mobile-bottom-item">
+        <i class="ph ph-user-plus" aria-hidden="true"></i>
+        <span>{{ __('ui.register') }}</span>
+    </a>
+    <button class="hnt-mobile-bottom-item" type="button" data-hnt-mobile-menu-open aria-controls="hntMobileMenuShell" aria-expanded="false">
+        <i class="ph ph-list" aria-hidden="true"></i>
+        <span>{{ __('ui.legal_navigation') }}</span>
+    </button>
+    @endauth
 </nav>
 
 <div class="hnt-mobile-menu-backdrop" data-hnt-mobile-menu-close hidden></div>
@@ -76,6 +101,7 @@
         </button>
     </div>
 
+    @auth
     <div class="hnt-mobile-menu-user">
         <span class="avatar avatar-sm hnt-avatar-shell">
             @if($avatarUrl)
@@ -105,10 +131,6 @@
             <i class="ph ph-star" aria-hidden="true"></i>
             <span>{{ __('ui.preview_nav_badges') }}</span>
         </a>
-        <a href="{{ $safeRoute('trophy-room.index', '/trophy-room') }}">
-            <i class="ph ph-cube" aria-hidden="true"></i>
-            <span>{{ __('ui.trophy_room_title') }}</span>
-        </a>
         <a href="{{ $safeRoute('crowns.index', '/crowns') }}">
             <i class="ph ph-crown-simple" aria-hidden="true"></i>
             <span>{{ __('ui.preview_nav_crowns') }}</span>
@@ -133,6 +155,29 @@
         <a href="{{ $safeRoute('crowns.shop', '/crowns/shop') }}">{{ __('ui.preview_nav_shop') }}</a>
         <a href="{{ $safeRoute('crowns.inventory', '/crowns/inventory') }}">{{ __('ui.preview_nav_crowns_inventory') }}</a>
     </div>
+    @else
+    <div class="hnt-mobile-menu-user">
+        <span class="avatar avatar-sm hnt-avatar-shell"><i class="ph ph-sign-in" aria-hidden="true"></i></span>
+        <div>
+            <strong>HNT.rocks</strong>
+            <span>{{ __('ui.guest_sidebar_text') }}</span>
+        </div>
+    </div>
+    <div class="hnt-mobile-menu-grid">
+        <a href="{{ $safeRoute('cups.index', '/cups') }}">
+            <i class="ph ph-trophy" aria-hidden="true"></i>
+            <span>{{ __('ui.preview_nav_cups') }}</span>
+        </a>
+        <a href="{{ $safeRoute('login', '/login') }}">
+            <i class="ph ph-sign-in" aria-hidden="true"></i>
+            <span>{{ __('ui.login_submit') }}</span>
+        </a>
+        <a href="{{ $safeRoute('register', '/register') }}">
+            <i class="ph ph-user-plus" aria-hidden="true"></i>
+            <span>{{ __('ui.register') }}</span>
+        </a>
+    </div>
+    @endauth
 
     <div class="hnt-mobile-menu-legal" aria-label="{{ __('ui.legal_navigation') }}">
         <span class="hnt-mobile-menu-legal-title">

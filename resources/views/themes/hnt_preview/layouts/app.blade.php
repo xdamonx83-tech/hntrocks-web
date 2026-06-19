@@ -7,9 +7,11 @@
 <body class="hnt-preview-body">
     <div class="app-window hnt-preview-shell @yield('app_window_class')" id="hntPreviewApp">
         @include('themes.hnt_preview.partials.sidebar-left')
-        @include('themes.hnt_preview.partials.notifications-shell')
-        @include('themes.hnt_preview.partials.friend-requests-shell')
-        @include('themes.hnt_preview.partials.messages-shell')
+        @auth
+            @include('themes.hnt_preview.partials.notifications-shell')
+            @include('themes.hnt_preview.partials.friend-requests-shell')
+            @include('themes.hnt_preview.partials.messages-shell')
+        @endauth
         @include('themes.hnt_preview.partials.mobile-chrome')
 
         <main class="@yield('main_class', 'feed-main')" id="hntPreviewMain">
@@ -25,7 +27,9 @@
 
     <div class="hnt-chat-tabs-shell" data-hnt-chat-tabs-shell aria-live="polite"></div>
 
-    @include('themes.hnt_preview.partials.composer-modal')
+    @auth
+        @include('themes.hnt_preview.partials.composer-modal')
+    @endauth
     @include('themes.hnt_preview.partials.post-modal')
     @include('themes.hnt_preview.partials.report-modal')
     @include('themes.hnt_preview.partials.likes-modal')

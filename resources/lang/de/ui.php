@@ -80,6 +80,7 @@ return [
     'mobile_profile_language_text' => 'Sprache für diese Oberfläche wechseln.',
     'login' => 'Login',
     'register' => 'Registrieren',
+    'guest_sidebar_text' => 'Melde dich an, um Feed, LFG, Moments und Community-Funktionen zu nutzen.',
     'messages_chat' => 'Nachrichten / Chat',
     'open_messages' => 'Nachrichten öffnen',
     'all_messages' => 'Alle Nachrichten',
