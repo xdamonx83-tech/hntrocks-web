@@ -1,6 +1,6 @@
 @php
     $currentUser = auth()->user();
-    $displayName = $currentUser?->name ?: ($currentUser?->username ?: 'Admin');
+    $displayName = $currentUser?->name ?: $currentUser?->username;
     $username = $currentUser?->username ? '@'.$currentUser->username : 'HNT.rocks';
     $avatarUrl = $currentUser?->avatarUrl();
     $safeRoute = static function (string $routeName, string $fallback = '/') : string {
@@ -24,7 +24,7 @@
 
 <aside class="sidebar-left" aria-label="{{ __('ui.sidebar_navigation') }}">
     <div class="logo-section">
-        <a class="logo-brand" href="{{ $safeRoute('feed.index', '/feed') }}" aria-label="{{ __('ui.feed') }}">
+        <a class="logo-brand" href="{{ $currentUser ? $safeRoute('feed.index', '/feed') : $safeRoute('cups.index', '/cups') }}" aria-label="HNT.rocks">
             
             <span>HNT.rocks</span>
         </a>
@@ -33,6 +33,7 @@
         </button>
     </div>
 
+    @auth
     <div class="user-profile" id="profileTrigger" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">
         <span class="avatar avatar-md hnt-avatar-shell">
             @if($avatarUrl)
@@ -179,12 +180,31 @@
             <span>{{ __('ui.preview_nav_badges') }}</span>
         </a>
 
-        <a href="{{ $safeRoute('trophy-room.index', '/trophy-room') }}" @class(['nav-item', 'active' => $isActive(['trophy-room.*'])])>
-            @if($isActive(['trophy-room.*']))<div class="active-indicator"></div>@endif
-            <i class="ph ph-cube" aria-hidden="true"></i>
-            <span>{{ __('ui.trophy_room_title') }}</span>
+    </nav>
+    @else
+    <div class="user-profile">
+        <span class="avatar avatar-md hnt-avatar-shell">
+            <i class="ph ph-sign-in" aria-hidden="true"></i>
+        </span>
+        <div class="user-info">
+            <span class="name">HNT.rocks</span>
+            <span class="greeting">{{ __('ui.guest_sidebar_text') }}</span>
+        </div>
+    </div>
+
+    <nav class="main-nav">
+        <a href="{{ $safeRoute('cups.index', '/cups') }}" @class(['nav-item', 'active' => $isActive(['cups.*'])])>
+            @if($isActive(['cups.*']))<div class="active-indicator"></div>@endif
+            <i class="ph ph-trophy" aria-hidden="true"></i>
+            <span>{{ __('ui.preview_nav_cups') }}</span>
+        </a>
+        <a href="{{ $safeRoute('login', '/login') }}" class="nav-item">
+            <i class="ph ph-sign-in" aria-hidden="true"></i>
+            <span>{{ __('ui.login_submit') }}</span>
         </a>
     </nav>
+    <a class="btn-create" href="{{ $safeRoute('register', '/register') }}">{{ __('ui.register') }}</a>
+    @endauth
 
     <div class="bottom-nav">
         <div class="nav-dropdown nav-dropdown-legal" data-nav-group="legal">
@@ -207,5 +227,7 @@
         </div>
     </div>
 
-    <button class="btn-create" type="button" id="openComposer">{{ __('ui.preview_nav_create_post') }}</button>
+    @auth
+        <button class="btn-create" type="button" id="openComposer">{{ __('ui.preview_nav_create_post') }}</button>
+    @endauth
 </aside>
