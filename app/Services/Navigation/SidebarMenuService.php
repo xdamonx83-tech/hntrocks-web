@@ -147,7 +147,22 @@ class SidebarMenuService
             $item->url,
         ])));
 
-        foreach (['trophäenraum', 'trophaenraum', 'trophyroom', 'trophy-room', 'trophy_room', '/trophy'] as $needle) {
+        foreach ([
+            'troph',
+            'tropha',
+            'trophä',
+            'trophy',
+            'trophies',
+            'trophyroom',
+            'trophy-room',
+            'trophy_room',
+            'trophäenraum',
+            'trophäen raum',
+            'trophaenraum',
+            'trophaeenraum',
+            'trophenraum',
+            'trophen raum',
+        ] as $needle) {
             if (Str::contains($haystack, $needle)) {
                 return true;
             }
