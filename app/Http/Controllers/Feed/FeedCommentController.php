@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
 use App\Services\GamificationService;
+use App\Services\MediaService;
 use App\Services\NotificationService;
 use App\Services\MentionService;
 use App\Services\Translation\FeedTranslationService;
@@ -13,17 +14,45 @@ use App\Support\FeedTextRenderer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FeedCommentController extends Controller
 {
-    public function store(Request $request, FeedPost $post, NotificationService $notifications, GamificationService $gamification, MentionService $mentions, FeedTranslationService $translations): RedirectResponse|JsonResponse
+    public function store(Request $request, FeedPost $post, NotificationService $notifications, GamificationService $gamification, MediaService $mediaService, MentionService $mentions, FeedTranslationService $translations): RedirectResponse|JsonResponse
     {
         abort_unless($post->canBeViewedBy($request->user()), 403);
 
         $validated = $request->validate([
-            'body' => ['required', 'string', 'max:50000'],
+            'body' => ['nullable', 'string', 'max:50000'],
             'parent_id' => ['nullable', 'integer', 'exists:feed_comments,id'],
+            'media' => ['nullable', 'array', 'max:'.config('hunthub.upload_limits.comment_media_count', 4)],
+            'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif', 'max:'.config('hunthub.upload_limits.comment_media_kb', 10240)],
         ]);
+
+        $files = $request->file('media', []);
+        if ($files && ! is_array($files)) {
+            $files = [$files];
+        }
+
+        foreach ($files as $file) {
+            $mediaService->assertAllowed($file, $request->user(), 'feed');
+        }
+
+        $body = trim((string) ($validated['body'] ?? ''));
+        if ($body === '' && count($files) === 0) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('ui.comment_body_or_media_required'),
+                    'errors' => [
+                        'body' => [__('ui.comment_body_or_media_required')],
+                    ],
+                ], 422);
+            }
+
+            return back()
+                ->withErrors(['body' => __('ui.comment_body_or_media_required')])
+                ->withInput();
+        }
 
         $parentId = null;
         $parent = null;
@@ -37,14 +66,38 @@ class FeedCommentController extends Controller
             }
         }
 
-        $comment = $post->comments()->create([
-            'user_id' => $request->user()->id,
-            'parent_id' => $parentId,
-            'body' => $validated['body'],
-            'source_language' => $translations->detectLanguage($validated['body']),
-        ]);
+        $comment = DB::transaction(function () use ($post, $request, $parentId, $body, $translations, $files, $mediaService): FeedComment {
+            $comment = $post->comments()->create([
+                'user_id' => $request->user()->id,
+                'parent_id' => $parentId,
+                'body' => $body !== '' ? $body : null,
+                'source_language' => $translations->detectLanguage($body !== '' ? $body : null),
+            ]);
 
-        $mentions->syncForFeedComment($comment, $request->user(), $comment->body, $notifications);
+            foreach ($files as $index => $file) {
+                $asset = $mediaService->store($file, $request->user(), 'feed', [
+                    'attachable' => $comment,
+                    'visibility' => $post->visibility,
+                ]);
+
+                $comment->media()->create([
+                    'user_id' => $request->user()->id,
+                    'media_asset_id' => $asset->id,
+                    'disk' => $asset->disk,
+                    'path' => $asset->path,
+                    'mime_type' => $asset->mime_type,
+                    'original_name' => $asset->original_name,
+                    'size_bytes' => $asset->size_bytes,
+                    'sort_order' => $index,
+                ]);
+            }
+
+            return $comment;
+        });
+
+        if (filled($comment->body)) {
+            $mentions->syncForFeedComment($comment, $request->user(), $comment->body, $notifications);
+        }
 
         if ($request->expectsJson()) {
             $this->runCommentAjaxSideEffects(
@@ -55,7 +108,7 @@ class FeedCommentController extends Controller
                 $gamification
             );
 
-            $comment->loadMissing(['user', 'reactions', 'viewerReaction']);
+            $comment->loadMissing(['user', 'reactions', 'viewerReaction', 'media.mediaAsset']);
 
             return response()->json([
                 'ok' => true,
@@ -162,7 +215,7 @@ class FeedCommentController extends Controller
 
     private function commentPayload(FeedPost $post, FeedComment $comment, $viewer, ?int $rootId): array
     {
-        $comment->loadMissing(['user', 'reactions', 'viewerReaction']);
+        $comment->loadMissing(['user', 'reactions', 'viewerReaction', 'media.mediaAsset']);
         $commentUser = $comment->user;
         $viewerId = (int) ($viewer?->id ?? 0);
         $viewerIsAdmin = $viewer && method_exists($viewer, 'isAdmin') && $viewer->isAdmin();
@@ -179,7 +232,8 @@ class FeedCommentController extends Controller
             'root_id' => $rootId ?: $comment->id,
             'is_reply' => (bool) $comment->parent_id,
             'body' => $comment->body,
-            'body_html' => FeedTextRenderer::render($comment->body),
+            'body_html' => FeedTextRenderer::render((string) $comment->body),
+            'media' => $this->mediaPayload($comment),
             'created_at_label' => $comment->created_at?->diffForHumans() ?? '',
             'reaction_count' => $comment->relationLoaded('reactions') ? $comment->reactions->count() : 0,
             'viewer_reaction' => $comment->relationLoaded('viewerReaction') ? $comment->viewerReaction?->type : null,
@@ -203,6 +257,29 @@ class FeedCommentController extends Controller
                 'translation' => route('feed.translation.comment', $comment),
             ],
         ];
+    }
+
+    private function mediaPayload(FeedComment $comment): array
+    {
+        if (! $comment->relationLoaded('media')) {
+            return [];
+        }
+
+        return $comment->media->map(function ($media): array {
+            $asset = $media->mediaAsset;
+            $mimeType = $asset?->mime_type ?: $media->mime_type;
+            $type = $asset?->type ?: (str_starts_with((string) $mimeType, 'image/') ? 'image' : 'file');
+
+            return [
+                'id' => $media->id,
+                'type' => $type,
+                'mime_type' => $mimeType,
+                'url' => $asset ? $asset->url() : $media->url(),
+                'thumbnail_url' => $asset?->thumbnailUrl(),
+                'status' => $asset?->status ?: 'ready',
+                'sort_order' => (int) $media->sort_order,
+            ];
+        })->values()->all();
     }
 
 

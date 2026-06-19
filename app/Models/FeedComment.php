@@ -48,6 +48,11 @@ class FeedComment extends Model
         return $this->hasMany(FeedCommentReaction::class);
     }
 
+    public function media(): HasMany
+    {
+        return $this->hasMany(FeedCommentMedia::class)->orderBy('sort_order');
+    }
+
 
     public function translations(): HasMany
     {
