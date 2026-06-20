@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Maps;
 
 use App\Http\Controllers\Controller;
+use App\Models\HntMap;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class MapController extends Controller
@@ -60,7 +62,7 @@ class MapController extends Controller
     public function index(): View
     {
         $maps = collect(self::MAPS)->map(function (array $map, string $slug): array {
-            $data = $this->readMapData($map['data']);
+            $data = $this->readMapData($slug, $map['data']);
 
             return [
                 ...$map,
@@ -80,7 +82,7 @@ class MapController extends Controller
         abort_unless(isset(self::MAPS[$slug]), 404);
 
         $map = self::MAPS[$slug];
-        $data = $this->readMapData($map['data']);
+        $data = $this->readMapData($slug, $map['data']);
         $imageAvailable = File::isFile(public_path($map['image']));
         $linesAvailable = File::isFile(public_path($map['lines']));
 
@@ -106,7 +108,65 @@ class MapController extends Controller
     /**
      * @return array{markers: array<int, array<string, mixed>>, error: string|null}
      */
-    private function readMapData(string $relativePath): array
+    private function readMapData(string $slug, string $relativePath): array
+    {
+        $databaseMarkers = $this->readDatabaseMarkers($slug);
+
+        if ($databaseMarkers !== null) {
+            return ['markers' => $databaseMarkers, 'error' => null];
+        }
+
+        return $this->readJsonMarkers($relativePath);
+    }
+
+    /**
+     * A null result deliberately selects the JSON fallback. This also protects
+     * deploys where application code arrives before its migrations or seeder.
+     *
+     * @return array<int, array<string, mixed>>|null
+     */
+    private function readDatabaseMarkers(string $slug): ?array
+    {
+        try {
+            if (! Schema::hasTable('hnt_maps') || ! Schema::hasTable('hnt_map_markers')) {
+                return null;
+            }
+
+            $map = HntMap::query()->where('slug', $slug)->where('is_active', true)->first();
+
+            if ($map === null) {
+                return null;
+            }
+
+            $markers = $map->markers()
+                ->where('status', 'approved')
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            if ($markers->isEmpty()) {
+                return null;
+            }
+
+            return $markers->map(fn ($marker): ?array => $this->safeMarker([
+                'type' => $marker->type,
+                'x' => $marker->x,
+                'y' => $marker->y,
+                'label' => [
+                    'de' => $marker->label_de,
+                    'en' => $marker->label_en,
+                ],
+                'source_image' => $marker->source_image,
+            ]))->filter()->values()->all();
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * @return array{markers: array<int, array<string, mixed>>, error: string|null}
+     */
+    private function readJsonMarkers(string $relativePath): array
     {
         $path = resource_path('data/'.$relativePath);
 
@@ -124,39 +184,50 @@ class MapController extends Controller
             return ['markers' => [], 'error' => 'invalid'];
         }
 
-        $locale = app()->getLocale() === 'de' ? 'de' : 'en';
         $markers = [];
 
         foreach ($decoded['markers'] as $marker) {
-            if (! is_array($marker)
-                || ! in_array($marker['type'] ?? null, self::MARKER_TYPES, true)
-                || ! is_numeric($marker['x'] ?? null)
-                || ! is_numeric($marker['y'] ?? null)) {
-                continue;
+            $safeMarker = is_array($marker) ? $this->safeMarker($marker) : null;
+
+            if ($safeMarker !== null) {
+                $markers[] = $safeMarker;
             }
-
-            $labels = is_array($marker['label'] ?? null) ? $marker['label'] : [];
-            $label = trim((string) ($labels[$locale] ?? $labels['en'] ?? ''));
-
-            $safeMarker = [
-                'type' => $marker['type'],
-                'x' => (float) $marker['x'],
-                'y' => (float) $marker['y'],
-                'label' => $label !== '' ? $label : __('ui.maps_type_'.$marker['type']),
-            ];
-
-            if ($marker['type'] === 'cash') {
-                $imageUrl = $this->cashSpotImageUrl($marker['source_image'] ?? null);
-
-                if ($imageUrl !== null) {
-                    $safeMarker['image_url'] = $imageUrl;
-                }
-            }
-
-            $markers[] = $safeMarker;
         }
 
         return ['markers' => $markers, 'error' => null];
+    }
+
+    /**
+     * @param  array<string, mixed>  $marker
+     * @return array<string, mixed>|null
+     */
+    private function safeMarker(array $marker): ?array
+    {
+        if (! in_array($marker['type'] ?? null, self::MARKER_TYPES, true)
+            || ! is_numeric($marker['x'] ?? null)
+            || ! is_numeric($marker['y'] ?? null)) {
+            return null;
+        }
+
+        $locale = app()->getLocale() === 'de' ? 'de' : 'en';
+        $labels = is_array($marker['label'] ?? null) ? $marker['label'] : [];
+        $label = trim((string) ($labels[$locale] ?? $labels['en'] ?? ''));
+        $safeMarker = [
+            'type' => $marker['type'],
+            'x' => (float) $marker['x'],
+            'y' => (float) $marker['y'],
+            'label' => $label !== '' ? $label : __('ui.maps_type_'.$marker['type']),
+        ];
+
+        if ($marker['type'] === 'cash') {
+            $imageUrl = $this->cashSpotImageUrl($marker['source_image'] ?? null);
+
+            if ($imageUrl !== null) {
+                $safeMarker['image_url'] = $imageUrl;
+            }
+        }
+
+        return $safeMarker;
     }
 
     private function cashSpotImageUrl(mixed $sourceImage): ?string
