@@ -4111,7 +4111,7 @@ return [
     'maps_choose_map' => 'Karte wählen',
     'maps_search' => 'Karte durchsuchen',
     'maps_search_placeholder' => 'Orte suchen',
-    'maps_search_help' => 'Durchsuche Markernamen und Typen.',
+    'maps_search_help' => 'Durchsuche Orte.',
     'maps_search_results' => 'Suchergebnisse',
     'maps_search_empty' => 'Keine Treffer',
     'maps_layers' => 'Ebenen',

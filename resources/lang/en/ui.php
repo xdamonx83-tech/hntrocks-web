@@ -4111,7 +4111,7 @@ return [
     'maps_choose_map' => 'Choose map',
     'maps_search' => 'Search map',
     'maps_search_placeholder' => 'Search locations',
-    'maps_search_help' => 'Search marker names and types.',
+    'maps_search_help' => 'Search locations.',
     'maps_search_results' => 'Search results',
     'maps_search_empty' => 'No results',
     'maps_layers' => 'Layers',

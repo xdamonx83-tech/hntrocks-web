@@ -161,13 +161,17 @@
         return Array.from(new Set([text, transliterated, withoutDiacritics])).filter(Boolean);
     }
 
-    function matchesSearch(reference, queryForms) {
-        var searchableForms = searchForms(reference.label + ' ' + reference.typeLabel);
-
-        return queryForms.some(function (query) {
-            return searchableForms.some(function (value) { return value.includes(query); });
-        });
+function matchesSearch(reference, queryForms) {
+    if (reference.marker.type !== 'compound') {
+        return false;
     }
+
+    var searchableForms = searchForms(reference.label);
+
+    return queryForms.some(function (query) {
+        return searchableForms.some(function (value) { return value.includes(query); });
+    });
+}
 
     function ensureMarkerTypeVisible(type) {
         var input = filterInputs[type];
