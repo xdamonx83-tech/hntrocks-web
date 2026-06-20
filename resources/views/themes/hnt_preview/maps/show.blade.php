@@ -72,11 +72,12 @@
 
             <section class="hnt-map-tool-section">
                 <label for="hntMapSearch">{{ __('ui.maps_search') }}</label>
-                <div class="hnt-map-search-wrap" aria-disabled="true">
+                <div class="hnt-map-search-wrap">
                     <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-                    <input id="hntMapSearch" type="search" placeholder="{{ __('ui.maps_search_placeholder') }}" disabled>
+                    <input id="hntMapSearch" type="search" placeholder="{{ __('ui.maps_search_placeholder') }}" autocomplete="off" aria-controls="hntMapSearchResults" aria-expanded="false">
                 </div>
-                <small>{{ __('ui.maps_search_followup') }}</small>
+                <div id="hntMapSearchResults" class="hnt-map-search-results" role="listbox" aria-label="{{ __('ui.maps_search_results') }}" hidden></div>
+                <small>{{ __('ui.maps_search_help') }}</small>
             </section>
 
             <section class="hnt-map-tool-section" aria-label="{{ __('ui.maps_filters') }}">
@@ -144,6 +145,7 @@
                 'markers' => $markers,
                 'typeLabels' => collect($markerTypes)
                     ->mapWithKeys(fn ($type) => [$type => __('ui.maps_type_'.$type)]),
+                'searchEmptyText' => __('ui.maps_search_empty'),
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
         @endif
 
