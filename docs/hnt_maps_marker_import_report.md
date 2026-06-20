@@ -1,16 +1,16 @@
 # HNT Maps Marker Import Report
-Total markers: **351**
+Total markers: **505**
 
 ## Types
-- boss: 57
-- bugs: 18
-- cash: 29
-- compound: 48
-- spawn: 79
-- supply: 46
+- boss: 76
+- bugs: 26
+- cash: 35
+- compound: 64
+- spawn: 99
+- supply: 97
 - tarot: 2
-- tower: 33
-- wild: 39
+- tower: 49
+- wild: 57
 
 ## Maps
 ### stillwater-bayou
@@ -20,8 +20,8 @@ Total markers: **351**
 
 ### lawson-delta
 
-- Markers: 0
-- Types: {}
+- Markers: 154
+- Types: {'boss': 19, 'bugs': 8, 'cash': 6, 'compound': 16, 'spawn': 20, 'supply': 51, 'tower': 16, 'wild': 18}
 
 ### desalle
 
@@ -37,5 +37,5 @@ Total markers: **351**
 ## Notes
 - Coordinates are copied as x=pos_x and y=pos_y from Huntmaps export.
 - source_id is preserved for later DB/admin migration.
-- source_image is preserved only as metadata for future cash screenshot migration; current frontend should not render it unless image assets exist.
-- Lawson Delta export is still empty in the provided ZIP.
+- source_image is preserved only as metadata for future cash screenshot migration; the current frontend does not render it.
+- Lawson Delta was added from the follow-up German and English exports.
