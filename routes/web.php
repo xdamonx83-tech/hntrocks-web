@@ -585,6 +585,9 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/hunt-news/{item}/skip', [AdminHuntNewsController::class, 'skip'])->name('hunt-news.skip');
         Route::get('/maps', [AdminMapController::class, 'index'])->name('maps.index');
         Route::get('/maps/{map:slug}/markers', [AdminMapController::class, 'markers'])->name('maps.markers');
+        Route::post('/maps/{map:slug}/markers', [AdminMapController::class, 'storeMarker'])->name('maps.markers.store');
+        Route::patch('/maps/markers/{marker}', [AdminMapController::class, 'updateMarker'])->name('maps.markers.update');
+        Route::delete('/maps/markers/{marker}', [AdminMapController::class, 'destroyMarker'])->name('maps.markers.destroy');
         Route::patch('/maps/markers/{marker}/position', [AdminMapController::class, 'updateMarkerPosition'])->name('maps.markers.position');
         Route::get('/outbound-links', [AdminApprovedOutboundLinkController::class, 'index'])->name('outbound-links.index');
         Route::post('/outbound-links', [AdminApprovedOutboundLinkController::class, 'store'])->name('outbound-links.store');

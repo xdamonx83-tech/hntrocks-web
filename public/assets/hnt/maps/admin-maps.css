@@ -31,8 +31,15 @@
     align-items: end;
     display: flex;
     gap: 18px;
-    justify-content: space-between;
     padding: 16px 18px;
+}
+
+.hh-admin-map-toolbar .hh-admin-map-save-status {
+    margin-left: auto;
+}
+
+.hh-admin-map-toolbar .hh-primary-button.is-active {
+    background: #7d5919;
 }
 
 .hh-admin-map-toolbar label {
@@ -77,6 +84,11 @@
     height: min(72vh, 820px);
     min-height: 560px;
     width: 100%;
+}
+
+.hh-admin-map-canvas.is-adding,
+.hh-admin-map-canvas.is-adding .leaflet-grab {
+    cursor: crosshair;
 }
 
 .hh-admin-map-marker {
@@ -125,11 +137,108 @@
     font-size: 11px;
 }
 
+.hh-admin-map-dialog {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .38);
+    color: #302b25;
+    max-width: min(680px, calc(100vw - 32px));
+    padding: 0;
+    width: 100%;
+}
+
+.hh-admin-map-dialog::backdrop {
+    background: rgba(20, 17, 13, .66);
+}
+
+.hh-admin-map-form {
+    display: grid;
+    gap: 20px;
+    padding: 24px;
+}
+
+.hh-admin-map-dialog-header,
+.hh-admin-map-form-actions {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.hh-admin-map-dialog-header h2,
+.hh-admin-map-dialog-header p {
+    margin: 0;
+}
+
+.hh-admin-map-dialog-close {
+    background: transparent;
+    border: 0;
+    color: #6f685e;
+    cursor: pointer;
+    font-size: 30px;
+    line-height: 1;
+    padding: 6px;
+}
+
+.hh-admin-map-form-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hh-admin-map-form-grid label {
+    display: grid;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 6px;
+    text-transform: uppercase;
+}
+
+.hh-admin-map-form-grid input,
+.hh-admin-map-form-grid select {
+    min-width: 0;
+    width: 100%;
+}
+
+.hh-admin-map-source-image {
+    grid-column: 1 / -1;
+}
+
+.hh-admin-map-form-error {
+    background: #fae3df;
+    border-radius: 10px;
+    color: #9b2f25;
+    font-weight: 700;
+    margin: 0;
+    padding: 10px 12px;
+}
+
+.hh-admin-map-form-actions span {
+    flex: 1;
+}
+
 @media (max-width: 720px) {
     .hh-admin-map-row,
     .hh-admin-map-toolbar {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .hh-admin-map-toolbar .hh-admin-map-save-status {
+        margin-left: 0;
+    }
+
+    .hh-admin-map-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hh-admin-map-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hh-admin-map-form-actions span {
+        display: none;
     }
 
     .hh-admin-map-canvas {
