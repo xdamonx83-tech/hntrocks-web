@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminOverviewController;
 use App\Http\Controllers\Admin\AdminNavigationController;
 use App\Http\Controllers\Admin\AdminMomentOfWeekController;
 use App\Http\Controllers\Admin\AdminLoadoutChallengeController;
+use App\Http\Controllers\Admin\AdminMapController;
 use App\Http\Controllers\Admin\AdminWeeklyContractController;
 use App\Http\Controllers\Admin\AdminApprovedOutboundLinkController;
 use App\Http\Controllers\Admin\AdminCampaignLinkController;
@@ -582,6 +583,9 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/hunt-news/sync', [AdminHuntNewsController::class, 'sync'])->name('hunt-news.sync');
         Route::post('/hunt-news/{item}/publish', [AdminHuntNewsController::class, 'publish'])->name('hunt-news.publish');
         Route::post('/hunt-news/{item}/skip', [AdminHuntNewsController::class, 'skip'])->name('hunt-news.skip');
+        Route::get('/maps', [AdminMapController::class, 'index'])->name('maps.index');
+        Route::get('/maps/{map:slug}/markers', [AdminMapController::class, 'markers'])->name('maps.markers');
+        Route::patch('/maps/markers/{marker}/position', [AdminMapController::class, 'updateMarkerPosition'])->name('maps.markers.position');
         Route::get('/outbound-links', [AdminApprovedOutboundLinkController::class, 'index'])->name('outbound-links.index');
         Route::post('/outbound-links', [AdminApprovedOutboundLinkController::class, 'store'])->name('outbound-links.store');
         Route::put('/outbound-links/{link:slug}', [AdminApprovedOutboundLinkController::class, 'update'])->name('outbound-links.update');
