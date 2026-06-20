@@ -86,23 +86,91 @@
     var layers = {};
     var markerReferences = [];
     var filterInputs = {};
+    // Marker types without a supplied asset keep the established circle-marker fallback.
+    var iconSizes = {
+        boss: 32,
+        spawn: 24,
+        supply: 18,
+        cash: 18,
+        tower: 24,
+        bugs: 24,
+        wild: 24
+    };
+    var activeBossPoint = null;
+    var activeBossRings = [];
 
     Object.keys(colors).forEach(function (type) {
         layers[type] = window.L.layerGroup().addTo(map);
     });
+
+    function markerIcon(type) {
+        var size = iconSizes[type];
+
+        if (!size) {
+            return null;
+        }
+
+        return window.L.divIcon({
+            className: 'hnt-map-icon-marker hnt-map-icon-marker--' + type,
+            html: '<span class="hnt-map-icon-ring"><img src="/assets/hnt/maps/icons/' + type + '.webp" alt=""></span>',
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2],
+            popupAnchor: [0, -(size / 2 + 3)]
+        });
+    }
+
+    function clearBossRings() {
+        activeBossRings.forEach(function (ring) { layers.boss.removeLayer(ring); });
+        activeBossRings = [];
+        activeBossPoint = null;
+    }
+
+    function toggleBossRings(point) {
+        if (activeBossPoint === point) {
+            clearBossRings();
+            return;
+        }
+
+        clearBossRings();
+        activeBossPoint = point;
+        activeBossRings = [
+            window.L.circle(point.getLatLng(), {
+                radius: 50,
+                color: '#a94b42',
+                weight: 2,
+                opacity: 0.88,
+                fillColor: '#8f342e',
+                fillOpacity: 0.1,
+                interactive: false
+            }),
+            window.L.circle(point.getLatLng(), {
+                radius: 150,
+                color: '#d6a84f',
+                weight: 2,
+                opacity: 0.82,
+                fillColor: '#d6a84f',
+                fillOpacity: 0.035,
+                interactive: false
+            })
+        ];
+        activeBossRings.forEach(function (ring) { ring.addTo(layers.boss); });
+    }
 
     (Array.isArray(config.markers) ? config.markers : []).forEach(function (marker) {
         if (!layers[marker.type]) {
             return;
         }
 
-        var point = window.L.circleMarker(markerLatLng(marker), {
-            radius: marker.type === 'boss' ? 8 : 6,
-            color: '#141412',
-            weight: 1.5,
-            fillColor: colors[marker.type],
-            fillOpacity: 1
-        });
+        var icon = markerIcon(marker.type);
+        var point = icon
+            ? window.L.marker(markerLatLng(marker), {icon: icon})
+            : window.L.circleMarker(markerLatLng(marker), {
+                radius: marker.type === 'boss' ? 8 : 6,
+                color: '#141412',
+                weight: 1.5,
+                fillColor: colors[marker.type],
+                fillOpacity: 1
+            });
         var popup = document.createElement('div');
         var title = document.createElement('strong');
         var type = document.createElement('span');
@@ -121,6 +189,10 @@
                 offset: [0, -9],
                 className: 'hnt-map-compound-label'
             });
+        }
+
+        if (marker.type === 'boss') {
+            point.on('click', function () { toggleBossRings(point); });
         }
 
         point.addTo(layers[marker.type]);
@@ -193,9 +265,24 @@ function matchesSearch(reference, queryForms) {
             fillOpacity: 1
         };
 
-        point.setStyle({color: '#d6a84f', weight: 4, fillOpacity: 1});
-        point.bringToFront();
-        window.setTimeout(function () { point.setStyle(originalStyle); }, 1400);
+        if (typeof point.setStyle === 'function') {
+            point.setStyle({color: '#d6a84f', weight: 4, fillOpacity: 1});
+            point.bringToFront();
+            window.setTimeout(function () { point.setStyle(originalStyle); }, 1400);
+            return;
+        }
+
+        var element = point.getElement();
+        if (!element) {
+            return;
+        }
+
+        element.classList.add('is-search-highlighted');
+        point.setZIndexOffset(1000);
+        window.setTimeout(function () {
+            element.classList.remove('is-search-highlighted');
+            point.setZIndexOffset(0);
+        }, 1400);
     }
 
     function selectSearchResult(reference) {
