@@ -84,6 +84,8 @@
         tarot: '#876f9e'
     };
     var layers = {};
+    var markerReferences = [];
+    var filterInputs = {};
 
     Object.keys(colors).forEach(function (type) {
         layers[type] = window.L.layerGroup().addTo(map);
@@ -122,9 +124,16 @@
         }
 
         point.addTo(layers[marker.type]);
+        markerReferences.push({
+            marker: marker,
+            point: point,
+            label: marker.label,
+            typeLabel: config.typeLabels[marker.type] || marker.type
+        });
     });
 
     document.querySelectorAll('[data-map-filter]').forEach(function (input) {
+        filterInputs[input.value] = input;
         input.addEventListener('change', function () {
             var layer = layers[input.value];
 
@@ -139,6 +148,117 @@
             }
         });
     });
+
+    function searchForms(value) {
+        var text = String(value || '').toLocaleLowerCase().trim();
+        var transliterated = text
+            .replace(/ä/g, 'ae')
+            .replace(/ö/g, 'oe')
+            .replace(/ü/g, 'ue')
+            .replace(/ß/g, 'ss');
+        var withoutDiacritics = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        return Array.from(new Set([text, transliterated, withoutDiacritics])).filter(Boolean);
+    }
+
+function matchesSearch(reference, queryForms) {
+    if (reference.marker.type !== 'compound') {
+        return false;
+    }
+
+    var searchableForms = searchForms(reference.label);
+
+    return queryForms.some(function (query) {
+        return searchableForms.some(function (value) { return value.includes(query); });
+    });
+}
+
+    function ensureMarkerTypeVisible(type) {
+        var input = filterInputs[type];
+
+        if (!input || input.checked) {
+            return;
+        }
+
+        input.checked = true;
+        input.dispatchEvent(new Event('change', {bubbles: true}));
+    }
+
+    function highlightMarker(reference) {
+        var point = reference.point;
+        var originalStyle = {
+            color: '#141412',
+            weight: 1.5,
+            fillColor: colors[reference.marker.type],
+            fillOpacity: 1
+        };
+
+        point.setStyle({color: '#d6a84f', weight: 4, fillOpacity: 1});
+        point.bringToFront();
+        window.setTimeout(function () { point.setStyle(originalStyle); }, 1400);
+    }
+
+    function selectSearchResult(reference) {
+        ensureMarkerTypeVisible(reference.marker.type);
+        map.setView(reference.point.getLatLng(), Math.max(map.getZoom(), 1.5), {animate: false});
+        reference.point.openPopup();
+        highlightMarker(reference);
+
+        if (window.matchMedia('(max-width: 768px)').matches) {
+            setToolsOpen(false);
+            window.setTimeout(function () { map.invalidateSize(); }, 240);
+        }
+    }
+
+    var searchInput = document.getElementById('hntMapSearch');
+    var searchResults = document.getElementById('hntMapSearchResults');
+
+    function renderSearchResults() {
+        if (!searchInput || !searchResults) {
+            return;
+        }
+
+        var queryForms = searchForms(searchInput.value);
+        searchResults.replaceChildren();
+
+        if (queryForms.length === 0) {
+            searchResults.hidden = true;
+            searchInput.setAttribute('aria-expanded', 'false');
+            return;
+        }
+
+        var matches = markerReferences.filter(function (reference) {
+            return matchesSearch(reference, queryForms);
+        }).slice(0, 8);
+
+        if (matches.length === 0) {
+            var empty = document.createElement('p');
+            empty.className = 'hnt-map-search-empty';
+            empty.textContent = config.searchEmptyText;
+            searchResults.appendChild(empty);
+        } else {
+            matches.forEach(function (reference) {
+                var result = document.createElement('button');
+                var label = document.createElement('strong');
+                var type = document.createElement('span');
+
+                result.type = 'button';
+                result.className = 'hnt-map-search-result';
+                result.setAttribute('role', 'option');
+                label.textContent = reference.label;
+                type.textContent = reference.typeLabel;
+                result.appendChild(label);
+                result.appendChild(type);
+                result.addEventListener('click', function () { selectSearchResult(reference); });
+                searchResults.appendChild(result);
+            });
+        }
+
+        searchResults.hidden = false;
+        searchInput.setAttribute('aria-expanded', 'true');
+    }
+
+    searchInput?.addEventListener('input', renderSearchResults);
 
     document.querySelector('[data-map-lines-toggle]')?.addEventListener('change', function (event) {
         if (!linesLayer) {
