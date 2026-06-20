@@ -6,7 +6,7 @@
 @section('right_sidebar')<aside hidden></aside>@endsection
 
 @push('head')
-    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/maps.css') }}?v=7">
+    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/maps.css') }}?v=9">
 @endpush
 
 @section('content')
