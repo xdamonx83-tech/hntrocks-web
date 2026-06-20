@@ -55,6 +55,11 @@ class MapController extends Controller
                 'lines_url' => $linesAvailable ? asset($map['lines']) : null,
             ],
             'markers' => $data['markers'],
+            'availableMaps' => collect(self::MAPS)->map(fn (array $availableMap, string $availableSlug): array => [
+                'slug' => $availableSlug,
+                'name' => $availableMap['name'],
+                'url' => route('maps.show', $availableSlug),
+            ])->values(),
             'imageAvailable' => $imageAvailable,
             'dataError' => $data['error'],
         ]);

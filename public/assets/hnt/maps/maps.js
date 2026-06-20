@@ -1,6 +1,36 @@
 (function () {
     'use strict';
 
+    var toolsPanel = document.querySelector('[data-map-tools-panel]');
+    var toolsBackdrop = document.querySelector('[data-map-tools-backdrop]');
+    var toolsToggle = document.querySelector('[data-map-tools-toggle]');
+
+    function setToolsOpen(isOpen) {
+        if (!toolsPanel) {
+            return;
+        }
+
+        toolsPanel.classList.toggle('is-open', isOpen);
+        toolsBackdrop?.classList.toggle('is-open', isOpen);
+        toolsToggle?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        document.body.classList.toggle('hnt-map-tools-open', isOpen);
+    }
+
+    toolsToggle?.addEventListener('click', function () { setToolsOpen(true); });
+    toolsBackdrop?.addEventListener('click', function () { setToolsOpen(false); });
+    document.querySelector('[data-map-tools-close]')?.addEventListener('click', function () { setToolsOpen(false); });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            setToolsOpen(false);
+        }
+    });
+
+    document.querySelector('[data-map-select]')?.addEventListener('change', function (event) {
+        if (event.target.value) {
+            window.location.assign(event.target.value);
+        }
+    });
+
     var configElement = document.getElementById('hntMapConfig');
     var mapElement = document.getElementById('hntMap');
 
@@ -24,16 +54,16 @@
         crs: window.L.CRS.Simple,
         minZoom: -2,
         maxZoom: 3,
-        zoomControl: true,
+        zoomControl: false,
         attributionControl: false
     });
 
+    window.L.control.zoom({position: 'topright'}).addTo(map);
     window.L.imageOverlay(config.imageUrl, bounds).addTo(map);
 
-    if (config.linesUrl) {
-        window.L.imageOverlay(config.linesUrl, bounds, {opacity: 0.72, interactive: false}).addTo(map);
-    }
-
+    var linesLayer = config.linesUrl
+        ? window.L.imageOverlay(config.linesUrl, bounds, {opacity: 0.72, interactive: false}).addTo(map)
+        : null;
     var colors = {
         compound: '#d6a84f',
         boss: '#b8463a',
@@ -87,7 +117,29 @@
         });
     });
 
-    map.fitBounds(bounds, {padding: [12, 12]});
+    document.querySelector('[data-map-lines-toggle]')?.addEventListener('change', function (event) {
+        if (!linesLayer) {
+            return;
+        }
+
+        if (event.target.checked) {
+            linesLayer.addTo(map);
+        } else {
+            map.removeLayer(linesLayer);
+        }
+    });
+
+    function resetView() {
+        map.fitBounds(bounds, {padding: [20, 20]});
+    }
+
+    document.querySelector('[data-map-reset]')?.addEventListener('click', function () {
+        resetView();
+        setToolsOpen(false);
+    });
+
+    resetView();
     map.setMaxBounds(bounds.pad(0.35));
     window.setTimeout(function () { map.invalidateSize(); }, 0);
+    window.addEventListener('resize', function () { map.invalidateSize(); });
 }());
