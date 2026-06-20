@@ -1,3 +1,692 @@
 {
-  "markers": []
+  "markers": [
+    {
+      "source_id": 639,
+      "type": "bugs",
+      "x": 449.952,
+      "y": 1414.59
+    },
+    {
+      "source_id": 628,
+      "type": "cash",
+      "x": 1322.47,
+      "y": 727.75,
+      "source_image": "20251020_125949_43e1f253.webp"
+    },
+    {
+      "source_id": 619,
+      "type": "cash",
+      "x": 494.922,
+      "y": 329.512,
+      "source_image": "20250823_153740_a0854c5a.webp"
+    },
+    {
+      "source_id": 613,
+      "type": "cash",
+      "x": 1453.52,
+      "y": 1189.84,
+      "source_image": "20250819_151835_3ae1a35d.webp"
+    },
+    {
+      "source_id": 612,
+      "type": "cash",
+      "x": 1029.2,
+      "y": 979.265,
+      "source_image": "20250819_151922_8ff8aec4.webp"
+    },
+    {
+      "source_id": 608,
+      "type": "cash",
+      "x": 1274.11,
+      "y": 1806.14,
+      "source_image": "20250817_013627_2b2f07d5.webp"
+    },
+    {
+      "source_id": 604,
+      "type": "cash",
+      "x": 1163.23,
+      "y": 1865.85,
+      "source_image": "20250815_180647_2233275f.webp"
+    },
+    {
+      "source_id": 603,
+      "type": "cash",
+      "x": 328.777,
+      "y": 1257.94,
+      "label": {
+        "de": "In der Scheune",
+        "en": "In der Scheune"
+      },
+      "source_image": "20250815_175318_3920cd1f.webp"
+    },
+    {
+      "source_id": 600,
+      "type": "cash",
+      "x": 1463.0,
+      "y": 1269.27,
+      "source_image": "20250813_221157_0b133dce.webp"
+    },
+    {
+      "source_id": 597,
+      "type": "compound",
+      "x": 1167.12,
+      "y": 275.616,
+      "label": {
+        "de": "Reeves Steinbruch",
+        "en": "Reeves Quarry"
+      }
+    },
+    {
+      "source_id": 596,
+      "type": "compound",
+      "x": 716.526,
+      "y": 223.89,
+      "label": {
+        "de": "Darins Schiffwerft",
+        "en": "Darin Shipyard"
+      }
+    },
+    {
+      "source_id": 595,
+      "type": "compound",
+      "x": 73.869,
+      "y": 837.218,
+      "label": {
+        "de": "Seven Sisters Estate",
+        "en": "Seven Sisters Estate"
+      }
+    },
+    {
+      "source_id": 594,
+      "type": "compound",
+      "x": 630.346,
+      "y": 654.943,
+      "label": {
+        "de": "Pelican Island Gefängnis",
+        "en": "Pelican Island Prison"
+      }
+    },
+    {
+      "source_id": 593,
+      "type": "compound",
+      "x": 881.499,
+      "y": 994.86,
+      "label": {
+        "de": "Forked River Fischerei",
+        "en": "Forked River Fishery"
+      }
+    },
+    {
+      "source_id": 592,
+      "type": "compound",
+      "x": 1275.47,
+      "y": 812.586,
+      "label": {
+        "de": "First Testimonial Kirche",
+        "en": "First Testimonial Church"
+      }
+    },
+    {
+      "source_id": 591,
+      "type": "compound",
+      "x": 765.772,
+      "y": 1342.17,
+      "label": {
+        "de": "Weeping Stone Mühle",
+        "en": "Weeping Stone Mill"
+      }
+    },
+    {
+      "source_id": 590,
+      "type": "compound",
+      "x": 1391.19,
+      "y": 1199.3,
+      "label": {
+        "de": "Ash Creek Sägewerk",
+        "en": "Ash Creek Lumber"
+      }
+    },
+    {
+      "source_id": 589,
+      "type": "compound",
+      "x": 1112.95,
+      "y": 1748.59,
+      "label": {
+        "de": "Heritage Schweinefarm",
+        "en": "Heritage Pork"
+      }
+    },
+    {
+      "source_id": 588,
+      "type": "compound",
+      "x": 637.322,
+      "y": 1862.07,
+      "label": {
+        "de": "Stanley Kohleunternehmen",
+        "en": "Stanley Coal Company"
+      }
+    },
+    {
+      "source_id": 584,
+      "type": "cash",
+      "x": 364.115,
+      "y": 1781.34,
+      "source_image": "20250811_134656_caae2138.webp"
+    },
+    {
+      "source_id": 583,
+      "type": "cash",
+      "x": 1329.61,
+      "y": 722.618,
+      "label": {
+        "de": "Im Turm",
+        "en": "In the tower"
+      },
+      "source_image": "20250811_134530_143438e0.webp"
+    },
+    {
+      "source_id": 363,
+      "type": "wild",
+      "x": 226.981,
+      "y": 200.262
+    },
+    {
+      "source_id": 362,
+      "type": "wild",
+      "x": 43.076,
+      "y": 448.706
+    },
+    {
+      "source_id": 361,
+      "type": "wild",
+      "x": 227.688,
+      "y": 495.881
+    },
+    {
+      "source_id": 360,
+      "type": "wild",
+      "x": 472.347,
+      "y": 704.441
+    },
+    {
+      "source_id": 359,
+      "type": "wild",
+      "x": 819.188,
+      "y": 506.912
+    },
+    {
+      "source_id": 358,
+      "type": "wild",
+      "x": 1742.58,
+      "y": 619.304
+    },
+    {
+      "source_id": 357,
+      "type": "wild",
+      "x": 1095.31,
+      "y": 561.653
+    },
+    {
+      "source_id": 356,
+      "type": "wild",
+      "x": 905.373,
+      "y": 836.018
+    },
+    {
+      "source_id": 355,
+      "type": "wild",
+      "x": 780.884,
+      "y": 1029.32
+    },
+    {
+      "source_id": 354,
+      "type": "wild",
+      "x": 318.905,
+      "y": 1410.98
+    },
+    {
+      "source_id": 353,
+      "type": "wild",
+      "x": 793.072,
+      "y": 1460.28
+    },
+    {
+      "source_id": 352,
+      "type": "wild",
+      "x": 1292.56,
+      "y": 1398.02
+    },
+    {
+      "source_id": 351,
+      "type": "wild",
+      "x": 1875.17,
+      "y": 1542.12
+    },
+    {
+      "source_id": 218,
+      "type": "compound",
+      "x": 315.173,
+      "y": 1239.46,
+      "label": {
+        "de": "Moses Geflügel",
+        "en": "Moses Poultry"
+      }
+    },
+    {
+      "source_id": 217,
+      "type": "compound",
+      "x": 418.589,
+      "y": 438.936,
+      "label": {
+        "de": "Fort Bolden",
+        "en": "Fort Bolden"
+      }
+    },
+    {
+      "source_id": 216,
+      "type": "compound",
+      "x": 1743.3,
+      "y": 810.873,
+      "label": {
+        "de": "Upper DeSalle",
+        "en": "Upper DeSalle"
+      }
+    },
+    {
+      "source_id": 215,
+      "type": "compound",
+      "x": 1644.81,
+      "y": 357.651,
+      "label": {
+        "de": "Lower DeSalle",
+        "en": "Lower DeSalle"
+      }
+    },
+    {
+      "source_id": 214,
+      "type": "compound",
+      "x": 1607.87,
+      "y": 1803.53,
+      "label": {
+        "de": "Pearl Plantage",
+        "en": "Pearl Plantation"
+      }
+    },
+    {
+      "source_id": 213,
+      "type": "compound",
+      "x": 172.36,
+      "y": 1680.37,
+      "label": {
+        "de": "Kingsnake Mine",
+        "en": "Kingsnake Mine"
+      }
+    },
+    {
+      "source_id": 182,
+      "type": "spawn",
+      "x": 120.652,
+      "y": 1749.34
+    },
+    {
+      "source_id": 181,
+      "type": "spawn",
+      "x": 59.095,
+      "y": 1505.49
+    },
+    {
+      "source_id": 180,
+      "type": "spawn",
+      "x": 105.878,
+      "y": 1337.99
+    },
+    {
+      "source_id": 179,
+      "type": "spawn",
+      "x": 44.321,
+      "y": 1207.44
+    },
+    {
+      "source_id": 178,
+      "type": "spawn",
+      "x": 115.728,
+      "y": 990.684
+    },
+    {
+      "source_id": 177,
+      "type": "spawn",
+      "x": 17.236,
+      "y": 810.873
+    },
+    {
+      "source_id": 176,
+      "type": "spawn",
+      "x": 64.019,
+      "y": 591.652
+    },
+    {
+      "source_id": 175,
+      "type": "spawn",
+      "x": 103.416,
+      "y": 406.914
+    },
+    {
+      "source_id": 174,
+      "type": "spawn",
+      "x": 177.285,
+      "y": 131.04
+    },
+    {
+      "source_id": 173,
+      "type": "spawn",
+      "x": 391.504,
+      "y": 86.703
+    },
+    {
+      "source_id": 172,
+      "type": "spawn",
+      "x": 598.336,
+      "y": 74.387
+    },
+    {
+      "source_id": 171,
+      "type": "spawn",
+      "x": 947.981,
+      "y": 64.535
+    },
+    {
+      "source_id": 170,
+      "type": "spawn",
+      "x": 1255.77,
+      "y": 81.777
+    },
+    {
+      "source_id": 169,
+      "type": "spawn",
+      "x": 1423.2,
+      "y": 42.366
+    },
+    {
+      "source_id": 168,
+      "type": "spawn",
+      "x": 1686.67,
+      "y": 135.966
+    },
+    {
+      "source_id": 167,
+      "type": "spawn",
+      "x": 1982.14,
+      "y": 325.63
+    },
+    {
+      "source_id": 166,
+      "type": "spawn",
+      "x": 1989.53,
+      "y": 911.863
+    },
+    {
+      "source_id": 165,
+      "type": "spawn",
+      "x": 1972.29,
+      "y": 1108.92
+    },
+    {
+      "source_id": 164,
+      "type": "spawn",
+      "x": 1927.97,
+      "y": 1286.26
+    },
+    {
+      "source_id": 163,
+      "type": "spawn",
+      "x": 1849.18,
+      "y": 1431.59
+    },
+    {
+      "source_id": 162,
+      "type": "spawn",
+      "x": 1883.65,
+      "y": 1685.3
+    },
+    {
+      "source_id": 161,
+      "type": "spawn",
+      "x": 1868.88,
+      "y": 1973.49
+    },
+    {
+      "source_id": 160,
+      "type": "spawn",
+      "x": 1346.87,
+      "y": 1998.12
+    },
+    {
+      "source_id": 159,
+      "type": "spawn",
+      "x": 1009.54,
+      "y": 1978.41
+    },
+    {
+      "source_id": 158,
+      "type": "spawn",
+      "x": 627.884,
+      "y": 2015.36
+    },
+    {
+      "source_id": 157,
+      "type": "spawn",
+      "x": 352.518,
+      "y": 1950.2
+    },
+    {
+      "source_id": 116,
+      "type": "bugs",
+      "x": 1408.0,
+      "y": 806.633
+    },
+    {
+      "source_id": 115,
+      "type": "bugs",
+      "x": 702.012,
+      "y": 908.157
+    },
+    {
+      "source_id": 114,
+      "type": "bugs",
+      "x": 987.378,
+      "y": 1283.8
+    },
+    {
+      "source_id": 113,
+      "type": "bugs",
+      "x": 1066.17,
+      "y": 1411.89
+    },
+    {
+      "source_id": 103,
+      "type": "tower",
+      "x": 573.713,
+      "y": 217.251
+    },
+    {
+      "source_id": 102,
+      "type": "tower",
+      "x": 1452.75,
+      "y": 537.462
+    },
+    {
+      "source_id": 101,
+      "type": "tower",
+      "x": 642.657,
+      "y": 692.641
+    },
+    {
+      "source_id": 100,
+      "type": "tower",
+      "x": 750.998,
+      "y": 919.252
+    },
+    {
+      "source_id": 99,
+      "type": "tower",
+      "x": 71.406,
+      "y": 899.547
+    },
+    {
+      "source_id": 98,
+      "type": "tower",
+      "x": 251.153,
+      "y": 1291.19
+    },
+    {
+      "source_id": 97,
+      "type": "tower",
+      "x": 613.11,
+      "y": 1237.0
+    },
+    {
+      "source_id": 96,
+      "type": "tower",
+      "x": 1058.78,
+      "y": 1256.71
+    },
+    {
+      "source_id": 95,
+      "type": "tower",
+      "x": 1925.51,
+      "y": 668.01
+    },
+    {
+      "source_id": 94,
+      "type": "tower",
+      "x": 1915.66,
+      "y": 1054.73
+    },
+    {
+      "source_id": 93,
+      "type": "tower",
+      "x": 1738.38,
+      "y": 1015.32
+    },
+    {
+      "source_id": 92,
+      "type": "tower",
+      "x": 1639.88,
+      "y": 1397.11
+    },
+    {
+      "source_id": 91,
+      "type": "tower",
+      "x": 1408.43,
+      "y": 1850.33
+    },
+    {
+      "source_id": 90,
+      "type": "tower",
+      "x": 1066.17,
+      "y": 1874.96
+    },
+    {
+      "source_id": 89,
+      "type": "tower",
+      "x": 721.451,
+      "y": 1968.56
+    },
+    {
+      "source_id": 60,
+      "type": "boss",
+      "x": 381.655,
+      "y": 367.504
+    },
+    {
+      "source_id": 59,
+      "type": "boss",
+      "x": 849.49,
+      "y": 310.851
+    },
+    {
+      "source_id": 58,
+      "type": "boss",
+      "x": 1787.62,
+      "y": 426.62
+    },
+    {
+      "source_id": 57,
+      "type": "boss",
+      "x": 1302.55,
+      "y": 328.093
+    },
+    {
+      "source_id": 56,
+      "type": "boss",
+      "x": 1765.46,
+      "y": 877.379
+    },
+    {
+      "source_id": 55,
+      "type": "boss",
+      "x": 1351.8,
+      "y": 744.368
+    },
+    {
+      "source_id": 54,
+      "type": "boss",
+      "x": 1058.78,
+      "y": 968.516
+    },
+    {
+      "source_id": 53,
+      "type": "boss",
+      "x": 699.29,
+      "y": 791.168
+    },
+    {
+      "source_id": 52,
+      "type": "boss",
+      "x": 204.37,
+      "y": 756.684
+    },
+    {
+      "source_id": 51,
+      "type": "boss",
+      "x": 302.862,
+      "y": 1168.03
+    },
+    {
+      "source_id": 50,
+      "type": "boss",
+      "x": 947.981,
+      "y": 1335.53
+    },
+    {
+      "source_id": 49,
+      "type": "boss",
+      "x": 1482.3,
+      "y": 1281.34
+    },
+    {
+      "source_id": 48,
+      "type": "boss",
+      "x": 1674.36,
+      "y": 1732.1
+    },
+    {
+      "source_id": 47,
+      "type": "boss",
+      "x": 1268.08,
+      "y": 1712.39
+    },
+    {
+      "source_id": 46,
+      "type": "boss",
+      "x": 723.913,
+      "y": 1801.06
+    },
+    {
+      "source_id": 45,
+      "type": "boss",
+      "x": 297.937,
+      "y": 1608.94
+    }
+  ]
 }

@@ -1,3 +1,1006 @@
 {
-  "markers": []
+  "markers": [
+    {
+      "source_id": 638,
+      "type": "bugs",
+      "x": 1195.64,
+      "y": 1533.7
+    },
+    {
+      "source_id": 637,
+      "type": "bugs",
+      "x": 581.903,
+      "y": 1513.61
+    },
+    {
+      "source_id": 636,
+      "type": "bugs",
+      "x": 721.771,
+      "y": 1332.81
+    },
+    {
+      "source_id": 626,
+      "type": "cash",
+      "x": 1706.61,
+      "y": 395.505,
+      "source_image": "20250928_104744_ae34520a.webp"
+    },
+    {
+      "source_id": 624,
+      "type": "cash",
+      "x": 906.392,
+      "y": 1605.1,
+      "source_image": "20250928_105045_dbaea2ae.webp"
+    },
+    {
+      "source_id": 623,
+      "type": "cash",
+      "x": 1774.04,
+      "y": 926.425,
+      "source_image": "20250928_105148_8f82f582.webp"
+    },
+    {
+      "source_id": 611,
+      "type": "cash",
+      "x": 1242.99,
+      "y": 1622.1,
+      "source_image": "20250818_152759_99735ea8.webp"
+    },
+    {
+      "source_id": 607,
+      "type": "cash",
+      "x": 723.347,
+      "y": 1765.66,
+      "source_image": "20250817_013820_2c428de9.webp"
+    },
+    {
+      "source_id": 605,
+      "type": "cash",
+      "x": 320.465,
+      "y": 766.182,
+      "source_image": "20250816_164356_1e441b10.webp"
+    },
+    {
+      "source_id": 599,
+      "type": "compound",
+      "x": 711.601,
+      "y": 189.406,
+      "label": {
+        "de": "Ziegelei",
+        "en": "Bradley & Craven Brickworks"
+      }
+    },
+    {
+      "source_id": 598,
+      "type": "compound",
+      "x": 1170.13,
+      "y": 287.852,
+      "label": {
+        "de": "C&A Sägewerk",
+        "en": "C&A Lumber"
+      }
+    },
+    {
+      "source_id": 587,
+      "type": "compound",
+      "x": 1209.15,
+      "y": 1783.65,
+      "label": {
+        "de": "Goldene Felder",
+        "en": "Golden Acres"
+      }
+    },
+    {
+      "source_id": 350,
+      "type": "wild",
+      "x": 52.7803,
+      "y": 1412.42
+    },
+    {
+      "source_id": 349,
+      "type": "wild",
+      "x": 594.027,
+      "y": 1400.06
+    },
+    {
+      "source_id": 348,
+      "type": "wild",
+      "x": 758.816,
+      "y": 1018.54
+    },
+    {
+      "source_id": 347,
+      "type": "wild",
+      "x": 410.085,
+      "y": 903.056
+    },
+    {
+      "source_id": 346,
+      "type": "wild",
+      "x": 296.278,
+      "y": 524.148
+    },
+    {
+      "source_id": 345,
+      "type": "wild",
+      "x": 497.961,
+      "y": 484.9
+    },
+    {
+      "source_id": 344,
+      "type": "wild",
+      "x": 484.026,
+      "y": 76.7792
+    },
+    {
+      "source_id": 343,
+      "type": "wild",
+      "x": 1191.81,
+      "y": 124.541
+    },
+    {
+      "source_id": 342,
+      "type": "wild",
+      "x": 1834.23,
+      "y": 223.621
+    },
+    {
+      "source_id": 341,
+      "type": "wild",
+      "x": 1931.54,
+      "y": 515.406
+    },
+    {
+      "source_id": 340,
+      "type": "wild",
+      "x": 1344,
+      "y": 520.539
+    },
+    {
+      "source_id": 339,
+      "type": "wild",
+      "x": 955.324,
+      "y": 790.771
+    },
+    {
+      "source_id": 338,
+      "type": "wild",
+      "x": 1169.64,
+      "y": 1027.26
+    },
+    {
+      "source_id": 337,
+      "type": "wild",
+      "x": 1302.2,
+      "y": 1137.59
+    },
+    {
+      "source_id": 336,
+      "type": "wild",
+      "x": 1923.92,
+      "y": 1330.55
+    },
+    {
+      "source_id": 335,
+      "type": "wild",
+      "x": 1991.14,
+      "y": 1925.8
+    },
+    {
+      "source_id": 334,
+      "type": "wild",
+      "x": 1470.78,
+      "y": 1715.77
+    },
+    {
+      "source_id": 333,
+      "type": "wild",
+      "x": 540.612,
+      "y": 1940.03
+    },
+    {
+      "source_id": 315,
+      "type": "supply",
+      "x": 276.166,
+      "y": 1485.47
+    },
+    {
+      "source_id": 314,
+      "type": "supply",
+      "x": 1123.22,
+      "y": 1238.31
+    },
+    {
+      "source_id": 313,
+      "type": "supply",
+      "x": 886,
+      "y": 1320.78
+    },
+    {
+      "source_id": 312,
+      "type": "supply",
+      "x": 814.136,
+      "y": 1267.23
+    },
+    {
+      "source_id": 311,
+      "type": "supply",
+      "x": 592.459,
+      "y": 1263.28
+    },
+    {
+      "source_id": 310,
+      "type": "supply",
+      "x": 405.089,
+      "y": 1300.23
+    },
+    {
+      "source_id": 309,
+      "type": "supply",
+      "x": 170.573,
+      "y": 1158.87
+    },
+    {
+      "source_id": 308,
+      "type": "supply",
+      "x": 579.948,
+      "y": 1066.26
+    },
+    {
+      "source_id": 307,
+      "type": "supply",
+      "x": 417.992,
+      "y": 932.82
+    },
+    {
+      "source_id": 306,
+      "type": "supply",
+      "x": 533.648,
+      "y": 838.618
+    },
+    {
+      "source_id": 305,
+      "type": "supply",
+      "x": 1595.54,
+      "y": 560.699
+    },
+    {
+      "source_id": 304,
+      "type": "supply",
+      "x": 1427.71,
+      "y": 558.5
+    },
+    {
+      "source_id": 303,
+      "type": "supply",
+      "x": 1258.23,
+      "y": 756.684
+    },
+    {
+      "source_id": 302,
+      "type": "supply",
+      "x": 1052.68,
+      "y": 759.145
+    },
+    {
+      "source_id": 301,
+      "type": "supply",
+      "x": 1107.07,
+      "y": 545.32
+    },
+    {
+      "source_id": 300,
+      "type": "supply",
+      "x": 966,
+      "y": 618.58
+    },
+    {
+      "source_id": 299,
+      "type": "supply",
+      "x": 820.951,
+      "y": 575.781
+    },
+    {
+      "source_id": 298,
+      "type": "supply",
+      "x": 482.478,
+      "y": 674.664
+    },
+    {
+      "source_id": 297,
+      "type": "supply",
+      "x": 339.114,
+      "y": 555.879
+    },
+    {
+      "source_id": 296,
+      "type": "supply",
+      "x": 481.226,
+      "y": 415.066
+    },
+    {
+      "source_id": 295,
+      "type": "supply",
+      "x": 438.355,
+      "y": 199.602
+    },
+    {
+      "source_id": 294,
+      "type": "supply",
+      "x": 573.713,
+      "y": 293.609
+    },
+    {
+      "source_id": 293,
+      "type": "supply",
+      "x": 898.351,
+      "y": 239.178
+    },
+    {
+      "source_id": 292,
+      "type": "supply",
+      "x": 981.745,
+      "y": 167.436
+    },
+    {
+      "source_id": 291,
+      "type": "supply",
+      "x": 1088.33,
+      "y": 113.798
+    },
+    {
+      "source_id": 290,
+      "type": "supply",
+      "x": 1162.2,
+      "y": 377.356
+    },
+    {
+      "source_id": 289,
+      "type": "supply",
+      "x": 1349.33,
+      "y": 254.198
+    },
+    {
+      "source_id": 288,
+      "type": "supply",
+      "x": 1583.25,
+      "y": 318.241
+    },
+    {
+      "source_id": 287,
+      "type": "supply",
+      "x": 1642.35,
+      "y": 160.598
+    },
+    {
+      "source_id": 286,
+      "type": "supply",
+      "x": 1822.68,
+      "y": 719.033
+    },
+    {
+      "source_id": 285,
+      "type": "supply",
+      "x": 1639.13,
+      "y": 944.385
+    },
+    {
+      "source_id": 284,
+      "type": "supply",
+      "x": 1780.02,
+      "y": 1045.52
+    },
+    {
+      "source_id": 283,
+      "type": "supply",
+      "x": 1698.98,
+      "y": 1219.76
+    },
+    {
+      "source_id": 282,
+      "type": "supply",
+      "x": 1353.65,
+      "y": 1143.98
+    },
+    {
+      "source_id": 281,
+      "type": "supply",
+      "x": 1301.47,
+      "y": 1173.83
+    },
+    {
+      "source_id": 280,
+      "type": "supply",
+      "x": 1260,
+      "y": 1224.75
+    },
+    {
+      "source_id": 279,
+      "type": "supply",
+      "x": 1255.77,
+      "y": 1441.44
+    },
+    {
+      "source_id": 278,
+      "type": "supply",
+      "x": 1470.47,
+      "y": 1524.51
+    },
+    {
+      "source_id": 277,
+      "type": "supply",
+      "x": 1619.22,
+      "y": 1388
+    },
+    {
+      "source_id": 276,
+      "type": "supply",
+      "x": 1836.87,
+      "y": 1520.26
+    },
+    {
+      "source_id": 275,
+      "type": "supply",
+      "x": 1860.37,
+      "y": 1677.94
+    },
+    {
+      "source_id": 274,
+      "type": "supply",
+      "x": 1588.18,
+      "y": 1709.93
+    },
+    {
+      "source_id": 273,
+      "type": "supply",
+      "x": 1496.24,
+      "y": 1775.15
+    },
+    {
+      "source_id": 272,
+      "type": "supply",
+      "x": 1162.2,
+      "y": 1569.53
+    },
+    {
+      "source_id": 271,
+      "type": "supply",
+      "x": 962.755,
+      "y": 1744.41
+    },
+    {
+      "source_id": 270,
+      "type": "supply",
+      "x": 391.504,
+      "y": 1663.13
+    },
+    {
+      "source_id": 269,
+      "type": "supply",
+      "x": 672.205,
+      "y": 1535.04
+    },
+    {
+      "source_id": 268,
+      "type": "supply",
+      "x": 834.716,
+      "y": 1483.32
+    },
+    {
+      "source_id": 267,
+      "type": "supply",
+      "x": 743.611,
+      "y": 1611.4
+    },
+    {
+      "source_id": 266,
+      "type": "supply",
+      "x": 573.713,
+      "y": 1702.54
+    },
+    {
+      "source_id": 265,
+      "type": "supply",
+      "x": 455.504,
+      "y": 1866.46
+    },
+    {
+      "source_id": 212,
+      "type": "compound",
+      "x": 1799.93,
+      "y": 975.905,
+      "label": {
+        "de": "Windy Run",
+        "en": "Windy Run"
+      }
+    },
+    {
+      "source_id": 211,
+      "type": "compound",
+      "x": 888.886,
+      "y": 1005.46,
+      "label": {
+        "de": "Sweetbell Getreidemühle",
+        "en": "Sweetbell Flour"
+      }
+    },
+    {
+      "source_id": 210,
+      "type": "compound",
+      "x": 211.757,
+      "y": 244.346,
+      "label": {
+        "de": "Wolfskopf Arsenal",
+        "en": "Wolf's Head Arsenal"
+      }
+    },
+    {
+      "source_id": 209,
+      "type": "compound",
+      "x": 1681.74,
+      "y": 241.882,
+      "label": {
+        "de": "Hemlock und Hide",
+        "en": "Hemlock and Hide"
+      }
+    },
+    {
+      "source_id": 208,
+      "type": "compound",
+      "x": 1349.33,
+      "y": 746.831,
+      "label": {
+        "de": "Nicholls Gefängnis",
+        "en": "Nicholls Prison"
+      }
+    },
+    {
+      "source_id": 207,
+      "type": "compound",
+      "x": 721.451,
+      "y": 594.115,
+      "label": {
+        "de": "Fort Carmick",
+        "en": "Fort Carmick"
+      }
+    },
+    {
+      "source_id": 206,
+      "type": "compound",
+      "x": 224.068,
+      "y": 803.484,
+      "label": {
+        "de": "Eisenhütte",
+        "en": "Bradley & Craven Brickworks"
+      }
+    },
+    {
+      "source_id": 205,
+      "type": "compound",
+      "x": 312.711,
+      "y": 1246.85,
+      "label": {
+        "de": "Battery Maw",
+        "en": "Maw Battery"
+      }
+    },
+    {
+      "source_id": 204,
+      "type": "compound",
+      "x": 839.641,
+      "y": 1446.37,
+      "label": {
+        "de": "Lawson Station",
+        "en": "Lawson Station"
+      }
+    },
+    {
+      "source_id": 203,
+      "type": "compound",
+      "x": 1393.66,
+      "y": 1126.16,
+      "label": {
+        "de": "Gemeinde Arden",
+        "en": "Arden Parish"
+      }
+    },
+    {
+      "source_id": 202,
+      "type": "compound",
+      "x": 1607.87,
+      "y": 1727.17,
+      "label": {
+        "de": "Salters Schweinefarm",
+        "en": "Salter's Pork"
+      }
+    },
+    {
+      "source_id": 201,
+      "type": "compound",
+      "x": 659.893,
+      "y": 1887.28,
+      "label": {
+        "de": "Blanc Brinary",
+        "en": "Blanc Brinery"
+      }
+    },
+    {
+      "source_id": 200,
+      "type": "compound",
+      "x": 130.501,
+      "y": 1857.72,
+      "label": {
+        "de": "Hafenbecken von Godard",
+        "en": "Godard Docks"
+      }
+    },
+    {
+      "source_id": 156,
+      "type": "spawn",
+      "x": 46.7835,
+      "y": 1643.42
+    },
+    {
+      "source_id": 155,
+      "type": "spawn",
+      "x": 105.878,
+      "y": 1461.15
+    },
+    {
+      "source_id": 154,
+      "type": "spawn",
+      "x": 76.331,
+      "y": 1246.85
+    },
+    {
+      "source_id": 153,
+      "type": "spawn",
+      "x": 54.1704,
+      "y": 835.505
+    },
+    {
+      "source_id": 152,
+      "type": "spawn",
+      "x": 110.803,
+      "y": 579.336
+    },
+    {
+      "source_id": 151,
+      "type": "spawn",
+      "x": 349.645,
+      "y": 57.1452
+    },
+    {
+      "source_id": 150,
+      "type": "spawn",
+      "x": 635.271,
+      "y": 79.3137
+    },
+    {
+      "source_id": 149,
+      "type": "spawn",
+      "x": 913.509,
+      "y": 25.1241
+    },
+    {
+      "source_id": 148,
+      "type": "spawn",
+      "x": 1319.79,
+      "y": 71.9242
+    },
+    {
+      "source_id": 147,
+      "type": "spawn",
+      "x": 1694.05,
+      "y": 57.1452
+    },
+    {
+      "source_id": 146,
+      "type": "spawn",
+      "x": 1994.45,
+      "y": 377.356
+    },
+    {
+      "source_id": 145,
+      "type": "spawn",
+      "x": 1991.99,
+      "y": 712.347
+    },
+    {
+      "source_id": 144,
+      "type": "spawn",
+      "x": 1942.75,
+      "y": 1128.62
+    },
+    {
+      "source_id": 143,
+      "type": "spawn",
+      "x": 1999.38,
+      "y": 1475.93
+    },
+    {
+      "source_id": 142,
+      "type": "spawn",
+      "x": 2006.77,
+      "y": 1761.65
+    },
+    {
+      "source_id": 141,
+      "type": "spawn",
+      "x": 1698.98,
+      "y": 1958.71
+    },
+    {
+      "source_id": 140,
+      "type": "spawn",
+      "x": 1367.58,
+      "y": 1995.11
+    },
+    {
+      "source_id": 139,
+      "type": "spawn",
+      "x": 999.689,
+      "y": 1988.27
+    },
+    {
+      "source_id": 138,
+      "type": "spawn",
+      "x": 652.507,
+      "y": 2010.43
+    },
+    {
+      "source_id": 137,
+      "type": "spawn",
+      "x": 306,
+      "y": 1990.99
+    },
+    {
+      "source_id": 112,
+      "type": "bugs",
+      "x": 1812.24,
+      "y": 707.42
+    },
+    {
+      "source_id": 111,
+      "type": "bugs",
+      "x": 586.446,
+      "y": 655.154
+    },
+    {
+      "source_id": 110,
+      "type": "bugs",
+      "x": 1140.04,
+      "y": 978.368
+    },
+    {
+      "source_id": 109,
+      "type": "bugs",
+      "x": 1491.91,
+      "y": 937.092
+    },
+    {
+      "source_id": 108,
+      "type": "bugs",
+      "x": 1237.87,
+      "y": 1447.42
+    },
+    {
+      "source_id": 88,
+      "type": "tower",
+      "x": 997.227,
+      "y": 126.114
+    },
+    {
+      "source_id": 87,
+      "type": "tower",
+      "x": 1364.11,
+      "y": 197.546
+    },
+    {
+      "source_id": 86,
+      "type": "tower",
+      "x": 1945.21,
+      "y": 342.872
+    },
+    {
+      "source_id": 85,
+      "type": "tower",
+      "x": 1595.56,
+      "y": 579.336
+    },
+    {
+      "source_id": 84,
+      "type": "tower",
+      "x": 984.916,
+      "y": 882.305
+    },
+    {
+      "source_id": 83,
+      "type": "tower",
+      "x": 586.025,
+      "y": 968.516
+    },
+    {
+      "source_id": 82,
+      "type": "tower",
+      "x": 433.363,
+      "y": 1108.92
+    },
+    {
+      "source_id": 81,
+      "type": "tower",
+      "x": 482.609,
+      "y": 1195.13
+    },
+    {
+      "source_id": 80,
+      "type": "tower",
+      "x": 903.66,
+      "y": 1192.66
+    },
+    {
+      "source_id": 79,
+      "type": "tower",
+      "x": 1120.34,
+      "y": 1301.04
+    },
+    {
+      "source_id": 78,
+      "type": "tower",
+      "x": 1332.1,
+      "y": 1241.93
+    },
+    {
+      "source_id": 77,
+      "type": "tower",
+      "x": 1393.66,
+      "y": 1466.07
+    },
+    {
+      "source_id": 76,
+      "type": "tower",
+      "x": 1509.38,
+      "y": 1761.65
+    },
+    {
+      "source_id": 75,
+      "type": "tower",
+      "x": 1120.34,
+      "y": 1680.37
+    },
+    {
+      "source_id": 74,
+      "type": "tower",
+      "x": 718.988,
+      "y": 1675.44
+    },
+    {
+      "source_id": 73,
+      "type": "tower",
+      "x": 332.409,
+      "y": 1653.28
+    },
+    {
+      "source_id": 44,
+      "type": "boss",
+      "x": 1753.15,
+      "y": 414.304
+    },
+    {
+      "source_id": 43,
+      "type": "boss",
+      "x": 1369.03,
+      "y": 448.788
+    },
+    {
+      "source_id": 42,
+      "type": "boss",
+      "x": 866.726,
+      "y": 293.609
+    },
+    {
+      "source_id": 41,
+      "type": "boss",
+      "x": 379.192,
+      "y": 325.63
+    },
+    {
+      "source_id": 40,
+      "type": "boss",
+      "x": 1465.06,
+      "y": 707.42
+    },
+    {
+      "source_id": 39,
+      "type": "boss",
+      "x": 337.334,
+      "y": 756.684
+    },
+    {
+      "source_id": 38,
+      "type": "boss",
+      "x": 374.268,
+      "y": 1185.27
+    },
+    {
+      "source_id": 37,
+      "type": "boss",
+      "x": 1053.86,
+      "y": 1052.26
+    },
+    {
+      "source_id": 36,
+      "type": "boss",
+      "x": 1511.85,
+      "y": 1192.66
+    },
+    {
+      "source_id": 35,
+      "type": "boss",
+      "x": 1669.43,
+      "y": 1608.94
+    },
+    {
+      "source_id": 34,
+      "type": "boss",
+      "x": 1287.78,
+      "y": 1695.15
+    },
+    {
+      "source_id": 33,
+      "type": "boss",
+      "x": 1080.94,
+      "y": 1458.69
+    },
+    {
+      "source_id": 32,
+      "type": "boss",
+      "x": 960.293,
+      "y": 1525.19
+    },
+    {
+      "source_id": 31,
+      "type": "boss",
+      "x": 1854.1,
+      "y": 862.6
+    },
+    {
+      "source_id": 30,
+      "type": "boss",
+      "x": 1477.37,
+      "y": 796.094
+    },
+    {
+      "source_id": 29,
+      "type": "boss",
+      "x": 679.592,
+      "y": 1759.19
+    },
+    {
+      "source_id": 28,
+      "type": "boss",
+      "x": 278.239,
+      "y": 1761.65
+    },
+    {
+      "source_id": 3,
+      "type": "boss",
+      "x": 699.29,
+      "y": 662.551,
+      "label": {
+        "de": "hfghfgh",
+        "en": "hfghfgh"
+      }
+    },
+    {
+      "source_id": 2,
+      "type": "boss",
+      "x": 711.601,
+      "y": 721.5,
+      "label": {
+        "de": "dffg",
+        "en": "dffg"
+      }
+    }
+  ]
 }

@@ -49,6 +49,11 @@
 
     var width = Number(config.width);
     var height = Number(config.height);
+
+    function markerLatLng(marker) {
+        return [Number(marker.y), Number(marker.x)];
+    }
+
     var bounds = window.L.latLngBounds([[0, 0], [height, width]]);
     var map = window.L.map(mapElement, {
         crs: window.L.CRS.Simple,
@@ -70,7 +75,11 @@
         spawn: '#6d9dc5',
         supply: '#69a878',
         extract: '#d9d2c2',
-        cash: '#d2c04c'
+        cash: '#c2ad4a',
+        tower: '#9b7653',
+        bugs: '#7d9260',
+        wild: '#9c6f5d',
+        tarot: '#876f9e'
     };
     var layers = {};
 
@@ -83,7 +92,7 @@
             return;
         }
 
-        var point = window.L.circleMarker([height - Number(marker.y), Number(marker.x)], {
+        var point = window.L.circleMarker(markerLatLng(marker), {
             radius: marker.type === 'boss' ? 9 : 7,
             color: '#141412',
             weight: 2,
@@ -98,6 +107,18 @@
         popup.appendChild(title);
         popup.appendChild(type);
         point.bindPopup(popup);
+
+        if (marker.type === 'compound') {
+            var compoundLabel = document.createElement('span');
+            compoundLabel.textContent = marker.label;
+            point.bindTooltip(compoundLabel, {
+                permanent: true,
+                direction: 'top',
+                offset: [0, -9],
+                className: 'hnt-map-compound-label'
+            });
+        }
+
         point.addTo(layers[marker.type]);
     });
 

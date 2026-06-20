@@ -1,3 +1,1018 @@
 {
-  "markers": []
+  "markers": [
+    {
+      "source_id": 635,
+      "type": "bugs",
+      "x": 1570.47,
+      "y": 1108.24
+    },
+    {
+      "source_id": 633,
+      "type": "tarot",
+      "x": 1039.39,
+      "y": 1352.02,
+      "label": {
+        "de": "Tarotkarte",
+        "en": "Tarotkarte"
+      },
+      "source_image": "tarot_20251211_003253_5dcdcb7d.webp"
+    },
+    {
+      "source_id": 632,
+      "type": "tarot",
+      "x": 776.729,
+      "y": 1998.5,
+      "label": {
+        "de": "Tarotkarte",
+        "en": "Tarotkarte"
+      },
+      "source_image": "tarot_20251211_000746_a1156cd6.webp"
+    },
+    {
+      "source_id": 625,
+      "type": "cash",
+      "x": 463.47,
+      "y": 1118.25,
+      "source_image": "20250928_104832_3400e843.webp"
+    },
+    {
+      "source_id": 622,
+      "type": "cash",
+      "x": 929.473,
+      "y": 1047.36,
+      "source_image": "20250823_164219_4b491370.webp"
+    },
+    {
+      "source_id": 620,
+      "type": "cash",
+      "x": 578.222,
+      "y": 1771.87,
+      "source_image": "20250823_161424_0d2293bc.webp"
+    },
+    {
+      "source_id": 618,
+      "type": "cash",
+      "x": 1127.27,
+      "y": 1274.34,
+      "source_image": "20250821_121730_e21c4897.webp"
+    },
+    {
+      "source_id": 610,
+      "type": "cash",
+      "x": 1223.51,
+      "y": 1719.96,
+      "source_image": "20250818_000525_acd98e98.webp"
+    },
+    {
+      "source_id": 609,
+      "type": "cash",
+      "x": 701.69,
+      "y": 551.644,
+      "source_image": "20250817_013443_6a6986a8.webp"
+    },
+    {
+      "source_id": 602,
+      "type": "cash",
+      "x": 942.775,
+      "y": 1455.06,
+      "label": {
+        "de": "Oben in der Scheune",
+        "en": "Oben in der Scheune"
+      },
+      "source_image": "20250815_170137_7c2bcec7.webp"
+    },
+    {
+      "source_id": 582,
+      "type": "cash",
+      "x": 224.106,
+      "y": 1699.88,
+      "source_image": "20250811_134220_d52ae05a.webp"
+    },
+    {
+      "source_id": 580,
+      "type": "cash",
+      "x": 926.92,
+      "y": 1080.35,
+      "label": {
+        "de": "Im Liar unter der Treppe",
+        "en": "In the lair under the stairs"
+      },
+      "source_image": "20250811_125424_7c694c8b.jpg"
+    },
+    {
+      "source_id": 578,
+      "type": "cash",
+      "x": 786.868,
+      "y": 109.809,
+      "source_image": "20250810_203607_a98755b8.png"
+    },
+    {
+      "source_id": 332,
+      "type": "wild",
+      "x": 473.579,
+      "y": 1572.59
+    },
+    {
+      "source_id": 331,
+      "type": "wild",
+      "x": 804.902,
+      "y": 1249.01
+    },
+    {
+      "source_id": 330,
+      "type": "wild",
+      "x": 104.652,
+      "y": 1134.41
+    },
+    {
+      "source_id": 329,
+      "type": "wild",
+      "x": 460.508,
+      "y": 937.32
+    },
+    {
+      "source_id": 328,
+      "type": "wild",
+      "x": 364.867,
+      "y": 609.524
+    },
+    {
+      "source_id": 327,
+      "type": "wild",
+      "x": 165.613,
+      "y": 195.575
+    },
+    {
+      "source_id": 326,
+      "type": "wild",
+      "x": 1974.21,
+      "y": 432.184
+    },
+    {
+      "source_id": 325,
+      "type": "wild",
+      "x": 1534.78,
+      "y": 332.445
+    },
+    {
+      "source_id": 324,
+      "type": "wild",
+      "x": 1192.92,
+      "y": 727.853
+    },
+    {
+      "source_id": 323,
+      "type": "wild",
+      "x": 1885.19,
+      "y": 996.18
+    },
+    {
+      "source_id": 322,
+      "type": "wild",
+      "x": 1784.63,
+      "y": 1098.1
+    },
+    {
+      "source_id": 321,
+      "type": "wild",
+      "x": 1455.47,
+      "y": 1259.75
+    },
+    {
+      "source_id": 320,
+      "type": "wild",
+      "x": 1762.97,
+      "y": 1562.61
+    },
+    {
+      "source_id": 319,
+      "type": "wild",
+      "x": 1545.7,
+      "y": 1588.62
+    },
+    {
+      "source_id": 318,
+      "type": "wild",
+      "x": 1278.84,
+      "y": 1845.99
+    },
+    {
+      "source_id": 317,
+      "type": "wild",
+      "x": 883.883,
+      "y": 1841.64
+    },
+    {
+      "source_id": 316,
+      "type": "bugs",
+      "x": 556.493,
+      "y": 912.339
+    },
+    {
+      "source_id": 264,
+      "type": "supply",
+      "x": 1403.5,
+      "y": 138.43
+    },
+    {
+      "source_id": 263,
+      "type": "supply",
+      "x": 1602.95,
+      "y": 204.935
+    },
+    {
+      "source_id": 262,
+      "type": "supply",
+      "x": 1723.6,
+      "y": 692.641
+    },
+    {
+      "source_id": 261,
+      "type": "supply",
+      "x": 1593.64,
+      "y": 1045.14
+    },
+    {
+      "source_id": 260,
+      "type": "supply",
+      "x": 1386.27,
+      "y": 1067.04
+    },
+    {
+      "source_id": 259,
+      "type": "supply",
+      "x": 1240.99,
+      "y": 909.4
+    },
+    {
+      "source_id": 258,
+      "type": "supply",
+      "x": 1250.84,
+      "y": 778.852
+    },
+    {
+      "source_id": 257,
+      "type": "supply",
+      "x": 1053.86,
+      "y": 739.442
+    },
+    {
+      "source_id": 256,
+      "type": "supply",
+      "x": 1053.86,
+      "y": 835.505
+    },
+    {
+      "source_id": 255,
+      "type": "supply",
+      "x": 779.179,
+      "y": 966.026
+    },
+    {
+      "source_id": 254,
+      "type": "supply",
+      "x": 688.722,
+      "y": 920.889
+    },
+    {
+      "source_id": 253,
+      "type": "supply",
+      "x": 807.631,
+      "y": 771.463
+    },
+    {
+      "source_id": 252,
+      "type": "supply",
+      "x": 913.509,
+      "y": 532.536
+    },
+    {
+      "source_id": 251,
+      "type": "supply",
+      "x": 962.755,
+      "y": 434.009
+    },
+    {
+      "source_id": 250,
+      "type": "supply",
+      "x": 1014.46,
+      "y": 278.83
+    },
+    {
+      "source_id": 249,
+      "type": "supply",
+      "x": 987.378,
+      "y": 177.84
+    },
+    {
+      "source_id": 248,
+      "type": "supply",
+      "x": 837.178,
+      "y": 281.293
+    },
+    {
+      "source_id": 247,
+      "type": "supply",
+      "x": 472.759,
+      "y": 798.557
+    },
+    {
+      "source_id": 246,
+      "type": "supply",
+      "x": 131.239,
+      "y": 701.697
+    },
+    {
+      "source_id": 245,
+      "type": "supply",
+      "x": 549.09,
+      "y": 340.409
+    },
+    {
+      "source_id": 244,
+      "type": "supply",
+      "x": 379.192,
+      "y": 337.946
+    },
+    {
+      "source_id": 243,
+      "type": "supply",
+      "x": 322.56,
+      "y": 473.42
+    },
+    {
+      "source_id": 242,
+      "type": "supply",
+      "x": 327.484,
+      "y": 648.304
+    },
+    {
+      "source_id": 241,
+      "type": "supply",
+      "x": 312.711,
+      "y": 1103.99
+    },
+    {
+      "source_id": 240,
+      "type": "supply",
+      "x": 310.248,
+      "y": 1387.25
+    },
+    {
+      "source_id": 239,
+      "type": "supply",
+      "x": 315.173,
+      "y": 1483.32
+    },
+    {
+      "source_id": 238,
+      "type": "supply",
+      "x": 595.874,
+      "y": 1360.16
+    },
+    {
+      "source_id": 237,
+      "type": "supply",
+      "x": 696.828,
+      "y": 1340.45
+    },
+    {
+      "source_id": 236,
+      "type": "supply",
+      "x": 844.565,
+      "y": 1269.02
+    },
+    {
+      "source_id": 235,
+      "type": "supply",
+      "x": 944.695,
+      "y": 1350.58
+    },
+    {
+      "source_id": 234,
+      "type": "supply",
+      "x": 1149.89,
+      "y": 1379.86
+    },
+    {
+      "source_id": 233,
+      "type": "supply",
+      "x": 1117.88,
+      "y": 1530.12
+    },
+    {
+      "source_id": 232,
+      "type": "supply",
+      "x": 1445.36,
+      "y": 1315.82
+    },
+    {
+      "source_id": 231,
+      "type": "supply",
+      "x": 1536.47,
+      "y": 1227.15
+    },
+    {
+      "source_id": 230,
+      "type": "supply",
+      "x": 1612.8,
+      "y": 1168.03
+    },
+    {
+      "source_id": 229,
+      "type": "supply",
+      "x": 1654.66,
+      "y": 1315.82
+    },
+    {
+      "source_id": 228,
+      "type": "supply",
+      "x": 1659.58,
+      "y": 1522.73
+    },
+    {
+      "source_id": 227,
+      "type": "supply",
+      "x": 1740.84,
+      "y": 1503.02
+    },
+    {
+      "source_id": 226,
+      "type": "supply",
+      "x": 1435.51,
+      "y": 1463.61
+    },
+    {
+      "source_id": 225,
+      "type": "supply",
+      "x": 1122.8,
+      "y": 1714.85
+    },
+    {
+      "source_id": 224,
+      "type": "supply",
+      "x": 950.443,
+      "y": 1650.81
+    },
+    {
+      "source_id": 223,
+      "type": "supply",
+      "x": 827.329,
+      "y": 1608.94
+    },
+    {
+      "source_id": 222,
+      "type": "supply",
+      "x": 738.687,
+      "y": 1530.12
+    },
+    {
+      "source_id": 221,
+      "type": "supply",
+      "x": 664.818,
+      "y": 1530.12
+    },
+    {
+      "source_id": 220,
+      "type": "supply",
+      "x": 487.533,
+      "y": 1604.01
+    },
+    {
+      "source_id": 219,
+      "type": "supply",
+      "x": 457.869,
+      "y": 1869.05
+    },
+    {
+      "source_id": 199,
+      "type": "compound",
+      "x": 1642.35,
+      "y": 293.609,
+      "label": {
+        "de": "Catfish Hain",
+        "en": "Catfish Grove"
+      }
+    },
+    {
+      "source_id": 198,
+      "type": "compound",
+      "x": 1078.48,
+      "y": 153.209,
+      "label": {
+        "de": "Schlachthaus",
+        "en": "The Slaughterhouse"
+      }
+    },
+    {
+      "source_id": 197,
+      "type": "compound",
+      "x": 561.402,
+      "y": 229.567,
+      "label": {
+        "de": "Davant Farm",
+        "en": "Davant Ranch"
+      }
+    },
+    {
+      "source_id": 196,
+      "type": "compound",
+      "x": 164.973,
+      "y": 453.715,
+      "label": {
+        "de": "Zypressenhütten",
+        "en": "Cyprus Huts"
+      }
+    },
+    {
+      "source_id": 195,
+      "type": "compound",
+      "x": 568.789,
+      "y": 650.768,
+      "label": {
+        "de": "Pitching Krematorium",
+        "en": "Pitching Crematorium"
+      }
+    },
+    {
+      "source_id": 194,
+      "type": "compound",
+      "x": 1044.01,
+      "y": 507.904,
+      "label": {
+        "de": "Heilwasser Kirche",
+        "en": "Healing Waters Church"
+      }
+    },
+    {
+      "source_id": 193,
+      "type": "compound",
+      "x": 1450.29,
+      "y": 798.557,
+      "label": {
+        "de": "Stillwater Siedlung",
+        "en": "Stillwater Bend"
+      }
+    },
+    {
+      "source_id": 192,
+      "type": "compound",
+      "x": 832.254,
+      "y": 1126.16,
+      "label": {
+        "de": "Lockbay Docks",
+        "en": "Lockbay Docks"
+      }
+    },
+    {
+      "source_id": 191,
+      "type": "compound",
+      "x": 263.465,
+      "y": 1224.68,
+      "label": {
+        "de": "Blanchett Totenacker",
+        "en": "Blanchett Graves"
+      }
+    },
+    {
+      "source_id": 190,
+      "type": "compound",
+      "x": 1551.24,
+      "y": 1287.79,
+      "label": {
+        "de": "Kapelle der schwarzen Madonna",
+        "en": "The Chapel of Madonna Noire"
+      }
+    },
+    {
+      "source_id": 189,
+      "type": "boss",
+      "x": 1792.55,
+      "y": 1320.75
+    },
+    {
+      "source_id": 188,
+      "type": "compound",
+      "x": 1162.2,
+      "y": 1335.53,
+      "label": {
+        "de": "Alice Gutshof",
+        "en": "Alice Farm"
+      }
+    },
+    {
+      "source_id": 187,
+      "type": "compound",
+      "x": 824.867,
+      "y": 1456.22,
+      "label": {
+        "de": "Darrow Viehzucht",
+        "en": "Darrow Livestock"
+      }
+    },
+    {
+      "source_id": 186,
+      "type": "compound",
+      "x": 1681.74,
+      "y": 1833.09,
+      "label": {
+        "de": "Scupper See",
+        "en": "Scupper Lake"
+      }
+    },
+    {
+      "source_id": 185,
+      "type": "compound",
+      "x": 1181.9,
+      "y": 1783.82,
+      "label": {
+        "de": "Reeker Hafen",
+        "en": "Port Reeker"
+      }
+    },
+    {
+      "source_id": 184,
+      "type": "compound",
+      "x": 667.28,
+      "y": 1877.42,
+      "label": {
+        "de": "Reynard Sägemühle",
+        "en": "Reynard Mill & Lumber"
+      }
+    },
+    {
+      "source_id": 183,
+      "type": "compound",
+      "x": 137.888,
+      "y": 1916.83,
+      "label": {
+        "de": "Fischfarm",
+        "en": "Alain & Son's Fish"
+      }
+    },
+    {
+      "source_id": 136,
+      "type": "spawn",
+      "x": 354.57,
+      "y": 1902.05
+    },
+    {
+      "source_id": 135,
+      "type": "spawn",
+      "x": 91.105,
+      "y": 1786.29
+    },
+    {
+      "source_id": 134,
+      "type": "spawn",
+      "x": 98.492,
+      "y": 1458.69
+    },
+    {
+      "source_id": 133,
+      "type": "spawn",
+      "x": 103.416,
+      "y": 1190.2
+    },
+    {
+      "source_id": 132,
+      "type": "spawn",
+      "x": 56.633,
+      "y": 934.031
+    },
+    {
+      "source_id": 131,
+      "type": "spawn",
+      "x": 36.934,
+      "y": 584.262
+    },
+    {
+      "source_id": 130,
+      "type": "spawn",
+      "x": 283.163,
+      "y": 116.261
+    },
+    {
+      "source_id": 129,
+      "type": "spawn",
+      "x": 475.222,
+      "y": 44.829
+    },
+    {
+      "source_id": 128,
+      "type": "spawn",
+      "x": 918.434,
+      "y": 17.735
+    },
+    {
+      "source_id": 127,
+      "type": "spawn",
+      "x": 1396.12,
+      "y": 22.661
+    },
+    {
+      "source_id": 126,
+      "type": "spawn",
+      "x": 1748.23,
+      "y": 57.145
+    },
+    {
+      "source_id": 125,
+      "type": "spawn",
+      "x": 2011.69,
+      "y": 387.209
+    },
+    {
+      "source_id": 124,
+      "type": "spawn",
+      "x": 1927.97,
+      "y": 717.273
+    },
+    {
+      "source_id": 123,
+      "type": "spawn",
+      "x": 1942.75,
+      "y": 1108.92
+    },
+    {
+      "source_id": 122,
+      "type": "spawn",
+      "x": 1969.83,
+      "y": 1515.34
+    },
+    {
+      "source_id": 121,
+      "type": "spawn",
+      "x": 1952.6,
+      "y": 1909.44
+    },
+    {
+      "source_id": 120,
+      "type": "spawn",
+      "x": 1849.18,
+      "y": 1939.0
+    },
+    {
+      "source_id": 119,
+      "type": "spawn",
+      "x": 1164.66,
+      "y": 2020.29
+    },
+    {
+      "source_id": 118,
+      "type": "spawn",
+      "x": 876.575,
+      "y": 1978.41
+    },
+    {
+      "source_id": 117,
+      "type": "spawn",
+      "x": 643.304,
+      "y": 2029.81
+    },
+    {
+      "source_id": 107,
+      "type": "bugs",
+      "x": 1432.99,
+      "y": 430.516
+    },
+    {
+      "source_id": 106,
+      "type": "bugs",
+      "x": 938.132,
+      "y": 411.214
+    },
+    {
+      "source_id": 105,
+      "type": "bugs",
+      "x": 810.093,
+      "y": 1042.41
+    },
+    {
+      "source_id": 104,
+      "type": "bugs",
+      "x": 1030.07,
+      "y": 1343.58
+    },
+    {
+      "source_id": 72,
+      "type": "tower",
+      "x": 1521.69,
+      "y": 187.693
+    },
+    {
+      "source_id": 71,
+      "type": "tower",
+      "x": 1849.18,
+      "y": 261.588
+    },
+    {
+      "source_id": 70,
+      "type": "tower",
+      "x": 869.188,
+      "y": 424.157
+    },
+    {
+      "source_id": 69,
+      "type": "tower",
+      "x": 147.737,
+      "y": 222.177
+    },
+    {
+      "source_id": 68,
+      "type": "tower",
+      "x": 164.973,
+      "y": 613.82
+    },
+    {
+      "source_id": 67,
+      "type": "tower",
+      "x": 406.278,
+      "y": 655.694
+    },
+    {
+      "source_id": 66,
+      "type": "tower",
+      "x": 797.782,
+      "y": 707.42
+    },
+    {
+      "source_id": 65,
+      "type": "tower",
+      "x": 701.752,
+      "y": 904.473
+    },
+    {
+      "source_id": 64,
+      "type": "tower",
+      "x": 268.389,
+      "y": 813.336
+    },
+    {
+      "source_id": 63,
+      "type": "tower",
+      "x": 1527.99,
+      "y": 1607.73
+    },
+    {
+      "source_id": 62,
+      "type": "tower",
+      "x": 1915.29,
+      "y": 1574.84
+    },
+    {
+      "source_id": 61,
+      "type": "tower",
+      "x": 782.0,
+      "y": 1994.98
+    },
+    {
+      "source_id": 27,
+      "type": "boss",
+      "x": 1664.51,
+      "y": 372.43
+    },
+    {
+      "source_id": 26,
+      "type": "boss",
+      "x": 1167.12,
+      "y": 103.945
+    },
+    {
+      "source_id": 25,
+      "type": "boss",
+      "x": 706.66,
+      "y": 162.775
+    },
+    {
+      "source_id": 24,
+      "type": "boss",
+      "x": 613.054,
+      "y": 169.559
+    },
+    {
+      "source_id": 23,
+      "type": "boss",
+      "x": 222.0,
+      "y": 388.504
+    },
+    {
+      "source_id": 22,
+      "type": "boss",
+      "x": 702.0,
+      "y": 608.576
+    },
+    {
+      "source_id": 21,
+      "type": "boss",
+      "x": 1140.37,
+      "y": 581.205
+    },
+    {
+      "source_id": 20,
+      "type": "boss",
+      "x": 1085.58,
+      "y": 584.387
+    },
+    {
+      "source_id": 19,
+      "type": "boss",
+      "x": 1546.57,
+      "y": 912.435
+    },
+    {
+      "source_id": 18,
+      "type": "boss",
+      "x": 477.662,
+      "y": 1128.65
+    },
+    {
+      "source_id": 17,
+      "type": "boss",
+      "x": 476.939,
+      "y": 1173.99
+    },
+    {
+      "source_id": 16,
+      "type": "boss",
+      "x": 918.434,
+      "y": 1052.26
+    },
+    {
+      "source_id": 15,
+      "type": "boss",
+      "x": 1201.6,
+      "y": 1254.24
+    },
+    {
+      "source_id": 14,
+      "type": "boss",
+      "x": 1130.82,
+      "y": 1254.01
+    },
+    {
+      "source_id": 13,
+      "type": "boss",
+      "x": 989.84,
+      "y": 1493.17
+    },
+    {
+      "source_id": 12,
+      "type": "boss",
+      "x": 969.955,
+      "y": 1541.66
+    },
+    {
+      "source_id": 11,
+      "type": "boss",
+      "x": 1728.0,
+      "y": 1746.84
+    },
+    {
+      "source_id": 10,
+      "type": "boss",
+      "x": 1420.0,
+      "y": 1658.44
+    },
+    {
+      "source_id": 9,
+      "type": "boss",
+      "x": 1292.0,
+      "y": 1625.6
+    },
+    {
+      "source_id": 8,
+      "type": "boss",
+      "x": 1256.0,
+      "y": 1709.63
+    },
+    {
+      "source_id": 7,
+      "type": "boss",
+      "x": 692.0,
+      "y": 1773.66
+    },
+    {
+      "source_id": 6,
+      "type": "boss",
+      "x": 616.0,
+      "y": 1797.67
+    },
+    {
+      "source_id": 5,
+      "type": "boss",
+      "x": 324.0,
+      "y": 1677.62
+    },
+    {
+      "source_id": 1,
+      "type": "boss",
+      "x": 476.59,
+      "y": 1301.08,
+      "label": {
+        "de": "1",
+        "en": "1"
+      }
+    }
+  ]
 }

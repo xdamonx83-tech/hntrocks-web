@@ -1,0 +1,93 @@
+{
+  "total_markers": 505,
+  "all_types": {
+    "boss": 76,
+    "bugs": 26,
+    "cash": 35,
+    "compound": 64,
+    "spawn": 99,
+    "supply": 97,
+    "tarot": 2,
+    "tower": 49,
+    "wild": 57
+  },
+  "maps": {
+    "stillwater-bayou": {
+      "markers": 153,
+      "types": {
+        "boss": 25,
+        "bugs": 6,
+        "cash": 10,
+        "compound": 16,
+        "spawn": 20,
+        "supply": 46,
+        "tarot": 2,
+        "tower": 12,
+        "wild": 16
+      },
+      "source_files": [
+        "bayou.de.json",
+        "bayou.en.json"
+      ],
+      "warnings": []
+    },
+    "lawson-delta": {
+      "markers": 154,
+      "types": {
+        "boss": 19,
+        "bugs": 8,
+        "cash": 6,
+        "compound": 16,
+        "spawn": 20,
+        "supply": 51,
+        "tower": 16,
+        "wild": 18
+      },
+      "source_files": [
+        "lawson-delta.de.json",
+        "lawson-delta.en.json"
+      ],
+      "warnings": []
+    },
+    "desalle": {
+      "markers": 101,
+      "types": {
+        "boss": 16,
+        "bugs": 5,
+        "cash": 10,
+        "compound": 16,
+        "spawn": 26,
+        "tower": 15,
+        "wild": 13
+      },
+      "source_files": [
+        "desalle.de.json",
+        "desalle.en.json"
+      ],
+      "warnings": []
+    },
+    "mammons-gulch": {
+      "markers": 97,
+      "types": {
+        "boss": 16,
+        "bugs": 7,
+        "cash": 9,
+        "compound": 16,
+        "spawn": 33,
+        "tower": 6,
+        "wild": 10
+      },
+      "source_files": [
+        "mammons-gulch.de.json",
+        "mammons-gulch.en.json"
+      ],
+      "warnings": []
+    }
+  },
+  "notes": [
+    "Coordinates are copied as x=pos_x and y=pos_y from Huntmaps export.",
+    "source_id is preserved for later DB/admin migration.",
+    "source_image is preserved only as metadata for future cash screenshot migration; the current frontend does not render it.",
+    "Lawson Delta was added from the follow-up German and English exports."
+  ]
+}
