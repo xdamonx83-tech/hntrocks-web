@@ -138,14 +138,56 @@ class MapController extends Controller
             $labels = is_array($marker['label'] ?? null) ? $marker['label'] : [];
             $label = trim((string) ($labels[$locale] ?? $labels['en'] ?? ''));
 
-            $markers[] = [
+            $safeMarker = [
                 'type' => $marker['type'],
                 'x' => (float) $marker['x'],
                 'y' => (float) $marker['y'],
                 'label' => $label !== '' ? $label : __('ui.maps_type_'.$marker['type']),
             ];
+
+            if ($marker['type'] === 'cash') {
+                $imageUrl = $this->cashSpotImageUrl($marker['source_image'] ?? null);
+
+                if ($imageUrl !== null) {
+                    $safeMarker['image_url'] = $imageUrl;
+                }
+            }
+
+            $markers[] = $safeMarker;
         }
 
         return ['markers' => $markers, 'error' => null];
+    }
+
+    private function cashSpotImageUrl(mixed $sourceImage): ?string
+    {
+        if (! is_string($sourceImage)) {
+            return null;
+        }
+
+        $sourceImage = trim($sourceImage);
+
+        if ($sourceImage === ''
+            || str_starts_with($sourceImage, '/')
+            || str_contains($sourceImage, '..')
+            || str_contains($sourceImage, '\\')
+            || str_contains($sourceImage, "\0")
+            || preg_match('/^[a-z][a-z0-9+.-]*:/i', $sourceImage) === 1) {
+            return null;
+        }
+
+        $segments = explode('/', $sourceImage);
+
+        if (in_array('', $segments, true)) {
+            return null;
+        }
+
+        $path = storage_path('app/public/maps/cash-spots/'.$sourceImage);
+
+        if (! File::isFile($path)) {
+            return null;
+        }
+
+        return '/storage/maps/cash-spots/'.implode('/', array_map('rawurlencode', $segments));
     }
 }

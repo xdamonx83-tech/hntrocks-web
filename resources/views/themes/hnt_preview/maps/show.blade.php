@@ -187,6 +187,9 @@
                 'measureMarkerAText' => __('ui.maps_measure_marker_a'),
                 'measureMarkerBText' => __('ui.maps_measure_marker_b'),
                 'shareSuccessText' => __('ui.maps_share_success'),
+                'cashScreenshotText' => __('ui.maps_cash_screenshot'),
+                'cashScreenshotErrorText' => __('ui.maps_cash_screenshot_error'),
+                'closeText' => __('ui.maps_close'),
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
         @endif
 

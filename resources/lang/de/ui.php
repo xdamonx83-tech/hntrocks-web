@@ -4133,4 +4133,7 @@ return [
     'maps_share_help' => 'Kopiere einen Link zur aktuellen Kartenposition.',
     'maps_share_success' => 'Link zur Kartenansicht kopiert.',
     'maps_share_fallback' => 'Link manuell kopieren',
+    'maps_cash_screenshot' => 'Kassenscreenshot',
+    'maps_cash_screenshot_error' => 'Bild konnte nicht geladen werden',
+    'maps_close' => 'Schließen',
 ];
