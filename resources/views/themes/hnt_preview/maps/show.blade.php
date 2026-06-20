@@ -182,6 +182,7 @@
                 'measureIdleText' => __('ui.maps_measure_idle'),
                 'measurePointAText' => __('ui.maps_measure_point_a'),
                 'measurePointBText' => __('ui.maps_measure_point_b'),
+                'measureSavedText' => __('ui.maps_measure_saved'),
                 'measureDistanceText' => __('ui.maps_measure_distance'),
                 'measureMarkerAText' => __('ui.maps_measure_marker_a'),
                 'measureMarkerBText' => __('ui.maps_measure_marker_b'),

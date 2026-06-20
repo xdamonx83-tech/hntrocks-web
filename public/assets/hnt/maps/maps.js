@@ -276,9 +276,14 @@ function matchesSearch(reference, queryForms) {
     var measureReset = document.querySelector('[data-map-measure-reset]');
     var measureStatus = document.querySelector('[data-map-measure-status]');
     var measureHint = document.querySelector('[data-map-measure-hint]');
-    var measurePoints = [];
-    var measureMarkers = [];
-    var measureLine = null;
+    var metersPerUnit = 0.5;
+    var speedMPerMin = 150;
+    var finishedMeasurements = window.L.layerGroup().addTo(map);
+    var currentMeasurement = window.L.layerGroup().addTo(map);
+    var previewMeasurement = window.L.layerGroup().addTo(map);
+    var currentMeasureStart = null;
+    var previewLine = null;
+    var previewLabel = null;
     var measuring = false;
 
     function setMeasureStatus(text) {
@@ -290,8 +295,26 @@ function matchesSearch(reference, queryForms) {
         }
     }
 
+    function clearPreview() {
+        previewMeasurement.clearLayers();
+        previewLine = null;
+        previewLabel = null;
+    }
+
+    function clearCurrentMeasurement() {
+        currentMeasurement.clearLayers();
+        currentMeasureStart = null;
+        clearPreview();
+    }
+
     function setMeasuring(active, statusText) {
         measuring = active;
+
+        if (!active) {
+            clearCurrentMeasurement();
+            measureReset.disabled = finishedMeasurements.getLayers().length === 0;
+        }
+
         mapElement.classList.toggle('is-measuring', active);
         measureToggle?.classList.toggle('is-active', active);
         measureToggle?.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -309,25 +332,15 @@ function matchesSearch(reference, queryForms) {
         }
     }
 
-    function clearMeasurement() {
-        measureMarkers.forEach(function (marker) { map.removeLayer(marker); });
-        measureMarkers = [];
-        measurePoints = [];
-
-        if (measureLine) {
-            map.removeLayer(measureLine);
-            measureLine = null;
-        }
-
-        if (measureReset) {
-            measureReset.disabled = true;
-        }
-
+    function resetMeasurements() {
+        clearCurrentMeasurement();
+        finishedMeasurements.clearLayers();
+        measureReset.disabled = true;
         setMeasureStatus(measuring ? config.measurePointAText : config.measureIdleText);
     }
 
-    function addMeasurePoint(latlng, label) {
-        var marker = window.L.circleMarker(latlng, {
+    function measureMarker(latlng, label) {
+        return window.L.circleMarker(latlng, {
             radius: 6,
             color: '#171713',
             weight: 2,
@@ -339,11 +352,58 @@ function matchesSearch(reference, queryForms) {
             direction: 'top',
             offset: [0, -7],
             className: 'hnt-map-measure-label'
-        }).addTo(map);
+        });
+    }
 
-        measureMarkers.push(marker);
-        measurePoints.push(latlng);
+    function measurementText(start, end) {
+        var dx = end.lng - start.lng;
+        var dy = end.lat - start.lat;
+        var unitDist = Math.hypot(dx, dy);
+        var distMeters = unitDist * metersPerUnit;
+        var durationSeconds = Math.round((distMeters / speedMPerMin) * 60);
+        var meterDigits = distMeters < 10 ? 1 : 0;
+        var meters = distMeters.toLocaleString(document.documentElement.lang, {
+            minimumFractionDigits: meterDigits,
+            maximumFractionDigits: meterDigits
+        });
+
+        return config.measureDistanceText
+            .replace(':meters', meters)
+            .replace(':seconds', String(durationSeconds));
+    }
+
+    function midpoint(start, end) {
+        return window.L.latLng((start.lat + end.lat) / 2, (start.lng + end.lng) / 2);
+    }
+
+    function beginMeasurement(latlng) {
+        currentMeasureStart = latlng;
+        measureMarker(latlng, config.measureMarkerAText).addTo(currentMeasurement);
         measureReset.disabled = false;
+        setMeasureStatus(config.measurePointBText);
+    }
+
+    function finishMeasurement(latlng) {
+        var start = currentMeasureStart;
+        var distanceText = measurementText(start, latlng);
+
+        clearCurrentMeasurement();
+        measureMarker(start, config.measureMarkerAText).addTo(finishedMeasurements);
+        measureMarker(latlng, config.measureMarkerBText).addTo(finishedMeasurements);
+        window.L.polyline([start, latlng], {
+            color: '#e2c477',
+            weight: 2.5,
+            opacity: 0.9,
+            interactive: false
+        }).addTo(finishedMeasurements);
+        window.L.tooltip({
+            permanent: true,
+            direction: 'center',
+            className: 'hnt-map-measure-distance'
+        }).setLatLng(midpoint(start, latlng)).setContent(distanceText).addTo(finishedMeasurements);
+
+        measureReset.disabled = false;
+        setMeasureStatus(config.measureSavedText);
     }
 
     measureToggle?.addEventListener('click', function () {
@@ -355,32 +415,50 @@ function matchesSearch(reference, queryForms) {
         }
     });
 
-    measureReset?.addEventListener('click', clearMeasurement);
+    measureReset?.addEventListener('click', resetMeasurements);
 
     map.on('click', function (event) {
-        if (!measuring || measurePoints.length >= 2 || !bounds.contains(event.latlng)) {
+        if (!measuring || !bounds.contains(event.latlng)) {
             return;
         }
 
-        addMeasurePoint(event.latlng, measurePoints.length === 0 ? config.measureMarkerAText : config.measureMarkerBText);
-
-        if (measurePoints.length === 1) {
-            setMeasureStatus(config.measurePointBText);
+        if (!currentMeasureStart) {
+            beginMeasurement(event.latlng);
             return;
         }
 
-        measureLine = window.L.polyline(measurePoints, {
-            color: '#e2c477',
-            weight: 2.5,
-            opacity: 0.9,
-            interactive: false
-        }).addTo(map);
-
-        var deltaX = measurePoints[1].lng - measurePoints[0].lng;
-        var deltaY = measurePoints[1].lat - measurePoints[0].lat;
-        var distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
-        setMeasuring(false, config.measureDistanceText.replace(':distance', distance.toFixed(1)));
+        finishMeasurement(event.latlng);
     });
+
+    map.on('mousemove', function (event) {
+        if (!measuring || !currentMeasureStart || !bounds.contains(event.latlng)) {
+            return;
+        }
+
+        var points = [currentMeasureStart, event.latlng];
+        var distanceText = measurementText(currentMeasureStart, event.latlng);
+
+        if (!previewLine) {
+            previewLine = window.L.polyline(points, {
+                color: '#d6b968',
+                weight: 2,
+                opacity: 0.72,
+                dashArray: '6 7',
+                interactive: false
+            }).addTo(previewMeasurement);
+            previewLabel = window.L.tooltip({
+                permanent: true,
+                direction: 'center',
+                className: 'hnt-map-measure-distance hnt-map-measure-distance--preview'
+            }).setLatLng(midpoint(currentMeasureStart, event.latlng)).setContent(distanceText).addTo(previewMeasurement);
+            return;
+        }
+
+        previewLine.setLatLngs(points);
+        previewLabel.setLatLng(midpoint(currentMeasureStart, event.latlng)).setContent(distanceText);
+    });
+
+    map.on('mouseout', clearPreview);
 
     var toastTimer;
 
