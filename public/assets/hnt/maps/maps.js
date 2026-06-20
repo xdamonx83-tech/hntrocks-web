@@ -98,6 +98,10 @@
     };
     var activeBossPoint = null;
     var activeBossRings = [];
+    var screenshotModal = null;
+    var screenshotImage = null;
+    var screenshotError = null;
+    var screenshotLastFocus = null;
 
     Object.keys(colors).forEach(function (type) {
         layers[type] = window.L.layerGroup().addTo(map);
@@ -156,6 +160,93 @@
         activeBossRings.forEach(function (ring) { ring.addTo(layers.boss); });
     }
 
+    function closeScreenshotModal() {
+        if (!screenshotModal || screenshotModal.hidden) {
+            return;
+        }
+
+        screenshotModal.hidden = true;
+        screenshotImage.removeAttribute('src');
+        document.body.classList.remove('hnt-map-lightbox-open');
+        screenshotLastFocus?.focus();
+        screenshotLastFocus = null;
+    }
+
+    function ensureScreenshotModal() {
+        if (screenshotModal) {
+            return;
+        }
+
+        screenshotModal = document.createElement('div');
+        screenshotModal.className = 'hnt-map-lightbox';
+        screenshotModal.hidden = true;
+        screenshotModal.setAttribute('role', 'dialog');
+        screenshotModal.setAttribute('aria-modal', 'true');
+        screenshotModal.setAttribute('aria-labelledby', 'hntMapLightboxTitle');
+
+        var panel = document.createElement('div');
+        var header = document.createElement('header');
+        var title = document.createElement('h2');
+        var closeButton = document.createElement('button');
+
+        panel.className = 'hnt-map-lightbox-panel';
+        header.className = 'hnt-map-lightbox-header';
+        title.id = 'hntMapLightboxTitle';
+        title.textContent = config.cashScreenshotText;
+        closeButton.type = 'button';
+        closeButton.className = 'hnt-map-lightbox-close';
+        closeButton.setAttribute('aria-label', config.closeText);
+        closeButton.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+        closeButton.addEventListener('click', closeScreenshotModal);
+
+        screenshotImage = document.createElement('img');
+        screenshotImage.className = 'hnt-map-lightbox-image';
+        screenshotImage.addEventListener('load', function () {
+            screenshotImage.hidden = false;
+            screenshotError.hidden = true;
+        });
+        screenshotImage.addEventListener('error', function () {
+            screenshotImage.hidden = true;
+            screenshotError.hidden = false;
+        });
+
+        screenshotError = document.createElement('p');
+        screenshotError.className = 'hnt-map-lightbox-error';
+        screenshotError.textContent = config.cashScreenshotErrorText;
+        screenshotError.hidden = true;
+
+        header.appendChild(title);
+        header.appendChild(closeButton);
+        panel.appendChild(header);
+        panel.appendChild(screenshotImage);
+        panel.appendChild(screenshotError);
+        screenshotModal.appendChild(panel);
+        screenshotModal.addEventListener('click', function (event) {
+            if (event.target === screenshotModal) {
+                closeScreenshotModal();
+            }
+        });
+        document.querySelector('.hnt-map-stage').appendChild(screenshotModal);
+    }
+
+    function openScreenshotModal(marker, trigger) {
+        ensureScreenshotModal();
+        screenshotLastFocus = trigger || document.activeElement;
+        screenshotImage.hidden = true;
+        screenshotError.hidden = true;
+        screenshotImage.alt = config.cashScreenshotText + ': ' + marker.label;
+        screenshotImage.src = marker.image_url;
+        screenshotModal.hidden = false;
+        document.body.classList.add('hnt-map-lightbox-open');
+        screenshotModal.querySelector('.hnt-map-lightbox-close').focus();
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeScreenshotModal();
+        }
+    });
+
     (Array.isArray(config.markers) ? config.markers : []).forEach(function (marker) {
         if (!layers[marker.type]) {
             return;
@@ -193,6 +284,10 @@
 
         if (marker.type === 'boss') {
             point.on('click', function () { toggleBossRings(point); });
+        }
+
+        if (marker.type === 'cash' && marker.image_url) {
+            point.on('click', function () { openScreenshotModal(marker, point.getElement()); });
         }
 
         point.addTo(layers[marker.type]);
