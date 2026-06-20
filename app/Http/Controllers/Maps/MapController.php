@@ -9,6 +9,19 @@ use Throwable;
 
 class MapController extends Controller
 {
+    private const MARKER_TYPES = [
+        'compound',
+        'boss',
+        'spawn',
+        'supply',
+        'extract',
+        'cash',
+        'tower',
+        'bugs',
+        'wild',
+        'tarot',
+    ];
+
     private const MAPS = [
         'stillwater-bayou' => [
             'name' => 'Stillwater Bayou',
@@ -79,6 +92,7 @@ class MapController extends Controller
                 'lines_url' => $linesAvailable ? asset($map['lines']) : null,
             ],
             'markers' => $data['markers'],
+            'markerTypes' => self::MARKER_TYPES,
             'availableMaps' => collect(self::MAPS)->map(fn (array $availableMap, string $availableSlug): array => [
                 'slug' => $availableSlug,
                 'name' => $availableMap['name'],
@@ -110,13 +124,12 @@ class MapController extends Controller
             return ['markers' => [], 'error' => 'invalid'];
         }
 
-        $allowedTypes = ['compound', 'boss', 'spawn', 'supply', 'extract', 'cash'];
         $locale = app()->getLocale() === 'de' ? 'de' : 'en';
         $markers = [];
 
         foreach ($decoded['markers'] as $marker) {
             if (! is_array($marker)
-                || ! in_array($marker['type'] ?? null, $allowedTypes, true)
+                || ! in_array($marker['type'] ?? null, self::MARKER_TYPES, true)
                 || ! is_numeric($marker['x'] ?? null)
                 || ! is_numeric($marker['y'] ?? null)) {
                 continue;
@@ -129,7 +142,7 @@ class MapController extends Controller
                 'type' => $marker['type'],
                 'x' => (float) $marker['x'],
                 'y' => (float) $marker['y'],
-                'label' => $label !== '' ? $label : __('ui.maps_marker_unnamed'),
+                'label' => $label !== '' ? $label : __('ui.maps_type_'.$marker['type']),
             ];
         }
 

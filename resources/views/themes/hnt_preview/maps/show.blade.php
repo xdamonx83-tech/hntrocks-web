@@ -85,7 +85,7 @@
                     <small>{{ __('ui.maps_filter_help') }}</small>
                 </div>
                 <div class="hnt-map-filter-options">
-                    @foreach(['compound', 'boss', 'spawn', 'supply', 'extract', 'cash'] as $type)
+                    @foreach($markerTypes as $type)
                         <label class="hnt-map-filter-chip hnt-map-filter-chip--{{ $type }}">
                             <input type="checkbox" value="{{ $type }}" checked data-map-filter>
                             <span aria-hidden="true"></span>{{ __('ui.maps_type_'.$type) }}
@@ -142,7 +142,7 @@
                 'width' => $map['width'],
                 'height' => $map['height'],
                 'markers' => $markers,
-                'typeLabels' => collect(['compound', 'boss', 'spawn', 'supply', 'extract', 'cash'])
+                'typeLabels' => collect($markerTypes)
                     ->mapWithKeys(fn ($type) => [$type => __('ui.maps_type_'.$type)]),
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
         @endif
