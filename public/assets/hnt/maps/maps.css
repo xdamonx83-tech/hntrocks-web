@@ -490,6 +490,7 @@ body.hnt-map-workspace-body {
 body.hnt-map-lightbox-open { overflow: hidden; }
 .hnt-map-cash-submission-panel { width: min(560px, 100%); }
 .hnt-map-cash-submission-form { display: grid; gap: 14px; padding: 20px; }
+.hnt-map-cash-submission-form [hidden] { display: none !important; }
 .hnt-map-cash-submission-form > p { margin: 0; color: var(--text-muted); }
 .hnt-map-cash-submission-form label { display: grid; gap: 6px; color: var(--text-main); font-weight: 700; }
 .hnt-map-cash-submission-form input:not([type="hidden"]) { box-sizing: border-box; width: 100%; }
