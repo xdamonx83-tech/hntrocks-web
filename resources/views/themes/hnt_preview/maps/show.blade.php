@@ -205,6 +205,7 @@
                 'measureMarkerAText' => __('ui.maps_measure_marker_a'),
                 'measureMarkerBText' => __('ui.maps_measure_marker_b'),
                 'shareSuccessText' => __('ui.maps_share_success'),
+                'viewerIsAuthenticated' => auth()->check(),
                 'cashSpotSubmissionUrl' => $map['cash_spot_submission_url'],
                 'cashScreenshotText' => __('ui.maps_cash_screenshot'),
                 'cashScreenshotErrorText' => __('ui.maps_cash_screenshot_error'),
@@ -226,8 +227,8 @@
                         <input type="hidden" name="x">
                         <input type="hidden" name="y">
                         <label><span>{{ __('ui.maps_cash_spot_screenshot') }}</span><input type="file" name="image" accept="image/jpeg,image/png,image/webp" required></label>
-                        <label><span>{{ __('ui.maps_cash_spot_name') }}</span><input type="text" name="submitter_name" maxlength="80"></label>
-                        <label><span>{{ __('ui.maps_cash_spot_email') }}</span><input type="email" name="submitter_email" maxlength="160"></label>
+                        <label data-map-cash-spot-guest-field @auth hidden @endauth><span>{{ __('ui.maps_cash_spot_name') }}</span><input type="text" name="submitter_name" maxlength="80" @auth disabled @endauth></label>
+                        <label data-map-cash-spot-guest-field @auth hidden @endauth><span>{{ __('ui.maps_cash_spot_email') }}</span><input type="email" name="submitter_email" maxlength="160" @auth disabled @endauth></label>
                         <input class="hnt-map-upload-honeypot" type="text" name="website" maxlength="120" tabindex="-1" autocomplete="off" aria-hidden="true">
                         <p class="hnt-map-cash-submission-status" data-map-cash-spot-status role="status"></p>
                         <div class="hnt-map-cash-submission-actions">

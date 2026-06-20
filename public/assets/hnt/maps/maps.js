@@ -307,6 +307,13 @@
     var cashSpotMode = false;
     var cashSpotDraft = null;
 
+    document.querySelectorAll('[data-map-cash-spot-guest-field]').forEach(function (field) {
+        field.hidden = Boolean(config.viewerIsAuthenticated);
+        field.querySelectorAll('input').forEach(function (input) {
+            input.disabled = Boolean(config.viewerIsAuthenticated);
+        });
+    });
+
     function clearCashSpotDraft() {
         if (cashSpotDraft) {
             map.removeLayer(cashSpotDraft);
