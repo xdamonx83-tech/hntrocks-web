@@ -77,6 +77,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Marketing\CampaignRedirectController;
 use App\Http\Controllers\Marketing\AppBetaController;
 use App\Http\Controllers\Marketing\LandingPageController;
+use App\Http\Controllers\Maps\MapController;
 use App\Models\FeedPost;
 use App\Models\Friendship;
 use App\Models\Team;
@@ -119,6 +120,10 @@ Route::get('/out/{link:slug}/go', [ApprovedOutboundLinkController::class, 'go'])
 Route::get('/sitemap.xml', SitemapController::class)->name('seo.sitemap');
 Route::get('/app-beta', [AppBetaController::class, 'index'])->name('app-beta.index');
 Route::post('/app-beta', [AppBetaController::class, 'store'])->middleware('throttle:6,1')->name('app-beta.store');
+Route::get('/maps', [MapController::class, 'index'])->name('maps.index');
+Route::get('/maps/{slug}', [MapController::class, 'show'])
+    ->where('slug', '[a-z0-9-]+')
+    ->name('maps.show');
 
 Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
 Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
