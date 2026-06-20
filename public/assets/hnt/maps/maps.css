@@ -316,8 +316,9 @@ body.hnt-map-workspace-body {
     display: block;
     object-fit: contain;
 }
+.hnt-map-canvas .hnt-map-icon-marker:hover { z-index: 1000 !important; }
 .hnt-map-canvas .hnt-map-icon-marker:hover .hnt-map-icon-ring { transform: scale(1.12); }
-.hnt-map-canvas .hnt-map-icon-marker--boss:hover .hnt-map-icon-ring { transform: scale(1.2); }
+.hnt-map-canvas .hnt-map-icon-marker--boss:hover .hnt-map-icon-ring { transform: scale(1.36); }
 .hnt-map-canvas .hnt-map-icon-marker--supply .hnt-map-icon-ring,
 .hnt-map-canvas .hnt-map-icon-marker--cash .hnt-map-icon-ring {
     border: 1px solid rgba(226, 196, 119, .62);
@@ -326,8 +327,8 @@ body.hnt-map-workspace-body {
 }
 .hnt-map-canvas .hnt-map-icon-marker--supply:hover .hnt-map-icon-ring,
 .hnt-map-canvas .hnt-map-icon-marker--cash:hover .hnt-map-icon-ring {
-    transform: scale(1.14);
-    box-shadow: 0 0 0 3px rgba(214, 168, 79, .2), 0 0 11px rgba(214, 168, 79, .42);
+    transform: scale(1.28);
+    box-shadow: 0 0 0 3px rgba(226, 196, 119, .34), 0 0 15px rgba(214, 168, 79, .62);
     opacity: 1;
 }
 .hnt-map-canvas .hnt-map-icon-marker.is-search-highlighted .hnt-map-icon-ring {
