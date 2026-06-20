@@ -272,6 +272,167 @@ function matchesSearch(reference, queryForms) {
         }
     });
 
+    var measureToggle = document.querySelector('[data-map-measure-toggle]');
+    var measureReset = document.querySelector('[data-map-measure-reset]');
+    var measureStatus = document.querySelector('[data-map-measure-status]');
+    var measureHint = document.querySelector('[data-map-measure-hint]');
+    var measurePoints = [];
+    var measureMarkers = [];
+    var measureLine = null;
+    var measuring = false;
+
+    function setMeasureStatus(text) {
+        if (measureStatus) {
+            measureStatus.textContent = text;
+        }
+        if (measureHint && measuring) {
+            measureHint.textContent = text;
+        }
+    }
+
+    function setMeasuring(active, statusText) {
+        measuring = active;
+        mapElement.classList.toggle('is-measuring', active);
+        measureToggle?.classList.toggle('is-active', active);
+        measureToggle?.setAttribute('aria-pressed', active ? 'true' : 'false');
+        if (measureHint) {
+            measureHint.hidden = !active;
+        }
+
+        var label = measureToggle?.querySelector('span');
+        if (label) {
+            label.textContent = active ? config.measureEndText : config.measureStartText;
+        }
+
+        if (statusText) {
+            setMeasureStatus(statusText);
+        }
+    }
+
+    function clearMeasurement() {
+        measureMarkers.forEach(function (marker) { map.removeLayer(marker); });
+        measureMarkers = [];
+        measurePoints = [];
+
+        if (measureLine) {
+            map.removeLayer(measureLine);
+            measureLine = null;
+        }
+
+        if (measureReset) {
+            measureReset.disabled = true;
+        }
+
+        setMeasureStatus(measuring ? config.measurePointAText : config.measureIdleText);
+    }
+
+    function addMeasurePoint(latlng, label) {
+        var marker = window.L.circleMarker(latlng, {
+            radius: 6,
+            color: '#171713',
+            weight: 2,
+            fillColor: '#d6a84f',
+            fillOpacity: 1,
+            interactive: false
+        }).bindTooltip(label, {
+            permanent: true,
+            direction: 'top',
+            offset: [0, -7],
+            className: 'hnt-map-measure-label'
+        }).addTo(map);
+
+        measureMarkers.push(marker);
+        measurePoints.push(latlng);
+        measureReset.disabled = false;
+    }
+
+    measureToggle?.addEventListener('click', function () {
+        setMeasuring(!measuring, measuring ? config.measureIdleText : config.measurePointAText);
+
+        if (measuring && window.matchMedia('(max-width: 768px)').matches) {
+            setToolsOpen(false);
+            window.setTimeout(function () { map.invalidateSize(); }, 240);
+        }
+    });
+
+    measureReset?.addEventListener('click', clearMeasurement);
+
+    map.on('click', function (event) {
+        if (!measuring || measurePoints.length >= 2 || !bounds.contains(event.latlng)) {
+            return;
+        }
+
+        addMeasurePoint(event.latlng, measurePoints.length === 0 ? config.measureMarkerAText : config.measureMarkerBText);
+
+        if (measurePoints.length === 1) {
+            setMeasureStatus(config.measurePointBText);
+            return;
+        }
+
+        measureLine = window.L.polyline(measurePoints, {
+            color: '#e2c477',
+            weight: 2.5,
+            opacity: 0.9,
+            interactive: false
+        }).addTo(map);
+
+        var deltaX = measurePoints[1].lng - measurePoints[0].lng;
+        var deltaY = measurePoints[1].lat - measurePoints[0].lat;
+        var distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        setMeasuring(false, config.measureDistanceText.replace(':distance', distance.toFixed(1)));
+    });
+
+    var toastTimer;
+
+    function showMapToast(text) {
+        var toast = document.querySelector('[data-map-toast]');
+        if (!toast) {
+            return;
+        }
+
+        window.clearTimeout(toastTimer);
+        toast.textContent = text;
+        toast.hidden = false;
+        toastTimer = window.setTimeout(function () { toast.hidden = true; }, 2600);
+    }
+
+    function currentViewUrl() {
+        var center = map.getCenter();
+        var url = new URL(window.location.href);
+        url.searchParams.set('x', center.lng.toFixed(2));
+        url.searchParams.set('y', center.lat.toFixed(2));
+        url.searchParams.set('z', map.getZoom().toFixed(2));
+        return url.toString();
+    }
+
+    function showShareFallback(url) {
+        var fallback = document.querySelector('[data-map-share-fallback]');
+        var input = document.querySelector('[data-map-share-url]');
+        if (!fallback || !input) {
+            return;
+        }
+
+        input.value = url;
+        fallback.hidden = false;
+        input.focus();
+        input.select();
+    }
+
+    document.querySelector('[data-map-share]')?.addEventListener('click', function () {
+        var url = currentViewUrl();
+
+        if (!navigator.clipboard || !window.isSecureContext) {
+            showShareFallback(url);
+            return;
+        }
+
+        navigator.clipboard.writeText(url).then(function () {
+            showMapToast(config.shareSuccessText);
+        }).catch(function () {
+            showShareFallback(url);
+        });
+    });
+
     function resetMapView() {
         var fittedZoom = map.getBoundsZoom(bounds, false, window.L.point(20, 20));
         map.setView(bounds.getCenter(), Math.min(fittedZoom + initialZoomOffset, map.getMaxZoom()));
@@ -282,8 +443,22 @@ function matchesSearch(reference, queryForms) {
         setToolsOpen(false);
     });
 
-    resetMapView();
     map.setMaxBounds(bounds.pad(0.35));
+
+    var query = new URLSearchParams(window.location.search);
+    var sharedX = Number(query.get('x'));
+    var sharedY = Number(query.get('y'));
+    var sharedZoom = Number(query.get('z'));
+    var hasSharedView = query.has('x') && query.has('y') && query.has('z')
+        && Number.isFinite(sharedX) && Number.isFinite(sharedY) && Number.isFinite(sharedZoom)
+        && bounds.contains([sharedY, sharedX]);
+
+    if (hasSharedView) {
+        map.setView([sharedY, sharedX], Math.max(map.getMinZoom(), Math.min(sharedZoom, map.getMaxZoom())), {animate: false});
+    } else {
+        resetMapView();
+    }
+
     window.setTimeout(function () { map.invalidateSize(); }, 0);
     window.addEventListener('resize', function () { map.invalidateSize(); });
 }());

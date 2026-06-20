@@ -106,6 +106,36 @@
                     </label>
                 </section>
             @endif
+
+            <section class="hnt-map-tool-section" aria-labelledby="hntMapMeasureTitle">
+                <div class="hnt-map-tool-title">
+                    <span id="hntMapMeasureTitle">{{ __('ui.maps_measure') }}</span>
+                    <small>{{ __('ui.maps_measure_help') }}</small>
+                </div>
+                <div class="hnt-map-tool-actions">
+                    <button type="button" class="hnt-map-tool-button" data-map-measure-toggle aria-pressed="false">
+                        <i class="ph ph-ruler" aria-hidden="true"></i><span>{{ __('ui.maps_measure_start') }}</span>
+                    </button>
+                    <button type="button" class="hnt-map-tool-button hnt-map-tool-button--muted" data-map-measure-reset disabled>
+                        <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>{{ __('ui.maps_measure_reset') }}</span>
+                    </button>
+                </div>
+                <p class="hnt-map-measure-status" data-map-measure-status role="status">{{ __('ui.maps_measure_idle') }}</p>
+            </section>
+
+            <section class="hnt-map-tool-section">
+                <div class="hnt-map-tool-title">
+                    <span>{{ __('ui.maps_share_view') }}</span>
+                    <small>{{ __('ui.maps_share_help') }}</small>
+                </div>
+                <button type="button" class="hnt-map-tool-button" data-map-share>
+                    <i class="ph ph-link" aria-hidden="true"></i><span>{{ __('ui.maps_share_view') }}</span>
+                </button>
+                <label class="hnt-map-share-fallback" data-map-share-fallback hidden>
+                    <span>{{ __('ui.maps_share_fallback') }}</span>
+                    <input type="text" readonly data-map-share-url>
+                </label>
+            </section>
         </div>
 
         <footer class="hnt-map-tools-footer">
@@ -134,6 +164,7 @@
             </section>
         @else
             <div id="hntMap" class="hnt-map-canvas" aria-label="{{ __('ui.maps_canvas_aria', ['map' => $map['name']]) }}"></div>
+            <p class="hnt-map-measure-hint" data-map-measure-hint hidden>{{ __('ui.maps_measure_point_a') }}</p>
             @if(empty($markers))
                 <p class="hnt-map-empty-markers">{{ __('ui.maps_no_markers') }}</p>
             @endif
@@ -146,9 +177,19 @@
                 'typeLabels' => collect($markerTypes)
                     ->mapWithKeys(fn ($type) => [$type => __('ui.maps_type_'.$type)]),
                 'searchEmptyText' => __('ui.maps_search_empty'),
+                'measureStartText' => __('ui.maps_measure_start'),
+                'measureEndText' => __('ui.maps_measure_end'),
+                'measureIdleText' => __('ui.maps_measure_idle'),
+                'measurePointAText' => __('ui.maps_measure_point_a'),
+                'measurePointBText' => __('ui.maps_measure_point_b'),
+                'measureDistanceText' => __('ui.maps_measure_distance'),
+                'measureMarkerAText' => __('ui.maps_measure_marker_a'),
+                'measureMarkerBText' => __('ui.maps_measure_marker_b'),
+                'shareSuccessText' => __('ui.maps_share_success'),
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
         @endif
 
+        <p class="hnt-map-toast" data-map-toast role="status" hidden></p>
         <p class="hnt-map-disclaimer">{{ __('ui.maps_disclaimer') }}</p>
     </main>
 </div>
