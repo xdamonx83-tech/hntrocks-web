@@ -92,6 +92,7 @@ class MapController extends Controller
                 'slug' => $slug,
                 'image_url' => asset($map['image']),
                 'lines_url' => $linesAvailable ? asset($map['lines']) : null,
+                'cash_spot_submission_url' => route('maps.cash-spots.store', ['map' => $slug]),
             ],
             'markers' => $data['markers'],
             'markerTypes' => self::MARKER_TYPES,

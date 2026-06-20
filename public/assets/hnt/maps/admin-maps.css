@@ -204,6 +204,115 @@
     grid-column: 1 / -1;
 }
 
+.hh-admin-map-upload-actions {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: auto 1fr;
+}
+
+.hh-admin-map-upload-actions form {
+    display: grid;
+    gap: 8px;
+}
+
+.hh-admin-map-upload-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.hh-admin-map-upload-filters a {
+    border: 1px solid #ded8ce;
+    border-radius: 999px;
+    color: #514b43;
+    font-weight: 700;
+    padding: 8px 14px;
+    text-decoration: none;
+}
+
+.hh-admin-map-upload-filters a.is-active {
+    background: #231f19;
+    border-color: #231f19;
+    color: #fff;
+}
+
+.hh-admin-map-upload-review-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.hh-admin-map-upload-review-card {
+    display: grid;
+    grid-template-columns: minmax(220px, 340px) 1fr;
+    overflow: hidden;
+}
+
+.hh-admin-map-upload-review-image {
+    background: #171511;
+    min-height: 240px;
+}
+
+.hh-admin-map-upload-review-image img {
+    display: block;
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+}
+
+.hh-admin-map-upload-review-body {
+    display: grid;
+    gap: 18px;
+    padding: 22px;
+}
+
+.hh-admin-map-upload-review-title {
+    align-items: start;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.hh-admin-map-upload-review-title h2,
+.hh-admin-map-upload-review-title p {
+    margin: 0;
+}
+
+.hh-admin-map-upload-status {
+    background: #eee9df;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 7px 10px;
+    text-transform: uppercase;
+}
+
+.hh-admin-map-upload-meta {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.hh-admin-map-upload-meta div {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 130px 1fr;
+}
+
+.hh-admin-map-upload-meta dt {
+    color: #6f685e;
+    font-weight: 700;
+}
+
+.hh-admin-map-upload-meta dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.hh-admin-map-upload-empty {
+    padding: 24px;
+}
+
 .hh-admin-map-form-error {
     background: #fae3df;
     border-radius: 10px;
@@ -243,5 +352,18 @@
 
     .hh-admin-map-canvas {
         min-height: 480px;
+    }
+
+    .hh-admin-map-upload-review-card {
+        grid-template-columns: 1fr;
+    }
+
+    .hh-admin-map-upload-review-image {
+        min-height: 200px;
+    }
+
+    .hh-admin-map-upload-meta div {
+        grid-template-columns: 1fr;
+        gap: 2px;
     }
 }

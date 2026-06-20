@@ -299,6 +299,136 @@
         });
     });
 
+    var cashSpotToggle = document.querySelector('[data-map-cash-spot-toggle]');
+    var cashSpotHint = document.querySelector('[data-map-cash-spot-hint]');
+    var cashSpotModal = document.querySelector('[data-map-cash-spot-modal]');
+    var cashSpotForm = document.querySelector('[data-map-cash-spot-form]');
+    var cashSpotStatus = document.querySelector('[data-map-cash-spot-status]');
+    var cashSpotMode = false;
+    var cashSpotDraft = null;
+
+    document.querySelectorAll('[data-map-cash-spot-guest-field]').forEach(function (field) {
+        field.hidden = Boolean(config.viewerIsAuthenticated);
+        field.querySelectorAll('input').forEach(function (input) {
+            input.disabled = Boolean(config.viewerIsAuthenticated);
+        });
+    });
+
+    function clearCashSpotDraft() {
+        if (cashSpotDraft) {
+            map.removeLayer(cashSpotDraft);
+            cashSpotDraft = null;
+        }
+    }
+
+    function setCashSpotMode(active) {
+        cashSpotMode = active;
+        clearCashSpotDraft();
+        mapElement.classList.toggle('is-cash-spot-submitting', active);
+        cashSpotToggle?.classList.toggle('is-active', active);
+        cashSpotToggle?.setAttribute('aria-pressed', active ? 'true' : 'false');
+        if (cashSpotHint) {
+            cashSpotHint.hidden = !active;
+            cashSpotHint.textContent = config.cashSpotSelectText;
+        }
+    }
+
+    function closeCashSpotModal(cancelMode) {
+        if (cashSpotModal) {
+            cashSpotModal.hidden = true;
+        }
+        document.body.classList.remove('hnt-map-lightbox-open');
+        if (cashSpotStatus) {
+            cashSpotStatus.textContent = '';
+        }
+        if (cancelMode) {
+            cashSpotForm?.reset();
+            setCashSpotMode(false);
+        }
+    }
+
+    function openCashSpotModal(latlng) {
+        if (!cashSpotModal || !cashSpotForm) {
+            return;
+        }
+
+        cashSpotForm.elements.x.value = latlng.lng.toFixed(6);
+        cashSpotForm.elements.y.value = latlng.lat.toFixed(6);
+        cashSpotModal.hidden = false;
+        document.body.classList.add('hnt-map-lightbox-open');
+        cashSpotForm.elements.image.focus();
+    }
+
+    cashSpotToggle?.addEventListener('click', function () {
+        if (!cashSpotMode && typeof setMeasuring === 'function') {
+            setMeasuring(false, config.measureIdleText);
+        }
+        setCashSpotMode(!cashSpotMode);
+
+        if (cashSpotMode && window.matchMedia('(max-width: 768px)').matches) {
+            setToolsOpen(false);
+            window.setTimeout(function () { map.invalidateSize(); }, 240);
+        }
+    });
+
+    map.on('click', function (event) {
+        if (!cashSpotMode || !bounds.contains(event.latlng)) {
+            return;
+        }
+
+        clearCashSpotDraft();
+        cashSpotDraft = window.L.marker(event.latlng, {icon: markerIcon('cash'), interactive: false}).addTo(map);
+        openCashSpotModal(event.latlng);
+    });
+
+    document.querySelectorAll('[data-map-cash-spot-cancel]').forEach(function (button) {
+        button.addEventListener('click', function () { closeCashSpotModal(true); });
+    });
+
+    cashSpotModal?.addEventListener('click', function (event) {
+        if (event.target === cashSpotModal) {
+            closeCashSpotModal(true);
+        }
+    });
+
+    cashSpotForm?.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var submitButton = cashSpotForm.querySelector('[type="submit"]');
+        submitButton.disabled = true;
+        cashSpotStatus.textContent = config.cashSpotRunningText;
+
+        fetch(config.cashSpotSubmissionUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: new FormData(cashSpotForm),
+            credentials: 'same-origin'
+        }).then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (payload) {
+                if (!response.ok) {
+                    var errors = payload.errors || {};
+                    var firstError = Object.keys(errors).length ? errors[Object.keys(errors)[0]][0] : null;
+                    throw new Error(firstError || payload.message || config.cashSpotErrorText);
+                }
+            });
+        }).then(function () {
+            closeCashSpotModal(true);
+            showMapToast(config.cashSpotPendingText);
+        }).catch(function (error) {
+            cashSpotStatus.textContent = error.message || config.cashSpotErrorText;
+        }).finally(function () {
+            submitButton.disabled = false;
+        });
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && cashSpotModal && !cashSpotModal.hidden) {
+            closeCashSpotModal(true);
+        }
+    });
+
     document.querySelectorAll('[data-map-filter]').forEach(function (input) {
         filterInputs[input.value] = input;
         input.addEventListener('change', function () {
@@ -589,6 +719,9 @@ function matchesSearch(reference, queryForms) {
     }
 
     measureToggle?.addEventListener('click', function () {
+        if (!measuring && cashSpotMode) {
+            closeCashSpotModal(true);
+        }
         setMeasuring(!measuring, measuring ? config.measureIdleText : config.measurePointAText);
 
         if (measuring && window.matchMedia('(max-width: 768px)').matches) {
@@ -699,6 +832,7 @@ function matchesSearch(reference, queryForms) {
     }
 
     document.querySelector('[data-map-reset]')?.addEventListener('click', function () {
+        closeCashSpotModal(true);
         resetMapView();
         setToolsOpen(false);
     });

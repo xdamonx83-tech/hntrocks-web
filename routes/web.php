@@ -79,6 +79,7 @@ use App\Http\Controllers\Marketing\CampaignRedirectController;
 use App\Http\Controllers\Marketing\AppBetaController;
 use App\Http\Controllers\Marketing\LandingPageController;
 use App\Http\Controllers\Maps\MapController;
+use App\Http\Controllers\Maps\MapCashSpotSubmissionController;
 use App\Models\FeedPost;
 use App\Models\Friendship;
 use App\Models\Team;
@@ -125,6 +126,9 @@ Route::get('/maps', [MapController::class, 'index'])->name('maps.index');
 Route::get('/maps/{slug}', [MapController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('maps.show');
+Route::post('/maps/{map:slug}/cash-spots', [MapCashSpotSubmissionController::class, 'store'])
+    ->middleware('throttle:4,1')
+    ->name('maps.cash-spots.store');
 
 Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
 Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
@@ -584,11 +588,15 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/hunt-news/{item}/publish', [AdminHuntNewsController::class, 'publish'])->name('hunt-news.publish');
         Route::post('/hunt-news/{item}/skip', [AdminHuntNewsController::class, 'skip'])->name('hunt-news.skip');
         Route::get('/maps', [AdminMapController::class, 'index'])->name('maps.index');
+        Route::get('/maps/cash-spots', [AdminMapController::class, 'cashSpots'])->name('maps.cash-spots.index');
         Route::get('/maps/{map:slug}/markers', [AdminMapController::class, 'markers'])->name('maps.markers');
         Route::post('/maps/{map:slug}/markers', [AdminMapController::class, 'storeMarker'])->name('maps.markers.store');
         Route::patch('/maps/markers/{marker}', [AdminMapController::class, 'updateMarker'])->name('maps.markers.update');
         Route::delete('/maps/markers/{marker}', [AdminMapController::class, 'destroyMarker'])->name('maps.markers.destroy');
         Route::patch('/maps/markers/{marker}/position', [AdminMapController::class, 'updateMarkerPosition'])->name('maps.markers.position');
+        Route::get('/maps/cash-spots/{submission}', [AdminMapController::class, 'showCashSpot'])->name('maps.cash-spots.show');
+        Route::post('/maps/cash-spots/{submission}/approve', [AdminMapController::class, 'approveCashSpot'])->name('maps.cash-spots.approve');
+        Route::post('/maps/cash-spots/{submission}/reject', [AdminMapController::class, 'rejectCashSpot'])->name('maps.cash-spots.reject');
         Route::get('/outbound-links', [AdminApprovedOutboundLinkController::class, 'index'])->name('outbound-links.index');
         Route::post('/outbound-links', [AdminApprovedOutboundLinkController::class, 'store'])->name('outbound-links.store');
         Route::put('/outbound-links/{link:slug}', [AdminApprovedOutboundLinkController::class, 'update'])->name('outbound-links.update');

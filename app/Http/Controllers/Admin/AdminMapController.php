@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
+use App\Models\HntMapCashSpotSubmission;
 use App\Models\HntMapMarker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminMapController extends Controller
 {
@@ -27,6 +31,38 @@ class AdminMapController extends Controller
             ->get();
 
         return view('admin.maps.index', compact('maps'));
+    }
+
+    public function cashSpots(Request $request): View
+    {
+        $this->guardAdmin($request);
+
+        $allowedStatuses = [
+            HntMapCashSpotSubmission::STATUS_PENDING,
+            HntMapCashSpotSubmission::STATUS_APPROVED,
+            HntMapCashSpotSubmission::STATUS_REJECTED,
+            'all',
+        ];
+        $status = in_array($request->query('status'), $allowedStatuses, true)
+            ? (string) $request->query('status')
+            : HntMapCashSpotSubmission::STATUS_PENDING;
+        $cashSpots = HntMapCashSpotSubmission::query()
+            ->with(['map', 'marker', 'user:id,username', 'reviewer:id,username'])
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            ->orderByRaw("case when status = 'pending' then 0 else 1 end")
+            ->latest('id')
+            ->get();
+
+        return view('admin.maps.cash-spots', [
+            'cashSpots' => $cashSpots,
+            'status' => $status,
+            'statusOptions' => [
+                HntMapCashSpotSubmission::STATUS_PENDING => 'Pending',
+                HntMapCashSpotSubmission::STATUS_APPROVED => 'Approved',
+                HntMapCashSpotSubmission::STATUS_REJECTED => 'Rejected',
+                'all' => 'Alle',
+            ],
+        ]);
     }
 
     public function markers(Request $request, HntMap $map): View
@@ -130,6 +166,95 @@ class AdminMapController extends Controller
             'x' => $marker->x,
             'y' => $marker->y,
         ]);
+    }
+
+    public function showCashSpot(Request $request, HntMapCashSpotSubmission $submission): StreamedResponse
+    {
+        $this->guardAdmin($request);
+        abort_unless(Storage::disk($submission->disk)->exists($submission->path), 404);
+
+        return Storage::disk($submission->disk)->response(
+            $submission->path,
+            $submission->original_name,
+            ['Content-Type' => $submission->mime_type],
+        );
+    }
+
+    public function approveCashSpot(Request $request, HntMapCashSpotSubmission $submission): RedirectResponse
+    {
+        $this->guardAdmin($request);
+
+        DB::transaction(function () use ($request, $submission): void {
+            $lockedSubmission = HntMapCashSpotSubmission::query()->lockForUpdate()->findOrFail($submission->id);
+            $map = HntMap::query()->lockForUpdate()->findOrFail($lockedSubmission->hnt_map_id);
+
+            abort_unless($lockedSubmission->status === HntMapCashSpotSubmission::STATUS_PENDING, 422, 'Nur ausstehende Vorschläge können freigegeben werden.');
+            abort_unless(Storage::disk($lockedSubmission->disk)->exists($lockedSubmission->path), 422, 'Die Upload-Datei fehlt.');
+
+            $extension = strtolower(pathinfo($lockedSubmission->path, PATHINFO_EXTENSION) ?: 'jpg');
+            $filename = Str::uuid().'.'.$extension;
+            $publicPath = 'maps/cash-spots/'.$filename;
+            $stream = Storage::disk($lockedSubmission->disk)->readStream($lockedSubmission->path);
+            $stored = false;
+
+            abort_unless(is_resource($stream), 500, 'Die Upload-Datei konnte nicht gelesen werden.');
+
+            try {
+                $stored = Storage::disk('public')->writeStream($publicPath, $stream);
+            } finally {
+                fclose($stream);
+            }
+
+            abort_unless($stored, 500, 'Das freigegebene Bild konnte nicht gespeichert werden.');
+
+            $marker = $map->markers()->create([
+                'legacy_key' => 'submission:'.$lockedSubmission->id,
+                'source_id' => null,
+                'type' => 'cash',
+                'x' => $lockedSubmission->x,
+                'y' => $lockedSubmission->y,
+                'label_de' => 'Kassenspot',
+                'label_en' => 'Cash spot',
+                'source_image' => $filename,
+                'status' => 'approved',
+                'sort_order' => ((int) $map->markers()->max('sort_order')) + 1,
+                'meta' => null,
+            ]);
+
+            $lockedSubmission->forceFill([
+                'hnt_map_marker_id' => $marker->id,
+                'status' => HntMapCashSpotSubmission::STATUS_APPROVED,
+                'public_path' => $publicPath,
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+                'rejection_reason' => null,
+            ])->save();
+        });
+
+        return back()->with('status', 'Kassenspot wurde freigegeben und als neuer Marker angelegt.');
+    }
+
+    public function rejectCashSpot(Request $request, HntMapCashSpotSubmission $submission): RedirectResponse
+    {
+        $this->guardAdmin($request);
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($request, $submission, $validated): void {
+            $lockedSubmission = HntMapCashSpotSubmission::query()->lockForUpdate()->findOrFail($submission->id);
+            abort_unless($lockedSubmission->status === HntMapCashSpotSubmission::STATUS_PENDING, 422, 'Nur ausstehende Vorschläge können abgelehnt werden.');
+
+            $lockedSubmission->forceFill([
+                'status' => HntMapCashSpotSubmission::STATUS_REJECTED,
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+                'rejection_reason' => $this->nullableTrimmedString($validated['reason'] ?? null),
+            ])->save();
+        });
+
+        return back()->with('status', 'Kassenspot-Vorschlag wurde abgelehnt. Die Datei wurde nicht gelöscht.');
     }
 
     private function validateMarker(Request $request, HntMap $map): array
