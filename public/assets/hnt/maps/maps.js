@@ -49,6 +49,7 @@
 
     var width = Number(config.width);
     var height = Number(config.height);
+    var initialZoomOffset = window.matchMedia('(max-width: 768px)').matches ? 0.25 : 0.5;
 
     function markerLatLng(marker) {
         return [Number(marker.y), Number(marker.x)];
@@ -59,6 +60,7 @@
         crs: window.L.CRS.Simple,
         minZoom: -2,
         maxZoom: 3,
+        zoomSnap: 0.25,
         zoomControl: false,
         attributionControl: false
     });
@@ -93,9 +95,9 @@
         }
 
         var point = window.L.circleMarker(markerLatLng(marker), {
-            radius: marker.type === 'boss' ? 9 : 7,
+            radius: marker.type === 'boss' ? 8 : 6,
             color: '#141412',
-            weight: 2,
+            weight: 1.5,
             fillColor: colors[marker.type],
             fillOpacity: 1
         });
@@ -150,16 +152,17 @@
         }
     });
 
-    function resetView() {
-        map.fitBounds(bounds, {padding: [20, 20]});
+    function resetMapView() {
+        var fittedZoom = map.getBoundsZoom(bounds, false, window.L.point(20, 20));
+        map.setView(bounds.getCenter(), Math.min(fittedZoom + initialZoomOffset, map.getMaxZoom()));
     }
 
     document.querySelector('[data-map-reset]')?.addEventListener('click', function () {
-        resetView();
+        resetMapView();
         setToolsOpen(false);
     });
 
-    resetView();
+    resetMapView();
     map.setMaxBounds(bounds.pad(0.35));
     window.setTimeout(function () { map.invalidateSize(); }, 0);
     window.addEventListener('resize', function () { map.invalidateSize(); });
