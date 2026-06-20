@@ -8,10 +8,10 @@
         <div>
             <p class="hh-kicker"><a href="{{ route('admin.maps.index') }}">← Zurück zu Admin Maps</a></p>
             <h1>{{ $map['name'] }}</h1>
-            <p>Marker ziehen und speichern. Gespeichert werden ausschließlich die Koordinaten x und y.</p>
+            <p>Marker erstellen, bearbeiten, verschieben und löschen. Änderungen sind nach dem Reload auch auf der Public Map sichtbar.</p>
         </div>
         <div class="hh-page-header-meta">
-            <strong>{{ number_format($markers->count(), 0, ',', '.') }}</strong>
+            <strong data-admin-map-count>{{ number_format($markers->count(), 0, ',', '.') }}</strong>
             <span>Marker</span>
         </div>
     </section>
@@ -27,6 +27,7 @@
                     @endforeach
                 </select>
             </label>
+            <button class="hh-primary-button" type="button" data-admin-map-add>Marker hinzufügen</button>
             <p class="hh-admin-map-save-status" data-admin-map-status role="status">Bereit</p>
         </div>
 
@@ -39,18 +40,78 @@
                 'linesUrl' => $map['lines_url'],
                 'width' => $map['width'],
                 'height' => $map['height'],
+                'storeUrl' => $map['store_url'],
                 'markers' => $markers,
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
         @endif
     </section>
+
+    <dialog class="hh-admin-map-dialog" data-admin-map-dialog>
+        <form class="hh-admin-map-form" data-admin-map-form>
+            <div class="hh-admin-map-dialog-header">
+                <div>
+                    <p class="hh-kicker" data-admin-map-form-mode>Marker bearbeiten</p>
+                    <h2 data-admin-map-form-title>Marker</h2>
+                </div>
+                <button class="hh-admin-map-dialog-close" type="button" data-admin-map-cancel aria-label="Schließen">×</button>
+            </div>
+
+            <div class="hh-admin-map-form-grid">
+                <label>
+                    Typ
+                    <select name="type" required>
+                        @foreach(['compound', 'boss', 'spawn', 'supply', 'extract', 'cash', 'tower', 'bugs', 'wild', 'tarot'] as $type)
+                            <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>
+                    Status
+                    <select name="status" required>
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                </label>
+                <label>
+                    Label DE
+                    <input name="label_de" type="text" maxlength="120">
+                </label>
+                <label>
+                    Label EN
+                    <input name="label_en" type="text" maxlength="120">
+                </label>
+                <label>
+                    X
+                    <input name="x" type="number" min="0" max="{{ $map['width'] }}" step="any" required>
+                </label>
+                <label>
+                    Y
+                    <input name="y" type="number" min="0" max="{{ $map['height'] }}" step="any" required>
+                </label>
+                <label class="hh-admin-map-source-image" data-admin-map-source-image hidden>
+                    Source Image
+                    <input name="source_image" type="text" maxlength="255" placeholder="datei.webp">
+                </label>
+            </div>
+
+            <p class="hh-admin-map-form-error" data-admin-map-form-error role="alert" hidden></p>
+            <div class="hh-admin-map-form-actions">
+                <button class="hh-danger-button" type="button" data-admin-map-delete>Marker löschen</button>
+                <span></span>
+                <button class="hh-secondary-button" type="button" data-admin-map-cancel>Abbrechen</button>
+                <button class="hh-primary-button" type="submit">Speichern</button>
+            </div>
+        </form>
+    </dialog>
 @endsection
 
 @push('head')
     <link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}?v=1.9.4">
-    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/admin-maps.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/admin-maps.css') }}?v=2">
 @endpush
 
 @push('scripts')
     <script src="{{ asset('assets/vendor/leaflet/leaflet.js') }}?v=1.9.4"></script>
-    <script src="{{ asset('assets/hnt/maps/admin-maps.js') }}?v=1" defer></script>
+    <script src="{{ asset('assets/hnt/maps/admin-maps.js') }}?v=2" defer></script>
 @endpush
