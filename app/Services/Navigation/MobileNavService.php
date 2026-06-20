@@ -96,6 +96,7 @@ class MobileNavService
             ['menu_key' => 'teams', 'label_key' => 'ui.teams', 'route_name' => 'teams.index', 'match_pattern' => 'teams.*', 'phosphor_icon' => 'users-three', 'sort_order' => 30],
             ['menu_key' => 'profile_sheet', 'label_key' => 'ui.mobile_profile_nav', 'action' => self::PROFILE_SHEET_ACTION, 'match_pattern' => 'profile.*,account.*,settings.*,messages.*,notifications.*', 'phosphor_icon' => 'user-circle', 'sort_order' => 40],
             ['menu_key' => 'cups', 'label_key' => 'ui.cups', 'route_name' => 'cups.index', 'match_pattern' => 'cups.*', 'phosphor_icon' => 'trophy', 'sort_order' => 50, 'is_enabled' => true],
+            ['menu_key' => 'maps', 'label_key' => 'ui.maps', 'route_name' => 'maps.index', 'match_pattern' => 'maps.*', 'phosphor_icon' => 'map-trifold', 'sort_order' => 55, 'is_enabled' => false, 'admin_only' => false],
             ['menu_key' => 'moments', 'label_key' => 'ui.moments', 'route_name' => 'moments.index', 'match_pattern' => 'moments.*', 'phosphor_icon' => 'play-circle', 'sort_order' => 60, 'is_enabled' => false],
         ];
     }

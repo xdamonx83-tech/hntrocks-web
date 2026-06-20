@@ -73,6 +73,10 @@ class SidebarMenuService
     {
         $this->ensureDefaultItems();
 
+        if (! Schema::hasTable('sidebar_menu_items')) {
+            return [];
+        }
+
         return SidebarMenuItem::query()
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -94,6 +98,7 @@ class SidebarMenuService
             ['menu_key' => 'members', 'label_key' => 'ui.members', 'route_name' => 'members.index', 'match_pattern' => 'members.*', 'phosphor_icon' => 'users', 'section' => 'main', 'sort_order' => 50],
             ['menu_key' => 'lfg', 'label_key' => 'ui.lfg', 'route_name' => 'lfg.index', 'match_pattern' => 'lfg.*', 'phosphor_icon' => 'crosshair', 'section' => 'main', 'sort_order' => 60],
             ['menu_key' => 'team_lfg', 'label_key' => 'ui.team_lfg', 'route_name' => 'team-lfg.index', 'match_pattern' => 'team-lfg.*', 'phosphor_icon' => 'users-four', 'section' => 'main', 'sort_order' => 70],
+            ['menu_key' => 'maps', 'label_key' => 'ui.maps', 'route_name' => 'maps.index', 'match_pattern' => 'maps.*', 'phosphor_icon' => 'map-trifold', 'section' => 'main', 'sort_order' => 75, 'is_enabled' => true, 'admin_only' => false],
             ['menu_key' => 'moments', 'label_key' => 'ui.moments', 'route_name' => 'moments.index', 'match_pattern' => 'moments.*', 'phosphor_icon' => 'play-circle', 'section' => 'main', 'sort_order' => 80, 'is_enabled' => false],
             ['menu_key' => 'cups', 'label_key' => 'ui.cups', 'route_name' => 'cups.index', 'match_pattern' => 'cups.*', 'phosphor_icon' => 'trophy', 'section' => 'main', 'sort_order' => 90],
             ['menu_key' => 'media', 'label_key' => 'ui.media_library', 'route_name' => 'media.index', 'match_pattern' => 'media.*', 'phosphor_icon' => 'images', 'section' => 'account', 'sort_order' => 100],
