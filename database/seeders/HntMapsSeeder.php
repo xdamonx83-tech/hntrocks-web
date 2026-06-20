@@ -50,25 +50,21 @@ class HntMapsSeeder extends Seeder
                         ? 'source:'.$sourceId
                         : $this->hashedLegacyKey($markerData, $labels, $sourceImage);
 
-                    $identity = ['hnt_map_id' => $map->id, 'legacy_key' => $legacyKey];
-                    $existingMarker = HntMapMarker::query()->where($identity)->first();
-                    $values = [
-                        'source_id' => $sourceId,
-                        'type' => (string) $markerData['type'],
-                        'x' => (float) $markerData['x'],
-                        'y' => (float) $markerData['y'],
-                        'label_de' => $this->nullableString($labels['de'] ?? null),
-                        'label_en' => $this->nullableString($labels['en'] ?? null),
-                        'sort_order' => $index,
-                        'meta' => null,
-                    ];
-
-                    if ($existingMarker === null) {
-                        $values['source_image'] = $this->nullableString($sourceImage);
-                        $values['status'] = 'approved';
-                    }
-
-                    $marker = HntMapMarker::updateOrCreate($identity, $values);
+                    $marker = HntMapMarker::updateOrCreate(
+                        ['hnt_map_id' => $map->id, 'legacy_key' => $legacyKey],
+                        [
+                            'source_id' => $sourceId,
+                            'type' => (string) $markerData['type'],
+                            'x' => (float) $markerData['x'],
+                            'y' => (float) $markerData['y'],
+                            'label_de' => $this->nullableString($labels['de'] ?? null),
+                            'label_en' => $this->nullableString($labels['en'] ?? null),
+                            'source_image' => $this->nullableString($sourceImage),
+                            'status' => 'approved',
+                            'sort_order' => $index,
+                            'meta' => null,
+                        ]
+                    );
 
                     $marker->wasRecentlyCreated ? $inserted++ : $updated++;
                 }

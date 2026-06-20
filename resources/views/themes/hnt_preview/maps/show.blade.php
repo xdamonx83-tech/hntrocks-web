@@ -143,6 +143,16 @@
                     <input type="text" readonly data-map-share-url>
                 </label>
             </section>
+
+            <section class="hnt-map-tool-section">
+                <div class="hnt-map-tool-title">
+                    <span>{{ __('ui.maps_cash_spot_submit') }}</span>
+                    <small>{{ __('ui.maps_cash_spot_submit_help') }}</small>
+                </div>
+                <button type="button" class="hnt-map-tool-button" data-map-cash-spot-toggle aria-pressed="false">
+                    <i class="ph ph-map-pin-plus" aria-hidden="true"></i><span>{{ __('ui.maps_cash_spot_submit') }}</span>
+                </button>
+            </section>
         </div>
 
         <footer class="hnt-map-tools-footer">
@@ -172,6 +182,7 @@
         @else
             <div id="hntMap" class="hnt-map-canvas" aria-label="{{ __('ui.maps_canvas_aria', ['map' => $map['name']]) }}"></div>
             <p class="hnt-map-measure-hint" data-map-measure-hint hidden>{{ __('ui.maps_measure_point_a') }}</p>
+            <p class="hnt-map-measure-hint" data-map-cash-spot-hint hidden>{{ __('ui.maps_cash_spot_select') }}</p>
             @if(empty($markers))
                 <p class="hnt-map-empty-markers">{{ __('ui.maps_no_markers') }}</p>
             @endif
@@ -194,18 +205,38 @@
                 'measureMarkerAText' => __('ui.maps_measure_marker_a'),
                 'measureMarkerBText' => __('ui.maps_measure_marker_b'),
                 'shareSuccessText' => __('ui.maps_share_success'),
+                'cashSpotSubmissionUrl' => $map['cash_spot_submission_url'],
                 'cashScreenshotText' => __('ui.maps_cash_screenshot'),
                 'cashScreenshotErrorText' => __('ui.maps_cash_screenshot_error'),
-                'cashUploadActionText' => __('ui.maps_cash_upload_action'),
-                'cashUploadHelpText' => __('ui.maps_cash_upload_help'),
-                'cashUploadFileLabel' => __('ui.maps_cash_upload_file'),
-                'cashUploadNameLabel' => __('ui.maps_cash_upload_name'),
-                'cashUploadEmailLabel' => __('ui.maps_cash_upload_email'),
-                'cashUploadRunningText' => __('ui.maps_cash_upload_running'),
-                'cashUploadPendingText' => __('ui.maps_cash_upload_pending'),
-                'cashUploadErrorText' => __('ui.maps_cash_upload_error'),
+                'cashSpotSelectText' => __('ui.maps_cash_spot_select'),
+                'cashSpotRunningText' => __('ui.maps_cash_spot_running'),
+                'cashSpotPendingText' => __('ui.maps_cash_spot_pending'),
+                'cashSpotErrorText' => __('ui.maps_cash_spot_error'),
                 'closeText' => __('ui.maps_close'),
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+
+            <div class="hnt-map-lightbox hnt-map-cash-submission-modal" data-map-cash-spot-modal hidden>
+                <div class="hnt-map-lightbox-panel hnt-map-cash-submission-panel" role="dialog" aria-modal="true" aria-labelledby="hntCashSpotSubmissionTitle">
+                    <header class="hnt-map-lightbox-header">
+                        <h2 id="hntCashSpotSubmissionTitle">{{ __('ui.maps_cash_spot_form_title') }}</h2>
+                        <button type="button" class="hnt-map-lightbox-close" data-map-cash-spot-cancel aria-label="{{ __('ui.maps_close') }}"><i class="ph ph-x" aria-hidden="true"></i></button>
+                    </header>
+                    <form class="hnt-map-cash-submission-form" data-map-cash-spot-form>
+                        <p>{{ __('ui.maps_cash_spot_form_help') }}</p>
+                        <input type="hidden" name="x">
+                        <input type="hidden" name="y">
+                        <label><span>{{ __('ui.maps_cash_spot_screenshot') }}</span><input type="file" name="image" accept="image/jpeg,image/png,image/webp" required></label>
+                        <label><span>{{ __('ui.maps_cash_spot_name') }}</span><input type="text" name="submitter_name" maxlength="80"></label>
+                        <label><span>{{ __('ui.maps_cash_spot_email') }}</span><input type="email" name="submitter_email" maxlength="160"></label>
+                        <input class="hnt-map-upload-honeypot" type="text" name="website" maxlength="120" tabindex="-1" autocomplete="off" aria-hidden="true">
+                        <p class="hnt-map-cash-submission-status" data-map-cash-spot-status role="status"></p>
+                        <div class="hnt-map-cash-submission-actions">
+                            <button type="button" class="hnt-map-popup-action" data-map-cash-spot-cancel>{{ __('ui.maps_cash_spot_cancel') }}</button>
+                            <button type="submit" class="hnt-map-popup-action">{{ __('ui.maps_cash_spot_send') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         @endif
 
         <p class="hnt-map-toast" data-map-toast role="status" hidden></p>

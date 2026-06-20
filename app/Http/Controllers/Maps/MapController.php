@@ -92,6 +92,7 @@ class MapController extends Controller
                 'slug' => $slug,
                 'image_url' => asset($map['image']),
                 'lines_url' => $linesAvailable ? asset($map['lines']) : null,
+                'cash_spot_submission_url' => route('maps.cash-spots.store', ['map' => $slug]),
             ],
             'markers' => $data['markers'],
             'markerTypes' => self::MARKER_TYPES,
@@ -144,6 +145,10 @@ class MapController extends Controller
                 ->orderBy('id')
                 ->get();
 
+            if ($markers->isEmpty()) {
+                return null;
+            }
+
             return $markers->map(fn ($marker): ?array => $this->safeMarker([
                 'type' => $marker->type,
                 'x' => $marker->x,
@@ -153,9 +158,6 @@ class MapController extends Controller
                     'en' => $marker->label_en,
                 ],
                 'source_image' => $marker->source_image,
-                'upload_url' => $marker->type === 'cash'
-                    ? route('maps.markers.images.store', $marker)
-                    : null,
             ]))->filter()->values()->all();
         } catch (Throwable) {
             return null;
@@ -186,11 +188,6 @@ class MapController extends Controller
         $markers = [];
 
         foreach ($decoded['markers'] as $marker) {
-            if (is_array($marker)) {
-                // Legacy JSON locates markers, but never authorizes a public image.
-                unset($marker['source_image'], $marker['image_url']);
-            }
-
             $safeMarker = is_array($marker) ? $this->safeMarker($marker) : null;
 
             if ($safeMarker !== null) {
@@ -228,10 +225,6 @@ class MapController extends Controller
 
             if ($imageUrl !== null) {
                 $safeMarker['image_url'] = $imageUrl;
-            }
-
-            if (is_string($marker['upload_url'] ?? null)) {
-                $safeMarker['upload_url'] = $marker['upload_url'];
             }
         }
 

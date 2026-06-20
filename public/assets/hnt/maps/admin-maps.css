@@ -200,64 +200,8 @@
     width: 100%;
 }
 
-.hh-admin-map-moderation {
-    display: grid;
-    gap: 20px;
-    margin-top: 24px;
-    padding: 24px;
-}
-
-.hh-admin-map-moderation-heading {
-    align-items: start;
-    display: flex;
-    gap: 16px;
-    justify-content: space-between;
-}
-
-.hh-admin-map-moderation-heading h2,
-.hh-admin-map-moderation-heading p,
-.hh-admin-map-upload-group h3,
-.hh-admin-map-upload-group p {
-    margin: 0;
-}
-
-.hh-admin-map-upload-group {
-    border-top: 1px solid #ded8ce;
-    display: grid;
-    gap: 12px;
-    padding-top: 18px;
-}
-
-.hh-admin-map-upload-grid {
-    display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-}
-
-.hh-admin-map-upload-card {
-    border: 1px solid #ded8ce;
-    border-radius: 12px;
-    display: grid;
-    gap: 12px;
-    overflow: hidden;
-    padding: 12px;
-}
-
-.hh-admin-map-upload-card img {
-    aspect-ratio: 16 / 9;
-    display: block;
-    object-fit: cover;
-    width: 100%;
-}
-
-.hh-admin-map-upload-card > div:not(.hh-admin-map-upload-actions) {
-    display: grid;
-    gap: 4px;
-}
-
-.hh-admin-map-upload-card span {
-    color: #6f685e;
-    font-size: 13px;
+.hh-admin-map-source-image {
+    grid-column: 1 / -1;
 }
 
 .hh-admin-map-upload-actions {

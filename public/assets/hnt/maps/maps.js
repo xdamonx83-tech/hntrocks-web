@@ -269,107 +269,6 @@
         type.textContent = config.typeLabels[marker.type] || marker.type;
         popup.appendChild(title);
         popup.appendChild(type);
-
-        if (marker.type === 'cash' && marker.image_url) {
-            var imageButton = document.createElement('button');
-            imageButton.type = 'button';
-            imageButton.className = 'hnt-map-popup-action';
-            imageButton.textContent = config.cashScreenshotText;
-            imageButton.addEventListener('click', function () {
-                openScreenshotModal(marker, imageButton);
-            });
-            popup.appendChild(imageButton);
-        }
-
-        if (marker.type === 'cash' && marker.upload_url) {
-            var uploadForm = document.createElement('form');
-            var uploadHelp = document.createElement('span');
-            var uploadFileLabel = document.createElement('label');
-            var uploadFileLabelText = document.createElement('span');
-            var uploadInput = document.createElement('input');
-            var uploadNameLabel = document.createElement('label');
-            var uploadNameLabelText = document.createElement('span');
-            var uploadNameInput = document.createElement('input');
-            var uploadEmailLabel = document.createElement('label');
-            var uploadEmailLabelText = document.createElement('span');
-            var uploadEmailInput = document.createElement('input');
-            var uploadHoneypot = document.createElement('input');
-            var uploadButton = document.createElement('button');
-            var uploadStatus = document.createElement('span');
-            uploadForm.className = 'hnt-map-popup-upload';
-            uploadHelp.textContent = config.cashUploadHelpText;
-            uploadFileLabelText.textContent = config.cashUploadFileLabel;
-            uploadInput.type = 'file';
-            uploadInput.name = 'image';
-            uploadInput.accept = 'image/jpeg,image/png,image/webp';
-            uploadInput.required = true;
-            uploadNameLabelText.textContent = config.cashUploadNameLabel;
-            uploadNameInput.type = 'text';
-            uploadNameInput.name = 'submitter_name';
-            uploadNameInput.maxLength = 80;
-            uploadEmailLabelText.textContent = config.cashUploadEmailLabel;
-            uploadEmailInput.type = 'email';
-            uploadEmailInput.name = 'submitter_email';
-            uploadEmailInput.maxLength = 160;
-            uploadHoneypot.type = 'text';
-            uploadHoneypot.name = 'website';
-            uploadHoneypot.maxLength = 120;
-            uploadHoneypot.tabIndex = -1;
-            uploadHoneypot.autocomplete = 'off';
-            uploadHoneypot.setAttribute('aria-hidden', 'true');
-            uploadHoneypot.className = 'hnt-map-upload-honeypot';
-            uploadButton.type = 'submit';
-            uploadButton.className = 'hnt-map-popup-action';
-            uploadButton.textContent = config.cashUploadActionText;
-            uploadStatus.setAttribute('role', 'status');
-            uploadFileLabel.appendChild(uploadFileLabelText);
-            uploadFileLabel.appendChild(uploadInput);
-            uploadNameLabel.appendChild(uploadNameLabelText);
-            uploadNameLabel.appendChild(uploadNameInput);
-            uploadEmailLabel.appendChild(uploadEmailLabelText);
-            uploadEmailLabel.appendChild(uploadEmailInput);
-            uploadForm.appendChild(uploadHelp);
-            uploadForm.appendChild(uploadFileLabel);
-            uploadForm.appendChild(uploadNameLabel);
-            uploadForm.appendChild(uploadEmailLabel);
-            uploadForm.appendChild(uploadHoneypot);
-            uploadForm.appendChild(uploadButton);
-            uploadForm.appendChild(uploadStatus);
-            uploadForm.addEventListener('submit', function (event) {
-                event.preventDefault();
-                uploadButton.disabled = true;
-                uploadStatus.textContent = config.cashUploadRunningText;
-
-                fetch(marker.upload_url, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                    },
-                    body: new FormData(uploadForm),
-                    credentials: 'same-origin'
-                }).then(function (response) {
-                    return response.json().catch(function () { return {}; }).then(function (payload) {
-                        if (!response.ok) {
-                            var errors = payload.errors || {};
-                            var firstError = Object.keys(errors).length ? errors[Object.keys(errors)[0]][0] : null;
-                            throw new Error(firstError || payload.message || config.cashUploadErrorText);
-                        }
-
-                        return payload;
-                    });
-                }).then(function () {
-                    uploadForm.reset();
-                    uploadStatus.textContent = config.cashUploadPendingText;
-                }).catch(function (error) {
-                    uploadStatus.textContent = error.message || config.cashUploadErrorText;
-                }).finally(function () {
-                    uploadButton.disabled = false;
-                });
-            });
-            popup.appendChild(uploadForm);
-        }
-
         point.bindPopup(popup);
 
         if (marker.type === 'compound') {
@@ -387,6 +286,10 @@
             point.on('click', function () { toggleBossRings(point); });
         }
 
+        if (marker.type === 'cash' && marker.image_url) {
+            point.on('click', function () { openScreenshotModal(marker, point.getElement()); });
+        }
+
         point.addTo(layers[marker.type]);
         markerReferences.push({
             marker: marker,
@@ -394,6 +297,129 @@
             label: marker.label,
             typeLabel: config.typeLabels[marker.type] || marker.type
         });
+    });
+
+    var cashSpotToggle = document.querySelector('[data-map-cash-spot-toggle]');
+    var cashSpotHint = document.querySelector('[data-map-cash-spot-hint]');
+    var cashSpotModal = document.querySelector('[data-map-cash-spot-modal]');
+    var cashSpotForm = document.querySelector('[data-map-cash-spot-form]');
+    var cashSpotStatus = document.querySelector('[data-map-cash-spot-status]');
+    var cashSpotMode = false;
+    var cashSpotDraft = null;
+
+    function clearCashSpotDraft() {
+        if (cashSpotDraft) {
+            map.removeLayer(cashSpotDraft);
+            cashSpotDraft = null;
+        }
+    }
+
+    function setCashSpotMode(active) {
+        cashSpotMode = active;
+        clearCashSpotDraft();
+        mapElement.classList.toggle('is-cash-spot-submitting', active);
+        cashSpotToggle?.classList.toggle('is-active', active);
+        cashSpotToggle?.setAttribute('aria-pressed', active ? 'true' : 'false');
+        if (cashSpotHint) {
+            cashSpotHint.hidden = !active;
+            cashSpotHint.textContent = config.cashSpotSelectText;
+        }
+    }
+
+    function closeCashSpotModal(cancelMode) {
+        if (cashSpotModal) {
+            cashSpotModal.hidden = true;
+        }
+        document.body.classList.remove('hnt-map-lightbox-open');
+        if (cashSpotStatus) {
+            cashSpotStatus.textContent = '';
+        }
+        if (cancelMode) {
+            cashSpotForm?.reset();
+            setCashSpotMode(false);
+        }
+    }
+
+    function openCashSpotModal(latlng) {
+        if (!cashSpotModal || !cashSpotForm) {
+            return;
+        }
+
+        cashSpotForm.elements.x.value = latlng.lng.toFixed(6);
+        cashSpotForm.elements.y.value = latlng.lat.toFixed(6);
+        cashSpotModal.hidden = false;
+        document.body.classList.add('hnt-map-lightbox-open');
+        cashSpotForm.elements.image.focus();
+    }
+
+    cashSpotToggle?.addEventListener('click', function () {
+        if (!cashSpotMode && typeof setMeasuring === 'function') {
+            setMeasuring(false, config.measureIdleText);
+        }
+        setCashSpotMode(!cashSpotMode);
+
+        if (cashSpotMode && window.matchMedia('(max-width: 768px)').matches) {
+            setToolsOpen(false);
+            window.setTimeout(function () { map.invalidateSize(); }, 240);
+        }
+    });
+
+    map.on('click', function (event) {
+        if (!cashSpotMode || !bounds.contains(event.latlng)) {
+            return;
+        }
+
+        clearCashSpotDraft();
+        cashSpotDraft = window.L.marker(event.latlng, {icon: markerIcon('cash'), interactive: false}).addTo(map);
+        openCashSpotModal(event.latlng);
+    });
+
+    document.querySelectorAll('[data-map-cash-spot-cancel]').forEach(function (button) {
+        button.addEventListener('click', function () { closeCashSpotModal(true); });
+    });
+
+    cashSpotModal?.addEventListener('click', function (event) {
+        if (event.target === cashSpotModal) {
+            closeCashSpotModal(true);
+        }
+    });
+
+    cashSpotForm?.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var submitButton = cashSpotForm.querySelector('[type="submit"]');
+        submitButton.disabled = true;
+        cashSpotStatus.textContent = config.cashSpotRunningText;
+
+        fetch(config.cashSpotSubmissionUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: new FormData(cashSpotForm),
+            credentials: 'same-origin'
+        }).then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (payload) {
+                if (!response.ok) {
+                    var errors = payload.errors || {};
+                    var firstError = Object.keys(errors).length ? errors[Object.keys(errors)[0]][0] : null;
+                    throw new Error(firstError || payload.message || config.cashSpotErrorText);
+                }
+            });
+        }).then(function () {
+            closeCashSpotModal(true);
+            showMapToast(config.cashSpotPendingText);
+        }).catch(function (error) {
+            cashSpotStatus.textContent = error.message || config.cashSpotErrorText;
+        }).finally(function () {
+            submitButton.disabled = false;
+        });
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && cashSpotModal && !cashSpotModal.hidden) {
+            closeCashSpotModal(true);
+        }
     });
 
     document.querySelectorAll('[data-map-filter]').forEach(function (input) {
@@ -686,6 +712,9 @@ function matchesSearch(reference, queryForms) {
     }
 
     measureToggle?.addEventListener('click', function () {
+        if (!measuring && cashSpotMode) {
+            closeCashSpotModal(true);
+        }
         setMeasuring(!measuring, measuring ? config.measureIdleText : config.measurePointAText);
 
         if (measuring && window.matchMedia('(max-width: 768px)').matches) {
@@ -796,6 +825,7 @@ function matchesSearch(reference, queryForms) {
     }
 
     document.querySelector('[data-map-reset]')?.addEventListener('click', function () {
+        closeCashSpotModal(true);
         resetMapView();
         setToolsOpen(false);
     });

@@ -29,6 +29,7 @@
     var formMode = document.querySelector('[data-admin-map-form-mode]');
     var formTitle = document.querySelector('[data-admin-map-form-title]');
     var formError = document.querySelector('[data-admin-map-form-error]');
+    var sourceImageField = document.querySelector('[data-admin-map-source-image]');
     var deleteButton = document.querySelector('[data-admin-map-delete]');
     var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
     var markerReferences = [];
@@ -233,13 +234,23 @@
         });
     }
 
+    function setSourceImageVisibility() {
+        if (!form || !sourceImageField) {
+            return;
+        }
+
+        sourceImageField.hidden = form.elements.type.value !== 'cash';
+    }
+
     function setFormValues(marker) {
         form.elements.type.value = marker.type || 'compound';
         form.elements.status.value = marker.status || 'approved';
         form.elements.label_de.value = marker.label_de || '';
         form.elements.label_en.value = marker.label_en || '';
+        form.elements.source_image.value = marker.source_image || '';
         form.elements.x.value = Number(marker.x).toFixed(6);
         form.elements.y.value = Number(marker.y).toFixed(6);
+        setSourceImageVisibility();
     }
 
     function showDialog() {
@@ -316,6 +327,7 @@
             status: form.elements.status.value,
             label_de: form.elements.label_de.value || null,
             label_en: form.elements.label_en.value || null,
+            source_image: form.elements.type.value === 'cash' ? (form.elements.source_image.value || null) : null,
             x: clamp(form.elements.x.value, width),
             y: clamp(form.elements.y.value, height)
         };
@@ -348,6 +360,8 @@
     });
 
     form?.elements.type.addEventListener('change', function () {
+        setSourceImageVisibility();
+
         if (!selectedReference && draftLayer) {
             draftLayer.setIcon(markerIcon(form.elements.type.value));
         }

@@ -9,7 +9,7 @@
         ['label' => 'Inhalte', 'route' => 'admin.content.index', 'active' => 'admin.content.*', 'icon' => 'IN'],
         ['label' => 'Hunt-News', 'route' => 'admin.hunt-news.index', 'active' => 'admin.hunt-news.*', 'icon' => 'HN'],
         ['label' => 'HNT Maps', 'route' => 'admin.maps.index', 'active' => ['admin.maps.index', 'admin.maps.markers*'], 'icon' => 'MP'],
-        ['label' => 'Cash Uploads', 'route' => 'admin.maps.uploads.index', 'active' => 'admin.maps.uploads.*', 'icon' => 'CU'],
+        ['label' => 'Kassenspots', 'route' => 'admin.maps.cash-spots.index', 'active' => 'admin.maps.cash-spots.*', 'icon' => 'KS'],
         ['label' => 'HNT-Aufträge', 'route' => 'admin.contracts.index', 'active' => 'admin.contracts.*', 'icon' => 'AU'],
         ['label' => 'Loadout-Challenges', 'route' => 'admin.loadout-challenges.index', 'active' => 'admin.loadout-challenges.*', 'icon' => 'LC'],
         ['label' => 'Externe Links', 'route' => 'admin.outbound-links.index', 'active' => 'admin.outbound-links.*', 'icon' => 'OL'],

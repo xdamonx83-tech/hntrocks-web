@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class HntMapMarkerUpload extends Model
+class HntMapCashSpotSubmission extends Model
 {
     public const STATUS_PENDING = 'pending';
 
@@ -13,33 +13,41 @@ class HntMapMarkerUpload extends Model
 
     public const STATUS_REJECTED = 'rejected';
 
-    public const STATUS_SUPERSEDED = 'superseded';
-
     protected $fillable = [
+        'hnt_map_id',
         'hnt_map_marker_id',
-        'uploaded_by',
+        'user_id',
         'reviewed_by',
-        'submitter_name',
-        'submitter_email',
-        'ip_hash',
-        'user_agent_hash',
+        'x',
+        'y',
+        'status',
         'disk',
         'path',
         'public_path',
         'original_name',
         'mime_type',
         'size',
-        'status',
-        'rejection_reason',
+        'submitter_name',
+        'submitter_email',
+        'ip_hash',
+        'user_agent_hash',
         'reviewed_at',
+        'rejection_reason',
     ];
 
     protected function casts(): array
     {
         return [
+            'x' => 'float',
+            'y' => 'float',
             'size' => 'integer',
             'reviewed_at' => 'datetime',
         ];
+    }
+
+    public function map(): BelongsTo
+    {
+        return $this->belongsTo(HntMap::class, 'hnt_map_id');
     }
 
     public function marker(): BelongsTo
@@ -47,9 +55,9 @@ class HntMapMarkerUpload extends Model
         return $this->belongsTo(HntMapMarker::class, 'hnt_map_marker_id');
     }
 
-    public function uploader(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->belongsTo(User::class);
     }
 
     public function reviewer(): BelongsTo
