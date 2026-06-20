@@ -14,6 +14,7 @@ return [
     'open_menu' => 'Open menu',
     'overview' => 'Overview',
     'feed' => 'Newsfeed',
+    'maps' => 'HNT Maps',
     'members' => 'Players',
     'teams' => 'Teams',
     'manage_teams' => 'Manage Teams',

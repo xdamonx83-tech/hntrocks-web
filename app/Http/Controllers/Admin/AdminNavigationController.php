@@ -9,6 +9,7 @@ use App\Services\Navigation\MobileNavService;
 use App\Services\Navigation\SidebarMenuService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -21,12 +22,18 @@ class AdminNavigationController extends Controller
         return view('admin.navigation.index', [
             'items' => $sidebarMenu->adminItems(),
             'mobileItems' => $mobileNav->adminItems(),
+            'sidebarNavigationAvailable' => Schema::hasTable('sidebar_menu_items'),
+            'mobileNavigationAvailable' => Schema::hasTable('mobile_nav_items'),
         ]);
     }
 
     public function update(Request $request): RedirectResponse
     {
         $this->guardAdmin($request);
+
+        if (! Schema::hasTable('sidebar_menu_items')) {
+            return $this->missingNavigationTable('sidebar_menu_items');
+        }
 
         $validated = $request->validate([
             'items' => ['array'],
@@ -76,6 +83,10 @@ class AdminNavigationController extends Controller
     {
         $this->guardAdmin($request);
 
+        if (! Schema::hasTable('sidebar_menu_items')) {
+            return $this->missingNavigationTable('sidebar_menu_items');
+        }
+
         $validated = $request->validate([
             'label' => ['required', 'string', 'max:80'],
             'url' => ['required', 'string', 'max:2048'],
@@ -108,6 +119,10 @@ class AdminNavigationController extends Controller
     public function updateMobile(Request $request): RedirectResponse
     {
         $this->guardAdmin($request);
+
+        if (! Schema::hasTable('mobile_nav_items')) {
+            return $this->missingNavigationTable('mobile_nav_items');
+        }
 
         $validated = $request->validate([
             'mobile_items' => ['array'],
@@ -151,6 +166,10 @@ class AdminNavigationController extends Controller
     public function storeMobile(Request $request, MobileNavService $mobileNav): RedirectResponse
     {
         $this->guardAdmin($request);
+
+        if (! Schema::hasTable('mobile_nav_items')) {
+            return $this->missingNavigationTable('mobile_nav_items');
+        }
 
         $validated = $request->validate([
             'label' => ['required', 'string', 'max:80'],
@@ -204,5 +223,12 @@ class AdminNavigationController extends Controller
     private function guardAdmin(Request $request): void
     {
         abort_unless($request->user()?->isAdmin(), 403);
+    }
+
+    private function missingNavigationTable(string $table): RedirectResponse
+    {
+        return redirect()
+            ->route('admin.navigation.index')
+            ->withErrors(['navigation' => "Die Navigationstabelle {$table} fehlt. Bitte die Migrationen ausführen."]);
     }
 }

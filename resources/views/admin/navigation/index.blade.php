@@ -6,6 +6,8 @@
 
 @section('content')
 @php($mobileItems = $mobileItems ?? [])
+@php($sidebarNavigationAvailable = $sidebarNavigationAvailable ?? true)
+@php($mobileNavigationAvailable = $mobileNavigationAvailable ?? true)
 <section class="hh-page-header">
     <div>
         <p class="hh-kicker">Admin · Navigation</p>
@@ -28,13 +30,22 @@
     </div>
 @endif
 
+@if(! $sidebarNavigationAvailable || ! $mobileNavigationAvailable)
+    <div class="hh-alert hh-alert-danger">
+        Die Navigation ist noch nicht vollständig initialisiert. Fehlende Migration:
+        @if(! $sidebarNavigationAvailable)<code>sidebar_menu_items</code>@endif
+        @if(! $sidebarNavigationAvailable && ! $mobileNavigationAvailable) / @endif
+        @if(! $mobileNavigationAvailable)<code>mobile_nav_items</code>@endif
+    </div>
+@endif
+
 <section class="hh-card hh-card-compact">
     <div class="hh-card-title-row">
         <div>
             <h2>Linke Sidebar & Desktop-Header</h2>
             <p class="hh-muted">Systempunkte nutzen echte Laravel-Routen. Die wichtigsten Hauptmenüpunkte steuern zusätzlich die Desktop-Header-Navigation.</p>
         </div>
-        <button class="hh-primary-button" type="submit" form="hh-admin-navigation-form">Speichern</button>
+        <button class="hh-primary-button" type="submit" form="hh-admin-navigation-form" @disabled(! $sidebarNavigationAvailable)>Speichern</button>
     </div>
 
     <form id="hh-admin-navigation-form" method="post" action="{{ route('admin.navigation.update') }}">
@@ -159,7 +170,7 @@
             <h2>Mobile Bottom-Bar</h2>
             <p class="hh-muted">Konfiguration für die feste mobile Leiste. Der Punkt „Profil“ ist ein Spezialpunkt und öffnet das mobile Profil-Sheet statt eine Seite direkt aufzurufen.</p>
         </div>
-        <button class="hh-primary-button" type="submit" form="hh-admin-mobile-navigation-form">Speichern</button>
+        <button class="hh-primary-button" type="submit" form="hh-admin-mobile-navigation-form" @disabled(! $mobileNavigationAvailable)>Speichern</button>
     </div>
 
     <form id="hh-admin-mobile-navigation-form" method="post" action="{{ route('admin.navigation.mobile.update') }}">
