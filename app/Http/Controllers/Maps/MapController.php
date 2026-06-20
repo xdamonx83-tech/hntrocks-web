@@ -10,10 +10,34 @@ use Throwable;
 class MapController extends Controller
 {
     private const MAPS = [
+        'stillwater-bayou' => [
+            'name' => 'Stillwater Bayou',
+            'width' => 2048,
+            'height' => 2048,
+            'image' => 'assets/hnt/maps/stillwater-bayou/map.webp',
+            'lines' => 'assets/hnt/maps/stillwater-bayou/lines.png',
+            'data' => 'maps/stillwater-bayou.json',
+        ],
+        'lawson-delta' => [
+            'name' => 'Lawson Delta',
+            'width' => 2048,
+            'height' => 2048,
+            'image' => 'assets/hnt/maps/lawson-delta/map.webp',
+            'lines' => 'assets/hnt/maps/lawson-delta/lines.png',
+            'data' => 'maps/lawson-delta.json',
+        ],
+        'desalle' => [
+            'name' => 'DeSalle',
+            'width' => 2048,
+            'height' => 2048,
+            'image' => 'assets/hnt/maps/desalle/map.webp',
+            'lines' => 'assets/hnt/maps/desalle/lines.png',
+            'data' => 'maps/desalle.json',
+        ],
         'mammons-gulch' => [
             'name' => "Mammon's Gulch",
-            'width' => 1600,
-            'height' => 1000,
+            'width' => 2048,
+            'height' => 2048,
             'image' => 'assets/hnt/maps/mammons-gulch/map.webp',
             'lines' => 'assets/hnt/maps/mammons-gulch/lines.png',
             'data' => 'maps/mammons-gulch.json',
