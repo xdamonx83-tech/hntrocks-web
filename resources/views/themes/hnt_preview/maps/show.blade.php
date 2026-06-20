@@ -1,6 +1,13 @@
 @extends('themes.hnt_preview.maps.layout')
 
-@section('title', $map['name'].' · HNT Maps')
+@section('title', __('ui.maps_detail_meta_title', ['map' => $map['name']]))
+@section('robots', 'index,follow')
+@section('meta_description', __('ui.maps_detail_meta_description', ['map' => $map['name']]))
+@section('canonical', route('maps.show', $map['slug']))
+@section('og_title', __('ui.maps_detail_og_title', ['map' => $map['name']]))
+@section('og_description', __('ui.maps_detail_og_description', ['map' => $map['name']]))
+@section('og_url', route('maps.show', $map['slug']))
+@section('og_image', asset($map['image']))
 
 @section('content')
 @php
