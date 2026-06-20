@@ -32,6 +32,41 @@ class AdminMapController extends Controller
         return view('admin.maps.index', compact('maps'));
     }
 
+    public function cashUploads(Request $request): View
+    {
+        $this->guardAdmin($request);
+
+        $allowedStatuses = [
+            HntMapMarkerUpload::STATUS_PENDING,
+            HntMapMarkerUpload::STATUS_APPROVED,
+            HntMapMarkerUpload::STATUS_REJECTED,
+            HntMapMarkerUpload::STATUS_SUPERSEDED,
+            'all',
+        ];
+        $status = in_array($request->query('status'), $allowedStatuses, true)
+            ? (string) $request->query('status')
+            : HntMapMarkerUpload::STATUS_PENDING;
+        $cashUploads = HntMapMarkerUpload::query()
+            ->with(['marker.map', 'uploader:id,username', 'reviewer:id,username'])
+            ->whereHas('marker', fn ($query) => $query->where('type', 'cash'))
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            ->orderByRaw("case when status = 'pending' then 0 else 1 end")
+            ->latest('id')
+            ->get();
+
+        return view('admin.maps.cash-uploads', [
+            'cashUploads' => $cashUploads,
+            'status' => $status,
+            'statusOptions' => [
+                HntMapMarkerUpload::STATUS_PENDING => 'Pending',
+                HntMapMarkerUpload::STATUS_APPROVED => 'Approved',
+                HntMapMarkerUpload::STATUS_REJECTED => 'Rejected',
+                HntMapMarkerUpload::STATUS_SUPERSEDED => 'Superseded',
+                'all' => 'Alle',
+            ],
+        ]);
+    }
+
     public function markers(Request $request, HntMap $map): View
     {
         $this->guardAdmin($request);

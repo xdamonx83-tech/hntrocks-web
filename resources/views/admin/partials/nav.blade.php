@@ -8,7 +8,8 @@
         ['label' => 'Moment der Woche', 'route' => 'admin.moment-of-week.index', 'active' => 'admin.moment-of-week.*', 'icon' => 'MW'],
         ['label' => 'Inhalte', 'route' => 'admin.content.index', 'active' => 'admin.content.*', 'icon' => 'IN'],
         ['label' => 'Hunt-News', 'route' => 'admin.hunt-news.index', 'active' => 'admin.hunt-news.*', 'icon' => 'HN'],
-        ['label' => 'HNT Maps', 'route' => 'admin.maps.index', 'active' => 'admin.maps.*', 'icon' => 'MP'],
+        ['label' => 'HNT Maps', 'route' => 'admin.maps.index', 'active' => ['admin.maps.index', 'admin.maps.markers*'], 'icon' => 'MP'],
+        ['label' => 'Cash Uploads', 'route' => 'admin.maps.uploads.index', 'active' => 'admin.maps.uploads.*', 'icon' => 'CU'],
         ['label' => 'HNT-Aufträge', 'route' => 'admin.contracts.index', 'active' => 'admin.contracts.*', 'icon' => 'AU'],
         ['label' => 'Loadout-Challenges', 'route' => 'admin.loadout-challenges.index', 'active' => 'admin.loadout-challenges.*', 'icon' => 'LC'],
         ['label' => 'Externe Links', 'route' => 'admin.outbound-links.index', 'active' => 'admin.outbound-links.*', 'icon' => 'OL'],
@@ -24,7 +25,7 @@
     <span class="hnt-admin-nav-title">Main Menu</span>
     @foreach($adminNav as $item)
         @if(\Illuminate\Support\Facades\Route::has($item['route']))
-            <a href="{{ route($item['route']) }}" @class(['is-active' => request()->routeIs($item['active'])])>
+            <a href="{{ route($item['route']) }}" @class(['is-active' => request()->routeIs(...(array) $item['active'])])>
                 <span class="hnt-admin-nav-icon">{{ $item['icon'] }}</span>
                 <span>{{ $item['label'] }}</span>
             </a>

@@ -315,8 +315,10 @@ body.hnt-map-workspace-body {
     padding: 7px 9px;
 }
 .hnt-map-popup-upload { display: grid; gap: 6px; margin-top: 6px; }
-.hnt-map-popup-upload input { max-width: 220px; }
+.hnt-map-popup-upload label { display: grid; gap: 3px; }
+.hnt-map-popup-upload input { box-sizing: border-box; max-width: 220px; width: 100%; }
 .hnt-map-popup-upload span { max-width: 220px; }
+.hnt-map-upload-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; }
 .hnt-map-canvas .hnt-map-icon-marker {
     border: 0;
     background: transparent;

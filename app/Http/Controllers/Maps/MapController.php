@@ -153,7 +153,7 @@ class MapController extends Controller
                     'en' => $marker->label_en,
                 ],
                 'source_image' => $marker->source_image,
-                'upload_url' => $marker->type === 'cash' && auth()->check()
+                'upload_url' => $marker->type === 'cash'
                     ? route('maps.markers.images.store', $marker)
                     : null,
             ]))->filter()->values()->all();

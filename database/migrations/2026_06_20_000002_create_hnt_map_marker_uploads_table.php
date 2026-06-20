@@ -13,6 +13,10 @@ return new class extends Migration
             $table->foreignId('hnt_map_marker_id')->constrained('hnt_map_markers')->cascadeOnDelete();
             $table->foreignId('uploaded_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('submitter_name', 80)->nullable();
+            $table->string('submitter_email', 160)->nullable();
+            $table->string('ip_hash', 64)->nullable();
+            $table->string('user_agent_hash', 64)->nullable();
             $table->string('disk')->default('local');
             $table->string('path');
             $table->string('public_path')->nullable();

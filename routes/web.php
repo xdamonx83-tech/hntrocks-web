@@ -126,6 +126,9 @@ Route::get('/maps', [MapController::class, 'index'])->name('maps.index');
 Route::get('/maps/{slug}', [MapController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('maps.show');
+Route::post('/maps/markers/{marker}/images', [MapMarkerUploadController::class, 'store'])
+    ->middleware('throttle:4,1')
+    ->name('maps.markers.images.store');
 
 Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
 Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
@@ -363,9 +366,6 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::post('/presence/heartbeat', PresenceHeartbeatController::class)->middleware('throttle:20,1')->name('presence.heartbeat');
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
-    Route::post('/maps/markers/{marker}/images', [MapMarkerUploadController::class, 'store'])
-        ->middleware('throttle:10,1')
-        ->name('maps.markers.images.store');
     Route::get('/mentions/search', [MentionController::class, 'search'])->name('mentions.search');
     Route::get('/socialite/header/live-badges', [HeaderLiveController::class, 'badges'])->name('socialite.header.live-badges');
     Route::get('/socialite/header/notifications', [HeaderLiveController::class, 'notifications'])->name('socialite.header.notifications');
@@ -588,6 +588,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/hunt-news/{item}/publish', [AdminHuntNewsController::class, 'publish'])->name('hunt-news.publish');
         Route::post('/hunt-news/{item}/skip', [AdminHuntNewsController::class, 'skip'])->name('hunt-news.skip');
         Route::get('/maps', [AdminMapController::class, 'index'])->name('maps.index');
+        Route::get('/maps/cash-uploads', [AdminMapController::class, 'cashUploads'])->name('maps.uploads.index');
         Route::get('/maps/{map:slug}/markers', [AdminMapController::class, 'markers'])->name('maps.markers');
         Route::post('/maps/{map:slug}/markers', [AdminMapController::class, 'storeMarker'])->name('maps.markers.store');
         Route::patch('/maps/markers/{marker}', [AdminMapController::class, 'updateMarker'])->name('maps.markers.update');
