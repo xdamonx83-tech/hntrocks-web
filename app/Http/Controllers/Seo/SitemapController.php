@@ -5,17 +5,31 @@ namespace App\Http\Controllers\Seo;
 use App\Http\Controllers\Controller;
 use App\Models\Cup;
 use App\Models\CupIdea;
+use App\Models\HntMap;
 use App\Models\LoadoutChallenge;
 use App\Models\MomentSpotlight;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class SitemapController extends Controller
 {
+    private const MAP_SLUGS = [
+        'stillwater-bayou',
+        'lawson-delta',
+        'desalle',
+        'mammons-gulch',
+    ];
+
     public function __invoke(): Response
     {
+        $mapLastModified = $this->mapLastModified();
+        $mapsLastModified = $mapLastModified->max() ?: now();
+
         $urls = collect([
             $this->url(route('home'), now(), 'daily', '1.0'),
             $this->url(route('app-beta.index'), now(), 'monthly', '0.7'),
@@ -24,6 +38,7 @@ class SitemapController extends Controller
             $this->url(route('loadout-challenges.index'), now(), 'weekly', '0.8'),
             $this->url(route('cup-ideas.index'), now(), 'weekly', '0.7'),
             $this->url(route('moment-of-week.index'), now(), 'weekly', '0.7'),
+            $this->url(route('maps.index'), $mapsLastModified, 'weekly', '0.9'),
             $this->url(route('legal.impressum'), now(), 'yearly', '0.3'),
             $this->url(route('legal.datenschutz'), now(), 'yearly', '0.3'),
             $this->url(route('legal.nutzungsbedingungen'), now(), 'yearly', '0.3'),
@@ -31,6 +46,10 @@ class SitemapController extends Controller
             $this->url(route('legal.account_deletion'), now(), 'yearly', '0.3'),
             $this->url(route('legal.child_safety'), now(), 'yearly', '0.3'),
         ]);
+
+        foreach (self::MAP_SLUGS as $slug) {
+            $urls->push($this->url(route('maps.show', $slug), $mapLastModified->get($slug, now()), 'weekly', '0.8'));
+        }
 
         if (Schema::hasTable('cups')) {
             Cup::query()
@@ -111,5 +130,36 @@ class SitemapController extends Controller
             'changefreq' => $changefreq,
             'priority' => $priority,
         ];
+    }
+
+    private function mapLastModified(): Collection
+    {
+        $lastModified = collect(self::MAP_SLUGS)->mapWithKeys(fn (string $slug): array => [$slug => now()]);
+
+        try {
+            if (! Schema::hasTable('hnt_maps')) {
+                return $lastModified;
+            }
+
+            $query = HntMap::query()->whereIn('slug', self::MAP_SLUGS);
+
+            if (Schema::hasTable('hnt_map_markers')) {
+                $query->withMax('markers', 'updated_at');
+            }
+
+            $query->get()->each(function (HntMap $map) use ($lastModified): void {
+                $timestamps = collect([
+                    $map->updated_at,
+                    $map->created_at,
+                    $map->getAttribute('markers_max_updated_at'),
+                ])->filter()->map(fn ($timestamp) => $timestamp instanceof CarbonInterface ? $timestamp : Carbon::parse($timestamp));
+
+                $lastModified->put($map->slug, $timestamps->max() ?: now());
+            });
+        } catch (Throwable) {
+            // Keep the public sitemap available while map tables are unavailable.
+        }
+
+        return $lastModified;
     }
 }

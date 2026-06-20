@@ -1,12 +1,19 @@
 @extends('themes.hnt_preview.layouts.app')
 
-@section('title', __('ui.maps_title').' · HNT.rocks')
+@section('title', __('ui.maps_meta_title'))
+@section('robots', 'index,follow')
+@section('meta_description', __('ui.maps_meta_description'))
+@section('canonical', route('maps.index'))
+@section('og_title', __('ui.maps_og_title'))
+@section('og_description', __('ui.maps_og_description'))
+@section('og_url', route('maps.index'))
+@section('og_image', asset('assets/hnt/maps/stillwater-bayou/map.webp'))
 @section('app_window_class', 'hnt-maps-window')
 @section('main_class', 'hnt-maps-main')
 @section('right_sidebar')<aside hidden></aside>@endsection
 
 @push('head')
-    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/maps.css') }}?v=10">
+    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/maps.css') }}?v=11">
 @endpush
 
 @section('content')
@@ -38,6 +45,11 @@
                 </div>
             </article>
         @endforeach
+    </section>
+
+    <section class="hnt-maps-seo-intro" aria-labelledby="hntMapsSeoIntroTitle">
+        <h2 id="hntMapsSeoIntroTitle">{{ __('ui.maps_seo_intro_title') }}</h2>
+        <p>{{ __('ui.maps_seo_intro_text') }}</p>
     </section>
 </div>
 @endsection

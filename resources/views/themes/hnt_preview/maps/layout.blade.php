@@ -3,7 +3,7 @@
 <head>
     @include('themes.hnt_preview.partials.head')
     <link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}?v=1.9.4">
-    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/maps.css') }}?v=10">
+    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/maps.css') }}?v=11">
 </head>
 <body class="hnt-map-workspace-body">
     @yield('content')
