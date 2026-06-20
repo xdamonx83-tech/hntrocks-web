@@ -4146,5 +4146,9 @@ return [
     'maps_share_fallback' => 'Link manuell kopieren',
     'maps_cash_screenshot' => 'Kassenscreenshot',
     'maps_cash_screenshot_error' => 'Bild konnte nicht geladen werden',
+    'maps_cash_upload_action' => 'Bild einreichen',
+    'maps_cash_upload_running' => 'Upload läuft …',
+    'maps_cash_upload_pending' => 'Upload wartet auf Admin-Freigabe.',
+    'maps_cash_upload_error' => 'Upload fehlgeschlagen.',
     'maps_close' => 'Schließen',
 ];

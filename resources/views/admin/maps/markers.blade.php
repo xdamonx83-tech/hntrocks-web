@@ -46,6 +46,65 @@
         @endif
     </section>
 
+    @php
+        $cashMarkersWithUploads = $markers
+            ->where('type', 'cash')
+            ->filter(fn (array $marker) => $marker['uploads']->isNotEmpty());
+    @endphp
+
+    <section class="hh-card hh-admin-map-moderation">
+        <div class="hh-admin-map-moderation-heading">
+            <div>
+                <p class="hh-kicker">Cash-Marker Uploads</p>
+                <h2>Bildfreigaben</h2>
+            </div>
+            <p>Uploads bleiben privat, bis sie hier freigegeben werden. Pro Marker ist nur das zuletzt freigegebene Bild aktiv.</p>
+        </div>
+
+        @forelse($cashMarkersWithUploads as $marker)
+            <article class="hh-admin-map-upload-group">
+                <h3>#{{ $marker['id'] }} · {{ $marker['label'] }}</h3>
+                <p>Aktives Bild: <code>{{ $marker['source_image'] ?: 'keins' }}</code></p>
+
+                <div class="hh-admin-map-upload-grid">
+                    @foreach($marker['uploads'] as $upload)
+                        <div class="hh-admin-map-upload-card" data-status="{{ $upload['status'] }}">
+                            <a href="{{ $upload['preview_url'] }}" target="_blank" rel="noopener">
+                                <img src="{{ $upload['preview_url'] }}" alt="Upload {{ $upload['id'] }} für {{ $marker['label'] }}">
+                            </a>
+                            <div>
+                                <strong>{{ $upload['original_name'] }}</strong>
+                                <span>{{ ucfirst($upload['status']) }} · {{ number_format($upload['size'] / 1024, 0, ',', '.') }} KB</span>
+                                @if($upload['uploader'])
+                                    <span>Von {{ '@'.$upload['uploader'] }}</span>
+                                @endif
+                                @if($upload['rejection_reason'])
+                                    <span>{{ $upload['rejection_reason'] }}</span>
+                                @endif
+                            </div>
+
+                            @if($upload['status'] === 'pending')
+                                <div class="hh-admin-map-upload-actions">
+                                    <form method="POST" action="{{ $upload['approve_url'] }}">
+                                        @csrf
+                                        <button class="hh-primary-button" type="submit">Freigeben</button>
+                                    </form>
+                                    <form method="POST" action="{{ $upload['reject_url'] }}">
+                                        @csrf
+                                        <input name="reason" type="text" maxlength="1000" placeholder="Grund (optional)">
+                                        <button class="hh-danger-button" type="submit">Ablehnen</button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </article>
+        @empty
+            <p>Für diese Karte liegen noch keine Cash-Marker-Uploads vor.</p>
+        @endforelse
+    </section>
+
     <dialog class="hh-admin-map-dialog" data-admin-map-dialog>
         <form class="hh-admin-map-form" data-admin-map-form>
             <div class="hh-admin-map-dialog-header">
@@ -88,10 +147,6 @@
                 <label>
                     Y
                     <input name="y" type="number" min="0" max="{{ $map['height'] }}" step="any" required>
-                </label>
-                <label class="hh-admin-map-source-image" data-admin-map-source-image hidden>
-                    Source Image
-                    <input name="source_image" type="text" maxlength="255" placeholder="datei.webp">
                 </label>
             </div>
 

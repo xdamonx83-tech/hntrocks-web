@@ -4146,5 +4146,9 @@ return [
     'maps_share_fallback' => 'Copy link manually',
     'maps_cash_screenshot' => 'Cash screenshot',
     'maps_cash_screenshot_error' => 'Image could not be loaded',
+    'maps_cash_upload_action' => 'Submit image',
+    'maps_cash_upload_running' => 'Uploading …',
+    'maps_cash_upload_pending' => 'Upload is waiting for admin approval.',
+    'maps_cash_upload_error' => 'Upload failed.',
     'maps_close' => 'Close',
 ];

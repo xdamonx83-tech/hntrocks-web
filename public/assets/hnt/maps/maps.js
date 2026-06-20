@@ -269,6 +269,70 @@
         type.textContent = config.typeLabels[marker.type] || marker.type;
         popup.appendChild(title);
         popup.appendChild(type);
+
+        if (marker.type === 'cash' && marker.image_url) {
+            var imageButton = document.createElement('button');
+            imageButton.type = 'button';
+            imageButton.className = 'hnt-map-popup-action';
+            imageButton.textContent = config.cashScreenshotText;
+            imageButton.addEventListener('click', function () {
+                openScreenshotModal(marker, imageButton);
+            });
+            popup.appendChild(imageButton);
+        }
+
+        if (marker.type === 'cash' && marker.upload_url) {
+            var uploadForm = document.createElement('form');
+            var uploadInput = document.createElement('input');
+            var uploadButton = document.createElement('button');
+            var uploadStatus = document.createElement('span');
+            uploadForm.className = 'hnt-map-popup-upload';
+            uploadInput.type = 'file';
+            uploadInput.name = 'image';
+            uploadInput.accept = 'image/jpeg,image/png,image/webp';
+            uploadInput.required = true;
+            uploadButton.type = 'submit';
+            uploadButton.className = 'hnt-map-popup-action';
+            uploadButton.textContent = config.cashUploadActionText;
+            uploadStatus.setAttribute('role', 'status');
+            uploadForm.appendChild(uploadInput);
+            uploadForm.appendChild(uploadButton);
+            uploadForm.appendChild(uploadStatus);
+            uploadForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                uploadButton.disabled = true;
+                uploadStatus.textContent = config.cashUploadRunningText;
+
+                fetch(marker.upload_url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    body: new FormData(uploadForm),
+                    credentials: 'same-origin'
+                }).then(function (response) {
+                    return response.json().catch(function () { return {}; }).then(function (payload) {
+                        if (!response.ok) {
+                            var errors = payload.errors || {};
+                            var firstError = Object.keys(errors).length ? errors[Object.keys(errors)[0]][0] : null;
+                            throw new Error(firstError || payload.message || config.cashUploadErrorText);
+                        }
+
+                        return payload;
+                    });
+                }).then(function () {
+                    uploadForm.reset();
+                    uploadStatus.textContent = config.cashUploadPendingText;
+                }).catch(function (error) {
+                    uploadStatus.textContent = error.message || config.cashUploadErrorText;
+                }).finally(function () {
+                    uploadButton.disabled = false;
+                });
+            });
+            popup.appendChild(uploadForm);
+        }
+
         point.bindPopup(popup);
 
         if (marker.type === 'compound') {
@@ -284,10 +348,6 @@
 
         if (marker.type === 'boss') {
             point.on('click', function () { toggleBossRings(point); });
-        }
-
-        if (marker.type === 'cash' && marker.image_url) {
-            point.on('click', function () { openScreenshotModal(marker, point.getElement()); });
         }
 
         point.addTo(layers[marker.type]);

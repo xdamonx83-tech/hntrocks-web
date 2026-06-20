@@ -196,6 +196,10 @@
                 'shareSuccessText' => __('ui.maps_share_success'),
                 'cashScreenshotText' => __('ui.maps_cash_screenshot'),
                 'cashScreenshotErrorText' => __('ui.maps_cash_screenshot_error'),
+                'cashUploadActionText' => __('ui.maps_cash_upload_action'),
+                'cashUploadRunningText' => __('ui.maps_cash_upload_running'),
+                'cashUploadPendingText' => __('ui.maps_cash_upload_pending'),
+                'cashUploadErrorText' => __('ui.maps_cash_upload_error'),
                 'closeText' => __('ui.maps_close'),
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
         @endif

@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
 use App\Models\HntMapMarker;
+use App\Models\HntMapMarkerUpload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminMapController extends Controller
 {
@@ -34,6 +37,9 @@ class AdminMapController extends Controller
         $this->guardAdmin($request);
 
         $markers = $map->markers()
+            ->with(['uploads' => fn ($query) => $query
+                ->with(['uploader:id,username', 'reviewer:id,username'])
+                ->latest('id')])
             ->orderByRaw("case when status = 'approved' then 0 else 1 end")
             ->orderBy('type')
             ->orderBy('sort_order')
@@ -86,6 +92,10 @@ class AdminMapController extends Controller
         $map = $marker->map()->firstOrFail();
         $validated = $this->validateMarker($request, $map);
 
+        if ($validated['type'] !== 'cash') {
+            $validated['source_image'] = null;
+        }
+
         $marker->forceFill($validated)->save();
 
         return response()->json([
@@ -132,6 +142,89 @@ class AdminMapController extends Controller
         ]);
     }
 
+    public function showUpload(Request $request, HntMapMarkerUpload $upload): StreamedResponse
+    {
+        $this->guardAdmin($request);
+        abort_unless(Storage::disk($upload->disk)->exists($upload->path), 404);
+
+        return Storage::disk($upload->disk)->response(
+            $upload->path,
+            $upload->original_name,
+            ['Content-Type' => $upload->mime_type],
+        );
+    }
+
+    public function approveUpload(Request $request, HntMapMarkerUpload $upload): RedirectResponse
+    {
+        $this->guardAdmin($request);
+
+        DB::transaction(function () use ($request, $upload): void {
+            $lockedUpload = HntMapMarkerUpload::query()->lockForUpdate()->findOrFail($upload->id);
+            $marker = HntMapMarker::query()->lockForUpdate()->findOrFail($lockedUpload->hnt_map_marker_id);
+
+            abort_unless($marker->type === 'cash', 422, 'Nur Cash-Marker können ein freigegebenes Bild haben.');
+            abort_unless($lockedUpload->status === HntMapMarkerUpload::STATUS_PENDING, 422, 'Nur ausstehende Uploads können freigegeben werden.');
+            abort_unless(Storage::disk($lockedUpload->disk)->exists($lockedUpload->path), 422, 'Die Upload-Datei fehlt.');
+
+            $extension = strtolower(pathinfo($lockedUpload->path, PATHINFO_EXTENSION) ?: 'jpg');
+            $filename = Str::uuid().'.'.$extension;
+            $publicPath = 'maps/cash-spots/'.$filename;
+            $stream = Storage::disk($lockedUpload->disk)->readStream($lockedUpload->path);
+            $stored = false;
+
+            abort_unless(is_resource($stream), 500, 'Die Upload-Datei konnte nicht gelesen werden.');
+
+            try {
+                $stored = Storage::disk('public')->writeStream($publicPath, $stream);
+            } finally {
+                fclose($stream);
+            }
+
+            abort_unless($stored, 500, 'Das freigegebene Bild konnte nicht gespeichert werden.');
+
+            HntMapMarkerUpload::query()
+                ->where('hnt_map_marker_id', $marker->id)
+                ->where('status', HntMapMarkerUpload::STATUS_APPROVED)
+                ->update(['status' => HntMapMarkerUpload::STATUS_SUPERSEDED]);
+
+            $lockedUpload->forceFill([
+                'status' => HntMapMarkerUpload::STATUS_APPROVED,
+                'public_path' => $publicPath,
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+                'rejection_reason' => null,
+            ])->save();
+
+            // This single reference is the only image source consumed by the public map.
+            $marker->forceFill(['source_image' => $filename])->save();
+        });
+
+        return back()->with('status', 'Bild wurde freigegeben und ist jetzt für diesen Cash-Marker aktiv.');
+    }
+
+    public function rejectUpload(Request $request, HntMapMarkerUpload $upload): RedirectResponse
+    {
+        $this->guardAdmin($request);
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($request, $upload, $validated): void {
+            $lockedUpload = HntMapMarkerUpload::query()->lockForUpdate()->findOrFail($upload->id);
+            abort_unless($lockedUpload->status === HntMapMarkerUpload::STATUS_PENDING, 422, 'Nur ausstehende Uploads können abgelehnt werden.');
+
+            $lockedUpload->forceFill([
+                'status' => HntMapMarkerUpload::STATUS_REJECTED,
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+                'rejection_reason' => $this->nullableTrimmedString($validated['reason'] ?? null),
+            ])->save();
+        });
+
+        return back()->with('status', 'Bild wurde abgelehnt. Die Datei wurde nicht gelöscht.');
+    }
+
     private function validateMarker(Request $request, HntMap $map): array
     {
         $validated = $request->validate([
@@ -143,7 +236,6 @@ class AdminMapController extends Controller
             'label_de' => ['nullable', 'string', 'max:120'],
             'label_en' => ['nullable', 'string', 'max:120'],
             'status' => ['required', 'string', Rule::in(['approved', 'pending', 'hidden'])],
-            'source_image' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],
         ]);
 
@@ -151,29 +243,7 @@ class AdminMapController extends Controller
         $validated['y'] = (float) $validated['y'];
         $validated['label_de'] = $this->nullableTrimmedString($validated['label_de'] ?? null);
         $validated['label_en'] = $this->nullableTrimmedString($validated['label_en'] ?? null);
-        $validated['source_image'] = $this->validatedSourceImage(
-            $validated['type'],
-            $validated['source_image'] ?? null,
-        );
-
         return $validated;
-    }
-
-    private function validatedSourceImage(string $type, mixed $sourceImage): ?string
-    {
-        if ($type !== 'cash') {
-            return null;
-        }
-
-        $sourceImage = $this->nullableTrimmedString($sourceImage);
-
-        if ($sourceImage !== null && ! $this->isSafeRelativePath($sourceImage)) {
-            throw ValidationException::withMessages([
-                'source_image' => 'Source Image muss ein sicherer relativer Pfad sein.',
-            ]);
-        }
-
-        return $sourceImage;
     }
 
     private function nullableTrimmedString(mixed $value): ?string
@@ -206,6 +276,20 @@ class AdminMapController extends Controller
             'position_url' => route('admin.maps.markers.position', $marker),
             'update_url' => route('admin.maps.markers.update', $marker),
             'delete_url' => route('admin.maps.markers.destroy', $marker),
+            'uploads' => $marker->uploads->map(fn (HntMapMarkerUpload $upload): array => [
+                'id' => $upload->id,
+                'status' => $upload->status,
+                'original_name' => $upload->original_name,
+                'mime_type' => $upload->mime_type,
+                'size' => $upload->size,
+                'uploader' => $upload->uploader?->username,
+                'reviewer' => $upload->reviewer?->username,
+                'reviewed_at' => $upload->reviewed_at?->toIso8601String(),
+                'rejection_reason' => $upload->rejection_reason,
+                'preview_url' => route('admin.maps.uploads.show', $upload),
+                'approve_url' => route('admin.maps.uploads.approve', $upload),
+                'reject_url' => route('admin.maps.uploads.reject', $upload),
+            ])->values(),
         ];
     }
 

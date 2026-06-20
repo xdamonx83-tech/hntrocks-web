@@ -79,6 +79,7 @@ use App\Http\Controllers\Marketing\CampaignRedirectController;
 use App\Http\Controllers\Marketing\AppBetaController;
 use App\Http\Controllers\Marketing\LandingPageController;
 use App\Http\Controllers\Maps\MapController;
+use App\Http\Controllers\Maps\MapMarkerUploadController;
 use App\Models\FeedPost;
 use App\Models\Friendship;
 use App\Models\Team;
@@ -362,6 +363,9 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::post('/presence/heartbeat', PresenceHeartbeatController::class)->middleware('throttle:20,1')->name('presence.heartbeat');
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
+    Route::post('/maps/markers/{marker}/images', [MapMarkerUploadController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('maps.markers.images.store');
     Route::get('/mentions/search', [MentionController::class, 'search'])->name('mentions.search');
     Route::get('/socialite/header/live-badges', [HeaderLiveController::class, 'badges'])->name('socialite.header.live-badges');
     Route::get('/socialite/header/notifications', [HeaderLiveController::class, 'notifications'])->name('socialite.header.notifications');
@@ -589,6 +593,9 @@ Route::middleware('auth')->group(function (): void {
         Route::patch('/maps/markers/{marker}', [AdminMapController::class, 'updateMarker'])->name('maps.markers.update');
         Route::delete('/maps/markers/{marker}', [AdminMapController::class, 'destroyMarker'])->name('maps.markers.destroy');
         Route::patch('/maps/markers/{marker}/position', [AdminMapController::class, 'updateMarkerPosition'])->name('maps.markers.position');
+        Route::get('/maps/uploads/{upload}', [AdminMapController::class, 'showUpload'])->name('maps.uploads.show');
+        Route::post('/maps/uploads/{upload}/approve', [AdminMapController::class, 'approveUpload'])->name('maps.uploads.approve');
+        Route::post('/maps/uploads/{upload}/reject', [AdminMapController::class, 'rejectUpload'])->name('maps.uploads.reject');
         Route::get('/outbound-links', [AdminApprovedOutboundLinkController::class, 'index'])->name('outbound-links.index');
         Route::post('/outbound-links', [AdminApprovedOutboundLinkController::class, 'store'])->name('outbound-links.store');
         Route::put('/outbound-links/{link:slug}', [AdminApprovedOutboundLinkController::class, 'update'])->name('outbound-links.update');
