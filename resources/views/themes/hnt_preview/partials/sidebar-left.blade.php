@@ -81,7 +81,11 @@
             <i class="ph ph-play-circle" aria-hidden="true"></i>
             <span>{{ __('ui.preview_nav_moments') }}</span>
         </a>
-
+        <a href="{{ $safeRoute('maps.index', '/maps') }}" @class(['nav-item', 'active' => $isActive(['maps.*'])])>
+            @if($isActive(['maps.*']))<div class="active-indicator"></div>@endif
+            <i class="ph ph-map-trifold" aria-hidden="true"></i>
+            <span>{{ __('ui.maps') }}</span>
+        </a>
         <div class="nav-spacer"></div>
 
         @php
