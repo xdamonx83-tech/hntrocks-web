@@ -1,5 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
+@section('robots', 'index,follow')
+
 @section('title', 'Nutzungsbedingungen')
 @section('meta_description', 'Nutzungsbedingungen für die Nutzung von hnt.rocks, User Content, Uploads, Cups, Meldungen und Moderation.')
 

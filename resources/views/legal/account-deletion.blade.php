@@ -1,5 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
+@section('robots', 'index,follow')
+
 @section('title', 'Konto löschen / Account deletion')
 @section('meta_description', 'Öffentliche Informationen zur Löschung eines hnt.rocks Kontos und der zugehörigen personenbezogenen Daten.')
 

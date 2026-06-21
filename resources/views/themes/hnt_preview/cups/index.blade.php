@@ -1,6 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
 @section('title', __('ui.cups').' · HNT Preview')
+@section('robots', request()->query() ? 'noindex,follow' : 'index,follow')
 @section('main_class', 'cups-main')
 
 @php
