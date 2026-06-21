@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\ApiHallOfFameController;
 use App\Http\Controllers\Api\V1\ApiHashtagController;
 use App\Http\Controllers\Api\V1\ApiLfgController;
 use App\Http\Controllers\Api\V1\ApiLoadoutChallengesController;
+use App\Http\Controllers\Api\V1\ApiMapsController;
 use App\Http\Controllers\Api\V1\ApiMembersController;
 use App\Http\Controllers\Api\V1\ApiMessageController;
 use App\Http\Controllers\Api\V1\ApiMomentsController;
@@ -42,6 +43,9 @@ Route::get('/v1/health', function (): array {
 })->name('api.health');
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    Route::get('/maps', [ApiMapsController::class, 'index'])->name('maps.index');
+    Route::get('/maps/{slug}', [ApiMapsController::class, 'show'])->name('maps.show');
+
     Route::post('/auth/register', [ApiAuthController::class, 'register'])->name('auth.register');
     Route::post('/auth/login', [ApiAuthController::class, 'login'])->name('auth.login');
     Route::post('/auth/forgot-password', ApiPasswordResetLinkController::class)->middleware('throttle:6,1')->name('auth.password.forgot');
