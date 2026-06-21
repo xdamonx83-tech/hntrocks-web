@@ -139,26 +139,63 @@ class MapController extends Controller
                 return null;
             }
 
-            $markers = $map->markers()
+            $markersQuery = $map->markers()
                 ->where('status', 'approved')
                 ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get();
+                ->orderBy('id');
+
+            $votesAvailable = Schema::hasTable('hnt_map_marker_votes');
+
+            if ($votesAvailable) {
+                $markersQuery->withCount([
+                    'votes as up_count' => fn ($query) => $query->where('value', 1),
+                    'votes as down_count' => fn ($query) => $query->where('value', -1),
+                ]);
+
+                if (auth()->check()) {
+                    $markersQuery->with(['votes' => fn ($query) => $query
+                        ->where('user_id', auth()->id())
+                        ->select(['id', 'hnt_map_marker_id', 'value'])]);
+                }
+            }
+
+            $markers = $markersQuery->get();
 
             if ($markers->isEmpty()) {
                 return null;
             }
 
-            return $markers->map(fn ($marker): ?array => $this->safeMarker([
-                'type' => $marker->type,
-                'x' => $marker->x,
-                'y' => $marker->y,
-                'label' => [
-                    'de' => $marker->label_de,
-                    'en' => $marker->label_en,
-                ],
-                'source_image' => $marker->source_image,
-            ]))->filter()->values()->all();
+            return $markers->map(function ($marker) use ($votesAvailable): ?array {
+                $safeMarker = $this->safeMarker([
+                    'type' => $marker->type,
+                    'x' => $marker->x,
+                    'y' => $marker->y,
+                    'label' => [
+                        'de' => $marker->label_de,
+                        'en' => $marker->label_en,
+                    ],
+                    'source_image' => $marker->source_image,
+                ]);
+
+                if ($safeMarker === null || $marker->type !== 'cash') {
+                    return $safeMarker;
+                }
+
+                $safeMarker['id'] = $marker->id;
+
+                if (! $votesAvailable) {
+                    return $safeMarker;
+                }
+
+                return [
+                    ...$safeMarker,
+                    'vote_url' => route('maps.markers.vote', $marker),
+                    'up_count' => (int) $marker->up_count,
+                    'down_count' => (int) $marker->down_count,
+                    'viewer_vote' => auth()->check() ? $marker->votes->first()?->value : null,
+                    'comment_count' => 0,
+                ];
+            })->filter()->values()->all();
         } catch (Throwable) {
             return null;
         }

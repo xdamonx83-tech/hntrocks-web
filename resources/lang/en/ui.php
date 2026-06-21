@@ -4159,5 +4159,12 @@ return [
     'maps_cash_spot_running' => 'Uploading …',
     'maps_cash_spot_pending' => 'Thank you! Your cash spot is waiting for approval.',
     'maps_cash_spot_error' => 'Upload failed.',
+    'maps_cash_spot_detail_title' => 'Cash spot',
+    'maps_cash_spot_helpful' => 'Is this cash spot helpful?',
+    'maps_cash_spot_upvote' => 'Helpful',
+    'maps_cash_spot_downvote' => 'Not helpful',
+    'maps_cash_spot_login_to_vote' => 'Sign in to vote.',
+    'maps_cash_spot_comments_soon' => 'Comments are coming soon.',
+    'maps_cash_spot_vote_error' => 'Your vote could not be saved.',
     'maps_close' => 'Close',
 ];

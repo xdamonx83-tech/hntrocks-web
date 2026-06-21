@@ -98,10 +98,18 @@
     };
     var activeBossPoint = null;
     var activeBossRings = [];
-    var screenshotModal = null;
-    var screenshotImage = null;
-    var screenshotError = null;
-    var screenshotLastFocus = null;
+    var cashDetailModal = null;
+    var cashDetailImage = null;
+    var cashDetailError = null;
+    var cashDetailLabel = null;
+    var cashDetailUpButton = null;
+    var cashDetailDownButton = null;
+    var cashDetailUpCount = null;
+    var cashDetailDownCount = null;
+    var cashDetailLogin = null;
+    var cashDetailVoteError = null;
+    var cashDetailMarker = null;
+    var cashDetailLastFocus = null;
 
     Object.keys(colors).forEach(function (type) {
         layers[type] = window.L.layerGroup().addTo(map);
@@ -160,90 +168,222 @@
         activeBossRings.forEach(function (ring) { ring.addTo(layers.boss); });
     }
 
-    function closeScreenshotModal() {
-        if (!screenshotModal || screenshotModal.hidden) {
+    function closeCashDetailModal() {
+        if (!cashDetailModal || cashDetailModal.hidden) {
             return;
         }
 
-        screenshotModal.hidden = true;
-        screenshotImage.removeAttribute('src');
+        cashDetailModal.hidden = true;
+        cashDetailImage.removeAttribute('src');
+        cashDetailMarker = null;
         document.body.classList.remove('hnt-map-lightbox-open');
-        screenshotLastFocus?.focus();
-        screenshotLastFocus = null;
+        cashDetailLastFocus?.focus();
+        cashDetailLastFocus = null;
     }
 
-    function ensureScreenshotModal() {
-        if (screenshotModal) {
+    function updateCashDetailVoteState() {
+        if (!cashDetailMarker) {
             return;
         }
 
-        screenshotModal = document.createElement('div');
-        screenshotModal.className = 'hnt-map-lightbox';
-        screenshotModal.hidden = true;
-        screenshotModal.setAttribute('role', 'dialog');
-        screenshotModal.setAttribute('aria-modal', 'true');
-        screenshotModal.setAttribute('aria-labelledby', 'hntMapLightboxTitle');
+        var viewerVote = Number(cashDetailMarker.viewer_vote) || null;
+        var canVote = Boolean(config.viewerIsAuthenticated && cashDetailMarker.vote_url);
+
+        cashDetailUpCount.textContent = String(Number(cashDetailMarker.up_count) || 0);
+        cashDetailDownCount.textContent = String(Number(cashDetailMarker.down_count) || 0);
+        cashDetailUpButton.classList.toggle('is-active', viewerVote === 1);
+        cashDetailDownButton.classList.toggle('is-active', viewerVote === -1);
+        cashDetailUpButton.setAttribute('aria-pressed', viewerVote === 1 ? 'true' : 'false');
+        cashDetailDownButton.setAttribute('aria-pressed', viewerVote === -1 ? 'true' : 'false');
+        cashDetailUpButton.disabled = !canVote;
+        cashDetailDownButton.disabled = !canVote;
+        cashDetailLogin.hidden = Boolean(config.viewerIsAuthenticated);
+    }
+
+    function submitCashDetailVote(value) {
+        if (!cashDetailMarker?.vote_url || !config.viewerIsAuthenticated) {
+            return;
+        }
+
+        var marker = cashDetailMarker;
+
+        cashDetailUpButton.disabled = true;
+        cashDetailDownButton.disabled = true;
+        cashDetailVoteError.hidden = true;
+
+        fetch(marker.vote_url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({value: value})
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error('vote_failed');
+            }
+
+            return response.json();
+        }).then(function (data) {
+            if (!data.ok) {
+                throw new Error('vote_failed');
+            }
+
+            marker.up_count = Number(data.up_count) || 0;
+            marker.down_count = Number(data.down_count) || 0;
+            marker.viewer_vote = data.viewer_vote;
+
+            if (cashDetailMarker === marker) {
+                updateCashDetailVoteState();
+            }
+        }).catch(function () {
+            if (cashDetailMarker === marker) {
+                cashDetailVoteError.hidden = false;
+                updateCashDetailVoteState();
+            }
+        });
+    }
+
+    function ensureCashDetailModal() {
+        if (cashDetailModal) {
+            return;
+        }
+
+        cashDetailModal = document.createElement('div');
+        cashDetailModal.className = 'hnt-map-lightbox hnt-map-cash-detail';
+        cashDetailModal.hidden = true;
+        cashDetailModal.setAttribute('role', 'dialog');
+        cashDetailModal.setAttribute('aria-modal', 'true');
+        cashDetailModal.setAttribute('aria-labelledby', 'hntMapCashDetailTitle');
 
         var panel = document.createElement('div');
         var header = document.createElement('header');
         var title = document.createElement('h2');
         var closeButton = document.createElement('button');
+        var body = document.createElement('div');
+        var media = document.createElement('div');
+        var details = document.createElement('aside');
+        var voteSection = document.createElement('section');
+        var voteTitle = document.createElement('h3');
+        var voteActions = document.createElement('div');
+        var comments = document.createElement('section');
 
-        panel.className = 'hnt-map-lightbox-panel';
+        panel.className = 'hnt-map-lightbox-panel hnt-map-cash-detail-panel';
         header.className = 'hnt-map-lightbox-header';
-        title.id = 'hntMapLightboxTitle';
-        title.textContent = config.cashScreenshotText;
+        title.id = 'hntMapCashDetailTitle';
+        title.textContent = config.cashSpotDetailTitle;
         closeButton.type = 'button';
         closeButton.className = 'hnt-map-lightbox-close';
         closeButton.setAttribute('aria-label', config.closeText);
         closeButton.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
-        closeButton.addEventListener('click', closeScreenshotModal);
+        closeButton.addEventListener('click', closeCashDetailModal);
 
-        screenshotImage = document.createElement('img');
-        screenshotImage.className = 'hnt-map-lightbox-image';
-        screenshotImage.addEventListener('load', function () {
-            screenshotImage.hidden = false;
-            screenshotError.hidden = true;
+        cashDetailImage = document.createElement('img');
+        cashDetailImage.className = 'hnt-map-lightbox-image hnt-map-cash-detail-image';
+        cashDetailImage.addEventListener('load', function () {
+            cashDetailImage.hidden = false;
+            cashDetailError.hidden = true;
         });
-        screenshotImage.addEventListener('error', function () {
-            screenshotImage.hidden = true;
-            screenshotError.hidden = false;
+        cashDetailImage.addEventListener('error', function () {
+            cashDetailImage.hidden = true;
+            cashDetailError.hidden = false;
         });
 
-        screenshotError = document.createElement('p');
-        screenshotError.className = 'hnt-map-lightbox-error';
-        screenshotError.textContent = config.cashScreenshotErrorText;
-        screenshotError.hidden = true;
+        cashDetailError = document.createElement('p');
+        cashDetailError.className = 'hnt-map-lightbox-error';
+        cashDetailError.textContent = config.cashScreenshotErrorText;
+        cashDetailError.hidden = true;
+
+        cashDetailLabel = document.createElement('p');
+        cashDetailLabel.className = 'hnt-map-cash-detail-label';
+        voteSection.className = 'hnt-map-cash-detail-votes';
+        voteTitle.textContent = config.cashSpotHelpfulText;
+        voteActions.className = 'hnt-map-cash-detail-vote-actions';
+
+        cashDetailUpButton = document.createElement('button');
+        cashDetailUpButton.type = 'button';
+        cashDetailUpButton.className = 'hnt-map-cash-detail-vote';
+        cashDetailUpButton.setAttribute('aria-label', config.cashSpotUpvoteText);
+        cashDetailUpButton.innerHTML = '<i class="ph ph-thumbs-up" aria-hidden="true"></i>';
+        cashDetailUpCount = document.createElement('span');
+        cashDetailUpButton.appendChild(cashDetailUpCount);
+        cashDetailUpButton.addEventListener('click', function () { submitCashDetailVote(1); });
+
+        cashDetailDownButton = document.createElement('button');
+        cashDetailDownButton.type = 'button';
+        cashDetailDownButton.className = 'hnt-map-cash-detail-vote';
+        cashDetailDownButton.setAttribute('aria-label', config.cashSpotDownvoteText);
+        cashDetailDownButton.innerHTML = '<i class="ph ph-thumbs-down" aria-hidden="true"></i>';
+        cashDetailDownCount = document.createElement('span');
+        cashDetailDownButton.appendChild(cashDetailDownCount);
+        cashDetailDownButton.addEventListener('click', function () { submitCashDetailVote(-1); });
+
+        cashDetailLogin = document.createElement('a');
+        cashDetailLogin.className = 'hnt-map-cash-detail-login';
+        cashDetailLogin.href = config.loginUrl;
+        cashDetailLogin.textContent = config.cashSpotLoginToVoteText;
+
+        cashDetailVoteError = document.createElement('p');
+        cashDetailVoteError.className = 'hnt-map-cash-detail-vote-error';
+        cashDetailVoteError.textContent = config.cashSpotVoteErrorText;
+        cashDetailVoteError.hidden = true;
+
+        comments.className = 'hnt-map-cash-detail-comments';
+        comments.innerHTML = '<i class="ph ph-chat-circle-dots" aria-hidden="true"></i>';
+        var commentsText = document.createElement('span');
+        commentsText.textContent = config.cashSpotCommentsSoonText;
+        comments.appendChild(commentsText);
 
         header.appendChild(title);
         header.appendChild(closeButton);
+        media.appendChild(cashDetailImage);
+        media.appendChild(cashDetailError);
+        voteActions.appendChild(cashDetailUpButton);
+        voteActions.appendChild(cashDetailDownButton);
+        voteSection.appendChild(voteTitle);
+        voteSection.appendChild(voteActions);
+        voteSection.appendChild(cashDetailLogin);
+        voteSection.appendChild(cashDetailVoteError);
+        details.appendChild(cashDetailLabel);
+        details.appendChild(voteSection);
+        details.appendChild(comments);
+        body.appendChild(media);
+        body.appendChild(details);
         panel.appendChild(header);
-        panel.appendChild(screenshotImage);
-        panel.appendChild(screenshotError);
-        screenshotModal.appendChild(panel);
-        screenshotModal.addEventListener('click', function (event) {
-            if (event.target === screenshotModal) {
-                closeScreenshotModal();
+        panel.appendChild(body);
+        cashDetailModal.appendChild(panel);
+        body.className = 'hnt-map-cash-detail-body';
+        media.className = 'hnt-map-cash-detail-media';
+        details.className = 'hnt-map-cash-detail-info';
+        cashDetailModal.addEventListener('click', function (event) {
+            if (event.target === cashDetailModal) {
+                closeCashDetailModal();
             }
         });
-        document.querySelector('.hnt-map-stage').appendChild(screenshotModal);
+        document.querySelector('.hnt-map-stage').appendChild(cashDetailModal);
     }
 
-    function openScreenshotModal(marker, trigger) {
-        ensureScreenshotModal();
-        screenshotLastFocus = trigger || document.activeElement;
-        screenshotImage.hidden = true;
-        screenshotError.hidden = true;
-        screenshotImage.alt = config.cashScreenshotText + ': ' + marker.label;
-        screenshotImage.src = marker.image_url;
-        screenshotModal.hidden = false;
+    function openCashDetailModal(marker, trigger) {
+        ensureCashDetailModal();
+        cashDetailMarker = marker;
+        cashDetailLastFocus = trigger || document.activeElement;
+        cashDetailImage.hidden = true;
+        cashDetailError.hidden = true;
+        cashDetailVoteError.hidden = true;
+        cashDetailLabel.textContent = marker.label;
+        cashDetailImage.alt = config.cashScreenshotText + ': ' + marker.label;
+        cashDetailImage.src = marker.image_url;
+        updateCashDetailVoteState();
+        cashDetailModal.hidden = false;
         document.body.classList.add('hnt-map-lightbox-open');
-        screenshotModal.querySelector('.hnt-map-lightbox-close').focus();
+        cashDetailModal.querySelector('.hnt-map-lightbox-close').focus();
     }
 
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
-            closeScreenshotModal();
+            closeCashDetailModal();
         }
     });
 
@@ -287,7 +427,7 @@
         }
 
         if (marker.type === 'cash' && marker.image_url) {
-            point.on('click', function () { openScreenshotModal(marker, point.getElement()); });
+            point.on('click', function () { openCashDetailModal(marker, point.getElement()); });
         }
 
         point.addTo(layers[marker.type]);

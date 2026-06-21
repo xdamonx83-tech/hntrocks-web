@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HntMapMarker extends Model
 {
@@ -36,5 +37,10 @@ class HntMapMarker extends Model
     public function map(): BelongsTo
     {
         return $this->belongsTo(HntMap::class, 'hnt_map_id');
+    }
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(HntMapMarkerVote::class);
     }
 }
