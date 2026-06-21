@@ -4115,7 +4115,7 @@ return [
     'maps_faq_mobile_q' => 'Can I use HNT Maps on mobile?',
     'maps_faq_mobile_a' => 'Yes. The map tools adapt to smaller screens so you can zoom, move around and switch marker filters on mobile.',
     'maps_faq_cash_q' => 'Can players submit cash spots?',
-    'maps_faq_cash_a' => 'Yes. Signed-in players can suggest cash spots with supporting details. Submissions are reviewed before they appear as public markers.',
+    'maps_faq_cash_a' => 'Players and guests can suggest cash spots with supporting details. Submissions are reviewed before they appear as public markers.',
     'maps_preview_alt' => 'Preview of :map',
     'maps_open' => 'Open map',
     'maps_back' => 'All maps',

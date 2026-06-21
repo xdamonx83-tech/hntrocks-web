@@ -4115,7 +4115,7 @@ return [
     'maps_faq_mobile_q' => 'Kann ich HNT Maps mobil nutzen?',
     'maps_faq_mobile_a' => 'Ja. Die Kartenwerkzeuge passen sich kleinen Displays an, damit du mobil zoomen, navigieren und Marker-Filter wechseln kannst.',
     'maps_faq_cash_q' => 'Können Spieler Kassenspots einreichen?',
-    'maps_faq_cash_a' => 'Ja. Angemeldete Spieler können Kassenspots mit ergänzenden Angaben vorschlagen. Die Einreichungen werden geprüft, bevor sie als öffentliche Marker erscheinen.',
+    'maps_faq_cash_a' => 'Spieler und Gäste können Kassenspots mit ergänzenden Angaben vorschlagen. Die Einreichungen werden geprüft, bevor sie als öffentliche Marker erscheinen.',
     'maps_preview_alt' => 'Vorschau von :map',
     'maps_open' => 'Karte öffnen',
     'maps_back' => 'Alle Karten',
