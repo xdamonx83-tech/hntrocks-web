@@ -491,6 +491,8 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 .hnt-map-cash-detail-panel {
     position: relative;
     width: min(1180px, 100%);
+    max-height: calc(100vh - 84px);
+    max-height: calc(100dvh - 84px);
     padding-top: 12px;
     border-color: rgba(255, 255, 255, .09);
     border-radius: 26px;
@@ -510,8 +512,10 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 }
 .hnt-map-cash-detail-body {
     min-height: 0;
+    flex: 1 1 auto;
     display: grid;
     grid-template-columns: minmax(0, 1.72fr) minmax(300px, .78fr);
+    overflow: hidden;
 }
 .hnt-map-cash-detail-media {
     min-width: 0;
@@ -530,9 +534,11 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 }
 .hnt-map-cash-detail-info {
     min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 22px;
+    overflow: hidden;
     padding: clamp(24px, 3vw, 34px);
     border-left: 1px solid rgba(255, 255, 255, .07);
     background: radial-gradient(circle at 92% 2%, rgba(214, 168, 79, .1), transparent 34%), #1a1a18;
@@ -632,12 +638,16 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 .hnt-map-cash-detail-anonymous-hint[hidden],
 .hnt-map-cash-detail-vote-error[hidden] { display: none; }
 .hnt-map-cash-detail-comments {
+    min-height: 0;
+    max-height: clamp(220px, 42vh, 430px);
+    max-height: clamp(220px, 42dvh, 430px);
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 12px;
     margin-top: auto;
-    min-height: 78px;
     padding: 16px;
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, .07);
     border-radius: 20px;
     background: linear-gradient(145deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .018)), rgba(12, 13, 11, .28);
@@ -645,7 +655,91 @@ body.hnt-map-lightbox-open { overflow: hidden; }
     color: var(--text-muted);
     font-size: 12px;
 }
-.hnt-map-cash-detail-comments .ph { color: var(--accent-primary); font-size: 20px; }
+.hnt-map-cash-detail-comments > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hnt-map-cash-detail-comments h3 { margin: 0; color: var(--text-main); font-size: 13px; }
+.hnt-map-cash-comments-count {
+    min-width: 25px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(214, 168, 79, .16);
+    color: #ead79f;
+    text-align: center;
+    font-weight: 800;
+}
+.hnt-map-cash-comments-list {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: grid;
+    align-content: start;
+    gap: 13px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+.hnt-map-cash-comment { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; }
+.hnt-map-cash-comment-avatar img { width: 34px; height: 34px; display: block; border-radius: 50%; object-fit: cover; }
+.hnt-map-cash-comment-content { min-width: 0; }
+.hnt-map-cash-comment-meta { display: flex; align-items: baseline; gap: 7px; }
+.hnt-map-cash-comment-meta a { color: var(--text-main); font-weight: 800; text-decoration: none; }
+.hnt-map-cash-comment-meta span { color: var(--text-muted); font-size: 10px; }
+.hnt-map-cash-comment-body { margin-top: 4px; color: #ded8cb; line-height: 1.5; overflow-wrap: anywhere; }
+.hnt-map-cash-comment-body p { margin: 0; }
+.hnt-map-cash-comment-actions { display: flex; gap: 4px; margin-top: 4px; }
+.hnt-map-cash-comment-actions button {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.hnt-map-cash-comment-actions button:hover,
+.hnt-map-cash-comment-actions button:focus-visible { outline: none; background: rgba(214, 168, 79, .14); color: var(--accent-primary); }
+.hnt-map-cash-comments-status,
+.hnt-map-cash-comments-login { margin: 0; color: var(--text-muted); line-height: 1.45; }
+.hnt-map-cash-comments-status[hidden],
+.hnt-map-cash-comments-login[hidden],
+.hnt-map-cash-comments-form[hidden],
+.hnt-map-cash-comment-actions[hidden] { display: none; }
+.hnt-map-cash-comments-login a { color: #e5d298; font-weight: 750; }
+.hnt-map-cash-comments-form,
+.hnt-map-cash-comment-editor { display: grid; gap: 8px; }
+.hnt-map-cash-comments-form { margin-top: auto; }
+.hnt-map-cash-comments-form textarea,
+.hnt-map-cash-comment-editor textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 70px;
+    resize: vertical;
+    padding: 10px 11px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 12px;
+    background: rgba(7, 8, 7, .46);
+    color: var(--text-main);
+    font: inherit;
+    line-height: 1.45;
+}
+.hnt-map-cash-comments-form textarea:focus,
+.hnt-map-cash-comment-editor textarea:focus { outline: none; border-color: var(--accent-primary); }
+.hnt-map-cash-comments-form button,
+.hnt-map-cash-comment-editor-actions button {
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid rgba(214, 168, 79, .5);
+    border-radius: 999px;
+    background: rgba(214, 168, 79, .17);
+    color: #f0dda8;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.hnt-map-cash-comments-form button { justify-self: end; }
+.hnt-map-cash-comments-form button:disabled { cursor: wait; opacity: .55; }
+.hnt-map-cash-comment-editor-actions { display: flex; justify-content: flex-end; gap: 7px; }
 .hnt-map-cash-submission-panel { width: min(560px, 100%); }
 .hnt-map-cash-submission-form { display: grid; gap: 14px; padding: 20px; }
 .hnt-map-cash-submission-form [hidden] { display: none !important; }
@@ -771,7 +865,9 @@ body.hnt-map-lightbox-open { overflow: hidden; }
     }
     .hnt-map-cash-detail-media { display: block; min-height: 0; height: auto; max-height: none; align-self: start; border-radius: 0; line-height: 0; }
     .hnt-map-cash-detail-image { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; }
-    .hnt-map-cash-detail-info { gap: 16px; padding: 20px 18px max(22px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255, 255, 255, .07); border-left: 0; }
+    .hnt-map-cash-detail-info { min-height: 0; gap: 16px; overflow: visible; padding: 20px 18px max(22px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255, 255, 255, .07); border-left: 0; }
+    .hnt-map-cash-detail-comments { min-height: 0; max-height: none; margin-top: 0; }
+    .hnt-map-cash-comments-list { max-height: clamp(140px, 30vh, 260px); max-height: clamp(140px, 30dvh, 260px); }
     .hnt-map-cash-detail-header .hnt-map-lightbox-close {
         position: fixed;
         z-index: 3;

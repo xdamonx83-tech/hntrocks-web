@@ -80,6 +80,7 @@ use App\Http\Controllers\Marketing\AppBetaController;
 use App\Http\Controllers\Marketing\LandingPageController;
 use App\Http\Controllers\Maps\MapController;
 use App\Http\Controllers\Maps\MapCashSpotSubmissionController;
+use App\Http\Controllers\Maps\MapMarkerCommentController;
 use App\Http\Controllers\Maps\MapMarkerVoteController;
 use App\Models\FeedPost;
 use App\Models\Friendship;
@@ -133,6 +134,9 @@ Route::post('/maps/{map:slug}/cash-spots', [MapCashSpotSubmissionController::cla
 Route::post('/maps/markers/{marker}/vote', [MapMarkerVoteController::class, 'store'])
     ->middleware('throttle:30,1')
     ->name('maps.markers.vote');
+Route::get('/maps/markers/{marker}/comments', [MapMarkerCommentController::class, 'index'])
+    ->middleware('throttle:60,1')
+    ->name('maps.markers.comments.index');
 
 Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
 Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
@@ -368,6 +372,15 @@ Route::get('/u/{user:username}', [ProfileController::class, 'show'])->name('prof
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::post('/maps/markers/{marker}/comments', [MapMarkerCommentController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('maps.markers.comments.store');
+    Route::patch('/maps/marker-comments/{comment}', [MapMarkerCommentController::class, 'update'])
+        ->middleware('throttle:20,1')
+        ->name('maps.marker-comments.update');
+    Route::delete('/maps/marker-comments/{comment}', [MapMarkerCommentController::class, 'destroy'])
+        ->middleware('throttle:20,1')
+        ->name('maps.marker-comments.destroy');
     Route::post('/presence/heartbeat', PresenceHeartbeatController::class)->middleware('throttle:20,1')->name('presence.heartbeat');
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
     Route::get('/mentions/search', [MentionController::class, 'search'])->name('mentions.search');

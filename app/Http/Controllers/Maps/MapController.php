@@ -150,6 +150,7 @@ class MapController extends Controller
                 ->orderBy('id');
 
             $votesAvailable = Schema::hasTable('hnt_map_marker_votes');
+            $commentsAvailable = Schema::hasTable('hnt_map_marker_comments');
 
             if ($votesAvailable) {
                 $markersQuery->withCount([
@@ -168,13 +169,17 @@ class MapController extends Controller
                 }
             }
 
+            if ($commentsAvailable) {
+                $markersQuery->withCount('comments');
+            }
+
             $markers = $markersQuery->get();
 
             if ($markers->isEmpty()) {
                 return null;
             }
 
-            return $markers->map(function ($marker) use ($votesAvailable): ?array {
+            return $markers->map(function ($marker) use ($votesAvailable, $commentsAvailable): ?array {
                 $safeMarker = $this->safeMarker([
                     'type' => $marker->type,
                     'x' => $marker->x,
@@ -191,6 +196,12 @@ class MapController extends Controller
                 }
 
                 $safeMarker['id'] = $marker->id;
+                $safeMarker['comments_url'] = route('maps.markers.comments.index', $marker);
+                $safeMarker['comment_store_url'] = auth()->check()
+                    ? route('maps.markers.comments.store', $marker)
+                    : null;
+                $safeMarker['comment_count'] = $commentsAvailable ? (int) $marker->comments_count : 0;
+                $safeMarker['viewer_can_comment'] = auth()->check();
 
                 if (! $votesAvailable) {
                     return $safeMarker;
@@ -202,7 +213,6 @@ class MapController extends Controller
                     'up_count' => (int) $marker->up_count,
                     'down_count' => (int) $marker->down_count,
                     'viewer_vote' => $marker->relationLoaded('votes') ? $marker->votes->first()?->value : null,
-                    'comment_count' => 0,
                 ];
             })->filter()->values()->all();
         } catch (Throwable) {
