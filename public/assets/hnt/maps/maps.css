@@ -762,15 +762,15 @@ body.hnt-map-lightbox-open { overflow: hidden; }
     }
     .hnt-map-cash-detail-grip { top: max(4px, env(safe-area-inset-top)); }
     .hnt-map-cash-detail-body {
+        display: block;
         min-height: 0;
         flex: 1 1 auto;
-        grid-template-columns: 1fr;
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
     }
-    .hnt-map-cash-detail-media { display: block; min-height: 0; height: auto; border-radius: 0; }
-    .hnt-map-cash-detail-image { width: 100%; height: auto; max-height: none; object-fit: contain; }
+    .hnt-map-cash-detail-media { display: block; min-height: 0; height: auto; max-height: none; align-self: start; border-radius: 0; line-height: 0; }
+    .hnt-map-cash-detail-image { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; }
     .hnt-map-cash-detail-info { gap: 16px; padding: 20px 18px max(22px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255, 255, 255, .07); border-left: 0; }
     .hnt-map-cash-detail-header .hnt-map-lightbox-close {
         position: fixed;
