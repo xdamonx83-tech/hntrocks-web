@@ -1,5 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
+@section('robots', 'index,follow')
+
 @section('title', 'Datenschutzerklärung')
 @section('meta_description', 'Datenschutzerklärung für hnt.rocks mit Informationen zu Account, Uploads, Social Login, Tracking, Moderation und Community-Funktionen.')
 

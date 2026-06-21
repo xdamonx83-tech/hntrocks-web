@@ -1,6 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
 @section('title', __('ui.hall_of_fame').' · HNT Preview')
+@section('robots', 'index,follow')
 @section('main_class', 'feed-main hall-main')
 
 @php

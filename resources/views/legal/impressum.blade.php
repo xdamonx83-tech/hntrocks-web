@@ -1,5 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
+@section('robots', 'index,follow')
+
 @section('title', 'Impressum')
 @section('meta_description', 'Impressum, Anbieterkennzeichnung und Kontaktangaben von hnt.rocks.')
 

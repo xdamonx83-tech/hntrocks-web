@@ -1,6 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
 @section('title', __('ui.cup_ideas_meta_title'))
+@section('robots', 'index,follow')
 @section('main_class', 'feed-main cup-feedback-main cup-ideas-main')
 
 @php

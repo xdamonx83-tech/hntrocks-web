@@ -77,6 +77,11 @@
 @endphp
 
 @section('title', $displayName . ' · ' . __('ui.preview_profile_title_suffix') . ' · HNT.rocks')
+@section('robots', request()->routeIs('profile.public', 'profile.*.public')
+    && ($profile?->profile_visibility ?? 'public') === 'public'
+    && in_array($activeSection, ['timeline', 'about', 'badges', 'trophies', 'teams'], true)
+        ? 'index,follow'
+        : 'noindex,nofollow')
 
 @section('content')
     <section class="profile-hero-card">

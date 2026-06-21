@@ -2,6 +2,7 @@
 
 @section('title', __('ui.app_beta_meta_title'))
 @section('meta_description', __('ui.app_beta_meta_description'))
+@section('robots', 'index,follow')
 @section('main_class', 'app-beta-main')
 
 @php

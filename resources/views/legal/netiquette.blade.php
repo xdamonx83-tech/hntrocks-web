@@ -1,5 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
+@section('robots', 'index,follow')
+
 @section('title', 'Netiquette')
 @section('meta_description', 'Community-Regeln und Netiquette für hnt.rocks: Fair Play, keine Hassinhalte, keine NSFW-Inhalte, Meldungen und Moderation.')
 @section('app_window_class', 'hnt-legal-window')

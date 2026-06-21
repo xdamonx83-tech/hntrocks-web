@@ -1,6 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
 @section('title', $cup->title.' · '.__('ui.preview_cup_page_title_suffix'))
+@section('robots', ($activeSection ?? 'overview') === 'overview' ? 'index,follow' : 'noindex,follow')
 @section('main_class', 'cup-detail-main')
 
 @php

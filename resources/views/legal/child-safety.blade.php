@@ -1,5 +1,7 @@
 @extends('themes.hnt_preview.layouts.app')
 
+@section('robots', 'index,follow')
+
 @section('title', 'Sicherheitsstandards zum Schutz von Kindern / Child Safety Standards')
 @section('meta_description', 'Veröffentlichte hnt.rocks Sicherheitsstandards gegen sexuellen Missbrauch und sexuelle Ausbeutung von Kindern (CSAE/CSAM).')
 @section('app_window_class', 'hnt-legal-window')

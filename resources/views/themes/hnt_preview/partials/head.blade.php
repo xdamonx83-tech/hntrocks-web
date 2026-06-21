@@ -11,7 +11,7 @@
     $hntOgUrl = trim($__env->yieldContent('og_url', $hntCanonical));
     $hntOgImage = trim($__env->yieldContent('og_image', ''));
 @endphp
-<meta name="robots" content="@yield('robots', 'index,follow')">
+<meta name="robots" content="@yield('robots', 'noindex,nofollow')">
 <meta name="color-scheme" content="dark">
 <title>{{ $hntTitle }}</title>
 <meta name="description" content="{{ $hntDescription }}">
