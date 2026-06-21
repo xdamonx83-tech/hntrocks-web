@@ -213,6 +213,14 @@
                 'cashSpotRunningText' => __('ui.maps_cash_spot_running'),
                 'cashSpotPendingText' => __('ui.maps_cash_spot_pending'),
                 'cashSpotErrorText' => __('ui.maps_cash_spot_error'),
+                'cashSpotDetailTitle' => __('ui.maps_cash_spot_detail_title'),
+                'cashSpotEyebrowText' => __('ui.maps_cash_spot_eyebrow'),
+                'cashSpotHelpfulText' => __('ui.maps_cash_spot_helpful'),
+                'cashSpotUpvoteText' => __('ui.maps_cash_spot_upvote'),
+                'cashSpotDownvoteText' => __('ui.maps_cash_spot_downvote'),
+                'cashSpotVoteAnonymousHintText' => __('ui.maps_cash_spot_vote_anonymous_hint'),
+                'cashSpotCommentsSoonText' => __('ui.maps_cash_spot_comments_soon'),
+                'cashSpotVoteErrorText' => __('ui.maps_cash_spot_vote_error'),
                 'closeText' => __('ui.maps_close'),
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 

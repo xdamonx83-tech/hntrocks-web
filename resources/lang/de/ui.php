@@ -4159,5 +4159,13 @@ return [
     'maps_cash_spot_running' => 'Upload läuft …',
     'maps_cash_spot_pending' => 'Danke! Dein Kassenspot wartet auf Freigabe.',
     'maps_cash_spot_error' => 'Upload fehlgeschlagen.',
+    'maps_cash_spot_detail_title' => 'Kassenspot',
+    'maps_cash_spot_eyebrow' => 'HNT Maps',
+    'maps_cash_spot_helpful' => 'Ist dieser Kassenspot hilfreich?',
+    'maps_cash_spot_upvote' => 'Hilfreich',
+    'maps_cash_spot_downvote' => 'Nicht hilfreich',
+    'maps_cash_spot_vote_anonymous_hint' => 'Deine Stimme wird anonym für diesen Browser gespeichert.',
+    'maps_cash_spot_comments_soon' => 'Kommentare folgen bald.',
+    'maps_cash_spot_vote_error' => 'Deine Stimme konnte nicht gespeichert werden.',
     'maps_close' => 'Schließen',
 ];

@@ -80,6 +80,7 @@ use App\Http\Controllers\Marketing\AppBetaController;
 use App\Http\Controllers\Marketing\LandingPageController;
 use App\Http\Controllers\Maps\MapController;
 use App\Http\Controllers\Maps\MapCashSpotSubmissionController;
+use App\Http\Controllers\Maps\MapMarkerVoteController;
 use App\Models\FeedPost;
 use App\Models\Friendship;
 use App\Models\Team;
@@ -129,6 +130,9 @@ Route::get('/maps/{slug}', [MapController::class, 'show'])
 Route::post('/maps/{map:slug}/cash-spots', [MapCashSpotSubmissionController::class, 'store'])
     ->middleware('throttle:4,1')
     ->name('maps.cash-spots.store');
+Route::post('/maps/markers/{marker}/vote', [MapMarkerVoteController::class, 'store'])
+    ->middleware('throttle:30,1')
+    ->name('maps.markers.vote');
 
 Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
 Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
