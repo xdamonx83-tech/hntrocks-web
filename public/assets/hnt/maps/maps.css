@@ -756,7 +756,7 @@ body.hnt-map-lightbox-open { overflow: hidden; }
         height: 100vh;
         height: 100dvh;
         max-height: none;
-        padding-top: env(safe-area-inset-top);
+        padding-top: 0;
         border: 0;
         border-radius: 0;
     }
@@ -769,8 +769,8 @@ body.hnt-map-lightbox-open { overflow: hidden; }
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
     }
-    .hnt-map-cash-detail-media { min-height: clamp(220px, 44dvh, 380px); border-radius: 0; }
-    .hnt-map-cash-detail-image { max-height: clamp(220px, 44dvh, 380px); }
+    .hnt-map-cash-detail-media { display: block; min-height: 0; height: auto; border-radius: 0; }
+    .hnt-map-cash-detail-image { width: 100%; height: auto; max-height: none; object-fit: contain; }
     .hnt-map-cash-detail-info { gap: 16px; padding: 20px 18px max(22px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255, 255, 255, .07); border-left: 0; }
     .hnt-map-cash-detail-header .hnt-map-lightbox-close {
         position: fixed;
