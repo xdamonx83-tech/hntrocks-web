@@ -97,7 +97,7 @@ class ApiMapsController extends Controller
             'width' => $map['width'],
             'height' => $map['height'],
             'image_url' => asset($map['image']),
-            'lines_url' => asset($map['lines']),
+            'lines_url' => File::isFile(public_path($map['lines'])) ? asset($map['lines']) : null,
             'marker_types' => self::MARKER_TYPES,
         ];
     }

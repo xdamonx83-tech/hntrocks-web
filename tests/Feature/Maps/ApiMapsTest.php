@@ -67,7 +67,12 @@ class ApiMapsTest extends TestCase
             ]);
 
         $this->assertStringStartsWith('http', $response->json('data.image_url'));
-        $this->assertStringStartsWith('http', $response->json('data.lines_url'));
+        $linesUrl = $response->json('data.lines_url');
+        $this->assertTrue($linesUrl === null || is_string($linesUrl));
+
+        if ($linesUrl !== null) {
+            $this->assertStringStartsWith('http', $linesUrl);
+        }
         $this->assertIsArray($response->json('data.markers'));
     }
 
