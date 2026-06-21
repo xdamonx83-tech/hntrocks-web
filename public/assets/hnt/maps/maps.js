@@ -108,6 +108,14 @@
     var cashDetailDownCount = null;
     var cashDetailAnonymousHint = null;
     var cashDetailVoteError = null;
+    var cashDetailCommentsCount = null;
+    var cashDetailCommentsList = null;
+    var cashDetailCommentsStatus = null;
+    var cashDetailCommentsLogin = null;
+    var cashDetailCommentsLoginLink = null;
+    var cashDetailCommentsForm = null;
+    var cashDetailCommentsInput = null;
+    var cashDetailCommentsSubmit = null;
     var cashDetailMarker = null;
     var cashDetailLastFocus = null;
 
@@ -246,6 +254,200 @@
         });
     }
 
+    function commentRequest(url, method, body) {
+        return fetch(url, {
+            method: method,
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: body === undefined ? undefined : JSON.stringify(body)
+        }).then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (data) {
+                if (!response.ok || !data.ok) {
+                    var validationError = data.errors?.body?.[0];
+                    throw new Error(validationError || data.message || config.cashSpotCommentErrorText);
+                }
+
+                return data;
+            });
+        });
+    }
+
+    function setCashDetailCommentCount(count) {
+        if (!cashDetailCommentsCount) {
+            return;
+        }
+
+        count = Number(count) || 0;
+        cashDetailCommentsCount.textContent = String(count);
+        if (cashDetailMarker) {
+            cashDetailMarker.comment_count = count;
+        }
+    }
+
+    function showCashDetailCommentError(message) {
+        cashDetailCommentsStatus.textContent = message || config.cashSpotCommentErrorText;
+        cashDetailCommentsStatus.hidden = false;
+    }
+
+    function renderCashDetailComment(comment) {
+        var item = document.createElement('article');
+        var avatarLink = document.createElement('a');
+        var avatar = document.createElement('img');
+        var content = document.createElement('div');
+        var meta = document.createElement('div');
+        var authorLink = document.createElement('a');
+        var time = document.createElement('span');
+        var body = document.createElement('div');
+        var actions = document.createElement('div');
+
+        item.className = 'hnt-map-cash-comment';
+        item.dataset.commentId = String(comment.id);
+        avatarLink.className = 'hnt-map-cash-comment-avatar';
+        avatarLink.href = comment.user.profile_url;
+        avatar.src = comment.user.avatar_url;
+        avatar.alt = '';
+        avatarLink.appendChild(avatar);
+        content.className = 'hnt-map-cash-comment-content';
+        meta.className = 'hnt-map-cash-comment-meta';
+        authorLink.href = comment.user.profile_url;
+        authorLink.textContent = comment.user.name;
+        time.textContent = comment.created_at_label;
+        body.className = 'hnt-map-cash-comment-body';
+        body.innerHTML = comment.body_html;
+        actions.className = 'hnt-map-cash-comment-actions';
+
+        function actionButton(icon, label, handler) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.title = label;
+            button.setAttribute('aria-label', label);
+            button.innerHTML = '<i class="ph ' + icon + '" aria-hidden="true"></i>';
+            button.addEventListener('click', handler);
+            return button;
+        }
+
+        if (comment.can_edit && comment.routes.update) {
+            actions.appendChild(actionButton('ph-pencil-simple', config.cashSpotCommentEditText, function () {
+                var editor = document.createElement('div');
+                var input = document.createElement('textarea');
+                var editorActions = document.createElement('div');
+                var save = document.createElement('button');
+                var cancel = document.createElement('button');
+
+                editor.className = 'hnt-map-cash-comment-editor';
+                input.maxLength = 2000;
+                input.value = comment.body;
+                editorActions.className = 'hnt-map-cash-comment-editor-actions';
+                save.type = 'button';
+                save.textContent = config.cashSpotCommentSaveText;
+                cancel.type = 'button';
+                cancel.textContent = config.cashSpotCommentCancelText;
+                editorActions.appendChild(cancel);
+                editorActions.appendChild(save);
+                editor.appendChild(input);
+                editor.appendChild(editorActions);
+                body.replaceWith(editor);
+                actions.hidden = true;
+                input.focus();
+
+                cancel.addEventListener('click', function () {
+                    editor.replaceWith(body);
+                    actions.hidden = false;
+                });
+                save.addEventListener('click', function () {
+                    save.disabled = true;
+                    commentRequest(comment.routes.update, 'PATCH', {body: input.value}).then(function (data) {
+                        var replacement = renderCashDetailComment(data.comment);
+                        item.replaceWith(replacement);
+                        cashDetailCommentsStatus.textContent = config.cashSpotCommentUpdatedText;
+                        cashDetailCommentsStatus.hidden = false;
+                    }).catch(function (error) {
+                        save.disabled = false;
+                        showCashDetailCommentError(error.message);
+                    });
+                });
+            }));
+        }
+
+        if (comment.can_delete && comment.routes.delete) {
+            actions.appendChild(actionButton('ph-trash', config.cashSpotCommentDeleteText, function () {
+                if (!window.confirm(config.cashSpotCommentDeleteConfirmText)) {
+                    return;
+                }
+
+                commentRequest(comment.routes.delete, 'DELETE').then(function (data) {
+                    item.remove();
+                    setCashDetailCommentCount(data.comment_count);
+                    cashDetailCommentsStatus.textContent = config.cashSpotCommentDeletedText;
+                    cashDetailCommentsStatus.hidden = false;
+                    if (!cashDetailCommentsList.children.length) {
+                        cashDetailCommentsStatus.textContent = config.cashSpotCommentsEmptyText;
+                    }
+                }).catch(function (error) {
+                    showCashDetailCommentError(error.message);
+                });
+            }));
+        }
+
+        meta.appendChild(authorLink);
+        meta.appendChild(time);
+        content.appendChild(meta);
+        content.appendChild(body);
+        content.appendChild(actions);
+        item.appendChild(avatarLink);
+        item.appendChild(content);
+
+        return item;
+    }
+
+    function loadCashDetailComments(marker) {
+        cashDetailCommentsList.replaceChildren();
+        cashDetailCommentsStatus.textContent = config.cashSpotCommentsLoadingText;
+        cashDetailCommentsStatus.hidden = false;
+        cashDetailCommentsForm.hidden = true;
+        cashDetailCommentsLogin.hidden = true;
+        setCashDetailCommentCount(marker.comment_count);
+
+        if (!marker.comments_url) {
+            showCashDetailCommentError(config.cashSpotCommentErrorText);
+            return;
+        }
+
+        fetch(marker.comments_url, {
+            credentials: 'same-origin',
+            headers: {'Accept': 'application/json'}
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error(config.cashSpotCommentErrorText);
+            }
+            return response.json();
+        }).then(function (data) {
+            if (!data.ok || cashDetailMarker !== marker) {
+                return;
+            }
+
+            data.comments.forEach(function (comment) {
+                cashDetailCommentsList.appendChild(renderCashDetailComment(comment));
+            });
+            setCashDetailCommentCount(data.comment_count);
+            cashDetailCommentsStatus.textContent = data.comments.length ? '' : config.cashSpotCommentsEmptyText;
+            cashDetailCommentsStatus.hidden = Boolean(data.comments.length);
+            marker.comment_store_url = data.routes.store;
+            marker.viewer_can_comment = data.viewer_can_comment;
+            cashDetailCommentsForm.hidden = !data.viewer_can_comment;
+            cashDetailCommentsLogin.hidden = data.viewer_can_comment;
+            cashDetailCommentsLoginLink.href = data.routes.login;
+        }).catch(function (error) {
+            if (cashDetailMarker === marker) {
+                showCashDetailCommentError(error.message);
+            }
+        });
+    }
+
     function ensureCashDetailModal() {
         if (cashDetailModal) {
             return;
@@ -273,6 +475,8 @@
         var voteTitle = document.createElement('h3');
         var voteActions = document.createElement('div');
         var comments = document.createElement('section');
+        var commentsHeader = document.createElement('header');
+        var commentsTitle = document.createElement('h3');
 
         panel.className = 'hnt-map-lightbox-panel hnt-map-cash-detail-panel';
         grip.className = 'hnt-map-cash-detail-grip';
@@ -343,10 +547,59 @@
         cashDetailVoteError.hidden = true;
 
         comments.className = 'hnt-map-cash-detail-comments';
-        comments.innerHTML = '<i class="ph ph-chat-circle-dots" aria-hidden="true"></i>';
-        var commentsText = document.createElement('span');
-        commentsText.textContent = config.cashSpotCommentsSoonText;
-        comments.appendChild(commentsText);
+        commentsTitle.textContent = config.cashSpotCommentsTitleText;
+        cashDetailCommentsCount = document.createElement('span');
+        cashDetailCommentsCount.className = 'hnt-map-cash-comments-count';
+        commentsHeader.appendChild(commentsTitle);
+        commentsHeader.appendChild(cashDetailCommentsCount);
+        cashDetailCommentsList = document.createElement('div');
+        cashDetailCommentsList.className = 'hnt-map-cash-comments-list';
+        cashDetailCommentsStatus = document.createElement('p');
+        cashDetailCommentsStatus.className = 'hnt-map-cash-comments-status';
+        cashDetailCommentsLogin = document.createElement('p');
+        cashDetailCommentsLogin.className = 'hnt-map-cash-comments-login';
+        cashDetailCommentsLoginLink = document.createElement('a');
+        cashDetailCommentsLoginLink.textContent = config.cashSpotCommentLoginText;
+        cashDetailCommentsLogin.appendChild(cashDetailCommentsLoginLink);
+        cashDetailCommentsForm = document.createElement('form');
+        cashDetailCommentsForm.className = 'hnt-map-cash-comments-form';
+        cashDetailCommentsInput = document.createElement('textarea');
+        cashDetailCommentsInput.name = 'body';
+        cashDetailCommentsInput.maxLength = 2000;
+        cashDetailCommentsInput.required = true;
+        cashDetailCommentsInput.placeholder = config.cashSpotCommentPlaceholderText;
+        cashDetailCommentsSubmit = document.createElement('button');
+        cashDetailCommentsSubmit.type = 'submit';
+        cashDetailCommentsSubmit.textContent = config.cashSpotCommentSendText;
+        cashDetailCommentsForm.appendChild(cashDetailCommentsInput);
+        cashDetailCommentsForm.appendChild(cashDetailCommentsSubmit);
+        cashDetailCommentsForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (!cashDetailMarker?.comment_store_url) {
+                return;
+            }
+
+            var marker = cashDetailMarker;
+            cashDetailCommentsSubmit.disabled = true;
+            cashDetailCommentsStatus.hidden = true;
+            commentRequest(marker.comment_store_url, 'POST', {body: cashDetailCommentsInput.value}).then(function (data) {
+                if (cashDetailMarker !== marker) {
+                    return;
+                }
+                cashDetailCommentsList.appendChild(renderCashDetailComment(data.comment));
+                cashDetailCommentsInput.value = '';
+                setCashDetailCommentCount(data.comment_count);
+            }).catch(function (error) {
+                showCashDetailCommentError(error.message);
+            }).finally(function () {
+                cashDetailCommentsSubmit.disabled = false;
+            });
+        });
+        comments.appendChild(commentsHeader);
+        comments.appendChild(cashDetailCommentsList);
+        comments.appendChild(cashDetailCommentsStatus);
+        comments.appendChild(cashDetailCommentsLogin);
+        comments.appendChild(cashDetailCommentsForm);
 
         titleBlock.appendChild(eyebrow);
         titleBlock.appendChild(title);
@@ -391,6 +644,7 @@
         cashDetailImage.alt = config.cashScreenshotText + ': ' + marker.label;
         cashDetailImage.src = marker.image_url;
         updateCashDetailVoteState();
+        loadCashDetailComments(marker);
         cashDetailModal.hidden = false;
         document.body.classList.add('hnt-map-lightbox-open');
         cashDetailModal.querySelector('.hnt-map-lightbox-close').focus();

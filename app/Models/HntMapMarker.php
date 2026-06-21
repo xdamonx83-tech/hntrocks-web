@@ -43,4 +43,9 @@ class HntMapMarker extends Model
     {
         return $this->hasMany(HntMapMarkerVote::class);
     }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(HntMapMarkerComment::class);
+    }
 }
