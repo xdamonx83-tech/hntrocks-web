@@ -491,6 +491,8 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 .hnt-map-cash-detail-panel {
     position: relative;
     width: min(1180px, 100%);
+    max-height: calc(100vh - 84px);
+    max-height: calc(100dvh - 84px);
     padding-top: 12px;
     border-color: rgba(255, 255, 255, .09);
     border-radius: 26px;
@@ -510,8 +512,10 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 }
 .hnt-map-cash-detail-body {
     min-height: 0;
+    flex: 1 1 auto;
     display: grid;
     grid-template-columns: minmax(0, 1.72fr) minmax(300px, .78fr);
+    overflow: hidden;
 }
 .hnt-map-cash-detail-media {
     min-width: 0;
@@ -530,9 +534,11 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 }
 .hnt-map-cash-detail-info {
     min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 22px;
+    overflow: hidden;
     padding: clamp(24px, 3vw, 34px);
     border-left: 1px solid rgba(255, 255, 255, .07);
     background: radial-gradient(circle at 92% 2%, rgba(214, 168, 79, .1), transparent 34%), #1a1a18;
@@ -632,13 +638,16 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 .hnt-map-cash-detail-anonymous-hint[hidden],
 .hnt-map-cash-detail-vote-error[hidden] { display: none; }
 .hnt-map-cash-detail-comments {
-    min-height: 220px;
+    min-height: 0;
+    max-height: clamp(220px, 42vh, 430px);
+    max-height: clamp(220px, 42dvh, 430px);
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     gap: 12px;
     margin-top: auto;
     padding: 16px;
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, .07);
     border-radius: 20px;
     background: linear-gradient(145deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .018)), rgba(12, 13, 11, .28);
@@ -659,6 +668,7 @@ body.hnt-map-lightbox-open { overflow: hidden; }
 }
 .hnt-map-cash-comments-list {
     min-height: 0;
+    flex: 1 1 auto;
     display: grid;
     align-content: start;
     gap: 13px;
@@ -855,9 +865,9 @@ body.hnt-map-lightbox-open { overflow: hidden; }
     }
     .hnt-map-cash-detail-media { display: block; min-height: 0; height: auto; max-height: none; align-self: start; border-radius: 0; line-height: 0; }
     .hnt-map-cash-detail-image { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; }
-    .hnt-map-cash-detail-info { gap: 16px; padding: 20px 18px max(22px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255, 255, 255, .07); border-left: 0; }
-    .hnt-map-cash-detail-comments { min-height: 300px; margin-top: 0; }
-    .hnt-map-cash-comments-list { max-height: 420px; }
+    .hnt-map-cash-detail-info { min-height: 0; gap: 16px; overflow: visible; padding: 20px 18px max(22px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255, 255, 255, .07); border-left: 0; }
+    .hnt-map-cash-detail-comments { min-height: 0; max-height: none; margin-top: 0; }
+    .hnt-map-cash-comments-list { max-height: clamp(140px, 30vh, 260px); max-height: clamp(140px, 30dvh, 260px); }
     .hnt-map-cash-detail-header .hnt-map-lightbox-close {
         position: fixed;
         z-index: 3;
