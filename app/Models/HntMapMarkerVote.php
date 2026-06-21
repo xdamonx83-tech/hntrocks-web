@@ -9,6 +9,9 @@ class HntMapMarkerVote extends Model
 {
     protected $fillable = [
         'user_id',
+        'visitor_hash',
+        'ip_hash',
+        'user_agent_hash',
         'value',
     ];
 

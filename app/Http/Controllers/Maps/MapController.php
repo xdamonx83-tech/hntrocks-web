@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Maps;
 
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
+use App\Support\MapVoteVisitorIdentity;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
@@ -77,12 +79,15 @@ class MapController extends Controller
         return view('themes.hnt_preview.maps.index', compact('maps'));
     }
 
-    public function show(string $slug): View
+    public function show(Request $request, MapVoteVisitorIdentity $visitorIdentity, string $slug): View
     {
         abort_unless(isset(self::MAPS[$slug]), 404);
 
         $map = self::MAPS[$slug];
-        $data = $this->readMapData($slug, $map['data']);
+        $viewerVisitorHash = $request->user() === null
+            ? $visitorIdentity->hashFromRequest($request)
+            : null;
+        $data = $this->readMapData($slug, $map['data'], $viewerVisitorHash);
         $imageAvailable = File::isFile(public_path($map['image']));
         $linesAvailable = File::isFile(public_path($map['lines']));
 
@@ -109,9 +114,9 @@ class MapController extends Controller
     /**
      * @return array{markers: array<int, array<string, mixed>>, error: string|null}
      */
-    private function readMapData(string $slug, string $relativePath): array
+    private function readMapData(string $slug, string $relativePath, ?string $viewerVisitorHash = null): array
     {
-        $databaseMarkers = $this->readDatabaseMarkers($slug);
+        $databaseMarkers = $this->readDatabaseMarkers($slug, $viewerVisitorHash);
 
         if ($databaseMarkers !== null) {
             return ['markers' => $databaseMarkers, 'error' => null];
@@ -126,7 +131,7 @@ class MapController extends Controller
      *
      * @return array<int, array<string, mixed>>|null
      */
-    private function readDatabaseMarkers(string $slug): ?array
+    private function readDatabaseMarkers(string $slug, ?string $viewerVisitorHash = null): ?array
     {
         try {
             if (! Schema::hasTable('hnt_maps') || ! Schema::hasTable('hnt_map_markers')) {
@@ -155,6 +160,10 @@ class MapController extends Controller
                 if (auth()->check()) {
                     $markersQuery->with(['votes' => fn ($query) => $query
                         ->where('user_id', auth()->id())
+                        ->select(['id', 'hnt_map_marker_id', 'value'])]);
+                } elseif ($viewerVisitorHash !== null) {
+                    $markersQuery->with(['votes' => fn ($query) => $query
+                        ->where('visitor_hash', $viewerVisitorHash)
                         ->select(['id', 'hnt_map_marker_id', 'value'])]);
                 }
             }
@@ -192,7 +201,7 @@ class MapController extends Controller
                     'vote_url' => route('maps.markers.vote', $marker),
                     'up_count' => (int) $marker->up_count,
                     'down_count' => (int) $marker->down_count,
-                    'viewer_vote' => auth()->check() ? $marker->votes->first()?->value : null,
+                    'viewer_vote' => $marker->relationLoaded('votes') ? $marker->votes->first()?->value : null,
                     'comment_count' => 0,
                 ];
             })->filter()->values()->all();

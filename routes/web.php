@@ -131,7 +131,7 @@ Route::post('/maps/{map:slug}/cash-spots', [MapCashSpotSubmissionController::cla
     ->middleware('throttle:4,1')
     ->name('maps.cash-spots.store');
 Route::post('/maps/markers/{marker}/vote', [MapMarkerVoteController::class, 'store'])
-    ->middleware(['auth', 'throttle:20,1'])
+    ->middleware('throttle:30,1')
     ->name('maps.markers.vote');
 
 Route::view('/impressum', 'legal.impressum')->name('legal.impressum');

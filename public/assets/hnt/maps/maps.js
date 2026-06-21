@@ -106,7 +106,7 @@
     var cashDetailDownButton = null;
     var cashDetailUpCount = null;
     var cashDetailDownCount = null;
-    var cashDetailLogin = null;
+    var cashDetailAnonymousHint = null;
     var cashDetailVoteError = null;
     var cashDetailMarker = null;
     var cashDetailLastFocus = null;
@@ -187,7 +187,7 @@
         }
 
         var viewerVote = Number(cashDetailMarker.viewer_vote) || null;
-        var canVote = Boolean(config.viewerIsAuthenticated && cashDetailMarker.vote_url);
+        var canVote = Boolean(cashDetailMarker.vote_url);
 
         cashDetailUpCount.textContent = String(Number(cashDetailMarker.up_count) || 0);
         cashDetailDownCount.textContent = String(Number(cashDetailMarker.down_count) || 0);
@@ -197,11 +197,11 @@
         cashDetailDownButton.setAttribute('aria-pressed', viewerVote === -1 ? 'true' : 'false');
         cashDetailUpButton.disabled = !canVote;
         cashDetailDownButton.disabled = !canVote;
-        cashDetailLogin.hidden = Boolean(config.viewerIsAuthenticated);
+        cashDetailAnonymousHint.hidden = Boolean(config.viewerIsAuthenticated);
     }
 
     function submitCashDetailVote(value) {
-        if (!cashDetailMarker?.vote_url || !config.viewerIsAuthenticated) {
+        if (!cashDetailMarker?.vote_url) {
             return;
         }
 
@@ -259,7 +259,11 @@
         cashDetailModal.setAttribute('aria-labelledby', 'hntMapCashDetailTitle');
 
         var panel = document.createElement('div');
+        var grip = document.createElement('span');
         var header = document.createElement('header');
+        var titleBlock = document.createElement('div');
+        var eyebrow = document.createElement('p');
+        var eyebrowDot = document.createElement('span');
         var title = document.createElement('h2');
         var closeButton = document.createElement('button');
         var body = document.createElement('div');
@@ -271,7 +275,14 @@
         var comments = document.createElement('section');
 
         panel.className = 'hnt-map-lightbox-panel hnt-map-cash-detail-panel';
-        header.className = 'hnt-map-lightbox-header';
+        grip.className = 'hnt-map-cash-detail-grip';
+        grip.setAttribute('aria-hidden', 'true');
+        header.className = 'hnt-map-cash-detail-header';
+        titleBlock.className = 'hnt-map-cash-detail-title-block';
+        eyebrow.className = 'hnt-map-cash-detail-eyebrow';
+        eyebrowDot.setAttribute('aria-hidden', 'true');
+        eyebrow.appendChild(eyebrowDot);
+        eyebrow.appendChild(document.createTextNode(config.cashSpotEyebrowText));
         title.id = 'hntMapCashDetailTitle';
         title.textContent = config.cashSpotDetailTitle;
         closeButton.type = 'button';
@@ -306,6 +317,7 @@
         cashDetailUpButton.type = 'button';
         cashDetailUpButton.className = 'hnt-map-cash-detail-vote';
         cashDetailUpButton.setAttribute('aria-label', config.cashSpotUpvoteText);
+        cashDetailUpButton.title = config.cashSpotUpvoteText;
         cashDetailUpButton.innerHTML = '<i class="ph ph-thumbs-up" aria-hidden="true"></i>';
         cashDetailUpCount = document.createElement('span');
         cashDetailUpButton.appendChild(cashDetailUpCount);
@@ -315,15 +327,15 @@
         cashDetailDownButton.type = 'button';
         cashDetailDownButton.className = 'hnt-map-cash-detail-vote';
         cashDetailDownButton.setAttribute('aria-label', config.cashSpotDownvoteText);
+        cashDetailDownButton.title = config.cashSpotDownvoteText;
         cashDetailDownButton.innerHTML = '<i class="ph ph-thumbs-down" aria-hidden="true"></i>';
         cashDetailDownCount = document.createElement('span');
         cashDetailDownButton.appendChild(cashDetailDownCount);
         cashDetailDownButton.addEventListener('click', function () { submitCashDetailVote(-1); });
 
-        cashDetailLogin = document.createElement('a');
-        cashDetailLogin.className = 'hnt-map-cash-detail-login';
-        cashDetailLogin.href = config.loginUrl;
-        cashDetailLogin.textContent = config.cashSpotLoginToVoteText;
+        cashDetailAnonymousHint = document.createElement('p');
+        cashDetailAnonymousHint.className = 'hnt-map-cash-detail-anonymous-hint';
+        cashDetailAnonymousHint.textContent = config.cashSpotVoteAnonymousHintText;
 
         cashDetailVoteError = document.createElement('p');
         cashDetailVoteError.className = 'hnt-map-cash-detail-vote-error';
@@ -336,7 +348,10 @@
         commentsText.textContent = config.cashSpotCommentsSoonText;
         comments.appendChild(commentsText);
 
-        header.appendChild(title);
+        titleBlock.appendChild(eyebrow);
+        titleBlock.appendChild(title);
+        titleBlock.appendChild(cashDetailLabel);
+        header.appendChild(titleBlock);
         header.appendChild(closeButton);
         media.appendChild(cashDetailImage);
         media.appendChild(cashDetailError);
@@ -344,14 +359,14 @@
         voteActions.appendChild(cashDetailDownButton);
         voteSection.appendChild(voteTitle);
         voteSection.appendChild(voteActions);
-        voteSection.appendChild(cashDetailLogin);
+        voteSection.appendChild(cashDetailAnonymousHint);
         voteSection.appendChild(cashDetailVoteError);
-        details.appendChild(cashDetailLabel);
+        details.appendChild(header);
         details.appendChild(voteSection);
         details.appendChild(comments);
         body.appendChild(media);
         body.appendChild(details);
-        panel.appendChild(header);
+        panel.appendChild(grip);
         panel.appendChild(body);
         cashDetailModal.appendChild(panel);
         body.className = 'hnt-map-cash-detail-body';
