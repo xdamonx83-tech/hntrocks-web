@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\ApiHashtagController;
 use App\Http\Controllers\Api\V1\ApiLfgController;
 use App\Http\Controllers\Api\V1\ApiLoadoutChallengesController;
 use App\Http\Controllers\Api\V1\ApiMapsController;
+use App\Http\Controllers\Api\V1\MapCashSpotSubmissionApiController;
 use App\Http\Controllers\Api\V1\MapMarkerInteractionController;
 use App\Http\Controllers\Api\V1\ApiMembersController;
 use App\Http\Controllers\Api\V1\ApiMessageController;
@@ -46,6 +47,7 @@ Route::get('/v1/health', function (): array {
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/maps', [ApiMapsController::class, 'index'])->name('maps.index');
     Route::get('/maps/{slug}', [ApiMapsController::class, 'show'])->name('maps.show');
+    Route::post('/maps/{slug}/cash-spots', [MapCashSpotSubmissionApiController::class, 'store'])->name('maps.cash-spots.store');
     Route::get('/maps/markers/{marker}/comments', [MapMarkerInteractionController::class, 'comments'])->name('maps.markers.comments.index');
     Route::post('/maps/markers/{marker}/vote', [MapMarkerInteractionController::class, 'vote'])->name('maps.markers.vote');
 
