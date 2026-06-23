@@ -32,6 +32,7 @@ class LiveLobbyResource extends JsonResource
             'language' => $this->language,
             'voice_required' => (bool) $this->voice_required,
             'playstyle' => $this->playstyle,
+            'mood' => $this->mood,
             'note' => $this->note,
             'creator' => $this->userSummary($this->creator),
             'common_ground' => $viewer ? HunterCommonGround::between(

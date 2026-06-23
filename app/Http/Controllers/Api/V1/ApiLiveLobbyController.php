@@ -215,6 +215,7 @@ class ApiLiveLobbyController extends Controller
             'language' => ['nullable', 'string', 'max:40'],
             'voice_required' => ['nullable', 'boolean'],
             'playstyle' => ['nullable', 'string', 'max:60'],
+            'mood' => ['nullable', 'string', 'max:40', Rule::in(['chill', 'serious', 'pvp', 'bossrush', 'meme', 'teaching'])],
             'note' => ['nullable', 'string', 'max:500', $safeText],
             'lobby_code' => ['nullable', 'string', 'max:64', $safeText],
             'steam_id' => ['nullable', 'string', 'max:100', $safeText],
