@@ -138,11 +138,30 @@ class LiveLobbyFeedbackApiTest extends TestCase
         $this->assertDatabaseMissing('live_lobby_feedback', ['feedback_request_id' => $feedbackRequest->id]);
     }
 
-    public function test_request_list_only_contains_the_reviewers_pending_requests_without_private_reputation(): void
+    public function test_request_cannot_be_submitted_before_it_is_available(): void
+    {
+        [$feedbackRequest, $reviewer] = $this->feedbackRequest(['available_at' => now()->addMinute()]);
+
+        $this->postAs($reviewer, '/api/v1/ready-lobby-feedback/'.$feedbackRequest->public_id.'/submit')
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'This feedback request is not available yet.');
+
+        $this->assertDatabaseMissing('live_lobby_feedback', ['feedback_request_id' => $feedbackRequest->id]);
+        $this->assertDatabaseHas('live_lobby_feedback_requests', [
+            'id' => $feedbackRequest->id,
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_request_list_only_contains_currently_available_pending_requests_for_the_reviewer(): void
     {
         [$feedbackRequest, $reviewer, $target] = $this->feedbackRequest();
         $otherReviewer = $this->user();
         $this->feedbackRequest([], $otherReviewer, $target);
+        $this->feedbackRequest(['available_at' => now()->addMinute()], $reviewer);
+        $this->feedbackRequest(['available_at' => null], $reviewer);
+        $this->feedbackRequest(['expires_at' => now()->subMinute()], $reviewer);
+        $this->feedbackRequest(['status' => 'completed'], $reviewer);
 
         $response = $this->getAs($reviewer, '/api/v1/ready-lobby-feedback/requests')
             ->assertOk()
