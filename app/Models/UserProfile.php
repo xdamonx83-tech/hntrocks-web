@@ -25,12 +25,16 @@ class UserProfile extends Model
         'youtube_url',
         'is_lfg_available',
         'profile_visibility',
+        'hunter_dna',
+        'hunter_dna_completed_at',
     ];
 
     protected function casts(): array
     {
         return [
             'is_lfg_available' => 'boolean',
+            'hunter_dna' => 'array',
+            'hunter_dna_completed_at' => 'datetime',
         ];
     }
 
