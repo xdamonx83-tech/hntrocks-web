@@ -21,6 +21,7 @@ use App\Services\SecurityLogService;
 use App\Services\UserDataExportService;
 use App\Services\MediaService;
 use App\Services\ReferralService;
+use App\Support\HunterDna;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -686,6 +687,14 @@ class ApiAuthController extends Controller
             'hunt_role' => ['nullable', 'string', 'max:60'],
             'discord_name' => ['nullable', 'string', 'max:80'],
             'is_lfg_available' => ['nullable', 'boolean'],
+            'hunter_dna' => ['nullable', 'array:voice,preferred_mode,experience,temper,goals,mentor'],
+            'hunter_dna.voice' => ['nullable', Rule::in(['yes', 'no', 'optional'])],
+            'hunter_dna.preferred_mode' => ['nullable', Rule::in(['solo', 'duo', 'trio', 'flexible'])],
+            'hunter_dna.experience' => ['nullable', Rule::in(['new', 'casual', 'experienced', 'veteran'])],
+            'hunter_dna.temper' => ['nullable', Rule::in(['chill', 'focused', 'tryhard', 'chaotic'])],
+            'hunter_dna.goals' => ['nullable', 'array', 'max:5'],
+            'hunter_dna.goals.*' => ['nullable', Rule::in(['pvp', 'bounty', 'boss', 'extract', 'events', 'quests', 'teach', 'learn', 'memes'])],
+            'hunter_dna.mentor' => ['nullable', 'boolean'],
         ]);
 
         if ($validator->fails()) {
@@ -732,6 +741,12 @@ class ApiAuthController extends Controller
 
         if (array_key_exists('is_lfg_available', $data)) {
             $updates['is_lfg_available'] = (bool) $data['is_lfg_available'];
+        }
+
+        if (array_key_exists('hunter_dna', $data)) {
+            $hunterDna = HunterDna::normalize($data['hunter_dna'] ?? []);
+            $updates['hunter_dna'] = $hunterDna === [] ? null : $hunterDna;
+            $updates['hunter_dna_completed_at'] = HunterDna::isComplete($hunterDna) ? now() : null;
         }
 
         if ($updates !== []) {

@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\User;
+use App\Support\HunterDna;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -36,6 +37,9 @@ class UserResource extends JsonResource
                 'hunt_role' => $profile?->hunt_role,
                 'discord_name' => $profile?->discord_name,
                 'is_lfg_available' => (bool) ($profile?->is_lfg_available ?? false),
+                'hunter_dna' => HunterDna::payload($profile?->hunter_dna),
+                'hunter_dna_completed_at' => $profile?->hunter_dna_completed_at?->toISOString(),
+                'hunter_dna_summary' => HunterDna::summary($profile),
             ]),
             'created_at' => $this->created_at?->toISOString(),
         ];
