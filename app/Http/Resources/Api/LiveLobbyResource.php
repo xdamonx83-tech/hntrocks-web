@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Support\HunterCommonGround;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -10,6 +11,7 @@ class LiveLobbyResource extends JsonResource
     public function toArray(Request $request): array
     {
         $viewer = $request->user();
+        $viewer?->loadMissing('profile');
         $isCreator = $viewer && (int) $this->creator_id === (int) $viewer->id;
         $isMember = $viewer && $this->activeMembers->contains('user_id', $viewer->id);
         $canJoin = $viewer && ! $isMember && $this->status === 'open' && $this->expires_at->isFuture();
@@ -30,6 +32,12 @@ class LiveLobbyResource extends JsonResource
             'playstyle' => $this->playstyle,
             'note' => $this->note,
             'creator' => $this->userSummary($this->creator),
+            'common_ground' => $viewer ? HunterCommonGround::between(
+                $viewer->profile,
+                $this->resource,
+                $this->creator?->profile,
+                (bool) $isCreator,
+            ) : null,
             'members' => $this->activeMembers->map(fn ($member): array => [
                 ...$this->userSummary($member->user),
                 'role' => $member->role,

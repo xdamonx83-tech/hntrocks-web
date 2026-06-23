@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ApiAccessToken;
 use App\Models\LiveLobby;
 use App\Models\User;
+use App\Models\UserProfile;
 use App\Services\LiveLobbyNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -165,6 +166,76 @@ class LiveLobbyApiTest extends TestCase
         $this->assertDatabaseHas('live_lobbies', ['id' => $expired->id, 'status' => 'expired']);
     }
 
+    public function test_common_ground_matches_profile_lobby_and_creator_traits_without_leaking_hunter_dna(): void
+    {
+        $creator = $this->user();
+        $this->profile($creator, [
+            'hunt_role' => 'support',
+            'hunter_dna' => [
+                'experience' => 'experienced',
+                'temper' => 'focused',
+                'goals' => ['boss'],
+                'mentor' => false,
+            ],
+        ]);
+        $lobby = $this->createLobby($creator, [
+            'platform' => 'pc',
+            'region' => 'EU',
+            'language' => 'de',
+            'playstyle' => 'tactical',
+        ]);
+
+        $viewer = $this->user();
+        $this->profile($viewer, [
+            'platform' => 'pc',
+            'region' => 'EU',
+            'language' => 'de',
+            'playstyle' => 'tactical',
+            'hunt_role' => 'support',
+            'hunter_dna' => [
+                'voice' => 'optional',
+                'preferred_mode' => 'flexible',
+                'experience' => 'experienced',
+                'temper' => 'focused',
+                'goals' => ['boss'],
+                'mentor' => false,
+            ],
+        ]);
+
+        $response = $this->getAs($viewer, '/api/v1/live-lobbies/'.$lobby->public_id)
+            ->assertOk()
+            ->assertJsonPath('data.id', $lobby->public_id)
+            ->assertJsonPath('data.creator.id', $creator->id)
+            ->assertJsonPath('data.common_ground.self', false)
+            ->assertJsonPath('data.common_ground.score', 10)
+            ->assertJsonPath('data.common_ground.max_score', 11)
+            ->assertJsonMissingPath('data.creator.hunter_dna')
+            ->assertJsonMissingPath('data.creator.profile')
+            ->assertJsonMissingPath('data.common_ground.hunter_dna')
+            ->assertJsonStructure(['data' => [
+                'id', 'public_id', 'status', 'mode', 'slots_total', 'slots_filled',
+                'missing_slots', 'platform', 'crossplay_pool', 'region', 'language',
+                'voice_required', 'playstyle', 'note', 'creator', 'members', 'viewer',
+                'expires_at', 'full_at', 'closed_at', 'created_at', 'common_ground',
+            ]]);
+
+        $this->assertSame(
+            ['platform', 'region', 'language', 'preferred_mode', 'playstyle', 'hunt_role', 'voice', 'temper', 'experience', 'goals'],
+            array_column($response->json('data.common_ground.items'), 'key'),
+        );
+    }
+
+    public function test_creator_receives_self_common_ground(): void
+    {
+        $creator = $this->user();
+        $this->profile($creator, ['platform' => 'pc']);
+        $lobby = $this->createLobby($creator);
+
+        $this->getAs($creator, '/api/v1/live-lobbies/'.$lobby->public_id)
+            ->assertOk()
+            ->assertJsonPath('data.common_ground.self', true);
+    }
+
     private function createLobby(User $creator, array $overrides = []): LiveLobby
     {
         $response = $this->postAs($creator, '/api/v1/live-lobbies', array_merge([
@@ -178,6 +249,18 @@ class LiveLobbyApiTest extends TestCase
     private function action(LiveLobby $lobby, string $action): string
     {
         return '/api/v1/live-lobbies/'.$lobby->public_id.'/'.$action;
+    }
+
+    private function profile(User $user, array $attributes): UserProfile
+    {
+        return $user->profile()->create(array_merge([
+            'platform' => null,
+            'region' => null,
+            'language' => null,
+            'playstyle' => null,
+            'hunt_role' => null,
+            'hunter_dna' => null,
+        ], $attributes));
     }
 
     private function getAs(User $user, string $uri)
