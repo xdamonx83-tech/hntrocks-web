@@ -42,6 +42,10 @@ class PushPayloadResolver
             return $moment;
         }
 
+        if ($liveLobby = $this->liveLobbyTarget($path)) {
+            return $liveLobby;
+        }
+
         if ($this->isFriendRequestType($type) || $path === '/friend-requests') {
             return ['target' => 'friend_request'];
         }
@@ -87,6 +91,19 @@ class PushPayloadResolver
         return [
             'target' => 'moment',
             'moment_id' => (string) $matches[1],
+        ];
+    }
+
+    private function liveLobbyTarget(string $path): ?array
+    {
+        if (! preg_match('#^/ready-lobbies/([0-9a-f-]+)/?$#i', $path, $matches)) {
+            return null;
+        }
+
+        return [
+            'target' => 'live_lobby',
+            'live_lobby_id' => (string) $matches[1],
+            'ready_lobby_id' => (string) $matches[1],
         ];
     }
 

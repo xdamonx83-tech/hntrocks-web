@@ -267,6 +267,16 @@ class User extends Authenticatable
         return $this->hasMany(LfgApplication::class);
     }
 
+    public function liveLobbies(): HasMany
+    {
+        return $this->hasMany(LiveLobby::class, 'creator_id');
+    }
+
+    public function liveLobbyMemberships(): HasMany
+    {
+        return $this->hasMany(LiveLobbyMember::class);
+    }
+
     public function teamLfgPosts(): HasMany
     {
         return $this->hasMany(TeamLfgPost::class);
