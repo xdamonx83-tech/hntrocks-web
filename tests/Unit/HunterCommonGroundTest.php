@@ -51,4 +51,26 @@ class HunterCommonGroundTest extends TestCase
         $this->assertSame(3, $result['max_score']);
         $this->assertSame(['boss', 'pvp', 'learn'], array_column($result['items'], 'value'));
     }
+
+    public function test_missing_creator_profile_excludes_creator_traits_from_score(): void
+    {
+        $result = HunterCommonGround::between(
+            new UserProfile([
+                'platform' => 'pc',
+                'hunt_role' => 'support',
+                'hunter_dna' => [
+                    'experience' => 'experienced',
+                    'temper' => 'focused',
+                    'goals' => ['boss'],
+                    'mentor' => true,
+                ],
+            ]),
+            new LiveLobby(['platform' => 'pc', 'crossplay_pool' => 'pc']),
+            null,
+        );
+
+        $this->assertSame(1, $result['score']);
+        $this->assertSame(1, $result['max_score']);
+        $this->assertSame(['platform'], array_column($result['items'], 'key'));
+    }
 }
