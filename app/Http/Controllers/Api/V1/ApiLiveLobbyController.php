@@ -76,7 +76,7 @@ class ApiLiveLobbyController extends Controller
                 'slots_total' => $validated['mode'] === 'duo' ? 2 : 3,
                 'slots_filled' => 1,
                 'crossplay_pool' => $this->poolFor($validated['platform']),
-                'voice_required' => $request->boolean('voice_required'),
+                'voice_required' => (bool) ($validated['voice_required'] ?? false),
                 'status' => 'open',
                 'expires_at' => now()->addMinutes(15),
             ]);
