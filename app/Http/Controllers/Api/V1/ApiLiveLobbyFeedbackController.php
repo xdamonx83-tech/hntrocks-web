@@ -28,6 +28,8 @@ class ApiLiveLobbyFeedbackController extends Controller
             ->with(['lobby', 'targetUser'])
             ->where('reviewer_id', $request->user()->id)
             ->where('status', 'pending')
+            ->whereNotNull('available_at')
+            ->where('available_at', '<=', now())
             ->where(function ($query): void {
                 $query->whereNull('expires_at')->orWhere('expires_at', '>=', now());
             })
