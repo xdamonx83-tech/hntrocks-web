@@ -277,6 +277,16 @@ class User extends Authenticatable
         return $this->hasMany(LiveLobbyMember::class);
     }
 
+    public function receivedLiveLobbyFeedback(): HasMany
+    {
+        return $this->hasMany(LiveLobbyFeedback::class, 'target_user_id');
+    }
+
+    public function givenLiveLobbyFeedback(): HasMany
+    {
+        return $this->hasMany(LiveLobbyFeedback::class, 'reviewer_id');
+    }
+
     public function teamLfgPosts(): HasMany
     {
         return $this->hasMany(TeamLfgPost::class);

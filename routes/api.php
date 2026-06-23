@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\ApiHallOfFameController;
 use App\Http\Controllers\Api\V1\ApiHashtagController;
 use App\Http\Controllers\Api\V1\ApiLfgController;
 use App\Http\Controllers\Api\V1\ApiLiveLobbyController;
+use App\Http\Controllers\Api\V1\ApiLiveLobbyFeedbackController;
 use App\Http\Controllers\Api\V1\ApiLoadoutChallengesController;
 use App\Http\Controllers\Api\V1\ApiMapsController;
 use App\Http\Controllers\Api\V1\MapCashSpotSubmissionApiController;
@@ -162,6 +163,9 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/live-lobbies/{lobby}/join', [ApiLiveLobbyController::class, 'join'])->name('live-lobbies.join');
         Route::post('/live-lobbies/{lobby}/leave', [ApiLiveLobbyController::class, 'leave'])->name('live-lobbies.leave');
         Route::post('/live-lobbies/{lobby}/close', [ApiLiveLobbyController::class, 'close'])->name('live-lobbies.close');
+        Route::get('/ready-lobby-feedback/requests', [ApiLiveLobbyFeedbackController::class, 'index'])->name('ready-lobby-feedback.requests.index');
+        Route::post('/ready-lobby-feedback/{feedbackRequest}/submit', [ApiLiveLobbyFeedbackController::class, 'submit'])->name('ready-lobby-feedback.submit');
+        Route::post('/ready-lobby-feedback/{feedbackRequest}/dismiss', [ApiLiveLobbyFeedbackController::class, 'dismiss'])->name('ready-lobby-feedback.dismiss');
         Route::get('/team-lfg', [ApiTeamLfgController::class, 'index'])->name('team-lfg.index');
         Route::get('/team-lfg/manageable-teams', [ApiTeamLfgController::class, 'manageableTeams'])->name('team-lfg.manageable-teams');
         Route::post('/team-lfg', [ApiTeamLfgController::class, 'store'])->name('team-lfg.store');

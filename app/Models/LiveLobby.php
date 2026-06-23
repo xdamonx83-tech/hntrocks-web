@@ -59,6 +59,16 @@ class LiveLobby extends Model
         return $this->members()->whereNull('left_at');
     }
 
+    public function feedbackRequests(): HasMany
+    {
+        return $this->hasMany(LiveLobbyFeedbackRequest::class);
+    }
+
+    public function feedbacks(): HasMany
+    {
+        return $this->hasMany(LiveLobbyFeedback::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereIn('status', self::ACTIVE_STATUSES)->where('expires_at', '>', now());
