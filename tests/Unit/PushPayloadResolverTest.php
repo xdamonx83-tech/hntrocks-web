@@ -48,6 +48,17 @@ class PushPayloadResolverTest extends TestCase
         $this->assertSame('42', $payload['moment_id']);
     }
 
+    public function test_ready_lobby_action_url_targets_live_lobby(): void
+    {
+        $id = '7b764c36-f1b5-49bc-82f7-bc6f42d3990e';
+        $payload = $this->resolver->forRaw('lfg_live_lobby_ready', '/ready-lobbies/'.$id);
+
+        $this->assertSame('live_lobby', $payload['target']);
+        $this->assertSame($id, $payload['live_lobby_id']);
+        $this->assertSame($id, $payload['ready_lobby_id']);
+        $this->assertSame('/ready-lobbies/'.$id, $payload['action_url']);
+    }
+
     public function test_friend_request_type_targets_friend_request(): void
     {
         $payload = $this->resolver->forRaw('friend_request_received', '/u/hunter');
