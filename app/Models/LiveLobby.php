@@ -17,7 +17,7 @@ class LiveLobby extends Model
 
     protected $fillable = [
         'public_id', 'creator_id', 'mode', 'slots_total', 'slots_filled', 'platform',
-        'crossplay_pool', 'region', 'language', 'voice_required', 'playstyle', 'note',
+        'crossplay_pool', 'region', 'language', 'voice_required', 'playstyle', 'mood', 'note',
         'lobby_code', 'steam_id', 'psn_id', 'xbox_gamertag', 'discord_handle', 'status',
         'expires_at', 'full_at', 'closed_at',
     ];

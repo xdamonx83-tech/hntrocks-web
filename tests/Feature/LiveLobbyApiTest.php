@@ -72,6 +72,40 @@ class LiveLobbyApiTest extends TestCase
         $this->assertSame('console', $xbox->crossplay_pool);
     }
 
+    public function test_lobby_can_be_created_with_mood_and_resource_contains_it(): void
+    {
+        $response = $this->postAs($this->user(), '/api/v1/live-lobbies', [
+            'mode' => 'duo',
+            'platform' => 'pc',
+            'mood' => 'bossrush',
+        ])->assertCreated()
+            ->assertJsonPath('data.mood', 'bossrush');
+
+        $this->assertDatabaseHas('live_lobbies', [
+            'public_id' => $response->json('data.id'),
+            'mood' => 'bossrush',
+        ]);
+    }
+
+    public function test_invalid_mood_is_rejected(): void
+    {
+        $this->postAs($this->user(), '/api/v1/live-lobbies', [
+            'mode' => 'duo',
+            'platform' => 'pc',
+            'mood' => 'speedrun',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('mood');
+    }
+
+    public function test_mood_is_optional_for_existing_requests(): void
+    {
+        $this->postAs($this->user(), '/api/v1/live-lobbies', [
+            'mode' => 'duo',
+            'platform' => 'pc',
+        ])->assertCreated()
+            ->assertJsonPath('data.mood', null);
+    }
+
     public function test_pc_lobby_rejects_console_and_accepts_pc(): void
     {
         $lobby = $this->createLobby($this->user(), ['platform' => 'pc']);
@@ -215,7 +249,7 @@ class LiveLobbyApiTest extends TestCase
             ->assertJsonStructure(['data' => [
                 'id', 'public_id', 'status', 'mode', 'slots_total', 'slots_filled',
                 'missing_slots', 'platform', 'crossplay_pool', 'region', 'language',
-                'voice_required', 'playstyle', 'note', 'creator', 'members', 'viewer',
+                'voice_required', 'playstyle', 'mood', 'note', 'creator', 'members', 'viewer',
                 'expires_at', 'full_at', 'closed_at', 'created_at', 'common_ground',
             ]]);
 
