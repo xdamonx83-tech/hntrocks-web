@@ -96,14 +96,15 @@ class PushPayloadResolver
 
     private function liveLobbyTarget(string $path): ?array
     {
-        if (! preg_match('#^/ready-lobbies/([0-9a-f-]+)/?$#i', $path, $matches)) {
+        if (! preg_match('#^/ready-lobbies/([0-9a-f-]+)(/feedback)?/?$#i', $path, $matches)) {
             return null;
         }
 
         return [
-            'target' => 'live_lobby',
+            'target' => isset($matches[2]) && $matches[2] !== '' ? 'live_lobby_feedback' : 'live_lobby',
             'live_lobby_id' => (string) $matches[1],
             'ready_lobby_id' => (string) $matches[1],
+            ...(isset($matches[2]) && $matches[2] !== '' ? ['feedback_request_id' => ''] : []),
         ];
     }
 
