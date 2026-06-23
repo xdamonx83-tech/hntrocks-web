@@ -15,6 +15,8 @@ class LiveLobbyResource extends JsonResource
         $isCreator = $viewer && (int) $this->creator_id === (int) $viewer->id;
         $isMember = $viewer && $this->activeMembers->contains('user_id', $viewer->id);
         $canJoin = $viewer && ! $isMember && $this->status === 'open' && $this->expires_at->isFuture();
+        $creatorProfile = $this->creator?->profile;
+        $canUseCreatorTraits = $isCreator || $creatorProfile?->profile_visibility !== 'private';
 
         return [
             'id' => $this->public_id,
@@ -35,7 +37,7 @@ class LiveLobbyResource extends JsonResource
             'common_ground' => $viewer ? HunterCommonGround::between(
                 $viewer->profile,
                 $this->resource,
-                $this->creator?->profile,
+                $canUseCreatorTraits ? $creatorProfile : null,
                 (bool) $isCreator,
             ) : null,
             'members' => $this->activeMembers->map(fn ($member): array => [

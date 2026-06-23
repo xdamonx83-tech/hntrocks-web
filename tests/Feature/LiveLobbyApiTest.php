@@ -228,12 +228,80 @@ class LiveLobbyApiTest extends TestCase
     public function test_creator_receives_self_common_ground(): void
     {
         $creator = $this->user();
-        $this->profile($creator, ['platform' => 'pc']);
+        $this->profile($creator, [
+            'profile_visibility' => 'private',
+            'platform' => 'pc',
+            'hunt_role' => 'support',
+            'hunter_dna' => [
+                'preferred_mode' => 'flexible',
+                'voice' => 'optional',
+                'experience' => 'experienced',
+                'temper' => 'focused',
+                'goals' => ['boss'],
+                'mentor' => true,
+            ],
+        ]);
         $lobby = $this->createLobby($creator);
 
-        $this->getAs($creator, '/api/v1/live-lobbies/'.$lobby->public_id)
+        $response = $this->getAs($creator, '/api/v1/live-lobbies/'.$lobby->public_id)
             ->assertOk()
             ->assertJsonPath('data.common_ground.self', true);
+
+        $this->assertSame(
+            ['platform', 'preferred_mode', 'hunt_role', 'voice', 'temper', 'experience', 'goals', 'mentor'],
+            array_column($response->json('data.common_ground.items'), 'key'),
+        );
+    }
+
+    public function test_private_creator_traits_are_excluded_for_other_viewers(): void
+    {
+        $creator = $this->user();
+        $this->profile($creator, [
+            'profile_visibility' => 'private',
+            'hunt_role' => 'support',
+            'hunter_dna' => [
+                'experience' => 'experienced',
+                'temper' => 'focused',
+                'goals' => ['boss'],
+                'mentor' => true,
+            ],
+        ]);
+        $lobby = $this->createLobby($creator, [
+            'platform' => 'pc',
+            'region' => 'EU',
+            'language' => 'de',
+            'playstyle' => 'tactical',
+        ]);
+
+        $viewer = $this->user();
+        $this->profile($viewer, [
+            'platform' => 'pc',
+            'region' => 'EU',
+            'language' => 'de',
+            'playstyle' => 'tactical',
+            'hunt_role' => 'support',
+            'hunter_dna' => [
+                'voice' => 'optional',
+                'preferred_mode' => 'flexible',
+                'experience' => 'experienced',
+                'temper' => 'focused',
+                'goals' => ['boss'],
+                'mentor' => true,
+            ],
+        ]);
+
+        $response = $this->getAs($viewer, '/api/v1/live-lobbies/'.$lobby->public_id)
+            ->assertOk()
+            ->assertJsonPath('data.common_ground.self', false)
+            ->assertJsonPath('data.common_ground.score', 6)
+            ->assertJsonPath('data.common_ground.max_score', 6)
+            ->assertJsonMissingPath('data.creator.hunter_dna')
+            ->assertJsonMissingPath('data.common_ground.hunter_dna');
+
+        $this->assertSame(
+            ['platform', 'region', 'language', 'preferred_mode', 'playstyle', 'voice'],
+            array_column($response->json('data.common_ground.items'), 'key'),
+        );
     }
 
     private function createLobby(User $creator, array $overrides = []): LiveLobby
