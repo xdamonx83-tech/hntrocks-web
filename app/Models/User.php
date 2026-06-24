@@ -272,6 +272,11 @@ class User extends Authenticatable
         return $this->hasMany(LiveLobby::class, 'creator_id');
     }
 
+    public function loadouts(): HasMany
+    {
+        return $this->hasMany(UserLoadout::class);
+    }
+
     public function liveLobbyMemberships(): HasMany
     {
         return $this->hasMany(LiveLobbyMember::class);

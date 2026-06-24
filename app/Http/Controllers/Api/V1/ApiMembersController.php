@@ -7,6 +7,7 @@ use App\Http\Resources\Api\LfgPostResource;
 use App\Http\Resources\Api\MomentResource;
 use App\Http\Resources\Api\TeamLfgPostResource;
 use App\Http\Resources\Api\TeamResource;
+use App\Http\Resources\Api\UserLoadoutResource;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Resources\Api\FeedPostResource;
 use App\Models\Friendship;
@@ -437,8 +438,25 @@ class ApiMembersController extends Controller
             'moments' => $this->profileMomentsPayload($request, $user, $isOwnProfile, $limit),
             'teams' => $this->profileTeamsPayload($request, $user, $isOwnProfile, $limit),
             'lfg' => $this->profileLfgPayload($request, $user, $isOwnProfile, $limit),
+            'loadouts' => $this->profileLoadoutsPayload($user),
             default => abort(404),
         };
+    }
+
+    private function profileLoadoutsPayload(User $user): array
+    {
+        $query = $user->loadouts()
+            ->where('is_active', true)
+            ->where('visibility', 'public');
+        $total = (clone $query)->count();
+        $items = $query
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(3)
+            ->get()
+            ->map(fn ($loadout): UserLoadoutResource => new UserLoadoutResource($loadout));
+
+        return $this->sectionResponse('loadouts', $items, $total, 3);
     }
 
     private function profileBadgesPayload(User $user, int $limit): array
