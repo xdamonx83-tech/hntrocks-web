@@ -26,6 +26,7 @@ class ApiLiveLobbyController extends Controller
             'region' => ['nullable', 'string', 'max:60'],
             'language' => ['nullable', 'string', 'max:40'],
             'mode' => ['nullable', Rule::in(['duo', 'trio'])],
+            'mentor_hunter' => ['nullable', 'boolean'],
         ]);
 
         $lobbies = LiveLobby::query()
@@ -36,6 +37,18 @@ class ApiLiveLobbyController extends Controller
             ->when($filters['region'] ?? null, fn ($query, $value) => $query->where('region', $value))
             ->when($filters['language'] ?? null, fn ($query, $value) => $query->where('language', $value))
             ->when($filters['mode'] ?? null, fn ($query, $value) => $query->where('mode', $value))
+            ->when($filters['mentor_hunter'] ?? false, function (Builder $query) use ($request): void {
+                $viewerId = $request->user()->id;
+
+                $query->whereHas('creator.profile', function (Builder $profile) use ($viewerId): void {
+                    $profile->where('hunter_dna->mentor', true)
+                        ->where(function (Builder $visibility) use ($viewerId): void {
+                            $visibility->where('profile_visibility', '!=', 'private')
+                                ->orWhereNull('profile_visibility')
+                                ->orWhere('user_id', $viewerId);
+                        });
+                });
+            })
             ->latest()
             ->paginate(20);
 
