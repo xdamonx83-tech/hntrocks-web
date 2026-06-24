@@ -240,6 +240,7 @@ class LiveLobbyApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.id', $lobby->public_id)
             ->assertJsonPath('data.creator.id', $creator->id)
+            ->assertJsonPath('data.creator.mentor_hunter', false)
             ->assertJsonPath('data.common_ground.self', false)
             ->assertJsonPath('data.common_ground.score', 10)
             ->assertJsonPath('data.common_ground.max_score', 11)
@@ -257,6 +258,26 @@ class LiveLobbyApiTest extends TestCase
             ['platform', 'region', 'language', 'preferred_mode', 'playstyle', 'hunt_role', 'voice', 'temper', 'experience', 'goals'],
             array_column($response->json('data.common_ground.items'), 'key'),
         );
+    }
+
+    public function test_public_creator_mentor_flag_is_exposed_without_hunter_dna(): void
+    {
+        $creator = $this->user();
+        $this->profile($creator, [
+            'hunter_dna' => ['mentor' => true],
+        ]);
+        $lobby = $this->createLobby($creator);
+        $viewer = $this->user();
+
+        $this->getAs($viewer, '/api/v1/live-lobbies')
+            ->assertOk()
+            ->assertJsonPath('data.0.creator.mentor_hunter', true);
+
+        $this->getAs($viewer, '/api/v1/live-lobbies/'.$lobby->public_id)
+            ->assertOk()
+            ->assertJsonPath('data.creator.mentor_hunter', true)
+            ->assertJsonMissingPath('data.creator.hunter_dna')
+            ->assertJsonMissingPath('data.creator.profile');
     }
 
     public function test_creator_receives_self_common_ground(): void
@@ -279,6 +300,7 @@ class LiveLobbyApiTest extends TestCase
 
         $response = $this->getAs($creator, '/api/v1/live-lobbies/'.$lobby->public_id)
             ->assertOk()
+            ->assertJsonPath('data.creator.mentor_hunter', true)
             ->assertJsonPath('data.common_ground.self', true);
 
         $this->assertSame(
@@ -326,6 +348,7 @@ class LiveLobbyApiTest extends TestCase
 
         $response = $this->getAs($viewer, '/api/v1/live-lobbies/'.$lobby->public_id)
             ->assertOk()
+            ->assertJsonPath('data.creator.mentor_hunter', false)
             ->assertJsonPath('data.common_ground.self', false)
             ->assertJsonPath('data.common_ground.score', 6)
             ->assertJsonPath('data.common_ground.max_score', 6)

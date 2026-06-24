@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Support\HunterCommonGround;
+use App\Support\HunterDna;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,6 +18,8 @@ class LiveLobbyResource extends JsonResource
         $canJoin = $viewer && ! $isMember && $this->status === 'open' && $this->expires_at->isFuture();
         $creatorProfile = $this->creator?->profile;
         $canUseCreatorTraits = $isCreator || $creatorProfile?->profile_visibility !== 'private';
+        $mentorHunter = $canUseCreatorTraits
+            && (HunterDna::normalize($creatorProfile?->hunter_dna)['mentor'] ?? false) === true;
 
         return [
             'id' => $this->public_id,
@@ -34,7 +37,10 @@ class LiveLobbyResource extends JsonResource
             'playstyle' => $this->playstyle,
             'mood' => $this->mood,
             'note' => $this->note,
-            'creator' => $this->userSummary($this->creator),
+            'creator' => $this->creator ? [
+                ...$this->userSummary($this->creator),
+                'mentor_hunter' => $mentorHunter,
+            ] : null,
             'common_ground' => $viewer ? HunterCommonGround::between(
                 $viewer->profile,
                 $this->resource,
