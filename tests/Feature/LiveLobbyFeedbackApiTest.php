@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ApiAccessToken;
 use App\Models\LiveLobby;
+use App\Models\LiveLobbyFeedback;
 use App\Models\LiveLobbyFeedbackRequest;
 use App\Models\User;
 use App\Services\LiveLobbyFeedbackService;
@@ -174,6 +175,99 @@ class LiveLobbyFeedbackApiTest extends TestCase
         $response->assertJsonMissingPath('data.0.comment');
     }
 
+    public function test_profile_contains_aggregated_positive_hunter_trust_without_private_feedback_data(): void
+    {
+        $viewer = $this->user();
+        $target = $this->user();
+
+        $this->feedback($target, ['chill', 'reliable', 'chill', 'unknown_tag'], ['left_early'], 'Private note');
+        $this->feedback($target, ['beginner_friendly', 'helpful', 'chill'], ['not_again'], 'Another private note');
+        $this->feedback($target, null, ['uncomfortable'], 'Never public');
+
+        $response = $this->getAs($viewer, '/api/v1/users/'.$target->username)
+            ->assertOk()
+            ->assertJsonPath('profile_summary.hunter_trust.total_feedback', 3)
+            ->assertJsonPath('profile_summary.hunter_trust.positive_tags_total', 5)
+            ->assertJsonPath('profile_summary.hunter_trust.tags', [
+                [
+                    'key' => 'chill',
+                    'label' => 'Chill',
+                    'label_de' => 'Chill',
+                    'label_en' => 'Chill',
+                    'count' => 2,
+                ],
+                [
+                    'key' => 'reliable',
+                    'label' => 'Reliable',
+                    'label_de' => 'Zuverlässig',
+                    'label_en' => 'Reliable',
+                    'count' => 1,
+                ],
+                [
+                    'key' => 'helpful',
+                    'label' => 'Helpful',
+                    'label_de' => 'Hilfsbereit',
+                    'label_en' => 'Helpful',
+                    'count' => 1,
+                ],
+                [
+                    'key' => 'beginner_friendly',
+                    'label' => 'Beginner-friendly',
+                    'label_de' => 'Anfängerfreundlich',
+                    'label_en' => 'Beginner-friendly',
+                    'count' => 1,
+                ],
+            ]);
+
+        $payload = $response->getContent();
+        $this->assertStringNotContainsString('private_flags', $payload);
+        $this->assertStringNotContainsString('feedback_request_id', $payload);
+        $this->assertStringNotContainsString('reviewer_id', $payload);
+        $this->assertStringNotContainsString('live_lobby_id', $payload);
+        $this->assertStringNotContainsString('Private note', $payload);
+        $this->assertStringNotContainsString('Another private note', $payload);
+        $this->assertStringNotContainsString('Never public', $payload);
+        $this->assertStringNotContainsString('left_early', $payload);
+        $this->assertStringNotContainsString('not_again', $payload);
+        $this->assertStringNotContainsString('uncomfortable', $payload);
+
+        $this->assertSame(
+            ['total_feedback', 'positive_tags_total', 'tags'],
+            array_keys($response->json('profile_summary.hunter_trust'))
+        );
+    }
+
+    public function test_profile_without_feedback_contains_empty_hunter_trust_summary(): void
+    {
+        $viewer = $this->user();
+        $target = $this->user();
+
+        $this->getAs($viewer, '/api/v1/users/'.$target->username)
+            ->assertOk()
+            ->assertJsonPath('profile_summary.hunter_trust', [
+                'total_feedback' => 0,
+                'positive_tags_total' => 0,
+                'tags' => [],
+            ]);
+    }
+
+    public function test_private_profile_remains_hidden_from_others_and_available_to_its_owner(): void
+    {
+        $owner = $this->user();
+        $owner->profile()->create(['profile_visibility' => 'private']);
+
+        $this->getAs($this->user(), '/api/v1/users/'.$owner->username)
+            ->assertNotFound();
+
+        $this->getAs($owner, '/api/v1/users/'.$owner->username)
+            ->assertOk()
+            ->assertJsonPath('profile_summary.hunter_trust', [
+                'total_feedback' => 0,
+                'positive_tags_total' => 0,
+                'tags' => [],
+            ]);
+    }
+
     private function feedbackRequest(array $overrides = [], ?User $reviewer = null, ?User $target = null): array
     {
         $reviewer ??= $this->user();
@@ -190,6 +284,25 @@ class LiveLobbyFeedbackApiTest extends TestCase
         ], $overrides));
 
         return [$feedbackRequest, $reviewer, $target];
+    }
+
+    private function feedback(
+        User $target,
+        ?array $positiveTags,
+        array $privateFlags,
+        string $comment
+    ): LiveLobbyFeedback {
+        [$feedbackRequest, $reviewer] = $this->feedbackRequest([], null, $target);
+
+        return LiveLobbyFeedback::query()->create([
+            'feedback_request_id' => $feedbackRequest->id,
+            'live_lobby_id' => $feedbackRequest->live_lobby_id,
+            'reviewer_id' => $reviewer->id,
+            'target_user_id' => $target->id,
+            'positive_tags' => $positiveTags,
+            'private_flags' => $privateFlags,
+            'comment' => $comment,
+        ]);
     }
 
     private function lobby(User $creator, User $member): LiveLobby

@@ -10,6 +10,7 @@ use App\Http\Resources\Api\TeamResource;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Resources\Api\FeedPostResource;
 use App\Models\Friendship;
+use App\Models\LiveLobbyFeedback;
 use App\Models\Quest;
 use App\Models\User;
 use App\Models\UserBlock;
@@ -22,6 +23,16 @@ use Illuminate\Support\Facades\Storage;
 
 class ApiMembersController extends Controller
 {
+    private const HUNTER_TRUST_TAGS = [
+        'reliable' => ['de' => 'Zuverlässig', 'en' => 'Reliable'],
+        'chill' => ['de' => 'Chill', 'en' => 'Chill'],
+        'teamplayer' => ['de' => 'Teamplayer', 'en' => 'Teamplayer'],
+        'good_communication' => ['de' => 'Gute Kommunikation', 'en' => 'Good communication'],
+        'helpful' => ['de' => 'Hilfsbereit', 'en' => 'Helpful'],
+        'beginner_friendly' => ['de' => 'Anfängerfreundlich', 'en' => 'Beginner-friendly'],
+        'would_play_again' => ['de' => 'Würde wieder spielen', 'en' => 'Would play again'],
+    ];
+
     public function index(Request $request, PlayerSearchQuery $playerSearch): JsonResponse
     {
         $viewer = $request->user();
@@ -950,6 +961,7 @@ class ApiMembersController extends Controller
             ->values();
 
         return [
+            'hunter_trust' => $this->hunterTrustSummary($user),
             'progress' => [
                 'level' => $level,
                 'xp_total' => $xpTotal,
@@ -980,6 +992,45 @@ class ApiMembersController extends Controller
             'recent_posts' => $recentPosts,
             'recent_moments' => MomentResource::collection($recentMoments)->resolve($request),
             'recent_comments' => $recentComments,
+        ];
+    }
+
+    private function hunterTrustSummary(User $user): array
+    {
+        $feedbackRows = LiveLobbyFeedback::query()
+            ->where('target_user_id', $user->id)
+            ->get(['positive_tags']);
+
+        $tagCounts = array_fill_keys(array_keys(self::HUNTER_TRUST_TAGS), 0);
+
+        foreach ($feedbackRows as $feedback) {
+            $positiveTags = is_array($feedback->positive_tags) ? $feedback->positive_tags : [];
+            $uniqueStringTags = array_unique(array_filter($positiveTags, 'is_string'));
+
+            foreach ($uniqueStringTags as $tag) {
+                if (array_key_exists($tag, $tagCounts)) {
+                    $tagCounts[$tag]++;
+                }
+            }
+        }
+
+        $tags = collect(self::HUNTER_TRUST_TAGS)
+            ->map(fn (array $labels, string $key): array => [
+                'key' => $key,
+                'label' => $labels['en'],
+                'label_de' => $labels['de'],
+                'label_en' => $labels['en'],
+                'count' => $tagCounts[$key],
+            ])
+            ->filter(fn (array $tag): bool => $tag['count'] > 0)
+            ->sortByDesc('count')
+            ->values()
+            ->all();
+
+        return [
+            'total_feedback' => $feedbackRows->count(),
+            'positive_tags_total' => array_sum($tagCounts),
+            'tags' => $tags,
         ];
     }
 
