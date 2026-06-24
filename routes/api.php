@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\ApiPushDeviceController;
 use App\Http\Controllers\Api\V1\ApiSearchController;
 use App\Http\Controllers\Api\V1\ApiTeamLfgController;
 use App\Http\Controllers\Api\V1\ApiTeamsController;
+use App\Http\Controllers\Api\V1\ApiUserLoadoutController;
 use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
 use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
@@ -70,6 +71,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/bootstrap', ApiBootstrapController::class)->name('bootstrap');
         Route::get('/me', [ApiAuthController::class, 'me'])->name('me');
         Route::get('/me/profile-sections/{section}', [ApiMembersController::class, 'meSection'])->name('me.profile-sections.show');
+        Route::get('/me/loadouts', [ApiUserLoadoutController::class, 'index'])->name('me.loadouts.index');
+        Route::post('/me/loadouts', [ApiUserLoadoutController::class, 'store'])->name('me.loadouts.store');
+        Route::match(['put', 'patch'], '/me/loadouts/{loadout}', [ApiUserLoadoutController::class, 'update'])->name('me.loadouts.update');
+        Route::delete('/me/loadouts/{loadout}', [ApiUserLoadoutController::class, 'destroy'])->name('me.loadouts.destroy');
         Route::post('/me/profile', [ApiAuthController::class, 'updateProfile'])->name('me.profile.update');
         Route::get('/me/privacy', [ApiAuthController::class, 'privacy'])->name('me.privacy.show');
         Route::post('/me/privacy', [ApiAuthController::class, 'updatePrivacy'])->name('me.privacy.update');
