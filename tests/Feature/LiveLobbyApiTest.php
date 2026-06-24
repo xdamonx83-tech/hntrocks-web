@@ -200,6 +200,57 @@ class LiveLobbyApiTest extends TestCase
         $this->assertDatabaseHas('live_lobbies', ['id' => $expired->id, 'status' => 'expired']);
     }
 
+    public function test_mentor_filter_is_opt_in_and_false_keeps_the_unfiltered_result(): void
+    {
+        $mentor = $this->user();
+        $this->profile($mentor, ['hunter_dna' => ['mentor' => true]]);
+        $mentorLobby = $this->createLobby($mentor);
+
+        $nonMentor = $this->user();
+        $this->profile($nonMentor, ['hunter_dna' => ['mentor' => false]]);
+        $nonMentorLobby = $this->createLobby($nonMentor);
+        $viewer = $this->user();
+
+        foreach (['/api/v1/live-lobbies', '/api/v1/live-lobbies?mentor_hunter=0'] as $uri) {
+            $this->getAs($viewer, $uri)
+                ->assertOk()
+                ->assertJsonFragment(['public_id' => $mentorLobby->public_id])
+                ->assertJsonFragment(['public_id' => $nonMentorLobby->public_id]);
+        }
+
+        $this->getAs($viewer, '/api/v1/live-lobbies?mentor_hunter=1')
+            ->assertOk()
+            ->assertJsonFragment(['public_id' => $mentorLobby->public_id])
+            ->assertJsonMissing(['public_id' => $nonMentorLobby->public_id]);
+    }
+
+    public function test_mentor_filter_respects_private_creator_traits_for_each_viewer(): void
+    {
+        $publicMentor = $this->user();
+        $this->profile($publicMentor, ['hunter_dna' => ['mentor' => true]]);
+        $publicLobby = $this->createLobby($publicMentor);
+
+        $privateMentor = $this->user();
+        $this->profile($privateMentor, [
+            'profile_visibility' => 'private',
+            'hunter_dna' => ['mentor' => true],
+        ]);
+        $privateLobby = $this->createLobby($privateMentor);
+
+        $this->getAs($this->user(), '/api/v1/live-lobbies?mentor_hunter=1')
+            ->assertOk()
+            ->assertJsonFragment(['public_id' => $publicLobby->public_id])
+            ->assertJsonMissing(['public_id' => $privateLobby->public_id]);
+
+        $this->getAs($privateMentor, '/api/v1/live-lobbies?mentor_hunter=1')
+            ->assertOk()
+            ->assertJsonFragment(['public_id' => $publicLobby->public_id])
+            ->assertJsonFragment(['public_id' => $privateLobby->public_id])
+            ->assertJsonPath('data.0.creator.mentor_hunter', true)
+            ->assertJsonMissingPath('data.0.creator.hunter_dna')
+            ->assertJsonMissingPath('data.0.creator.profile');
+    }
+
     public function test_common_ground_matches_profile_lobby_and_creator_traits_without_leaking_hunter_dna(): void
     {
         $creator = $this->user();
