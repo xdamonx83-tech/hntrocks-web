@@ -44,6 +44,9 @@
     $postUrl = route('feed.show', $post);
     $body = trim((string) $post->body);
     $bodyHtml = \App\Support\FeedTextRenderer::render($body);
+    $plainBody = trim(preg_replace('/\s+/u', ' ', strip_tags($body)));
+    $readMoreLimit = $firstMediaUrl ? 260 : 520;
+    $shouldReadMore = mb_strlen($plainBody) > $readMoreLimit;
     $reactionUsers = ($post->relationLoaded('reactions') ? $post->reactions : collect())
         ->take(3)
         ->filter(fn ($reaction) => $reaction->user !== null)
@@ -175,9 +178,11 @@
 <span data-rework-like-summary>{{ $reactionSummary }}</span>
 </button>
 @if($body !== '')
-<div class="post-text rework-post-body is-collapsed" data-rework-post-body>
+<div class="post-text rework-post-body {{ $shouldReadMore ? 'is-collapsed can-expand' : 'is-static' }}" data-rework-post-body>
 <div class="rework-post-body-content">{!! $bodyHtml !!}</div>
-<button class="rework-read-more" data-rework-read-more data-more-label="Mehr lesen" data-less-label="Weniger lesen" hidden type="button">Mehr lesen</button>
+@if($shouldReadMore)
+<button class="rework-read-more" data-rework-read-more data-more-label="Mehr lesen" data-less-label="Weniger lesen" type="button">Mehr lesen</button>
+@endif
 </div>
 @endif
 <div class="comment-row">

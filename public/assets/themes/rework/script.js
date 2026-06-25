@@ -400,135 +400,27 @@
       });
     }
 
-    const countRenderedLines = (element) => {
-      if (!element) return 0;
-
-      const range = document.createRange();
-      range.selectNodeContents(element);
-
-      const rects = Array.from(range.getClientRects()).filter((rect) => (
-        rect.width > 0 && rect.height > 0
-      ));
-
-      if (typeof range.detach === 'function') range.detach();
-
-      const tops = [];
-      rects.forEach((rect) => {
-        const top = Math.round(rect.top);
-        if (!tops.some((existing) => Math.abs(existing - top) <= 2)) {
-          tops.push(top);
-        }
-      });
-
-      return tops.length;
-    };
-
-    const getRenderedLineCount = (element) => {
-      if (!element) return 0;
-
-      const range = document.createRange();
-      range.selectNodeContents(element);
-
-      const tops = [];
-      Array.from(range.getClientRects()).forEach((rect) => {
-        if (rect.width < 2 || rect.height < 2) return;
-        const top = Math.round(rect.top);
-        if (!tops.includes(top)) tops.push(top);
-      });
-
-      range.detach?.();
-
-      if (tops.length > 0) return tops.length;
-
-      const computed = window.getComputedStyle(element);
-      const fontSize = Number.parseFloat(computed.fontSize) || 14;
-      let lineHeight = Number.parseFloat(computed.lineHeight);
-      if (!Number.isFinite(lineHeight) || lineHeight <= 0) {
-        lineHeight = fontSize * 1.45;
-      }
-
-      return Math.ceil(element.scrollHeight / lineHeight);
-    };
-
-    const initializeReadMore = (root = document, force = false) => {
-      root.querySelectorAll('[data-rework-post-body]').forEach((body) => {
-        if (!force && body.dataset.reworkReadMoreReady === '1') return;
-        const content = body.querySelector('.rework-post-body-content');
-        const toggle = body.querySelector('[data-rework-read-more]');
-        if (!content || !toggle) return;
-
-        body.dataset.reworkReadMoreReady = '1';
-        window.requestAnimationFrame(() => {
-          const wasExpanded = body.classList.contains('is-expanded');
-          const textValue = (content.textContent || '').replace(/\s+/g, ' ').trim();
-          const postCard = body.closest('.post-card');
-          const hasMedia = Boolean(postCard?.classList.contains('has-media'));
-          const visibleLineLimit = hasMedia ? 3 : 5;
-          const minimumTextLength = hasMedia ? 180 : 220;
-          const forceLongTextLimit = hasMedia ? 460 : 620;
-
-          body.classList.remove('is-collapsed', 'is-expanded', 'can-expand');
-          toggle.hidden = true;
-          toggle.textContent = toggle.getAttribute('data-more-label') || 'Mehr lesen';
-
-          if (!textValue || textValue.length < minimumTextLength) {
-            return;
-          }
-
-          const previous = {
-            maxHeight: content.style.maxHeight,
-            overflow: content.style.overflow,
-            webkitLineClamp: content.style.webkitLineClamp,
-            display: content.style.display,
-          };
-
-          content.style.maxHeight = 'none';
-          content.style.overflow = 'visible';
-          content.style.webkitLineClamp = 'unset';
-          content.style.display = 'block';
-
-          const renderedLines = getRenderedLineCount(content);
-
-          content.style.maxHeight = previous.maxHeight;
-          content.style.overflow = previous.overflow;
-          content.style.webkitLineClamp = previous.webkitLineClamp;
-          content.style.display = previous.display;
-
-          const shouldClamp = textValue.length >= forceLongTextLimit || renderedLines > visibleLineLimit;
-
-          if (!shouldClamp) {
-            return;
-          }
-
-          body.classList.add('can-expand');
-          toggle.hidden = false;
-
-          if (wasExpanded) {
-            body.classList.add('is-expanded');
-            toggle.textContent = toggle.getAttribute('data-less-label') || 'Weniger lesen';
-          } else {
-            body.classList.add('is-collapsed');
-          }
-        });
-      });
+    const initializeReadMore = () => {
+      // Read-more visibility is decided server-side in the Rework post-card.
+      // JS only toggles already-rendered buttons. This avoids false positives
+      // from font/rendering/DOM height measurements.
     };
 
     document.addEventListener('click', (event) => {
       const toggle = event.target.closest('[data-rework-read-more]');
       if (!toggle) return;
+
       event.preventDefault();
       const body = toggle.closest('[data-rework-post-body]');
       if (!body) return;
+
       const expanded = body.classList.toggle('is-expanded');
       body.classList.toggle('is-collapsed', !expanded);
+
       toggle.textContent = expanded
         ? toggle.getAttribute('data-less-label') || 'Weniger lesen'
         : toggle.getAttribute('data-more-label') || 'Mehr lesen';
     });
-
-    initializeReadMore();
-    window.addEventListener('load', () => initializeReadMore(document, true), { once: true });
-    window.addEventListener('resize', () => initializeReadMore(document, true));
 
     const loadMoreButton = document.querySelector('[data-rework-load-more]');
     const postStream = document.querySelector('[data-rework-post-stream]');

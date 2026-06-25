@@ -8179,3 +8179,33 @@ body.is-modal-open { overflow: hidden; }
   .modal-media-stage > img,
   .modal-media-stage > video { height: auto; max-height: 28dvh; }
 }
+
+/* 071: Rework read-more server-side final */
+.rework-post-body.is-static .rework-post-body-content {
+  display: block;
+  overflow: visible;
+  max-height: none;
+  -webkit-line-clamp: unset;
+}
+
+.rework-post-body.is-collapsed .rework-post-body-content {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+
+.post-card.has-media .rework-post-body.is-collapsed .rework-post-body-content {
+  -webkit-line-clamp: 3;
+}
+
+.rework-post-body.is-expanded .rework-post-body-content {
+  display: block;
+  overflow: visible;
+  max-height: none;
+  -webkit-line-clamp: unset;
+}
+
+.rework-read-more[hidden] {
+  display: none !important;
+}
