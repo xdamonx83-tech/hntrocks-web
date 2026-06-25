@@ -7355,3 +7355,69 @@ body.is-modal-open { overflow: hidden; }
 .cups-status-tabs a.active {
   color: #ffffff !important;
 }
+
+.rework-feed-filters {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 14px;
+}
+
+.rework-feed-filters a {
+  flex: 0 0 auto;
+  border: 1px solid #dedede;
+  border-radius: 999px;
+  color: #6c6c6c;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 12px 18px;
+  text-decoration: none;
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+
+.rework-feed-filters a.active,
+.rework-feed-filters a:hover {
+  background: #161616;
+  border-color: #161616;
+  color: #fff;
+}
+
+.post-media video {
+  display: block;
+  width: 100%;
+  max-height: 560px;
+  object-fit: cover;
+  background: #111;
+}
+
+.rework-post-body {
+  color: #4c4c4c;
+  line-height: 1.7;
+}
+
+.rework-post-body a {
+  color: #141414;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.rework-post-body p {
+  margin: 0;
+}
+
+.rework-empty-state {
+  padding: 34px;
+}
+
+.rework-empty-state h2 {
+  color: #171717;
+  font-family: var(--font-display);
+  font-size: 28px;
+  margin: 8px 0;
+}
+
+.rework-empty-state p {
+  color: var(--muted);
+  margin: 0;
+}

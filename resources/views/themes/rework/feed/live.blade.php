@@ -1,3 +1,45 @@
+@php
+    $viewer = auth()->user();
+    $socialiteFeedFilter = $socialiteFeedFilter ?? 'all';
+    $reworkAsset = fn (string $path): string => \App\Support\HntTheme::asset($path, 'rework');
+    $formatCount = fn (int $count): string => number_format($count);
+    $feedFilterUrl = function (string $filterKey): string {
+        $query = request()->query();
+        unset($query['page'], $query['fragment']);
+
+        if ($filterKey === 'all') {
+            unset($query['filter']);
+        } else {
+            $query['filter'] = $filterKey;
+        }
+
+        return route('feed.index', $query);
+    };
+    $memberProfileUrl = function ($member): string {
+        if (! $member?->username) {
+            return '#';
+        }
+
+        return (int) $member->id === (int) auth()->id()
+            ? route('profile.show')
+            : route('profile.public', $member);
+    };
+    $postAuthorUrl = function ($author): string {
+        if (! $author?->username) {
+            return '#';
+        }
+
+        return (int) $author->id === (int) auth()->id()
+            ? route('profile.show')
+            : route('profile.public', $author);
+    };
+    $feedFilters = [
+        'all' => 'All',
+        'friends' => 'Freunde',
+        'media' => 'Medien',
+        'mentions' => 'Mentions',
+    ];
+@endphp
 <!DOCTYPE html>
 
 <html lang="de">
@@ -159,171 +201,132 @@
 <a class="btn" data-post-composer-open="" href="#">Create</a>
 </div>
 </section>
-<article class="card post-card">
+<nav class="rework-feed-filters" aria-label="Feed Filter">
+@foreach($feedFilters as $filterKey => $filterLabel)
+<a @class(['active' => $socialiteFeedFilter === $filterKey]) href="{{ $feedFilterUrl($filterKey) }}">{{ $filterLabel }}</a>
+@endforeach
+</nav>
+@forelse($socialitePosts as $post)
+@php
+    $author = $post->user;
+    $authorName = $author?->name ?: 'HNT Hunter';
+    $authorAvatar = $author?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+    $authorMeta = trim(($author?->username ? '@'.$author->username.' · ' : '') . ($post->created_at?->diffForHumans() ?: 'now'));
+    $visibilityLabel = method_exists($post, 'visibilityLabel') ? $post->visibilityLabel() : ucfirst((string) ($post->visibility ?: 'public'));
+    $mediaItems = $post->relationLoaded('media') ? $post->media->values() : collect();
+    $firstMedia = $mediaItems->first();
+    $firstMediaUrl = $firstMedia ? $firstMedia->url() : null;
+    $firstMediaAlt = $firstMedia?->original_name ?: 'Feed media by '.$authorName;
+    $extraMediaCount = max($mediaItems->count() - 1, 0);
+    $reactionCount = (int) ($post->reactions_count ?? ($post->relationLoaded('reactions') ? $post->reactions->count() : 0));
+    $commentCount = (int) ($post->comments_count ?? ($post->relationLoaded('comments') ? $post->comments->count() : 0));
+    $shareCount = (int) ($post->shares_count ?? 0);
+    $postAlreadyReported = ($reportedFeedKeys ?? collect())->has('feed_post:' . $post->id);
+    $postUrl = route('feed.show', $post);
+    $body = trim((string) $post->body);
+@endphp
+<article class="card post-card" id="post-{{ $post->id }}">
 <header class="post-head">
-<img alt="Krispie" class="avatar" src="{{ \App\Support\HntTheme::asset('images/post-avatar.png', 'rework') }}"/>
-<div class="post-user"><strong>Krispie</strong><span>Public</span></div>
-<a class="btn large" href="#">Freund hinzufügen</a>
+<a href="{{ $postAuthorUrl($author) }}"><img alt="{{ $authorName }}" class="avatar" src="{{ $authorAvatar }}"/></a>
+<div class="post-user"><strong>{{ $authorName }}</strong><span>{{ $authorMeta }} · {{ $post->team?->name ?: $visibilityLabel }}</span></div>
+<a class="btn large" href="{{ $postUrl }}">Öffnen</a>
 <div class="post-options action-menu">
 <a aria-expanded="false" aria-label="Post-Optionen öffnen" class="more" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-dots-three ph-icon"></i></a>
 <div aria-label="Post-Optionen" class="post-dropdown" role="menu">
-<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i></span><strong>Bearbeiten</strong></a>
-<a class="danger" href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-trash ph-icon"></i></span><strong>Löschen</strong></a>
+<a href="{{ $postUrl }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-arrow-square-out ph-icon"></i></span><strong>Post öffnen</strong></a>
+<a href="{{ $postAuthorUrl($author) }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-user ph-icon"></i></span><strong>Profil öffnen</strong></a>
+<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></span><strong>Merken</strong></a>
+@if(! $postAlreadyReported && (int) $post->user_id !== (int) auth()->id())
 <a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-flag ph-icon"></i></span><strong>Melden</strong></a>
+@endif
 </div>
 </div>
 </header>
+@if($firstMedia && $firstMediaUrl)
 <div class="post-media">
-<img alt="Minecraft" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/>
-<div class="game-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/minecraft-icon.png', 'rework') }}"/>Minecraft</div>
+@if($firstMedia->isVideo())
+<video controls playsinline preload="metadata" src="{{ $firstMediaUrl }}"></video>
+@else
+<img alt="{{ $firstMediaAlt }}" src="{{ $firstMediaUrl }}"/>
+@endif
+<div class="game-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>{{ $extraMediaCount > 0 ? '+'.$extraMediaCount.' Medien' : 'Feed Media' }}</div>
 </div>
+@endif
 <div class="post-actions">
 <div class="icons">
 <a aria-label="Like" href="#"><i aria-hidden="true" class="ph ph-heart ph-icon"></i></a>
 <a aria-label="Kommentare öffnen" data-comment-modal-open="" href="#"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i></a>
 <a aria-label="Teilen" href="#"><i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i></a>
+<a aria-label="Merken" href="#"><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></a>
 </div>
-<div class="ai-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>KI-generierter Inhalt</div>
+@if($post->ai_user_declared || $post->ai_detected_possible || $post->admin_confirmed_ai)
+<div class="ai-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>KI-Inhalt</div>
+@endif
 <div class="metrics">
-<span class="metric"><i aria-hidden="true" class="ph ph-heart ph-icon"></i>12 Likes</span>
-<span class="metric"><i aria-hidden="true" class="ph ph-eye ph-icon"></i>56 Views</span>
+<span class="metric"><i aria-hidden="true" class="ph ph-heart ph-icon"></i>{{ $formatCount($reactionCount) }} Likes</span>
+<span class="metric"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>{{ $formatCount($commentCount) }} Kommentare</span>
+<span class="metric"><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>{{ $formatCount($shareCount) }} Shares</span>
 </div>
 </div>
 <div class="liked">
 <div class="liked-avatars">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-1.png', 'rework') }}"/>
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-2.png', 'rework') }}"/>
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-3.png', 'rework') }}"/>
+<img alt="{{ $authorName }}" src="{{ $authorAvatar }}"/>
+@foreach(($socialiteMembers ?? collect())->take(2) as $reactionMember)
+<img alt="{{ $reactionMember->name }}" src="{{ $reactionMember->avatarUrl() }}"/>
+@endforeach
 </div>
-<span>Liked by mr.beast and 34 others</span>
+<span>{{ $formatCount($reactionCount) }} Reaktionen · {{ $formatCount($commentCount) }} Antworten</span>
 </div>
-<p class="post-text">What you need to do for this is very simple. Register and click the Become a Creator button. Making money is not far off. Come on, be a creator.</p>
+@if($body !== '')
+<div class="post-text rework-post-body">{!! \App\Support\FeedTextRenderer::render($body) !!}</div>
+@endif
 <div class="comment-row">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/comment-avatar.png', 'rework') }}"/>
+<img alt="" src="{{ $viewer?->avatarUrl() ?: $reworkAsset('images/comment-avatar.png') }}"/>
 <input class="comment-input" data-comment-modal-open="" placeholder="Post a comment.." readonly="" type="text"/>
 <a class="btn" data-comment-modal-open="" href="#">Antworten</a>
 </div>
 </article>
-<article class="card post-card post-card-secondary">
-<header class="post-head">
-<img alt="Tina Tzoo" class="avatar" src="{{ \App\Support\HntTheme::asset('images/like-2.png', 'rework') }}"/>
-<div class="post-user"><strong>Tina Tzoo</strong><span>Public</span></div>
-<a class="btn large" href="#">Freund hinzufügen</a>
-<div class="post-options action-menu">
-<a aria-expanded="false" aria-label="Post-Optionen öffnen" class="more" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-dots-three ph-icon"></i></a>
-<div aria-label="Post-Optionen" class="post-dropdown" role="menu">
-<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i></span><strong>Bearbeiten</strong></a>
-<a class="danger" href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-trash ph-icon"></i></span><strong>Löschen</strong></a>
-<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-flag ph-icon"></i></span><strong>Melden</strong></a>
-</div>
-</div>
-</header>
-<div class="post-media">
-<img alt="Hunt Loadout Diskussion" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/>
-<div class="game-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>Hunt: Showdown</div>
-</div>
-<div class="post-actions">
-<div class="icons">
-<a aria-label="Like" href="#"><i aria-hidden="true" class="ph ph-heart ph-icon"></i></a>
-<a aria-label="Kommentare öffnen" data-comment-modal-open="" href="#"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i></a>
-<a aria-label="Teilen" href="#"><i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i></a>
-</div>
-<div class="ai-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>Community Loadout</div>
-<div class="metrics">
-<span class="metric"><i aria-hidden="true" class="ph ph-heart ph-icon"></i>28 Likes</span>
-<span class="metric"><i aria-hidden="true" class="ph ph-eye ph-icon"></i>134 Views</span>
-</div>
-</div>
-<div class="liked">
-<div class="liked-avatars">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-1.png', 'rework') }}"/>
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-2.png', 'rework') }}"/>
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-3.png', 'rework') }}"/>
-</div>
-<span>Liked by Krispie and 27 others</span>
-</div>
-<p class="post-text">Meine aktuelle Loadout-Idee für kurze Runden: schneller Druck, wenig Schnickschnack und trotzdem genug Utility für Boss, Push und Extraction.</p>
-<div class="comment-row">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/comment-avatar.png', 'rework') }}"/>
-<input class="comment-input" data-comment-modal-open="" placeholder="Post a comment.." readonly="" type="text"/>
-<a class="btn" data-comment-modal-open="" href="#">Antworten</a>
-</div>
+@empty
+<article class="card post-card rework-empty-state">
+<div class="eyebrow">Feed Preview</div>
+<h2>Keine Posts gefunden</h2>
+<p>Dieser Rework-Feed zeigt echte Beiträge, sobald der aktuelle Filter passende Feed-Posts liefert.</p>
 </article>
-<article class="card post-card post-card-tertiary">
-<header class="post-head">
-<img alt="Faraz Tariq" class="avatar" src="{{ \App\Support\HntTheme::asset('images/like-1.png', 'rework') }}"/>
-<div class="post-user"><strong>Faraz Tariq</strong><span>Public</span></div>
-<a class="btn large" href="#">Freund hinzufügen</a>
-<div class="post-options action-menu">
-<a aria-expanded="false" aria-label="Post-Optionen öffnen" class="more" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-dots-three ph-icon"></i></a>
-<div aria-label="Post-Optionen" class="post-dropdown" role="menu">
-<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i></span><strong>Bearbeiten</strong></a>
-<a class="danger" href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-trash ph-icon"></i></span><strong>Löschen</strong></a>
-<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-flag ph-icon"></i></span><strong>Melden</strong></a>
-</div>
-</div>
-</header>
-<div class="post-media">
-<img alt="Community Highlight" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/>
-<div class="game-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>Community</div>
-</div>
-<div class="post-actions">
-<div class="icons">
-<a aria-label="Like" href="#"><i aria-hidden="true" class="ph ph-heart ph-icon"></i></a>
-<a aria-label="Kommentare öffnen" data-comment-modal-open="" href="#"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i></a>
-<a aria-label="Teilen" href="#"><i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i></a>
-</div>
-<div class="ai-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>Highlight</div>
-<div class="metrics">
-<span class="metric"><i aria-hidden="true" class="ph ph-heart ph-icon"></i>41 Likes</span>
-<span class="metric"><i aria-hidden="true" class="ph ph-eye ph-icon"></i>212 Views</span>
-</div>
-</div>
-<div class="liked">
-<div class="liked-avatars">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-1.png', 'rework') }}"/>
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-2.png', 'rework') }}"/>
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/like-3.png', 'rework') }}"/>
-</div>
-<span>Liked by MKBHD and 40 others</span>
-</div>
-<p class="post-text">Kurzer Testpost für den Scroll-Check: So sieht der Feed mit mehreren Karten aus, während die rechte Spalte auf Desktop sauber mitläuft.</p>
-<div class="comment-row">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/comment-avatar.png', 'rework') }}"/>
-<input class="comment-input" data-comment-modal-open="" placeholder="Post a comment.." readonly="" type="text"/>
-<a class="btn" data-comment-modal-open="" href="#">Antworten</a>
-</div>
-</article>
+@endforelse
 </div>
 <aside class="right-col">
 <section class="profile-card card">
-<div class="profile-top"><strong>Krispie</strong><span class="status">Online</span></div>
+<div class="profile-top"><strong>{{ $viewer?->name ?: 'HNT Hunter' }}</strong><span class="status">Online</span></div>
 <div class="profile-main">
-<img alt="Bounty Marks" class="mark" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>
+<img alt="Bounty Marks" class="mark" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>
 <div class="levels">
-<span class="level-badge">Level 7</span>
-<span class="level-badge">350 XP</span>
+<span class="level-badge">Level {{ $viewer?->level ?? 1 }}</span>
+<span class="level-badge">{{ number_format((int) ($viewer?->xp_total ?? 0)) }} XP</span>
 </div>
 </div>
 <div class="balance">
-<div><strong>12,256</strong><span>Bounty Marks</span></div>
+<div><strong>{{ number_format((int) ($viewer?->xp_total ?? 0)) }}</strong><span>XP gesammelt</span></div>
 <div class="profile-buttons"><a class="btn light" href="#">Shop</a><a class="btn light" href="#">ProPass</a></div>
 </div>
 </section>
 <section class="side-card suggested">
 <div class="side-head"><h2>Suggested For You</h2><a href="#">See All</a></div>
 <div class="suggestion-list">
-<div class="suggestion"><img alt="" src="{{ \App\Support\HntTheme::asset('images/sug-1.png', 'rework') }}"/><div class="suggestion-info"><strong>Faraz Tariq</strong><span>Super Active</span></div><a class="btn light" href="#">Follow</a></div>
-<div class="suggestion"><img alt="" src="{{ \App\Support\HntTheme::asset('images/sug-2.png', 'rework') }}"/><div class="suggestion-info"><strong>Tina Tzoo</strong><span>Super Active</span></div><a class="btn light" href="#">Follow</a></div>
-<div class="suggestion"><img alt="" src="{{ \App\Support\HntTheme::asset('images/sug-3.png', 'rework') }}"/><div class="suggestion-info"><strong>MKBHD</strong><span>Super Active</span></div><a class="btn light" href="#">Follow</a></div>
+@forelse(($socialiteMembers ?? collect())->take(3) as $member)
+<div class="suggestion"><img alt="{{ $member->name }}" src="{{ $member->avatarUrl() }}"/><div class="suggestion-info"><strong>{{ $member->name }}</strong><span>{{ $member->username ? '@'.$member->username : 'HNT Hunter' }}</span></div><a class="btn light" href="{{ $memberProfileUrl($member) }}">View</a></div>
+@empty
+<div class="suggestion"><img alt="" src="{{ $reworkAsset('images/sug-1.png') }}"/><div class="suggestion-info"><strong>HNT Community</strong><span>No hunters yet</span></div><a class="btn light" href="#">View</a></div>
+@endforelse
 </div>
 </section>
 <section class="side-card highlights">
 <div class="side-head"><h2>Highlights</h2></div>
 <div class="highlight-list">
-<div class="highlight"><img alt="" src="{{ \App\Support\HntTheme::asset('images/high-1.png', 'rework') }}"/><div class="highlight-info"><strong>Summer Cup</strong><span>Lorem ipsum?</span></div><span class="highlight-time">2h ago</span></div>
-<div class="highlight"><img alt="" src="{{ \App\Support\HntTheme::asset('images/high-2.png', 'rework') }}"/><div class="highlight-info"><strong>Feed Post</strong><span>Wir haben uns entschieden, den aktuel...</span></div><span class="highlight-time">2h ago</span></div>
-<div class="highlight"><img alt="" src="{{ \App\Support\HntTheme::asset('images/high-3.png', 'rework') }}"/><div class="highlight-info"><strong>Neuestes LFG</strong><span>Suche Leute für Schießstand mehr auch ned</span></div><span class="highlight-time">2h ago</span></div>
+@forelse(($socialiteTeams ?? collect())->take(3) as $team)
+<div class="highlight"><img alt="{{ $team->name }}" src="{{ $team->avatarUrl() }}"/><div class="highlight-info"><strong>{{ $team->name }}</strong><span>{{ trans_choice('ui.hunter_count', (int) ($team->active_members_count ?? 0), ['count' => (int) ($team->active_members_count ?? 0)]) }}</span></div><span class="highlight-time">Team</span></div>
+@empty
+<div class="highlight"><img alt="" src="{{ $reworkAsset('images/high-1.png') }}"/><div class="highlight-info"><strong>HNT Teams</strong><span>No featured teams yet</span></div><span class="highlight-time">Preview</span></div>
+@endforelse
 </div>
 </section>
 </aside>
