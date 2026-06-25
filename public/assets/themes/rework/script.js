@@ -35,6 +35,15 @@
 
     const commentModal = document.querySelector('[data-comment-modal]');
     const commentModalClose = document.querySelector('[data-comment-modal-close]');
+    const reactionsModal = document.querySelector('[data-reactions-modal]');
+    const reactionsModalClose = document.querySelector('[data-reactions-modal-close]');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    const formatCount = (value) => {
+      const number = Number.parseInt(value, 10);
+      if (!Number.isFinite(number)) return '0';
+      return new Intl.NumberFormat(document.documentElement.lang || undefined).format(number);
+    };
 
     const parsePostContext = (card) => {
       if (!card) return null;
@@ -46,6 +55,12 @@
       } catch (error) {
         return null;
       }
+    };
+
+    const savePostContext = (card, context) => {
+      const contextScript = card?.querySelector('[data-rework-post-context]');
+      if (!contextScript || !context) return;
+      contextScript.textContent = JSON.stringify(context);
     };
 
     const setHtml = (element, html) => {
@@ -67,7 +82,7 @@
       const modalAuthorName = commentModal.querySelector('.modal-post-head strong');
       const modalAuthorMeta = commentModal.querySelector('.modal-post-head span');
       const modalMedia = commentModal.querySelector('.modal-post-media');
-      const modalBody = commentModal.querySelector('.comment-modal-post > p');
+      const modalBody = commentModal.querySelector('.modal-post-body');
       const modalStats = commentModal.querySelector('.modal-post-stats');
       const modalCount = commentModal.querySelector('.comment-modal-head strong');
       const modalThread = commentModal.querySelector('.comment-thread');
@@ -101,12 +116,12 @@
 
       if (modalStats) {
         modalStats.innerHTML = `
-          <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${context.likes || '0'} Likes</span>
-          <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${context.comments || '0'} Kommentare</span>
-          <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${context.shares || '0'} Shares</span>
+          <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${context.likes_label || formatCount(context.likes || 0)} Reaktionen</span>
+          <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${context.comments_label || formatCount(context.comments || 0)} Kommentare</span>
+          <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${context.shares_label || formatCount(context.shares || 0)} Shares</span>
         `;
       }
-      setText(modalCount, `${context.comments || '0'} Antworten`);
+      setText(modalCount, `${context.comments_label || formatCount(context.comments || 0)} Antworten`);
 
       if (modalThread) {
         modalThread.innerHTML = '';
@@ -194,6 +209,204 @@
       });
     }
 
+    const closeReactionsModal = () => {
+      if (!reactionsModal) return;
+      reactionsModal.classList.remove('is-open');
+      reactionsModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('is-modal-open');
+    };
+
+    const renderReactionsModal = (payload) => {
+      if (!reactionsModal) return;
+      const total = Number.parseInt(payload?.total, 10) || 0;
+      const totalNode = reactionsModal.querySelector('[data-reactions-total]');
+      const statsNode = reactionsModal.querySelector('[data-reactions-stats]');
+      const listNode = reactionsModal.querySelector('[data-reactions-list]');
+
+      setText(totalNode, `${formatCount(total)} ${total === 1 ? 'Reaktion' : 'Reaktionen'}`);
+
+      if (statsNode) {
+        statsNode.innerHTML = '';
+        const stats = Array.isArray(payload?.stats) ? payload.stats : [];
+        stats.forEach((stat) => {
+          const pill = document.createElement('span');
+          pill.textContent = `${stat.emoji || ''} ${stat.label || stat.type || 'Like'} ${formatCount(stat.count || 0)}`.trim();
+          statsNode.appendChild(pill);
+        });
+        statsNode.hidden = stats.length === 0;
+      }
+
+      if (!listNode) return;
+      listNode.innerHTML = '';
+      const users = Array.isArray(payload?.users) ? payload.users : [];
+
+      if (!users.length) {
+        const empty = document.createElement('div');
+        empty.className = 'comment-empty-state';
+        empty.textContent = 'Noch keine Reaktionen.';
+        listNode.appendChild(empty);
+        return;
+      }
+
+      users.forEach((user) => {
+        const item = document.createElement(user.profile_url ? 'a' : 'div');
+        const avatar = document.createElement('img');
+        const body = document.createElement('div');
+        const name = document.createElement('strong');
+        const meta = document.createElement('span');
+        const reaction = document.createElement('em');
+
+        item.className = 'reaction-user';
+        if (user.profile_url) item.href = user.profile_url;
+        avatar.src = user.avatar || '';
+        avatar.alt = user.name || '';
+        name.textContent = user.name || 'HNT Hunter';
+        meta.textContent = [user.username, user.reacted_at].filter(Boolean).join(' - ');
+        reaction.textContent = user.reaction_emoji || 'Like';
+
+        body.append(name, meta);
+        item.append(avatar, body, reaction);
+        listNode.appendChild(item);
+      });
+    };
+
+    const openReactionsModal = async (url) => {
+      if (!reactionsModal || !url) return;
+      closeAllDropdowns();
+      closeCommentModal();
+      reactionsModal.classList.add('is-open');
+      reactionsModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('is-modal-open');
+      renderReactionsModal({ total: 0, stats: [], users: [] });
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        });
+        if (!response.ok) throw new Error('Reactions failed');
+        renderReactionsModal(await response.json());
+      } catch (error) {
+        const listNode = reactionsModal.querySelector('[data-reactions-list]');
+        if (listNode) {
+          listNode.innerHTML = '';
+          const empty = document.createElement('div');
+          empty.className = 'comment-empty-state';
+          empty.textContent = 'Reaktionen konnten nicht geladen werden.';
+          listNode.appendChild(empty);
+        }
+      }
+    };
+
+    const updateLikeUi = (card, reacted, count) => {
+      if (!card) return;
+      const likeButton = card.querySelector('[data-rework-like-toggle]');
+      const summary = card.querySelector('[data-rework-like-summary]');
+      const likedRow = card.querySelector('[data-rework-reactions-open]');
+      const context = parsePostContext(card) || {};
+      const formattedCount = formatCount(count);
+
+      if (likeButton) {
+        likeButton.classList.toggle('is-active', reacted);
+        likeButton.setAttribute('aria-pressed', reacted ? 'true' : 'false');
+        likeButton.setAttribute('data-reaction-count', String(count));
+      }
+      if (summary) {
+        summary.textContent = count > 0 ? `${formattedCount} Reaktionen` : 'Noch keine Reaktionen';
+      }
+      if (likedRow) {
+        likedRow.classList.toggle('is-empty', count <= 0);
+      }
+
+      context.likes = count;
+      context.likes_label = formattedCount;
+      context.reacted = reacted;
+      savePostContext(card, context);
+    };
+
+    document.addEventListener('click', async (event) => {
+      const likeButton = event.target.closest('[data-rework-like-toggle]');
+      if (!likeButton) return;
+      event.preventDefault();
+
+      const card = likeButton.closest('[data-rework-post-card]');
+      const url = likeButton.getAttribute('data-reaction-url');
+      const type = likeButton.getAttribute('data-reaction-type') || 'like';
+      if (!card || !url || likeButton.disabled) return;
+
+      likeButton.disabled = true;
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          body: JSON.stringify({ type, mode: 'toggle' }),
+        });
+        if (!response.ok) throw new Error('Reaction toggle failed');
+        const payload = await response.json();
+        updateLikeUi(card, Boolean(payload.reacted), Number.parseInt(payload.count, 10) || 0);
+      } catch (error) {
+        likeButton.classList.add('has-error');
+        window.setTimeout(() => likeButton.classList.remove('has-error'), 900);
+      } finally {
+        likeButton.disabled = false;
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-rework-reactions-open]');
+      if (!trigger) return;
+      event.preventDefault();
+      openReactionsModal(trigger.getAttribute('data-reactions-url'));
+    });
+
+    if (reactionsModalClose) {
+      reactionsModalClose.addEventListener('click', closeReactionsModal);
+    }
+
+    if (reactionsModal) {
+      reactionsModal.addEventListener('click', (event) => {
+        if (event.target === reactionsModal) closeReactionsModal();
+      });
+    }
+
+    const initializeReadMore = (root = document) => {
+      root.querySelectorAll('[data-rework-post-body]').forEach((body) => {
+        if (body.dataset.reworkReadMoreReady === '1') return;
+        const content = body.querySelector('.rework-post-body-content');
+        const toggle = body.querySelector('[data-rework-read-more]');
+        if (!content || !toggle) return;
+
+        body.dataset.reworkReadMoreReady = '1';
+        window.requestAnimationFrame(() => {
+          const shouldClamp = content.scrollHeight > content.clientHeight + 8;
+          body.classList.toggle('can-expand', shouldClamp);
+          toggle.hidden = !shouldClamp;
+        });
+      });
+    };
+
+    document.addEventListener('click', (event) => {
+      const toggle = event.target.closest('[data-rework-read-more]');
+      if (!toggle) return;
+      event.preventDefault();
+      const body = toggle.closest('[data-rework-post-body]');
+      if (!body) return;
+      const expanded = body.classList.toggle('is-expanded');
+      body.classList.toggle('is-collapsed', !expanded);
+      toggle.textContent = expanded
+        ? toggle.getAttribute('data-less-label') || 'Weniger lesen'
+        : toggle.getAttribute('data-more-label') || 'Mehr lesen';
+    });
+
+    initializeReadMore();
+
     const loadMoreButton = document.querySelector('[data-rework-load-more]');
     const postStream = document.querySelector('[data-rework-post-stream]');
 
@@ -226,6 +439,7 @@
           const template = document.createElement('template');
           template.innerHTML = payload.html || '';
           postStream.append(...template.content.childNodes);
+          initializeReadMore(postStream);
 
           if (payload.hasMorePages && payload.nextPageUrl) {
             loadMoreButton.setAttribute('data-next-url', payload.nextPageUrl);
@@ -244,6 +458,7 @@
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
       closeCommentModal();
+      closeReactionsModal();
       closePostComposerModal();
     });
 
@@ -261,6 +476,7 @@
       if (!postComposerModal) return;
       closeAllDropdowns();
       closeCommentModal();
+      closeReactionsModal();
       postComposerModal.classList.add('is-open');
       postComposerModal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('is-modal-open');
@@ -310,6 +526,7 @@
       if (!membersFilterModal) return;
       closeAllDropdowns();
       closeCommentModal();
+      closeReactionsModal();
       closePostComposerModal();
       membersFilterModal.classList.add('is-open');
       membersFilterModal.setAttribute('aria-hidden', 'false');
@@ -359,6 +576,7 @@
       if (!settingsModal) return;
       closeAllDropdowns();
       if (typeof closeCommentModal === 'function') closeCommentModal();
+      if (typeof closeReactionsModal === 'function') closeReactionsModal();
       if (typeof closePostComposerModal === 'function') closePostComposerModal();
       if (typeof closeProfileEditModal === 'function') closeProfileEditModal();
       if (typeof closeMembersFilterModal === 'function') closeMembersFilterModal();

@@ -46,6 +46,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="csrf-token" content="{{ csrf_token() }}"/>
 <title>HNT.rocks Rework Feed Preview</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -280,7 +281,7 @@
 <img alt="Minecraft" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/>
 <div class="game-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/minecraft-icon.png', 'rework') }}"/>Minecraft</div>
 </div>
-<p>What you need to do for this is very simple. Register and click the Become a Creator button. Making money is not far off. Come on, be a creator.</p>
+<div class="modal-post-body">What you need to do for this is very simple. Register and click the Become a Creator button. Making money is not far off. Come on, be a creator.</div>
 <div class="modal-post-stats">
 <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>12 Likes</span>
 <span><i aria-hidden="true" class="ph ph-eye ph-icon"></i>56 Views</span>
@@ -327,6 +328,22 @@
 <a class="btn" href="#">Senden</a>
 </div>
 </div>
+</div>
+</section>
+</div>
+<div aria-hidden="true" class="modal-backdrop reactions-backdrop" data-reactions-modal="">
+<section aria-labelledby="reactions-modal-title" aria-modal="true" class="reactions-modal" role="dialog">
+<button aria-label="Reaktionen schließen" class="modal-close" data-reactions-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<header class="reactions-modal-head">
+<div>
+<span>Feed</span>
+<h2 id="reactions-modal-title">Reaktionen</h2>
+</div>
+<strong data-reactions-total>0 Reaktionen</strong>
+</header>
+<div class="reactions-stats" data-reactions-stats></div>
+<div class="reactions-list" data-reactions-list>
+<div class="comment-empty-state">Noch keine Reaktionen.</div>
 </div>
 </section>
 </div>

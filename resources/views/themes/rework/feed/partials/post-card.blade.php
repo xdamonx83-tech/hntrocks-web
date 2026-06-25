@@ -25,10 +25,27 @@
     $reactionCount = (int) ($post->reactions_count ?? ($post->relationLoaded('reactions') ? $post->reactions->count() : 0));
     $commentCount = (int) ($post->comments_count ?? ($post->relationLoaded('comments') ? $post->comments->count() : 0));
     $shareCount = (int) ($post->shares_count ?? 0);
+    $viewerReaction = $post->relationLoaded('viewerReaction') ? $post->viewerReaction : null;
+    $viewerReacted = $viewerReaction !== null;
+    $reactionUrl = route('feed.reactions.toggle', $post);
+    $reactionsUrl = route('feed.reactions.index', $post);
     $postAlreadyReported = ($reportedFeedKeys ?? collect())->has('feed_post:' . $post->id);
     $postUrl = route('feed.show', $post);
     $body = trim((string) $post->body);
     $bodyHtml = \App\Support\FeedTextRenderer::render($body);
+    $reactionUsers = ($post->relationLoaded('reactions') ? $post->reactions : collect())
+        ->filter(fn ($reaction) => $reaction->relationLoaded('user') && $reaction->user !== null)
+        ->take(3)
+        ->map(function ($reaction): array {
+            $reactionUser = $reaction->user;
+
+            return [
+                'name' => $reactionUser?->name ?: 'HNT Hunter',
+                'avatar' => $reactionUser?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'),
+            ];
+        })
+        ->values()
+        ->all();
     $commentsPreview = ($post->relationLoaded('comments') ? $post->comments : collect())
         ->take(6)
         ->map(function ($comment): array {
@@ -52,9 +69,15 @@
         'media_url' => $firstMediaUrl,
         'media_type' => $firstMediaType,
         'media_alt' => $firstMediaAlt,
-        'likes' => $formatCount($reactionCount),
-        'comments' => $formatCount($commentCount),
-        'shares' => $formatCount($shareCount),
+        'likes' => $reactionCount,
+        'likes_label' => $formatCount($reactionCount),
+        'comments' => $commentCount,
+        'comments_label' => $formatCount($commentCount),
+        'shares' => $shareCount,
+        'shares_label' => $formatCount($shareCount),
+        'reacted' => $viewerReacted,
+        'reaction_url' => $reactionUrl,
+        'reactions_url' => $reactionsUrl,
         'comments_preview' => $commentsPreview,
     ];
 @endphp
@@ -86,14 +109,25 @@
 @if($firstMedia->isVideo())
 <video controls playsinline preload="metadata" src="{{ $firstMediaUrl }}"></video>
 @else
+<button aria-label="Post mit Bild öffnen" class="post-media-trigger" data-comment-modal-open type="button">
 <img alt="{{ $firstMediaAlt }}" src="{{ $firstMediaUrl }}"/>
+</button>
 @endif
 <div class="game-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>{{ $extraMediaCount > 0 ? '+'.$extraMediaCount.' Medien' : 'Feed Media' }}</div>
 </div>
 @endif
 <div class="post-actions">
 <div class="icons">
-<a aria-label="Like" href="#"><i aria-hidden="true" class="ph ph-heart ph-icon"></i></a>
+<button
+    aria-label="Like"
+    aria-pressed="{{ $viewerReacted ? 'true' : 'false' }}"
+    class="rework-icon-action {{ $viewerReacted ? 'is-active' : '' }}"
+    data-rework-like-toggle
+    data-reaction-url="{{ $reactionUrl }}"
+    data-reaction-type="like"
+    data-reaction-count="{{ $reactionCount }}"
+    type="button"
+><i aria-hidden="true" class="ph ph-heart ph-icon"></i></button>
 <a aria-label="Kommentare öffnen" data-comment-modal-open href="#"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i></a>
 <a aria-label="Teilen" href="#"><i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i></a>
 <a aria-label="Merken" href="#"><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></a>
@@ -102,23 +136,28 @@
 <div class="ai-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>KI-Inhalt</div>
 @endif
 <div class="metrics">
-<span class="metric"><i aria-hidden="true" class="ph ph-heart ph-icon"></i>{{ $formatCount($reactionCount) }} Likes</span>
 <span class="metric"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>{{ $formatCount($commentCount) }} Kommentare</span>
 <span class="metric"><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>{{ $formatCount($shareCount) }} Shares</span>
 </div>
 </div>
-<div class="liked">
+<button
+    class="liked {{ $reactionCount > 0 ? '' : 'is-empty' }}"
+    data-rework-reactions-open
+    data-reactions-url="{{ $reactionsUrl }}"
+    type="button"
+>
 <div class="liked-avatars">
-<img alt="{{ $authorName }}" src="{{ $authorAvatar }}"/>
-@foreach(($post->relationLoaded('comments') ? $post->comments : collect())->take(2) as $reactionComment)
-@php($reactionAuthor = $reactionComment->user)
-<img alt="{{ $reactionAuthor?->name ?: 'HNT Hunter' }}" src="{{ $reactionAuthor?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+@foreach($reactionUsers as $reactionUser)
+<img alt="{{ $reactionUser['name'] }}" src="{{ $reactionUser['avatar'] }}"/>
 @endforeach
 </div>
-<span>{{ $formatCount($reactionCount) }} Reaktionen - {{ $formatCount($commentCount) }} Antworten</span>
-</div>
+<span data-rework-like-summary>{{ $reactionCount > 0 ? $formatCount($reactionCount).' Reaktionen' : 'Noch keine Reaktionen' }}</span>
+</button>
 @if($body !== '')
-<div class="post-text rework-post-body">{!! $bodyHtml !!}</div>
+<div class="post-text rework-post-body is-collapsed" data-rework-post-body>
+<div class="rework-post-body-content">{!! $bodyHtml !!}</div>
+<button class="rework-read-more" data-rework-read-more data-more-label="Mehr lesen" data-less-label="Weniger lesen" hidden type="button">Mehr lesen</button>
+</div>
 @endif
 <div class="comment-row">
 <img alt="" src="{{ $viewer?->avatarUrl() ?: $reworkAsset('images/comment-avatar.png') }}"/>
