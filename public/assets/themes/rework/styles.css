@@ -7522,11 +7522,27 @@ body.is-modal-open { overflow: hidden; }
 .left-col .post-card.has-no-media .comment-row { order: 5; }
 
 .left-col .post-card.has-no-media.has-body .post-actions {
-  margin-top: 4px;
+  margin-top: 12px;
 }
 
 .left-col .post-card.has-no-media.has-no-body .post-actions {
   margin-top: 18px;
+}
+
+.left-col .post-card.has-no-media .liked {
+  margin-top: 8px;
+}
+
+.left-col .post-card.has-no-media .comment-row {
+  margin-top: 14px;
+}
+
+.left-col .post-card.has-no-media.has-no-body .liked {
+  margin-top: 6px;
+}
+
+.left-col .post-card.has-no-media.has-no-body .comment-row {
+  margin-top: 10px;
 }
 
 [data-rework-post-stream] {
@@ -7558,18 +7574,28 @@ body.is-modal-open { overflow: hidden; }
 .rework-icon-action {
   width: 23px;
   height: 23px;
-  display: inline-grid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   place-items: center;
   padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
   cursor: pointer;
+  font: inherit;
+  line-height: 1;
 }
 
 .post-actions .icons a,
 .post-actions .icons button {
   color: var(--muted-warm);
+}
+
+.post-actions .icons .ph-icon {
+  display: block;
+  font-size: 23px;
+  line-height: 1;
 }
 
 .rework-icon-action.is-active {
@@ -7614,9 +7640,19 @@ body.is-modal-open { overflow: hidden; }
   flex: 0 0 67px;
 }
 
+.liked-avatars.is-single {
+  width: 27px;
+  flex-basis: 27px;
+  margin-right: 4px;
+}
+
 .liked-avatars img {
   border: 2px solid #1E1E1D;
   box-shadow: 0 4px 12px rgba(0,0,0,.18);
+}
+
+.liked-avatars.is-single img {
+  left: 0;
 }
 
 .rework-post-body {
@@ -7688,6 +7724,36 @@ body.is-modal-open { overflow: hidden; }
   overflow-y: auto;
   padding-top: 34px;
   background: #1E1E1D;
+}
+
+.comment-modal-post.has-no-media {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-modal-post.has-no-media .modal-post-head {
+  margin-bottom: 18px;
+}
+
+.comment-modal-post.has-no-media .modal-post-body {
+  margin-top: 4px;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(21,21,20,.34);
+  border: 1px solid rgba(255,255,255,.045);
+}
+
+.comment-modal-post.has-no-media .modal-post-stats {
+  position: sticky;
+  bottom: -1px;
+  margin: 18px -4px 0;
+  padding: 14px 4px 2px;
+  background: linear-gradient(180deg, rgba(30,30,29,0), #1E1E1D 34%);
+  justify-content: flex-start;
+}
+
+.comment-modal-post.has-no-media.has-no-body .modal-post-stats {
+  margin-top: 0;
 }
 
 .comment-modal-post::-webkit-scrollbar,

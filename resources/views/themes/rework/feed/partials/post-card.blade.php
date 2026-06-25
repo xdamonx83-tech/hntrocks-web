@@ -120,7 +120,7 @@
 <img alt="{{ $firstMediaAlt }}" src="{{ $firstMediaUrl }}"/>
 </button>
 @endif
-<div class="game-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>{{ $extraMediaCount > 0 ? '+'.$extraMediaCount.' Medien' : 'Feed Media' }}</div>
+<div class="game-pill">{{ $extraMediaCount > 0 ? '+'.$extraMediaCount.' Medien' : 'Feed Media' }}</div>
 </div>
 @endif
 <div class="post-actions">
@@ -155,7 +155,7 @@
     data-viewer-avatar="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"
     type="button"
 >
-<div class="liked-avatars">
+<div class="liked-avatars {{ count($reactionUsers) === 1 ? 'is-single' : '' }}">
 @foreach($reactionUsers as $reactionUser)
 <img alt="{{ $reactionUser['name'] }}" src="{{ $reactionUser['avatar'] }}"/>
 @endforeach

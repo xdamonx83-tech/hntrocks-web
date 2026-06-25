@@ -86,8 +86,16 @@
       const modalMedia = commentModal.querySelector('.modal-post-media');
       const modalBody = commentModal.querySelector('.modal-post-body');
       const modalStats = commentModal.querySelector('.modal-post-stats');
+      const modalPostPanel = commentModal.querySelector('.comment-modal-post');
       const modalCount = commentModal.querySelector('.comment-modal-head strong');
       const modalThread = commentModal.querySelector('.comment-thread');
+
+      if (modalPostPanel) {
+        modalPostPanel.classList.toggle('has-media', Boolean(context.media_url));
+        modalPostPanel.classList.toggle('has-no-media', !context.media_url);
+        modalPostPanel.classList.toggle('has-body', Boolean(context.body_html));
+        modalPostPanel.classList.toggle('has-no-body', !context.body_html);
+      }
 
       if (modalAuthorAvatar) {
         modalAuthorAvatar.src = context.author_avatar || '';
@@ -392,18 +400,30 @@
       });
     }
 
-    const initializeReadMore = (root = document) => {
+    const initializeReadMore = (root = document, force = false) => {
       root.querySelectorAll('[data-rework-post-body]').forEach((body) => {
-        if (body.dataset.reworkReadMoreReady === '1') return;
+        if (!force && body.dataset.reworkReadMoreReady === '1') return;
         const content = body.querySelector('.rework-post-body-content');
         const toggle = body.querySelector('[data-rework-read-more]');
         if (!content || !toggle) return;
 
         body.dataset.reworkReadMoreReady = '1';
         window.requestAnimationFrame(() => {
-          const shouldClamp = content.scrollHeight > content.clientHeight + 8;
+          const wasExpanded = body.classList.contains('is-expanded');
+          body.classList.add('is-collapsed');
+          body.classList.remove('is-expanded', 'can-expand');
+          toggle.hidden = true;
+          toggle.textContent = toggle.getAttribute('data-more-label') || 'Mehr lesen';
+
+          const shouldClamp = content.scrollHeight > content.clientHeight + 6;
           body.classList.toggle('can-expand', shouldClamp);
           toggle.hidden = !shouldClamp;
+
+          if (shouldClamp && wasExpanded) {
+            body.classList.add('is-expanded');
+            body.classList.remove('is-collapsed');
+            toggle.textContent = toggle.getAttribute('data-less-label') || 'Weniger lesen';
+          }
         });
       });
     };
@@ -422,6 +442,8 @@
     });
 
     initializeReadMore();
+    window.addEventListener('load', () => initializeReadMore(document, true), { once: true });
+    window.addEventListener('resize', () => initializeReadMore(document, true));
 
     const loadMoreButton = document.querySelector('[data-rework-load-more]');
     const postStream = document.querySelector('[data-rework-post-stream]');
