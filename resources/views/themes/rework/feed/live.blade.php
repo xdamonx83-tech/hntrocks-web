@@ -267,7 +267,8 @@
 </div>
 <div aria-hidden="true" class="modal-backdrop" data-comment-modal="">
 <section aria-labelledby="comment-modal-title" aria-modal="true" class="comment-modal" role="dialog">
-<button aria-label="Kommentare schließen" class="modal-close" data-comment-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<div aria-hidden="true" class="post-composer-grip"></div>
+<button aria-label="Kommentare schließen" class="modal-close post-composer-close" data-comment-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
 <div class="comment-modal-layout">
 <div class="comment-modal-post">
 <div class="modal-post-head">
@@ -333,7 +334,8 @@
 </div>
 <div aria-hidden="true" class="modal-backdrop reactions-backdrop" data-reactions-modal="">
 <section aria-labelledby="reactions-modal-title" aria-modal="true" class="reactions-modal" role="dialog">
-<button aria-label="Reaktionen schließen" class="modal-close" data-reactions-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<div aria-hidden="true" class="post-composer-grip"></div>
+<button aria-label="Reaktionen schließen" class="modal-close post-composer-close" data-reactions-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
 <header class="reactions-modal-head">
 <div>
 <span>Feed</span>

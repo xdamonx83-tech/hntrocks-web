@@ -7,8 +7,10 @@
       });
     };
 
-    document.querySelectorAll('[data-dropdown-toggle]').forEach((toggle) => {
-      toggle.addEventListener('click', (event) => {
+    document.addEventListener('click', (event) => {
+      const toggle = event.target.closest('[data-dropdown-toggle]');
+
+      if (toggle) {
         event.preventDefault();
         const menu = toggle.closest('.action-menu');
         if (!menu) return;
@@ -20,10 +22,10 @@
           menu.classList.add('is-open');
           toggle.setAttribute('aria-expanded', 'true');
         }
-      });
-    });
 
-    document.addEventListener('click', (event) => {
+        return;
+      }
+
       if (event.target.closest('.action-menu')) return;
       closeAllDropdowns();
     });
@@ -305,6 +307,7 @@
       const likeButton = card.querySelector('[data-rework-like-toggle]');
       const summary = card.querySelector('[data-rework-like-summary]');
       const likedRow = card.querySelector('[data-rework-reactions-open]');
+      const avatars = likedRow?.querySelector('.liked-avatars');
       const context = parsePostContext(card) || {};
       const formattedCount = formatCount(count);
 
@@ -314,10 +317,23 @@
         likeButton.setAttribute('data-reaction-count', String(count));
       }
       if (summary) {
-        summary.textContent = count > 0 ? `${formattedCount} Reaktionen` : 'Noch keine Reaktionen';
+        const viewerName = likedRow?.getAttribute('data-viewer-name') || 'dir';
+        summary.textContent = count > 0
+          ? (reacted ? `Liked by ${viewerName}${count > 1 ? ` und ${formatCount(count - 1)} andere` : ''}` : `${formattedCount} Reaktionen`)
+          : 'Noch keine Reaktionen';
       }
       if (likedRow) {
         likedRow.classList.toggle('is-empty', count <= 0);
+      }
+      if (avatars && !reacted) {
+        avatars.querySelector('[data-rework-viewer-reaction-avatar]')?.remove();
+      }
+      if (avatars && reacted && avatars.children.length === 0) {
+        const avatar = document.createElement('img');
+        avatar.alt = likedRow?.getAttribute('data-viewer-name') || '';
+        avatar.src = likedRow?.getAttribute('data-viewer-avatar') || '';
+        avatar.setAttribute('data-rework-viewer-reaction-avatar', '1');
+        avatars.appendChild(avatar);
       }
 
       context.likes = count;

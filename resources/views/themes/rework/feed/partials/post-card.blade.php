@@ -34,8 +34,8 @@
     $body = trim((string) $post->body);
     $bodyHtml = \App\Support\FeedTextRenderer::render($body);
     $reactionUsers = ($post->relationLoaded('reactions') ? $post->reactions : collect())
-        ->filter(fn ($reaction) => $reaction->relationLoaded('user') && $reaction->user !== null)
         ->take(3)
+        ->filter(fn ($reaction) => $reaction->user !== null)
         ->map(function ($reaction): array {
             $reactionUser = $reaction->user;
 
@@ -46,6 +46,13 @@
         })
         ->values()
         ->all();
+    $firstReactionName = $reactionUsers[0]['name'] ?? null;
+    $remainingReactionCount = max($reactionCount - 1, 0);
+    $reactionSummary = $reactionCount <= 0
+        ? 'Noch keine Reaktionen'
+        : ($firstReactionName
+            ? 'Liked by '.$firstReactionName.($remainingReactionCount > 0 ? ' und '.$formatCount($remainingReactionCount).' andere' : '')
+            : $formatCount($reactionCount).' Reaktionen');
     $commentsPreview = ($post->relationLoaded('comments') ? $post->comments : collect())
         ->take(6)
         ->map(function ($comment): array {
@@ -144,6 +151,8 @@
     class="liked {{ $reactionCount > 0 ? '' : 'is-empty' }}"
     data-rework-reactions-open
     data-reactions-url="{{ $reactionsUrl }}"
+    data-viewer-name="{{ $viewer?->name ?: 'Du' }}"
+    data-viewer-avatar="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"
     type="button"
 >
 <div class="liked-avatars">
@@ -151,7 +160,7 @@
 <img alt="{{ $reactionUser['name'] }}" src="{{ $reactionUser['avatar'] }}"/>
 @endforeach
 </div>
-<span data-rework-like-summary>{{ $reactionCount > 0 ? $formatCount($reactionCount).' Reaktionen' : 'Noch keine Reaktionen' }}</span>
+<span data-rework-like-summary>{{ $reactionSummary }}</span>
 </button>
 @if($body !== '')
 <div class="post-text rework-post-body is-collapsed" data-rework-post-body>
