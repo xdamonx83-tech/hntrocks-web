@@ -525,6 +525,159 @@
       });
     }
 
+    const postComposerForm = postComposerModal?.querySelector('[data-rework-post-composer-form]');
+    const postComposerTextarea = postComposerModal?.querySelector('[data-rework-composer-textarea]');
+    const postComposerFileInput = postComposerModal?.querySelector('[data-rework-composer-file-input]');
+    const postComposerPreview = postComposerModal?.querySelector('[data-rework-composer-media-preview]');
+    const postComposerError = postComposerModal?.querySelector('[data-rework-composer-error]');
+    const postComposerSubmit = postComposerModal?.querySelector('[data-rework-composer-submit]');
+
+    const showComposerError = (message) => {
+      if (!postComposerError) return;
+      postComposerError.textContent = message || '';
+      postComposerError.hidden = !message;
+    };
+
+    const resetComposerPanels = () => {
+      postComposerModal?.querySelectorAll('[data-rework-composer-panel]').forEach((panel) => {
+        panel.hidden = true;
+      });
+      postComposerModal?.querySelectorAll('[data-rework-composer-panel-toggle]').forEach((button) => {
+        button.classList.remove('is-active');
+        button.setAttribute('aria-expanded', 'false');
+      });
+    };
+
+    const renderComposerMediaPreview = () => {
+      if (!postComposerFileInput || !postComposerPreview) return;
+      const files = Array.from(postComposerFileInput.files || []);
+      postComposerPreview.innerHTML = '';
+      postComposerPreview.hidden = files.length === 0;
+
+      files.slice(0, 6).forEach((file) => {
+        const item = document.createElement('span');
+        item.className = 'rework-composer-media-item';
+        const isVideo = file.type.startsWith('video/');
+        if (isVideo) {
+          item.textContent = `🎬 ${file.name}`;
+        } else {
+          const img = document.createElement('img');
+          img.alt = file.name;
+          img.src = URL.createObjectURL(file);
+          img.addEventListener('load', () => URL.revokeObjectURL(img.src), { once: true });
+          item.appendChild(img);
+        }
+        postComposerPreview.appendChild(item);
+      });
+
+      if (files.length > 6) {
+        const more = document.createElement('span');
+        more.className = 'rework-composer-media-item is-more';
+        more.textContent = `+${files.length - 6}`;
+        postComposerPreview.appendChild(more);
+      }
+    };
+
+    postComposerFileInput?.addEventListener('change', () => {
+      showComposerError('');
+      renderComposerMediaPreview();
+    });
+
+    postComposerModal?.querySelector('[data-rework-composer-emoji]')?.addEventListener('click', () => {
+      if (!postComposerTextarea) return;
+      const insert = ' 😄';
+      const start = postComposerTextarea.selectionStart ?? postComposerTextarea.value.length;
+      const end = postComposerTextarea.selectionEnd ?? postComposerTextarea.value.length;
+      postComposerTextarea.value = `${postComposerTextarea.value.slice(0, start)}${insert}${postComposerTextarea.value.slice(end)}`;
+      postComposerTextarea.focus();
+      postComposerTextarea.setSelectionRange(start + insert.length, start + insert.length);
+    });
+
+    postComposerModal?.querySelectorAll('[data-rework-composer-panel-toggle]').forEach((button) => {
+      button.setAttribute('aria-expanded', 'false');
+      button.addEventListener('click', () => {
+        const target = button.getAttribute('data-rework-composer-panel-toggle');
+        const panel = postComposerModal.querySelector(`[data-rework-composer-panel="${target}"]`);
+        if (!panel) return;
+        const shouldOpen = panel.hidden;
+        resetComposerPanels();
+        panel.hidden = !shouldOpen;
+        button.classList.toggle('is-active', shouldOpen);
+        button.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+      });
+    });
+
+    const resetPostComposerForm = () => {
+      if (!postComposerForm) return;
+      postComposerForm.reset();
+      if (postComposerPreview) {
+        postComposerPreview.innerHTML = '';
+        postComposerPreview.hidden = true;
+      }
+      resetComposerPanels();
+      showComposerError('');
+      if (postComposerSubmit) {
+        postComposerSubmit.disabled = false;
+        postComposerSubmit.textContent = 'Posten';
+      }
+    };
+
+    postComposerForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      showComposerError('');
+
+      const formData = new FormData(postComposerForm);
+      const body = String(formData.get('body') || '').trim();
+      const files = Array.from(postComposerFileInput?.files || []);
+      const pollQuestion = String(formData.get('poll_question') || '').trim();
+      const pollOptions = Array.from(postComposerForm.querySelectorAll('input[name="poll_options[]"]'))
+        .map((input) => input.value.trim())
+        .filter(Boolean);
+
+      if (!body && files.length === 0 && !(pollQuestion && pollOptions.length >= 2)) {
+        showComposerError('Schreib etwas, wähle Medien aus oder erstelle eine Umfrage mit mindestens zwei Antworten.');
+        postComposerTextarea?.focus();
+        return;
+      }
+
+      if (postComposerSubmit) {
+        postComposerSubmit.disabled = true;
+        postComposerSubmit.textContent = 'Postet...';
+      }
+
+      try {
+        const response = await fetch(postComposerForm.action, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          body: formData,
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok || payload.ok === false) {
+          const firstError = payload?.errors
+            ? Object.values(payload.errors).flat().filter(Boolean)[0]
+            : null;
+          throw new Error(firstError || payload?.message || 'Post konnte nicht erstellt werden.');
+        }
+
+        resetPostComposerForm();
+        closePostComposerModal();
+        window.location.reload();
+      } catch (error) {
+        showComposerError(error?.message || 'Post konnte nicht erstellt werden.');
+        if (postComposerSubmit) {
+          postComposerSubmit.disabled = false;
+          postComposerSubmit.textContent = 'Posten';
+        }
+      }
+    });
+
+
 
 
     const membersFilterModal = document.querySelector('[data-members-filter-modal]');

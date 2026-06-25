@@ -351,6 +351,9 @@
 </div>
 <div aria-hidden="true" class="modal-backdrop post-composer-backdrop" data-post-composer-modal="">
 <section aria-labelledby="post-composer-title" aria-modal="true" class="post-composer-modal" role="dialog">
+<form action="{{ route('feed.store') }}" class="rework-post-composer-form" data-rework-post-composer-form enctype="multipart/form-data" method="post">
+@csrf
+<input name="background_style" type="hidden" value="none"/>
 <div aria-hidden="true" class="post-composer-grip"></div>
 <header class="post-composer-header">
 <div class="post-composer-titleblock">
@@ -363,34 +366,68 @@
 <div class="post-composer-body">
 <div class="post-composer-author-row">
 <div class="post-composer-author">
-<img alt="Krispie Army" src="{{ \App\Support\HntTheme::asset('images/post-avatar.png', 'rework') }}"/>
+<img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: $reworkAsset('images/comment-avatar.png') }}"/>
 <div>
-<strong>Krispie Army</strong>
+<strong>{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}</strong>
 <span>Community · HNT Feed</span>
 </div>
 </div>
-<a class="audience-pill" href="#">Community <span><i aria-hidden="true" class="ph ph-caret-down ph-icon"></i></span></a>
+<label class="audience-pill rework-audience-select">
+<select aria-label="Sichtbarkeit" name="visibility" data-rework-composer-visibility>
+<option value="public" @selected(old('visibility', 'public') === 'public')>Community</option>
+<option value="followers" @selected(old('visibility') === 'followers')>Freunde</option>
+<option value="private" @selected(old('visibility') === 'private')>Privat</option>
+</select>
+<span><i aria-hidden="true" class="ph ph-caret-down ph-icon"></i></span>
+</label>
 </div>
 <div class="post-composer-textbox">
-<textarea placeholder="Was gibt es Neues im Bayou?"></textarea>
+<textarea maxlength="5000" name="body" placeholder="Was gibt es Neues im Bayou?" data-rework-composer-textarea>{{ old('body') }}</textarea>
+<div class="rework-composer-media-preview" data-rework-composer-media-preview hidden></div>
 <div class="composer-textbox-footer">
-<div aria-hidden="true" class="composer-ghost-actions">
-<span></span><span></span><span></span>
-</div>
-<a aria-label="Emoji hinzufügen" class="composer-emoji" href="#"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></a>
+<div aria-hidden="true" class="composer-ghost-actions"><span></span><span></span><span></span></div>
+<button aria-label="Emoji hinzufügen" class="composer-emoji" data-rework-composer-emoji type="button"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></button>
 </div>
 </div>
 <div class="post-composer-tools">
-<a href="#"><span><i aria-hidden="true" class="ph ph-plus ph-icon"></i></span>Medien</a>
-<a href="#"><span><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></span>Gefühl</a>
-<a href="#"><span><i aria-hidden="true" class="ph ph-question ph-icon"></i></span>Umfrage</a>
-<a href="#"><span class="composer-check"><i aria-hidden="true" class="ph ph-square ph-icon"></i></span>KI-Inhalt</a>
+<label class="rework-composer-tool" for="reworkComposerMedia"><span><i aria-hidden="true" class="ph ph-plus ph-icon"></i></span>Medien</label>
+<input accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" class="rework-composer-file-input" data-rework-composer-file-input id="reworkComposerMedia" multiple name="media[]" type="file"/>
+<button class="rework-composer-tool" data-rework-composer-panel-toggle="feeling" type="button"><span><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></span>Gefühl</button>
+<button class="rework-composer-tool" data-rework-composer-panel-toggle="poll" type="button"><span><i aria-hidden="true" class="ph ph-question ph-icon"></i></span>Umfrage</button>
+<label class="rework-composer-tool rework-composer-check"><input name="ai_generated" type="checkbox" value="1"/><span class="composer-check"><i aria-hidden="true" class="ph ph-square ph-icon"></i></span>KI-Inhalt</label>
 </div>
+<div class="rework-composer-panels">
+<div class="rework-composer-panel" data-rework-composer-panel="feeling" hidden>
+<strong>Gefühl</strong>
+<div class="rework-composer-chip-grid">
+<label><input checked name="feeling_key" type="radio" value="none"/> Kein Gefühl</label>
+<label><input name="feeling_key" type="radio" value="happy"/> 😄 Happy</label>
+<label><input name="feeling_key" type="radio" value="excited"/> 🔥 Aufgeregt</label>
+<label><input name="feeling_key" type="radio" value="focused"/> 🎯 Fokussiert</label>
+<label><input name="feeling_key" type="radio" value="chill"/> 🌙 Chill</label>
+<label><input name="feeling_key" type="radio" value="tired"/> 💤 Müde</label>
+<label><input name="feeling_key" type="radio" value="salty"/> 🧂 Salty</label>
+</div>
+</div>
+<div class="rework-composer-panel" data-rework-composer-panel="poll" hidden>
+<strong>Umfrage</strong>
+<p>Optional: Mindestens zwei Antworten ausfüllen.</p>
+<input maxlength="180" name="poll_question" placeholder="Frage" type="text"/>
+<div class="rework-composer-poll-options">
+<input maxlength="180" name="poll_options[]" placeholder="Antwort 1" type="text"/>
+<input maxlength="180" name="poll_options[]" placeholder="Antwort 2" type="text"/>
+<input maxlength="180" name="poll_options[]" placeholder="Antwort 3" type="text"/>
+<input maxlength="180" name="poll_options[]" placeholder="Antwort 4" type="text"/>
+</div>
+</div>
+</div>
+<div class="rework-composer-error" data-rework-composer-error hidden></div>
 </div>
 <footer class="post-composer-footer">
-<a class="composer-cancel" data-post-composer-close="" href="#">Abbrechen</a>
-<a class="composer-submit" href="#">Posten</a>
+<button class="composer-cancel" data-post-composer-close="" type="button">Abbrechen</button>
+<button class="composer-submit" data-rework-composer-submit type="submit">Posten</button>
 </footer>
+</form>
 </section>
 </div>
 <div aria-hidden="true" class="modal-backdrop settings-backdrop" data-settings-modal="">
