@@ -46,6 +46,7 @@ return [
             'socialite' => env('HH_THEME_SOCIALITE_ASSET_PATH', 'assets/socialite'),
             'vikinger' => env('HH_THEME_VIKINGER_ASSET_PATH', 'assets/vikinger'),
             'hnt_preview' => env('HH_THEME_HNT_PREVIEW_ASSET_PATH', 'assets/themes/hnt_preview'),
+            'rework' => env('HH_THEME_REWORK_ASSET_PATH', 'assets/themes/rework'),
         ],
         'preview' => [
             'theme' => env('HH_THEME_PREVIEW_THEME', 'hnt_preview'),

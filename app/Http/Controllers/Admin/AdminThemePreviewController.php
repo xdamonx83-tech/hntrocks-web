@@ -95,7 +95,7 @@ class AdminThemePreviewController extends Controller
     private function templateReferences(): array
     {
         return [
-            'index.html' => 'Feed / globale Shell',
+            'index.html' => 'Rework Feed Preview / globale Shell',
             'profile.html' => 'Profil',
             'profile-edit.html' => 'Profil bearbeiten',
             'members.html' => 'Mitglieder',
