@@ -21,6 +21,17 @@
     $firstMediaUrl = $firstMedia ? $firstMedia->url() : null;
     $firstMediaType = $firstMedia?->isVideo() ? 'video' : ($firstMedia ? 'image' : null);
     $firstMediaAlt = $firstMedia?->original_name ?: 'Feed media by '.$authorName;
+    $mediaPayload = $mediaItems
+        ->map(function ($media) use ($authorName): array {
+            return [
+                'url' => $media->url(),
+                'type' => $media->isVideo() ? 'video' : 'image',
+                'alt' => $media->original_name ?: 'Feed media by '.$authorName,
+            ];
+        })
+        ->filter(fn (array $item): bool => ! empty($item['url']))
+        ->values()
+        ->all();
     $extraMediaCount = max($mediaItems->count() - 1, 0);
     $reactionCount = (int) ($post->reactions_count ?? ($post->relationLoaded('reactions') ? $post->reactions->count() : 0));
     $commentCount = (int) ($post->comments_count ?? ($post->relationLoaded('comments') ? $post->comments->count() : 0));
@@ -76,6 +87,7 @@
         'media_url' => $firstMediaUrl,
         'media_type' => $firstMediaType,
         'media_alt' => $firstMediaAlt,
+        'media_items' => $mediaPayload,
         'likes' => $reactionCount,
         'likes_label' => $formatCount($reactionCount),
         'comments' => $commentCount,

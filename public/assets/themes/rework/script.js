@@ -690,3 +690,137 @@
         sidebarToggle.setAttribute('aria-label', isExpanded ? 'Sidebar einklappen' : 'Sidebar erweitern');
       });
     }
+
+
+/* 071 manual rework feed JS hotfix */
+(() => {
+  const commentModal = document.querySelector('[data-comment-modal]');
+  const postStream = document.querySelector('[data-rework-post-stream]');
+
+  const parseContextFromCard = (card) => {
+    const node = card?.querySelector('[data-rework-post-context]');
+    if (!node) return null;
+    try { return JSON.parse(node.textContent || '{}'); } catch (_) { return null; }
+  };
+
+  const normalizeMediaItems = (context) => {
+    const mediaItems = Array.isArray(context?.media_items) ? context.media_items : [];
+    const cleaned = mediaItems.filter((item) => item && item.url);
+    if (cleaned.length) return cleaned;
+    if (context?.media_url) {
+      return [{ url: context.media_url, type: context.media_type || 'image', alt: context.media_alt || '' }];
+    }
+    return [];
+  };
+
+  const renderModalMedia = (context) => {
+    if (!commentModal || !context) return;
+    const mediaBox = commentModal.querySelector('.modal-post-media');
+    if (!mediaBox) return;
+    const items = normalizeMediaItems(context);
+    mediaBox.innerHTML = '';
+    mediaBox.hidden = items.length === 0;
+    if (!items.length) return;
+
+    let index = 0;
+    const render = () => {
+      const item = items[index] || items[0];
+      mediaBox.innerHTML = '';
+      const stage = document.createElement('div');
+      stage.className = 'modal-media-stage';
+      const media = document.createElement(item.type === 'video' ? 'video' : 'img');
+      media.src = item.url;
+      media.alt = item.alt || context.media_alt || '';
+      if (item.type === 'video') {
+        media.controls = true;
+        media.playsInline = true;
+        media.preload = 'metadata';
+      }
+      stage.appendChild(media);
+
+      if (items.length > 1) {
+        const prev = document.createElement('button');
+        prev.type = 'button';
+        prev.className = 'modal-media-nav prev';
+        prev.setAttribute('aria-label', 'Vorheriges Medium');
+        prev.innerHTML = '&lsaquo;';
+        prev.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          index = (index - 1 + items.length) % items.length;
+          render();
+        });
+
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'modal-media-nav next';
+        next.setAttribute('aria-label', 'Nächstes Medium');
+        next.innerHTML = '&rsaquo;';
+        next.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          index = (index + 1) % items.length;
+          render();
+        });
+
+        const counter = document.createElement('span');
+        counter.className = 'modal-media-counter';
+        counter.textContent = `${index + 1}/${items.length}`;
+        stage.append(prev, next, counter);
+      }
+
+      mediaBox.appendChild(stage);
+    };
+
+    render();
+  };
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-comment-modal-open]');
+    if (!trigger) return;
+    const card = trigger.closest('[data-rework-post-card]');
+    const context = parseContextFromCard(card);
+    window.setTimeout(() => renderModalMedia(context), 0);
+  });
+
+  const recalibrateReadMore = (root = document) => {
+    root.querySelectorAll('[data-rework-post-body]').forEach((body) => {
+      const content = body.querySelector('.rework-post-body-content');
+      const toggle = body.querySelector('[data-rework-read-more]');
+      if (!content || !toggle) return;
+
+      const wasExpanded = body.classList.contains('is-expanded');
+      body.classList.add('is-collapsed');
+      body.classList.remove('is-expanded', 'can-expand');
+      toggle.hidden = true;
+      toggle.textContent = toggle.getAttribute('data-more-label') || 'Mehr lesen';
+
+      window.requestAnimationFrame(() => {
+        const plainText = (content.textContent || '').replace(/\s+/g, ' ').trim();
+        const actuallyOverflowing = content.scrollHeight > content.clientHeight + 12;
+        const shouldClamp = plainText.length > 140 && actuallyOverflowing;
+        body.classList.toggle('can-expand', shouldClamp);
+        toggle.hidden = !shouldClamp;
+        if (shouldClamp && wasExpanded) {
+          body.classList.add('is-expanded');
+          body.classList.remove('is-collapsed');
+          toggle.textContent = toggle.getAttribute('data-less-label') || 'Weniger lesen';
+        }
+      });
+    });
+  };
+
+  const queueRecalibration = (root = document) => {
+    window.requestAnimationFrame(() => recalibrateReadMore(root));
+    window.setTimeout(() => recalibrateReadMore(root), 160);
+  };
+
+  queueRecalibration();
+  window.addEventListener('load', () => queueRecalibration(), { once: true });
+  window.addEventListener('resize', () => queueRecalibration());
+
+  if (postStream) {
+    const observer = new MutationObserver(() => queueRecalibration(postStream));
+    observer.observe(postStream, { childList: true, subtree: false });
+  }
+})();
