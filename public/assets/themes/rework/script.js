@@ -36,6 +36,117 @@
     const commentModal = document.querySelector('[data-comment-modal]');
     const commentModalClose = document.querySelector('[data-comment-modal-close]');
 
+    const parsePostContext = (card) => {
+      if (!card) return null;
+      const contextScript = card.querySelector('[data-rework-post-context]');
+      if (!contextScript) return null;
+
+      try {
+        return JSON.parse(contextScript.textContent || '{}');
+      } catch (error) {
+        return null;
+      }
+    };
+
+    const setHtml = (element, html) => {
+      if (!element) return;
+      element.innerHTML = html || '';
+      element.hidden = !html;
+    };
+
+    const setText = (element, text) => {
+      if (!element) return;
+      element.textContent = text || '';
+      element.hidden = !text;
+    };
+
+    const updateCommentModal = (context) => {
+      if (!commentModal || !context) return;
+
+      const modalAuthorAvatar = commentModal.querySelector('.modal-post-head img');
+      const modalAuthorName = commentModal.querySelector('.modal-post-head strong');
+      const modalAuthorMeta = commentModal.querySelector('.modal-post-head span');
+      const modalMedia = commentModal.querySelector('.modal-post-media');
+      const modalBody = commentModal.querySelector('.comment-modal-post > p');
+      const modalStats = commentModal.querySelector('.modal-post-stats');
+      const modalCount = commentModal.querySelector('.comment-modal-head strong');
+      const modalThread = commentModal.querySelector('.comment-thread');
+
+      if (modalAuthorAvatar) {
+        modalAuthorAvatar.src = context.author_avatar || '';
+        modalAuthorAvatar.alt = context.author || '';
+      }
+      setText(modalAuthorName, context.author || 'HNT Hunter');
+      setText(modalAuthorMeta, context.meta || 'Feed Post');
+
+      if (modalMedia) {
+        modalMedia.innerHTML = '';
+        if (context.media_url) {
+          const media = document.createElement(context.media_type === 'video' ? 'video' : 'img');
+          if (context.media_type === 'video') {
+            media.controls = true;
+            media.playsInline = true;
+            media.preload = 'metadata';
+          }
+          media.src = context.media_url;
+          media.alt = context.media_alt || '';
+          modalMedia.appendChild(media);
+          modalMedia.hidden = false;
+        } else {
+          modalMedia.hidden = true;
+        }
+      }
+
+      setHtml(modalBody, context.body_html || '');
+
+      if (modalStats) {
+        modalStats.innerHTML = `
+          <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${context.likes || '0'} Likes</span>
+          <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${context.comments || '0'} Kommentare</span>
+          <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${context.shares || '0'} Shares</span>
+        `;
+      }
+      setText(modalCount, `${context.comments || '0'} Antworten`);
+
+      if (modalThread) {
+        modalThread.innerHTML = '';
+        const comments = Array.isArray(context.comments_preview) ? context.comments_preview : [];
+
+        if (!comments.length) {
+          const empty = document.createElement('div');
+          empty.className = 'comment-empty-state';
+          empty.textContent = 'Noch keine Kommentare.';
+          modalThread.appendChild(empty);
+        } else {
+          comments.forEach((comment) => {
+            const item = document.createElement('article');
+            item.className = 'comment-item';
+            const avatar = document.createElement('img');
+            const content = document.createElement('div');
+            const header = document.createElement('header');
+            const author = document.createElement('strong');
+            const time = document.createElement('span');
+            const body = document.createElement('p');
+            const reply = document.createElement('a');
+
+            avatar.alt = comment.author || '';
+            avatar.src = comment.avatar || '';
+            reply.href = '#';
+            reply.textContent = 'Antworten';
+
+            setText(author, comment.author || 'HNT Hunter');
+            setText(time, comment.time || '');
+            setHtml(body, comment.body_html || '');
+
+            header.append(author, time);
+            content.append(header, body, reply);
+            item.append(avatar, content);
+            modalThread.appendChild(item);
+          });
+        }
+      }
+    };
+
     const closeCommentModal = () => {
       if (!commentModal) return;
       commentModal.classList.remove('is-open');
@@ -43,9 +154,10 @@
       document.body.classList.remove('is-modal-open');
     };
 
-    const openCommentModal = () => {
+    const openCommentModal = (context) => {
       if (!commentModal) return;
       closeAllDropdowns();
+      updateCommentModal(context);
       commentModal.classList.add('is-open');
       commentModal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('is-modal-open');
@@ -53,10 +165,22 @@
       if (composerInput) window.setTimeout(() => composerInput.focus(), 120);
     };
 
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-comment-modal-open]');
+      if (!trigger) return;
+      if (!commentModal) return;
+
+      event.preventDefault();
+      const card = trigger.closest('[data-rework-post-card]');
+      openCommentModal(parsePostContext(card));
+    });
+
     document.querySelectorAll('[data-comment-modal-open]').forEach((trigger) => {
-      trigger.addEventListener('click', (event) => {
+      trigger.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
-        openCommentModal();
+        const card = trigger.closest('[data-rework-post-card]');
+        openCommentModal(parsePostContext(card));
       });
     });
 
@@ -67,6 +191,53 @@
     if (commentModal) {
       commentModal.addEventListener('click', (event) => {
         if (event.target === commentModal) closeCommentModal();
+      });
+    }
+
+    const loadMoreButton = document.querySelector('[data-rework-load-more]');
+    const postStream = document.querySelector('[data-rework-post-stream]');
+
+    if (loadMoreButton && postStream) {
+      loadMoreButton.addEventListener('click', async () => {
+        const nextUrl = loadMoreButton.getAttribute('data-next-url');
+        if (!nextUrl || loadMoreButton.disabled) return;
+
+        const label = loadMoreButton.querySelector('[data-rework-load-more-label]');
+        const loadingLabel = loadMoreButton.getAttribute('data-loading-label') || 'Loading...';
+        const readyLabel = loadMoreButton.getAttribute('data-ready-label') || 'Load more';
+        const errorLabel = loadMoreButton.getAttribute('data-error-label') || 'Try again';
+
+        loadMoreButton.disabled = true;
+        if (label) label.textContent = loadingLabel;
+
+        try {
+          const url = new URL(nextUrl, window.location.href);
+          url.searchParams.set('fragment', '1');
+          const response = await fetch(url.toString(), {
+            headers: {
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+          });
+
+          if (!response.ok) throw new Error('Load more failed');
+
+          const payload = await response.json();
+          const template = document.createElement('template');
+          template.innerHTML = payload.html || '';
+          postStream.append(...template.content.childNodes);
+
+          if (payload.hasMorePages && payload.nextPageUrl) {
+            loadMoreButton.setAttribute('data-next-url', payload.nextPageUrl);
+            loadMoreButton.disabled = false;
+            if (label) label.textContent = readyLabel;
+          } else {
+            loadMoreButton.closest('[data-rework-load-more-wrap]')?.remove();
+          }
+        } catch (error) {
+          loadMoreButton.disabled = false;
+          if (label) label.textContent = errorLabel;
+        }
       });
     }
 
@@ -263,4 +434,3 @@
         sidebarToggle.setAttribute('aria-label', isExpanded ? 'Sidebar einklappen' : 'Sidebar erweitern');
       });
     }
-  

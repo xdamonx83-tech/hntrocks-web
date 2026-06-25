@@ -7421,3 +7421,89 @@ body.is-modal-open { overflow: hidden; }
   color: var(--muted);
   margin: 0;
 }
+
+.left-col .post-card {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.left-col .post-card.has-media {
+  min-height: 0;
+}
+
+.left-col .post-card.has-no-media,
+.left-col .post-card.has-no-body {
+  padding-bottom: 24px;
+}
+
+.left-col .post-card.has-no-media .post-actions {
+  margin-top: 18px;
+}
+
+.left-col .post-card.has-no-body .liked {
+  margin-bottom: 18px;
+}
+
+.left-col .post-media > img,
+.left-col .post-media > video {
+  width: 100%;
+  height: auto;
+  max-height: 430px;
+  aspect-ratio: 693 / 282;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.left-col .post-text {
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+.left-col .post-actions {
+  height: auto;
+  min-height: 48px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.left-col .metrics {
+  flex-wrap: wrap;
+  gap: 12px 18px;
+}
+
+.rework-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 28px;
+}
+
+.rework-load-more {
+  min-width: 190px;
+  height: 38px;
+}
+
+.modal-post-media[hidden],
+.comment-modal-post > p[hidden] {
+  display: none;
+}
+
+.modal-post-media > video {
+  width: 100%;
+  height: 360px;
+  display: block;
+  object-fit: cover;
+  background: #111;
+}
+
+.comment-empty-state {
+  border: 1px dashed rgba(255,255,255,.12);
+  border-radius: 14px;
+  color: rgba(255,255,255,.62);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 18px;
+  text-align: center;
+}
