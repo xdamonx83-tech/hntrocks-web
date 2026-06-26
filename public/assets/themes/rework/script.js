@@ -3342,3 +3342,159 @@
     }
   });
 })();
+
+/* 102: Rework sidebar late sticky profile */
+(() => {
+  if (window.__hntReworkSidebarLateStickyReady) return;
+  window.__hntReworkSidebarLateStickyReady = true;
+
+  let clone = null;
+
+  const ensureClone = (profile) => {
+    if (clone) return clone;
+
+    clone = profile.cloneNode(true);
+    clone.classList.add('rework-profile-late-sticky-clone');
+    clone.classList.remove('is-late-sticky');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+    document.body.appendChild(clone);
+
+    return clone;
+  };
+
+  const setup = () => {
+    const rightCol = document.querySelector('.right-col');
+    const profile = rightCol?.querySelector(':scope > .profile-card');
+
+    if (!rightCol || !profile) return;
+
+    const update = () => {
+      const stickyClone = ensureClone(profile);
+
+      if (window.matchMedia('(max-width: 1100px)').matches) {
+        stickyClone.classList.remove('is-active');
+        stickyClone.style.removeProperty('--rework-profile-left');
+        stickyClone.style.removeProperty('--rework-profile-width');
+        return;
+      }
+
+      const columnRect = rightCol.getBoundingClientRect();
+      const profileRect = profile.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const originalGone = profileRect.bottom <= -8;
+      const stickyHeight = stickyClone.offsetHeight || profile.offsetHeight || 0;
+      const lateTriggerLine = Math.max(160, stickyHeight + 36);
+      const reachedWidgetEnd = columnRect.bottom <= lateTriggerLine;
+      const shouldShow = originalGone && reachedWidgetEnd;
+
+      if (shouldShow) {
+        stickyClone.style.setProperty('--rework-profile-left', `${columnRect.left}px`);
+        stickyClone.style.setProperty('--rework-profile-width', `${columnRect.width}px`);
+        stickyClone.classList.add('is-active');
+      } else {
+        stickyClone.classList.remove('is-active');
+      }
+    };
+
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    window.setTimeout(update, 120);
+    window.setTimeout(update, 420);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
+
+/* 104: Late sticky profile quick actions */
+(() => {
+  if (window.__hntReworkLateStickyProfileActionsReady) return;
+  window.__hntReworkLateStickyProfileActionsReady = true;
+
+  const labels = () => {
+    const lang = (document.documentElement.getAttribute('lang') || 'de').toLowerCase();
+
+    if (lang.startsWith('en')) {
+      return {
+        open: 'Open profile',
+        edit: 'Edit profile',
+        settings: 'Settings',
+        logout: 'Logout',
+      };
+    }
+
+    return {
+      open: 'Profil öffnen',
+      edit: 'Profil bearbeiten',
+      settings: 'Einstellungen',
+      logout: 'Logout',
+    };
+  };
+
+  const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  const attachActions = () => {
+    const clone = document.querySelector('.rework-profile-late-sticky-clone');
+    if (!clone || clone.querySelector('[data-rework-late-profile-actions]')) return;
+
+    const copy = labels();
+    const actions = document.createElement('div');
+    actions.className = 'profile-late-actions';
+    actions.setAttribute('data-rework-late-profile-actions', '');
+    actions.innerHTML = `
+      <a href="/profile">
+        <i aria-hidden="true" class="ph ph-user-circle ph-icon"></i>
+        <span>${copy.open}</span>
+      </a>
+      <a href="/profile/edit">
+        <i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i>
+        <span>${copy.edit}</span>
+      </a>
+      <button type="button" data-rework-late-settings>
+        <i aria-hidden="true" class="ph ph-gear-six ph-icon"></i>
+        <span>${copy.settings}</span>
+      </button>
+      <form method="POST" action="/logout">
+        <input type="hidden" name="_token" value="${csrfToken()}">
+        <button type="submit">
+          <i aria-hidden="true" class="ph ph-sign-out ph-icon"></i>
+          <span>${copy.logout}</span>
+        </button>
+      </form>
+    `;
+
+    clone.appendChild(actions);
+  };
+
+  const observe = () => {
+    attachActions();
+
+    const observer = new MutationObserver(attachActions);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('scroll', attachActions, { passive: true });
+    window.addEventListener('resize', attachActions);
+    window.setTimeout(attachActions, 120);
+    window.setTimeout(attachActions, 420);
+  };
+
+  document.addEventListener('click', (event) => {
+    const settingsButton = event.target.closest('[data-rework-late-settings]');
+    if (!settingsButton) return;
+
+    event.preventDefault();
+    const opener = document.querySelector('[data-settings-modal-open]');
+    if (opener) opener.click();
+  }, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', observe);
+  } else {
+    observe();
+  }
+})();

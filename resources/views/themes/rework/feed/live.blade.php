@@ -34,6 +34,7 @@
             : route('profile.public', $author);
     };
     $crownsSummary = $socialiteCrownsSummary ?? ['balance' => 0, 'enabled' => false];
+    $profileStats = $socialiteProfileStats ?? [];
     $marksBalance = (int) ($crownsSummary['balance'] ?? 0);
     $shopUrl = \Illuminate\Support\Facades\Route::has('crowns.shop') ? route('crowns.shop') : null;
     $membersUrl = \Illuminate\Support\Facades\Route::has('members.index') ? route('members.index') : null;
@@ -111,7 +112,7 @@
 <em>21m</em>
 </a>
 <a class="dropdown-item" href="#">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>
+<img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-marks.png', 'rework') }}"/>
 <span><strong>Loadout bewertet</strong><small>Dein Community-Loadout bekommt gerade Likes.</small></span>
 <em>1h</em>
 </a>
@@ -189,7 +190,7 @@
 <div class="user-menu-list">
 <a href="#"><i aria-hidden="true" class="ph ph-user ph-icon"></i><span>Mein Profil</span></a>
 <a data-settings-modal-open="" href="#"><i aria-hidden="true" class="ph ph-gear-six ph-icon"></i><span>Einstellungen</span></a>
-<a href="#"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/><span>Bounty Marks</span></a>
+<a href="#"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-marks.png', 'rework') }}"/><span>Bounty Marks</span></a>
 <a href="#"><i aria-hidden="true" class="ph ph-storefront ph-icon"></i><span>Shop</span></a>
 </div>
 <a class="user-logout" href="#"><i aria-hidden="true" class="ph ph-sign-out ph-icon"></i>Logout</a>
@@ -237,11 +238,12 @@
 </div>
 <aside class="right-col">
 <section class="profile-card card">
-<div class="profile-top"><strong>{{ $viewer?->name ?: 'HNT Hunter' }}</strong><span class="status">{{ $viewer?->isOnline() ? __('ui.online') : __('ui.offline') }}</span></div>
+<div class="profile-top"><strong>{{ $viewer?->name ?: 'HNT Hunter' }}</strong></div>
 <div class="profile-main">
-<img alt="{{ __('ui.crowns_label') }}" class="mark" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>
+<img alt="{{ __('ui.crowns_label') }}" class="mark" src="{{ $reworkAsset('images/bounty-marks.png') }}"/>
 <div class="levels">
 <span class="level-badge">{{ __('ui.level') }} {{ $viewer?->level ?? 1 }}</span>
+<span class="level-badge">{{ number_format((int) ($profileStats['xp'] ?? ($viewer?->xp_total ?? 0))) }} XP</span>
 </div>
 </div>
 <div class="balance">
@@ -251,6 +253,14 @@
 <a class="btn light" href="{{ $shopUrl }}">{{ __('ui.crowns_shop_kicker') }}</a>
 @endif
 </div>
+</div>
+<div class="profile-stat-grid">
+<span><strong>{{ number_format((int) ($profileStats['posts'] ?? 0)) }}</strong><em>{{ __('ui.rework_profile_posts') }}</em></span>
+<span><strong>{{ number_format((int) ($profileStats['reactions'] ?? 0)) }}</strong><em>{{ __('ui.rework_profile_reactions') }}</em></span>
+<span><strong>{{ number_format((int) ($profileStats['comments'] ?? 0)) }}</strong><em>{{ __('ui.rework_profile_comments') }}</em></span>
+<span><strong>{{ number_format((int) ($profileStats['moments'] ?? 0)) }}</strong><em>{{ __('ui.rework_profile_moments') }}</em></span>
+<span><strong>{{ number_format((int) ($profileStats['friends'] ?? 0)) }}</strong><em>{{ __('ui.rework_profile_friends') }}</em></span>
+<span><strong>{{ number_format((int) ($profileStats['lfg'] ?? 0)) }}</strong><em>{{ __('ui.rework_profile_lfg') }}</em></span>
 </div>
 </section>
 <section class="side-card suggested">

@@ -12,6 +12,7 @@ use App\Models\FeedReaction;
 use App\Models\Friendship;
 use App\Models\LfgPost;
 use App\Models\MediaAsset;
+use App\Models\Moment;
 use App\Models\Quest;
 use App\Models\Report;
 use App\Models\Team;
@@ -363,9 +364,35 @@ class FeedController extends Controller
 
         $viewer->loadMissing('crownWallet');
 
+        $profileStats = [
+            'xp' => (int) ($viewer->xp_total ?? 0),
+            'posts' => FeedPost::query()
+                ->where('user_id', $viewerId)
+                ->where('status', 'published')
+                ->count(),
+            'reactions' => FeedReaction::query()
+                ->whereHas('post', fn ($query) => $query->where('user_id', $viewerId))
+                ->count(),
+            'comments' => FeedComment::query()
+                ->where('user_id', $viewerId)
+                ->count(),
+            'moments' => Moment::query()
+                ->where('user_id', $viewerId)
+                ->published()
+                ->count(),
+            'friends' => Friendship::query()
+                ->forUser($viewer)
+                ->where('status', Friendship::STATUS_ACCEPTED)
+                ->count(),
+            'lfg' => LfgPost::query()
+                ->where('user_id', $viewerId)
+                ->count(),
+        ];
+
         return view(HntTheme::resolve('feed.live'), [
             'socialitePosts' => $posts,
             'socialiteMembers' => $members,
+            'socialiteProfileStats' => $profileStats,
             'socialiteCrownsSummary' => [
                 'balance' => (int) ($viewer->crownWallet?->balance ?? 0),
                 'enabled' => $viewer->crownWallet !== null,
