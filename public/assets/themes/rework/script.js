@@ -1450,3 +1450,752 @@
 
   syncSelectedFeeling();
 })();
+
+
+/* 087: Rework own post edit/delete actions */
+(() => {
+  if (window.__hntReworkPostManageReady) return;
+  window.__hntReworkPostManageReady = true;
+
+  const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  const closeReworkDropdowns = () => {
+    document.querySelectorAll('.action-menu.is-open').forEach((menu) => {
+      menu.classList.remove('is-open');
+      menu.querySelector('[data-dropdown-toggle]')?.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  const submitPostUpdate = async (trigger, nextBody) => {
+    const url = trigger.getAttribute('data-update-url');
+    if (!url) throw new Error('Update-URL fehlt.');
+
+    const params = new URLSearchParams();
+    params.set('_method', 'PUT');
+    params.set('body', nextBody);
+    params.set('visibility', trigger.getAttribute('data-post-visibility') || 'public');
+    params.set('background_style', trigger.getAttribute('data-post-background-style') || 'none');
+    params.set('feeling_key', trigger.getAttribute('data-post-feeling-key') || 'none');
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'X-CSRF-TOKEN': csrfToken(),
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: params,
+    });
+
+    if (!response.ok) {
+      throw new Error('Post konnte nicht gespeichert werden.');
+    }
+  };
+
+  document.addEventListener('click', async (event) => {
+    const editTrigger = event.target.closest('[data-rework-post-edit-open]');
+
+    if (editTrigger) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeReworkDropdowns();
+
+      const currentBody = editTrigger.getAttribute('data-post-body') || '';
+      const nextBody = window.prompt('Post bearbeiten', currentBody);
+
+      if (nextBody === null) return;
+
+      const trimmedBody = nextBody.trim();
+
+      if (!trimmedBody) {
+        window.alert('Der Post darf nicht leer sein.');
+        return;
+      }
+
+      try {
+        await submitPostUpdate(editTrigger, trimmedBody);
+        window.location.reload();
+      } catch (error) {
+        window.alert(error?.message || 'Post konnte nicht gespeichert werden.');
+      }
+
+      return;
+    }
+
+    const deleteTrigger = event.target.closest('[data-rework-post-delete-trigger]');
+
+    if (deleteTrigger) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeReworkDropdowns();
+
+      const formId = deleteTrigger.getAttribute('data-delete-form');
+      const form = formId ? document.getElementById(formId) : null;
+
+      if (!form) return;
+      if (!window.confirm('Diesen Post wirklich löschen?')) return;
+
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+      } else {
+        form.submit();
+      }
+    }
+  });
+})();
+
+/* 089: Rework post edit/delete using existing composer/settings modal design */
+(() => {
+  if (window.__hntReworkPostManageDesignerReady) return;
+  window.__hntReworkPostManageDesignerReady = true;
+
+  const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  let activeEditTrigger = null;
+  let activeDeleteForm = null;
+  let selectedFiles = [];
+
+  const closeDropdowns = () => {
+    document.querySelectorAll('.action-menu.is-open').forEach((menu) => {
+      menu.classList.remove('is-open');
+      menu.querySelector('[data-dropdown-toggle]')?.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  const escapeHtml = (value) => String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+
+  const parsePostContext = (card) => {
+    const node = card?.querySelector('[data-rework-post-context]');
+    if (!node) return {};
+    try {
+      return JSON.parse(node.textContent || '{}') || {};
+    } catch (_) {
+      return {};
+    }
+  };
+
+  const mediaItemsFromContext = (context) => {
+    const items = Array.isArray(context?.media_items) ? context.media_items : [];
+    const cleaned = items.filter((item) => item && item.url);
+    if (cleaned.length) return cleaned;
+
+    if (context?.media_url) {
+      return [{
+        id: '',
+        url: context.media_url,
+        type: context.media_type || 'image',
+        alt: context.media_alt || 'Post Medium',
+      }];
+    }
+
+    return [];
+  };
+
+  const viewerFromPage = () => {
+    const profileCard = document.querySelector('.profile-card');
+    const avatar = document.querySelector('.profile-card img, .header-avatar, .post-composer-author img');
+    return {
+      name: profileCard?.querySelector('.profile-top strong')?.textContent?.trim()
+        || document.querySelector('.post-composer-author strong')?.textContent?.trim()
+        || 'HNT Hunter',
+      avatar: avatar?.getAttribute('src') || '',
+    };
+  };
+
+  const ensureEditModal = () => {
+    let backdrop = document.querySelector('[data-rework-post-edit-modal]');
+    if (backdrop) return backdrop;
+
+    const viewer = viewerFromPage();
+
+    backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop post-composer-backdrop rework-post-edit-backdrop';
+    backdrop.setAttribute('data-rework-post-edit-modal', '');
+    backdrop.setAttribute('aria-hidden', 'true');
+    backdrop.innerHTML = `
+      <section aria-labelledby="rework-post-edit-title" aria-modal="true" class="post-composer-modal rework-post-edit-composer-modal" role="dialog">
+        <div aria-hidden="true" class="post-composer-grip"></div>
+        <header class="post-composer-header">
+          <div class="post-composer-titleblock">
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>HNT FEED</span>
+            <h2 id="rework-post-edit-title">Post bearbeiten</h2>
+            <p>Bearbeite Text und Medien deines Feed-Posts.</p>
+          </div>
+          <button aria-label="Post bearbeiten schließen" class="post-composer-close" data-rework-post-edit-close type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+        </header>
+
+        <div class="post-composer-body">
+          <div class="post-composer-author-row">
+            <div class="post-composer-author">
+              <img alt="${escapeHtml(viewer.name)}" src="${escapeHtml(viewer.avatar)}">
+              <div>
+                <strong>${escapeHtml(viewer.name)}</strong>
+                <span data-rework-post-edit-audience>Community · HNT Feed</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="post-composer-textbox">
+            <textarea data-rework-post-edit-body maxlength="5000" name="body" placeholder="Was gibt es Neues im Bayou?"></textarea>
+            <div class="composer-textbox-footer">
+              <div aria-hidden="true" class="composer-ghost-actions"><span></span><span></span><span></span></div>
+              <span class="rework-post-edit-counter" data-rework-post-edit-count>0/5000</span>
+            </div>
+          </div>
+
+          <div class="post-composer-tools rework-post-edit-tools">
+            <a data-rework-post-edit-add-media href="#"><span><i aria-hidden="true" class="ph ph-plus ph-icon"></i></span>Medien hinzufügen</a>
+            <input accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" data-rework-post-edit-file-input multiple type="file" hidden>
+          </div>
+
+          <div class="rework-composer-addons rework-post-edit-addons">
+            <div class="rework-composer-media-preview rework-post-edit-media-preview" data-rework-post-edit-media-preview></div>
+            <span class="rework-post-edit-error" data-rework-post-edit-error hidden></span>
+          </div>
+        </div>
+
+        <footer class="post-composer-footer">
+          <a class="composer-cancel" data-rework-post-edit-close href="#">Abbrechen</a>
+          <a class="composer-submit" data-rework-post-edit-save href="#">Speichern</a>
+        </footer>
+      </section>
+    `;
+
+    document.body.appendChild(backdrop);
+    return backdrop;
+  };
+
+  const ensureDeleteModal = () => {
+    let backdrop = document.querySelector('[data-rework-post-delete-modal]');
+    if (backdrop) return backdrop;
+
+    backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop post-composer-backdrop rework-post-delete-backdrop';
+    backdrop.setAttribute('data-rework-post-delete-modal', '');
+    backdrop.setAttribute('aria-hidden', 'true');
+    backdrop.innerHTML = `
+      <section aria-labelledby="rework-post-delete-title" aria-modal="true" class="post-composer-modal rework-post-delete-composer-modal" role="dialog">
+        <div aria-hidden="true" class="post-composer-grip"></div>
+        <header class="post-composer-header">
+          <div class="post-composer-titleblock">
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>BESTÄTIGUNG</span>
+            <h2 id="rework-post-delete-title">Post löschen?</h2>
+            <p>Der Post wird dauerhaft entfernt. Diese Aktion kann nicht rückgängig gemacht werden.</p>
+          </div>
+          <button aria-label="Löschen schließen" class="post-composer-close" data-rework-post-delete-close type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+        </header>
+
+        <div class="post-composer-body rework-post-delete-body">
+          <div class="settings-section-head">
+            <span>HNT Feed</span>
+            <h3>Diesen Beitrag wirklich löschen?</h3>
+            <p>Kommentare, Reaktionen und Medien dieses Posts werden aus dem Feed entfernt.</p>
+          </div>
+        </div>
+
+        <footer class="post-composer-footer">
+          <a class="composer-cancel" data-rework-post-delete-close href="#">Nein, behalten</a>
+          <a class="composer-submit rework-post-delete-confirm" data-rework-post-delete-confirm href="#">Ja, löschen</a>
+        </footer>
+      </section>
+    `;
+
+    document.body.appendChild(backdrop);
+    return backdrop;
+  };
+
+  const setBackdropOpen = (backdrop, open) => {
+    if (!backdrop) return;
+    backdrop.classList.toggle('is-open', open);
+    backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+    document.body.classList.toggle('is-modal-open', open);
+  };
+
+  const closeEditModal = () => {
+    setBackdropOpen(document.querySelector('[data-rework-post-edit-modal]'), false);
+    activeEditTrigger = null;
+    selectedFiles = [];
+  };
+
+  const closeDeleteModal = () => {
+    setBackdropOpen(document.querySelector('[data-rework-post-delete-modal]'), false);
+    activeDeleteForm = null;
+  };
+
+  const renderEditMedia = (context) => {
+    const backdrop = ensureEditModal();
+    const preview = backdrop.querySelector('[data-rework-post-edit-media-preview]');
+    if (!preview) return;
+
+    const existing = mediaItemsFromContext(context);
+    preview.innerHTML = '';
+
+    if (!existing.length && !selectedFiles.length) {
+      preview.innerHTML = '<div class="rework-post-edit-empty-media">Keine Medien an diesem Post.</div>';
+      return;
+    }
+
+    existing.forEach((item, index) => {
+      const id = item.id ? String(item.id) : '';
+      const tile = document.createElement('div');
+      tile.className = 'rework-composer-media-item rework-post-edit-media-item';
+      tile.setAttribute('data-rework-existing-media', id);
+      tile.setAttribute('data-rework-existing-media-url', item.url || '');
+      tile.setAttribute('data-removed', '0');
+      tile.innerHTML = item.type === 'video'
+        ? `<video src="${escapeHtml(item.url)}" muted playsinline preload="metadata"></video>${id ? '<button type="button" aria-label="Medium entfernen" data-rework-existing-media-remove><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>' : ''}<em>Video ${index + 1}</em>`
+        : `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt || 'Post Medium')}">${id ? '<button type="button" aria-label="Medium entfernen" data-rework-existing-media-remove><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>' : ''}<em>Bild ${index + 1}</em>`;
+      /* 091: hide remove button when existing media id is missing */
+      preview.appendChild(tile);
+    });
+
+    selectedFiles.forEach((file, index) => {
+      const tile = document.createElement('div');
+      tile.className = 'rework-composer-media-item rework-post-edit-media-item is-new';
+      const url = URL.createObjectURL(file);
+
+      if (file.type.startsWith('video/')) {
+        tile.innerHTML = `<video src="${escapeHtml(url)}" muted playsinline preload="metadata"></video><button type="button" aria-label="Neues Medium entfernen" data-rework-new-media-remove="${index}"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button><em>Neu ${index + 1}</em>`;
+      } else {
+        tile.innerHTML = `<img src="${escapeHtml(url)}" alt="${escapeHtml(file.name)}"><button type="button" aria-label="Neues Medium entfernen" data-rework-new-media-remove="${index}"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button><em>Neu ${index + 1}</em>`;
+      }
+
+      preview.appendChild(tile);
+    });
+  };
+
+  const updateCounter = () => {
+    const backdrop = ensureEditModal();
+    const textarea = backdrop.querySelector('[data-rework-post-edit-body]');
+    const counter = backdrop.querySelector('[data-rework-post-edit-count]');
+    if (!textarea || !counter) return;
+    counter.textContent = `${textarea.value.length}/5000`;
+  };
+
+  const showEditError = (message) => {
+    const backdrop = ensureEditModal();
+    const error = backdrop.querySelector('[data-rework-post-edit-error]');
+    if (!error) return;
+    error.textContent = message || '';
+    error.hidden = !message;
+  };
+
+  const openEditModal = (trigger) => {
+    activeEditTrigger = trigger;
+    activeDeleteForm = null;
+    selectedFiles = [];
+    closeDropdowns();
+
+    const card = trigger.closest('[data-rework-post-card]');
+    const context = parsePostContext(card);
+    const backdrop = ensureEditModal();
+    const textarea = backdrop.querySelector('[data-rework-post-edit-body]');
+    const audience = backdrop.querySelector('[data-rework-post-edit-audience]');
+    const save = backdrop.querySelector('[data-rework-post-edit-save]');
+
+    if (textarea) {
+      textarea.value = trigger.getAttribute('data-post-body') || '';
+    }
+
+    if (audience) {
+      audience.textContent = `${trigger.getAttribute('data-post-visibility') || 'Community'} · HNT Feed`;
+    }
+
+    if (save) {
+      save.textContent = 'Speichern';
+      save.setAttribute('aria-disabled', 'false');
+    }
+
+    const fileInput = backdrop.querySelector('[data-rework-post-edit-file-input]');
+    if (fileInput) fileInput.value = '';
+
+    showEditError('');
+    updateCounter();
+    renderEditMedia(context);
+    setBackdropOpen(backdrop, true);
+
+    window.setTimeout(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(textarea.value.length, textarea.value.length);
+    }, 90);
+  };
+
+  const openDeleteModal = (trigger) => {
+    const formId = trigger.getAttribute('data-delete-form');
+    activeDeleteForm = formId ? document.getElementById(formId) : null;
+    activeEditTrigger = null;
+
+    if (!activeDeleteForm) return;
+
+    closeDropdowns();
+
+    const backdrop = ensureDeleteModal();
+    const confirm = backdrop.querySelector('[data-rework-post-delete-confirm]');
+    if (confirm) {
+      confirm.textContent = 'Ja, löschen';
+      confirm.disabled = false;
+    }
+    setBackdropOpen(backdrop, true);
+  };
+
+  const currentContext = () => parsePostContext(activeEditTrigger?.closest('[data-rework-post-card]'));
+
+  const visibleExistingMediaCount = () => {
+    const backdrop = ensureEditModal();
+    return backdrop.querySelectorAll('[data-rework-existing-media][data-removed="0"]').length;
+  };
+
+  const submitEdit = async () => {
+    const backdrop = ensureEditModal();
+    const textarea = backdrop.querySelector('[data-rework-post-edit-body]');
+    const save = backdrop.querySelector('[data-rework-post-edit-save]');
+    const trigger = activeEditTrigger;
+
+    if (!trigger || !textarea || !save) return;
+
+    const body = textarea.value.trim();
+    const context = currentContext();
+    const hasPoll = Boolean(context.poll);
+    const mediaCount = visibleExistingMediaCount() + selectedFiles.length;
+
+    if (!body && mediaCount < 1 && !hasPoll) {
+      showEditError('Schreib etwas oder füge mindestens ein Medium hinzu.');
+      textarea.focus();
+      return;
+    }
+
+    const url = trigger.getAttribute('data-update-url');
+    if (!url) {
+      showEditError('Update-URL fehlt.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set('_method', 'PUT');
+    formData.set('body', body);
+    formData.set('visibility', trigger.getAttribute('data-post-visibility') || 'public');
+    formData.set('background_style', trigger.getAttribute('data-post-background-style') || 'none');
+    formData.set('feeling_key', trigger.getAttribute('data-post-feeling-key') || 'none');
+
+    formData.set('media_keep_mode', '1');
+
+    backdrop.querySelectorAll('[data-rework-existing-media]').forEach((tile) => {
+      const id = tile.getAttribute('data-rework-existing-media');
+      const url = tile.getAttribute('data-rework-existing-media-url')
+        || tile.querySelector('img, video')?.getAttribute('src')
+        || '';
+
+      if (tile.getAttribute('data-removed') === '1') {
+        if (id) formData.append('media_remove[]', id);
+        if (url) formData.append('media_remove_urls[]', url);
+        return;
+      }
+
+      if (url) formData.append('media_keep_urls[]', url);
+    });
+
+    selectedFiles.forEach((file) => formData.append('media[]', file));
+
+    save.textContent = 'Speichert...';
+    save.setAttribute('aria-disabled', 'true');
+    showEditError('');
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken(),
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload.ok === false) {
+        const firstError = payload?.errors ? Object.values(payload.errors).flat().filter(Boolean)[0] : null;
+        throw new Error(firstError || payload?.message || 'Post konnte nicht gespeichert werden.');
+      }
+
+      window.location.reload();
+    } catch (error) {
+      showEditError(error?.message || 'Post konnte nicht gespeichert werden.');
+      save.textContent = 'Speichern';
+      save.setAttribute('aria-disabled', 'false');
+    }
+  };
+
+  const confirmDelete = () => {
+    if (!activeDeleteForm) return;
+
+    const backdrop = ensureDeleteModal();
+    const confirm = backdrop.querySelector('[data-rework-post-delete-confirm]');
+    if (confirm) {
+      confirm.disabled = true;
+      confirm.textContent = 'Löscht...';
+    }
+
+    if (typeof activeDeleteForm.requestSubmit === 'function') {
+      activeDeleteForm.requestSubmit();
+    } else {
+      activeDeleteForm.submit();
+    }
+  };
+
+  document.addEventListener('input', (event) => {
+    if (event.target.closest('[data-rework-post-edit-body]')) {
+      updateCounter();
+      showEditError('');
+    }
+  }, true);
+
+  document.addEventListener('change', (event) => {
+    const input = event.target.closest('[data-rework-post-edit-file-input]');
+    if (!input) return;
+
+    selectedFiles = selectedFiles.concat(Array.from(input.files || []));
+    input.value = '';
+    showEditError('');
+    renderEditMedia(currentContext());
+  }, true);
+
+  document.addEventListener('click', (event) => {
+    const editTrigger = event.target.closest('[data-rework-post-edit-open]');
+    const deleteTrigger = event.target.closest('[data-rework-post-delete-trigger]');
+
+    if (editTrigger) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openEditModal(editTrigger);
+      return;
+    }
+
+    if (deleteTrigger) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openDeleteModal(deleteTrigger);
+      return;
+    }
+
+    if (event.target.closest('[data-rework-post-edit-close]')) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeEditModal();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-post-delete-close]') || event.target.matches?.('[data-rework-post-delete-modal]')) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeDeleteModal();
+      return;
+    }
+
+    const addMedia = event.target.closest('[data-rework-post-edit-add-media]');
+    if (addMedia) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      ensureEditModal().querySelector('[data-rework-post-edit-file-input]')?.click();
+      return;
+    }
+
+    const removeExisting = event.target.closest('[data-rework-existing-media-remove]');
+    if (removeExisting) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const tile = removeExisting.closest('[data-rework-existing-media]');
+      if (tile) {
+        const willRemove = tile.getAttribute('data-removed') !== '1';
+        tile.setAttribute('data-removed', willRemove ? '1' : '0');
+        tile.classList.toggle('is-removed', willRemove);
+        removeExisting.setAttribute('aria-label', willRemove ? 'Medium behalten' : 'Medium entfernen');
+        removeExisting.innerHTML = willRemove
+          ? '<i aria-hidden="true" class="ph ph-arrow-counter-clockwise ph-icon"></i>'
+          : '<i aria-hidden="true" class="ph ph-x ph-icon"></i>';
+      }
+      showEditError('');
+      return;
+    }
+
+    const removeNew = event.target.closest('[data-rework-new-media-remove]');
+    if (removeNew) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const index = Number(removeNew.getAttribute('data-rework-new-media-remove'));
+      if (Number.isFinite(index)) {
+        selectedFiles.splice(index, 1);
+        renderEditMedia(currentContext());
+      }
+      return;
+    }
+
+    if (event.target.closest('[data-rework-post-edit-save]')) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (event.target.closest('[data-rework-post-edit-save]').getAttribute('aria-disabled') === 'true') return;
+      submitEdit();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-post-delete-confirm]')) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      confirmDelete();
+    }
+  }, true);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+
+    if (document.querySelector('[data-rework-post-edit-modal].is-open')) {
+      event.preventDefault();
+      closeEditModal();
+    }
+
+    if (document.querySelector('[data-rework-post-delete-modal].is-open')) {
+      event.preventDefault();
+      closeDeleteModal();
+    }
+  }, true);
+})();
+
+/* 095: Rework edit media strip navigation */
+(() => {
+  if (window.__hntReworkEditMediaStripNavReady) return;
+  window.__hntReworkEditMediaStripNavReady = true;
+
+  const previewSelector = '[data-rework-post-edit-media-preview]';
+
+  const tiles = (preview) => Array.from(preview?.querySelectorAll('.rework-post-edit-media-item') || []);
+
+  const isOverflowing = (preview) => {
+    if (!preview) return false;
+    return preview.scrollWidth > preview.clientWidth + 8;
+  };
+
+  const tileStep = (preview) => {
+    const first = tiles(preview)[0];
+    if (!first) return Math.max(180, Math.floor(preview.clientWidth * 0.8));
+
+    const styles = window.getComputedStyle(preview);
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || '14') || 14;
+    return first.getBoundingClientRect().width + gap;
+  };
+
+  const navFor = (preview) => preview?.parentElement?.querySelector(`[data-rework-edit-media-nav="${preview.dataset.reworkMediaNavId || ''}"]`);
+
+  const updateNav = (preview) => {
+    if (!preview) return;
+
+    const nav = navFor(preview);
+    if (!nav) return;
+
+    const allTiles = tiles(preview);
+    const total = allTiles.length;
+    const overflow = isOverflowing(preview);
+
+    nav.hidden = !overflow || total < 2;
+
+    if (nav.hidden) return;
+
+    const step = Math.max(1, tileStep(preview));
+    const firstIndex = Math.min(total - 1, Math.max(0, Math.round(preview.scrollLeft / step)));
+    const visibleCount = Math.max(1, Math.floor((preview.clientWidth + 8) / step));
+    const lastIndex = Math.min(total, firstIndex + visibleCount);
+
+    nav.querySelector('[data-rework-edit-media-range]').textContent = `${firstIndex + 1}-${lastIndex} von ${total}`;
+    nav.querySelector('[data-rework-edit-media-prev]').disabled = preview.scrollLeft <= 4;
+    nav.querySelector('[data-rework-edit-media-next]').disabled = preview.scrollLeft + preview.clientWidth >= preview.scrollWidth - 4;
+  };
+
+  const ensureNav = (preview) => {
+    if (!preview || preview.dataset.reworkMediaNavEnhanced === '1') {
+      updateNav(preview);
+      return;
+    }
+
+    preview.dataset.reworkMediaNavEnhanced = '1';
+    preview.dataset.reworkMediaNavId = preview.dataset.reworkMediaNavId || `media-strip-${Math.random().toString(36).slice(2)}`;
+
+    const nav = document.createElement('div');
+    nav.className = 'rework-post-edit-media-nav';
+    nav.setAttribute('data-rework-edit-media-nav', preview.dataset.reworkMediaNavId);
+    nav.innerHTML = `
+      <button type="button" data-rework-edit-media-prev aria-label="Vorherige Medien">
+        <i aria-hidden="true" class="ph ph-caret-left ph-icon"></i>
+      </button>
+      <span data-rework-edit-media-range></span>
+      <button type="button" data-rework-edit-media-next aria-label="Weitere Medien">
+        <i aria-hidden="true" class="ph ph-caret-right ph-icon"></i>
+      </button>
+    `;
+
+    preview.insertAdjacentElement('afterend', nav);
+
+    preview.addEventListener('scroll', () => updateNav(preview), { passive: true });
+
+    preview.addEventListener('wheel', (event) => {
+      if (!isOverflowing(preview)) return;
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+
+      event.preventDefault();
+      preview.scrollLeft += event.deltaY;
+    }, { passive: false });
+
+    updateNav(preview);
+  };
+
+  const scan = () => {
+    document.querySelectorAll(previewSelector).forEach((preview) => {
+      ensureNav(preview);
+      updateNav(preview);
+    });
+  };
+
+  document.addEventListener('click', (event) => {
+    const prev = event.target.closest('[data-rework-edit-media-prev]');
+    const next = event.target.closest('[data-rework-edit-media-next]');
+
+    if (!prev && !next) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const nav = event.target.closest('[data-rework-edit-media-nav]');
+    const id = nav?.getAttribute('data-rework-edit-media-nav');
+    const preview = id ? document.querySelector(`${previewSelector}[data-rework-media-nav-id="${id}"]`) : null;
+
+    if (!preview) return;
+
+    const distance = Math.max(tileStep(preview), Math.floor(preview.clientWidth * 0.86));
+    preview.scrollBy({
+      left: prev ? -distance : distance,
+      behavior: 'smooth',
+    });
+
+    window.setTimeout(() => updateNav(preview), 240);
+  }, true);
+
+  const observer = new MutationObserver(() => {
+    window.requestAnimationFrame(scan);
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
+
+  window.addEventListener('resize', scan);
+  document.addEventListener('DOMContentLoaded', scan);
+  window.setTimeout(scan, 0);
+  window.setTimeout(scan, 300);
+})();

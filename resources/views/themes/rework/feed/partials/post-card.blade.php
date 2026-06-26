@@ -1,5 +1,6 @@
 @php
     $viewer = auth()->user();
+    $isOwnPost = $viewer && (int) $post->user_id === (int) $viewer->id;
     $reworkAsset = fn (string $path): string => \App\Support\HntTheme::asset($path, 'rework');
     $formatCount = fn (int $count): string => number_format($count);
     $postAuthorUrl = function ($author): string {
@@ -24,6 +25,7 @@
     $mediaPayload = $mediaItems
         ->map(function ($media) use ($authorName): array {
             return [
+                'id' => (int) $media->id,
                 'url' => $media->url(),
                 'type' => $media->isVideo() ? 'video' : 'image',
                 'alt' => $media->original_name ?: 'Feed media by '.$authorName,
@@ -143,6 +145,23 @@
 <div aria-label="Post-Optionen" class="post-dropdown" role="menu">
 <a href="{{ $postUrl }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-arrow-square-out ph-icon"></i></span><strong>Post öffnen</strong></a>
 <a href="{{ $postAuthorUrl($author) }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-user ph-icon"></i></span><strong>Profil öffnen</strong></a>
+@if($isOwnPost)
+<a
+    href="#"
+    role="menuitem"
+    data-rework-post-edit-open
+    data-update-url="{{ route('feed.update', $post) }}"
+    data-post-body="{{ e($body) }}"
+    data-post-visibility="{{ $post->isTeamPost() ? 'team' : $post->visibility }}"
+    data-post-background-style="{{ $post->background_style ?: 'none' }}"
+    data-post-feeling-key="{{ $post->feeling_key ?: 'none' }}"
+><span><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i></span><strong>Bearbeiten</strong></a>
+<a href="#" role="menuitem" data-rework-post-delete-trigger data-delete-form="rework-post-delete-{{ $post->id }}"><span><i aria-hidden="true" class="ph ph-trash ph-icon"></i></span><strong>Löschen</strong></a>
+<form id="rework-post-delete-{{ $post->id }}" action="{{ route('feed.destroy', $post) }}" method="post" hidden>
+@csrf
+@method('DELETE')
+</form>
+@endif
 <a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></span><strong>Merken</strong></a>
 @if(! $postAlreadyReported && (int) $post->user_id !== (int) auth()->id())
 <a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-flag ph-icon"></i></span><strong>Melden</strong></a>

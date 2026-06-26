@@ -9210,3 +9210,307 @@ body.is-modal-open { overflow: hidden; }
 .post-card.card[data-rework-post-card] > .comment-row {
   order: 70 !important;
 }
+
+/* 090: Rework post edit/delete modal alignment with composer design */
+.rework-post-edit-backdrop.is-open,
+.rework-post-delete-backdrop.is-open {
+  z-index: 9600;
+}
+
+.rework-post-edit-composer-modal {
+  max-height: min(92vh, 920px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rework-post-edit-composer-modal .post-composer-header,
+.rework-post-edit-composer-modal .post-composer-footer,
+.rework-post-delete-composer-modal .post-composer-header,
+.rework-post-delete-composer-modal .post-composer-footer {
+  flex: 0 0 auto;
+}
+
+.rework-post-edit-composer-modal .post-composer-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 28px;
+  scrollbar-width: thin;
+}
+
+.rework-post-edit-composer-modal .post-composer-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rework-post-edit-composer-modal .post-composer-body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+}
+
+.rework-post-edit-composer-modal .post-composer-textbox textarea {
+  min-height: 170px;
+}
+
+.rework-post-edit-counter {
+  color: var(--muted-warm);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.rework-post-edit-tools {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.rework-post-edit-tools a {
+  width: fit-content;
+  min-width: 245px;
+}
+
+.rework-post-edit-addons {
+  margin-top: 18px;
+}
+
+.rework-post-edit-media-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 132px);
+  gap: 16px;
+  align-items: start;
+}
+
+.rework-post-edit-media-preview:empty {
+  display: none;
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item {
+  position: relative;
+  width: 132px !important;
+  height: 132px !important;
+  min-width: 132px !important;
+  min-height: 132px !important;
+  max-width: 132px !important;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.035);
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item img,
+.rework-post-edit-media-preview .rework-post-edit-media-item video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  display: block;
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item button {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  cursor: pointer;
+  color: #F5EFE4;
+  background: rgba(21,21,20,.84);
+  font-size: 0;
+  line-height: 1;
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item button i {
+  font-size: 17px;
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item em {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 2;
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #F5EFE4;
+  background: rgba(21,21,20,.80);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item.is-removed img,
+.rework-post-edit-media-preview .rework-post-edit-media-item.is-removed video {
+  opacity: .30;
+  filter: grayscale(1);
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item.is-removed::after {
+  content: 'Wird entfernt';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: #F5EFE4;
+  font-size: 13px;
+  font-weight: 900;
+  background: rgba(184,70,58,.22);
+}
+
+.rework-post-edit-empty-media {
+  min-height: 96px;
+  border-radius: 18px;
+  border: 1px dashed rgba(255,255,255,.14);
+  display: grid;
+  place-items: center;
+  color: var(--muted-warm);
+  font-size: 14px;
+}
+
+.rework-post-edit-error {
+  display: block;
+  margin-top: 12px;
+  color: #F0B7AE;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.rework-post-delete-composer-modal {
+  width: min(620px, calc(100vw - 32px));
+  max-height: min(88vh, 680px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 0 !important;
+}
+
+.rework-post-delete-composer-modal .post-composer-body {
+  padding-bottom: 24px;
+}
+
+.rework-post-delete-composer-modal .settings-section-head {
+  margin: 0;
+}
+
+.rework-post-delete-composer-modal .settings-section-head h3 {
+  max-width: 520px;
+}
+
+.rework-post-delete-confirm {
+  background: #B8463A !important;
+  color: #fff !important;
+}
+
+@media (max-width: 700px) {
+  .rework-post-edit-composer-modal {
+    max-height: 92vh;
+  }
+
+  .rework-post-edit-composer-modal .post-composer-body {
+    padding-bottom: 22px;
+  }
+
+  .rework-post-edit-media-preview {
+    grid-template-columns: repeat(3, 96px);
+    gap: 12px;
+  }
+
+  .rework-post-edit-media-preview .rework-post-edit-media-item {
+    width: 96px !important;
+    height: 96px !important;
+    min-width: 96px !important;
+    min-height: 96px !important;
+    max-width: 96px !important;
+    border-radius: 15px;
+  }
+
+  .rework-post-delete-composer-modal {
+    width: 100%;
+    max-height: 90vh;
+  }
+}
+
+/* 094: Rework edit media strip, hidden internal scrollbar */
+.rework-post-edit-composer-modal .post-composer-body {
+  scrollbar-width: none;
+}
+
+.rework-post-edit-composer-modal .post-composer-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.rework-post-edit-media-preview {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rework-post-edit-media-preview::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.rework-post-edit-media-preview .rework-post-edit-media-item {
+  flex: 0 0 132px;
+}
+
+@media (max-width: 700px) {
+  .rework-post-edit-media-preview {
+    gap: 10px;
+  }
+
+  .rework-post-edit-media-preview .rework-post-edit-media-item {
+    flex-basis: 96px;
+  }
+}
+
+/* 095: Rework edit media strip navigation */
+.rework-post-edit-media-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  color: var(--muted-warm);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.rework-post-edit-media-nav[hidden] {
+  display: none !important;
+}
+
+.rework-post-edit-media-nav button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #F2E8D8;
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+}
+
+.rework-post-edit-media-nav button:not(:disabled):hover {
+  background: rgba(214,168,79,.18);
+}
+
+.rework-post-edit-media-nav button:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+.rework-post-edit-media-nav span {
+  min-width: 74px;
+  text-align: center;
+}

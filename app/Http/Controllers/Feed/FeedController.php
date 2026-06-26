@@ -659,6 +659,12 @@ class FeedController extends Controller
             'visibility' => ['required', 'string', 'in:public,followers,private'],
             'background_style' => ['nullable', 'string', 'in:none,bayou,blood,gold,night'],
             'feeling_key' => ['nullable', 'string', 'in:none,happy,excited,focused,chill,tired,salty'],
+            'media_remove' => ['nullable', 'array'],
+            'media_remove.*' => ['integer'],
+            'media_remove_urls' => ['nullable', 'array'],
+            'media_remove_urls.*' => ['string', 'max:2048'],
+            'media' => ['nullable', 'array', 'max:'.config('hunthub.upload_limits.feed_media_count', 12)],
+            'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif,mp4,webm,mov', 'max:'.config('hunthub.upload_limits.feed_media_kb', 51200)],
             'poll_question' => ['nullable', 'string', 'max:180'],
             'poll_options' => ['nullable', 'array', 'max:6'],
             'poll_options.*' => ['nullable', 'string', 'max:180'],
@@ -899,22 +905,114 @@ class FeedController extends Controller
         return back()->with('status', __('ui.feed_post_pinned'));
     }
 
-    public function update(Request $request, FeedPost $post, MentionService $mentions, NotificationService $notifications, GifProviderService $gifs, FeedTranslationService $translations): RedirectResponse|JsonResponse
+    public function update(Request $request, FeedPost $post, MediaService $mediaService, MentionService $mentions, NotificationService $notifications, GifProviderService $gifs, FeedTranslationService $translations): RedirectResponse|JsonResponse
     {
         abort_unless($post->user_id === $request->user()->id, 403);
 
         $validated = $request->validate([
-            'body' => ['required', 'string', 'max:5000'],
+            'body' => ['nullable', 'string', 'max:5000'],
             'visibility' => ['required', 'string', 'in:public,followers,private,team'],
             'background_style' => ['nullable', 'string', 'in:none,bayou,blood,gold,night'],
             'feeling_key' => ['nullable', 'string', 'in:none,happy,excited,focused,chill,tired,salty'],
+            'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif,mp4,webm,mov', 'max:'.config('hunthub.upload_limits.feed_media_kb', 51200)],
+            'media' => ['nullable', 'array', 'max:'.config('hunthub.upload_limits.feed_media_count', 12)],
+            'media_keep_urls.*' => ['string', 'max:2048'],
+            'media_keep_urls' => ['nullable', 'array'],
+            'media_keep_mode' => ['nullable', 'boolean'],
+            'media_remove_urls.*' => ['string', 'max:2048'],
+            'media_remove_urls' => ['nullable', 'array'],
+            'media_remove.*' => ['integer'],
+            'media_remove' => ['nullable', 'array'],
         ]);
+
+        /* 094: robust edit media keep/remove preparation */
+        $files = $request->file('media', []);
+        $removeMediaIds = collect($validated['media_remove'] ?? [])
+            ->map(fn ($id): int => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+        $removeMediaUrls = collect($validated['media_remove_urls'] ?? [])
+            ->map(fn ($url): string => trim((string) $url))
+            ->filter()
+            ->unique()
+            ->values();
+        $keepMediaMode = $request->boolean('media_keep_mode');
+        $keepMediaUrls = collect($validated['media_keep_urls'] ?? [])
+            ->map(fn ($url): string => trim((string) $url))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $post->loadMissing('media.mediaAsset');
+
+        $mediaToRemove = $post->media
+            ->filter(function ($media) use ($removeMediaIds, $removeMediaUrls, $keepMediaMode, $keepMediaUrls): bool {
+                if ($keepMediaMode) {
+                    return ! $keepMediaUrls->contains($media->url());
+                }
+
+                if ($removeMediaIds->contains((int) $media->id)) {
+                    return true;
+                }
+
+                return $removeMediaUrls->contains($media->url());
+            })
+            ->values();
+
+        $currentMediaCount = $post->media->count();
+        $removeCount = $mediaToRemove->count();
+        $mediaCountAfterEdit = max(0, $currentMediaCount - $removeCount) + count($files);
+        $maxMediaCount = (int) config('hunthub.upload_limits.feed_media_count', 12);
+
+        if ($mediaCountAfterEdit > $maxMediaCount) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('ui.feed_media_limit_exceeded', ['count' => $maxMediaCount]),
+                    'errors' => [
+                        'media' => [__('ui.feed_media_limit_exceeded', ['count' => $maxMediaCount])],
+                    ],
+                ], 422);
+            }
+
+            return back()
+                ->withErrors(['media' => __('ui.feed_media_limit_exceeded', ['count' => $maxMediaCount])])
+                ->withInput();
+        }
+
+        foreach ($files as $file) {
+            $mediaService->assertAllowed($file, $request->user(), 'feed');
+        }
 
         if ($post->isTeamPost()) {
             $validated['visibility'] = 'team';
         } elseif ($validated['visibility'] === 'team') {
             $validated['visibility'] = 'public';
         }
+
+        /* 094: prevent empty post after text/media edit */
+        $nextBody = trim((string) ($validated['body'] ?? ''));
+        $hasPersistentPostContent = $mediaCountAfterEdit > 0
+            || $post->poll()->exists()
+            || filled($post->gif_url)
+            || filled($post->shared_post_id);
+
+        if ($nextBody === '' && ! $hasPersistentPostContent) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('ui.feed_body_or_media_required'),
+                    'errors' => [
+                        'body' => [__('ui.feed_body_or_media_required')],
+                    ],
+                ], 422);
+            }
+
+            return back()
+                ->withErrors(['body' => __('ui.feed_body_or_media_required')])
+                ->withInput();
+        }
+
+        $validated['body'] = $nextBody !== '' ? $validated['body'] : null;
 
         $backgroundStyle = array_key_exists('background_style', $validated)
             ? FeedPost::normalizeBackgroundStyle($validated['background_style'] ?? null)
@@ -933,6 +1031,40 @@ class FeedController extends Controller
 
         $post->translations()->delete();
 
+        if ($mediaToRemove->isNotEmpty()) {
+            $mediaToRemove->each(function ($media) use ($mediaService): void {
+                if ($media->mediaAsset) {
+                    $mediaService->delete($media->mediaAsset);
+                } else {
+                    Storage::disk($media->disk)->delete($media->path);
+                }
+
+                $media->delete();
+            });
+        }
+
+        if (count($files) > 0) {
+            $nextSortOrder = (int) ($post->media()->max('sort_order') ?? -1) + 1;
+
+            foreach ($files as $file) {
+                $asset = $mediaService->store($file, $request->user(), 'feed', [
+                    'attachable' => $post,
+                    'visibility' => $validated['visibility'],
+                ]);
+
+                $post->media()->create([
+                    'user_id' => $request->user()->id,
+                    'media_asset_id' => $asset->id,
+                    'disk' => $asset->disk,
+                    'path' => $asset->path,
+                    'mime_type' => $asset->mime_type,
+                    'original_name' => $asset->original_name,
+                    'size_bytes' => $asset->size_bytes,
+                    'sort_order' => $nextSortOrder++,
+                ]);
+            }
+        }
+
         $mentions->syncForFeedPost($post, $request->user(), $post->body, $notifications);
 
         if ($request->expectsJson()) {
@@ -940,11 +1072,12 @@ class FeedController extends Controller
                 'ok' => true,
                 'id' => $post->id,
                 'body' => $post->body,
-                'body_html' => FeedTextRenderer::render($post->body),
+                'body_html' => FeedTextRenderer::render((string) $post->body),
                 'internal_link_previews' => FeedTextRenderer::internalLinkPreviews($post->body, 1),
                 'visibility' => $post->visibility,
                 'background_style' => $post->background_style,
                 'visibility_label' => $post->visibilityLabel(),
+                'media_count' => $post->media()->count(),
             ]);
         }
 
