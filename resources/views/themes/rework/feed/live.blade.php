@@ -194,12 +194,12 @@
 <div class="eyebrow">Newsfeed</div>
 <h1>Check What Your Friends Up To!</h1>
 <p>Conveniently customize proactive web services for leveraged without continually aggregate frictionless ou well-structured HNT activity..</p>
-<div aria-label="Post erstellen öffnen" class="composer-mini" data-post-composer-open="" role="button" tabindex="0">
-<span>What’s on your mind , Kevin ?</span>
+<div aria-label="{{ __('ui.rework_post_composer_open') }}" class="composer-mini" data-post-composer-open="" role="button" tabindex="0">
+<span>{{ __('ui.rework_composer_prompt', ['name' => $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter')]) }}</span>
 <span class="spacer"></span>
 <a class="square-icon" data-post-composer-open="" href="#"><i aria-hidden="true" class="ph ph-image ph-icon"></i></a>
 <a class="square-icon" data-post-composer-open="" href="#"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></a>
-<a class="btn" data-post-composer-open="" href="#">Create</a>
+<a class="btn" data-post-composer-open="" href="#">{{ __('ui.rework_post_create') }}</a>
 </div>
 </section>
 <nav class="rework-feed-filters" aria-label="Feed Filter">
@@ -265,87 +265,121 @@
 </section>
 </main>
 </div>
-<div aria-hidden="true" class="modal-backdrop" data-comment-modal="">
+<div aria-hidden="true" class="modal-backdrop" data-comment-modal="" data-rework-report-url="{{ route('reports.store') }}">
 <section aria-labelledby="comment-modal-title" aria-modal="true" class="comment-modal" role="dialog">
 <div aria-hidden="true" class="post-composer-grip"></div>
-<button aria-label="Kommentare schließen" class="modal-close post-composer-close" data-comment-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<button aria-label="{{ __('ui.preview_post_modal_close_aria') }}" class="modal-close post-composer-close" data-comment-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
 <div class="comment-modal-layout">
 <div class="comment-modal-post">
 <div class="modal-post-head">
-<img alt="Krispie" src="{{ \App\Support\HntTheme::asset('images/post-avatar.png', 'rework') }}"/>
+<a data-rework-modal-author-url href="#"><img alt="" src="{{ asset('assets/vikinger/img/default-avatar.svg') }}"/></a>
 <div>
-<strong>Krispie</strong>
-<span>Public · Feed Post</span>
+<a data-rework-modal-author-url href="#"><strong data-rework-modal-author></strong></a>
+<span data-rework-modal-meta></span>
 </div>
 </div>
-<div class="modal-post-media">
-<img alt="Minecraft" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/>
-<div class="game-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/minecraft-icon.png', 'rework') }}"/>Minecraft</div>
-</div>
-<div class="modal-post-body">What you need to do for this is very simple. Register and click the Become a Creator button. Making money is not far off. Come on, be a creator.</div>
-<div class="modal-post-stats">
-<span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>12 Likes</span>
-<span><i aria-hidden="true" class="ph ph-eye ph-icon"></i>56 Views</span>
-</div>
+<div class="modal-post-media" data-rework-modal-media hidden></div>
+<div class="modal-post-body" data-rework-modal-body hidden></div>
+<div class="modal-post-stats" data-rework-modal-stats></div>
 </div>
 <div class="comment-modal-panel">
 <div class="comment-modal-head">
 <div>
-<span>Diskussion</span>
-<h2 id="comment-modal-title">Kommentare</h2>
+<span>{{ __('ui.feed_post') }}</span>
+<h2 id="comment-modal-title">{{ __('ui.comments') }}</h2>
 </div>
-<strong>34 Antworten</strong>
+<strong data-rework-modal-comment-count>0</strong>
 </div>
-<div class="comment-thread">
-<article class="comment-item">
-<img alt="Tina Tzoo" src="{{ \App\Support\HntTheme::asset('images/sug-2.png', 'rework') }}"/>
-<div>
-<header><strong>Tina Tzoo</strong><span>12m</span></header>
-<p>Das Loadout sieht stark aus. Für kurze Runden würde ich noch eine schnelle Utility-Option ergänzen.</p>
-<a href="#">Antworten</a>
-</div>
-</article>
-<article class="comment-item">
-<img alt="MKBHD" src="{{ \App\Support\HntTheme::asset('images/sug-3.png', 'rework') }}"/>
-<div>
-<header><strong>MKBHD</strong><span>24m</span></header>
-<p>Die Idee gefällt mir. Gerade für Pushes wirkt das sauber und nicht überladen.</p>
-<a href="#">Antworten</a>
-</div>
-</article>
-<article class="comment-item">
-<img alt="Faraz Tariq" src="{{ \App\Support\HntTheme::asset('images/sug-1.png', 'rework') }}"/>
-<div>
-<header><strong>Faraz Tariq</strong><span>1h</span></header>
-<p>Würde ich später testen. Schreib mir, wenn du eine Lobby offen hast.</p>
-<a href="#">Antworten</a>
-</div>
-</article>
-</div>
-<div class="modal-composer">
-<img alt="Krispie" src="{{ \App\Support\HntTheme::asset('images/comment-avatar.png', 'rework') }}"/>
-<input placeholder="Schreib einen Kommentar..." type="text"/>
-<a class="square-icon" href="#"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></a>
-<a class="btn" href="#">Senden</a>
-</div>
+<div class="comment-thread" data-rework-modal-comments></div>
+<form class="modal-composer" data-rework-comment-form method="post">
+<img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+<input name="body" placeholder="{{ __('ui.rework_comment_placeholder') }}" autocomplete="off" type="text" data-rework-comment-input/>
+<input accept="image/*,video/*" data-rework-comment-media-input multiple name="media[]" type="file" hidden>
+<button class="square-icon" data-rework-comment-media-trigger type="button" aria-label="{{ __('ui.preview_comment_add_image') }}"><i aria-hidden="true" class="ph ph-image ph-icon"></i></button>
+<button class="square-icon" data-rework-emoji-toggle type="button" aria-label="{{ __('ui.preview_emoji_button') }}"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></button>
+<button class="btn" data-rework-comment-submit type="submit">{{ __('ui.send') }}</button>
+<div class="rework-emoji-picker rework-comment-emoji-picker" data-rework-emoji-picker hidden></div>
+<div class="rework-comment-media-preview" data-rework-comment-media-preview hidden></div>
+<p class="rework-comment-status" data-rework-comment-status hidden></p>
+<input name="parent_id" type="hidden" data-rework-comment-parent>
+</form>
 </div>
 </div>
 </section>
 </div>
-<div aria-hidden="true" class="modal-backdrop reactions-backdrop" data-reactions-modal="">
+<div
+    aria-hidden="true"
+    class="modal-backdrop rework-report-backdrop"
+    data-rework-report-modal=""
+    data-label-sending="{{ __('ui.js_i18n_sending') }}"
+    data-label-report-failed="{{ __('ui.report_could_not_be_sent') }}"
+    data-label-report-success="{{ __('ui.report_success') }}"
+    data-label-report-default="{{ __('ui.preview_report_default_label') }}"
+    data-label-reported="{{ __('ui.preview_comment_reported_short') }}"
+>
+<section aria-labelledby="rework-report-title" aria-modal="true" class="post-composer-modal rework-report-modal" role="dialog">
+<div aria-hidden="true" class="post-composer-grip"></div>
+<header class="post-composer-header">
+<div class="post-composer-titleblock">
+<span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>{{ __('ui.rework_report_kicker') }}</span>
+<h2 id="rework-report-title">{{ __('ui.preview_report_title') }}</h2>
+<p data-rework-report-label>{{ __('ui.preview_report_intro') }}</p>
+</div>
+<button aria-label="{{ __('ui.preview_report_close_aria') }}" class="post-composer-close" data-rework-report-close type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+</header>
+<form action="{{ route('reports.store') }}" class="rework-report-form" data-rework-report-form method="post">
+@csrf
+<input name="type" type="hidden" data-rework-report-type>
+<input name="id" type="hidden" data-rework-report-id>
+<div class="post-composer-body rework-report-body">
+<label class="rework-report-field">
+<span>{{ __('ui.preview_report_reason') }}</span>
+<select name="reason" required>
+<option value="spam">{{ __('ui.report_reason_spam_title') }}</option>
+<option value="abuse">{{ __('ui.preview_report_reason_abuse') }}</option>
+<option value="hate">{{ __('ui.report_reason_hate_title') }}</option>
+<option value="nsfw">{{ __('ui.preview_report_reason_nsfw') }}</option>
+<option value="fraud">{{ __('ui.report_reason_fraud_title') }}</option>
+<option value="cheating">{{ __('ui.preview_report_reason_cheating') }}</option>
+<option value="privacy">{{ __('ui.report_reason_privacy_title') }}</option>
+<option value="other">{{ __('ui.preview_report_reason_other') }}</option>
+</select>
+</label>
+<label class="rework-report-field">
+<span>{{ __('ui.preview_report_details_optional') }}</span>
+<textarea maxlength="2000" name="body" placeholder="{{ __('ui.preview_report_body_placeholder') }}" rows="4"></textarea>
+</label>
+<p class="rework-report-status" data-rework-report-status hidden></p>
+</div>
+<footer class="post-composer-footer">
+<button class="composer-cancel" data-rework-report-close type="button">{{ __('ui.preview_action_cancel') }}</button>
+<button class="composer-submit" data-rework-report-submit type="submit">{{ __('ui.preview_report_submit_short') }}</button>
+</footer>
+</form>
+</section>
+</div>
+<div
+    aria-hidden="true"
+    class="modal-backdrop reactions-backdrop"
+    data-reactions-modal=""
+    data-label-reaction="{{ __('ui.reaction_like') }}"
+    data-label-reactions="{{ __('ui.rework_reactions') }}"
+    data-label-no-reactions="{{ __('ui.rework_no_reactions') }}"
+    data-label-reactions-failed="{{ __('ui.rework_reactions_failed') }}"
+>
 <section aria-labelledby="reactions-modal-title" aria-modal="true" class="reactions-modal" role="dialog">
 <div aria-hidden="true" class="post-composer-grip"></div>
-<button aria-label="Reaktionen schließen" class="modal-close post-composer-close" data-reactions-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<button aria-label="{{ __('ui.preview_likes_close_aria') }}" class="modal-close post-composer-close" data-reactions-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
 <header class="reactions-modal-head">
 <div>
 <span>Feed</span>
-<h2 id="reactions-modal-title">Reaktionen</h2>
+<h2 id="reactions-modal-title">{{ __('ui.rework_reactions') }}</h2>
 </div>
-<strong data-reactions-total>0 Reaktionen</strong>
+<strong data-reactions-total>0 {{ __('ui.rework_reactions') }}</strong>
 </header>
 <div class="reactions-stats" data-reactions-stats></div>
 <div class="reactions-list" data-reactions-list>
-<div class="comment-empty-state">Noch keine Reaktionen.</div>
+<div class="comment-empty-state">{{ __('ui.rework_no_reactions') }}</div>
 </div>
 </section>
 </div>
@@ -371,7 +405,7 @@
 <div class="post-composer-body">
 <div class="post-composer-author-row">
 <div class="post-composer-author">
-<img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: $reworkAsset('images/post-avatar.png') }}">
+<img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}">
 <div>
 <strong>{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}</strong>
 <span>Community · HNT Feed</span>

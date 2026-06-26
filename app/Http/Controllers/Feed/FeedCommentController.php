@@ -26,7 +26,7 @@ class FeedCommentController extends Controller
             'body' => ['nullable', 'string', 'max:50000'],
             'parent_id' => ['nullable', 'integer', 'exists:feed_comments,id'],
             'media' => ['nullable', 'array', 'max:'.config('hunthub.upload_limits.comment_media_count', 4)],
-            'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif', 'max:'.config('hunthub.upload_limits.comment_media_kb', 10240)],
+            'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif,mp4,webm,mov', 'max:'.config('hunthub.upload_limits.comment_media_kb', 10240)],
         ]);
 
         $files = $request->file('media', []);

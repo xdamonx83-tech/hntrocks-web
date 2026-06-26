@@ -40,6 +40,7 @@
     const reactionsModal = document.querySelector('[data-reactions-modal]');
     const reactionsModalClose = document.querySelector('[data-reactions-modal-close]');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const reactionLabel = (key, fallback = '') => reactionsModal?.dataset?.[key] || fallback;
 
     const formatCount = (value) => {
       const number = Number.parseInt(value, 10);
@@ -186,12 +187,12 @@
 
       if (modalStats) {
         modalStats.innerHTML = `
-          <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${context.likes_label || formatCount(context.likes || 0)} Reaktionen</span>
-          <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${context.comments_label || formatCount(context.comments || 0)} Kommentare</span>
-          <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${context.shares_label || formatCount(context.shares || 0)} Shares</span>
+          <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${context.likes_label || formatCount(context.likes || 0)} ${context.labels?.reactions || reactionLabel('labelReactions', 'Reactions')}</span>
+          <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${context.comments_label || formatCount(context.comments || 0)} ${context.labels?.comments || 'Comments'}</span>
+          <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${context.shares_label || formatCount(context.shares || 0)} ${context.labels?.shares || 'Share'}</span>
         `;
       }
-      setText(modalCount, `${context.comments_label || formatCount(context.comments || 0)} Antworten`);
+      setText(modalCount, `${context.comments_label || formatCount(context.comments || 0)} ${context.labels?.comments || 'Comments'}`);
 
       if (modalThread) {
         modalThread.innerHTML = '';
@@ -200,7 +201,7 @@
         if (!comments.length) {
           const empty = document.createElement('div');
           empty.className = 'comment-empty-state';
-          empty.textContent = 'Noch keine Kommentare.';
+          empty.textContent = context.labels?.no_comments || 'No comments yet.';
           modalThread.appendChild(empty);
         } else {
           comments.forEach((comment) => {
@@ -217,7 +218,7 @@
             avatar.alt = comment.author || '';
             avatar.src = comment.avatar || '';
             reply.href = '#';
-            reply.textContent = 'Antworten';
+            reply.textContent = context.labels?.reply || 'Reply';
 
             setText(author, comment.author || 'HNT Hunter');
             setText(time, comment.time || '');
@@ -293,7 +294,7 @@
       const statsNode = reactionsModal.querySelector('[data-reactions-stats]');
       const listNode = reactionsModal.querySelector('[data-reactions-list]');
 
-      setText(totalNode, `${formatCount(total)} ${total === 1 ? 'Reaktion' : 'Reaktionen'}`);
+      setText(totalNode, `${formatCount(total)} ${total === 1 ? reactionLabel('labelReaction', 'Reaction') : reactionLabel('labelReactions', 'Reactions')}`);
 
       if (statsNode) {
         statsNode.innerHTML = '';
@@ -313,7 +314,7 @@
       if (!users.length) {
         const empty = document.createElement('div');
         empty.className = 'comment-empty-state';
-        empty.textContent = 'Noch keine Reaktionen.';
+        empty.textContent = reactionLabel('labelNoReactions', 'No reactions yet');
         listNode.appendChild(empty);
         return;
       }
@@ -356,7 +357,7 @@
             'X-Requested-With': 'XMLHttpRequest',
           },
         });
-        if (!response.ok) throw new Error('Reactions failed');
+        if (!response.ok) throw new Error(reactionLabel('labelReactionsFailed', 'Reactions could not be loaded.'));
         renderReactionsModal(await response.json());
       } catch (error) {
         const listNode = reactionsModal.querySelector('[data-reactions-list]');
@@ -364,7 +365,7 @@
           listNode.innerHTML = '';
           const empty = document.createElement('div');
           empty.className = 'comment-empty-state';
-          empty.textContent = 'Reaktionen konnten nicht geladen werden.';
+          empty.textContent = reactionLabel('labelReactionsFailed', 'Reactions could not be loaded.');
           listNode.appendChild(empty);
         }
       }
@@ -387,8 +388,8 @@
       if (summary) {
         const viewerName = likedRow?.getAttribute('data-viewer-name') || 'dir';
         summary.textContent = count > 0
-          ? (reacted ? `Liked by ${viewerName}${count > 1 ? ` und ${formatCount(count - 1)} andere` : ''}` : `${formattedCount} Reaktionen`)
-          : 'Noch keine Reaktionen';
+          ? (reacted ? `Liked by ${viewerName}${count > 1 ? ` + ${formatCount(count - 1)}` : ''}` : `${formattedCount} ${reactionLabel('labelReactions', 'Reactions')}`)
+          : reactionLabel('labelNoReactions', 'No reactions yet');
       }
       if (likedRow) {
         likedRow.classList.toggle('is-empty', count <= 0);
@@ -1071,6 +1072,910 @@
   }
 })();
 
+/* Rework feed comment modal parity */
+(() => {
+  const modal = document.querySelector('[data-comment-modal]');
+  if (!modal) return;
+
+  const reportModal = document.querySelector('[data-rework-report-modal]');
+  const reportForm = reportModal?.querySelector('[data-rework-report-form]');
+  const reportStatus = reportModal?.querySelector('[data-rework-report-status]');
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  const emojis = ['😀', '😂', '😍', '🔥', '💪', '🎯', '👏', '🙌', '👍', '❤️', '💯', '👀', '😎', '🤝', '🏆', '✨'];
+  let activeCard = null;
+  let activeContext = null;
+  let replyRootId = null;
+  let replyName = '';
+  let activeMediaIndex = 0;
+  let commentFiles = [];
+  let activeReportTarget = null;
+
+  const formatCount = (value) => new Intl.NumberFormat(document.documentElement.lang || undefined)
+    .format(Number.parseInt(value, 10) || 0);
+
+  const parseContext = (card) => {
+    const script = card?.querySelector('[data-rework-post-context]');
+    if (!script) return null;
+
+    try {
+      return JSON.parse(script.textContent || '{}');
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const saveContext = () => {
+    const script = activeCard?.querySelector('[data-rework-post-context]');
+    if (script && activeContext) script.textContent = JSON.stringify(activeContext);
+  };
+
+  const label = (key, fallback, replacements = {}) => {
+    const dataKey = `label${key.replace(/(^|_)([a-z])/g, (_match, _sep, char) => char.toUpperCase())}`;
+    let value = activeContext?.labels?.[key] || reportModal?.dataset?.[dataKey] || fallback;
+    Object.entries(replacements).forEach(([name, replacement]) => {
+      value = value.replace(`__${name}__`, replacement).replace(`:${name}`, replacement);
+    });
+    return value;
+  };
+
+  const setStatus = (message, isError = false) => {
+    const status = modal.querySelector('[data-rework-comment-status]');
+    if (!status) return;
+    status.textContent = message || '';
+    status.hidden = !message;
+    status.classList.toggle('is-error', isError);
+  };
+
+  const mediaItems = () => {
+    if (!activeContext) return [];
+    if (Array.isArray(activeContext.media_items) && activeContext.media_items.length) return activeContext.media_items;
+    return activeContext.media_url ? [{
+      url: activeContext.media_url,
+      type: activeContext.media_type,
+      alt: activeContext.media_alt,
+    }] : [];
+  };
+
+  const isVideoItem = (item) => item?.type === 'video' || String(item?.mime_type || '').startsWith('video/');
+
+  const setPostCounts = () => {
+    if (!activeCard || !activeContext) return;
+    const commentMetric = activeCard.querySelector('.metrics .metric:first-child');
+    if (commentMetric) {
+      commentMetric.innerHTML = `<i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Comments')}`;
+    }
+    modal.querySelector('[data-rework-modal-comment-count]').textContent = `${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Comments')}`;
+  };
+
+  const allComments = () => (activeContext?.comments_preview || [])
+    .flatMap((thread) => [thread.root].concat(thread.replies || []))
+    .filter(Boolean);
+
+  const findComment = (id) => allComments().find((comment) => Number(comment.id) === Number(id));
+
+  const normalizeComment = (comment) => {
+    if (!comment) return null;
+    const user = comment.user || {};
+
+    return {
+      ...comment,
+      author: comment.author || user.name || 'HNT Hunter',
+      avatar: comment.avatar || user.avatar_url || '',
+      profile_url: comment.profile_url || user.profile_url || '#',
+      time: comment.time || comment.created_at_label || '',
+      root_id: comment.root_id || comment.id,
+      viewer_reacted: Boolean(comment.viewer_reacted || comment.viewer_reaction),
+      reaction_count: Number(comment.reaction_count) || 0,
+      can_report: Boolean(comment.can_report),
+      routes: comment.routes || {},
+      media: Array.isArray(comment.media) ? comment.media : [],
+    };
+  };
+
+  const insertTextAtCursor = (input, text) => {
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    input.value = `${input.value.slice(0, start)}${text}${input.value.slice(end)}`;
+    input.focus();
+    input.setSelectionRange(start + text.length, start + text.length);
+  };
+
+  const renderEmojiPicker = () => {
+    const picker = modal.querySelector('[data-rework-emoji-picker]');
+    if (!picker || picker.childElementCount) return;
+    emojis.forEach((emoji) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = emoji;
+      button.setAttribute('data-rework-emoji', emoji);
+      picker.appendChild(button);
+    });
+  };
+
+  const renderMedia = (wrap, mediaItems = []) => {
+    if (!mediaItems.length) return;
+    const grid = document.createElement('div');
+    grid.className = 'rework-comment-media-grid';
+    mediaItems.forEach((item) => {
+      const link = document.createElement('a');
+      link.href = item.url || '#';
+      link.target = '_blank';
+      link.rel = 'noopener';
+      if (isVideoItem(item)) {
+        const video = document.createElement('video');
+        video.src = item.url || '';
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        link.appendChild(video);
+      } else if (item.type === 'image') {
+        const image = document.createElement('img');
+        image.src = item.url || '';
+        image.alt = item.alt || '';
+        link.appendChild(image);
+      } else {
+        link.textContent = item.alt || item.url || '';
+      }
+      grid.appendChild(link);
+    });
+    wrap.appendChild(grid);
+  };
+
+  const renderComment = (comment, isReply = false) => {
+    const item = document.createElement('article');
+    item.className = `comment-item rework-comment-item ${isReply ? 'is-reply' : 'is-root'}`;
+    item.dataset.reworkCommentId = comment.id;
+    item.dataset.reworkRootId = comment.root_id || comment.id;
+
+    const avatarLink = document.createElement('a');
+    avatarLink.href = comment.profile_url || '#';
+    const avatar = document.createElement('img');
+    avatar.src = comment.avatar || '';
+    avatar.alt = comment.author || '';
+    avatarLink.appendChild(avatar);
+
+    const content = document.createElement('div');
+    const header = document.createElement('header');
+    const author = document.createElement('a');
+    const authorName = document.createElement('strong');
+    author.href = comment.profile_url || '#';
+    authorName.textContent = comment.author || 'HNT Hunter';
+    author.appendChild(authorName);
+    const time = document.createElement('span');
+    time.textContent = comment.time || '';
+    header.append(author, time);
+
+    const body = document.createElement('p');
+    body.className = 'rework-comment-body';
+    body.innerHTML = comment.body_html || '';
+    content.append(header, body);
+    renderMedia(content, comment.media || []);
+
+    const actions = document.createElement('div');
+    actions.className = 'rework-comment-actions';
+    actions.innerHTML = `
+      <button type="button" class="${comment.viewer_reacted ? 'is-active' : ''}" data-rework-comment-like="${comment.id}" aria-label="${label('like', 'Like')}"><i aria-hidden="true" class="ph ph-heart ph-icon"></i><span>${formatCount(comment.reaction_count || 0)}</span></button>
+      <button type="button" data-rework-comment-reply="${comment.id}" aria-label="${label('reply', 'Reply')}"><i aria-hidden="true" class="ph ph-arrow-bend-up-left ph-icon"></i><span>${label('reply', 'Reply')}</span></button>
+      ${comment.can_edit ? `<button type="button" data-rework-comment-edit="${comment.id}" aria-label="${label('edit', 'Edit')}"><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i><span>${label('edit', 'Edit')}</span></button>` : ''}
+      ${comment.can_delete ? `<button type="button" data-rework-comment-delete="${comment.id}" aria-label="${label('delete', 'Delete')}"><i aria-hidden="true" class="ph ph-trash ph-icon"></i><span>${label('delete', 'Delete')}</span></button>` : ''}
+      ${comment.can_report ? `<button type="button" data-rework-comment-report="${comment.id}" aria-label="${label('report', 'Report')}"><i aria-hidden="true" class="ph ph-flag ph-icon"></i><span>${label('report', 'Report')}</span></button>` : ''}
+    `;
+    content.appendChild(actions);
+    item.append(avatarLink, content);
+    return item;
+  };
+
+  const renderThreads = () => {
+    const list = modal.querySelector('[data-rework-modal-comments]');
+    if (!list || !activeContext) return;
+    list.innerHTML = '';
+
+    const threads = Array.isArray(activeContext.comments_preview) ? activeContext.comments_preview : [];
+    if (!threads.length) {
+      const empty = document.createElement('div');
+      empty.className = 'comment-empty-state';
+      empty.textContent = label('no_comments', 'No comments yet.');
+      list.appendChild(empty);
+      return;
+    }
+
+    threads.forEach((thread) => {
+      const root = thread.root;
+      const replies = Array.isArray(thread.replies) ? thread.replies : [];
+      const wrap = document.createElement('div');
+      wrap.className = 'rework-comment-thread';
+      wrap.dataset.reworkThreadId = root.id;
+      wrap.appendChild(renderComment(root, false));
+
+      if (replies.length) {
+        const toggle = document.createElement('button');
+        toggle.className = 'rework-comment-replies-toggle';
+        toggle.type = 'button';
+        toggle.dataset.reworkRepliesToggle = root.id;
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.textContent = `${formatCount(replies.length)} ${label('replies', 'Replies')}`;
+        wrap.appendChild(toggle);
+
+        const repliesWrap = document.createElement('div');
+        repliesWrap.className = 'rework-comment-replies';
+        repliesWrap.dataset.reworkReplies = root.id;
+        replies.forEach((reply) => repliesWrap.appendChild(renderComment(reply, true)));
+        wrap.appendChild(repliesWrap);
+      }
+
+      list.appendChild(wrap);
+    });
+  };
+
+  const syncLikeUi = (reacted, count) => {
+    if (!activeCard || !activeContext) return;
+    const formatted = formatCount(count);
+    const button = activeCard.querySelector('[data-rework-like-toggle]');
+    const summary = activeCard.querySelector('[data-rework-like-summary]');
+    const likedRow = activeCard.querySelector('[data-rework-reactions-open]');
+
+    activeContext.likes = count;
+    activeContext.likes_label = formatted;
+    activeContext.reacted = reacted;
+    saveContext();
+
+    button?.classList.toggle('is-active', reacted);
+    button?.setAttribute('aria-pressed', reacted ? 'true' : 'false');
+    button?.setAttribute('data-reaction-count', String(count));
+    likedRow?.classList.toggle('is-empty', count < 1);
+    if (summary) summary.textContent = count > 0 ? `${formatted} ${label('reactions', 'Reactions')}` : label('no_reactions', 'No reactions yet');
+    renderModalPost();
+  };
+
+  const renderModalPost = () => {
+    if (!activeContext) return;
+    modal.querySelectorAll('[data-rework-modal-author-url]').forEach((link) => {
+      link.href = activeContext.author_url || '#';
+    });
+    const avatar = modal.querySelector('.modal-post-head img');
+    if (avatar) {
+      avatar.src = activeContext.author_avatar || '';
+      avatar.alt = activeContext.author || '';
+    }
+    modal.querySelector('[data-rework-modal-author]').textContent = activeContext.author || 'HNT Hunter';
+    modal.querySelector('[data-rework-modal-meta]').textContent = activeContext.meta || '';
+
+    const media = modal.querySelector('[data-rework-modal-media]');
+    if (media) {
+      media.innerHTML = '';
+      const items = mediaItems();
+      activeMediaIndex = Math.min(Math.max(activeMediaIndex, 0), Math.max(items.length - 1, 0));
+      const item = items[activeMediaIndex];
+
+      if (item) {
+        const stage = document.createElement('div');
+        stage.className = 'modal-media-stage';
+        const node = document.createElement(isVideoItem(item) ? 'video' : 'img');
+        node.src = item.url || '';
+        if (isVideoItem(item)) {
+          node.controls = true;
+          node.playsInline = true;
+          node.preload = 'metadata';
+        } else {
+          node.alt = item.alt || '';
+        }
+        stage.appendChild(node);
+
+        if (items.length > 1) {
+          stage.insertAdjacentHTML('beforeend', `
+            <button type="button" class="modal-media-nav prev" data-rework-modal-media-prev aria-label="${label('previous_media', 'Previous media')}"><i aria-hidden="true" class="ph ph-caret-left ph-icon"></i></button>
+            <button type="button" class="modal-media-nav next" data-rework-modal-media-next aria-label="${label('next_media', 'Next media')}"><i aria-hidden="true" class="ph ph-caret-right ph-icon"></i></button>
+            <span class="modal-media-counter">${activeMediaIndex + 1} / ${items.length}</span>
+          `);
+        }
+
+        media.appendChild(stage);
+
+        if (items.length > 1) {
+          const strip = document.createElement('div');
+          strip.className = 'modal-media-strip';
+          items.forEach((thumb, index) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = index === activeMediaIndex ? 'is-active' : '';
+            button.setAttribute('data-rework-modal-media-thumb', String(index));
+            button.setAttribute('aria-label', `${label('media', 'Media')} ${index + 1}`);
+            if (isVideoItem(thumb)) {
+              button.innerHTML = `<video src="${thumb.url || ''}" muted playsinline preload="metadata"></video><i aria-hidden="true" class="ph ph-play ph-icon"></i>`;
+            } else {
+              button.innerHTML = `<img src="${thumb.url || ''}" alt="${thumb.alt || ''}">`;
+            }
+            strip.appendChild(button);
+          });
+          media.appendChild(strip);
+        }
+      }
+      media.hidden = items.length === 0;
+    }
+
+    const body = modal.querySelector('[data-rework-modal-body]');
+    if (body) {
+      body.innerHTML = activeContext.body_html || '';
+      body.hidden = !activeContext.body_html;
+    }
+
+    const stats = modal.querySelector('[data-rework-modal-stats]');
+    if (stats) {
+      stats.innerHTML = `
+        <button type="button" class="${activeContext.reacted ? 'is-active' : ''}" data-rework-modal-like><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${activeContext.likes_label || formatCount(activeContext.likes)} ${label('reactions', 'Reactions')}</button>
+        <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Comments')}</span>
+        <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${activeContext.shares_label || formatCount(activeContext.shares)} ${label('shares', 'Share')}</span>
+        ${activeContext.can_report ? `<button type="button" data-rework-modal-post-report><i aria-hidden="true" class="ph ph-flag ph-icon"></i>${label('post_report', 'Report')}</button>` : ''}
+      `;
+    }
+
+    const postPanel = modal.querySelector('.comment-modal-post');
+    postPanel?.classList.toggle('has-media', Boolean(mediaItems().length));
+    postPanel?.classList.toggle('has-no-media', !mediaItems().length);
+    postPanel?.classList.toggle('has-body', Boolean(activeContext.body_html));
+    postPanel?.classList.toggle('has-no-body', !activeContext.body_html);
+    setPostCounts();
+  };
+
+  const openModal = (card) => {
+    activeCard = card;
+    activeContext = parseContext(card);
+    if (!activeContext) return;
+    replyRootId = null;
+    replyName = '';
+    activeMediaIndex = 0;
+    commentFiles = [];
+    renderEmojiPicker();
+    renderCommentMediaPreview();
+    renderModalPost();
+    renderThreads();
+    setStatus('');
+    const input = modal.querySelector('[data-rework-comment-input]');
+    const parent = modal.querySelector('[data-rework-comment-parent]');
+    if (input) {
+      input.value = '';
+      input.placeholder = label('write_comment', 'Write a comment');
+    }
+    if (parent) parent.value = '';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('is-modal-open');
+    window.setTimeout(() => input?.focus(), 120);
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('is-modal-open');
+  };
+
+  const renderCommentMediaPreview = () => {
+    const preview = modal.querySelector('[data-rework-comment-media-preview]');
+    if (!preview) return;
+    preview.innerHTML = '';
+    preview.hidden = commentFiles.length === 0;
+
+    commentFiles.forEach((file, index) => {
+      const item = document.createElement('div');
+      item.className = 'rework-comment-media-preview-item';
+      const url = URL.createObjectURL(file);
+      item.innerHTML = file.type.startsWith('video/')
+        ? `<video src="${url}" muted playsinline preload="metadata"></video>`
+        : `<img src="${url}" alt="${file.name || label('media', 'Media')}">`;
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.setAttribute('data-rework-comment-media-remove', String(index));
+      remove.setAttribute('aria-label', label('remove_media', 'Remove media'));
+      remove.innerHTML = '<i aria-hidden="true" class="ph ph-x ph-icon"></i>';
+      item.appendChild(remove);
+      preview.appendChild(item);
+    });
+  };
+
+  const resetCommentMedia = () => {
+    commentFiles = [];
+    const input = modal.querySelector('[data-rework-comment-media-input]');
+    if (input) input.value = '';
+    renderCommentMediaPreview();
+  };
+
+  const submitComment = async (event) => {
+    event.preventDefault();
+    if (!activeContext?.comment_store_url) return;
+    const form = event.currentTarget;
+    const input = form.querySelector('[data-rework-comment-input]');
+    const button = form.querySelector('[data-rework-comment-submit]');
+    const body = (input?.value || '').trim();
+    if (!body && commentFiles.length === 0) {
+      setStatus(label('send_failed', 'Comment could not be sent.'), true);
+      return;
+    }
+
+    const original = button.textContent;
+    button.disabled = true;
+    button.textContent = label('sending', 'Sending...');
+    setStatus('');
+
+    try {
+      const headers = {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest',
+      };
+      let bodyPayload;
+
+      if (commentFiles.length > 0) {
+        bodyPayload = new FormData();
+        bodyPayload.set('body', body);
+        if (replyRootId) bodyPayload.set('parent_id', replyRootId);
+        commentFiles.forEach((file) => bodyPayload.append('media[]', file));
+      } else {
+        headers['Content-Type'] = 'application/json';
+        bodyPayload = JSON.stringify({ body, parent_id: replyRootId || undefined });
+      }
+
+      const response = await fetch(activeContext.comment_store_url, {
+        method: 'POST',
+        headers,
+        body: bodyPayload,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.ok === false) throw new Error(payload.message || label('send_failed', 'Comment could not be sent.'));
+
+      const comment = normalizeComment(payload.comment);
+      if (comment) {
+        if (comment.is_reply) {
+          const rootId = Number(comment.root_id || comment.parent_id || replyRootId);
+          let thread = activeContext.comments_preview.find((item) => Number(item.root?.id) === rootId);
+          if (!thread) {
+            thread = { root: findComment(rootId), replies: [] };
+            activeContext.comments_preview.push(thread);
+          }
+          thread.replies = thread.replies || [];
+          thread.replies.push(comment);
+        } else {
+          activeContext.comments_preview.unshift({ root: comment, replies: [] });
+        }
+      }
+
+      activeContext.comments = (Number(activeContext.comments) || 0) + 1;
+      activeContext.comments_label = formatCount(activeContext.comments);
+      saveContext();
+      input.value = '';
+      replyRootId = null;
+      replyName = '';
+      input.placeholder = label('write_comment', 'Write a comment');
+      form.querySelector('[data-rework-comment-parent]').value = '';
+      resetCommentMedia();
+      renderThreads();
+      renderModalPost();
+    } catch (error) {
+      setStatus(error.message || label('send_failed', 'Comment could not be sent.'), true);
+    } finally {
+      button.disabled = false;
+      button.textContent = original;
+    }
+  };
+
+  const updateCommentReaction = async (comment) => {
+    if (!comment?.routes?.reaction) return;
+    const response = await fetch(comment.routes.reaction, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({ type: 'like', mode: 'toggle' }),
+    });
+    const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(label('reaction_failed', 'Reaction could not be saved.'));
+    comment.viewer_reacted = Boolean(payload.reacted);
+    comment.reaction_count = Number(payload.count) || 0;
+    saveContext();
+    renderThreads();
+  };
+
+  const openDeletePrompt = (comment) => {
+    const item = modal.querySelector(`[data-rework-comment-id="${comment.id}"]`);
+    if (!item || item.querySelector('[data-rework-delete-prompt]')) return;
+    const prompt = document.createElement('div');
+    prompt.className = 'rework-comment-delete-prompt';
+    prompt.dataset.reworkDeletePrompt = comment.id;
+    prompt.innerHTML = `
+      <span>${label('delete_confirm', 'Delete this comment?')}</span>
+      <button type="button" data-rework-delete-cancel>${label('cancel', 'Cancel')}</button>
+      <button type="button" data-rework-delete-confirm="${comment.id}">${label('delete', 'Delete')}</button>
+    `;
+    item.querySelector('.rework-comment-actions')?.insertAdjacentElement('afterend', prompt);
+  };
+
+  const deleteComment = async (comment) => {
+    if (!comment?.routes?.delete) return;
+    const response = await fetch(comment.routes.delete, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.ok === false) throw new Error(payload.message || label('delete_failed', 'Comment could not be deleted.'));
+
+    activeContext.comments_preview = activeContext.comments_preview
+      .map((thread) => {
+        if (Number(thread.root?.id) === Number(comment.id)) return null;
+        thread.replies = (thread.replies || []).filter((reply) => Number(reply.id) !== Number(comment.id));
+        return thread;
+      })
+      .filter(Boolean);
+    activeContext.comments = Number(payload.comment_count ?? Math.max(0, (Number(activeContext.comments) || 0) - 1));
+    activeContext.comments_label = formatCount(activeContext.comments);
+    saveContext();
+    renderThreads();
+    renderModalPost();
+  };
+
+  const openEdit = (comment) => {
+    const item = modal.querySelector(`[data-rework-comment-id="${comment.id}"]`);
+    const body = item?.querySelector('.rework-comment-body');
+    if (!item || !body || item.querySelector('[data-rework-edit-form]')) return;
+    body.hidden = true;
+    const form = document.createElement('form');
+    form.className = 'rework-comment-edit-form';
+    form.dataset.reworkEditForm = comment.id;
+    form.innerHTML = `
+      <input name="body" value="">
+      <div>
+        <button type="button" data-rework-edit-cancel>${label('cancel', 'Cancel')}</button>
+        <button type="submit">${label('save', 'Save')}</button>
+      </div>
+    `;
+    form.querySelector('input').value = comment.body || '';
+    body.insertAdjacentElement('afterend', form);
+    form.querySelector('input').focus();
+  };
+
+  const submitEdit = async (form) => {
+    const id = form.dataset.reworkEditForm;
+    const comment = findComment(id);
+    const body = (form.querySelector('input')?.value || '').trim();
+    if (!comment?.routes?.update || !body) return;
+
+    const response = await fetch(comment.routes.update, {
+      method: 'PATCH',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({ body }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.ok === false) throw new Error(payload.message || label('save_failed', 'Comment could not be saved.'));
+    comment.body = payload.body || body;
+    comment.body_html = payload.body_html || body;
+    saveContext();
+    renderThreads();
+  };
+
+  const openReportModal = (target) => {
+    if (!reportModal || !reportForm || !target?.type || !target?.id) return;
+    activeReportTarget = target;
+    reportForm.reset();
+    reportForm.querySelector('[data-rework-report-type]').value = target.type;
+    reportForm.querySelector('[data-rework-report-id]').value = target.id;
+    const labelNode = reportModal.querySelector('[data-rework-report-label]');
+    if (labelNode) labelNode.textContent = target.label || label('report_default', 'Help us review problematic content faster.');
+    if (reportStatus) {
+      reportStatus.hidden = true;
+      reportStatus.textContent = '';
+      reportStatus.classList.remove('is-error');
+    }
+    reportModal.classList.add('is-open');
+    reportModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('is-modal-open');
+    window.setTimeout(() => reportForm.querySelector('select[name="reason"]')?.focus(), 80);
+  };
+
+  const closeReportModal = () => {
+    if (!reportModal) return;
+    reportModal.classList.remove('is-open');
+    reportModal.setAttribute('aria-hidden', 'true');
+    activeReportTarget = null;
+    if (!modal.classList.contains('is-open')) document.body.classList.remove('is-modal-open');
+  };
+
+  const markReported = (target) => {
+    if (!target) return;
+
+    if (target.type === 'feed_post') {
+      if (activeContext) {
+        activeContext.can_report = false;
+        activeContext.reported = true;
+      }
+      document.querySelectorAll(`[data-rework-report-open][data-report-type="feed_post"][data-report-id="${target.id}"]`).forEach((button) => {
+        button.setAttribute('aria-disabled', 'true');
+        button.classList.add('is-reported');
+        const text = button.querySelector('strong');
+        if (text) text.textContent = label('reported', reportModal?.dataset?.labelReported || 'Reported');
+      });
+    }
+
+    if (target.type === 'feed_comment') {
+      const comment = findComment(target.id);
+      if (comment) {
+        comment.can_report = false;
+        comment.reported = true;
+      }
+      renderThreads();
+    }
+
+    saveContext();
+    if (activeContext) renderModalPost();
+  };
+
+  document.addEventListener('click', (event) => {
+    const reportTrigger = event.target.closest('[data-rework-report-open]');
+    if (reportTrigger) {
+      event.preventDefault();
+      event.stopPropagation();
+      openReportModal({
+        type: reportTrigger.getAttribute('data-report-type'),
+        id: reportTrigger.getAttribute('data-report-id'),
+        label: reportTrigger.getAttribute('data-report-label'),
+      });
+      return;
+    }
+
+    const trigger = event.target.closest('[data-comment-modal-open]');
+    if (!trigger) return;
+    const card = trigger.closest('[data-rework-post-card]');
+    if (!card) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openModal(card);
+  }, true);
+
+  modal.querySelector('[data-rework-comment-form]')?.addEventListener('submit', submitComment);
+
+  modal.addEventListener('click', async (event) => {
+    if (event.target === modal || event.target.closest('[data-comment-modal-close]')) {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-emoji-toggle]')) {
+      event.preventDefault();
+      const picker = modal.querySelector('[data-rework-emoji-picker]');
+      if (picker) picker.hidden = !picker.hidden;
+      return;
+    }
+
+    const emoji = event.target.closest('[data-rework-emoji]')?.getAttribute('data-rework-emoji');
+    if (emoji) {
+      event.preventDefault();
+      insertTextAtCursor(modal.querySelector('[data-rework-comment-input]'), emoji);
+      modal.querySelector('[data-rework-emoji-picker]').hidden = true;
+      return;
+    }
+
+    if (event.target.closest('[data-rework-modal-like]')) {
+      event.preventDefault();
+      const response = await fetch(activeContext.reaction_url, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': token,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({ type: 'like', mode: 'toggle' }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (response.ok) syncLikeUi(Boolean(payload.reacted), Number(payload.count) || 0);
+      return;
+    }
+
+    if (event.target.closest('[data-rework-modal-post-report]')) {
+      event.preventDefault();
+      openReportModal(activeContext.report);
+      return;
+    }
+
+    if (event.target.closest('[data-rework-modal-media-prev]')) {
+      event.preventDefault();
+      activeMediaIndex = (activeMediaIndex - 1 + mediaItems().length) % mediaItems().length;
+      renderModalPost();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-modal-media-next]')) {
+      event.preventDefault();
+      activeMediaIndex = (activeMediaIndex + 1) % mediaItems().length;
+      renderModalPost();
+      return;
+    }
+
+    const mediaThumb = event.target.closest('[data-rework-modal-media-thumb]');
+    if (mediaThumb) {
+      event.preventDefault();
+      activeMediaIndex = Number(mediaThumb.getAttribute('data-rework-modal-media-thumb')) || 0;
+      renderModalPost();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-comment-media-trigger]')) {
+      event.preventDefault();
+      modal.querySelector('[data-rework-comment-media-input]')?.click();
+      return;
+    }
+
+    const removeMedia = event.target.closest('[data-rework-comment-media-remove]');
+    if (removeMedia) {
+      event.preventDefault();
+      const index = Number(removeMedia.getAttribute('data-rework-comment-media-remove'));
+      if (Number.isFinite(index)) {
+        commentFiles.splice(index, 1);
+        renderCommentMediaPreview();
+      }
+      return;
+    }
+
+    const like = event.target.closest('[data-rework-comment-like]');
+    const reply = event.target.closest('[data-rework-comment-reply]');
+    const edit = event.target.closest('[data-rework-comment-edit]');
+    const del = event.target.closest('[data-rework-comment-delete]');
+    const report = event.target.closest('[data-rework-comment-report]');
+    const confirmDelete = event.target.closest('[data-rework-delete-confirm]');
+    const repliesToggle = event.target.closest('[data-rework-replies-toggle]');
+
+    try {
+      if (repliesToggle) {
+        event.preventDefault();
+        const rootId = repliesToggle.getAttribute('data-rework-replies-toggle');
+        const replies = modal.querySelector(`[data-rework-replies="${rootId}"]`);
+        const expanded = repliesToggle.getAttribute('aria-expanded') !== 'false';
+        repliesToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        if (replies) replies.hidden = expanded;
+      } else if (like) {
+        event.preventDefault();
+        await updateCommentReaction(findComment(like.getAttribute('data-rework-comment-like')));
+      } else if (reply) {
+        event.preventDefault();
+        const comment = findComment(reply.getAttribute('data-rework-comment-reply'));
+        replyRootId = comment?.root_id || comment?.id || null;
+        replyName = comment?.author || '';
+        const input = modal.querySelector('[data-rework-comment-input]');
+        const parent = modal.querySelector('[data-rework-comment-parent]');
+        if (parent) parent.value = replyRootId || '';
+        if (input) {
+          input.placeholder = label('reply_to', `Reply to ${replyName}`, { name: replyName });
+          input.focus();
+        }
+      } else if (edit) {
+        event.preventDefault();
+        openEdit(findComment(edit.getAttribute('data-rework-comment-edit')));
+      } else if (del) {
+        event.preventDefault();
+        openDeletePrompt(findComment(del.getAttribute('data-rework-comment-delete')));
+      } else if (confirmDelete) {
+        event.preventDefault();
+        await deleteComment(findComment(confirmDelete.getAttribute('data-rework-delete-confirm')));
+      } else if (event.target.closest('[data-rework-delete-cancel]')) {
+        event.preventDefault();
+        event.target.closest('[data-rework-delete-prompt]')?.remove();
+      } else if (report) {
+        event.preventDefault();
+        const comment = findComment(report.getAttribute('data-rework-comment-report'));
+        if (comment) {
+          openReportModal({
+            type: 'feed_comment',
+            id: comment.id,
+            label: comment.author ? label('comment_report_label', 'Report comment by :name', { name: comment.author }) : label('report', 'Report'),
+          });
+        }
+      }
+    } catch (error) {
+      setStatus(error.message || label('action_failed', 'Action could not be completed.'), true);
+    }
+  });
+
+  modal.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-rework-edit-form]');
+    if (!form) return;
+    event.preventDefault();
+    try {
+      await submitEdit(form);
+    } catch (error) {
+      setStatus(error.message || label('save_failed', 'Comment could not be saved.'), true);
+    }
+  });
+
+  modal.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-rework-edit-cancel]')) return;
+    event.preventDefault();
+    renderThreads();
+  });
+
+  modal.addEventListener('change', (event) => {
+    const input = event.target.closest('[data-rework-comment-media-input]');
+    if (!input) return;
+    commentFiles = commentFiles.concat(Array.from(input.files || []));
+    input.value = '';
+    setStatus('');
+    renderCommentMediaPreview();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-rework-report-close]') || event.target === reportModal) {
+      event.preventDefault();
+      closeReportModal();
+    }
+  });
+
+  reportForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const submit = reportForm.querySelector('[data-rework-report-submit]');
+    const original = submit?.textContent || '';
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = label('sending', 'Sending...');
+    }
+    if (reportStatus) {
+      reportStatus.hidden = true;
+      reportStatus.textContent = '';
+      reportStatus.classList.remove('is-error');
+    }
+
+    try {
+      const response = await fetch(reportForm.action, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': token,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: new FormData(reportForm),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || label('report_failed', 'Report could not be sent.'));
+      markReported(payload.report || activeReportTarget);
+      if (reportStatus) {
+        reportStatus.textContent = payload.message || label('report_success', 'Report sent.');
+        reportStatus.hidden = false;
+      }
+      window.setTimeout(closeReportModal, 450);
+    } catch (error) {
+      if (reportStatus) {
+        reportStatus.textContent = error.message || label('report_failed', 'Report could not be sent.');
+        reportStatus.classList.add('is-error');
+        reportStatus.hidden = false;
+      }
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = original;
+      }
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if (reportModal?.classList.contains('is-open')) {
+      closeReportModal();
+      return;
+    }
+    if (modal.classList.contains('is-open')) closeModal();
+  });
+})();
+
 
 /* 082: Rework composer addon functionality */
 (() => {
@@ -1696,7 +2601,7 @@
           <div class="settings-section-head">
             <span>HNT Feed</span>
             <h3>Diesen Beitrag wirklich löschen?</h3>
-            <p>Kommentare, Reaktionen und Medien dieses Posts werden aus dem Feed entfernt.</p>
+            <p>Alle zugehörigen Inhalte dieses Posts werden aus dem Feed entfernt.</p>
           </div>
         </div>
 
@@ -2198,4 +3103,187 @@
   document.addEventListener('DOMContentLoaded', scan);
   window.setTimeout(scan, 0);
   window.setTimeout(scan, 300);
+})();
+
+/* 098: Rework comment media viewer */
+(() => {
+  if (window.__hntReworkCommentMediaViewerReady) return;
+  window.__hntReworkCommentMediaViewerReady = true;
+
+  let activeItems = [];
+  let activeIndex = 0;
+
+  const isVideoUrl = (url = '') => /\.(mp4|webm|mov)(\?|#|$)/i.test(url);
+
+  const ensureViewer = () => {
+    let viewer = document.querySelector('[data-rework-comment-media-viewer]');
+    if (viewer) return viewer;
+
+    viewer = document.createElement('div');
+    viewer.className = 'modal-backdrop rework-comment-media-viewer-backdrop';
+    viewer.setAttribute('data-rework-comment-media-viewer', '');
+    viewer.setAttribute('aria-hidden', 'true');
+    viewer.innerHTML = `
+      <section class="post-composer-modal rework-comment-media-viewer-modal" role="dialog" aria-modal="true" aria-labelledby="rework-comment-media-viewer-title">
+        <div aria-hidden="true" class="post-composer-grip"></div>
+        <header class="post-composer-header">
+          <div class="post-composer-titleblock">
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>HNT MEDIA</span>
+            <h2 id="rework-comment-media-viewer-title">Kommentar-Medium</h2>
+            <p data-rework-comment-media-viewer-counter></p>
+          </div>
+          <button aria-label="Medienansicht schließen" class="post-composer-close" data-rework-comment-media-viewer-close type="button">
+            <i aria-hidden="true" class="ph ph-x ph-icon"></i>
+          </button>
+        </header>
+        <div class="rework-comment-media-viewer-stage" data-rework-comment-media-viewer-stage></div>
+      </section>
+    `;
+
+    document.body.appendChild(viewer);
+    return viewer;
+  };
+
+  const setOpen = (open) => {
+    const viewer = ensureViewer();
+    viewer.classList.toggle('is-open', open);
+    viewer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    document.body.classList.toggle('is-modal-open', open);
+  };
+
+  const render = () => {
+    const viewer = ensureViewer();
+    const stage = viewer.querySelector('[data-rework-comment-media-viewer-stage]');
+    const counter = viewer.querySelector('[data-rework-comment-media-viewer-counter]');
+
+    if (!stage) return;
+
+    const item = activeItems[activeIndex];
+    stage.innerHTML = '';
+
+    if (!item) {
+      setOpen(false);
+      return;
+    }
+
+    const frame = document.createElement('div');
+    frame.className = 'rework-comment-media-viewer-frame';
+
+    const mediaNode = item.type === 'video' || isVideoUrl(item.url)
+      ? document.createElement('video')
+      : document.createElement('img');
+
+    mediaNode.src = item.url || '';
+
+    if (mediaNode.tagName === 'VIDEO') {
+      mediaNode.controls = true;
+      mediaNode.playsInline = true;
+      mediaNode.preload = 'metadata';
+    } else {
+      mediaNode.alt = item.alt || '';
+    }
+
+    frame.appendChild(mediaNode);
+
+    if (activeItems.length > 1) {
+      frame.insertAdjacentHTML('beforeend', `
+        <button type="button" class="rework-comment-media-viewer-nav is-prev" data-rework-comment-media-viewer-prev aria-label="Vorheriges Medium">
+          <i aria-hidden="true" class="ph ph-caret-left ph-icon"></i>
+        </button>
+        <button type="button" class="rework-comment-media-viewer-nav is-next" data-rework-comment-media-viewer-next aria-label="Nächstes Medium">
+          <i aria-hidden="true" class="ph ph-caret-right ph-icon"></i>
+        </button>
+      `);
+    }
+
+    stage.appendChild(frame);
+
+    if (counter) {
+      counter.textContent = activeItems.length > 1 ? `${activeIndex + 1} / ${activeItems.length}` : '';
+    }
+  };
+
+  const itemsFromGrid = (grid) => Array.from(grid.querySelectorAll('a'))
+    .map((link) => {
+      const media = link.querySelector('img, video');
+      const url = link.getAttribute('href') || media?.getAttribute('src') || '';
+      if (!url || url === '#') return null;
+
+      return {
+        url,
+        alt: media?.getAttribute('alt') || '',
+        type: media?.tagName === 'VIDEO' || isVideoUrl(url) ? 'video' : 'image',
+      };
+    })
+    .filter(Boolean);
+
+  const openFromLink = (link) => {
+    const grid = link.closest('.rework-comment-media-grid');
+    if (!grid) return;
+
+    activeItems = itemsFromGrid(grid);
+    const url = link.getAttribute('href') || link.querySelector('img, video')?.getAttribute('src') || '';
+    activeIndex = Math.max(0, activeItems.findIndex((item) => item.url === url));
+
+    render();
+    setOpen(true);
+  };
+
+  document.addEventListener('click', (event) => {
+    const mediaLink = event.target.closest('.rework-comment-media-grid a');
+
+    if (mediaLink) {
+      event.preventDefault();
+      event.stopPropagation();
+      openFromLink(mediaLink);
+      return;
+    }
+
+    const viewer = event.target.closest('[data-rework-comment-media-viewer]');
+
+    if (event.target.matches?.('[data-rework-comment-media-viewer]') || event.target.closest('[data-rework-comment-media-viewer-close]')) {
+      event.preventDefault();
+      setOpen(false);
+      return;
+    }
+
+    if (!viewer) return;
+
+    if (event.target.closest('[data-rework-comment-media-viewer-prev]')) {
+      event.preventDefault();
+      activeIndex = (activeIndex - 1 + activeItems.length) % activeItems.length;
+      render();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-comment-media-viewer-next]')) {
+      event.preventDefault();
+      activeIndex = (activeIndex + 1) % activeItems.length;
+      render();
+    }
+  }, true);
+
+  document.addEventListener('keydown', (event) => {
+    const viewer = document.querySelector('[data-rework-comment-media-viewer].is-open');
+    if (!viewer) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setOpen(false);
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' && activeItems.length > 1) {
+      event.preventDefault();
+      activeIndex = (activeIndex - 1 + activeItems.length) % activeItems.length;
+      render();
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && activeItems.length > 1) {
+      event.preventDefault();
+      activeIndex = (activeIndex + 1) % activeItems.length;
+      render();
+    }
+  });
 })();
