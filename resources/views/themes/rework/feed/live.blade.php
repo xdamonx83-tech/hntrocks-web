@@ -355,7 +355,7 @@
 <input name="background_style" type="hidden" value="none">
 <input data-rework-composer-visibility-input name="visibility" type="hidden" value="public">
 <input data-rework-composer-ai-input name="ai_generated" type="hidden" value="0">
-<input name="feeling_key" type="hidden" value="none">
+<input data-rework-composer-feeling-input name="feeling_key" type="hidden" value="none">
 <input accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" data-rework-composer-file-input id="reworkComposerMedia" multiple name="media[]" type="file">
 </form>
 <section aria-labelledby="post-composer-title" aria-modal="true" class="post-composer-modal" role="dialog">
@@ -378,6 +378,11 @@
 </div>
 </div>
 <a class="audience-pill" data-rework-composer-audience href="#">Community <span><i aria-hidden="true" class="ph ph-caret-down ph-icon"></i></span></a>
+<div class="rework-composer-audience-menu" data-rework-composer-audience-menu hidden>
+<button data-rework-composer-audience-option="public" type="button"><strong>Community</strong><span>Alle eingeloggten Hunter</span></button>
+<button data-rework-composer-audience-option="followers" type="button"><strong>Freunde</strong><span>Nur dein Netzwerk</span></button>
+<button data-rework-composer-audience-option="private" type="button"><strong>Privat</strong><span>Nur du</span></button>
+</div>
 </div>
 <div class="post-composer-textbox">
 <textarea data-rework-composer-textarea form="reworkPostComposerForm" maxlength="5000" name="body" placeholder="Was gibt es Neues im Bayou?"></textarea>
@@ -393,6 +398,25 @@
 <a data-rework-composer-feeling href="#"><span><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></span>Gefühl</a>
 <a data-rework-composer-poll href="#"><span><i aria-hidden="true" class="ph ph-question ph-icon"></i></span>Umfrage</a>
 <a data-rework-composer-ai-toggle href="#"><span class="composer-check"><i aria-hidden="true" class="ph ph-square ph-icon"></i></span>KI-Inhalt</a>
+</div>
+<div class="rework-composer-addons" data-rework-composer-addons>
+<div class="rework-composer-media-preview" data-rework-composer-media-preview hidden></div>
+<div class="rework-composer-selected-feeling" data-rework-composer-feeling-selected hidden></div>
+<div class="rework-composer-feeling-panel" data-rework-composer-feeling-panel hidden>
+<button data-rework-composer-feeling-option="happy" type="button">😄 Happy</button>
+<button data-rework-composer-feeling-option="excited" type="button">🔥 Hype</button>
+<button data-rework-composer-feeling-option="focused" type="button">🎯 Fokus</button>
+<button data-rework-composer-feeling-option="chill" type="button">😎 Chill</button>
+<button data-rework-composer-feeling-option="tired" type="button">💀 Müde</button>
+<button data-rework-composer-feeling-option="salty" type="button">🧂 Salty</button>
+</div>
+<div class="rework-composer-poll-panel" data-rework-composer-poll-panel hidden>
+<label><span>Frage</span><input form="reworkPostComposerForm" maxlength="180" name="poll_question" placeholder="Was möchtest du wissen?" type="text"></label>
+<label><span>Antwort 1</span><input form="reworkPostComposerForm" maxlength="180" name="poll_options[]" placeholder="Option 1" type="text"></label>
+<label><span>Antwort 2</span><input form="reworkPostComposerForm" maxlength="180" name="poll_options[]" placeholder="Option 2" type="text"></label>
+<label><span>Antwort 3</span><input form="reworkPostComposerForm" maxlength="180" name="poll_options[]" placeholder="Option 3 optional" type="text"></label>
+<label><span>Antwort 4</span><input form="reworkPostComposerForm" maxlength="180" name="poll_options[]" placeholder="Option 4 optional" type="text"></label>
+</div>
 </div>
 </div>
 <footer class="post-composer-footer">

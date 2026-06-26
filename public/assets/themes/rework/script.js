@@ -87,6 +87,7 @@
       const modalBody = commentModal.querySelector('.modal-post-body');
       const modalStats = commentModal.querySelector('.modal-post-stats');
       const modalPostPanel = commentModal.querySelector('.comment-modal-post');
+      let modalExtra = commentModal.querySelector('[data-rework-modal-extra]');
       const modalCount = commentModal.querySelector('.comment-modal-head strong');
       const modalThread = commentModal.querySelector('.comment-thread');
 
@@ -123,6 +124,65 @@
       }
 
       setHtml(modalBody, context.body_html || '');
+
+      const renderModalExtras = () => {
+        if (!modalPostPanel) return;
+
+        if (!modalExtra) {
+          modalExtra = document.createElement('div');
+          modalExtra.setAttribute('data-rework-modal-extra', '');
+          modalExtra.className = 'rework-modal-extra';
+          modalBody?.insertAdjacentElement('afterend', modalExtra);
+        }
+
+        modalExtra.innerHTML = '';
+
+        if (context.feeling?.label) {
+          const feeling = document.createElement('div');
+          feeling.className = 'rework-post-feeling';
+          feeling.innerHTML = `<span>${context.feeling.emoji || '✨'}</span><strong>${context.author || 'HNT Hunter'}</strong><em>fühlt sich ${context.feeling.label}</em>`;
+          modalExtra.appendChild(feeling);
+        }
+
+        if (context.poll && Array.isArray(context.poll.options) && context.poll.options.length) {
+          const poll = document.createElement('div');
+          poll.className = 'rework-post-poll';
+
+          if (context.poll.question) {
+            const question = document.createElement('strong');
+            question.className = 'rework-post-poll-question';
+            question.textContent = context.poll.question;
+            poll.appendChild(question);
+          }
+
+          const options = document.createElement('div');
+          options.className = 'rework-post-poll-options';
+
+          context.poll.options.forEach((option) => {
+            const row = document.createElement('div');
+            row.className = 'rework-post-poll-option';
+            const percent = Number.parseInt(option.percent, 10) || 0;
+            row.innerHTML = `
+              <div class="rework-post-poll-option-head"><span></span><em>${percent}%</em></div>
+              <div class="rework-post-poll-bar"><span style="width:${percent}%"></span></div>
+            `;
+            row.querySelector('span').textContent = option.body || '';
+            options.appendChild(row);
+          });
+
+          poll.appendChild(options);
+
+          const total = document.createElement('span');
+          total.className = 'rework-post-poll-total';
+          total.textContent = `${formatCount(context.poll.total_votes || 0)} Stimmen`;
+          poll.appendChild(total);
+          modalExtra.appendChild(poll);
+        }
+
+        modalExtra.hidden = modalExtra.childElementCount === 0;
+      };
+
+      renderModalExtras();
 
       if (modalStats) {
         modalStats.innerHTML = `
@@ -1012,27 +1072,42 @@
 })();
 
 
-/* 081: Rework post composer functional bridge without visual changes */
+/* 082: Rework composer addon functionality */
 (() => {
   const backdrop = document.querySelector('[data-post-composer-modal]');
   const form = backdrop?.querySelector('[data-rework-post-composer-form]');
-  const textarea = backdrop?.querySelector('[data-rework-composer-textarea]');
-  const fileInput = backdrop?.querySelector('[data-rework-composer-file-input]');
-  const mediaTrigger = backdrop?.querySelector('[data-rework-composer-media-trigger]');
-  const submitTrigger = backdrop?.querySelector('[data-rework-composer-submit]');
-  const aiTrigger = backdrop?.querySelector('[data-rework-composer-ai-toggle]');
-  const aiInput = form?.querySelector('[data-rework-composer-ai-input]');
-  const audienceTrigger = backdrop?.querySelector('[data-rework-composer-audience]');
-  const visibilityInput = form?.querySelector('[data-rework-composer-visibility-input]');
-  const emojiTrigger = backdrop?.querySelector('[data-rework-composer-emoji]');
-
   if (!backdrop || !form) return;
-  if (backdrop.dataset.reworkComposerBridgeReady === '1') return;
-  backdrop.dataset.reworkComposerBridgeReady = '1';
+  if (backdrop.dataset.reworkComposerAddonReady === '1') return;
+  backdrop.dataset.reworkComposerAddonReady = '1';
 
+  const textarea = backdrop.querySelector('[data-rework-composer-textarea]');
+  const fileInput = form.querySelector('[data-rework-composer-file-input]');
+  const mediaTrigger = backdrop.querySelector('[data-rework-composer-media-trigger]');
+  const mediaPreview = backdrop.querySelector('[data-rework-composer-media-preview]');
+  const submitTrigger = backdrop.querySelector('[data-rework-composer-submit]');
+  const aiTrigger = backdrop.querySelector('[data-rework-composer-ai-toggle]');
+  const aiInput = form.querySelector('[data-rework-composer-ai-input]');
+  const audienceTrigger = backdrop.querySelector('[data-rework-composer-audience]');
+  const audienceMenu = backdrop.querySelector('[data-rework-composer-audience-menu]');
+  const visibilityInput = form.querySelector('[data-rework-composer-visibility-input]');
+  const feelingTrigger = backdrop.querySelector('[data-rework-composer-feeling]');
+  const feelingPanel = backdrop.querySelector('[data-rework-composer-feeling-panel]');
+  const feelingInput = form.querySelector('[data-rework-composer-feeling-input]');
+  const pollTrigger = backdrop.querySelector('[data-rework-composer-poll]');
+  const pollPanel = backdrop.querySelector('[data-rework-composer-poll-panel]');
+  const emojiTrigger = backdrop.querySelector('[data-rework-composer-emoji]');
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
     || form.querySelector('input[name="_token"]')?.value
     || '';
+
+  let selectedFiles = [];
+
+  const closeFloatingPanels = (except = null) => {
+    if (except !== 'audience' && audienceMenu) audienceMenu.hidden = true;
+    if (except !== 'feeling' && feelingPanel) feelingPanel.hidden = true;
+    if (except !== 'poll' && pollPanel) pollPanel.hidden = true;
+    if (except !== 'emoji') backdrop.querySelector('[data-rework-inline-emoji-picker]')?.remove();
+  };
 
   const setSubmitState = (isSubmitting) => {
     if (!submitTrigger) return;
@@ -1040,7 +1115,56 @@
     submitTrigger.textContent = isSubmitting ? 'Postet...' : 'Posten';
   };
 
-  const getSelectedFiles = () => Array.from(fileInput?.files || []);
+  const syncFileInput = () => {
+    if (!fileInput || typeof DataTransfer === 'undefined') return;
+    const transfer = new DataTransfer();
+    selectedFiles.forEach((file) => transfer.items.add(file));
+    fileInput.files = transfer.files;
+  };
+
+  const renderMediaPreview = () => {
+    if (!mediaPreview) return;
+    mediaPreview.innerHTML = '';
+    mediaPreview.hidden = selectedFiles.length === 0;
+
+    selectedFiles.forEach((file, index) => {
+      const tile = document.createElement('div');
+      tile.className = 'rework-composer-media-tile';
+
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.alt = file.name;
+        img.src = URL.createObjectURL(file);
+        img.addEventListener('load', () => URL.revokeObjectURL(img.src), { once: true });
+        tile.appendChild(img);
+      } else if (file.type.startsWith('video/')) {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.muted = true;
+        video.playsInline = true;
+        video.addEventListener('loadeddata', () => URL.revokeObjectURL(video.src), { once: true });
+        tile.appendChild(video);
+      } else {
+        tile.classList.add('is-file');
+        tile.textContent = file.name;
+      }
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'rework-composer-media-remove';
+      remove.setAttribute('aria-label', `${file.name} entfernen`);
+      remove.innerHTML = '<i aria-hidden="true" class="ph ph-x ph-icon"></i>';
+      remove.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        selectedFiles.splice(index, 1);
+        syncFileInput();
+        renderMediaPreview();
+      });
+      tile.appendChild(remove);
+      mediaPreview.appendChild(tile);
+    });
+  };
 
   mediaTrigger?.addEventListener('click', (event) => {
     event.preventDefault();
@@ -1049,57 +1173,80 @@
   });
 
   fileInput?.addEventListener('change', () => {
-    const count = getSelectedFiles().length;
-    if (mediaTrigger) {
-      mediaTrigger.setAttribute('aria-label', count > 0 ? `${count} Medien ausgewählt` : 'Medien auswählen');
-      mediaTrigger.setAttribute('title', count > 0 ? `${count} Medien ausgewählt` : 'Medien auswählen');
-    }
-  });
-
-  aiTrigger?.addEventListener('click', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!aiInput) return;
-    aiInput.value = aiInput.value === '1' ? '0' : '1';
-
-    const icon = aiTrigger.querySelector('.composer-check i');
-    if (icon) {
-      icon.classList.toggle('ph-square', aiInput.value !== '1');
-      icon.classList.toggle('ph-check-square', aiInput.value === '1');
-    }
-
-    aiTrigger.setAttribute('aria-pressed', aiInput.value === '1' ? 'true' : 'false');
+    selectedFiles = Array.from(fileInput.files || []);
+    renderMediaPreview();
   });
 
   audienceTrigger?.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
-
-    if (!visibilityInput) return;
-
-    const options = [
-      ['public', 'Community'],
-      ['followers', 'Freunde'],
-      ['private', 'Privat'],
-    ];
-
-    const currentIndex = Math.max(0, options.findIndex(([value]) => value === visibilityInput.value));
-    const next = options[(currentIndex + 1) % options.length];
-
-    visibilityInput.value = next[0];
-
-    const labelNode = Array.from(audienceTrigger.childNodes)
-      .find((node) => node.nodeType === Node.TEXT_NODE);
-
-    if (labelNode) {
-      labelNode.textContent = next[1] + ' ';
-    }
-
-    audienceTrigger.setAttribute('aria-label', `Sichtbarkeit: ${next[1]}`);
+    if (!audienceMenu) return;
+    const willOpen = audienceMenu.hidden;
+    closeFloatingPanels(willOpen ? 'audience' : null);
+    audienceMenu.hidden = !willOpen;
   });
 
-  const emojiList = ['😄', '😂', '😍', '🔥', '🎯', '💀', '🤠', '😎', '😭', '😡', '👏', '🙏', '👀', '🏆', '🎮', '🧂'];
+  audienceMenu?.addEventListener('click', (event) => {
+    const option = event.target.closest('[data-rework-composer-audience-option]');
+    if (!option || !visibilityInput || !audienceTrigger) return;
+    event.preventDefault();
+
+    const value = option.getAttribute('data-rework-composer-audience-option') || 'public';
+    const label = option.querySelector('strong')?.textContent?.trim() || 'Community';
+    visibilityInput.value = value;
+
+    const textNode = Array.from(audienceTrigger.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+    if (textNode) textNode.textContent = `${label} `;
+
+    audienceMenu.querySelectorAll('[data-rework-composer-audience-option]').forEach((button) => {
+      button.classList.toggle('is-active', button === option);
+    });
+
+    audienceMenu.hidden = true;
+  });
+
+  feelingTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!feelingPanel) return;
+    const willOpen = feelingPanel.hidden;
+    closeFloatingPanels(willOpen ? 'feeling' : null);
+    feelingPanel.hidden = !willOpen;
+  });
+
+  feelingPanel?.addEventListener('click', (event) => {
+    const option = event.target.closest('[data-rework-composer-feeling-option]');
+    if (!option || !feelingInput) return;
+    event.preventDefault();
+
+    const isActive = option.classList.contains('is-active');
+    feelingPanel.querySelectorAll('[data-rework-composer-feeling-option]').forEach((button) => button.classList.remove('is-active'));
+    option.classList.toggle('is-active', !isActive);
+    feelingInput.value = isActive ? 'none' : (option.getAttribute('data-rework-composer-feeling-option') || 'none');
+    feelingPanel.hidden = true;
+  });
+
+  pollTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!pollPanel) return;
+    const willOpen = pollPanel.hidden;
+    closeFloatingPanels(willOpen ? 'poll' : null);
+    pollPanel.hidden = !willOpen;
+  });
+
+  aiTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!aiInput) return;
+    aiInput.value = aiInput.value === '1' ? '0' : '1';
+    const icon = aiTrigger.querySelector('.composer-check i');
+    if (icon) {
+      icon.classList.toggle('ph-square', aiInput.value !== '1');
+      icon.classList.toggle('ph-check-square', aiInput.value === '1');
+    }
+    aiTrigger.setAttribute('aria-pressed', aiInput.value === '1' ? 'true' : 'false');
+  });
 
   const insertTextAtCursor = (insert) => {
     if (!textarea || !insert) return;
@@ -1112,10 +1259,6 @@
     textarea.setSelectionRange(start + value.length, start + value.length);
   };
 
-  const removeEmojiPicker = () => {
-    backdrop.querySelector('[data-rework-inline-emoji-picker]')?.remove();
-  };
-
   emojiTrigger?.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1125,6 +1268,8 @@
       existing.remove();
       return;
     }
+
+    closeFloatingPanels('emoji');
 
     const picker = document.createElement('div');
     picker.setAttribute('data-rework-inline-emoji-picker', '');
@@ -1145,7 +1290,7 @@
     picker.style.left = `${Math.max(12, rect.left - backdropRect.left - 235)}px`;
     picker.style.top = `${Math.max(12, rect.top - backdropRect.top - 82)}px`;
 
-    emojiList.forEach((emoji) => {
+    ['😄','😂','😍','🔥','🎯','💀','🤠','😎','😭','😡','👏','🙏','👀','🏆','🎮','🧂'].forEach((emoji) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = emoji;
@@ -1157,11 +1302,11 @@
       button.style.background = 'rgba(255,255,255,.05)';
       button.style.cursor = 'pointer';
       button.style.fontSize = '18px';
-      button.addEventListener('click', (buttonEvent) => {
-        buttonEvent.preventDefault();
-        buttonEvent.stopPropagation();
+      button.addEventListener('click', (emojiEvent) => {
+        emojiEvent.preventDefault();
+        emojiEvent.stopPropagation();
         insertTextAtCursor(emoji);
-        removeEmojiPicker();
+        picker.remove();
       });
       picker.appendChild(button);
     });
@@ -1170,10 +1315,20 @@
   });
 
   document.addEventListener('click', (event) => {
-    if (event.target.closest('[data-rework-inline-emoji-picker]') || event.target.closest('[data-rework-composer-emoji]')) {
+    if (
+      event.target.closest('[data-rework-composer-audience]') ||
+      event.target.closest('[data-rework-composer-audience-menu]') ||
+      event.target.closest('[data-rework-composer-feeling]') ||
+      event.target.closest('[data-rework-composer-feeling-panel]') ||
+      event.target.closest('[data-rework-composer-poll]') ||
+      event.target.closest('[data-rework-composer-poll-panel]') ||
+      event.target.closest('[data-rework-composer-emoji]') ||
+      event.target.closest('[data-rework-inline-emoji-picker]')
+    ) {
       return;
     }
-    removeEmojiPicker();
+
+    closeFloatingPanels();
   });
 
   submitTrigger?.addEventListener('click', (event) => {
@@ -1195,19 +1350,24 @@
 
     if (submitTrigger?.getAttribute('aria-disabled') === 'true') return;
 
-    const body = String(textarea?.value || '').trim();
-    const files = getSelectedFiles();
-
-    if (!body && files.length === 0) {
-      textarea?.focus();
-      window.alert('Schreib etwas oder wähle Medien aus.');
-      return;
-    }
-
     const formData = new FormData(form);
     formData.set('body', textarea?.value || '');
     formData.set('visibility', visibilityInput?.value || 'public');
     formData.set('ai_generated', aiInput?.value === '1' ? '1' : '0');
+    formData.set('feeling_key', feelingInput?.value || 'none');
+
+    const body = String(formData.get('body') || '').trim();
+    const files = Array.from(fileInput?.files || []);
+    const pollQuestion = String(formData.get('poll_question') || '').trim();
+    const pollOptions = formData.getAll('poll_options[]')
+      .map((value) => String(value || '').trim())
+      .filter(Boolean);
+
+    if (!body && files.length === 0 && !(pollQuestion && pollOptions.length >= 2)) {
+      textarea?.focus();
+      window.alert('Schreib etwas, wähle Medien aus oder erstelle eine Umfrage mit mindestens zwei Antworten.');
+      return;
+    }
 
     setSubmitState(true);
 
@@ -1238,4 +1398,55 @@
       window.alert(error?.message || 'Post konnte nicht erstellt werden.');
     }
   }, true);
+})();
+
+
+/* 083: Rework composer selected feeling label */
+(() => {
+  const backdrop = document.querySelector('[data-post-composer-modal]');
+  if (!backdrop) return;
+
+  const feelingPanel = backdrop.querySelector('[data-rework-composer-feeling-panel]');
+  const selected = backdrop.querySelector('[data-rework-composer-feeling-selected]');
+  const feelingInput = backdrop.querySelector('[data-rework-composer-feeling-input]');
+
+  if (!feelingPanel || !selected || !feelingInput) return;
+  if (backdrop.dataset.reworkFeelingLabelReady === '1') return;
+  backdrop.dataset.reworkFeelingLabelReady = '1';
+
+  const labels = {
+    happy: '😄 Happy',
+    excited: '🔥 Hype',
+    focused: '🎯 Fokus',
+    chill: '😎 Chill',
+    tired: '💀 Müde',
+    salty: '🧂 Salty',
+  };
+
+  const syncSelectedFeeling = () => {
+    const value = feelingInput.value || 'none';
+    if (!value || value === 'none') {
+      selected.hidden = true;
+      selected.textContent = '';
+      return;
+    }
+
+    selected.hidden = false;
+    selected.textContent = `Gefühl: ${labels[value] || value}`;
+  };
+
+  feelingPanel.addEventListener('click', () => {
+    window.setTimeout(syncSelectedFeeling, 0);
+  });
+
+  document.querySelectorAll('[data-post-composer-close]').forEach((close) => {
+    close.addEventListener('click', () => {
+      window.setTimeout(() => {
+        feelingInput.value = 'none';
+        syncSelectedFeeling();
+      }, 0);
+    });
+  });
+
+  syncSelectedFeeling();
 })();

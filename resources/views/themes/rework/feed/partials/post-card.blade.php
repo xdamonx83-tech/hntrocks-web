@@ -44,6 +44,13 @@
     $postUrl = route('feed.show', $post);
     $body = trim((string) $post->body);
     $bodyHtml = \App\Support\FeedTextRenderer::render($body);
+    $feelingMeta = method_exists($post, 'feelingMeta') ? $post->feelingMeta() : null;
+    $poll = $post->relationLoaded('poll') ? $post->poll : null;
+    $pollOptions = $poll && $poll->relationLoaded('options') ? $poll->options->values() : collect();
+    $pollVotes = $poll && $poll->relationLoaded('votes') ? $poll->votes : collect();
+    $pollTotalVotes = $pollVotes->count();
+    $viewerPollVote = $viewer && $poll ? $pollVotes->firstWhere('user_id', $viewer->id) : null;
+    $viewerPollOptionId = $viewerPollVote?->feed_post_poll_option_id;
     $plainBody = trim(preg_replace('/\s+/u', ' ', strip_tags($body)));
     $readMoreLimit = $firstMediaUrl ? 260 : 520;
     $shouldReadMore = mb_strlen($plainBody) > $readMoreLimit;
@@ -87,6 +94,7 @@
         'author_avatar' => $authorAvatar,
         'meta' => trim($authorMeta.' - '.($post->team?->name ?: $visibilityLabel)),
         'body_html' => $body !== '' ? $bodyHtml : '',
+        'feeling' => $feelingMeta,
         'media_url' => $firstMediaUrl,
         'media_type' => $firstMediaType,
         'media_alt' => $firstMediaAlt,
@@ -101,6 +109,22 @@
         'reaction_url' => $reactionUrl,
         'reactions_url' => $reactionsUrl,
         'comments_preview' => $commentsPreview,
+        'poll' => $poll ? [
+            'question' => $poll->question,
+            'vote_url' => route('feed.poll.vote', $post),
+            'total_votes' => $pollTotalVotes,
+            'options' => $pollOptions->map(function ($option) use ($pollTotalVotes, $viewerPollOptionId): array {
+                $votes = $option->relationLoaded('votes') ? $option->votes->count() : 0;
+
+                return [
+                    'id' => (int) $option->id,
+                    'body' => (string) $option->body,
+                    'votes' => $votes,
+                    'percent' => $pollTotalVotes > 0 ? (int) round(($votes / max(1, $pollTotalVotes)) * 100) : 0,
+                    'selected' => $viewerPollOptionId && (int) $viewerPollOptionId === (int) $option->id,
+                ];
+            })->values()->all(),
+        ] : null,
     ];
 @endphp
 
@@ -126,6 +150,45 @@
 </div>
 </div>
 </header>
+@if($feelingMeta || ($poll && $pollOptions->isNotEmpty()))
+<div class="rework-post-extras">
+@if($feelingMeta)
+<div class="rework-post-feeling">
+<span>{{ $feelingMeta['emoji'] ?? '✨' }}</span>
+<strong>{{ $authorName }}</strong>
+<em>fühlt sich {{ $feelingMeta['label'] ?? 'bereit' }}</em>
+</div>
+@endif
+@if($poll && $pollOptions->isNotEmpty())
+<div class="rework-post-poll">
+@if(filled($poll->question))
+<strong class="rework-post-poll-question">{{ $poll->question }}</strong>
+@endif
+<div class="rework-post-poll-options">
+@foreach($pollOptions as $option)
+@php
+    $optionVotes = $option->relationLoaded('votes') ? $option->votes->count() : 0;
+    $optionPercent = $pollTotalVotes > 0 ? (int) round(($optionVotes / max(1, $pollTotalVotes)) * 100) : 0;
+    $optionSelected = $viewerPollOptionId && (int) $viewerPollOptionId === (int) $option->id;
+@endphp
+<form action="{{ route('feed.poll.vote', $post) }}" class="rework-post-poll-option-form" method="post">
+@csrf
+<input name="poll_option_id" type="hidden" value="{{ $option->id }}">
+<button class="rework-post-poll-option {{ $optionSelected ? 'is-selected' : '' }}" type="submit">
+<span class="rework-post-poll-option-bar" style="width: {{ $optionPercent }}%"></span>
+<span class="rework-post-poll-option-head">
+<span>{{ $option->body }}</span>
+<em>{{ $optionPercent }}%</em>
+</span>
+</button>
+</form>
+@endforeach
+</div>
+<span class="rework-post-poll-total">{{ number_format((int) $pollTotalVotes) }} Stimmen</span>
+</div>
+@endif
+</div>
+@endif
 @if($firstMedia && $firstMediaUrl)
 <div class="post-media">
 @if($firstMedia->isVideo())
