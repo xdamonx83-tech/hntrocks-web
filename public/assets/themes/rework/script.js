@@ -3104,3 +3104,186 @@
   window.setTimeout(scan, 0);
   window.setTimeout(scan, 300);
 })();
+
+/* 098: Rework comment media viewer */
+(() => {
+  if (window.__hntReworkCommentMediaViewerReady) return;
+  window.__hntReworkCommentMediaViewerReady = true;
+
+  let activeItems = [];
+  let activeIndex = 0;
+
+  const isVideoUrl = (url = '') => /\.(mp4|webm|mov)(\?|#|$)/i.test(url);
+
+  const ensureViewer = () => {
+    let viewer = document.querySelector('[data-rework-comment-media-viewer]');
+    if (viewer) return viewer;
+
+    viewer = document.createElement('div');
+    viewer.className = 'modal-backdrop rework-comment-media-viewer-backdrop';
+    viewer.setAttribute('data-rework-comment-media-viewer', '');
+    viewer.setAttribute('aria-hidden', 'true');
+    viewer.innerHTML = `
+      <section class="post-composer-modal rework-comment-media-viewer-modal" role="dialog" aria-modal="true" aria-labelledby="rework-comment-media-viewer-title">
+        <div aria-hidden="true" class="post-composer-grip"></div>
+        <header class="post-composer-header">
+          <div class="post-composer-titleblock">
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>HNT MEDIA</span>
+            <h2 id="rework-comment-media-viewer-title">Kommentar-Medium</h2>
+            <p data-rework-comment-media-viewer-counter></p>
+          </div>
+          <button aria-label="Medienansicht schließen" class="post-composer-close" data-rework-comment-media-viewer-close type="button">
+            <i aria-hidden="true" class="ph ph-x ph-icon"></i>
+          </button>
+        </header>
+        <div class="rework-comment-media-viewer-stage" data-rework-comment-media-viewer-stage></div>
+      </section>
+    `;
+
+    document.body.appendChild(viewer);
+    return viewer;
+  };
+
+  const setOpen = (open) => {
+    const viewer = ensureViewer();
+    viewer.classList.toggle('is-open', open);
+    viewer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    document.body.classList.toggle('is-modal-open', open);
+  };
+
+  const render = () => {
+    const viewer = ensureViewer();
+    const stage = viewer.querySelector('[data-rework-comment-media-viewer-stage]');
+    const counter = viewer.querySelector('[data-rework-comment-media-viewer-counter]');
+
+    if (!stage) return;
+
+    const item = activeItems[activeIndex];
+    stage.innerHTML = '';
+
+    if (!item) {
+      setOpen(false);
+      return;
+    }
+
+    const frame = document.createElement('div');
+    frame.className = 'rework-comment-media-viewer-frame';
+
+    const mediaNode = item.type === 'video' || isVideoUrl(item.url)
+      ? document.createElement('video')
+      : document.createElement('img');
+
+    mediaNode.src = item.url || '';
+
+    if (mediaNode.tagName === 'VIDEO') {
+      mediaNode.controls = true;
+      mediaNode.playsInline = true;
+      mediaNode.preload = 'metadata';
+    } else {
+      mediaNode.alt = item.alt || '';
+    }
+
+    frame.appendChild(mediaNode);
+
+    if (activeItems.length > 1) {
+      frame.insertAdjacentHTML('beforeend', `
+        <button type="button" class="rework-comment-media-viewer-nav is-prev" data-rework-comment-media-viewer-prev aria-label="Vorheriges Medium">
+          <i aria-hidden="true" class="ph ph-caret-left ph-icon"></i>
+        </button>
+        <button type="button" class="rework-comment-media-viewer-nav is-next" data-rework-comment-media-viewer-next aria-label="Nächstes Medium">
+          <i aria-hidden="true" class="ph ph-caret-right ph-icon"></i>
+        </button>
+      `);
+    }
+
+    stage.appendChild(frame);
+
+    if (counter) {
+      counter.textContent = activeItems.length > 1 ? `${activeIndex + 1} / ${activeItems.length}` : '';
+    }
+  };
+
+  const itemsFromGrid = (grid) => Array.from(grid.querySelectorAll('a'))
+    .map((link) => {
+      const media = link.querySelector('img, video');
+      const url = link.getAttribute('href') || media?.getAttribute('src') || '';
+      if (!url || url === '#') return null;
+
+      return {
+        url,
+        alt: media?.getAttribute('alt') || '',
+        type: media?.tagName === 'VIDEO' || isVideoUrl(url) ? 'video' : 'image',
+      };
+    })
+    .filter(Boolean);
+
+  const openFromLink = (link) => {
+    const grid = link.closest('.rework-comment-media-grid');
+    if (!grid) return;
+
+    activeItems = itemsFromGrid(grid);
+    const url = link.getAttribute('href') || link.querySelector('img, video')?.getAttribute('src') || '';
+    activeIndex = Math.max(0, activeItems.findIndex((item) => item.url === url));
+
+    render();
+    setOpen(true);
+  };
+
+  document.addEventListener('click', (event) => {
+    const mediaLink = event.target.closest('.rework-comment-media-grid a');
+
+    if (mediaLink) {
+      event.preventDefault();
+      event.stopPropagation();
+      openFromLink(mediaLink);
+      return;
+    }
+
+    const viewer = event.target.closest('[data-rework-comment-media-viewer]');
+
+    if (event.target.matches?.('[data-rework-comment-media-viewer]') || event.target.closest('[data-rework-comment-media-viewer-close]')) {
+      event.preventDefault();
+      setOpen(false);
+      return;
+    }
+
+    if (!viewer) return;
+
+    if (event.target.closest('[data-rework-comment-media-viewer-prev]')) {
+      event.preventDefault();
+      activeIndex = (activeIndex - 1 + activeItems.length) % activeItems.length;
+      render();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-comment-media-viewer-next]')) {
+      event.preventDefault();
+      activeIndex = (activeIndex + 1) % activeItems.length;
+      render();
+    }
+  }, true);
+
+  document.addEventListener('keydown', (event) => {
+    const viewer = document.querySelector('[data-rework-comment-media-viewer].is-open');
+    if (!viewer) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setOpen(false);
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' && activeItems.length > 1) {
+      event.preventDefault();
+      activeIndex = (activeIndex - 1 + activeItems.length) % activeItems.length;
+      render();
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && activeItems.length > 1) {
+      event.preventDefault();
+      activeIndex = (activeIndex + 1) % activeItems.length;
+      render();
+    }
+  });
+})();

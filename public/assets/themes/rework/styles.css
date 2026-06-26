@@ -9881,3 +9881,190 @@ body.is-modal-open { overflow: hidden; }
   min-width: 74px;
   text-align: center;
 }
+
+/* 096: Rework desktop comment action overflow fix */
+.comment-modal-panel,
+.comment-thread,
+.rework-comment-thread,
+.comment-item.rework-comment-item,
+.comment-item.rework-comment-item > div {
+  min-width: 0;
+}
+
+.comment-item.rework-comment-item {
+  overflow: hidden;
+}
+
+.rework-comment-actions {
+  max-width: 100%;
+  overflow-x: visible !important;
+  flex-wrap: wrap !important;
+  gap: 7px;
+}
+
+.rework-comment-actions button {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+.rework-comment-actions button span {
+  display: none !important;
+}
+
+.rework-comment-actions button .ph-icon {
+  font-size: 16px;
+}
+
+.rework-comment-edit-form,
+.rework-comment-delete-prompt {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.rework-comment-edit-form input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.rework-comment-edit-form div {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.rework-comment-edit-form button,
+.rework-comment-delete-prompt button {
+  max-width: 100%;
+}
+
+.rework-comment-delete-prompt {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+@media (min-width: 761px) {
+  .comment-modal-panel .rework-comment-actions {
+    padding-right: 2px;
+  }
+
+  .comment-modal-panel .rework-comment-actions button {
+    flex: 0 0 34px;
+  }
+}
+
+/* 098: Rework comment media viewer */
+.rework-comment-media-grid a {
+  cursor: zoom-in;
+}
+
+.rework-comment-media-viewer-backdrop {
+  z-index: 9800;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.rework-comment-media-viewer-modal {
+  width: min(980px, calc(100vw - 32px));
+  max-height: min(92vh, 880px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rework-comment-media-viewer-modal .post-composer-header {
+  flex: 0 0 auto;
+}
+
+.rework-comment-media-viewer-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.rework-comment-media-viewer-frame {
+  position: relative;
+  width: 100%;
+  min-height: min(58vh, 620px);
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, .28);
+  display: grid;
+  place-items: center;
+}
+
+.rework-comment-media-viewer-frame img,
+.rework-comment-media-viewer-frame video {
+  display: block;
+  max-width: 100%;
+  max-height: min(68vh, 680px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.rework-comment-media-viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #F2E8D8;
+  background: rgba(20, 20, 18, .78);
+  cursor: pointer;
+}
+
+.rework-comment-media-viewer-nav.is-prev {
+  left: 14px;
+}
+
+.rework-comment-media-viewer-nav.is-next {
+  right: 14px;
+}
+
+.rework-comment-media-viewer-nav:hover {
+  background: rgba(214, 168, 79, .24);
+}
+
+@media (max-width: 760px) {
+  .rework-comment-media-viewer-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .rework-comment-media-viewer-modal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .rework-comment-media-viewer-stage {
+    padding: 12px;
+  }
+
+  .rework-comment-media-viewer-frame {
+    min-height: 48vh;
+    border-radius: 20px;
+  }
+
+  .rework-comment-media-viewer-frame img,
+  .rework-comment-media-viewer-frame video {
+    max-height: 58vh;
+  }
+
+  .rework-comment-media-viewer-nav {
+    width: 42px;
+    height: 42px;
+  }
+}
