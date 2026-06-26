@@ -1072,6 +1072,61 @@
   }
 })();
 
+/* Rework sidebar friend suggestions */
+(() => {
+  if (window.__hntReworkFriendSuggestionsReady) return;
+  window.__hntReworkFriendSuggestionsReady = true;
+
+  const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  document.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-rework-friend-request-form]');
+    if (!form) return;
+
+    event.preventDefault();
+
+    const button = form.querySelector('button[type="submit"]');
+    const requestedLabel = form.getAttribute('data-requested-label') || 'Requested';
+    const failedLabel = form.getAttribute('data-failed-label') || 'Friend request failed';
+    const originalLabel = button?.textContent || '';
+
+    if (!button || button.disabled) return;
+
+    button.disabled = true;
+    button.classList.remove('has-error');
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken(),
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: new FormData(form),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload?.message || failedLabel);
+      }
+
+      button.textContent = requestedLabel;
+      button.classList.add('is-requested');
+    } catch (error) {
+      button.textContent = failedLabel;
+      button.classList.add('has-error');
+      window.setTimeout(() => {
+        button.textContent = originalLabel;
+        button.classList.remove('has-error');
+        button.disabled = false;
+      }, 1800);
+    }
+  });
+})();
+
 /* Rework feed comment modal parity */
 (() => {
   const modal = document.querySelector('[data-comment-modal]');

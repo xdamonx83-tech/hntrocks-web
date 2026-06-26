@@ -33,6 +33,15 @@
             ? route('profile.show')
             : route('profile.public', $author);
     };
+    $crownsSummary = $socialiteCrownsSummary ?? ['balance' => 0, 'enabled' => false];
+    $marksBalance = (int) ($crownsSummary['balance'] ?? 0);
+    $shopUrl = \Illuminate\Support\Facades\Route::has('crowns.shop') ? route('crowns.shop') : null;
+    $membersUrl = \Illuminate\Support\Facades\Route::has('members.index') ? route('members.index') : null;
+    $highlightScore = function ($post): int {
+        return (int) ($post?->reactions_count ?? 0)
+            + (int) ($post?->comments_count ?? 0)
+            + (int) ($post?->shares_count ?? 0);
+    };
     $feedFilters = [
         'all' => 'All',
         'friends' => 'Freunde',
@@ -228,37 +237,74 @@
 </div>
 <aside class="right-col">
 <section class="profile-card card">
-<div class="profile-top"><strong>{{ $viewer?->name ?: 'HNT Hunter' }}</strong><span class="status">Online</span></div>
+<div class="profile-top"><strong>{{ $viewer?->name ?: 'HNT Hunter' }}</strong><span class="status">{{ $viewer?->isOnline() ? __('ui.online') : __('ui.offline') }}</span></div>
 <div class="profile-main">
-<img alt="Bounty Marks" class="mark" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>
+<img alt="{{ __('ui.crowns_label') }}" class="mark" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>
 <div class="levels">
-<span class="level-badge">Level {{ $viewer?->level ?? 1 }}</span>
-<span class="level-badge">{{ number_format((int) ($viewer?->xp_total ?? 0)) }} XP</span>
+<span class="level-badge">{{ __('ui.level') }} {{ $viewer?->level ?? 1 }}</span>
 </div>
 </div>
 <div class="balance">
-<div><strong>{{ number_format((int) ($viewer?->xp_total ?? 0)) }}</strong><span>XP gesammelt</span></div>
-<div class="profile-buttons"><a class="btn light" href="#">Shop</a><a class="btn light" href="#">ProPass</a></div>
+<div><strong>{{ number_format($marksBalance) }}</strong><span>{{ __('ui.crowns_label') }}</span></div>
+<div class="profile-buttons">
+@if($shopUrl)
+<a class="btn light" href="{{ $shopUrl }}">{{ __('ui.crowns_shop_kicker') }}</a>
+@endif
+</div>
 </div>
 </section>
 <section class="side-card suggested">
-<div class="side-head"><h2>Suggested For You</h2><a href="#">See All</a></div>
+<div class="side-head"><h2>{{ __('ui.rework_suggested_for_you') }}</h2>@if($membersUrl)<a href="{{ $membersUrl }}">{{ __('ui.see_all') }}</a>@endif</div>
 <div class="suggestion-list">
 @forelse(($socialiteMembers ?? collect())->take(3) as $member)
-<div class="suggestion"><img alt="{{ $member->name }}" src="{{ $member->avatarUrl() }}"/><div class="suggestion-info"><strong>{{ $member->name }}</strong><span>{{ $member->username ? '@'.$member->username : 'HNT Hunter' }}</span></div><a class="btn light" href="{{ $memberProfileUrl($member) }}">View</a></div>
+<div class="suggestion">
+<a class="suggestion-avatar" href="{{ $memberProfileUrl($member) }}"><img alt="{{ $member->name }}" src="{{ $member->avatarUrl() }}"/></a>
+<div class="suggestion-info"><a href="{{ $memberProfileUrl($member) }}"><strong>{{ $member->name }}</strong></a><span>{{ $member->username ? '@'.$member->username : 'HNT Hunter' }}</span></div>
+<form action="{{ route('friends.store', $member) }}" class="rework-friend-request-form" data-rework-friend-request-form method="post" data-requested-label="{{ __('ui.requested') }}" data-failed-label="{{ __('ui.rework_friend_request_failed') }}">
+@csrf
+<button class="btn light" type="submit">{{ __('ui.profile_add_friend_clean') }}</button>
+</form>
+</div>
 @empty
-<div class="suggestion"><img alt="" src="{{ $reworkAsset('images/sug-1.png') }}"/><div class="suggestion-info"><strong>HNT Community</strong><span>No hunters yet</span></div><a class="btn light" href="#">View</a></div>
+<div class="side-empty">{{ __('ui.rework_no_suggestions') }}</div>
 @endforelse
 </div>
 </section>
 <section class="side-card highlights">
-<div class="side-head"><h2>Highlights</h2></div>
+<div class="side-head"><h2>{{ __('ui.rework_current_highlights') }}</h2></div>
 <div class="highlight-list">
-@forelse(($socialiteTeams ?? collect())->take(3) as $team)
-<div class="highlight"><img alt="{{ $team->name }}" src="{{ $team->avatarUrl() }}"/><div class="highlight-info"><strong>{{ $team->name }}</strong><span>{{ trans_choice('ui.hunter_count', (int) ($team->active_members_count ?? 0), ['count' => (int) ($team->active_members_count ?? 0)]) }}</span></div><span class="highlight-time">Team</span></div>
-@empty
-<div class="highlight"><img alt="" src="{{ $reworkAsset('images/high-1.png') }}"/><div class="highlight-info"><strong>HNT Teams</strong><span>No featured teams yet</span></div><span class="highlight-time">Preview</span></div>
-@endforelse
+@if($socialiteHighlightTopPost)
+<a class="highlight-card" href="{{ $socialiteHighlightTopPost->permalink() }}">
+<span class="highlight-badge">{{ __('ui.rework_top_post') }}</span>
+<strong>{{ $socialiteHighlightTopPost->excerpt(90) ?: __('ui.rework_top_post_empty') }}</strong>
+<small>{{ __('ui.rework_feed_author', ['author' => $socialiteHighlightTopPost->user?->name ?: ($socialiteHighlightTopPost->user?->username ?: 'HNT Hunter')]) }}</small>
+<span class="highlight-meta"><i aria-hidden="true" class="ph ph-heart ph-icon"></i>{{ number_format((int) ($socialiteHighlightTopPost->reactions_count ?? 0)) }} <i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>{{ number_format((int) ($socialiteHighlightTopPost->comments_count ?? 0)) }} <i aria-hidden="true" class="ph ph-share-network ph-icon"></i>{{ number_format((int) ($socialiteHighlightTopPost->shares_count ?? 0)) }} <em>{{ trans_choice('ui.rework_interactions', $highlightScore($socialiteHighlightTopPost), ['count' => $highlightScore($socialiteHighlightTopPost)]) }}</em></span>
+</a>
+@endif
+@if($socialiteHighlightLfg)
+<a class="highlight-card" href="{{ route('lfg.show', $socialiteHighlightLfg) }}">
+<span class="highlight-badge">{{ __('ui.rework_new_lfg') }}</span>
+<strong>{{ $socialiteHighlightLfg->title }}</strong>
+<small>{{ $socialiteHighlightLfg->user?->name ?: ($socialiteHighlightLfg->user?->username ?: 'HNT Hunter') }}</small>
+<span class="highlight-pills">
+@foreach(array_slice($socialiteHighlightLfg->displayTags(), 0, 3) as $tag)
+<em>{{ $tag }}</em>
+@endforeach
+<em>{{ $socialiteHighlightLfg->statusLabel() }}</em>
+</span>
+</a>
+@endif
+@if($socialiteHighlightCup)
+<a class="highlight-card" href="{{ route('cups.show', $socialiteHighlightCup) }}">
+<span class="highlight-badge">{{ __('ui.rework_active_cup') }}</span>
+<strong>{{ $socialiteHighlightCup->title }}</strong>
+<small>{{ $socialiteHighlightCup->displaySummary() }}</small>
+<span class="highlight-pills"><em>{{ $socialiteHighlightCup->statusLabel() }}</em><em>{{ trans_choice('ui.rework_cup_team_count', (int) ($socialiteHighlightCup->active_teams_count ?? 0), ['count' => (int) ($socialiteHighlightCup->active_teams_count ?? 0)]) }}</em></span>
+</a>
+@endif
+@if(! $socialiteHighlightTopPost && ! $socialiteHighlightLfg && ! $socialiteHighlightCup)
+<div class="side-empty">{{ __('ui.rework_no_highlights') }}</div>
+@endif
 </div>
 </section>
 </aside>
