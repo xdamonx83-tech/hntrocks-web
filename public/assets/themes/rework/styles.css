@@ -381,7 +381,7 @@ a { color: inherit; }
 .post-text { margin: 16px 0 27px; width: 697px;   color: rgba(255,255,255,.68);
   font-size: 13px;
   line-height: 24px; line-height: 19px; font-weight: 300; letter-spacing: .02em; }
-.comment-row { display:flex; align-items:center; gap:11px; }
+.comment-row { display:flex; align-items:center; gap:11px;padding-top: 15px; }
 .comment-row img { width:40px; height:40px; border-radius:10px; object-fit:cover; }
 .comment-input { flex:1; height:40px; border:0; border-radius:10px; background:#151514; color:#A5A5A5; padding:0 14px; font-size:10px; }
 .comment-row .btn { height:28px; min-width:88px; }
@@ -968,7 +968,7 @@ body.is-modal-open { overflow: hidden; }
 .comment-modal-panel {
   min-width: 0;
   height: 100%;
-  padding: 38px 30px 26px;
+  padding: 0px 10px 26px;
   display: flex;
   flex-direction: column;
 }
@@ -7368,12 +7368,12 @@ body.is-modal-open { overflow: hidden; }
 .rework-feed-filters a {
   flex: 0 0 auto;
   border: 1px solid #dedede;
-  border-radius: 999px;
+  border-radius: 10px;
   color: #6c6c6c;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1;
-  padding: 12px 18px;
+  padding: 8px 18px;
   text-decoration: none;
   transition: border-color .18s ease, color .18s ease, background .18s ease;
 }
@@ -7394,7 +7394,7 @@ body.is-modal-open { overflow: hidden; }
 }
 
 .rework-post-body {
-  color: #4c4c4c;
+  color: #a4a3a3;
   line-height: 1.7;
 }
 
@@ -7792,9 +7792,7 @@ body.is-modal-open { overflow: hidden; }
   font-size: 24px;
 }
 
-.comment-modal-head {
-  background: linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0));
-}
+
 
 .comment-modal-head span,
 .reactions-modal-head span {
@@ -7996,8 +7994,8 @@ body.is-modal-open { overflow: hidden; }
   height: min(700px, calc(100dvh - 72px));
   max-height: calc(100dvh - 72px);
   background: #1E1E1D;
-  border: 1px solid rgba(255,255,255,.07);
-  box-shadow: 0 34px 110px rgba(0,0,0,.64);
+  border: 0px solid rgba(255,255,255,.07);
+  box-shadow: 0;
 }
 .comment-modal-layout {
   height: 100%;
@@ -8009,7 +8007,7 @@ body.is-modal-open { overflow: hidden; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 32px 34px 26px;
+  padding: 0px 25px 26px;
 }
 .modal-post-head {
   flex: 0 0 auto;
