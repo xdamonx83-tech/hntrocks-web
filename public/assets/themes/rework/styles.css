@@ -8416,3 +8416,172 @@ body.is-modal-open { overflow: hidden; }
     font-size: 14px;
   }
 }
+
+/* 078: Rework composer UX correction - keep template look, real controls */
+.rework-post-composer-form .rework-audience-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 154px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 16px;
+  background: rgba(15,15,14,.62);
+  border: 1px solid rgba(255,255,255,.055);
+  cursor: pointer;
+}
+.rework-post-composer-form .rework-audience-select select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.rework-post-composer-form .rework-audience-label {
+  color: #fff;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 800;
+  pointer-events: none;
+}
+.rework-post-composer-form .rework-audience-caret {
+  width: auto;
+  height: auto;
+  margin-left: 10px;
+  color: var(--muted-warm);
+  pointer-events: none;
+}
+.post-composer-textbox {
+  position: relative;
+}
+.post-composer-tools .rework-composer-tool {
+  height: 50px;
+  padding: 0 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(18,18,17,.46);
+  color: #F5EFE4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 800;
+  letter-spacing: 0;
+  cursor: pointer;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none;
+}
+.post-composer-tools .rework-composer-tool:hover,
+.post-composer-tools .rework-composer-tool:focus-visible {
+  border-color: rgba(207,161,73,.38);
+  background: rgba(207,161,73,.055);
+}
+.post-composer-tools .rework-composer-tool.is-active,
+.post-composer-tools .rework-composer-tool.has-media,
+.post-composer-tools .rework-composer-check.is-checked {
+  border-color: rgba(207,161,73,.56);
+  background: rgba(207,161,73,.085);
+  box-shadow: inset 0 0 0 1px rgba(207,161,73,.10);
+}
+.post-composer-tools .rework-composer-tool > span,
+.post-composer-tools .rework-composer-tool .composer-check {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(207,161,73,.18);
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.post-composer-tools .rework-composer-tool .composer-check {
+  border: 1px solid rgba(255,255,255,.34);
+  background: rgba(255,255,255,.035);
+  color: #D7CCBA;
+}
+.post-composer-tools .rework-composer-check.is-checked .composer-check {
+  border-color: rgba(207,161,73,.64);
+  background: rgba(207,161,73,.20);
+  color: var(--accent);
+}
+.post-composer-tools .rework-composer-check input,
+.rework-composer-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.rework-emoji-picker {
+  position: absolute;
+  right: 12px;
+  bottom: 58px;
+  z-index: 8;
+  display: grid;
+  grid-template-columns: repeat(6, 34px);
+  gap: 7px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #171716;
+  box-shadow: 0 18px 48px rgba(0,0,0,.52);
+}
+.rework-emoji-picker[hidden] {
+  display: none !important;
+}
+.rework-emoji-picker button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 11px;
+  background: rgba(255,255,255,.055);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  cursor: pointer;
+}
+.rework-emoji-picker button:hover,
+.rework-emoji-picker button:focus-visible,
+.composer-emoji.is-active {
+  background: rgba(207,161,73,.16);
+}
+.rework-composer-panel {
+  margin-top: 14px;
+  border-color: rgba(207,161,73,.18);
+  background: rgba(15,15,14,.52);
+}
+@media (max-width: 700px) {
+  .rework-post-composer-form .rework-audience-select {
+    min-width: 116px;
+    height: 38px;
+    padding: 0 13px;
+  }
+  .rework-post-composer-form .rework-audience-label {
+    font-size: 12px;
+  }
+  .post-composer-tools .rework-composer-tool {
+    height: 42px;
+    padding: 0 12px;
+    border-radius: 14px;
+    gap: 9px;
+    font-size: 12px;
+  }
+  .post-composer-tools .rework-composer-tool > span,
+  .post-composer-tools .rework-composer-tool .composer-check {
+    width: 25px;
+    height: 25px;
+    border-radius: 8px;
+  }
+  .rework-emoji-picker {
+    right: 6px;
+    bottom: 48px;
+    grid-template-columns: repeat(4, 34px);
+  }
+}

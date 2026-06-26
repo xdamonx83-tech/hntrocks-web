@@ -531,6 +531,38 @@
     const postComposerPreview = postComposerModal?.querySelector('[data-rework-composer-media-preview]');
     const postComposerError = postComposerModal?.querySelector('[data-rework-composer-error]');
     const postComposerSubmit = postComposerModal?.querySelector('[data-rework-composer-submit]');
+    const postComposerVisibility = postComposerModal?.querySelector('[data-rework-composer-visibility]');
+    const postComposerVisibilityLabel = postComposerModal?.querySelector('[data-rework-composer-visibility-label]');
+    const postComposerMediaTool = postComposerModal?.querySelector('label[for="reworkComposerMedia"]');
+    const postComposerAiInput = postComposerModal?.querySelector('.rework-composer-check input[name="ai_generated"]');
+    const postComposerAiTool = postComposerAiInput?.closest('.rework-composer-check');
+    const postComposerEmojiButton = postComposerModal?.querySelector('[data-rework-composer-emoji]');
+    const postComposerEmojiPicker = postComposerModal?.querySelector('[data-rework-composer-emoji-picker]');
+
+    const updateComposerVisibilityLabel = () => {
+      if (!postComposerVisibility || !postComposerVisibilityLabel) return;
+      const selected = postComposerVisibility.options[postComposerVisibility.selectedIndex];
+      postComposerVisibilityLabel.textContent = selected?.textContent?.trim() || 'Community';
+    };
+
+    const insertComposerText = (insert) => {
+      if (!postComposerTextarea || !insert) return;
+      const start = postComposerTextarea.selectionStart ?? postComposerTextarea.value.length;
+      const end = postComposerTextarea.selectionEnd ?? postComposerTextarea.value.length;
+      const prefix = start > 0 && !/\s$/.test(postComposerTextarea.value.slice(0, start)) ? ' ' : '';
+      const value = `${prefix}${insert}`;
+      postComposerTextarea.value = `${postComposerTextarea.value.slice(0, start)}${value}${postComposerTextarea.value.slice(end)}`;
+      postComposerTextarea.focus();
+      postComposerTextarea.setSelectionRange(start + value.length, start + value.length);
+    };
+
+    updateComposerVisibilityLabel();
+
+    postComposerVisibility?.addEventListener('change', updateComposerVisibilityLabel);
+
+    postComposerAiInput?.addEventListener('change', () => {
+      postComposerAiTool?.classList.toggle('is-checked', Boolean(postComposerAiInput.checked));
+    });
 
     const showComposerError = (message) => {
       if (!postComposerError) return;
@@ -553,6 +585,7 @@
       const files = Array.from(postComposerFileInput.files || []);
       postComposerPreview.innerHTML = '';
       postComposerPreview.hidden = files.length === 0;
+      postComposerMediaTool?.classList.toggle('has-media', files.length > 0);
 
       files.slice(0, 6).forEach((file) => {
         const item = document.createElement('span');
@@ -583,14 +616,31 @@
       renderComposerMediaPreview();
     });
 
-    postComposerModal?.querySelector('[data-rework-composer-emoji]')?.addEventListener('click', () => {
-      if (!postComposerTextarea) return;
-      const insert = ' 😄';
-      const start = postComposerTextarea.selectionStart ?? postComposerTextarea.value.length;
-      const end = postComposerTextarea.selectionEnd ?? postComposerTextarea.value.length;
-      postComposerTextarea.value = `${postComposerTextarea.value.slice(0, start)}${insert}${postComposerTextarea.value.slice(end)}`;
-      postComposerTextarea.focus();
-      postComposerTextarea.setSelectionRange(start + insert.length, start + insert.length);
+    postComposerEmojiButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (!postComposerEmojiPicker) return;
+      const shouldOpen = postComposerEmojiPicker.hidden;
+      postComposerEmojiPicker.hidden = !shouldOpen;
+      postComposerEmojiButton.classList.toggle('is-active', shouldOpen);
+      postComposerEmojiButton.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    });
+
+    postComposerEmojiPicker?.addEventListener('click', (event) => {
+      const emojiButton = event.target.closest('[data-rework-composer-emoji-value]');
+      if (!emojiButton) return;
+      event.preventDefault();
+      insertComposerText(emojiButton.getAttribute('data-rework-composer-emoji-value') || '');
+      postComposerEmojiPicker.hidden = true;
+      postComposerEmojiButton?.classList.remove('is-active');
+      postComposerEmojiButton?.setAttribute('aria-expanded', 'false');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!postComposerEmojiPicker || postComposerEmojiPicker.hidden) return;
+      if (event.target.closest('[data-rework-composer-emoji]') || event.target.closest('[data-rework-composer-emoji-picker]')) return;
+      postComposerEmojiPicker.hidden = true;
+      postComposerEmojiButton?.classList.remove('is-active');
+      postComposerEmojiButton?.setAttribute('aria-expanded', 'false');
     });
 
     postComposerModal?.querySelectorAll('[data-rework-composer-panel-toggle]').forEach((button) => {
@@ -615,6 +665,12 @@
         postComposerPreview.hidden = true;
       }
       resetComposerPanels();
+      postComposerMediaTool?.classList.remove('has-media');
+      postComposerAiTool?.classList.remove('is-checked');
+      if (postComposerEmojiPicker) postComposerEmojiPicker.hidden = true;
+      postComposerEmojiButton?.classList.remove('is-active');
+      postComposerEmojiButton?.setAttribute('aria-expanded', 'false');
+      updateComposerVisibilityLabel();
       showComposerError('');
       if (postComposerSubmit) {
         postComposerSubmit.disabled = false;
@@ -953,4 +1009,56 @@
     const observer = new MutationObserver(() => queueRecalibration(postStream));
     observer.observe(postStream, { childList: true, subtree: false });
   }
+})();
+
+
+/* 080: Rework post composer exact markup behavior */
+(() => {
+  const modal = document.querySelector('[data-post-composer-modal]');
+  const form = document.querySelector('[data-rework-post-composer-form]');
+  if (!modal || !form) return;
+
+  const fileInput = form.querySelector('[data-rework-composer-file-input]');
+  const mediaTrigger = modal.querySelector('[data-rework-composer-media-trigger]');
+  const submitTrigger = modal.querySelector('[data-rework-composer-submit]');
+  const aiTrigger = modal.querySelector('[data-rework-composer-ai-toggle]');
+  const aiInput = form.querySelector('[data-rework-composer-ai-input]');
+  const textarea = modal.querySelector('[data-rework-composer-textarea]');
+
+  mediaTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    fileInput?.click();
+  });
+
+  submitTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (typeof form.requestSubmit === 'function') {
+      form.requestSubmit();
+    } else {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    }
+  });
+
+  aiTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (!aiInput) return;
+    aiInput.value = aiInput.value === '1' ? '0' : '1';
+    const icon = aiTrigger.querySelector('.composer-check i');
+    if (icon) {
+      icon.classList.toggle('ph-square', aiInput.value !== '1');
+      icon.classList.toggle('ph-check-square', aiInput.value === '1');
+    }
+  });
+
+  modal.querySelector('[data-rework-composer-emoji]')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (!textarea) return;
+    const emoji = '😄';
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? textarea.value.length;
+    const insert = `${start > 0 && !/\s$/.test(textarea.value.slice(0, start)) ? ' ' : ''}${emoji}`;
+    textarea.value = `${textarea.value.slice(0, start)}${insert}${textarea.value.slice(end)}`;
+    textarea.focus();
+    textarea.setSelectionRange(start + insert.length, start + insert.length);
+  });
 })();
