@@ -1,5 +1,6 @@
 @php
     $viewer = auth()->user();
+    $reportedFeedKeys = $reportedFeedKeys ?? collect();
     $isOwnPost = $viewer && (int) $post->user_id === (int) $viewer->id;
     $reworkAsset = fn (string $path): string => \App\Support\HntTheme::asset($path, 'rework');
     $formatCount = fn (int $count): string => number_format($count);
@@ -76,24 +77,93 @@
         : ($firstReactionName
             ? 'Liked by '.$firstReactionName.($remainingReactionCount > 0 ? ' und '.$formatCount($remainingReactionCount).' andere' : '')
             : $formatCount($reactionCount).' Reaktionen');
-    $commentsPreview = ($post->relationLoaded('comments') ? $post->comments : collect())
-        ->take(6)
-        ->map(function ($comment): array {
+    $allComments = ($post->relationLoaded('comments') ? $post->comments : collect())->sortBy('created_at')->values();
+    $commentsById = $allComments->keyBy(fn ($item) => (int) $item->id);
+    $rootIdFor = function ($comment) use ($commentsById): int {
+        $parentId = (int) ($comment->parent_id ?? 0);
+        $guard = 0;
+
+        while ($parentId > 0 && $commentsById->has($parentId) && $guard < 10) {
+            $parent = $commentsById->get($parentId);
+            $nextParentId = (int) ($parent->parent_id ?? 0);
+
+            if ($nextParentId < 1) {
+                return (int) $parent->id;
+            }
+
+            $parentId = $nextParentId;
+            $guard++;
+        }
+
+        return $parentId > 0 ? $parentId : (int) $comment->id;
+    };
+    $commentPayload = function ($comment) use ($post, $viewer, $reportedFeedKeys, $rootIdFor): array {
             $commentAuthor = $comment->user;
+            $viewerId = (int) ($viewer?->id ?? 0);
+            $viewerIsAdmin = $viewer && method_exists($viewer, 'isAdmin') && $viewer->isAdmin();
+            $isOwnComment = $viewerId > 0 && (int) $comment->user_id === $viewerId;
+            $canDeleteComment = $isOwnComment || $viewerIsAdmin || ($viewerId > 0 && (int) $post->user_id === $viewerId);
+            $commentAlreadyReported = ($reportedFeedKeys ?? collect())->has('feed_comment:' . $comment->id);
+            $commentAuthorName = $commentAuthor?->name ?: ($commentAuthor?->username ?: 'HNT Hunter');
+            $commentAuthorUrl = $commentAuthor
+                ? (((int) $commentAuthor->id === $viewerId) ? route('profile.show') : route('profile.public', $commentAuthor))
+                : '#';
 
             return [
-                'author' => $commentAuthor?->name ?: 'HNT Hunter',
+                'id' => (int) $comment->id,
+                'post_id' => (int) $post->id,
+                'parent_id' => $comment->parent_id ? (int) $comment->parent_id : null,
+                'root_id' => $rootIdFor($comment),
+                'is_reply' => ! empty($comment->parent_id),
+                'author' => $commentAuthorName,
                 'avatar' => $commentAuthor?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'),
+                'profile_url' => $commentAuthorUrl,
                 'time' => $comment->created_at?->diffForHumans() ?: 'now',
+                'body' => (string) $comment->body,
                 'body_html' => \App\Support\FeedTextRenderer::render((string) $comment->body),
+                'media' => ($comment->relationLoaded('media') ? $comment->media : collect())
+                    ->map(fn ($media): array => [
+                        'url' => $media->url(),
+                        'type' => $media->isImage() ? 'image' : ($media->isVideo() ? 'video' : 'file'),
+                        'alt' => $media->original_name ?: __('ui.preview_comment_image_preview'),
+                    ])
+                    ->filter(fn (array $item): bool => ! empty($item['url']))
+                    ->values()
+                    ->all(),
+                'reaction_count' => $comment->relationLoaded('reactions') ? $comment->reactions->count() : 0,
+                'viewer_reacted' => (bool) ($comment->relationLoaded('viewerReaction') ? $comment->viewerReaction : null),
+                'can_edit' => $isOwnComment,
+                'can_delete' => $canDeleteComment,
+                'can_report' => ! $isOwnComment && ! $commentAlreadyReported,
+                'reported' => $commentAlreadyReported,
+                'routes' => [
+                    'store' => route('feed.comments.store', $post),
+                    'reaction' => route('feed.comments.reactions.toggle', $comment),
+                    'update' => $isOwnComment ? route('feed.comments.update', $comment) : null,
+                    'delete' => $canDeleteComment ? route('feed.comments.destroy', $comment) : null,
+                    'reactions' => route('feed.comments.reactions.index', $comment),
+                ],
             ];
-        })
+    };
+    $rootComments = $allComments
+        ->filter(fn ($item) => empty($item->parent_id) || ! $commentsById->has((int) $item->parent_id))
+        ->values();
+    $repliesByRoot = $allComments
+        ->filter(fn ($item) => ! empty($item->parent_id) && $commentsById->has((int) $item->parent_id))
+        ->groupBy(fn ($item) => $rootIdFor($item));
+    $commentThreads = $rootComments
+        ->map(fn ($root): array => [
+            'root' => $commentPayload($root),
+            'replies' => ($repliesByRoot->get((int) $root->id, collect()))->values()->map($commentPayload)->all(),
+        ])
         ->values()
         ->all();
     $postContext = [
         'id' => (int) $post->id,
         'author' => $authorName,
         'author_avatar' => $authorAvatar,
+        'author_url' => $postAuthorUrl($author),
+        'post_url' => $postUrl,
         'meta' => trim($authorMeta.' - '.($post->team?->name ?: $visibilityLabel)),
         'body_html' => $body !== '' ? $bodyHtml : '',
         'feeling' => $feelingMeta,
@@ -110,7 +180,32 @@
         'reacted' => $viewerReacted,
         'reaction_url' => $reactionUrl,
         'reactions_url' => $reactionsUrl,
-        'comments_preview' => $commentsPreview,
+        'comment_store_url' => route('feed.comments.store', $post),
+        'comments_preview' => $commentThreads,
+        'viewer' => [
+            'name' => $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter'),
+            'avatar' => $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'),
+        ],
+        'labels' => [
+            'comments' => __('ui.comments'),
+            'replies' => __('ui.preview_comment_reply'),
+            'reply' => __('ui.preview_comment_reply'),
+            'reply_to' => __('ui.js_i18n_reply_to', ['name' => '__name__']),
+            'write_comment' => __('ui.rework_comment_placeholder'),
+            'send' => __('ui.send'),
+            'sending' => __('ui.js_i18n_sending'),
+            'save' => __('ui.preview_action_save'),
+            'cancel' => __('ui.preview_action_cancel'),
+            'edit' => __('ui.preview_comment_edit'),
+            'delete' => __('ui.preview_comment_delete'),
+            'report' => __('ui.preview_comment_report'),
+            'like' => __('ui.preview_comment_like'),
+            'no_comments' => __('ui.no_comments_yet'),
+            'delete_confirm' => __('ui.preview_comment_delete_confirm'),
+            'send_failed' => __('ui.preview_comment_send_failed'),
+            'save_failed' => __('ui.preview_comment_save_failed'),
+            'delete_failed' => __('ui.preview_comment_delete_failed'),
+        ],
         'poll' => $poll ? [
             'question' => $poll->question,
             'vote_url' => route('feed.poll.vote', $post),
@@ -138,7 +233,7 @@
 <script type="application/json" data-rework-post-context>{!! json_encode($postContext, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 <header class="post-head">
 <a href="{{ $postAuthorUrl($author) }}"><img alt="{{ $authorName }}" class="avatar" src="{{ $authorAvatar }}"/></a>
-<div class="post-user"><strong>{{ $authorName }}</strong><span>{{ $authorMeta }} - {{ $post->team?->name ?: $visibilityLabel }}</span></div>
+<div class="post-user"><a href="{{ $postAuthorUrl($author) }}"><strong>{{ $authorName }}</strong></a><span>{{ $authorMeta }} - {{ $post->team?->name ?: $visibilityLabel }}</span></div>
 <a class="btn large" href="{{ $postUrl }}">Öffnen</a>
 <div class="post-options action-menu">
 <a aria-expanded="false" aria-label="Post-Optionen öffnen" class="more" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-dots-three ph-icon"></i></a>
@@ -268,8 +363,8 @@
 </div>
 @endif
 <div class="comment-row">
-<img alt="" src="{{ $viewer?->avatarUrl() ?: $reworkAsset('images/comment-avatar.png') }}"/>
-<input class="comment-input" data-comment-modal-open placeholder="Post a comment.." readonly type="text"/>
-<a class="btn" data-comment-modal-open href="#">Antworten</a>
+<img alt="" src="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+<input class="comment-input" data-comment-modal-open placeholder="{{ __('ui.rework_comment_placeholder') }}" readonly type="text"/>
+<a class="btn" data-comment-modal-open href="#">{{ __('ui.preview_comment_reply') }}</a>
 </div>
 </article>

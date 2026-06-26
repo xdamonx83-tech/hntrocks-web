@@ -194,12 +194,12 @@
 <div class="eyebrow">Newsfeed</div>
 <h1>Check What Your Friends Up To!</h1>
 <p>Conveniently customize proactive web services for leveraged without continually aggregate frictionless ou well-structured HNT activity..</p>
-<div aria-label="Post erstellen öffnen" class="composer-mini" data-post-composer-open="" role="button" tabindex="0">
-<span>What’s on your mind , Kevin ?</span>
+<div aria-label="{{ __('ui.rework_post_composer_open') }}" class="composer-mini" data-post-composer-open="" role="button" tabindex="0">
+<span>{{ __('ui.rework_composer_prompt', ['name' => $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter')]) }}</span>
 <span class="spacer"></span>
 <a class="square-icon" data-post-composer-open="" href="#"><i aria-hidden="true" class="ph ph-image ph-icon"></i></a>
 <a class="square-icon" data-post-composer-open="" href="#"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></a>
-<a class="btn" data-post-composer-open="" href="#">Create</a>
+<a class="btn" data-post-composer-open="" href="#">{{ __('ui.rework_post_create') }}</a>
 </div>
 </section>
 <nav class="rework-feed-filters" aria-label="Feed Filter">
@@ -265,69 +265,41 @@
 </section>
 </main>
 </div>
-<div aria-hidden="true" class="modal-backdrop" data-comment-modal="">
+<div aria-hidden="true" class="modal-backdrop" data-comment-modal="" data-rework-report-url="{{ route('reports.store') }}">
 <section aria-labelledby="comment-modal-title" aria-modal="true" class="comment-modal" role="dialog">
 <div aria-hidden="true" class="post-composer-grip"></div>
-<button aria-label="Kommentare schließen" class="modal-close post-composer-close" data-comment-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<button aria-label="{{ __('ui.preview_post_modal_close_aria') }}" class="modal-close post-composer-close" data-comment-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
 <div class="comment-modal-layout">
 <div class="comment-modal-post">
 <div class="modal-post-head">
-<img alt="Krispie" src="{{ \App\Support\HntTheme::asset('images/post-avatar.png', 'rework') }}"/>
+<a data-rework-modal-author-url href="#"><img alt="" src="{{ asset('assets/vikinger/img/default-avatar.svg') }}"/></a>
 <div>
-<strong>Krispie</strong>
-<span>Public · Feed Post</span>
+<a data-rework-modal-author-url href="#"><strong data-rework-modal-author></strong></a>
+<span data-rework-modal-meta></span>
 </div>
 </div>
-<div class="modal-post-media">
-<img alt="Minecraft" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/>
-<div class="game-pill"><img alt="" src="{{ \App\Support\HntTheme::asset('images/minecraft-icon.png', 'rework') }}"/>Minecraft</div>
-</div>
-<div class="modal-post-body">What you need to do for this is very simple. Register and click the Become a Creator button. Making money is not far off. Come on, be a creator.</div>
-<div class="modal-post-stats">
-<span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>12 Likes</span>
-<span><i aria-hidden="true" class="ph ph-eye ph-icon"></i>56 Views</span>
-</div>
+<div class="modal-post-media" data-rework-modal-media hidden></div>
+<div class="modal-post-body" data-rework-modal-body hidden></div>
+<div class="modal-post-stats" data-rework-modal-stats></div>
 </div>
 <div class="comment-modal-panel">
 <div class="comment-modal-head">
 <div>
-<span>Diskussion</span>
-<h2 id="comment-modal-title">Kommentare</h2>
+<span>{{ __('ui.feed_post') }}</span>
+<h2 id="comment-modal-title">{{ __('ui.comments') }}</h2>
 </div>
-<strong>34 Antworten</strong>
+<strong data-rework-modal-comment-count>0</strong>
 </div>
-<div class="comment-thread">
-<article class="comment-item">
-<img alt="Tina Tzoo" src="{{ \App\Support\HntTheme::asset('images/sug-2.png', 'rework') }}"/>
-<div>
-<header><strong>Tina Tzoo</strong><span>12m</span></header>
-<p>Das Loadout sieht stark aus. Für kurze Runden würde ich noch eine schnelle Utility-Option ergänzen.</p>
-<a href="#">Antworten</a>
-</div>
-</article>
-<article class="comment-item">
-<img alt="MKBHD" src="{{ \App\Support\HntTheme::asset('images/sug-3.png', 'rework') }}"/>
-<div>
-<header><strong>MKBHD</strong><span>24m</span></header>
-<p>Die Idee gefällt mir. Gerade für Pushes wirkt das sauber und nicht überladen.</p>
-<a href="#">Antworten</a>
-</div>
-</article>
-<article class="comment-item">
-<img alt="Faraz Tariq" src="{{ \App\Support\HntTheme::asset('images/sug-1.png', 'rework') }}"/>
-<div>
-<header><strong>Faraz Tariq</strong><span>1h</span></header>
-<p>Würde ich später testen. Schreib mir, wenn du eine Lobby offen hast.</p>
-<a href="#">Antworten</a>
-</div>
-</article>
-</div>
-<div class="modal-composer">
-<img alt="Krispie" src="{{ \App\Support\HntTheme::asset('images/comment-avatar.png', 'rework') }}"/>
-<input placeholder="Schreib einen Kommentar..." type="text"/>
-<a class="square-icon" href="#"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></a>
-<a class="btn" href="#">Senden</a>
-</div>
+<div class="comment-thread" data-rework-modal-comments></div>
+<form class="modal-composer" data-rework-comment-form method="post">
+<img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+<input name="body" placeholder="{{ __('ui.rework_comment_placeholder') }}" autocomplete="off" type="text" data-rework-comment-input/>
+<button class="square-icon" data-rework-emoji-toggle type="button" aria-label="{{ __('ui.preview_emoji_button') }}"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></button>
+<button class="btn" data-rework-comment-submit type="submit">{{ __('ui.send') }}</button>
+<div class="rework-emoji-picker rework-comment-emoji-picker" data-rework-emoji-picker hidden></div>
+<p class="rework-comment-status" data-rework-comment-status hidden></p>
+<input name="parent_id" type="hidden" data-rework-comment-parent>
+</form>
 </div>
 </div>
 </section>
@@ -371,7 +343,7 @@
 <div class="post-composer-body">
 <div class="post-composer-author-row">
 <div class="post-composer-author">
-<img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: $reworkAsset('images/post-avatar.png') }}">
+<img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}">
 <div>
 <strong>{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}</strong>
 <span>Community · HNT Feed</span>
