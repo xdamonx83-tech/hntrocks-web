@@ -1012,26 +1012,176 @@
 })();
 
 
-/* 080: Rework post composer exact markup behavior */
+/* 081: Rework post composer functional bridge without visual changes */
 (() => {
-  const modal = document.querySelector('[data-post-composer-modal]');
-  const form = document.querySelector('[data-rework-post-composer-form]');
-  if (!modal || !form) return;
+  const backdrop = document.querySelector('[data-post-composer-modal]');
+  const form = backdrop?.querySelector('[data-rework-post-composer-form]');
+  const textarea = backdrop?.querySelector('[data-rework-composer-textarea]');
+  const fileInput = backdrop?.querySelector('[data-rework-composer-file-input]');
+  const mediaTrigger = backdrop?.querySelector('[data-rework-composer-media-trigger]');
+  const submitTrigger = backdrop?.querySelector('[data-rework-composer-submit]');
+  const aiTrigger = backdrop?.querySelector('[data-rework-composer-ai-toggle]');
+  const aiInput = form?.querySelector('[data-rework-composer-ai-input]');
+  const audienceTrigger = backdrop?.querySelector('[data-rework-composer-audience]');
+  const visibilityInput = form?.querySelector('[data-rework-composer-visibility-input]');
+  const emojiTrigger = backdrop?.querySelector('[data-rework-composer-emoji]');
 
-  const fileInput = form.querySelector('[data-rework-composer-file-input]');
-  const mediaTrigger = modal.querySelector('[data-rework-composer-media-trigger]');
-  const submitTrigger = modal.querySelector('[data-rework-composer-submit]');
-  const aiTrigger = modal.querySelector('[data-rework-composer-ai-toggle]');
-  const aiInput = form.querySelector('[data-rework-composer-ai-input]');
-  const textarea = modal.querySelector('[data-rework-composer-textarea]');
+  if (!backdrop || !form) return;
+  if (backdrop.dataset.reworkComposerBridgeReady === '1') return;
+  backdrop.dataset.reworkComposerBridgeReady = '1';
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    || form.querySelector('input[name="_token"]')?.value
+    || '';
+
+  const setSubmitState = (isSubmitting) => {
+    if (!submitTrigger) return;
+    submitTrigger.setAttribute('aria-disabled', isSubmitting ? 'true' : 'false');
+    submitTrigger.textContent = isSubmitting ? 'Postet...' : 'Posten';
+  };
+
+  const getSelectedFiles = () => Array.from(fileInput?.files || []);
 
   mediaTrigger?.addEventListener('click', (event) => {
     event.preventDefault();
+    event.stopPropagation();
     fileInput?.click();
+  });
+
+  fileInput?.addEventListener('change', () => {
+    const count = getSelectedFiles().length;
+    if (mediaTrigger) {
+      mediaTrigger.setAttribute('aria-label', count > 0 ? `${count} Medien ausgewählt` : 'Medien auswählen');
+      mediaTrigger.setAttribute('title', count > 0 ? `${count} Medien ausgewählt` : 'Medien auswählen');
+    }
+  });
+
+  aiTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!aiInput) return;
+    aiInput.value = aiInput.value === '1' ? '0' : '1';
+
+    const icon = aiTrigger.querySelector('.composer-check i');
+    if (icon) {
+      icon.classList.toggle('ph-square', aiInput.value !== '1');
+      icon.classList.toggle('ph-check-square', aiInput.value === '1');
+    }
+
+    aiTrigger.setAttribute('aria-pressed', aiInput.value === '1' ? 'true' : 'false');
+  });
+
+  audienceTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!visibilityInput) return;
+
+    const options = [
+      ['public', 'Community'],
+      ['followers', 'Freunde'],
+      ['private', 'Privat'],
+    ];
+
+    const currentIndex = Math.max(0, options.findIndex(([value]) => value === visibilityInput.value));
+    const next = options[(currentIndex + 1) % options.length];
+
+    visibilityInput.value = next[0];
+
+    const labelNode = Array.from(audienceTrigger.childNodes)
+      .find((node) => node.nodeType === Node.TEXT_NODE);
+
+    if (labelNode) {
+      labelNode.textContent = next[1] + ' ';
+    }
+
+    audienceTrigger.setAttribute('aria-label', `Sichtbarkeit: ${next[1]}`);
+  });
+
+  const emojiList = ['😄', '😂', '😍', '🔥', '🎯', '💀', '🤠', '😎', '😭', '😡', '👏', '🙏', '👀', '🏆', '🎮', '🧂'];
+
+  const insertTextAtCursor = (insert) => {
+    if (!textarea || !insert) return;
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? textarea.value.length;
+    const prefix = start > 0 && !/\s$/.test(textarea.value.slice(0, start)) ? ' ' : '';
+    const value = `${prefix}${insert}`;
+    textarea.value = `${textarea.value.slice(0, start)}${value}${textarea.value.slice(end)}`;
+    textarea.focus();
+    textarea.setSelectionRange(start + value.length, start + value.length);
+  };
+
+  const removeEmojiPicker = () => {
+    backdrop.querySelector('[data-rework-inline-emoji-picker]')?.remove();
+  };
+
+  emojiTrigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const existing = backdrop.querySelector('[data-rework-inline-emoji-picker]');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+
+    const picker = document.createElement('div');
+    picker.setAttribute('data-rework-inline-emoji-picker', '');
+    picker.setAttribute('role', 'menu');
+    picker.style.position = 'absolute';
+    picker.style.zIndex = '9999';
+    picker.style.display = 'grid';
+    picker.style.gridTemplateColumns = 'repeat(8, 32px)';
+    picker.style.gap = '6px';
+    picker.style.padding = '10px';
+    picker.style.borderRadius = '12px';
+    picker.style.background = '#151514';
+    picker.style.border = '1px solid rgba(255,255,255,.08)';
+    picker.style.boxShadow = '0 18px 50px rgba(0,0,0,.45)';
+
+    const rect = emojiTrigger.getBoundingClientRect();
+    const backdropRect = backdrop.getBoundingClientRect();
+    picker.style.left = `${Math.max(12, rect.left - backdropRect.left - 235)}px`;
+    picker.style.top = `${Math.max(12, rect.top - backdropRect.top - 82)}px`;
+
+    emojiList.forEach((emoji) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = emoji;
+      button.setAttribute('aria-label', `Emoji ${emoji} einfügen`);
+      button.style.width = '32px';
+      button.style.height = '32px';
+      button.style.border = '0';
+      button.style.borderRadius = '9px';
+      button.style.background = 'rgba(255,255,255,.05)';
+      button.style.cursor = 'pointer';
+      button.style.fontSize = '18px';
+      button.addEventListener('click', (buttonEvent) => {
+        buttonEvent.preventDefault();
+        buttonEvent.stopPropagation();
+        insertTextAtCursor(emoji);
+        removeEmojiPicker();
+      });
+      picker.appendChild(button);
+    });
+
+    backdrop.appendChild(picker);
+  });
+
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-rework-inline-emoji-picker]') || event.target.closest('[data-rework-composer-emoji]')) {
+      return;
+    }
+    removeEmojiPicker();
   });
 
   submitTrigger?.addEventListener('click', (event) => {
     event.preventDefault();
+    event.stopPropagation();
+
+    if (submitTrigger.getAttribute('aria-disabled') === 'true') return;
+
     if (typeof form.requestSubmit === 'function') {
       form.requestSubmit();
     } else {
@@ -1039,26 +1189,53 @@
     }
   });
 
-  aiTrigger?.addEventListener('click', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!aiInput) return;
-    aiInput.value = aiInput.value === '1' ? '0' : '1';
-    const icon = aiTrigger.querySelector('.composer-check i');
-    if (icon) {
-      icon.classList.toggle('ph-square', aiInput.value !== '1');
-      icon.classList.toggle('ph-check-square', aiInput.value === '1');
-    }
-  });
+    event.stopImmediatePropagation();
 
-  modal.querySelector('[data-rework-composer-emoji]')?.addEventListener('click', (event) => {
-    event.preventDefault();
-    if (!textarea) return;
-    const emoji = '😄';
-    const start = textarea.selectionStart ?? textarea.value.length;
-    const end = textarea.selectionEnd ?? textarea.value.length;
-    const insert = `${start > 0 && !/\s$/.test(textarea.value.slice(0, start)) ? ' ' : ''}${emoji}`;
-    textarea.value = `${textarea.value.slice(0, start)}${insert}${textarea.value.slice(end)}`;
-    textarea.focus();
-    textarea.setSelectionRange(start + insert.length, start + insert.length);
-  });
+    if (submitTrigger?.getAttribute('aria-disabled') === 'true') return;
+
+    const body = String(textarea?.value || '').trim();
+    const files = getSelectedFiles();
+
+    if (!body && files.length === 0) {
+      textarea?.focus();
+      window.alert('Schreib etwas oder wähle Medien aus.');
+      return;
+    }
+
+    const formData = new FormData(form);
+    formData.set('body', textarea?.value || '');
+    formData.set('visibility', visibilityInput?.value || 'public');
+    formData.set('ai_generated', aiInput?.value === '1' ? '1' : '0');
+
+    setSubmitState(true);
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        credentials: 'same-origin',
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload.ok === false) {
+        const firstError = payload?.errors
+          ? Object.values(payload.errors).flat().filter(Boolean)[0]
+          : null;
+        throw new Error(firstError || payload?.message || 'Post konnte nicht erstellt werden.');
+      }
+
+      window.location.reload();
+    } catch (error) {
+      setSubmitState(false);
+      window.alert(error?.message || 'Post konnte nicht erstellt werden.');
+    }
+  }, true);
 })();
