@@ -40,6 +40,7 @@
     const reactionsModal = document.querySelector('[data-reactions-modal]');
     const reactionsModalClose = document.querySelector('[data-reactions-modal-close]');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const reactionLabel = (key, fallback = '') => reactionsModal?.dataset?.[key] || fallback;
 
     const formatCount = (value) => {
       const number = Number.parseInt(value, 10);
@@ -186,12 +187,12 @@
 
       if (modalStats) {
         modalStats.innerHTML = `
-          <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${context.likes_label || formatCount(context.likes || 0)} Reaktionen</span>
-          <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${context.comments_label || formatCount(context.comments || 0)} Kommentare</span>
-          <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${context.shares_label || formatCount(context.shares || 0)} Shares</span>
+          <span><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${context.likes_label || formatCount(context.likes || 0)} ${context.labels?.reactions || reactionLabel('labelReactions', 'Reactions')}</span>
+          <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${context.comments_label || formatCount(context.comments || 0)} ${context.labels?.comments || 'Comments'}</span>
+          <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${context.shares_label || formatCount(context.shares || 0)} ${context.labels?.shares || 'Share'}</span>
         `;
       }
-      setText(modalCount, `${context.comments_label || formatCount(context.comments || 0)} Antworten`);
+      setText(modalCount, `${context.comments_label || formatCount(context.comments || 0)} ${context.labels?.comments || 'Comments'}`);
 
       if (modalThread) {
         modalThread.innerHTML = '';
@@ -200,7 +201,7 @@
         if (!comments.length) {
           const empty = document.createElement('div');
           empty.className = 'comment-empty-state';
-          empty.textContent = 'Noch keine Kommentare.';
+          empty.textContent = context.labels?.no_comments || 'No comments yet.';
           modalThread.appendChild(empty);
         } else {
           comments.forEach((comment) => {
@@ -217,7 +218,7 @@
             avatar.alt = comment.author || '';
             avatar.src = comment.avatar || '';
             reply.href = '#';
-            reply.textContent = 'Antworten';
+            reply.textContent = context.labels?.reply || 'Reply';
 
             setText(author, comment.author || 'HNT Hunter');
             setText(time, comment.time || '');
@@ -293,7 +294,7 @@
       const statsNode = reactionsModal.querySelector('[data-reactions-stats]');
       const listNode = reactionsModal.querySelector('[data-reactions-list]');
 
-      setText(totalNode, `${formatCount(total)} ${total === 1 ? 'Reaktion' : 'Reaktionen'}`);
+      setText(totalNode, `${formatCount(total)} ${total === 1 ? reactionLabel('labelReaction', 'Reaction') : reactionLabel('labelReactions', 'Reactions')}`);
 
       if (statsNode) {
         statsNode.innerHTML = '';
@@ -313,7 +314,7 @@
       if (!users.length) {
         const empty = document.createElement('div');
         empty.className = 'comment-empty-state';
-        empty.textContent = 'Noch keine Reaktionen.';
+        empty.textContent = reactionLabel('labelNoReactions', 'No reactions yet');
         listNode.appendChild(empty);
         return;
       }
@@ -356,7 +357,7 @@
             'X-Requested-With': 'XMLHttpRequest',
           },
         });
-        if (!response.ok) throw new Error('Reactions failed');
+        if (!response.ok) throw new Error(reactionLabel('labelReactionsFailed', 'Reactions could not be loaded.'));
         renderReactionsModal(await response.json());
       } catch (error) {
         const listNode = reactionsModal.querySelector('[data-reactions-list]');
@@ -364,7 +365,7 @@
           listNode.innerHTML = '';
           const empty = document.createElement('div');
           empty.className = 'comment-empty-state';
-          empty.textContent = 'Reaktionen konnten nicht geladen werden.';
+          empty.textContent = reactionLabel('labelReactionsFailed', 'Reactions could not be loaded.');
           listNode.appendChild(empty);
         }
       }
@@ -387,8 +388,8 @@
       if (summary) {
         const viewerName = likedRow?.getAttribute('data-viewer-name') || 'dir';
         summary.textContent = count > 0
-          ? (reacted ? `Liked by ${viewerName}${count > 1 ? ` und ${formatCount(count - 1)} andere` : ''}` : `${formattedCount} Reaktionen`)
-          : 'Noch keine Reaktionen';
+          ? (reacted ? `Liked by ${viewerName}${count > 1 ? ` + ${formatCount(count - 1)}` : ''}` : `${formattedCount} ${reactionLabel('labelReactions', 'Reactions')}`)
+          : reactionLabel('labelNoReactions', 'No reactions yet');
       }
       if (likedRow) {
         likedRow.classList.toggle('is-empty', count <= 0);
@@ -1076,12 +1077,18 @@
   const modal = document.querySelector('[data-comment-modal]');
   if (!modal) return;
 
+  const reportModal = document.querySelector('[data-rework-report-modal]');
+  const reportForm = reportModal?.querySelector('[data-rework-report-form]');
+  const reportStatus = reportModal?.querySelector('[data-rework-report-status]');
   const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   const emojis = ['😀', '😂', '😍', '🔥', '💪', '🎯', '👏', '🙌', '👍', '❤️', '💯', '👀', '😎', '🤝', '🏆', '✨'];
   let activeCard = null;
   let activeContext = null;
   let replyRootId = null;
   let replyName = '';
+  let activeMediaIndex = 0;
+  let commentFiles = [];
+  let activeReportTarget = null;
 
   const formatCount = (value) => new Intl.NumberFormat(document.documentElement.lang || undefined)
     .format(Number.parseInt(value, 10) || 0);
@@ -1103,7 +1110,8 @@
   };
 
   const label = (key, fallback, replacements = {}) => {
-    let value = activeContext?.labels?.[key] || fallback;
+    const dataKey = `label${key.replace(/(^|_)([a-z])/g, (_match, _sep, char) => char.toUpperCase())}`;
+    let value = activeContext?.labels?.[key] || reportModal?.dataset?.[dataKey] || fallback;
     Object.entries(replacements).forEach(([name, replacement]) => {
       value = value.replace(`__${name}__`, replacement).replace(`:${name}`, replacement);
     });
@@ -1118,13 +1126,25 @@
     status.classList.toggle('is-error', isError);
   };
 
+  const mediaItems = () => {
+    if (!activeContext) return [];
+    if (Array.isArray(activeContext.media_items) && activeContext.media_items.length) return activeContext.media_items;
+    return activeContext.media_url ? [{
+      url: activeContext.media_url,
+      type: activeContext.media_type,
+      alt: activeContext.media_alt,
+    }] : [];
+  };
+
+  const isVideoItem = (item) => item?.type === 'video' || String(item?.mime_type || '').startsWith('video/');
+
   const setPostCounts = () => {
     if (!activeCard || !activeContext) return;
     const commentMetric = activeCard.querySelector('.metrics .metric:first-child');
     if (commentMetric) {
-      commentMetric.innerHTML = `<i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Kommentare')}`;
+      commentMetric.innerHTML = `<i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Comments')}`;
     }
-    modal.querySelector('[data-rework-modal-comment-count]').textContent = `${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Kommentare')}`;
+    modal.querySelector('[data-rework-modal-comment-count]').textContent = `${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Comments')}`;
   };
 
   const allComments = () => (activeContext?.comments_preview || [])
@@ -1181,7 +1201,14 @@
       link.href = item.url || '#';
       link.target = '_blank';
       link.rel = 'noopener';
-      if (item.type === 'image') {
+      if (isVideoItem(item)) {
+        const video = document.createElement('video');
+        video.src = item.url || '';
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        link.appendChild(video);
+      } else if (item.type === 'image') {
         const image = document.createElement('img');
         image.src = item.url || '';
         image.alt = item.alt || '';
@@ -1227,11 +1254,11 @@
     const actions = document.createElement('div');
     actions.className = 'rework-comment-actions';
     actions.innerHTML = `
-      <button type="button" class="${comment.viewer_reacted ? 'is-active' : ''}" data-rework-comment-like="${comment.id}"><i aria-hidden="true" class="ph ph-heart ph-icon"></i><span>${formatCount(comment.reaction_count || 0)}</span></button>
-      <button type="button" data-rework-comment-reply="${comment.id}">${label('reply', 'Antworten')}</button>
-      ${comment.can_edit ? `<button type="button" data-rework-comment-edit="${comment.id}">${label('edit', 'Bearbeiten')}</button>` : ''}
-      ${comment.can_delete ? `<button type="button" data-rework-comment-delete="${comment.id}">${label('delete', 'Löschen')}</button>` : ''}
-      ${comment.can_report ? `<button type="button" data-rework-comment-report="${comment.id}">${label('report', 'Melden')}</button>` : ''}
+      <button type="button" class="${comment.viewer_reacted ? 'is-active' : ''}" data-rework-comment-like="${comment.id}" aria-label="${label('like', 'Like')}"><i aria-hidden="true" class="ph ph-heart ph-icon"></i><span>${formatCount(comment.reaction_count || 0)}</span></button>
+      <button type="button" data-rework-comment-reply="${comment.id}" aria-label="${label('reply', 'Reply')}"><i aria-hidden="true" class="ph ph-arrow-bend-up-left ph-icon"></i><span>${label('reply', 'Reply')}</span></button>
+      ${comment.can_edit ? `<button type="button" data-rework-comment-edit="${comment.id}" aria-label="${label('edit', 'Edit')}"><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i><span>${label('edit', 'Edit')}</span></button>` : ''}
+      ${comment.can_delete ? `<button type="button" data-rework-comment-delete="${comment.id}" aria-label="${label('delete', 'Delete')}"><i aria-hidden="true" class="ph ph-trash ph-icon"></i><span>${label('delete', 'Delete')}</span></button>` : ''}
+      ${comment.can_report ? `<button type="button" data-rework-comment-report="${comment.id}" aria-label="${label('report', 'Report')}"><i aria-hidden="true" class="ph ph-flag ph-icon"></i><span>${label('report', 'Report')}</span></button>` : ''}
     `;
     content.appendChild(actions);
     item.append(avatarLink, content);
@@ -1247,7 +1274,7 @@
     if (!threads.length) {
       const empty = document.createElement('div');
       empty.className = 'comment-empty-state';
-      empty.textContent = label('no_comments', 'Noch keine Kommentare.');
+      empty.textContent = label('no_comments', 'No comments yet.');
       list.appendChild(empty);
       return;
     }
@@ -1266,7 +1293,7 @@
         toggle.type = 'button';
         toggle.dataset.reworkRepliesToggle = root.id;
         toggle.setAttribute('aria-expanded', 'true');
-        toggle.textContent = `${formatCount(replies.length)} ${label('replies', 'Antworten')}`;
+        toggle.textContent = `${formatCount(replies.length)} ${label('replies', 'Replies')}`;
         wrap.appendChild(toggle);
 
         const repliesWrap = document.createElement('div');
@@ -1296,7 +1323,7 @@
     button?.setAttribute('aria-pressed', reacted ? 'true' : 'false');
     button?.setAttribute('data-reaction-count', String(count));
     likedRow?.classList.toggle('is-empty', count < 1);
-    if (summary) summary.textContent = count > 0 ? `${formatted} Reaktionen` : 'Noch keine Reaktionen';
+    if (summary) summary.textContent = count > 0 ? `${formatted} ${label('reactions', 'Reactions')}` : label('no_reactions', 'No reactions yet');
     renderModalPost();
   };
 
@@ -1316,21 +1343,53 @@
     const media = modal.querySelector('[data-rework-modal-media]');
     if (media) {
       media.innerHTML = '';
-      const items = Array.isArray(activeContext.media_items) && activeContext.media_items.length
-        ? activeContext.media_items
-        : (activeContext.media_url ? [{ url: activeContext.media_url, type: activeContext.media_type, alt: activeContext.media_alt }] : []);
-      items.forEach((item) => {
-        const node = document.createElement(item.type === 'video' ? 'video' : 'img');
+      const items = mediaItems();
+      activeMediaIndex = Math.min(Math.max(activeMediaIndex, 0), Math.max(items.length - 1, 0));
+      const item = items[activeMediaIndex];
+
+      if (item) {
+        const stage = document.createElement('div');
+        stage.className = 'modal-media-stage';
+        const node = document.createElement(isVideoItem(item) ? 'video' : 'img');
         node.src = item.url || '';
-        if (item.type === 'video') {
+        if (isVideoItem(item)) {
           node.controls = true;
           node.playsInline = true;
           node.preload = 'metadata';
         } else {
           node.alt = item.alt || '';
         }
-        media.appendChild(node);
-      });
+        stage.appendChild(node);
+
+        if (items.length > 1) {
+          stage.insertAdjacentHTML('beforeend', `
+            <button type="button" class="modal-media-nav prev" data-rework-modal-media-prev aria-label="${label('previous_media', 'Previous media')}"><i aria-hidden="true" class="ph ph-caret-left ph-icon"></i></button>
+            <button type="button" class="modal-media-nav next" data-rework-modal-media-next aria-label="${label('next_media', 'Next media')}"><i aria-hidden="true" class="ph ph-caret-right ph-icon"></i></button>
+            <span class="modal-media-counter">${activeMediaIndex + 1} / ${items.length}</span>
+          `);
+        }
+
+        media.appendChild(stage);
+
+        if (items.length > 1) {
+          const strip = document.createElement('div');
+          strip.className = 'modal-media-strip';
+          items.forEach((thumb, index) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = index === activeMediaIndex ? 'is-active' : '';
+            button.setAttribute('data-rework-modal-media-thumb', String(index));
+            button.setAttribute('aria-label', `${label('media', 'Media')} ${index + 1}`);
+            if (isVideoItem(thumb)) {
+              button.innerHTML = `<video src="${thumb.url || ''}" muted playsinline preload="metadata"></video><i aria-hidden="true" class="ph ph-play ph-icon"></i>`;
+            } else {
+              button.innerHTML = `<img src="${thumb.url || ''}" alt="${thumb.alt || ''}">`;
+            }
+            strip.appendChild(button);
+          });
+          media.appendChild(strip);
+        }
+      }
       media.hidden = items.length === 0;
     }
 
@@ -1343,15 +1402,16 @@
     const stats = modal.querySelector('[data-rework-modal-stats]');
     if (stats) {
       stats.innerHTML = `
-        <button type="button" class="${activeContext.reacted ? 'is-active' : ''}" data-rework-modal-like><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${activeContext.likes_label || formatCount(activeContext.likes)} Reaktionen</button>
-        <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Kommentare')}</span>
-        <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${activeContext.shares_label || formatCount(activeContext.shares)} Shares</span>
+        <button type="button" class="${activeContext.reacted ? 'is-active' : ''}" data-rework-modal-like><i aria-hidden="true" class="ph ph-heart ph-icon"></i>${activeContext.likes_label || formatCount(activeContext.likes)} ${label('reactions', 'Reactions')}</button>
+        <span><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>${activeContext.comments_label || formatCount(activeContext.comments)} ${label('comments', 'Comments')}</span>
+        <span><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>${activeContext.shares_label || formatCount(activeContext.shares)} ${label('shares', 'Share')}</span>
+        ${activeContext.can_report ? `<button type="button" data-rework-modal-post-report><i aria-hidden="true" class="ph ph-flag ph-icon"></i>${label('post_report', 'Report')}</button>` : ''}
       `;
     }
 
     const postPanel = modal.querySelector('.comment-modal-post');
-    postPanel?.classList.toggle('has-media', Boolean(activeContext.media_url || activeContext.media_items?.length));
-    postPanel?.classList.toggle('has-no-media', !(activeContext.media_url || activeContext.media_items?.length));
+    postPanel?.classList.toggle('has-media', Boolean(mediaItems().length));
+    postPanel?.classList.toggle('has-no-media', !mediaItems().length);
     postPanel?.classList.toggle('has-body', Boolean(activeContext.body_html));
     postPanel?.classList.toggle('has-no-body', !activeContext.body_html);
     setPostCounts();
@@ -1363,7 +1423,10 @@
     if (!activeContext) return;
     replyRootId = null;
     replyName = '';
+    activeMediaIndex = 0;
+    commentFiles = [];
     renderEmojiPicker();
+    renderCommentMediaPreview();
     renderModalPost();
     renderThreads();
     setStatus('');
@@ -1371,7 +1434,7 @@
     const parent = modal.querySelector('[data-rework-comment-parent]');
     if (input) {
       input.value = '';
-      input.placeholder = label('write_comment', 'Kommentar schreiben');
+      input.placeholder = label('write_comment', 'Write a comment');
     }
     if (parent) parent.value = '';
     modal.classList.add('is-open');
@@ -1386,6 +1449,37 @@
     document.body.classList.remove('is-modal-open');
   };
 
+  const renderCommentMediaPreview = () => {
+    const preview = modal.querySelector('[data-rework-comment-media-preview]');
+    if (!preview) return;
+    preview.innerHTML = '';
+    preview.hidden = commentFiles.length === 0;
+
+    commentFiles.forEach((file, index) => {
+      const item = document.createElement('div');
+      item.className = 'rework-comment-media-preview-item';
+      const url = URL.createObjectURL(file);
+      item.innerHTML = file.type.startsWith('video/')
+        ? `<video src="${url}" muted playsinline preload="metadata"></video>`
+        : `<img src="${url}" alt="${file.name || label('media', 'Media')}">`;
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.setAttribute('data-rework-comment-media-remove', String(index));
+      remove.setAttribute('aria-label', label('remove_media', 'Remove media'));
+      remove.innerHTML = '<i aria-hidden="true" class="ph ph-x ph-icon"></i>';
+      item.appendChild(remove);
+      preview.appendChild(item);
+    });
+  };
+
+  const resetCommentMedia = () => {
+    commentFiles = [];
+    const input = modal.querySelector('[data-rework-comment-media-input]');
+    if (input) input.value = '';
+    renderCommentMediaPreview();
+  };
+
   const submitComment = async (event) => {
     event.preventDefault();
     if (!activeContext?.comment_store_url) return;
@@ -1393,29 +1487,41 @@
     const input = form.querySelector('[data-rework-comment-input]');
     const button = form.querySelector('[data-rework-comment-submit]');
     const body = (input?.value || '').trim();
-    if (!body) {
-      setStatus(label('send_failed', 'Kommentar konnte nicht gesendet werden.'), true);
+    if (!body && commentFiles.length === 0) {
+      setStatus(label('send_failed', 'Comment could not be sent.'), true);
       return;
     }
 
     const original = button.textContent;
     button.disabled = true;
-    button.textContent = label('sending', 'Senden...');
+    button.textContent = label('sending', 'Sending...');
     setStatus('');
 
     try {
+      const headers = {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest',
+      };
+      let bodyPayload;
+
+      if (commentFiles.length > 0) {
+        bodyPayload = new FormData();
+        bodyPayload.set('body', body);
+        if (replyRootId) bodyPayload.set('parent_id', replyRootId);
+        commentFiles.forEach((file) => bodyPayload.append('media[]', file));
+      } else {
+        headers['Content-Type'] = 'application/json';
+        bodyPayload = JSON.stringify({ body, parent_id: replyRootId || undefined });
+      }
+
       const response = await fetch(activeContext.comment_store_url, {
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': token,
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: JSON.stringify({ body, parent_id: replyRootId || undefined }),
+        headers,
+        body: bodyPayload,
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.ok === false) throw new Error(payload.message || label('send_failed', 'Kommentar konnte nicht gesendet werden.'));
+      if (!response.ok || payload.ok === false) throw new Error(payload.message || label('send_failed', 'Comment could not be sent.'));
 
       const comment = normalizeComment(payload.comment);
       if (comment) {
@@ -1439,12 +1545,13 @@
       input.value = '';
       replyRootId = null;
       replyName = '';
-      input.placeholder = label('write_comment', 'Kommentar schreiben');
+      input.placeholder = label('write_comment', 'Write a comment');
       form.querySelector('[data-rework-comment-parent]').value = '';
+      resetCommentMedia();
       renderThreads();
       renderModalPost();
     } catch (error) {
-      setStatus(error.message || label('send_failed', 'Kommentar konnte nicht gesendet werden.'), true);
+      setStatus(error.message || label('send_failed', 'Comment could not be sent.'), true);
     } finally {
       button.disabled = false;
       button.textContent = original;
@@ -1464,7 +1571,7 @@
       body: JSON.stringify({ type: 'like', mode: 'toggle' }),
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error('Reaction failed');
+        if (!response.ok) throw new Error(label('reaction_failed', 'Reaction could not be saved.'));
     comment.viewer_reacted = Boolean(payload.reacted);
     comment.reaction_count = Number(payload.count) || 0;
     saveContext();
@@ -1478,9 +1585,9 @@
     prompt.className = 'rework-comment-delete-prompt';
     prompt.dataset.reworkDeletePrompt = comment.id;
     prompt.innerHTML = `
-      <span>${label('delete_confirm', 'Kommentar wirklich löschen?')}</span>
-      <button type="button" data-rework-delete-cancel>${label('cancel', 'Abbrechen')}</button>
-      <button type="button" data-rework-delete-confirm="${comment.id}">${label('delete', 'Löschen')}</button>
+      <span>${label('delete_confirm', 'Delete this comment?')}</span>
+      <button type="button" data-rework-delete-cancel>${label('cancel', 'Cancel')}</button>
+      <button type="button" data-rework-delete-confirm="${comment.id}">${label('delete', 'Delete')}</button>
     `;
     item.querySelector('.rework-comment-actions')?.insertAdjacentElement('afterend', prompt);
   };
@@ -1496,7 +1603,7 @@
       },
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok || payload.ok === false) throw new Error(payload.message || label('delete_failed', 'Kommentar konnte nicht gelöscht werden.'));
+    if (!response.ok || payload.ok === false) throw new Error(payload.message || label('delete_failed', 'Comment could not be deleted.'));
 
     activeContext.comments_preview = activeContext.comments_preview
       .map((thread) => {
@@ -1523,8 +1630,8 @@
     form.innerHTML = `
       <input name="body" value="">
       <div>
-        <button type="button" data-rework-edit-cancel>${label('cancel', 'Abbrechen')}</button>
-        <button type="submit">${label('save', 'Speichern')}</button>
+        <button type="button" data-rework-edit-cancel>${label('cancel', 'Cancel')}</button>
+        <button type="submit">${label('save', 'Save')}</button>
       </div>
     `;
     form.querySelector('input').value = comment.body || '';
@@ -1549,34 +1656,82 @@
       body: JSON.stringify({ body }),
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok || payload.ok === false) throw new Error(payload.message || label('save_failed', 'Kommentar konnte nicht gespeichert werden.'));
+    if (!response.ok || payload.ok === false) throw new Error(payload.message || label('save_failed', 'Comment could not be saved.'));
     comment.body = payload.body || body;
     comment.body_html = payload.body_html || body;
     saveContext();
     renderThreads();
   };
 
-  const reportComment = async (comment) => {
-    const url = modal.getAttribute('data-rework-report-url');
-    if (!url || !comment?.can_report) return;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': token,
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      body: JSON.stringify({ type: 'feed_comment', id: comment.id, reason: 'other' }),
-    });
-    if (!response.ok) throw new Error('Report failed');
-    comment.can_report = false;
-    comment.reported = true;
+  const openReportModal = (target) => {
+    if (!reportModal || !reportForm || !target?.type || !target?.id) return;
+    activeReportTarget = target;
+    reportForm.reset();
+    reportForm.querySelector('[data-rework-report-type]').value = target.type;
+    reportForm.querySelector('[data-rework-report-id]').value = target.id;
+    const labelNode = reportModal.querySelector('[data-rework-report-label]');
+    if (labelNode) labelNode.textContent = target.label || label('report_default', 'Help us review problematic content faster.');
+    if (reportStatus) {
+      reportStatus.hidden = true;
+      reportStatus.textContent = '';
+      reportStatus.classList.remove('is-error');
+    }
+    reportModal.classList.add('is-open');
+    reportModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('is-modal-open');
+    window.setTimeout(() => reportForm.querySelector('select[name="reason"]')?.focus(), 80);
+  };
+
+  const closeReportModal = () => {
+    if (!reportModal) return;
+    reportModal.classList.remove('is-open');
+    reportModal.setAttribute('aria-hidden', 'true');
+    activeReportTarget = null;
+    if (!modal.classList.contains('is-open')) document.body.classList.remove('is-modal-open');
+  };
+
+  const markReported = (target) => {
+    if (!target) return;
+
+    if (target.type === 'feed_post') {
+      if (activeContext) {
+        activeContext.can_report = false;
+        activeContext.reported = true;
+      }
+      document.querySelectorAll(`[data-rework-report-open][data-report-type="feed_post"][data-report-id="${target.id}"]`).forEach((button) => {
+        button.setAttribute('aria-disabled', 'true');
+        button.classList.add('is-reported');
+        const text = button.querySelector('strong');
+        if (text) text.textContent = label('reported', reportModal?.dataset?.labelReported || 'Reported');
+      });
+    }
+
+    if (target.type === 'feed_comment') {
+      const comment = findComment(target.id);
+      if (comment) {
+        comment.can_report = false;
+        comment.reported = true;
+      }
+      renderThreads();
+    }
+
     saveContext();
-    renderThreads();
+    if (activeContext) renderModalPost();
   };
 
   document.addEventListener('click', (event) => {
+    const reportTrigger = event.target.closest('[data-rework-report-open]');
+    if (reportTrigger) {
+      event.preventDefault();
+      event.stopPropagation();
+      openReportModal({
+        type: reportTrigger.getAttribute('data-report-type'),
+        id: reportTrigger.getAttribute('data-report-id'),
+        label: reportTrigger.getAttribute('data-report-label'),
+      });
+      return;
+    }
+
     const trigger = event.target.closest('[data-comment-modal-open]');
     if (!trigger) return;
     const card = trigger.closest('[data-rework-post-card]');
@@ -1628,6 +1783,51 @@
       return;
     }
 
+    if (event.target.closest('[data-rework-modal-post-report]')) {
+      event.preventDefault();
+      openReportModal(activeContext.report);
+      return;
+    }
+
+    if (event.target.closest('[data-rework-modal-media-prev]')) {
+      event.preventDefault();
+      activeMediaIndex = (activeMediaIndex - 1 + mediaItems().length) % mediaItems().length;
+      renderModalPost();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-modal-media-next]')) {
+      event.preventDefault();
+      activeMediaIndex = (activeMediaIndex + 1) % mediaItems().length;
+      renderModalPost();
+      return;
+    }
+
+    const mediaThumb = event.target.closest('[data-rework-modal-media-thumb]');
+    if (mediaThumb) {
+      event.preventDefault();
+      activeMediaIndex = Number(mediaThumb.getAttribute('data-rework-modal-media-thumb')) || 0;
+      renderModalPost();
+      return;
+    }
+
+    if (event.target.closest('[data-rework-comment-media-trigger]')) {
+      event.preventDefault();
+      modal.querySelector('[data-rework-comment-media-input]')?.click();
+      return;
+    }
+
+    const removeMedia = event.target.closest('[data-rework-comment-media-remove]');
+    if (removeMedia) {
+      event.preventDefault();
+      const index = Number(removeMedia.getAttribute('data-rework-comment-media-remove'));
+      if (Number.isFinite(index)) {
+        commentFiles.splice(index, 1);
+        renderCommentMediaPreview();
+      }
+      return;
+    }
+
     const like = event.target.closest('[data-rework-comment-like]');
     const reply = event.target.closest('[data-rework-comment-reply]');
     const edit = event.target.closest('[data-rework-comment-edit]');
@@ -1656,7 +1856,7 @@
         const parent = modal.querySelector('[data-rework-comment-parent]');
         if (parent) parent.value = replyRootId || '';
         if (input) {
-          input.placeholder = label('reply_to', `Antwort auf ${replyName}`, { name: replyName });
+          input.placeholder = label('reply_to', `Reply to ${replyName}`, { name: replyName });
           input.focus();
         }
       } else if (edit) {
@@ -1673,10 +1873,17 @@
         event.target.closest('[data-rework-delete-prompt]')?.remove();
       } else if (report) {
         event.preventDefault();
-        await reportComment(findComment(report.getAttribute('data-rework-comment-report')));
+        const comment = findComment(report.getAttribute('data-rework-comment-report'));
+        if (comment) {
+          openReportModal({
+            type: 'feed_comment',
+            id: comment.id,
+            label: comment.author ? label('comment_report_label', 'Report comment by :name', { name: comment.author }) : label('report', 'Report'),
+          });
+        }
       }
     } catch (error) {
-      setStatus(error.message || 'Action failed', true);
+      setStatus(error.message || label('action_failed', 'Action could not be completed.'), true);
     }
   });
 
@@ -1687,7 +1894,7 @@
     try {
       await submitEdit(form);
     } catch (error) {
-      setStatus(error.message || label('save_failed', 'Kommentar konnte nicht gespeichert werden.'), true);
+      setStatus(error.message || label('save_failed', 'Comment could not be saved.'), true);
     }
   });
 
@@ -1697,8 +1904,75 @@
     renderThreads();
   });
 
+  modal.addEventListener('change', (event) => {
+    const input = event.target.closest('[data-rework-comment-media-input]');
+    if (!input) return;
+    commentFiles = commentFiles.concat(Array.from(input.files || []));
+    input.value = '';
+    setStatus('');
+    renderCommentMediaPreview();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-rework-report-close]') || event.target === reportModal) {
+      event.preventDefault();
+      closeReportModal();
+    }
+  });
+
+  reportForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const submit = reportForm.querySelector('[data-rework-report-submit]');
+    const original = submit?.textContent || '';
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = label('sending', 'Sending...');
+    }
+    if (reportStatus) {
+      reportStatus.hidden = true;
+      reportStatus.textContent = '';
+      reportStatus.classList.remove('is-error');
+    }
+
+    try {
+      const response = await fetch(reportForm.action, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': token,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: new FormData(reportForm),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || label('report_failed', 'Report could not be sent.'));
+      markReported(payload.report || activeReportTarget);
+      if (reportStatus) {
+        reportStatus.textContent = payload.message || label('report_success', 'Report sent.');
+        reportStatus.hidden = false;
+      }
+      window.setTimeout(closeReportModal, 450);
+    } catch (error) {
+      if (reportStatus) {
+        reportStatus.textContent = error.message || label('report_failed', 'Report could not be sent.');
+        reportStatus.classList.add('is-error');
+        reportStatus.hidden = false;
+      }
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = original;
+      }
+    }
+  });
+
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+    if (event.key !== 'Escape') return;
+    if (reportModal?.classList.contains('is-open')) {
+      closeReportModal();
+      return;
+    }
+    if (modal.classList.contains('is-open')) closeModal();
   });
 })();
 
@@ -2327,7 +2601,7 @@
           <div class="settings-section-head">
             <span>HNT Feed</span>
             <h3>Diesen Beitrag wirklich löschen?</h3>
-            <p>Kommentare, Reaktionen und Medien dieses Posts werden aus dem Feed entfernt.</p>
+            <p>Alle zugehörigen Inhalte dieses Posts werden aus dem Feed entfernt.</p>
           </div>
         </div>
 

@@ -181,6 +181,13 @@
         'reaction_url' => $reactionUrl,
         'reactions_url' => $reactionsUrl,
         'comment_store_url' => route('feed.comments.store', $post),
+        'can_report' => ! $postAlreadyReported && (int) $post->user_id !== (int) auth()->id(),
+        'reported' => $postAlreadyReported,
+        'report' => [
+            'type' => 'feed_post',
+            'id' => (int) $post->id,
+            'label' => __('ui.preview_post_report_label', ['name' => $authorName]),
+        ],
         'comments_preview' => $commentThreads,
         'viewer' => [
             'name' => $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter'),
@@ -188,6 +195,9 @@
         ],
         'labels' => [
             'comments' => __('ui.comments'),
+            'reactions' => __('ui.rework_reactions'),
+            'no_reactions' => __('ui.rework_no_reactions'),
+            'shares' => __('ui.rework_shares'),
             'replies' => __('ui.preview_comment_reply'),
             'reply' => __('ui.preview_comment_reply'),
             'reply_to' => __('ui.js_i18n_reply_to', ['name' => '__name__']),
@@ -199,12 +209,24 @@
             'edit' => __('ui.preview_comment_edit'),
             'delete' => __('ui.preview_comment_delete'),
             'report' => __('ui.preview_comment_report'),
+            'post_report' => __('ui.preview_post_report'),
+            'reported' => __('ui.preview_comment_reported_short'),
+            'comment_report_label' => __('ui.preview_comment_report_label', ['name' => '__name__']),
             'like' => __('ui.preview_comment_like'),
             'no_comments' => __('ui.no_comments_yet'),
+            'media' => __('ui.rework_media'),
+            'previous_media' => __('ui.rework_previous_media'),
+            'next_media' => __('ui.rework_next_media'),
+            'add_media' => __('ui.preview_comment_add_image'),
+            'remove_media' => __('ui.rework_remove_media'),
             'delete_confirm' => __('ui.preview_comment_delete_confirm'),
             'send_failed' => __('ui.preview_comment_send_failed'),
             'save_failed' => __('ui.preview_comment_save_failed'),
             'delete_failed' => __('ui.preview_comment_delete_failed'),
+            'reaction_failed' => __('ui.rework_reaction_failed'),
+            'action_failed' => __('ui.rework_action_failed'),
+            'report_success' => __('ui.report_success'),
+            'report_failed' => __('ui.report_could_not_be_sent'),
         ],
         'poll' => $poll ? [
             'question' => $poll->question,
@@ -259,7 +281,14 @@
 @endif
 <a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></span><strong>Merken</strong></a>
 @if(! $postAlreadyReported && (int) $post->user_id !== (int) auth()->id())
-<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-flag ph-icon"></i></span><strong>Melden</strong></a>
+<a
+    href="#"
+    role="menuitem"
+    data-rework-report-open
+    data-report-type="feed_post"
+    data-report-id="{{ $post->id }}"
+    data-report-label="{{ __('ui.preview_post_report_label', ['name' => $authorName]) }}"
+><span><i aria-hidden="true" class="ph ph-flag ph-icon"></i></span><strong>{{ __('ui.preview_post_report') }}</strong></a>
 @endif
 </div>
 </div>

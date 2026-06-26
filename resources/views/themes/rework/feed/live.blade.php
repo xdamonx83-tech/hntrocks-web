@@ -294,9 +294,12 @@
 <form class="modal-composer" data-rework-comment-form method="post">
 <img alt="{{ $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter') }}" src="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
 <input name="body" placeholder="{{ __('ui.rework_comment_placeholder') }}" autocomplete="off" type="text" data-rework-comment-input/>
+<input accept="image/*,video/*" data-rework-comment-media-input multiple name="media[]" type="file" hidden>
+<button class="square-icon" data-rework-comment-media-trigger type="button" aria-label="{{ __('ui.preview_comment_add_image') }}"><i aria-hidden="true" class="ph ph-image ph-icon"></i></button>
 <button class="square-icon" data-rework-emoji-toggle type="button" aria-label="{{ __('ui.preview_emoji_button') }}"><i aria-hidden="true" class="ph ph-smiley ph-icon"></i></button>
 <button class="btn" data-rework-comment-submit type="submit">{{ __('ui.send') }}</button>
 <div class="rework-emoji-picker rework-comment-emoji-picker" data-rework-emoji-picker hidden></div>
+<div class="rework-comment-media-preview" data-rework-comment-media-preview hidden></div>
 <p class="rework-comment-status" data-rework-comment-status hidden></p>
 <input name="parent_id" type="hidden" data-rework-comment-parent>
 </form>
@@ -304,20 +307,79 @@
 </div>
 </section>
 </div>
-<div aria-hidden="true" class="modal-backdrop reactions-backdrop" data-reactions-modal="">
+<div
+    aria-hidden="true"
+    class="modal-backdrop rework-report-backdrop"
+    data-rework-report-modal=""
+    data-label-sending="{{ __('ui.js_i18n_sending') }}"
+    data-label-report-failed="{{ __('ui.report_could_not_be_sent') }}"
+    data-label-report-success="{{ __('ui.report_success') }}"
+    data-label-report-default="{{ __('ui.preview_report_default_label') }}"
+    data-label-reported="{{ __('ui.preview_comment_reported_short') }}"
+>
+<section aria-labelledby="rework-report-title" aria-modal="true" class="post-composer-modal rework-report-modal" role="dialog">
+<div aria-hidden="true" class="post-composer-grip"></div>
+<header class="post-composer-header">
+<div class="post-composer-titleblock">
+<span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>{{ __('ui.rework_report_kicker') }}</span>
+<h2 id="rework-report-title">{{ __('ui.preview_report_title') }}</h2>
+<p data-rework-report-label>{{ __('ui.preview_report_intro') }}</p>
+</div>
+<button aria-label="{{ __('ui.preview_report_close_aria') }}" class="post-composer-close" data-rework-report-close type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+</header>
+<form action="{{ route('reports.store') }}" class="rework-report-form" data-rework-report-form method="post">
+@csrf
+<input name="type" type="hidden" data-rework-report-type>
+<input name="id" type="hidden" data-rework-report-id>
+<div class="post-composer-body rework-report-body">
+<label class="rework-report-field">
+<span>{{ __('ui.preview_report_reason') }}</span>
+<select name="reason" required>
+<option value="spam">{{ __('ui.report_reason_spam_title') }}</option>
+<option value="abuse">{{ __('ui.preview_report_reason_abuse') }}</option>
+<option value="hate">{{ __('ui.report_reason_hate_title') }}</option>
+<option value="nsfw">{{ __('ui.preview_report_reason_nsfw') }}</option>
+<option value="fraud">{{ __('ui.report_reason_fraud_title') }}</option>
+<option value="cheating">{{ __('ui.preview_report_reason_cheating') }}</option>
+<option value="privacy">{{ __('ui.report_reason_privacy_title') }}</option>
+<option value="other">{{ __('ui.preview_report_reason_other') }}</option>
+</select>
+</label>
+<label class="rework-report-field">
+<span>{{ __('ui.preview_report_details_optional') }}</span>
+<textarea maxlength="2000" name="body" placeholder="{{ __('ui.preview_report_body_placeholder') }}" rows="4"></textarea>
+</label>
+<p class="rework-report-status" data-rework-report-status hidden></p>
+</div>
+<footer class="post-composer-footer">
+<button class="composer-cancel" data-rework-report-close type="button">{{ __('ui.preview_action_cancel') }}</button>
+<button class="composer-submit" data-rework-report-submit type="submit">{{ __('ui.preview_report_submit_short') }}</button>
+</footer>
+</form>
+</section>
+</div>
+<div
+    aria-hidden="true"
+    class="modal-backdrop reactions-backdrop"
+    data-reactions-modal=""
+    data-label-reaction="{{ __('ui.reaction_like') }}"
+    data-label-reactions="{{ __('ui.rework_reactions') }}"
+    data-label-no-reactions="{{ __('ui.rework_no_reactions') }}"
+    data-label-reactions-failed="{{ __('ui.rework_reactions_failed') }}"
+>
 <section aria-labelledby="reactions-modal-title" aria-modal="true" class="reactions-modal" role="dialog">
 <div aria-hidden="true" class="post-composer-grip"></div>
-<button aria-label="Reaktionen schließen" class="modal-close post-composer-close" data-reactions-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<button aria-label="{{ __('ui.preview_likes_close_aria') }}" class="modal-close post-composer-close" data-reactions-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
 <header class="reactions-modal-head">
 <div>
 <span>Feed</span>
-<h2 id="reactions-modal-title">Reaktionen</h2>
+<h2 id="reactions-modal-title">{{ __('ui.rework_reactions') }}</h2>
 </div>
-<strong data-reactions-total>0 Reaktionen</strong>
+<strong data-reactions-total>0 {{ __('ui.rework_reactions') }}</strong>
 </header>
 <div class="reactions-stats" data-reactions-stats></div>
 <div class="reactions-list" data-reactions-list>
-<div class="comment-empty-state">Noch keine Reaktionen.</div>
+<div class="comment-empty-state">{{ __('ui.rework_no_reactions') }}</div>
 </div>
 </section>
 </div>
