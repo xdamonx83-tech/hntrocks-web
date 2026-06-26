@@ -8585,3 +8585,628 @@ body.is-modal-open { overflow: hidden; }
     grid-template-columns: repeat(4, 34px);
   }
 }
+
+
+/* 082: Rework composer functional addon surfaces */
+.rework-composer-audience-menu {
+  width: min(300px, 100%);
+  margin: -12px 0 18px auto;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #151514;
+  box-shadow: 0 18px 45px rgba(0,0,0,.36);
+}
+
+.rework-composer-audience-menu[hidden] {
+  display: none !important;
+}
+
+.rework-composer-audience-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #F5EFE4;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.rework-composer-audience-menu button:hover,
+.rework-composer-audience-menu button.is-active {
+  background: rgba(207,161,73,.12);
+}
+
+.rework-composer-audience-menu strong {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.rework-composer-audience-menu span {
+  color: rgba(245,239,228,.58);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.rework-composer-addons {
+  margin-top: 14px;
+}
+
+.rework-composer-media-preview[hidden],
+.rework-composer-feeling-panel[hidden],
+.rework-composer-poll-panel[hidden] {
+  display: none !important;
+}
+
+.rework-composer-media-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.rework-composer-media-tile {
+  position: relative;
+  min-height: 82px;
+  border-radius: 13px;
+  overflow: hidden;
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.rework-composer-media-tile img,
+.rework-composer-media-tile video {
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+  display: block;
+}
+
+.rework-composer-media-tile.is-file {
+  min-height: 72px;
+  padding: 12px;
+  display: grid;
+  place-items: center;
+  color: rgba(245,239,228,.76);
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.rework-composer-media-remove {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0,0,0,.68);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.rework-composer-feeling-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(21,21,20,.46);
+}
+
+.rework-composer-feeling-panel button {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: rgba(255,255,255,.04);
+  color: #F5EFE4;
+  padding: 8px 11px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rework-composer-feeling-panel button.is-active {
+  border-color: rgba(207,161,73,.55);
+  background: rgba(207,161,73,.13);
+}
+
+.rework-composer-poll-panel {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(21,21,20,.46);
+}
+
+.rework-composer-poll-panel label {
+  display: grid;
+  gap: 5px;
+}
+
+.rework-composer-poll-panel span {
+  color: rgba(245,239,228,.58);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.rework-composer-poll-panel input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 11px;
+  background: rgba(0,0,0,.25);
+  color: #F5EFE4;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.rework-composer-poll-panel input::placeholder {
+  color: rgba(245,239,228,.38);
+}
+
+
+/* 083: Rework composer feeling status and poll display */
+.rework-composer-selected-feeling {
+  margin: 0 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 8px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(207,161,73,.34);
+  background: rgba(207,161,73,.10);
+  color: #F5EFE4;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.rework-composer-selected-feeling[hidden] {
+  display: none !important;
+}
+
+@media (min-width: 760px) {
+  .rework-composer-poll-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+    padding: 10px;
+  }
+
+  .rework-composer-poll-panel label:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .rework-composer-poll-panel input {
+    min-height: 36px;
+  }
+}
+
+.rework-post-feeling {
+  margin: 16px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 8px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(207,161,73,.26);
+  background: rgba(207,161,73,.08);
+  color: rgba(245,239,228,.84);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.rework-post-feeling strong {
+  color: #F5EFE4;
+}
+
+.rework-post-feeling em {
+  font-style: normal;
+  color: rgba(245,239,228,.66);
+}
+
+.rework-post-poll {
+  margin: 18px 0 0;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(0,0,0,.18);
+}
+
+.rework-post-poll-question {
+  display: block;
+  margin-bottom: 12px;
+  color: #F5EFE4;
+  font-size: 16px;
+  line-height: 22px;
+}
+
+.rework-post-poll-options {
+  display: grid;
+  gap: 9px;
+}
+
+.rework-post-poll-option {
+  display: grid;
+  gap: 7px;
+}
+
+.rework-post-poll-option-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(245,239,228,.78);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.rework-post-poll-option-head em {
+  font-style: normal;
+  color: rgba(245,239,228,.55);
+  font-weight: 800;
+}
+
+.rework-post-poll-bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+}
+
+.rework-post-poll-bar span {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  border-radius: inherit;
+  background: rgba(207,161,73,.72);
+}
+
+.rework-post-poll-total {
+  display: block;
+  margin-top: 10px;
+  color: rgba(245,239,228,.48);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+
+/* 084: Rework composer/poll placement hardening */
+.post-composer-author-row {
+  position: relative;
+  overflow: visible;
+}
+
+.post-composer-body {
+  overflow: visible;
+}
+
+.rework-composer-audience-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: 236px;
+  margin: 0;
+  padding: 6px;
+  border-radius: 13px;
+  background: #151514;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 16px 44px rgba(0,0,0,.38);
+}
+
+.rework-composer-audience-menu button {
+  display: block;
+  min-height: 0;
+  padding: 9px 10px;
+  border-radius: 9px;
+  text-align: left;
+}
+
+.rework-composer-audience-menu strong {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.rework-composer-audience-menu span {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  line-height: 14px;
+  color: rgba(245,239,228,.55);
+}
+
+.rework-post-extras {
+  margin: 14px 0 16px;
+}
+
+.rework-post-extras .rework-post-feeling {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(207,161,73,.25);
+  background: rgba(207,161,73,.08);
+}
+
+.rework-post-extras .rework-post-poll {
+  margin: 0;
+}
+
+.rework-post-poll-options {
+  display: grid;
+  gap: 8px;
+}
+
+.rework-post-poll-option-form {
+  margin: 0;
+}
+
+.rework-post-poll-option {
+  position: relative;
+  width: 100%;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  background: rgba(0,0,0,.18);
+  color: #F5EFE4;
+  cursor: pointer;
+  text-align: left;
+}
+
+.rework-post-poll-option:hover,
+.rework-post-poll-option.is-selected {
+  border-color: rgba(207,161,73,.42);
+  background: rgba(207,161,73,.08);
+}
+
+.rework-post-poll-option-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 0;
+  background: rgba(207,161,73,.18);
+  pointer-events: none;
+}
+
+.rework-post-poll-option.is-selected .rework-post-poll-option-bar {
+  background: rgba(207,161,73,.28);
+}
+
+.rework-post-poll-option-head {
+  position: relative;
+  z-index: 1;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 12px;
+  color: rgba(245,239,228,.82);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.rework-post-poll-option-head em {
+  font-style: normal;
+  font-weight: 800;
+  color: rgba(245,239,228,.62);
+}
+
+.rework-post-poll-option.is-selected .rework-post-poll-option-head em::after {
+  content: ' ✓';
+  color: rgba(207,161,73,.95);
+}
+
+.rework-post-poll-bar {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .rework-composer-poll-panel {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+
+/* 085: Rework post extras strict placement */
+.post-card > .post-head {
+  position: relative;
+  z-index: 2;
+}
+
+.post-card > .rework-post-extras {
+  display: block;
+  margin: 16px 0 18px;
+  clear: both;
+}
+
+.post-card > .rework-post-extras .rework-post-feeling {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 12px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(207,161,73,.26);
+  background: rgba(207,161,73,.08);
+  color: rgba(245,239,228,.84);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.post-card > .rework-post-extras .rework-post-feeling strong {
+  color: #F5EFE4;
+}
+
+.post-card > .rework-post-extras .rework-post-feeling em {
+  font-style: normal;
+  color: rgba(245,239,228,.66);
+}
+
+.post-card > .rework-post-extras .rework-post-poll {
+  margin: 0;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(0,0,0,.18);
+}
+
+.post-card > .rework-post-extras .rework-post-poll-question {
+  display: block;
+  margin-bottom: 12px;
+  color: #F5EFE4;
+  font-size: 16px;
+  line-height: 22px;
+}
+
+.post-card > .rework-post-extras .rework-post-poll-options {
+  display: grid;
+  gap: 8px;
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option-form {
+  margin: 0;
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option {
+  position: relative;
+  width: 100%;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  background: rgba(0,0,0,.18);
+  color: #F5EFE4;
+  cursor: pointer;
+  text-align: left;
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option:hover,
+.post-card > .rework-post-extras .rework-post-poll-option.is-selected {
+  border-color: rgba(207,161,73,.42);
+  background: rgba(207,161,73,.08);
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 0;
+  background: rgba(207,161,73,.18);
+  pointer-events: none;
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option.is-selected .rework-post-poll-option-bar {
+  background: rgba(207,161,73,.28);
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option-head {
+  position: relative;
+  z-index: 1;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 12px;
+  color: rgba(245,239,228,.82);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option-head em {
+  font-style: normal;
+  font-weight: 800;
+  color: rgba(245,239,228,.62);
+}
+
+.post-card > .rework-post-extras .rework-post-poll-option.is-selected .rework-post-poll-option-head em::after {
+  content: ' ✓';
+  color: rgba(207,161,73,.95);
+}
+
+.post-card > .rework-post-extras .rework-post-poll-total {
+  display: block;
+  margin-top: 10px;
+  color: rgba(245,239,228,.48);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+
+/* 086: Rework post-card child order hard lock */
+.post-card.card[data-rework-post-card] {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-card.card[data-rework-post-card] > script[data-rework-post-context] {
+  display: none !important;
+  order: 0;
+}
+
+.post-card.card[data-rework-post-card] > .post-head {
+  order: 10 !important;
+}
+
+.post-card.card[data-rework-post-card] > .rework-post-extras,
+.post-card.card[data-rework-post-card] > .rework-post-feeling,
+.post-card.card[data-rework-post-card] > .rework-post-poll {
+  order: 20 !important;
+}
+
+.post-card.card[data-rework-post-card] > .post-media {
+  order: 30 !important;
+}
+
+.post-card.card[data-rework-post-card] > .post-actions {
+  order: 40 !important;
+}
+
+.post-card.card[data-rework-post-card] > .liked {
+  order: 50 !important;
+}
+
+.post-card.card[data-rework-post-card] > .post-text,
+.post-card.card[data-rework-post-card] > .rework-post-body {
+  order: 60 !important;
+}
+
+.post-card.card[data-rework-post-card] > .comment-row {
+  order: 70 !important;
+}
+
+
+/* 087: Rework post content before actions */
+.post-card.card[data-rework-post-card] > .post-text,
+.post-card.card[data-rework-post-card] > .rework-post-body {
+  order: 35 !important;
+}
+
+.post-card.card[data-rework-post-card] > .post-actions {
+  order: 40 !important;
+}
+
+.post-card.card[data-rework-post-card] > .liked {
+  order: 50 !important;
+}
+
+.post-card.card[data-rework-post-card] > .comment-row {
+  order: 70 !important;
+}
