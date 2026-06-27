@@ -171,103 +171,51 @@
 <main class="main">
 <header class="topbar">
 <a class="search-box" href="#"><i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i><span>Search</span></a>
-<div class="top-actions">
-<div class="action-menu notification-menu">
+<div class="top-actions" data-rework-header-live data-rework-live-badges-url="{{ route('socialite.header.live-badges') }}" data-rework-live-notifications-url="{{ route('socialite.header.notifications', ['variant' => 'rework']) }}" data-rework-live-messages-url="{{ route('socialite.header.messages', ['variant' => 'rework']) }}" data-rework-live-friend-requests-url="{{ route('socialite.header.friend-requests', ['variant' => 'rework']) }}">
+<div class="action-menu notification-menu" data-rework-header-menu="notifications">
 <a aria-expanded="false" aria-label="{{ __('ui.notifications') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-bell ph-icon"></i>@if($headerNotificationsUnread > 0)<span class="action-count" data-rework-notification-count>{{ $headerNotificationsUnread > 99 ? '99+' : $headerNotificationsUnread }}</span>@endif</a>
 <div class="top-dropdown notification-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
 <strong>{{ __('ui.notifications') }}</strong>
-<span>{{ __('ui.notifications_unread_label') }}: {{ number_format($headerNotificationsUnread) }}</span>
+<span data-rework-notification-summary data-label="{{ __('ui.notifications_unread_label') }}">{{ __('ui.notifications_unread_label') }}: {{ number_format($headerNotificationsUnread) }}</span>
 </div>
 <a href="{{ $notificationsUrl }}">{{ __('ui.notifications_total') }}</a>
 </div>
 <div class="dropdown-list rework-dropdown-scroll" data-rework-notification-list>
-@forelse($headerNotifications as $notification)
-@php
-    $actor = $notification->actor;
-    $avatarUrl = method_exists($notification, 'displayActorAvatarUrl')
-        ? $notification->displayActorAvatarUrl()
-        : ($actor?->avatarUrl() ?: $defaultAvatar);
-    $notificationTargetUrl = $notification->actionUrl() ?: $notificationsUrl;
-@endphp
-<a class="dropdown-item {{ $notification->isUnread() ? 'unread' : '' }}" href="{{ $notificationTargetUrl }}" data-rework-notification-read data-read-url="{{ route('notifications.read', $notification) }}" data-target-url="{{ $notificationTargetUrl }}">
-<img alt="" src="{{ $avatarUrl }}"/>
-<span><strong>{{ $notification->displayTitle() }}</strong><small>{{ $notification->displayBody() ?: __('ui.notifications') }}</small></span>
-<em>{{ $notification->created_at?->diffForHumans() }}</em>
-</a>
-@empty
-<div class="dropdown-empty"><i aria-hidden="true" class="ph ph-bell ph-icon"></i><span>{{ __('ui.no_notifications') }}</span></div>
-@endforelse
+@include('themes.rework.feed.partials.header-notifications', ['headerNotifications' => $headerNotifications, 'notificationsUrl' => $notificationsUrl, 'defaultAvatar' => $defaultAvatar])
 </div>
 <a class="dropdown-footer" href="{{ $notificationsUrl }}">{{ __('ui.view_all_notifications') }}</a>
 </div>
 </div>
-<div class="action-menu friend-request-menu">
+<div class="action-menu friend-request-menu" data-rework-header-menu="friendRequests">
 <a aria-expanded="false" aria-label="{{ __('ui.friend_requests') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-user-plus ph-icon"></i>@if($headerFriendRequestCount > 0)<span class="action-count" data-rework-friend-request-count>{{ $headerFriendRequestCount > 99 ? '99+' : $headerFriendRequestCount }}</span>@endif</a>
 <div class="top-dropdown friend-request-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
 <strong>{{ __('ui.friend_requests') }}</strong>
-<span>{{ number_format($headerFriendRequestCount) }} {{ __('ui.notifications_total') }}</span>
+<span data-rework-friend-request-summary data-label="{{ __('ui.notifications_total') }}">{{ number_format($headerFriendRequestCount) }} {{ __('ui.notifications_total') }}</span>
 </div>
 <a href="{{ route('profile.friends') }}">{{ __('ui.notifications_total') }}</a>
 </div>
 <div class="dropdown-list request-list rework-dropdown-scroll" data-rework-friend-request-list data-empty-label="{{ __('ui.friend_requests_empty') }}">
-@forelse($headerFriendRequests as $friendRequest)
-@php
-    $requester = $friendRequest->requester;
-    $requesterName = $requester?->name ?: ($requester?->username ?: 'hnt.rocks');
-    $requesterAvatar = $requester?->avatarUrl() ?: $defaultAvatar;
-    $requesterUrl = $requester ? route('profile.public', $requester) : route('members.index');
-    $requesterHandle = $requester?->username ? '@'.$requester->username : __('ui.members');
-@endphp
-<article class="dropdown-item request-item unread" data-rework-friend-request-item>
-<a class="request-avatar" href="{{ $requesterUrl }}"><img alt="{{ $requesterName }}" src="{{ $requesterAvatar }}"/></a>
-<div class="request-copy"><strong>{{ $requesterName }}</strong><small>{{ $requesterHandle }} &middot; {{ $friendRequest->created_at?->diffForHumans() }}</small><div class="request-actions">
-<form method="post" action="{{ route('friends.accept', $friendRequest) }}" data-rework-friend-request-action>
-@csrf
-<button type="submit">{{ __('ui.accept_friend_request') }}</button>
-</form>
-<form method="post" action="{{ route('friends.decline', $friendRequest) }}" data-rework-friend-request-action>
-@csrf
-<button type="submit">{{ __('ui.decline_friend_request') }}</button>
-</form>
-</div><small data-rework-friend-request-status hidden></small></div>
-</article>
-@empty
-<div class="dropdown-empty"><i aria-hidden="true" class="ph ph-users-three ph-icon"></i><span>{{ __('ui.friend_requests_empty') }}</span></div>
-@endforelse
+@include('themes.rework.feed.partials.header-friend-requests', ['headerFriendRequests' => $headerFriendRequests, 'defaultAvatar' => $defaultAvatar])
 </div>
 <a class="dropdown-footer" href="{{ route('profile.friends') }}">{{ __('ui.more_friend_requests') }}</a>
 </div>
 </div>
-<div class="action-menu message-menu">
+<div class="action-menu message-menu" data-rework-header-menu="messages">
 <a aria-expanded="false" aria-label="{{ __('ui.messages') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>@if($headerMessagesUnread > 0)<span class="action-count" data-rework-message-count>{{ $headerMessagesUnread > 99 ? '99+' : $headerMessagesUnread }}</span>@endif</a>
 <div class="top-dropdown message-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
 <strong>{{ __('ui.messages') }}</strong>
-<span>{{ __('ui.notifications_unread_label') }}: {{ number_format($headerMessagesUnread) }}</span>
+<span data-rework-message-summary data-label="{{ __('ui.notifications_unread_label') }}">{{ __('ui.notifications_unread_label') }}: {{ number_format($headerMessagesUnread) }}</span>
 </div>
 <a href="{{ $messagesUrl }}">{{ __('ui.messages_total') }}</a>
 </div>
-<div class="dropdown-list rework-dropdown-scroll">
-@forelse($headerMessageConversations as $conversation)
-@php
-    $other = $conversation->otherParticipant($viewer);
-    $latestBody = $conversation->latestMessage?->body;
-    $latestAt = $conversation->latestMessage?->created_at ?? $conversation->updated_at;
-    $unread = $conversation->unreadCountFor($viewer);
-@endphp
-<a class="dropdown-item {{ $unread > 0 ? 'unread' : '' }}" href="{{ route('messages.show', $conversation) }}" data-hnt-chat-tab-open data-hnt-chat-tab-url="{{ route('messages.chat-tab', $conversation) }}" data-hnt-chat-conversation-id="{{ $conversation->id }}">
-<img alt="" src="{{ $other?->avatarUrl() ?: $defaultAvatar }}"/>
-<span><strong>{{ $conversation->displayTitleFor($viewer) }}</strong><small>{{ $latestBody ? \Illuminate\Support\Str::limit($latestBody, 82) : __('ui.message_no_messages_yet') }}</small></span>
-<em>{{ $latestAt?->diffForHumans() }}</em>
-</a>
-@empty
-<div class="dropdown-empty"><i aria-hidden="true" class="ph ph-chat-circle-text ph-icon"></i><span>{{ __('ui.message_no_conversations') }}</span></div>
-@endforelse
+<div class="dropdown-list rework-dropdown-scroll" data-rework-message-list>
+@include('themes.rework.feed.partials.header-messages', ['headerMessageConversations' => $headerMessageConversations, 'viewer' => $viewer, 'defaultAvatar' => $defaultAvatar])
 </div>
 <a class="dropdown-footer" href="{{ $messagesUrl }}">{{ __('ui.view_all_messages') }}</a>
 </div>

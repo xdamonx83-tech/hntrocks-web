@@ -21,6 +21,7 @@
         if (!isOpen) {
           menu.classList.add('is-open');
           toggle.setAttribute('aria-expanded', 'true');
+          refreshHeaderDropdownForMenu(menu);
         }
 
         return;
@@ -42,9 +43,31 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const reactionLabel = (key, fallback = '') => reactionsModal?.dataset?.[key] || fallback;
 
-    const updateHeaderCount = (selector, value) => {
+    const createHeaderBadge = (selector, buttonSelector) => {
+      const button = document.querySelector(buttonSelector);
+      if (!button) return null;
+
+      const badge = document.createElement('span');
+      badge.className = 'action-count';
+
+      if (selector === '[data-rework-notification-count]') {
+        badge.setAttribute('data-rework-notification-count', '');
+      } else if (selector === '[data-rework-friend-request-count]') {
+        badge.setAttribute('data-rework-friend-request-count', '');
+      } else if (selector === '[data-rework-message-count]') {
+        badge.setAttribute('data-rework-message-count', '');
+      }
+
+      button.appendChild(badge);
+      return badge;
+    };
+
+    const updateHeaderCount = (selector, value, buttonSelector = '') => {
       const count = Number.parseInt(value, 10) || 0;
-      const badge = document.querySelector(selector);
+      let badge = document.querySelector(selector);
+      if (!badge && count > 0 && buttonSelector) {
+        badge = createHeaderBadge(selector, buttonSelector);
+      }
       const button = badge?.closest('.action-btn');
 
       if (button) button.classList.remove('has-dot');
@@ -98,10 +121,12 @@
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(payload.message || 'Friend request update failed.');
 
-        updateHeaderCount('[data-rework-friend-request-count]', payload.friend_request_count);
+        updateHeaderCount('[data-rework-friend-request-count]', payload.friend_request_count, '[data-rework-header-menu="friendRequests"] .action-btn');
+        updateHeaderSummary('[data-rework-friend-request-summary]', payload.friend_request_count, true);
         const list = item?.closest('[data-rework-friend-request-list]');
         item?.remove();
         ensureFriendRequestEmptyState(list);
+        refreshHeaderBadges({ refreshOpen: true });
       } catch (error) {
         buttons.forEach((button) => { button.disabled = false; });
         if (status) {
@@ -134,7 +159,9 @@
         const payload = await response.json().catch(() => ({}));
         if (response.ok) {
           link.classList.remove('unread');
-          updateHeaderCount('[data-rework-notification-count]', payload.unread_count);
+          updateHeaderCount('[data-rework-notification-count]', payload.unread_count, '[data-rework-header-menu="notifications"] .action-btn');
+          updateHeaderSummary('[data-rework-notification-summary]', payload.unread_count);
+          refreshHeaderBadges({ refreshOpen: true });
         }
       } finally {
         window.location.href = targetUrl || link.href;
@@ -146,6 +173,149 @@
       if (!Number.isFinite(number)) return '0';
       return new Intl.NumberFormat(document.documentElement.lang || undefined).format(number);
     };
+
+    const reworkHeaderLive = document.querySelector('[data-rework-header-live]');
+    const reworkHeaderState = {
+      counts: null,
+      loading: new Set(),
+    };
+
+    const updateHeaderSummary = (selector, value, suffix = false) => {
+      const node = document.querySelector(selector);
+      if (!node) return;
+
+      const label = node.getAttribute('data-label') || '';
+      node.textContent = suffix ? `${formatCount(value)} ${label}`.trim() : `${label}: ${formatCount(value)}`;
+    };
+
+    const fetchHeaderJson = async (url) => {
+      if (!url) return null;
+
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+      });
+
+      if (!response.ok) return null;
+      return response.json().catch(() => null);
+    };
+
+    const setHeaderDropdownHtml = (kind, html) => {
+      const selectors = {
+        notifications: '[data-rework-notification-list]',
+        friendRequests: '[data-rework-friend-request-list]',
+        messages: '[data-rework-message-list]',
+      };
+      const list = document.querySelector(selectors[kind]);
+      if (!list || typeof html !== 'string') return;
+
+      list.innerHTML = html;
+      if (kind === 'friendRequests') ensureFriendRequestEmptyState(list);
+    };
+
+    const headerMenuIsOpen = (kind) => Boolean(document.querySelector(`[data-rework-header-menu="${kind}"].is-open`));
+
+    const refreshHeaderDropdown = async (kind) => {
+      if (!reworkHeaderLive || reworkHeaderState.loading.has(kind)) return;
+
+      const urls = {
+        notifications: reworkHeaderLive.dataset.reworkLiveNotificationsUrl,
+        friendRequests: reworkHeaderLive.dataset.reworkLiveFriendRequestsUrl,
+        messages: reworkHeaderLive.dataset.reworkLiveMessagesUrl,
+      };
+      const url = urls[kind];
+      if (!url) return;
+
+      reworkHeaderState.loading.add(kind);
+      try {
+        const payload = await fetchHeaderJson(url);
+        if (!payload || payload.authenticated === false) return;
+
+        setHeaderDropdownHtml(kind, payload.html);
+
+        if (kind === 'notifications') {
+          updateHeaderCount('[data-rework-notification-count]', payload.unread_count, '[data-rework-header-menu="notifications"] .action-btn');
+          updateHeaderSummary('[data-rework-notification-summary]', payload.unread_count);
+        } else if (kind === 'friendRequests') {
+          updateHeaderCount('[data-rework-friend-request-count]', payload.count, '[data-rework-header-menu="friendRequests"] .action-btn');
+          updateHeaderSummary('[data-rework-friend-request-summary]', payload.count, true);
+        } else if (kind === 'messages') {
+          updateHeaderCount('[data-rework-message-count]', payload.unread_count, '[data-rework-header-menu="messages"] .action-btn');
+          updateHeaderSummary('[data-rework-message-summary]', payload.unread_count);
+        }
+      } catch (error) {
+        // Header live refresh is optional; leave the rendered UI intact on failure.
+      } finally {
+        reworkHeaderState.loading.delete(kind);
+      }
+    };
+
+    const refreshHeaderDropdownForMenu = (menu) => {
+      const kind = menu?.getAttribute('data-rework-header-menu');
+      if (kind === 'notifications' || kind === 'friendRequests' || kind === 'messages') {
+        refreshHeaderDropdown(kind);
+      }
+    };
+
+    const refreshHeaderBadges = async ({ refreshOpen = false } = {}) => {
+      if (!reworkHeaderLive || reworkHeaderState.loading.has('badges')) return;
+
+      reworkHeaderState.loading.add('badges');
+      try {
+        const payload = await fetchHeaderJson(reworkHeaderLive.dataset.reworkLiveBadgesUrl);
+        if (!payload || payload.authenticated === false) return;
+
+        const nextCounts = {
+          notifications: Number.parseInt(payload.notifications_unread, 10) || 0,
+          messages: Number.parseInt(payload.messages_unread, 10) || 0,
+          friendRequests: Number.parseInt(payload.friend_request_count, 10) || 0,
+        };
+        const previousCounts = reworkHeaderState.counts;
+
+        updateHeaderCount('[data-rework-notification-count]', nextCounts.notifications, '[data-rework-header-menu="notifications"] .action-btn');
+        updateHeaderCount('[data-rework-message-count]', nextCounts.messages, '[data-rework-header-menu="messages"] .action-btn');
+        updateHeaderCount('[data-rework-friend-request-count]', nextCounts.friendRequests, '[data-rework-header-menu="friendRequests"] .action-btn');
+        updateHeaderSummary('[data-rework-notification-summary]', nextCounts.notifications);
+        updateHeaderSummary('[data-rework-message-summary]', nextCounts.messages);
+        updateHeaderSummary('[data-rework-friend-request-summary]', nextCounts.friendRequests, true);
+
+        if (refreshOpen) {
+          [
+            ['notifications', nextCounts.notifications],
+            ['messages', nextCounts.messages],
+            ['friendRequests', nextCounts.friendRequests],
+          ].forEach(([kind, count]) => {
+            const changed = !previousCounts || previousCounts[kind] !== count;
+            if (changed && headerMenuIsOpen(kind)) refreshHeaderDropdown(kind);
+          });
+        }
+
+        reworkHeaderState.counts = nextCounts;
+      } catch (error) {
+        // Silent by design: stale badges are better than breaking the feed shell.
+      } finally {
+        reworkHeaderState.loading.delete('badges');
+      }
+    };
+
+    if (reworkHeaderLive) {
+      refreshHeaderBadges();
+      window.setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          refreshHeaderBadges({ refreshOpen: true });
+        }
+      }, 25000);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          refreshHeaderBadges({ refreshOpen: true });
+          document.querySelectorAll('[data-rework-header-menu].is-open').forEach(refreshHeaderDropdownForMenu);
+        }
+      });
+    }
 
     const parsePostContext = (card) => {
       if (!card) return null;
