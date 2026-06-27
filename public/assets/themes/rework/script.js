@@ -1123,6 +1123,16 @@
     const profileEditStatus = profileEditModal?.querySelector('[data-profile-edit-status]');
     const profileEditLabels = profileEditModal?.dataset || {};
 
+    /* 119: Move profile edit modal to body so fixed positioning is viewport-based */
+    if (profileEditModal && profileEditModal.parentElement !== document.body) {
+      document.body.appendChild(profileEditModal);
+    }
+
+    /* 120: Profile edit active tab initial state */
+    if (profileEditModal && !profileEditModal.getAttribute('data-profile-edit-active-tab')) {
+      profileEditModal.setAttribute('data-profile-edit-active-tab', 'basic');
+    }
+
     const setProfileEditStatus = (message = '', isError = false) => {
       if (!profileEditStatus) return;
       profileEditStatus.textContent = message;
@@ -1139,6 +1149,7 @@
 
     const activateProfileEditTab = (target) => {
       if (!target) return;
+      profileEditModal?.setAttribute('data-profile-edit-active-tab', target);
       profileEditTabs.forEach((tab) => {
         tab.classList.toggle('is-active', tab.getAttribute('data-profile-edit-tab') === target);
       });
