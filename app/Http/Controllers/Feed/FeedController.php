@@ -4,19 +4,15 @@ namespace App\Http\Controllers\Feed;
 
 use App\Http\Controllers\Controller;
 use App\Models\Badge;
-use App\Models\Cup;
 use App\Models\FeedComment;
 use App\Models\FeedCommentReaction;
 use App\Models\FeedPost;
 use App\Models\FeedReaction;
 use App\Models\Friendship;
-use App\Models\LfgPost;
 use App\Models\MediaAsset;
-use App\Models\Moment;
 use App\Models\Quest;
 use App\Models\Report;
 use App\Models\Team;
-use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\Gifs\GifProviderService;
 use App\Services\MediaService;
@@ -28,6 +24,7 @@ use App\Services\Auth\TwoFactorService;
 use App\Support\HntTheme;
 use App\Support\FeedTextRenderer;
 use App\Support\NotificationSettingsGroups;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -318,51 +315,7 @@ class FeedController extends Controller
             ]);
         }
 
-        $friendshipExcludedIds = Friendship::query()
-            ->forUser($viewer)
-            ->whereIn('status', [Friendship::STATUS_ACCEPTED, Friendship::STATUS_PENDING])
-            ->get(['user_one_id', 'user_two_id'])
-            ->map(fn (Friendship $friendship): int => (int) ($friendship->user_one_id === $viewerId ? $friendship->user_two_id : $friendship->user_one_id))
-            ->push($viewerId)
-            ->unique()
-            ->values();
-
-        $members = User::query()
-            ->with('profile')
-            ->where('status', 'active')
-            ->whereNotNull('username')
-            ->where('username', '!=', '')
-            ->whereNotIn('id', $friendshipExcludedIds->all())
-            ->whereDoesntHave('blockedUsers', fn ($query) => $query->where('blocked_user_id', $viewerId))
-            ->whereDoesntHave('blockedByUsers', fn ($query) => $query->where('user_id', $viewerId))
-            ->inRandomOrder()
-            ->limit(3)
-            ->get();
-
-        $topPost = $this->socialiteHighlightTopPost($viewerId, true)
-            ?: $this->socialiteHighlightTopPost($viewerId, false);
-
-        $latestLfg = LfgPost::query()
-            ->with('user.profile')
-            ->where('status', 'open')
-            ->where('visibility', 'public')
-            ->where(function ($query): void {
-                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
-            })
-            ->latest()
-            ->first();
-
-        $activeCup = Cup::query()
-            ->withCount('activeTeams')
-            ->where('visibility', 'public')
-            ->whereIn('status', ['active', 'planned'])
-            ->where(function ($query): void {
-                $query->whereNull('ends_at')->orWhere('ends_at', '>', now());
-            })
-            ->orderByRaw("case when status = 'active' then 0 else 1 end")
-            ->orderBy('starts_at')
-            ->latest('id')
-            ->first();
+        $sidebarData = ReworkFeedSidebar::forViewer($viewer);
 
         $viewer->loadMissing(['crownWallet', 'privacySettings', 'accountDeletionRequest']);
 
@@ -375,39 +328,11 @@ class FeedController extends Controller
             ->get();
         $twoFactor = app(TwoFactorService::class);
 
-        $profileStats = [
-            'xp' => (int) ($viewer->xp_total ?? 0),
-            'posts' => FeedPost::query()
-                ->where('user_id', $viewerId)
-                ->where('status', 'published')
-                ->count(),
-            'reactions' => FeedReaction::query()
-                ->whereHas('post', fn ($query) => $query->where('user_id', $viewerId))
-                ->count(),
-            'comments' => FeedComment::query()
-                ->where('user_id', $viewerId)
-                ->count(),
-            'moments' => Moment::query()
-                ->where('user_id', $viewerId)
-                ->published()
-                ->count(),
-            'friends' => Friendship::query()
-                ->forUser($viewer)
-                ->where('status', Friendship::STATUS_ACCEPTED)
-                ->count(),
-            'lfg' => LfgPost::query()
-                ->where('user_id', $viewerId)
-                ->count(),
-        ];
-
         return view(HntTheme::resolve('feed.live'), [
             'socialitePosts' => $posts,
-            'socialiteMembers' => $members,
-            'socialiteProfileStats' => $profileStats,
-            'socialiteCrownsSummary' => [
-                'balance' => (int) ($viewer->crownWallet?->balance ?? 0),
-                'enabled' => $viewer->crownWallet !== null,
-            ],
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
             'reworkNotificationSettings' => $notificationSettings,
             'reworkNotificationGroups' => NotificationSettingsGroups::all(),
             'reworkPrivacySettings' => $privacySettings,
@@ -415,41 +340,12 @@ class FeedController extends Controller
             'reworkTwoFactorEnabled' => $viewer->hasTwoFactorEnabled(),
             'reworkTwoFactorRecoveryCount' => $twoFactor->recoveryCodeCount($viewer),
             'reworkDeletionRequest' => $viewer->accountDeletionRequest,
-            'socialiteHighlightTopPost' => $topPost,
-            'socialiteHighlightLfg' => $latestLfg,
-            'socialiteHighlightCup' => $activeCup,
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
             'socialiteFeedFilter' => $feedFilter,
             'reportedFeedKeys' => $reportedFeedKeys,
         ]);
-    }
-
-
-    private function socialiteHighlightTopPost(int $viewerId, bool $recentOnly): ?FeedPost
-    {
-        return FeedPost::query()
-            ->with(['user.profile'])
-            ->withCount(['comments', 'reactions'])
-            ->withCount('sharedByPosts as shares_count')
-            ->where('status', 'published')
-            ->where(function ($query) use ($viewerId): void {
-                $query->where(function ($normalPosts) use ($viewerId): void {
-                    $normalPosts->whereNull('team_id')
-                        ->where(function ($visibility) use ($viewerId): void {
-                            $visibility->where('visibility', '!=', 'private')
-                                ->orWhere('user_id', $viewerId);
-                        });
-                })->orWhere(function ($teamPosts) use ($viewerId): void {
-                    $teamPosts->whereNotNull('team_id')
-                        ->whereHas('team', function ($teamQuery) use ($viewerId): void {
-                            $teamQuery->where('visibility', '!=', 'private')
-                                ->orWhereHas('activeMembers', fn ($memberQuery) => $memberQuery->where('user_id', $viewerId));
-                        });
-                });
-            })
-            ->when($recentOnly, fn ($query) => $query->where('created_at', '>=', now()->subDays(7)))
-            ->orderByRaw('(comments_count + reactions_count + shares_count) desc')
-            ->latest()
-            ->first();
     }
 
 

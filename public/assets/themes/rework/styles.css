@@ -12062,7 +12062,48 @@ body.is-modal-open {
     min-height: 0;
   }
 
-  .profile-edit-upload input[type="file"] {
+.profile-edit-upload input[type="file"] {
     font-size: 10px;
   }
+}
+
+/* 121: Rework profile quick media upload affordances */
+.rework-profile-media-btn,
+.rework-profile-avatar-upload {
+  border: 0;
+  cursor: pointer;
+}
+
+.rework-profile-avatar-upload {
+  position: absolute;
+  right: 50%;
+  bottom: -22px;
+  transform: translateX(50%);
+  width: 86px;
+  height: 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #111;
+  background: var(--accent);
+  box-shadow: 0 12px 28px rgba(0,0,0,.34);
+  z-index: 4;
+}
+
+.rework-profile-media-status {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 1400;
+  max-width: min(420px, calc(100vw - 32px));
+}
+
+.profile-action-disabled {
+  pointer-events: none;
+  opacity: .72;
+}
+
+.profile-page .hnt-profile-actions form {
+  display: inline-flex;
 }

@@ -14,8 +14,11 @@ use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Services\ReferralService;
+use App\Services\Auth\TwoFactorService;
 use App\Support\CrownCosmetics;
 use App\Support\HntTheme;
+use App\Support\NotificationSettingsGroups;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -183,6 +186,17 @@ class ProfileController extends Controller
             ->values();
 
         $profileView = $this->profileThemeView($request, 'profile.show', 'themes.socialite.profile.show');
+        $viewer = $request->user();
+        $sidebarData = str_starts_with($profileView, 'themes.rework.')
+            ? ReworkFeedSidebar::forViewer($viewer)
+            : [];
+        $headerData = str_starts_with($profileView, 'themes.rework.')
+            ? ReworkFeedSidebar::headerData($viewer)
+            : [];
+        $reworkSettingsData = $this->reworkSettingsData($viewer);
+        $profileIsBlocked = $viewer && ! $isOwnProfile
+            ? ($viewer->hasBlocked($profileUser) || $profileUser->hasBlocked($viewer))
+            : false;
 
         return view($profileView, [
             'profileUser' => $profileUser,
@@ -204,6 +218,22 @@ class ProfileController extends Controller
             'friendship' => $friendship,
             'profileFriendsCount' => $profileUser->friendsCount(),
             'profileCosmetics' => CrownCosmetics::forUser($profileUser),
+            'profileCanRequestFriend' => $this->canRequestFriend($viewer, $profileUser, $friendship, $isOwnProfile, $profileIsBlocked),
+            'profileCanMessage' => $this->canMessageProfile($viewer, $profileUser, $friendship, $isOwnProfile, $profileIsBlocked),
+            'profileIsBlocked' => $profileIsBlocked,
+            'socialiteMembers' => $sidebarData['members'] ?? collect(),
+            'socialiteProfileStats' => $sidebarData['profileStats'] ?? [],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'] ?? ['balance' => 0, 'enabled' => false],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'] ?? null,
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'] ?? null,
+            'socialiteHighlightCup' => $sidebarData['highlightCup'] ?? null,
+            'headerNotificationsUnread' => $headerData['notificationsUnread'] ?? 0,
+            'headerNotifications' => $headerData['notifications'] ?? collect(),
+            'headerFriendRequests' => $headerData['friendRequests'] ?? collect(),
+            'headerFriendRequestCount' => $headerData['friendRequestCount'] ?? 0,
+            'headerMessageConversations' => $headerData['messageConversations'] ?? collect(),
+            'headerMessagesUnread' => $headerData['messagesUnread'] ?? 0,
+            ...$reworkSettingsData,
         ]);
     }
 
@@ -865,6 +895,64 @@ class ProfileController extends Controller
         return in_array($activeSection, ['timeline', 'about', 'friends', 'badges', 'trophies', 'teams', 'contact'], true)
             ? $activeSection
             : 'timeline';
+    }
+
+    private function canRequestFriend(?User $viewer, User $profileUser, ?Friendship $friendship, bool $isOwnProfile, bool $profileIsBlocked): bool
+    {
+        return $viewer !== null
+            && ! $isOwnProfile
+            && ! $profileIsBlocked
+            && ! $friendship
+            && $profileUser->status === 'active';
+    }
+
+    private function canMessageProfile(?User $viewer, User $profileUser, ?Friendship $friendship, bool $isOwnProfile, bool $profileIsBlocked): bool
+    {
+        if (! $viewer || $isOwnProfile || $profileIsBlocked || $profileUser->status !== 'active') {
+            return false;
+        }
+
+        $profileUser->loadMissing('privacySettings');
+        $allowMessagesFrom = (string) ($profileUser->privacySettings?->allow_messages_from ?? 'registered');
+
+        return match ($allowMessagesFrom) {
+            'everyone', 'registered' => true,
+            'following' => $friendship?->isAccepted() ?? false,
+            'nobody' => false,
+            default => false,
+        };
+    }
+
+    private function reworkSettingsData(?User $viewer): array
+    {
+        if (! $viewer) {
+            return [
+                'reworkNotificationSettings' => null,
+                'reworkNotificationGroups' => NotificationSettingsGroups::all(),
+                'reworkPrivacySettings' => null,
+                'reworkBlockedUsers' => collect(),
+                'reworkTwoFactorEnabled' => false,
+                'reworkTwoFactorRecoveryCount' => 0,
+                'reworkDeletionRequest' => null,
+            ];
+        }
+
+        $viewer->loadMissing(['privacySettings', 'accountDeletionRequest']);
+        $twoFactor = app(TwoFactorService::class);
+
+        return [
+            'reworkNotificationSettings' => $viewer->notificationSettings()->firstOrCreate([]),
+            'reworkNotificationGroups' => NotificationSettingsGroups::all(),
+            'reworkPrivacySettings' => $viewer->privacySettings ?: $viewer->privacySettings()->create(),
+            'reworkBlockedUsers' => $viewer->blockedUsers()
+                ->with('blockedUser')
+                ->latest()
+                ->limit(10)
+                ->get(),
+            'reworkTwoFactorEnabled' => $viewer->hasTwoFactorEnabled(),
+            'reworkTwoFactorRecoveryCount' => $twoFactor->recoveryCodeCount($viewer),
+            'reworkDeletionRequest' => $viewer->accountDeletionRequest,
+        ];
     }
 
     public function edit(Request $request): View
