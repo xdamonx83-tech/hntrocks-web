@@ -1072,6 +1072,61 @@
   }
 })();
 
+/* Rework sidebar friend suggestions */
+(() => {
+  if (window.__hntReworkFriendSuggestionsReady) return;
+  window.__hntReworkFriendSuggestionsReady = true;
+
+  const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  document.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-rework-friend-request-form]');
+    if (!form) return;
+
+    event.preventDefault();
+
+    const button = form.querySelector('button[type="submit"]');
+    const requestedLabel = form.getAttribute('data-requested-label') || 'Requested';
+    const failedLabel = form.getAttribute('data-failed-label') || 'Friend request failed';
+    const originalLabel = button?.textContent || '';
+
+    if (!button || button.disabled) return;
+
+    button.disabled = true;
+    button.classList.remove('has-error');
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken(),
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: new FormData(form),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload?.message || failedLabel);
+      }
+
+      button.textContent = requestedLabel;
+      button.classList.add('is-requested');
+    } catch (error) {
+      button.textContent = failedLabel;
+      button.classList.add('has-error');
+      window.setTimeout(() => {
+        button.textContent = originalLabel;
+        button.classList.remove('has-error');
+        button.disabled = false;
+      }, 1800);
+    }
+  });
+})();
+
 /* Rework feed comment modal parity */
 (() => {
   const modal = document.querySelector('[data-comment-modal]');
@@ -3286,4 +3341,250 @@
       render();
     }
   });
+})();
+
+/* 102: Rework sidebar late sticky profile */
+(() => {
+  if (window.__hntReworkSidebarLateStickyReady) return;
+  window.__hntReworkSidebarLateStickyReady = true;
+
+  const isDesktopMagicViewport = () => window.matchMedia('(min-width: 1101px)').matches;
+
+  const killMobileClone = () => {
+    if (isDesktopMagicViewport()) return;
+    document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+  };
+
+  killMobileClone();
+
+  let clone = null;
+
+  const ensureClone = (profile) => {
+    if (!isDesktopMagicViewport()) return null;
+    if (clone) return clone;
+
+    clone = profile.cloneNode(true);
+    clone.classList.add('rework-profile-late-sticky-clone');
+    clone.classList.remove('is-late-sticky');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+    document.body.appendChild(clone);
+
+    return clone;
+  };
+
+  const setup = () => {
+    if (!isDesktopMagicViewport()) {
+      killMobileClone();
+      window.addEventListener('resize', killMobileClone, { passive: true });
+      return;
+    }
+
+    const rightCol = document.querySelector('.right-col');
+    const profile = rightCol?.querySelector(':scope > .profile-card');
+
+    if (!rightCol || !profile) return;
+
+    const update = () => {
+      if (window.matchMedia('(max-width: 1100px)').matches) {
+        if (clone) {
+          clone.remove();
+          clone = null;
+        }
+
+        return;
+      }
+
+      const stickyClone = ensureClone(profile);
+      if (!stickyClone) return;
+
+      const columnRect = rightCol.getBoundingClientRect();
+      const profileRect = profile.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const originalGone = profileRect.bottom <= -8;
+      const stickyHeight = stickyClone.offsetHeight || profile.offsetHeight || 0;
+      const lateTriggerLine = Math.max(160, stickyHeight + 36);
+      const reachedWidgetEnd = columnRect.bottom <= lateTriggerLine;
+      const shouldShow = originalGone && reachedWidgetEnd;
+
+      if (shouldShow) {
+        stickyClone.style.setProperty('--rework-profile-left', `${columnRect.left}px`);
+        stickyClone.style.setProperty('--rework-profile-width', `${columnRect.width}px`);
+        stickyClone.classList.add('is-active');
+      } else {
+        stickyClone.classList.remove('is-active');
+      }
+    };
+
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    window.setTimeout(update, 120);
+    window.setTimeout(update, 420);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
+
+/* 104: Late sticky profile quick actions */
+(() => {
+  if (window.__hntReworkLateStickyProfileActionsReady) return;
+  window.__hntReworkLateStickyProfileActionsReady = true;
+
+  const labels = () => {
+    const lang = (document.documentElement.getAttribute('lang') || 'de').toLowerCase();
+
+    if (lang.startsWith('en')) {
+      return {
+        open: 'Open profile',
+        edit: 'Edit profile',
+        settings: 'Settings',
+        logout: 'Logout',
+      };
+    }
+
+    return {
+      open: 'Profil öffnen',
+      edit: 'Profil bearbeiten',
+      settings: 'Einstellungen',
+      logout: 'Logout',
+    };
+  };
+
+  const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  const attachActions = () => {
+    const clone = document.querySelector('.rework-profile-late-sticky-clone');
+    if (!clone || clone.querySelector('[data-rework-late-profile-actions]')) return;
+
+    const copy = labels();
+    const actions = document.createElement('div');
+    actions.className = 'profile-late-actions';
+    actions.setAttribute('data-rework-late-profile-actions', '');
+    actions.innerHTML = `
+      <a href="/profile">
+        <i aria-hidden="true" class="ph ph-user-circle ph-icon"></i>
+        <span>${copy.open}</span>
+      </a>
+      <a href="/profile/edit">
+        <i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i>
+        <span>${copy.edit}</span>
+      </a>
+      <button type="button" data-rework-late-settings>
+        <i aria-hidden="true" class="ph ph-gear-six ph-icon"></i>
+        <span>${copy.settings}</span>
+      </button>
+      <form method="POST" action="/logout">
+        <input type="hidden" name="_token" value="${csrfToken()}">
+        <button type="submit">
+          <i aria-hidden="true" class="ph ph-sign-out ph-icon"></i>
+          <span>${copy.logout}</span>
+        </button>
+      </form>
+    `;
+
+    clone.appendChild(actions);
+  };
+
+  const observe = () => {
+    if (!window.matchMedia('(min-width: 1101px)').matches) {
+      document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+      return;
+    }
+
+    attachActions();
+
+    const observer = new MutationObserver(attachActions);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('scroll', attachActions, { passive: true });
+    window.addEventListener('resize', attachActions);
+    window.setTimeout(attachActions, 120);
+    window.setTimeout(attachActions, 420);
+  };
+
+  document.addEventListener('click', (event) => {
+    const settingsButton = event.target.closest('[data-rework-late-settings]');
+    if (!settingsButton) return;
+
+    event.preventDefault();
+    const opener = document.querySelector('[data-settings-modal-open]');
+    if (opener) opener.click();
+  }, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', observe);
+  } else {
+    observe();
+  }
+})();
+
+/* 107: Mobile sidebar flicker kill switch */
+(() => {
+  if (window.__hntReworkMobileSidebarFlickerKillReady) return;
+  window.__hntReworkMobileSidebarFlickerKillReady = true;
+
+  const isMobileSidebar = () => window.matchMedia('(max-width: 1100px)').matches;
+
+  const kill = () => {
+    if (!isMobileSidebar()) return;
+
+    document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+
+    const rightCol = document.querySelector('.right-col');
+    if (rightCol) {
+      rightCol.style.setProperty('display', 'none', 'important');
+      rightCol.style.setProperty('position', 'static', 'important');
+      rightCol.style.setProperty('transform', 'none', 'important');
+      rightCol.style.setProperty('animation', 'none', 'important');
+      rightCol.style.setProperty('transition', 'none', 'important');
+    }
+  };
+
+  kill();
+  document.addEventListener('DOMContentLoaded', kill);
+  window.addEventListener('resize', kill, { passive: true });
+  window.addEventListener('orientationchange', kill, { passive: true });
+  window.setTimeout(kill, 80);
+  window.setTimeout(kill, 350);
+  window.setTimeout(kill, 900);
+})();
+
+/* 110: Touch/mobile hard kill for right widgets and magic clone */
+(() => {
+  if (window.__hntReworkTouchWidgetKillReady) return;
+  window.__hntReworkTouchWidgetKillReady = true;
+
+  const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    || window.matchMedia('(max-width: 1100px)').matches;
+
+  const kill = () => {
+    if (!isTouchDevice()) return;
+
+    document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+
+    const rightCol = document.querySelector('.right-col');
+    if (!rightCol) return;
+
+    rightCol.style.setProperty('display', 'none', 'important');
+    rightCol.style.setProperty('visibility', 'hidden', 'important');
+    rightCol.style.setProperty('opacity', '0', 'important');
+    rightCol.style.setProperty('height', '0', 'important');
+    rightCol.style.setProperty('max-height', '0', 'important');
+    rightCol.style.setProperty('overflow', 'hidden', 'important');
+    rightCol.style.setProperty('pointer-events', 'none', 'important');
+  };
+
+  kill();
+  document.addEventListener('DOMContentLoaded', kill);
+  window.addEventListener('resize', kill, { passive: true });
+  window.addEventListener('orientationchange', kill, { passive: true });
+  window.setTimeout(kill, 80);
+  window.setTimeout(kill, 350);
+  window.setTimeout(kill, 900);
+  window.setTimeout(kill, 1800);
 })();

@@ -415,6 +415,128 @@ a { color: inherit; }
 .highlight:first-child::after, .highlight:nth-child(3)::after { content:''; position:absolute; left:37px; top:2px; width:8px; height:8px; background:var(--green); border-radius:50%; }
 .highlight-time { font-size:11px; color:#fff; white-space:nowrap; margin-top:0; }
 
+.profile-card { min-height: 217px; height: auto; }
+.profile-buttons { gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.suggested, .highlights { height: auto; min-height: 0; }
+.suggestion { min-width: 0; }
+.suggestion-avatar { flex: 0 0 auto; display: block; line-height: 0; }
+.suggestion-info a { color: #fff; text-decoration: none; }
+.suggestion form { flex: 0 0 auto; margin: 0; }
+.suggestion .btn { min-width: 96px; max-width: 118px; padding: 0 12px; overflow: hidden; text-overflow: ellipsis; }
+.suggestion .btn.is-requested { background: rgba(126, 166, 108, .8); }
+.suggestion .btn.has-error { background: rgba(207, 161, 73, .42); }
+.side-empty {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, .68);
+  font-size: 11px;
+  text-align: center;
+  padding: 12px;
+}
+.highlight-list { gap: 12px; }
+.highlight-card {
+  display: grid;
+  gap: 7px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .045);
+  color: #fff;
+  text-decoration: none;
+  min-width: 0;
+}
+.highlight-card:hover { background: rgba(255, 255, 255, .07); }
+.highlight-card strong {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.highlight-card small {
+  color: rgba(255, 255, 255, .62);
+  font-size: 10px;
+  line-height: 15px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.highlight-badge {
+  justify-self: start;
+  border: 1px solid rgba(207, 161, 73, .48);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #e5c47f;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.highlight-meta, .highlight-pills {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  color: rgba(255, 255, 255, .72);
+  font-size: 10px;
+}
+.highlight-meta .ph-icon { font-size: 13px; color: #cfa149; }
+.highlight-meta em, .highlight-pills em {
+  font-style: normal;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  padding: 4px 7px;
+  color: rgba(255, 255, 255, .76);
+}
+
+@media (max-width: 1100px) {
+  .content-grid {
+    grid-template-columns: minmax(0, 760px);
+  }
+
+  .right-col {
+    display: flex;
+    position: static;
+    width: 100%;
+    max-width: 760px;
+  }
+}
+
+@media (max-width: 700px) {
+  .right-col {
+    gap: 16px;
+  }
+
+  .profile-card,
+  .side-card {
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .profile-main {
+    gap: 16px;
+    margin-top: 22px;
+  }
+
+  .balance {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .suggestion {
+    gap: 10px;
+  }
+
+  .suggestion .btn {
+    min-width: 86px;
+    max-width: 98px;
+    padding: 0 9px;
+    font-size: 10px;
+  }
+}
+
 @media (max-width: 1100px) {
   .app { width: 100%; min-width: 390px; }
   .sidebar { width: 78px; }
@@ -10066,5 +10188,825 @@ body.is-modal-open { overflow: hidden; }
   .rework-comment-media-viewer-nav {
     width: 42px;
     height: 42px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .content-grid {
+    grid-template-columns: minmax(0, 760px);
+  }
+
+  .right-col {
+    display: flex;
+    position: static;
+    width: 100%;
+    max-width: 760px;
+  }
+}
+
+@media (max-width: 700px) {
+  .right-col {
+    gap: 16px;
+  }
+
+  .profile-card,
+  .side-card {
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .profile-main {
+    gap: 16px;
+    margin-top: 22px;
+  }
+
+  .balance {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .suggestion {
+    gap: 10px;
+  }
+
+  .suggestion .btn {
+    min-width: 86px;
+    max-width: 98px;
+    padding: 0 9px;
+    font-size: 10px;
+  }
+}
+
+/* 099: Rework sidebar profile XP + natural widget scroll */
+@media (min-width: 1101px) {
+  .right-col {
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+.profile-card {
+  min-height: 284px;
+}
+
+.profile-top {
+  justify-content: flex-start;
+}
+
+.profile-top .status {
+  display: none !important;
+}
+
+.profile-card .levels {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.profile-card .level-badge {
+  min-width: 91px;
+  width: auto;
+  padding: 0 14px;
+}
+
+.profile-stat-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profile-stat-grid span {
+  min-width: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .045);
+  padding: 8px 7px;
+  text-align: center;
+}
+
+.profile-stat-grid strong {
+  display: block;
+  color: #F2E8D8;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-stat-grid em {
+  display: block;
+  margin-top: 2px;
+  color: rgba(242, 232, 216, .62);
+  font-size: 9px;
+  line-height: 11px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.highlights,
+.highlight-list {
+  overflow: visible !important;
+}
+
+.highlight-card {
+  min-height: 0;
+}
+
+@media (max-width: 700px) {
+  .profile-card {
+    min-height: 0;
+  }
+
+  .profile-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 100: Rework sidebar 3x2 stats grid, marks asset and smooth sticky scroll */
+@media (min-width: 1101px) {
+  .right-col {
+    position: sticky !important;
+    top: 24px !important;
+    max-height: calc(100vh - 48px) !important;
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    padding-right: 0;
+  }
+
+  .right-col::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+.profile-card {
+  min-height: 330px;
+}
+
+.profile-top {
+  justify-content: flex-start;
+}
+
+.profile-top .status {
+  display: none !important;
+}
+
+.profile-card .mark {
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(214, 168, 79, .12));
+}
+
+.profile-card .levels {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.profile-card .level-badge {
+  min-width: 91px;
+  width: auto;
+  padding: 0 14px;
+}
+
+.profile-stat-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.profile-stat-grid span {
+  min-width: 0;
+  min-height: 58px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .045);
+  padding: 8px 7px;
+  text-align: center;
+  display: grid;
+  align-content: center;
+}
+
+.profile-stat-grid strong {
+  display: block;
+  color: #F2E8D8;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-stat-grid em {
+  display: block;
+  margin-top: 3px;
+  color: rgba(242, 232, 216, .62);
+  font-size: 8px;
+  line-height: 10px;
+  letter-spacing: .02em;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.highlights,
+.highlight-list {
+  overflow: visible !important;
+}
+
+.highlight-card {
+  min-height: 0;
+}
+
+@media (max-width: 700px) {
+  .profile-card {
+    min-height: 0;
+  }
+
+  .profile-card .mark {
+    width: 62px;
+    height: 62px;
+  }
+
+  .profile-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+/* 101: Repair sidebar sticky scope and profile stat overflow */
+@media (min-width: 1101px) {
+  .right-col {
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
+
+  .right-col > .profile-card {
+    position: sticky;
+    top: 24px;
+    z-index: 3;
+  }
+}
+
+.right-col > .profile-card {
+  height: auto !important;
+  min-height: 0 !important;
+  padding-bottom: 30px !important;
+  overflow: visible !important;
+}
+
+.right-col > .profile-card .profile-main {
+  align-items: center;
+}
+
+.right-col > .profile-card .balance {
+  align-items: center;
+  gap: 18px;
+}
+
+.right-col > .profile-card .profile-stat-grid {
+  width: 100%;
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px;
+}
+
+.right-col > .profile-card .profile-stat-grid span {
+  min-width: 0;
+  min-height: 56px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  overflow: hidden;
+}
+
+.right-col > .profile-card .profile-stat-grid strong {
+  max-width: 100%;
+}
+
+.right-col > .profile-card .profile-stat-grid em {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  font-size: 8px;
+  line-height: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.right-col > .side-card {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 700px) {
+  .right-col > .profile-card {
+    position: static;
+    padding-bottom: 22px !important;
+  }
+
+  .right-col > .profile-card .profile-stat-grid {
+    gap: 8px;
+  }
+
+  .right-col > .profile-card .profile-stat-grid span {
+    min-height: 52px;
+  }
+}
+
+/* 102: Late sticky clone only after sidebar end */
+@media (min-width: 1101px) {
+  .right-col {
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .right-col > .profile-card {
+    position: relative !important;
+    top: auto !important;
+    z-index: 3;
+  }
+
+  .rework-profile-late-sticky-clone {
+    position: fixed;
+    left: var(--rework-profile-left, -9999px);
+    top: 24px;
+    width: var(--rework-profile-width, 374px);
+    z-index: 40;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity .16s ease, transform .16s ease;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .24);
+  }
+
+  .rework-profile-late-sticky-clone.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1100px) {
+  .rework-profile-late-sticky-clone {
+    display: none !important;
+  }
+
+  .right-col > .profile-card {
+    position: static !important;
+    top: auto !important;
+  }
+}
+
+/* 104: Late sticky profile quick actions, no shadow */
+@media (min-width: 1101px) {
+  .rework-profile-late-sticky-clone {
+    box-shadow: none !important;
+  }
+}
+
+.profile-late-actions {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profile-late-actions a,
+.profile-late-actions button {
+  min-width: 0;
+  width: 100%;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .055);
+  color: #F2E8D8;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.profile-late-actions form {
+  margin: 0;
+  min-width: 0;
+}
+
+.profile-late-actions .ph-icon {
+  font-size: 15px;
+  color: #D6A84F;
+  flex: 0 0 auto;
+}
+
+.profile-late-actions span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-late-actions a:hover,
+.profile-late-actions button:hover {
+  background: rgba(214, 168, 79, .14);
+}
+
+@media (max-width: 1100px) {
+  .profile-late-actions {
+    display: none !important;
+  }
+}
+
+/* 106: Hard mobile kill for late sticky profile magic */
+@media (max-width: 1100px) {
+  .rework-profile-late-sticky-clone,
+  .rework-profile-late-sticky-clone.is-active,
+  body > .rework-profile-late-sticky-clone {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+}
+
+/* 107: Mobile sidebar flicker kill switch */
+@media (max-width: 1100px) {
+  .right-col {
+    display: none !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    contain: none !important;
+  }
+
+  .right-col *,
+  .right-col > .profile-card,
+  .right-col > .profile-card.is-late-sticky {
+    position: static !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .rework-profile-late-sticky-clone,
+  .rework-profile-late-sticky-clone *,
+  body > .rework-profile-late-sticky-clone {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: fixed !important;
+    left: -99999px !important;
+    top: -99999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 108: Mobile fixed bottom bar flicker fix */
+@media (max-width: 700px) {
+  .app {
+    min-height: 100svh !important;
+  }
+
+  .sidebar {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgb(30, 30, 28) !important;
+    transform: translateZ(0);
+    will-change: transform;
+    transition: none !important;
+    contain: paint;
+  }
+
+  .sidebar,
+  .nav,
+  .nav a,
+  .nav-bottom,
+  .nav-bottom a,
+  .main,
+  .topbar {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .topbar {
+    transform: translateZ(0);
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* 109: Mobile sticky topbar flicker test/fix */
+@media (max-width: 700px) {
+  .topbar {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+    margin: 0 0 18px !important;
+    padding: 0 !important;
+    min-height: 56px !important;
+    background: transparent !important;
+    transform: none !important;
+    will-change: auto !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .top-dropdown {
+    top: 64px !important;
+  }
+
+  .user-menu .top-dropdown {
+    top: 64px !important;
+  }
+}
+
+/* 110: Hide right widgets on real touch/mobile devices */
+@media (hover: none) and (pointer: coarse), (max-width: 1100px) {
+  .content-grid {
+    display: block !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .left-col {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .right-col,
+  .right-col *,
+  body > .rework-profile-late-sticky-clone,
+  body > .rework-profile-late-sticky-clone * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 112: Mobile feed overflow stabilizer */
+@media (hover: none) and (pointer: coarse), (max-width: 700px) {
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    position: relative;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .app,
+  .main,
+  .content-grid,
+  .left-col,
+  [data-rework-post-stream],
+  .card,
+  .hero-card,
+  .post-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .main {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .post-head,
+  .post-user,
+  .post-media,
+  .post-text,
+  .post-actions,
+  .metrics,
+  .liked,
+  .comment-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .post-media > img,
+  .post-media > video,
+  .post-media img,
+  .post-media video {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .post-actions {
+    overflow: hidden;
+  }
+
+  .post-actions .metrics {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0 !important;
+  }
+
+  .metric {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .liked {
+    overflow: hidden;
+  }
+
+  .liked > span,
+  .liked span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .comment-row {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .comment-row img {
+    width: 36px !important;
+    height: 36px !important;
+    grid-column: 1;
+  }
+
+  .comment-input {
+    grid-column: 2;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .comment-row .btn {
+    grid-column: 3;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    justify-self: end;
+  }
+
+  .rework-load-more-wrap,
+  .rework-load-more {
+    max-width: 100% !important;
+  }
+
+  img,
+  video,
+  canvas,
+  iframe {
+    max-width: 100%;
+  }
+}
+
+/* 113: Mobile post repaint stabilizer */
+@media (hover: none) and (pointer: coarse), (max-width: 700px) {
+  .left-col,
+  [data-rework-post-stream] {
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .post-card {
+    position: relative;
+    contain: layout paint style;
+    isolation: isolate;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: auto;
+    box-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .post-card *,
+  .post-card *::before,
+  .post-card *::after {
+    transition-property: none !important;
+    animation: none !important;
+  }
+
+  .post-media {
+    contain: paint;
+    isolation: isolate;
+    overflow: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .post-media > img,
+  .post-media > video,
+  .post-media img,
+  .post-media video {
+    display: block;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: auto;
+    image-rendering: auto;
+  }
+
+  .post-head,
+  .post-actions,
+  .liked,
+  .comment-row {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .post-actions .ph-icon,
+  .post-actions img,
+  .metric,
+  .liked-avatars,
+  .liked-avatars img {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .game-pill,
+  .more,
+  .btn,
+  .square-icon {
+    transition: none !important;
+    animation: none !important;
   }
 }
