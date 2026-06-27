@@ -53,6 +53,7 @@ return [
     'hunthub_system' => 'hnt.rocks',
     'friend_requests' => 'Freundschaftsanfragen',
     'friend_requests_open_label' => 'offen',
+    'friend_requests_empty' => 'Keine neuen Anfragen',
     'find_friends' => 'Freunde finden',
     'view_all_requests' => 'Alle Anfragen ansehen',
     'no_friend_requests' => 'Keine offenen Freundschaftsanfragen.',

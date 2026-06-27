@@ -4,6 +4,7 @@
     $reworkAsset = fn (string $path): string => \App\Support\HntTheme::asset($path, 'rework');
     $reworkStyleVersion = @filemtime(public_path('assets/themes/rework/styles.css')) ?: time();
     $reworkScriptVersion = @filemtime(public_path('assets/themes/rework/script.js')) ?: time();
+    $socialiteChatTabsVersion = @filemtime(public_path('assets/socialite/js/hnt-socialite-chat-tabs.js')) ?: time();
     $formatCount = fn (int $count): string => number_format($count);
     $feedFilterUrl = function (string $filterKey): string {
         $query = request()->query();
@@ -40,6 +41,52 @@
     $marksBalance = (int) ($crownsSummary['balance'] ?? 0);
     $shopUrl = \Illuminate\Support\Facades\Route::has('crowns.shop') ? route('crowns.shop') : null;
     $membersUrl = \Illuminate\Support\Facades\Route::has('members.index') ? route('members.index') : null;
+    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
+    $notificationsUrl = route('notifications.index');
+    $messagesUrl = route('messages.index');
+    $defaultAvatar = asset('assets/vikinger/img/default-avatar.svg');
+    $headerAvatar = $viewer?->avatarUrl() ?: $defaultAvatar;
+    $headerName = $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter');
+    $headerHandle = $viewer?->username ? '@'.$viewer->username : __('ui.members');
+    $headerNotificationsUnread = $viewer
+        ? $viewer->notificationItems()->standard()->unread()->count()
+        : 0;
+    $headerNotifications = $viewer
+        ? $viewer->notificationItems()
+            ->standard()
+            ->with('actor.profile')
+            ->orderByRaw('read_at is not null')
+            ->latest()
+            ->limit(5)
+            ->get()
+        : collect();
+    $headerFriendRequests = $viewer
+        ? \App\Models\Friendship::query()
+            ->where('recipient_id', $viewer->id)
+            ->where('status', \App\Models\Friendship::STATUS_PENDING)
+            ->with('requester.profile')
+            ->latest()
+            ->limit(5)
+            ->get()
+        : collect();
+    $headerFriendRequestCount = $viewer
+        ? \App\Models\Friendship::query()
+            ->where('recipient_id', $viewer->id)
+            ->where('status', \App\Models\Friendship::STATUS_PENDING)
+            ->count()
+        : 0;
+    $headerMessageConversations = $viewer
+        ? \App\Models\Conversation::query()
+            ->forUser($viewer)
+            ->where('type', 'private')
+            ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
+            ->latest('updated_at')
+            ->limit(5)
+            ->get()
+        : collect();
+    $headerMessagesUnread = $viewer && method_exists($viewer, 'unreadMessagesCount')
+        ? $viewer->unreadMessagesCount()
+        : 0;
     $highlightScore = function ($post): int {
         return (int) ($post?->reactions_count ?? 0)
             + (int) ($post?->comments_count ?? 0)
@@ -54,7 +101,7 @@
 @endphp
 <!DOCTYPE html>
 
-<html lang="de">
+<html lang="{{ $currentLocale }}">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
@@ -124,111 +171,84 @@
 <main class="main">
 <header class="topbar">
 <a class="search-box" href="#"><i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i><span>Search</span></a>
-<div class="top-actions">
-<div class="action-menu notification-menu">
-<a aria-expanded="false" aria-label="Notifications" class="action-btn has-dot" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-bell ph-icon"></i></a>
+<div class="top-actions" data-rework-header-live data-rework-live-badges-url="{{ route('socialite.header.live-badges') }}" data-rework-live-notifications-url="{{ route('socialite.header.notifications', ['variant' => 'rework']) }}" data-rework-live-messages-url="{{ route('socialite.header.messages', ['variant' => 'rework']) }}" data-rework-live-friend-requests-url="{{ route('socialite.header.friend-requests', ['variant' => 'rework']) }}">
+<div class="action-menu notification-menu" data-rework-header-menu="notifications">
+<a aria-expanded="false" aria-label="{{ __('ui.notifications') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-bell ph-icon"></i>@if($headerNotificationsUnread > 0)<span class="action-count" data-rework-notification-count>{{ $headerNotificationsUnread > 99 ? '99+' : $headerNotificationsUnread }}</span>@endif</a>
 <div class="top-dropdown notification-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
-<strong>Notifications</strong>
-<span>Aktuelles aus deiner Lobby</span>
+<strong>{{ __('ui.notifications') }}</strong>
+<span data-rework-notification-summary data-label="{{ __('ui.notifications_unread_label') }}">{{ __('ui.notifications_unread_label') }}: {{ number_format($headerNotificationsUnread) }}</span>
 </div>
-<a href="#">Alle</a>
+<a href="{{ $notificationsUrl }}">{{ __('ui.notifications_total') }}</a>
 </div>
-<div class="dropdown-list">
-<a class="dropdown-item unread" href="#">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/high-1.png', 'rework') }}"/>
-<span><strong>Summer Cup startet bald</strong><small>Team-Anmeldungen sind jetzt offen.</small></span>
-<em>8m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/sug-2.png', 'rework') }}"/>
-<span><strong>Neuer Kommentar</strong><small>Tina hat auf deinen Feed-Post reagiert.</small></span>
-<em>21m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-marks.png', 'rework') }}"/>
-<span><strong>Loadout bewertet</strong><small>Dein Community-Loadout bekommt gerade Likes.</small></span>
-<em>1h</em>
-</a>
+<div class="dropdown-list rework-dropdown-scroll" data-rework-notification-list>
+@include('themes.rework.feed.partials.header-notifications', ['headerNotifications' => $headerNotifications, 'notificationsUrl' => $notificationsUrl, 'defaultAvatar' => $defaultAvatar])
 </div>
-<a class="dropdown-footer" href="#">Alle Notifications öffnen</a>
+<a class="dropdown-footer" href="{{ $notificationsUrl }}">{{ __('ui.view_all_notifications') }}</a>
 </div>
 </div>
-<div class="action-menu friend-request-menu">
-<a aria-expanded="false" aria-label="Freundschaftsanfragen" class="action-btn has-dot" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-user-plus ph-icon"></i></a>
+<div class="action-menu friend-request-menu" data-rework-header-menu="friendRequests">
+<a aria-expanded="false" aria-label="{{ __('ui.friend_requests') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-user-plus ph-icon"></i>@if($headerFriendRequestCount > 0)<span class="action-count" data-rework-friend-request-count>{{ $headerFriendRequestCount > 99 ? '99+' : $headerFriendRequestCount }}</span>@endif</a>
 <div class="top-dropdown friend-request-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
-<strong>Freundschaftsanfragen</strong>
-<span>Neue Hunter wollen sich verbinden</span>
+<strong>{{ __('ui.friend_requests') }}</strong>
+<span data-rework-friend-request-summary data-label="{{ __('ui.notifications_total') }}">{{ number_format($headerFriendRequestCount) }} {{ __('ui.notifications_total') }}</span>
 </div>
-<a href="#">Alle</a>
+<a href="{{ route('profile.friends') }}">{{ __('ui.notifications_total') }}</a>
 </div>
-<div class="dropdown-list request-list">
-<a class="dropdown-item request-item unread" href="#">
-<img alt="Krispie Army" src="{{ \App\Support\HntTheme::asset('images/friend-krispie-army.png', 'rework') }}"/>
-<span class="request-copy"><strong>Krispie Army</strong><small>@krispie-1 · 2 gemeinsame Freunde</small><span class="request-actions"><b>Annehmen</b><em>Ablehnen</em></span></span>
-</a>
-<a class="dropdown-item request-item" href="#">
-<img alt="Babybel" src="{{ \App\Support\HntTheme::asset('images/friend-babybel.png', 'rework') }}"/>
-<span class="request-copy"><strong>Babybel</strong><small>@Babybel · spielt EU / Xbox</small><span class="request-actions"><b>Annehmen</b><em>Ablehnen</em></span></span>
-</a>
-<a class="dropdown-item request-item" href="#">
-<img alt="Faraz Tariq" src="{{ \App\Support\HntTheme::asset('images/sug-1.png', 'rework') }}"/>
-<span class="request-copy"><strong>Faraz Tariq</strong><small>Hat dich über Members gefunden.</small><span class="request-actions"><b>Annehmen</b><em>Ablehnen</em></span></span>
-</a>
+<div class="dropdown-list request-list rework-dropdown-scroll" data-rework-friend-request-list data-empty-label="{{ __('ui.friend_requests_empty') }}">
+@include('themes.rework.feed.partials.header-friend-requests', ['headerFriendRequests' => $headerFriendRequests, 'defaultAvatar' => $defaultAvatar])
 </div>
-<a class="dropdown-footer" href="#">Alle Anfragen öffnen</a>
+<a class="dropdown-footer" href="{{ route('profile.friends') }}">{{ __('ui.more_friend_requests') }}</a>
 </div>
 </div>
-<div class="action-menu message-menu">
-<a aria-expanded="false" aria-label="Messages" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i></a>
+<div class="action-menu message-menu" data-rework-header-menu="messages">
+<a aria-expanded="false" aria-label="{{ __('ui.messages') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>@if($headerMessagesUnread > 0)<span class="action-count" data-rework-message-count>{{ $headerMessagesUnread > 99 ? '99+' : $headerMessagesUnread }}</span>@endif</a>
 <div class="top-dropdown message-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
-<strong>Messages</strong>
-<span>Neue Chats und Antworten</span>
+<strong>{{ __('ui.messages') }}</strong>
+<span data-rework-message-summary data-label="{{ __('ui.notifications_unread_label') }}">{{ __('ui.notifications_unread_label') }}: {{ number_format($headerMessagesUnread) }}</span>
 </div>
-<a href="#">Alle</a>
+<a href="{{ $messagesUrl }}">{{ __('ui.messages_total') }}</a>
 </div>
-<div class="dropdown-list">
-<a class="dropdown-item unread" href="#">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/sug-2.png', 'rework') }}"/>
-<span><strong>Tina Tzoo</strong><small>Bin gleich online, schick mir dein Loadout.</small></span>
-<em>2m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/sug-3.png', 'rework') }}"/>
-<span><strong>MKBHD</strong><small>Sieht wild aus. Würde ich testen.</small></span>
-<em>18m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ \App\Support\HntTheme::asset('images/sug-1.png', 'rework') }}"/>
-<span><strong>Faraz Tariq</strong><small>Ready Lobby später?</small></span>
-<em>1h</em>
-</a>
+<div class="dropdown-list rework-dropdown-scroll" data-rework-message-list>
+@include('themes.rework.feed.partials.header-messages', ['headerMessageConversations' => $headerMessageConversations, 'viewer' => $viewer, 'defaultAvatar' => $defaultAvatar])
 </div>
-<a class="dropdown-footer" href="#">Alle Messages öffnen</a>
+<a class="dropdown-footer" href="{{ $messagesUrl }}">{{ __('ui.view_all_messages') }}</a>
 </div>
 </div>
 <div class="action-menu user-menu">
-<a aria-expanded="false" aria-label="User menu" class="avatar-wrap" data-dropdown-toggle="" href="#"><img alt="Krispie" class="header-avatar" src="{{ \App\Support\HntTheme::asset('images/avatar-main.png', 'rework') }}"/></a>
+<a aria-expanded="false" aria-label="User menu" class="avatar-wrap" data-dropdown-toggle="" href="#"><img alt="{{ $headerName }}" class="header-avatar" src="{{ $headerAvatar }}"/></a>
 <div class="top-dropdown user-dropdown" data-dropdown-panel="">
 <div class="user-dropdown-head">
-<img alt="Krispie" src="{{ \App\Support\HntTheme::asset('images/avatar-main.png', 'rework') }}"/>
+<img alt="{{ $headerName }}" src="{{ $headerAvatar }}"/>
 <div>
-<strong>Krispie</strong>
-<span>Level 7 · 12,256 Marks</span>
+<strong>{{ $headerName }}</strong>
+<span>{{ $headerHandle }} &middot; {{ number_format($marksBalance) }} {{ __('ui.crowns_label') }}</span>
 </div>
 </div>
 <div class="user-menu-list">
-<a href="#"><i aria-hidden="true" class="ph ph-user ph-icon"></i><span>Mein Profil</span></a>
-<a data-settings-modal-open="" href="#"><i aria-hidden="true" class="ph ph-gear-six ph-icon"></i><span>Einstellungen</span></a>
-<a href="#"><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-marks.png', 'rework') }}"/><span>Bounty Marks</span></a>
-<a href="#"><i aria-hidden="true" class="ph ph-storefront ph-icon"></i><span>Shop</span></a>
+<a href="{{ route('profile.show') }}"><i aria-hidden="true" class="ph ph-user ph-icon"></i><span>{{ __('ui.my_profile') }}</span></a>
+<a href="{{ route('profile.edit') }}"><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i><span>{{ __('ui.edit_profile') }}</span></a>
+<a data-settings-modal-open="" href="{{ route('account.settings.edit') }}"><i aria-hidden="true" class="ph ph-gear-six ph-icon"></i><span>{{ __('ui.settings') }}</span></a>
+<div class="user-menu-language">
+<span><i aria-hidden="true" class="ph ph-globe-hemisphere-west ph-icon"></i>{{ __('ui.language') }}</span>
+<div>
+<a class="{{ $currentLocale === 'de' ? 'is-active' : '' }}" href="{{ route('locale.switch', 'de') }}" lang="de" hreflang="de" @if($currentLocale === 'de') aria-current="true" @endif>{{ __('ui.language_german') }}</a>
+<a class="{{ $currentLocale === 'en' ? 'is-active' : '' }}" href="{{ route('locale.switch', 'en') }}" lang="en" hreflang="en" @if($currentLocale === 'en') aria-current="true" @endif>{{ __('ui.language_english') }}</a>
 </div>
-<a class="user-logout" href="#"><i aria-hidden="true" class="ph ph-sign-out ph-icon"></i>Logout</a>
+</div>
+@if($shopUrl)
+<a href="{{ $shopUrl }}"><i aria-hidden="true" class="ph ph-storefront ph-icon"></i><span>{{ __('ui.crowns_shop_kicker') }}</span></a>
+@endif
+</div>
+<form action="{{ route('logout') }}" method="post" class="user-logout-form">
+@csrf
+<button class="user-logout" type="submit"><i aria-hidden="true" class="ph ph-sign-out ph-icon"></i>{{ __('ui.logout') }}</button>
+</form>
 </div>
 </div>
 </div>
@@ -642,6 +662,8 @@
 </footer>
 </section>
 </div>
+@include('themes.socialite.partials.chat-tabs')
 <script defer src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}"></script>
+<script defer src="{{ asset('assets/socialite/js/hnt-socialite-chat-tabs.js') }}?v={{ $socialiteChatTabsVersion }}"></script>
 </body>
 </html>

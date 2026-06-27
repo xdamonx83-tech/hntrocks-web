@@ -50,6 +50,28 @@ class HeaderLiveController extends Controller
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
+        if ($request->query('variant') === 'rework') {
+            $notifications = $user
+                ->notificationItems()
+                ->standard()
+                ->with('actor.profile')
+                ->orderByRaw('read_at is not null')
+                ->latest()
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'authenticated' => true,
+                'html' => view('themes.rework.feed.partials.header-notifications', [
+                    'headerNotifications' => $notifications,
+                    'notificationsUrl' => route('notifications.index'),
+                    'defaultAvatar' => asset('assets/vikinger/img/default-avatar.svg'),
+                ])->render(),
+                'unread_count' => $user->notificationItems()->standard()->unread()->count(),
+                'total_count' => $user->notificationItems()->standard()->count(),
+            ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
         $notifications = $user
             ->notificationItems()
             ->standard()
@@ -78,6 +100,30 @@ class HeaderLiveController extends Controller
                 'html' => '',
                 'unread_count' => 0,
                 'total_count' => 0,
+            ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        if ($request->query('variant') === 'rework') {
+            $conversations = Conversation::query()
+                ->forUser($user)
+                ->where('type', 'private')
+                ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
+                ->latest('updated_at')
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'authenticated' => true,
+                'html' => view('themes.rework.feed.partials.header-messages', [
+                    'headerMessageConversations' => $conversations,
+                    'viewer' => $user,
+                    'defaultAvatar' => asset('assets/vikinger/img/default-avatar.svg'),
+                ])->render(),
+                'unread_count' => method_exists($user, 'unreadMessagesCount') ? $user->unreadMessagesCount() : 0,
+                'total_count' => Conversation::query()
+                    ->forUser($user)
+                    ->where('type', 'private')
+                    ->count(),
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
@@ -113,6 +159,29 @@ class HeaderLiveController extends Controller
                 'html' => '',
                 'count' => 0,
                 'visible_count' => 0,
+            ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        if ($request->query('variant') === 'rework') {
+            $requests = Friendship::query()
+                ->where('recipient_id', $user->id)
+                ->where('status', Friendship::STATUS_PENDING)
+                ->with('requester.profile')
+                ->latest()
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'authenticated' => true,
+                'html' => view('themes.rework.feed.partials.header-friend-requests', [
+                    'headerFriendRequests' => $requests,
+                    'defaultAvatar' => asset('assets/vikinger/img/default-avatar.svg'),
+                ])->render(),
+                'count' => Friendship::query()
+                    ->where('recipient_id', $user->id)
+                    ->where('status', Friendship::STATUS_PENDING)
+                    ->count(),
+                'visible_count' => $requests->count(),
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
