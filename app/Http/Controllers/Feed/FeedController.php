@@ -24,8 +24,10 @@ use App\Services\AI\MediaAiDisclosureService;
 use App\Services\MentionService;
 use App\Services\NotificationService;
 use App\Services\Translation\FeedTranslationService;
+use App\Services\Auth\TwoFactorService;
 use App\Support\HntTheme;
 use App\Support\FeedTextRenderer;
+use App\Support\NotificationSettingsGroups;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -362,7 +364,16 @@ class FeedController extends Controller
             ->latest('id')
             ->first();
 
-        $viewer->loadMissing('crownWallet');
+        $viewer->loadMissing(['crownWallet', 'privacySettings', 'accountDeletionRequest']);
+
+        $notificationSettings = $viewer->notificationSettings()->firstOrCreate([]);
+        $privacySettings = $viewer->privacySettings ?: $viewer->privacySettings()->create();
+        $blockedUsers = $viewer->blockedUsers()
+            ->with('blockedUser')
+            ->latest()
+            ->limit(10)
+            ->get();
+        $twoFactor = app(TwoFactorService::class);
 
         $profileStats = [
             'xp' => (int) ($viewer->xp_total ?? 0),
@@ -397,6 +408,13 @@ class FeedController extends Controller
                 'balance' => (int) ($viewer->crownWallet?->balance ?? 0),
                 'enabled' => $viewer->crownWallet !== null,
             ],
+            'reworkNotificationSettings' => $notificationSettings,
+            'reworkNotificationGroups' => NotificationSettingsGroups::all(),
+            'reworkPrivacySettings' => $privacySettings,
+            'reworkBlockedUsers' => $blockedUsers,
+            'reworkTwoFactorEnabled' => $viewer->hasTwoFactorEnabled(),
+            'reworkTwoFactorRecoveryCount' => $twoFactor->recoveryCodeCount($viewer),
+            'reworkDeletionRequest' => $viewer->accountDeletionRequest,
             'socialiteHighlightTopPost' => $topPost,
             'socialiteHighlightLfg' => $latestLfg,
             'socialiteHighlightCup' => $activeCup,

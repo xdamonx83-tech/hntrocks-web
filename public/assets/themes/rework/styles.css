@@ -5368,6 +5368,7 @@ body.is-modal-open { overflow: hidden; }
 .blocked-form { align-items: end; }
 .settings-inline-btn {
   min-height: 42px;
+  border: 0;
   border-radius: 13px;
   display: inline-flex;
   align-items: center;
@@ -5378,6 +5379,25 @@ body.is-modal-open { overflow: hidden; }
   font-size: 12px;
   line-height: 1;
   font-weight: 900;
+  cursor: pointer;
+}
+.settings-form-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+.settings-field-error { color: #f0a093; font-size: 10px; line-height: 14px; }
+.settings-status {
+  border: 1px solid rgba(94, 199, 135, .28);
+  border-radius: 13px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  color: #9ee0b8;
+  background: rgba(94, 199, 135, .08);
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 800;
+}
+.settings-status.is-error {
+  border-color: rgba(228,108,91,.3);
+  color: #f0a093;
+  background: rgba(228,108,91,.09);
 }
 .blocked-list {
   display: grid;
@@ -5396,7 +5416,25 @@ body.is-modal-open { overflow: hidden; }
 }
 .blocked-item strong { display: block; color: #fff; font-size: 12px; line-height: 17px; font-weight: 900; }
 .blocked-item span { display: block; margin-top: 3px; color: rgba(255,255,255,.54); font-size: 10px; line-height: 15px; }
-.blocked-item a { color: var(--accent); font-size: 11px; font-weight: 900; text-decoration: none; }
+.blocked-item button {
+  border: 0;
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.blocked-empty {
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  padding: 13px 14px;
+  color: rgba(255,255,255,.56);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 800;
+}
 .settings-action-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -11411,5 +11449,114 @@ body.is-modal-open { overflow: hidden; }
 
   .comment-row .btn.comment-send-icon span {
     display: none !important;
+  }
+}
+
+/* 116: Rework settings modal tabs/footer layout polish */
+.settings-has-footer-submit {
+  overflow: hidden;
+}
+
+.settings-has-footer-submit .settings-tabs {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 4;
+  min-height: 64px;
+  padding: 14px 22px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  border-top: 1px solid rgba(255,255,255,.055);
+  border-bottom: 1px solid rgba(255,255,255,.055);
+  background: rgba(24,24,22,.92);
+}
+
+.settings-has-footer-submit .settings-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-has-footer-submit .settings-tabs button {
+  flex: 0 0 auto;
+  min-width: max-content;
+  max-width: none;
+  position: relative;
+  z-index: 1;
+}
+
+.settings-has-footer-submit .settings-modal-body {
+  position: relative;
+  z-index: 1;
+  padding-top: 24px;
+}
+
+.settings-has-footer-submit .settings-toggle-list,
+.settings-has-footer-submit .settings-form-grid,
+.settings-has-footer-submit .settings-action-grid,
+.settings-has-footer-submit .settings-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.settings-has-footer-submit .settings-form-actions {
+  display: none !important;
+}
+
+.settings-has-footer-submit .settings-modal-footer {
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.settings-has-footer-submit .settings-modal-footer .settings-cancel {
+  margin-right: auto;
+}
+
+.settings-has-footer-submit .settings-modal-footer .settings-save[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  .settings-has-footer-submit .settings-modal {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .settings-has-footer-submit .settings-tabs {
+    min-height: 62px;
+    padding: 12px 18px 12px;
+    gap: 8px;
+  }
+
+  .settings-has-footer-submit .settings-tabs button {
+    height: 40px;
+    padding-inline: 12px;
+    font-size: 11px;
+  }
+
+  .settings-has-footer-submit .settings-modal-body {
+    padding-top: 20px;
+    padding-bottom: 18px;
+  }
+
+  .settings-has-footer-submit .settings-modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px 14px 14px;
+    background: rgba(20,20,18,.96);
+    backdrop-filter: blur(12px);
+  }
+
+  .settings-has-footer-submit .settings-modal-footer .settings-cancel {
+    margin-right: 0;
+  }
+
+  .settings-has-footer-submit .settings-modal-footer button {
+    width: 100%;
+    min-width: 0;
   }
 }
