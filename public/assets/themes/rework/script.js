@@ -1159,13 +1159,41 @@
       });
     });
 
+    const settingsFooterSubmit = settingsModal?.querySelector('[data-settings-active-submit]');
+
+    const updateSettingsFooterSubmit = () => {
+      if (!settingsFooterSubmit || !settingsModal) return;
+      const activePanel = settingsModal.querySelector('[data-settings-panel].is-active');
+      const activeForm = activePanel?.querySelector('form');
+      settingsFooterSubmit.hidden = !activeForm;
+      settingsFooterSubmit.disabled = !activeForm;
+    };
+
+    /* 116: Settings footer submit active tab form */
+    settingsFooterSubmit?.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (!settingsModal) return;
+      const activePanel = settingsModal.querySelector('[data-settings-panel].is-active');
+      const activeForm = activePanel?.querySelector('form');
+      if (!activeForm) return;
+
+      if (typeof activeForm.requestSubmit === 'function') {
+        activeForm.requestSubmit();
+      } else {
+        activeForm.submit();
+      }
+    });
+
     settingsTabs.forEach((tab) => {
       tab.addEventListener('click', () => {
         const target = tab.getAttribute('data-settings-tab');
         settingsTabs.forEach((item) => item.classList.toggle('is-active', item === tab));
         settingsPanels.forEach((panel) => panel.classList.toggle('is-active', panel.getAttribute('data-settings-panel') === target));
+        updateSettingsFooterSubmit();
       });
     });
+
+    updateSettingsFooterSubmit();
 
     if (settingsModal) {
       settingsModal.addEventListener('click', (event) => {

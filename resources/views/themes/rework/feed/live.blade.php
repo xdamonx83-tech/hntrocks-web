@@ -610,7 +610,7 @@
 </section>
 </div>
 <div aria-hidden="{{ $reworkSettingsShouldOpen ? 'false' : 'true' }}" class="modal-backdrop settings-backdrop @if($reworkSettingsShouldOpen) is-open @endif" data-settings-modal="" @if($reworkSettingsShouldOpen) data-settings-modal-autopen="1" @endif>
-<section aria-labelledby="settings-modal-title" aria-modal="true" class="settings-modal" role="dialog">
+<section aria-labelledby="settings-modal-title" aria-modal="true" class="settings-modal settings-has-footer-submit" role="dialog">
 <header class="settings-modal-header">
 <div>
 <span class="settings-eyebrow">{{ __('ui.account') }}</span>
@@ -716,6 +716,7 @@
 </div>
 <footer class="settings-modal-footer">
 <button class="settings-cancel" data-settings-modal-close="" type="button">{{ __('ui.cancel') }}</button>
+<button class="settings-save" data-settings-active-submit="" type="button">{{ __('ui.save_changes') }}</button>
 </footer>
 </section>
 </div>
