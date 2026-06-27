@@ -1,3 +1,18 @@
+@php
+    $reworkSettingsShouldOpen = $reworkSettingsShouldOpen ?? false;
+    $reworkSettingsActiveTab = $reworkSettingsActiveTab ?? 'notifications';
+    $reworkSettingsStatusMessages = $reworkSettingsStatusMessages ?? [];
+    $reworkSettingsHasErrors = $reworkSettingsHasErrors ?? false;
+    $reworkNotificationSettings = $reworkNotificationSettings ?? null;
+    $reworkNotificationGroups = $reworkNotificationGroups ?? [];
+    $reworkPrivacySettings = $reworkPrivacySettings ?? null;
+    $reworkPrivacyToggles = $reworkPrivacyToggles ?? [];
+    $reworkBlockedUsers = $reworkBlockedUsers ?? collect();
+    $reworkTwoFactorEnabled = $reworkTwoFactorEnabled ?? false;
+    $reworkTwoFactorRecoveryCount = $reworkTwoFactorRecoveryCount ?? 0;
+    $reworkDeletionRequest = $reworkDeletionRequest ?? null;
+@endphp
+
 <div aria-hidden="{{ $reworkSettingsShouldOpen ? 'false' : 'true' }}" class="modal-backdrop settings-backdrop @if($reworkSettingsShouldOpen) is-open @endif" data-settings-modal="" @if($reworkSettingsShouldOpen) data-settings-modal-autopen="1" @endif>
 <section aria-labelledby="settings-modal-title" aria-modal="true" class="settings-modal settings-has-footer-submit" role="dialog">
 <header class="settings-modal-header">
