@@ -4,6 +4,7 @@
     $reworkAsset = fn (string $path): string => \App\Support\HntTheme::asset($path, 'rework');
     $reworkStyleVersion = @filemtime(public_path('assets/themes/rework/styles.css')) ?: time();
     $reworkScriptVersion = @filemtime(public_path('assets/themes/rework/script.js')) ?: time();
+    $socialiteChatTabsVersion = @filemtime(public_path('assets/socialite/js/hnt-socialite-chat-tabs.js')) ?: time();
     $formatCount = fn (int $count): string => number_format($count);
     $feedFilterUrl = function (string $filterKey): string {
         $query = request()->query();
@@ -172,7 +173,7 @@
 <a class="search-box" href="#"><i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i><span>Search</span></a>
 <div class="top-actions">
 <div class="action-menu notification-menu">
-<a aria-expanded="false" aria-label="{{ __('ui.notifications') }}" class="action-btn {{ $headerNotificationsUnread > 0 ? 'has-dot' : '' }}" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-bell ph-icon"></i>@if($headerNotificationsUnread > 0)<span class="action-count" data-rework-notification-count>{{ $headerNotificationsUnread > 99 ? '99+' : $headerNotificationsUnread }}</span>@endif</a>
+<a aria-expanded="false" aria-label="{{ __('ui.notifications') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-bell ph-icon"></i>@if($headerNotificationsUnread > 0)<span class="action-count" data-rework-notification-count>{{ $headerNotificationsUnread > 99 ? '99+' : $headerNotificationsUnread }}</span>@endif</a>
 <div class="top-dropdown notification-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
@@ -203,16 +204,16 @@
 </div>
 </div>
 <div class="action-menu friend-request-menu">
-<a aria-expanded="false" aria-label="{{ __('ui.no_friend_requests') }}" class="action-btn {{ $headerFriendRequestCount > 0 ? 'has-dot' : '' }}" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-user-plus ph-icon"></i>@if($headerFriendRequestCount > 0)<span class="action-count" data-rework-friend-request-count>{{ $headerFriendRequestCount > 99 ? '99+' : $headerFriendRequestCount }}</span>@endif</a>
+<a aria-expanded="false" aria-label="{{ __('ui.friend_requests') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-user-plus ph-icon"></i>@if($headerFriendRequestCount > 0)<span class="action-count" data-rework-friend-request-count>{{ $headerFriendRequestCount > 99 ? '99+' : $headerFriendRequestCount }}</span>@endif</a>
 <div class="top-dropdown friend-request-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
-<strong>{{ __('ui.no_friend_requests') }}</strong>
+<strong>{{ __('ui.friend_requests') }}</strong>
 <span>{{ number_format($headerFriendRequestCount) }} {{ __('ui.notifications_total') }}</span>
 </div>
 <a href="{{ route('profile.friends') }}">{{ __('ui.notifications_total') }}</a>
 </div>
-<div class="dropdown-list request-list rework-dropdown-scroll" data-rework-friend-request-list data-empty-label="{{ __('ui.no_friend_requests') }}">
+<div class="dropdown-list request-list rework-dropdown-scroll" data-rework-friend-request-list data-empty-label="{{ __('ui.friend_requests_empty') }}">
 @forelse($headerFriendRequests as $friendRequest)
 @php
     $requester = $friendRequest->requester;
@@ -235,14 +236,14 @@
 </div><small data-rework-friend-request-status hidden></small></div>
 </article>
 @empty
-<div class="dropdown-empty"><i aria-hidden="true" class="ph ph-users-three ph-icon"></i><span>{{ __('ui.no_friend_requests') }}</span></div>
+<div class="dropdown-empty"><i aria-hidden="true" class="ph ph-users-three ph-icon"></i><span>{{ __('ui.friend_requests_empty') }}</span></div>
 @endforelse
 </div>
 <a class="dropdown-footer" href="{{ route('profile.friends') }}">{{ __('ui.more_friend_requests') }}</a>
 </div>
 </div>
 <div class="action-menu message-menu">
-<a aria-expanded="false" aria-label="{{ __('ui.messages') }}" class="action-btn {{ $headerMessagesUnread > 0 ? 'has-dot' : '' }}" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>@if($headerMessagesUnread > 0)<span class="action-count" data-rework-message-count>{{ $headerMessagesUnread > 99 ? '99+' : $headerMessagesUnread }}</span>@endif</a>
+<a aria-expanded="false" aria-label="{{ __('ui.messages') }}" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>@if($headerMessagesUnread > 0)<span class="action-count" data-rework-message-count>{{ $headerMessagesUnread > 99 ? '99+' : $headerMessagesUnread }}</span>@endif</a>
 <div class="top-dropdown message-dropdown" data-dropdown-panel="">
 <div class="dropdown-head">
 <div>
@@ -713,6 +714,8 @@
 </footer>
 </section>
 </div>
+@include('themes.socialite.partials.chat-tabs')
 <script defer src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}"></script>
+<script defer src="{{ asset('assets/socialite/js/hnt-socialite-chat-tabs.js') }}?v={{ $socialiteChatTabsVersion }}"></script>
 </body>
 </html>

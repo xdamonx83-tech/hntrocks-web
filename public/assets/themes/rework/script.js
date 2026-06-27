@@ -47,7 +47,7 @@
       const badge = document.querySelector(selector);
       const button = badge?.closest('.action-btn');
 
-      if (button) button.classList.toggle('has-dot', count > 0);
+      if (button) button.classList.remove('has-dot');
       if (!badge) return;
 
       if (count <= 0) {
