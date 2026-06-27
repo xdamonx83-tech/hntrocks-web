@@ -98,6 +98,45 @@
         'media' => 'Medien',
         'mentions' => 'Mentions',
     ];
+    $reworkNotificationSettings = $reworkNotificationSettings ?? null;
+    $reworkNotificationGroups = $reworkNotificationGroups ?? [];
+    $reworkPrivacySettings = $reworkPrivacySettings ?? null;
+    $reworkBlockedUsers = $reworkBlockedUsers ?? collect();
+    $reworkTwoFactorEnabled = (bool) ($reworkTwoFactorEnabled ?? false);
+    $reworkTwoFactorRecoveryCount = (int) ($reworkTwoFactorRecoveryCount ?? 0);
+    $reworkDeletionRequest = $reworkDeletionRequest ?? null;
+    $reworkPrivacyToggles = [
+        'allow_team_invites' => ['title' => __('ui.allow_team_invites'), 'text' => __('ui.allow_team_invites_text')],
+        'allow_lfg_invites' => ['title' => __('ui.allow_lfg_invites'), 'text' => __('ui.allow_lfg_invites_text')],
+        'show_online_status' => ['title' => __('ui.show_online_status'), 'text' => __('ui.show_online_status_text')],
+        'show_activity_feed' => ['title' => __('ui.show_activity_feed'), 'text' => __('ui.show_activity_feed_text')],
+        'show_gamification' => ['title' => __('ui.show_gamification'), 'text' => __('ui.show_gamification_text')],
+        'data_usage_consent' => ['title' => __('ui.data_usage_consent'), 'text' => __('ui.data_usage_consent_text')],
+    ];
+    $reworkSettingsFields = array_merge(
+        array_keys($reworkNotificationGroups),
+        ['profile_visibility', 'allow_messages_from', 'username', 'reason', 'current_password', 'password', 'delete_confirmation', 'code'],
+        array_keys($reworkPrivacyToggles)
+    );
+    $reworkSettingsHasErrors = collect($reworkSettingsFields)->contains(fn ($field) => $errors->has($field));
+    $reworkSettingsStatusMessages = [
+        __('ui.notification_settings_saved'),
+        __('ui.privacy_settings_saved'),
+        __('ui.user_blocked_status'),
+        __('ui.user_unblocked_status'),
+        __('ui.security_password_updated'),
+        __('ui.two_factor_setup_started'),
+        __('ui.account_deletion_cancelled_status'),
+    ];
+    $reworkSettingsShouldOpen = $reworkSettingsHasErrors || (session('status') && in_array(session('status'), $reworkSettingsStatusMessages, true));
+    $reworkSettingsActiveTab = 'notifications';
+    if (collect(['profile_visibility', 'allow_messages_from', 'allow_team_invites', 'allow_lfg_invites', 'show_online_status', 'show_activity_feed', 'show_gamification', 'data_usage_consent'])->contains(fn ($field) => $errors->has($field)) || session('status') === __('ui.privacy_settings_saved')) {
+        $reworkSettingsActiveTab = 'privacy';
+    } elseif (collect(['username', 'reason'])->contains(fn ($field) => $errors->has($field)) || in_array(session('status'), [__('ui.user_blocked_status'), __('ui.user_unblocked_status')], true)) {
+        $reworkSettingsActiveTab = 'blocked';
+    } elseif (collect(['current_password', 'password', 'code', 'delete_confirmation'])->contains(fn ($field) => $errors->has($field)) || in_array(session('status'), [__('ui.security_password_updated'), __('ui.two_factor_setup_started'), __('ui.account_deletion_cancelled_status')], true)) {
+        $reworkSettingsActiveTab = 'security';
+    }
 @endphp
 <!DOCTYPE html>
 
@@ -570,95 +609,113 @@
 </footer>
 </section>
 </div>
-<div aria-hidden="true" class="modal-backdrop settings-backdrop" data-settings-modal="">
+<div aria-hidden="{{ $reworkSettingsShouldOpen ? 'false' : 'true' }}" class="modal-backdrop settings-backdrop @if($reworkSettingsShouldOpen) is-open @endif" data-settings-modal="" @if($reworkSettingsShouldOpen) data-settings-modal-autopen="1" @endif>
 <section aria-labelledby="settings-modal-title" aria-modal="true" class="settings-modal" role="dialog">
 <header class="settings-modal-header">
 <div>
-<span class="settings-eyebrow">Account</span>
-<h2 id="settings-modal-title">Einstellungen</h2>
-<p>Benachrichtigungen, Datenschutz, blockierte Nutzer und Sicherheit an einem Ort verwalten.</p>
+<span class="settings-eyebrow">{{ __('ui.account') }}</span>
+<h2 id="settings-modal-title">{{ __('ui.settings') }}</h2>
+<p>{{ __('ui.rework_settings_modal_intro') }}</p>
 </div>
-<button aria-label="Einstellungen schließen" class="settings-close" data-settings-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+<button aria-label="{{ __('ui.rework_settings_close_aria') }}" class="settings-close" data-settings-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
 </header>
-<nav aria-label="Einstellungen Tabs" class="settings-tabs">
-<button class="is-active" data-settings-tab="notifications" type="button"><i aria-hidden="true" class="ph ph-bell ph-icon"></i><span>Benachrichtigungen</span></button>
-<button data-settings-tab="privacy" type="button"><i aria-hidden="true" class="ph ph-shield-check ph-icon"></i><span>Datenschutz</span></button>
-<button data-settings-tab="blocked" type="button"><i aria-hidden="true" class="ph ph-prohibit ph-icon"></i><span>Blockierte Nutzer</span></button>
-<button data-settings-tab="security" type="button"><i aria-hidden="true" class="ph ph-lock-key ph-icon"></i><span>Sicherheit</span></button>
+<nav aria-label="{{ __('ui.rework_settings_tabs_aria') }}" class="settings-tabs">
+<button class="@if($reworkSettingsActiveTab === 'notifications') is-active @endif" data-settings-tab="notifications" type="button"><i aria-hidden="true" class="ph ph-bell ph-icon"></i><span>{{ __('ui.notification_settings') }}</span></button>
+<button class="@if($reworkSettingsActiveTab === 'privacy') is-active @endif" data-settings-tab="privacy" type="button"><i aria-hidden="true" class="ph ph-shield-check ph-icon"></i><span>{{ __('ui.privacy') }}</span></button>
+<button class="@if($reworkSettingsActiveTab === 'blocked') is-active @endif" data-settings-tab="blocked" type="button"><i aria-hidden="true" class="ph ph-prohibit ph-icon"></i><span>{{ __('ui.account_blocked_users') }}</span></button>
+<button class="@if($reworkSettingsActiveTab === 'security') is-active @endif" data-settings-tab="security" type="button"><i aria-hidden="true" class="ph ph-lock-key ph-icon"></i><span>{{ __('ui.security') }}</span></button>
 </nav>
 <div class="settings-modal-body">
-<section class="settings-panel is-active" data-settings-panel="notifications">
+@if (session('status') && in_array(session('status'), $reworkSettingsStatusMessages, true))
+<div class="settings-status">{{ session('status') }}</div>
+@endif
+@if ($reworkSettingsHasErrors)
+<div class="settings-status is-error">{{ __('ui.profile_validation_error') }}</div>
+@endif
+<section class="settings-panel @if($reworkSettingsActiveTab === 'notifications') is-active @endif" data-settings-panel="notifications">
 <div class="settings-section-head">
 <span>Notification Center</span>
-<h3>Benachrichtigungseinstellungen</h3>
-<p>Lege fest, welche HNT.rocks-Meldungen im System erscheinen sollen.</p>
+<h3>{{ __('ui.notification_settings') }}</h3>
+<p>{{ __('ui.notification_settings_intro') }}</p>
 </div>
+<form action="{{ route('account.settings.update') }}" method="post">
+@csrf
+@method('PUT')
 <div class="settings-toggle-list">
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Feed-Kommentare</strong><p>Wenn jemand deine Feed-Beiträge kommentiert.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Feed-Reaktionen</strong><p>Wenn jemand auf deine Feed-Beiträge reagiert.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Freunde &amp; Netzwerk</strong><p>Anfragen, angenommene Freundschaften und Netzwerk-Aktivität.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Teams</strong><p>Team-Anfragen, Team-Aktivität und Team-LFG.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>LFG</strong><p>Bewerbungen, Annahmen und Ablehnungen in der Mitspielersuche.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Badges &amp; Quests</strong><p>Freigeschaltete Badges und abgeschlossene Quests.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Moments</strong><p>Likes und Kommentare auf deinen Moments.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Cups</strong><p>Cup-Teams, Einreichungen und Ergebnisse.</p></div></label>
+@foreach($reworkNotificationGroups as $field => $meta)
+<label class="settings-toggle-row" for="rework-notification-{{ $field }}"><input id="rework-notification-{{ $field }}" name="{{ $field }}" value="1" @checked(old($field, $reworkNotificationSettings?->{$field})) type="checkbox"/><span></span><div><strong>{{ $meta['title'] }}</strong><p>{{ $meta['text'] }}</p></div></label>
+@endforeach
 </div>
+<div class="settings-form-actions"><button class="settings-inline-btn" type="submit">{{ __('ui.save_changes') }}</button></div>
+</form>
 </section>
-<section class="settings-panel" data-settings-panel="privacy">
+<section class="settings-panel @if($reworkSettingsActiveTab === 'privacy') is-active @endif" data-settings-panel="privacy">
 <div class="settings-section-head">
-<span>Datenschutz</span>
-<h3>Kontakt &amp; Profilsichtbarkeit</h3>
-<p>Steuere, wer dein Profil sehen kann und wer dich direkt kontaktieren darf.</p>
+<span>{{ __('ui.privacy') }}</span>
+<h3>{{ __('ui.contact_and_profile_visibility') }}</h3>
+<p>{{ __('ui.privacy_settings_intro') }}</p>
 </div>
+<form action="{{ route('settings.privacy.update') }}" method="post">
+@csrf
+@method('PUT')
 <div class="settings-form-grid">
-<label><span>Profil-Sichtbarkeit</span><select><option>Öffentlich</option><option>Nur angemeldete Nutzer</option><option>Privat</option></select></label>
-<label><span>Nachrichten erlauben von</span><select><option>Allen</option><option>Angemeldeten Nutzern</option><option>Nur Kontakten</option><option>Niemandem</option></select></label>
+<label><span>{{ __('ui.profile_visibility') }}</span><select name="profile_visibility"><option value="public" @selected(old('profile_visibility', $reworkPrivacySettings?->profile_visibility) === 'public')>{{ __('ui.visibility_public') }}</option><option value="registered" @selected(old('profile_visibility', $reworkPrivacySettings?->profile_visibility) === 'registered')>{{ __('ui.visibility_registered') }}</option><option value="private" @selected(old('profile_visibility', $reworkPrivacySettings?->profile_visibility) === 'private')>{{ __('ui.visibility_private') }}</option></select>@error('profile_visibility')<small class="settings-field-error">{{ $message }}</small>@enderror</label>
+<label><span>{{ __('ui.allow_messages_from') }}</span><select name="allow_messages_from"><option value="everyone" @selected(old('allow_messages_from', $reworkPrivacySettings?->allow_messages_from) === 'everyone')>{{ __('ui.allow_messages_everyone') }}</option><option value="registered" @selected(old('allow_messages_from', $reworkPrivacySettings?->allow_messages_from) === 'registered')>{{ __('ui.allow_messages_registered') }}</option><option value="following" @selected(old('allow_messages_from', $reworkPrivacySettings?->allow_messages_from) === 'following')>{{ __('ui.allow_messages_following') }}</option><option value="nobody" @selected(old('allow_messages_from', $reworkPrivacySettings?->allow_messages_from) === 'nobody')>{{ __('ui.allow_messages_nobody') }}</option></select>@error('allow_messages_from')<small class="settings-field-error">{{ $message }}</small>@enderror</label>
 </div>
 <div class="settings-toggle-list compact">
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Team-Einladungen erlauben</strong><p>Andere Spieler können dich zu Teams einladen.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>LFG-Einladungen erlauben</strong><p>Andere Spieler können dich für Mitspielersuche kontaktieren.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Online-Status anzeigen</strong><p>Dein Status kann in Profil- und Community-Bereichen erscheinen.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Level, Badges und Quests anzeigen</strong><p>Dein Fortschritt darf öffentlich im Profil sichtbar sein.</p></div></label>
+@foreach($reworkPrivacyToggles as $field => $meta)
+<label class="settings-toggle-row" for="rework-privacy-{{ $field }}"><input id="rework-privacy-{{ $field }}" name="{{ $field }}" value="1" @checked(old($field, $reworkPrivacySettings?->{$field})) type="checkbox"/><span></span><div><strong>{{ $meta['title'] }}</strong><p>{{ $meta['text'] }}</p></div></label>
+@endforeach
 </div>
+<div class="settings-form-actions"><button class="settings-inline-btn" type="submit">{{ __('ui.save_changes') }}</button></div>
+</form>
 </section>
-<section class="settings-panel" data-settings-panel="blocked">
+<section class="settings-panel @if($reworkSettingsActiveTab === 'blocked') is-active @endif" data-settings-panel="blocked">
 <div class="settings-section-head">
-<span>Datenschutz</span>
-<h3>Blockierte Nutzer</h3>
-<p>Blockierte Spieler können später für Nachrichten, Einladungen und Interaktionen ausgeschlossen werden.</p>
+<span>{{ __('ui.privacy') }}</span>
+<h3>{{ __('ui.account_blocked_users') }}</h3>
+<p>{{ __('ui.blocked_users_privacy_text') }}</p>
 </div>
+<form action="{{ route('settings.privacy.blocks.store') }}" method="post">
+@csrf
 <div class="settings-form-grid blocked-form">
-<label><span>Nutzername</span><input placeholder="z. B. huntername" type="text"/></label>
-<label><span>Notiz</span><input placeholder="Optionaler Grund für dich" type="text"/></label>
-<a class="settings-inline-btn" href="#">Blockieren</a>
+<label><span>{{ __('ui.username') }}</span><input name="username" value="{{ old('username') }}" placeholder="z. B. huntername" type="text"/>@error('username')<small class="settings-field-error">{{ $message }}</small>@enderror</label>
+<label><span>{{ __('ui.reason_optional') }}</span><input maxlength="120" name="reason" value="{{ old('reason') }}" placeholder="{{ __('ui.rework_settings_block_reason_placeholder') }}" type="text"/>@error('reason')<small class="settings-field-error">{{ $message }}</small>@enderror</label>
+<button class="settings-inline-btn" type="submit">{{ __('ui.rework_settings_block_user') }}</button>
 </div>
+</form>
 <div class="blocked-list">
-<div class="blocked-item"><div><strong>ToxicHunter</strong><span>Spam im Chat</span></div><a href="#">Aufheben</a></div>
-<div class="blocked-item"><div><strong>CampKing77</strong><span>Optionaler Grund für dich</span></div><a href="#">Aufheben</a></div>
+@forelse($reworkBlockedUsers as $block)
+<div class="blocked-item"><div><strong>{{ $block->blockedUser?->name ?? __('ui.deleted_user') }}</strong><span>{{ $block->blockedUser?->username ? '@'.$block->blockedUser->username : __('ui.unknown') }}</span>@if($block->reason)<span>{{ $block->reason }}</span>@endif</div><form action="{{ route('settings.privacy.blocks.destroy', $block) }}" method="post">@csrf @method('DELETE')<button type="submit">{{ __('ui.rework_settings_unblock_user') }}</button></form></div>
+@empty
+<div class="blocked-empty">{{ __('ui.no_blocked_users') }}</div>
+@endforelse
 </div>
 </section>
-<section class="settings-panel" data-settings-panel="security">
+<section class="settings-panel @if($reworkSettingsActiveTab === 'security') is-active @endif" data-settings-panel="security">
 <div class="settings-section-head">
-<span>Sicherheit</span>
-<h3>Passwort &amp; Datenkontrolle</h3>
-<p>Passwort, 2FA, Datenexport und Kontolöschung verwalten.</p>
+<span>{{ __('ui.security') }}</span>
+<h3>{{ __('ui.account_security_info') }}</h3>
+<p>{{ __('ui.account_security_banner_text') }}</p>
 </div>
+<form action="{{ route('settings.security.password') }}" method="post">
+@csrf
 <div class="settings-form-grid">
-<label><span>Aktuelles Passwort bestätigen</span><input placeholder="••••••••" type="password"/></label>
-<label><span>Neues Passwort</span><input placeholder="Neues Passwort" type="password"/></label>
-<label><span>Neues Passwort bestätigen</span><input placeholder="Wiederholen" type="password"/></label>
+<label><span>{{ __('ui.current_password') }}</span><input autocomplete="current-password" name="current_password" type="password"/>@error('current_password')<small class="settings-field-error">{{ $message }}</small>@enderror</label>
+<label><span>{{ __('ui.new_password') }}</span><input autocomplete="new-password" name="password" type="password"/>@error('password')<small class="settings-field-error">{{ $message }}</small>@enderror</label>
+<label><span>{{ __('ui.confirm_new_password') }}</span><input autocomplete="new-password" name="password_confirmation" type="password"/></label>
 </div>
+<div class="settings-form-actions"><button class="settings-inline-btn" type="submit">{{ __('ui.change_password_now') }}</button></div>
+</form>
 <div class="settings-action-grid">
-<a href="#"><i aria-hidden="true" class="ph ph-lock-key ph-icon"></i><strong>Passwort ändern</strong><span>Login-Daten aktualisieren</span></a>
-<a href="#"><i aria-hidden="true" class="ph ph-device-mobile-camera ph-icon"></i><strong>2FA einrichten</strong><span>Authenticator-App verbinden</span></a>
-<a href="#"><i aria-hidden="true" class="ph ph-download-simple ph-icon"></i><strong>Datenexport</strong><span>Accountdaten herunterladen</span></a>
-<a class="danger" href="#"><i aria-hidden="true" class="ph ph-warning ph-icon"></i><strong>Kontolöschung</strong><span>Löschung vormerken</span></a>
+<a href="{{ route('settings.security.index') }}"><i aria-hidden="true" class="ph ph-device-mobile-camera ph-icon"></i><strong>{{ __('ui.two_factor_authentication') }}</strong><span>{{ $reworkTwoFactorEnabled ? __('ui.two_factor_enabled_intro', ['count' => $reworkTwoFactorRecoveryCount]) : __('ui.two_factor_disabled_intro') }}</span></a>
+<a href="{{ route('settings.security.export') }}"><i aria-hidden="true" class="ph ph-download-simple ph-icon"></i><strong>{{ __('ui.data_export') }}</strong><span>{{ __('ui.download_data_export') }}</span></a>
+<a class="danger" href="{{ route('settings.security.index') }}"><i aria-hidden="true" class="ph ph-warning ph-icon"></i><strong>{{ __('ui.account_deletion') }}</strong><span>{{ $reworkDeletionRequest && $reworkDeletionRequest->isPending() ? __('ui.account_deletion_pending', ['date' => $reworkDeletionRequest->scheduled_for?->format('d.m.Y H:i')]) : __('ui.account_deletion_intro') }}</span></a>
 </div>
 </section>
 </div>
 <footer class="settings-modal-footer">
-<button class="settings-cancel" data-settings-modal-close="" type="button">Abbrechen</button>
-<button class="settings-save" type="button">Speichern</button>
+<button class="settings-cancel" data-settings-modal-close="" type="button">{{ __('ui.cancel') }}</button>
 </footer>
 </section>
 </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\UserNotificationSetting;
 use App\Support\HntTheme;
+use App\Support\NotificationSettingsGroups;
 use App\Services\SecurityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class NotificationSettingsController extends Controller
 
         return view($view, [
             'settings' => $settings,
-            'notificationGroups' => $this->notificationGroups(),
+            'notificationGroups' => NotificationSettingsGroups::all(),
         ]);
     }
 
@@ -50,18 +51,4 @@ class NotificationSettingsController extends Controller
         return array_fill_keys(UserNotificationSetting::FIELDS, ['nullable', 'boolean']);
     }
 
-    private function notificationGroups(): array
-    {
-        return [
-            'feed_comments' => ['title' => __('ui.notification_feed_comments'), 'text' => __('ui.notification_feed_comments_text')],
-            'feed_reactions' => ['title' => __('ui.notification_feed_reactions'), 'text' => __('ui.notification_feed_reactions_text')],
-            'friends' => ['title' => __('ui.notification_friends'), 'text' => __('ui.notification_friends_text')],
-            'teams' => ['title' => __('ui.notification_teams'), 'text' => __('ui.notification_teams_text')],
-            'lfg' => ['title' => __('ui.notification_lfg'), 'text' => __('ui.notification_lfg_text')],
-            'gamification' => ['title' => __('ui.notification_gamification'), 'text' => __('ui.notification_gamification_text')],
-            'moments' => ['title' => __('ui.notification_moments'), 'text' => __('ui.notification_moments_text')],
-            'cups' => ['title' => __('ui.notification_cups'), 'text' => __('ui.notification_cups_text')],
-            'referrals' => ['title' => __('ui.notification_referrals'), 'text' => __('ui.notification_referrals_text')],
-        ];
-    }
 }

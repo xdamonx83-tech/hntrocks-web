@@ -1141,6 +1141,10 @@
       if (firstControl) window.setTimeout(() => firstControl.focus(), 120);
     };
 
+    if (settingsModal && settingsModal.hasAttribute('data-settings-modal-autopen')) {
+      document.body.classList.add('is-modal-open');
+    }
+
     document.querySelectorAll('[data-settings-modal-open]').forEach((trigger) => {
       trigger.addEventListener('click', (event) => {
         event.preventDefault();
