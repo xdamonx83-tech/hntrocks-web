@@ -42,6 +42,105 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const reactionLabel = (key, fallback = '') => reactionsModal?.dataset?.[key] || fallback;
 
+    const updateHeaderCount = (selector, value) => {
+      const count = Number.parseInt(value, 10) || 0;
+      const badge = document.querySelector(selector);
+      const button = badge?.closest('.action-btn');
+
+      if (button) button.classList.toggle('has-dot', count > 0);
+      if (!badge) return;
+
+      if (count <= 0) {
+        badge.remove();
+        return;
+      }
+
+      badge.textContent = count > 99 ? '99+' : String(count);
+    };
+
+    const ensureFriendRequestEmptyState = (list) => {
+      if (!list || list.querySelector('[data-rework-friend-request-item]')) return;
+      if (list.querySelector('.dropdown-empty')) return;
+
+      const empty = document.createElement('div');
+      empty.className = 'dropdown-empty';
+      empty.innerHTML = '<i aria-hidden="true" class="ph ph-users-three ph-icon"></i><span></span>';
+      empty.querySelector('span').textContent = list.dataset.emptyLabel || 'No open friend requests.';
+      list.appendChild(empty);
+    };
+
+    document.addEventListener('submit', async (event) => {
+      const form = event.target.closest('[data-rework-friend-request-action]');
+      if (!form) return;
+
+      event.preventDefault();
+      const item = form.closest('[data-rework-friend-request-item]');
+      const status = item?.querySelector('[data-rework-friend-request-status]');
+      const buttons = item ? Array.from(item.querySelectorAll('button')) : [];
+
+      buttons.forEach((button) => { button.disabled = true; });
+      if (status) {
+        status.hidden = true;
+        status.textContent = '';
+      }
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          credentials: 'same-origin',
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.message || 'Friend request update failed.');
+
+        updateHeaderCount('[data-rework-friend-request-count]', payload.friend_request_count);
+        const list = item?.closest('[data-rework-friend-request-list]');
+        item?.remove();
+        ensureFriendRequestEmptyState(list);
+      } catch (error) {
+        buttons.forEach((button) => { button.disabled = false; });
+        if (status) {
+          status.textContent = error.message || 'Update failed.';
+          status.hidden = false;
+        }
+      }
+    });
+
+    document.addEventListener('click', async (event) => {
+      const link = event.target.closest('[data-rework-notification-read]');
+      if (!link) return;
+
+      const readUrl = link.getAttribute('data-read-url');
+      const targetUrl = link.getAttribute('data-target-url') || link.href;
+      if (!readUrl) return;
+
+      event.preventDefault();
+
+      try {
+        const response = await fetch(readUrl, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          credentials: 'same-origin',
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (response.ok) {
+          link.classList.remove('unread');
+          updateHeaderCount('[data-rework-notification-count]', payload.unread_count);
+        }
+      } finally {
+        window.location.href = targetUrl || link.href;
+      }
+    });
+
     const formatCount = (value) => {
       const number = Number.parseInt(value, 10);
       if (!Number.isFinite(number)) return '0';
