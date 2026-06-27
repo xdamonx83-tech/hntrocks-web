@@ -11010,3 +11010,236 @@ body.is-modal-open { overflow: hidden; }
     animation: none !important;
   }
 }
+
+/* 114: Mobile post actions compact polish */
+@media (hover: none) and (pointer: coarse), (max-width: 700px) {
+  .post-actions {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 18px 0 8px !important;
+    overflow: visible !important;
+  }
+
+  .post-actions .icons {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 18px !important;
+  }
+
+  .post-actions .icons a,
+  .post-actions .icons button {
+    width: 25px !important;
+    height: 25px !important;
+    min-width: 25px !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .post-actions .icons .ph-icon {
+    font-size: 25px !important;
+    line-height: 1 !important;
+  }
+
+  .post-actions .metrics {
+    width: auto !important;
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .post-actions .metrics .metric {
+    min-width: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    color: rgba(242, 232, 216, .72) !important;
+  }
+
+  .post-actions .metrics .metric .ph-icon {
+    font-size: 18px !important;
+  }
+
+  .post-actions .metrics .metric:nth-child(2) {
+    display: none !important;
+  }
+
+  .liked {
+    width: 100% !important;
+    margin: 10px 0 14px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    text-align: left !important;
+    overflow: hidden !important;
+  }
+
+  .liked.is-empty {
+    display: none !important;
+  }
+
+  .liked-avatars {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .liked-avatars img {
+    width: 27px !important;
+    height: 27px !important;
+  }
+
+  .liked > span,
+  .liked span[data-rework-like-summary] {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
+  }
+
+  .comment-row {
+    grid-template-columns: 36px minmax(0, 1fr) 44px !important;
+    gap: 8px !important;
+  }
+
+  .comment-row .btn {
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .comment-row .btn::after {
+    content: '➤' !important;
+    color: #F2E8D8 !important;
+    font-size: 17px !important;
+    line-height: 1 !important;
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    transform: translateX(1px);
+  }
+}
+
+/* 115: Mobile like row and real send icon polish */
+@media (hover: none) and (pointer: coarse), (max-width: 700px) {
+  .liked {
+    width: 100% !important;
+    min-height: 34px !important;
+    margin: 12px 0 16px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    text-align: left !important;
+    overflow: visible !important;
+    color: rgba(242, 232, 216, .76) !important;
+  }
+
+  .liked.is-empty {
+    display: none !important;
+  }
+
+  .liked-avatars {
+    flex: 0 0 67px !important;
+    width: 67px !important;
+    min-width: 67px !important;
+    height: 28px !important;
+    margin-right: 2px !important;
+    position: relative !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .liked-avatars img {
+    width: 27px !important;
+    height: 27px !important;
+    min-width: 27px !important;
+    border-radius: 50% !important;
+    position: absolute !important;
+    top: 0 !important;
+    object-fit: cover !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .liked-avatars img:nth-child(1) { left: 0 !important; }
+  .liked-avatars img:nth-child(2) { left: 20px !important; }
+  .liked-avatars img:nth-child(3) { left: 42px !important; }
+
+  .liked > span,
+  .liked span[data-rework-like-summary] {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    display: block !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
+    transform: none !important;
+  }
+
+  .comment-row .btn.comment-send-icon {
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #F2E8D8 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .comment-row .btn.comment-send-icon::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .comment-row .btn.comment-send-icon .ph-icon {
+    display: block !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+    color: #F2E8D8 !important;
+    transform: translateX(1px);
+  }
+
+  .comment-row .btn.comment-send-icon span {
+    display: none !important;
+  }
+}

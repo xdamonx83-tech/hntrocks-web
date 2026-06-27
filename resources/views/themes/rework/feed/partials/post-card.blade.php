@@ -394,6 +394,6 @@
 <div class="comment-row">
 <img alt="" src="{{ $viewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
 <input class="comment-input" data-comment-modal-open placeholder="{{ __('ui.rework_comment_placeholder') }}" readonly type="text"/>
-<a class="btn" data-comment-modal-open href="#">{{ __('ui.preview_comment_reply') }}</a>
+<a class="btn comment-send-icon" data-comment-modal-open href="#" aria-label="{{ __('ui.preview_comment_reply') }}"><i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i><span>{{ __('ui.preview_comment_reply') }}</span></a>
 </div>
 </article>
