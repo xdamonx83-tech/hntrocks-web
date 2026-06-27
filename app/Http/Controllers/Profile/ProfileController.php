@@ -31,7 +31,7 @@ class ProfileController extends Controller
     public function show(Request $request, ?User $user = null): View
     {
         $profileUser = $user ?? $request->user();
-        $profileUser->loadMissing('profile');
+        $profileUser->loadMissing(['profile', 'crownWallet']);
 
         if (! $profileUser->profile) {
             $profileUser->profile()->create([
@@ -103,6 +103,14 @@ class ProfileController extends Controller
             ->orderByPivot('awarded_at', 'desc')
             ->orderBy('badges.sort_order')
             ->limit(30)
+            ->get();
+
+        $profileMomentsPreview = $profileUser->moments()
+            ->published()
+            ->with(['cover', 'media'])
+            ->latest('published_at')
+            ->latest()
+            ->limit(12)
             ->get();
 
         $profileQuestPreview = Quest::query()
@@ -209,6 +217,7 @@ class ProfileController extends Controller
             'profilePostsTotal' => $profilePostsTotal,
             'profileNextPostId' => $profileNextPostId,
             'latestBadges' => $latestBadges,
+            'profileMomentsPreview' => $profileMomentsPreview,
             'profileQuestPreview' => $profileQuestPreview,
             'profileCompletedQuestCount' => $profileCompletedQuestCount,
             'trophyCabinet' => $trophyCabinet,

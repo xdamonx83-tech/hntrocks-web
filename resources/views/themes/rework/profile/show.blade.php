@@ -17,6 +17,8 @@
     $momentsCount = (int) ($profileUser->moments_count ?? 0);
     $commentsCount = (int) ($profileUser->feed_comments_count ?? 0);
     $activeTeamsCount = (int) ($profileUser->active_teams_count ?? 0);
+    $profileMarksBalance = (int) ($profileUser->crownWallet?->balance ?? 0);
+    $profileIsLfg = (bool) ($profile?->is_lfg_available ?? false);
     $activeSection = $activeSection ?? 'timeline';
     $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
     $defaultAvatar = asset('assets/vikinger/img/default-avatar.svg');
@@ -53,10 +55,10 @@
         return $isOwnProfile ? route($meta['own']) : route($meta['public'], $profileUser);
     };
     $tabItems = [
-        'timeline' => ['label' => __('ui.profile_section_timeline'), 'icon' => 'ph-image', 'count' => $postsCount],
+        'timeline' => ['label' => __('ui.rework_profile_posts'), 'icon' => 'ph-image', 'count' => $postsCount],
         'about' => ['label' => __('ui.profile_section_info'), 'icon' => 'ph-user', 'count' => null],
         'friends' => ['label' => __('ui.preview_profile_tab_friends'), 'icon' => 'ph-users-three', 'count' => $friendsCount],
-        'trophies' => ['label' => __('ui.preview_profile_tab_trophies'), 'icon' => 'ph-trophy', 'count' => $momentsCount],
+        'trophies' => ['label' => __('ui.rework_profile_moments'), 'icon' => 'ph-play-circle', 'count' => $momentsCount],
         'badges' => ['label' => __('ui.preview_profile_tab_badges'), 'icon' => 'ph-seal-check', 'count' => $badgesCount],
     ];
     $infoRows = collect([
@@ -87,6 +89,38 @@
 <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css" rel="stylesheet"/>
 <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css" rel="stylesheet"/>
 <link href="{{ \App\Support\HntTheme::asset('styles.css', 'rework') }}?v={{ $reworkStyleVersion }}" rel="stylesheet"/>
+<style>
+@media (hover: none) and (pointer: coarse), (max-width: 1100px) {
+  .right-col,
+  .right-col *,
+  body > .rework-profile-late-sticky-clone,
+  body > .rework-profile-late-sticky-clone * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .content-grid {
+    display: block !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .left-col {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+</style>
 </head>
 <body class="profile-page">
 <div class="app">
@@ -175,17 +209,23 @@
 @endif
 </div>
 </div>
-<div class="hnt-profile-quick-info">
-<p>{{ $bio !== '' ? \Illuminate\Support\Str::limit($bio, 180) : ($headline !== '' ? $headline : __('ui.profile_no_bio')) }}</p>
+<div class="hnt-profile-stats hnt-profile-stats-right">
+<div><strong>{{ $formatCount($profileMarksBalance) }}</strong><span>{{ __('ui.crowns_label') }}</span></div>
+<div><strong>{{ $profileIsLfg ? '1' : '0' }}</strong><span>{{ __('ui.profile_lfg_available') }}</span></div>
+<div><strong>{{ $formatCount($momentsCount) }}</strong><span>{{ __('ui.rework_profile_moments') }}</span></div>
+</div>
+</div>
+@if($bio !== '' || $headline !== '' || $profile?->platform || $profile?->region || $profile?->language || $profileIsLfg)
+<div class="hnt-profile-meta-row">
+<p>{{ $bio !== '' ? \Illuminate\Support\Str::limit($bio, 180) : $headline }}</p>
 <div class="profile-chip-row">
 @if($profile?->platform)<span>{{ $profile->platform }}</span>@endif
 @if($profile?->region)<span>{{ $profile->region }}</span>@endif
 @if($profile?->language)<span>{{ $profile->language }}</span>@endif
-@if($profile?->is_lfg_available)<span class="filled">{{ __('ui.profile_lfg_active') }}</span>@endif
-<em>{{ $formatCount($commentsCount) }} {{ __('ui.rework_profile_comments') }}</em>
+@if($profileIsLfg)<span class="filled">{{ __('ui.profile_lfg_active') }}</span>@endif
 </div>
 </div>
-</div>
+@endif
 <div class="hnt-profile-progress"><span>{{ __('ui.level') }} {{ $level }}</span><div class="profile-progress-track"><i style="width: {{ $levelProgress }}%"></i><strong>{{ $levelProgress }}%</strong></div></div>
 </section>
 
@@ -194,7 +234,7 @@
 @foreach($tabItems as $section => $item)
 <a @class(['active' => $activeSection === $section]) href="{{ $sectionUrl($section) }}"><i aria-hidden="true" class="ph {{ $item['icon'] }} ph-icon"></i>{{ $item['label'] }}@if(! is_null($item['count'])) <span>{{ $formatCount((int) $item['count']) }}</span>@endif</a>
 @endforeach
-@if($isOwnProfile)<a class="profile-create-post" href="{{ route('feed.index') }}" data-post-composer-open="">{{ __('ui.profile_create_first_post') }}</a>@endif
+@if($isOwnProfile)<a class="profile-create-post" href="{{ route('feed.index') }}" data-post-composer-open="">{{ __('ui.preview_nav_create_post') }}</a>@endif
 </div>
 </section>
 
@@ -206,9 +246,14 @@
 <section class="card profile-info-panel">
 <h2>{{ __('ui.profile_no_timeline_title') }}</h2>
 <p>{{ $isOwnProfile ? __('ui.profile_timeline_empty_own') : __('ui.profile_timeline_empty_user', ['name' => $displayName]) }}</p>
-@if($isOwnProfile)<a class="btn light" href="{{ route('feed.index') }}">{{ __('ui.profile_create_first_post') }}</a>@endif
+@if($isOwnProfile)<a class="btn light" href="{{ route('feed.index') }}" data-post-composer-open="">{{ __('ui.preview_nav_create_post') }}</a>@endif
 </section>
 @endforelse
+@if($profilePostsShown < $profilePostsTotal)
+<div class="rework-load-more-wrap">
+<a class="btn rework-load-more" href="{{ request()->fullUrlWithQuery(['profile_posts_page' => $profilePostPage + 1]) }}">{{ __('ui.load_more') }}</a>
+</div>
+@endif
 </div>
 @elseif($activeSection === 'about')
 <section class="card profile-info-panel">
@@ -247,12 +292,19 @@
 </section>
 @else
 <section class="card profile-moments-panel">
-<div class="profile-section-head"><h2>{{ __('ui.preview_profile_trophies_title') }}</h2><span>{{ $formatCount($momentsCount + $activeTeamsCount) }}</span></div>
-<div class="profile-info-grid">
-<div><strong>{{ $formatCount($momentsCount) }}</strong><span>{{ __('ui.rework_profile_moments') }}</span></div>
-<div><strong>{{ $formatCount($activeTeamsCount) }}</strong><span>{{ __('ui.profile_teams_title') }}</span></div>
-<div><strong>{{ $formatCount((int) ($trophyCabinet['stats']['cup_points'] ?? 0)) }}</strong><span>{{ __('ui.preview_profile_cup_points') }}</span></div>
-<div><strong>{{ $formatCount((int) ($trophyCabinet['stats']['badges'] ?? 0)) }}</strong><span>{{ __('ui.profile_badges_stat') }}</span></div>
+<div class="profile-section-head"><h2>{{ __('ui.rework_profile_moments') }}</h2><span>{{ $formatCount($momentsCount) }}</span></div>
+<div class="profile-moments-grid">
+@forelse($profileMomentsPreview as $moment)
+<a href="{{ route('moments.show', $moment) }}" class="profile-moment-card">
+<img src="{{ $moment->coverUrl() }}" alt="{{ \Illuminate\Support\Str::limit($moment->caption ?: __('ui.rework_profile_moments'), 80) }}">
+<div>
+<strong>{{ \Illuminate\Support\Str::limit($moment->caption ?: __('ui.rework_profile_moments'), 70) }}</strong>
+<span>{{ optional($moment->published_at)->diffForHumans() ?: __('ui.preview_profile_unlocked') }}</span>
+</div>
+</a>
+@empty
+<p>{{ $isOwnProfile ? __('ui.preview_profile_moments_empty_own') : __('ui.preview_profile_moments_empty_user') }}</p>
+@endforelse
 </div>
 </section>
 @endif
@@ -267,9 +319,10 @@
 <p class="settings-status rework-profile-media-status" data-rework-profile-media-status data-rework-profile-media-url="{{ route('profile.media.update') }}" hidden></p>
 @include('themes.rework.profile.partials.profile-edit-modal')
 @endif
-<div aria-hidden="true" class="modal-backdrop" data-comment-modal="" data-rework-report-url="{{ \Illuminate\Support\Facades\Route::has('reports.store') ? route('reports.store') : '#' }}">
-<section aria-labelledby="comment-modal-title" aria-modal="true" class="comment-modal" role="dialog"><button aria-label="{{ __('ui.preview_post_modal_close_aria') }}" class="modal-close post-composer-close" data-comment-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button><div class="comment-modal-layout"><div class="comment-modal-post"><div class="modal-post-head"><a data-rework-modal-author-url href="#"><img alt="" src="{{ $defaultAvatar }}"/></a><div><a data-rework-modal-author-url href="#"><strong data-rework-modal-author></strong></a><span data-rework-modal-meta></span></div></div><div class="modal-post-media" hidden></div><div class="modal-post-body"></div><div class="modal-post-stats"></div></div><div class="comment-modal-panel"><header class="comment-modal-head"><strong id="comment-modal-title">{{ __('ui.comments') }}</strong></header><div class="comment-thread"></div></div></div></section>
-</div>
+@include('themes.rework.feed.partials.post-modals')
+@auth
+@include('themes.rework.feed.partials.settings-modal')
+@endauth
 @include('themes.socialite.partials.chat-tabs')
 <script defer src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}"></script>
 <script defer src="{{ asset('assets/socialite/js/hnt-socialite-chat-tabs.js') }}?v={{ $socialiteChatTabsVersion }}"></script>
