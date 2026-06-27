@@ -3348,9 +3348,19 @@
   if (window.__hntReworkSidebarLateStickyReady) return;
   window.__hntReworkSidebarLateStickyReady = true;
 
+  const isDesktopMagicViewport = () => window.matchMedia('(min-width: 1101px)').matches;
+
+  const killMobileClone = () => {
+    if (isDesktopMagicViewport()) return;
+    document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+  };
+
+  killMobileClone();
+
   let clone = null;
 
   const ensureClone = (profile) => {
+    if (!isDesktopMagicViewport()) return null;
     if (clone) return clone;
 
     clone = profile.cloneNode(true);
@@ -3364,20 +3374,29 @@
   };
 
   const setup = () => {
+    if (!isDesktopMagicViewport()) {
+      killMobileClone();
+      window.addEventListener('resize', killMobileClone, { passive: true });
+      return;
+    }
+
     const rightCol = document.querySelector('.right-col');
     const profile = rightCol?.querySelector(':scope > .profile-card');
 
     if (!rightCol || !profile) return;
 
     const update = () => {
-      const stickyClone = ensureClone(profile);
-
       if (window.matchMedia('(max-width: 1100px)').matches) {
-        stickyClone.classList.remove('is-active');
-        stickyClone.style.removeProperty('--rework-profile-left');
-        stickyClone.style.removeProperty('--rework-profile-width');
+        if (clone) {
+          clone.remove();
+          clone = null;
+        }
+
         return;
       }
+
+      const stickyClone = ensureClone(profile);
+      if (!stickyClone) return;
 
       const columnRect = rightCol.getBoundingClientRect();
       const profileRect = profile.getBoundingClientRect();
@@ -3472,6 +3491,11 @@
   };
 
   const observe = () => {
+    if (!window.matchMedia('(min-width: 1101px)').matches) {
+      document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+      return;
+    }
+
     attachActions();
 
     const observer = new MutationObserver(attachActions);
@@ -3497,4 +3521,70 @@
   } else {
     observe();
   }
+})();
+
+/* 107: Mobile sidebar flicker kill switch */
+(() => {
+  if (window.__hntReworkMobileSidebarFlickerKillReady) return;
+  window.__hntReworkMobileSidebarFlickerKillReady = true;
+
+  const isMobileSidebar = () => window.matchMedia('(max-width: 1100px)').matches;
+
+  const kill = () => {
+    if (!isMobileSidebar()) return;
+
+    document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+
+    const rightCol = document.querySelector('.right-col');
+    if (rightCol) {
+      rightCol.style.setProperty('display', 'none', 'important');
+      rightCol.style.setProperty('position', 'static', 'important');
+      rightCol.style.setProperty('transform', 'none', 'important');
+      rightCol.style.setProperty('animation', 'none', 'important');
+      rightCol.style.setProperty('transition', 'none', 'important');
+    }
+  };
+
+  kill();
+  document.addEventListener('DOMContentLoaded', kill);
+  window.addEventListener('resize', kill, { passive: true });
+  window.addEventListener('orientationchange', kill, { passive: true });
+  window.setTimeout(kill, 80);
+  window.setTimeout(kill, 350);
+  window.setTimeout(kill, 900);
+})();
+
+/* 110: Touch/mobile hard kill for right widgets and magic clone */
+(() => {
+  if (window.__hntReworkTouchWidgetKillReady) return;
+  window.__hntReworkTouchWidgetKillReady = true;
+
+  const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    || window.matchMedia('(max-width: 1100px)').matches;
+
+  const kill = () => {
+    if (!isTouchDevice()) return;
+
+    document.querySelectorAll('.rework-profile-late-sticky-clone').forEach((node) => node.remove());
+
+    const rightCol = document.querySelector('.right-col');
+    if (!rightCol) return;
+
+    rightCol.style.setProperty('display', 'none', 'important');
+    rightCol.style.setProperty('visibility', 'hidden', 'important');
+    rightCol.style.setProperty('opacity', '0', 'important');
+    rightCol.style.setProperty('height', '0', 'important');
+    rightCol.style.setProperty('max-height', '0', 'important');
+    rightCol.style.setProperty('overflow', 'hidden', 'important');
+    rightCol.style.setProperty('pointer-events', 'none', 'important');
+  };
+
+  kill();
+  document.addEventListener('DOMContentLoaded', kill);
+  window.addEventListener('resize', kill, { passive: true });
+  window.addEventListener('orientationchange', kill, { passive: true });
+  window.setTimeout(kill, 80);
+  window.setTimeout(kill, 350);
+  window.setTimeout(kill, 900);
+  window.setTimeout(kill, 1800);
 })();

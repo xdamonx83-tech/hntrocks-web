@@ -10642,3 +10642,371 @@ body.is-modal-open { overflow: hidden; }
     display: none !important;
   }
 }
+
+/* 106: Hard mobile kill for late sticky profile magic */
+@media (max-width: 1100px) {
+  .rework-profile-late-sticky-clone,
+  .rework-profile-late-sticky-clone.is-active,
+  body > .rework-profile-late-sticky-clone {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+}
+
+/* 107: Mobile sidebar flicker kill switch */
+@media (max-width: 1100px) {
+  .right-col {
+    display: none !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    contain: none !important;
+  }
+
+  .right-col *,
+  .right-col > .profile-card,
+  .right-col > .profile-card.is-late-sticky {
+    position: static !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .rework-profile-late-sticky-clone,
+  .rework-profile-late-sticky-clone *,
+  body > .rework-profile-late-sticky-clone {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: fixed !important;
+    left: -99999px !important;
+    top: -99999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 108: Mobile fixed bottom bar flicker fix */
+@media (max-width: 700px) {
+  .app {
+    min-height: 100svh !important;
+  }
+
+  .sidebar {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgb(30, 30, 28) !important;
+    transform: translateZ(0);
+    will-change: transform;
+    transition: none !important;
+    contain: paint;
+  }
+
+  .sidebar,
+  .nav,
+  .nav a,
+  .nav-bottom,
+  .nav-bottom a,
+  .main,
+  .topbar {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .topbar {
+    transform: translateZ(0);
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* 109: Mobile sticky topbar flicker test/fix */
+@media (max-width: 700px) {
+  .topbar {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+    margin: 0 0 18px !important;
+    padding: 0 !important;
+    min-height: 56px !important;
+    background: transparent !important;
+    transform: none !important;
+    will-change: auto !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .top-dropdown {
+    top: 64px !important;
+  }
+
+  .user-menu .top-dropdown {
+    top: 64px !important;
+  }
+}
+
+/* 110: Hide right widgets on real touch/mobile devices */
+@media (hover: none) and (pointer: coarse), (max-width: 1100px) {
+  .content-grid {
+    display: block !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .left-col {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .right-col,
+  .right-col *,
+  body > .rework-profile-late-sticky-clone,
+  body > .rework-profile-late-sticky-clone * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 112: Mobile feed overflow stabilizer */
+@media (hover: none) and (pointer: coarse), (max-width: 700px) {
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    position: relative;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .app,
+  .main,
+  .content-grid,
+  .left-col,
+  [data-rework-post-stream],
+  .card,
+  .hero-card,
+  .post-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .main {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .post-head,
+  .post-user,
+  .post-media,
+  .post-text,
+  .post-actions,
+  .metrics,
+  .liked,
+  .comment-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .post-media > img,
+  .post-media > video,
+  .post-media img,
+  .post-media video {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .post-actions {
+    overflow: hidden;
+  }
+
+  .post-actions .metrics {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0 !important;
+  }
+
+  .metric {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .liked {
+    overflow: hidden;
+  }
+
+  .liked > span,
+  .liked span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .comment-row {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .comment-row img {
+    width: 36px !important;
+    height: 36px !important;
+    grid-column: 1;
+  }
+
+  .comment-input {
+    grid-column: 2;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .comment-row .btn {
+    grid-column: 3;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    justify-self: end;
+  }
+
+  .rework-load-more-wrap,
+  .rework-load-more {
+    max-width: 100% !important;
+  }
+
+  img,
+  video,
+  canvas,
+  iframe {
+    max-width: 100%;
+  }
+}
+
+/* 113: Mobile post repaint stabilizer */
+@media (hover: none) and (pointer: coarse), (max-width: 700px) {
+  .left-col,
+  [data-rework-post-stream] {
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .post-card {
+    position: relative;
+    contain: layout paint style;
+    isolation: isolate;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: auto;
+    box-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .post-card *,
+  .post-card *::before,
+  .post-card *::after {
+    transition-property: none !important;
+    animation: none !important;
+  }
+
+  .post-media {
+    contain: paint;
+    isolation: isolate;
+    overflow: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .post-media > img,
+  .post-media > video,
+  .post-media img,
+  .post-media video {
+    display: block;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: auto;
+    image-rendering: auto;
+  }
+
+  .post-head,
+  .post-actions,
+  .liked,
+  .comment-row {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .post-actions .ph-icon,
+  .post-actions img,
+  .metric,
+  .liked-avatars,
+  .liked-avatars img {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .game-pill,
+  .more,
+  .btn,
+  .square-icon {
+    transition: none !important;
+    animation: none !important;
+  }
+}

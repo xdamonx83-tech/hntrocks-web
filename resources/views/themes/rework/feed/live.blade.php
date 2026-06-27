@@ -2,6 +2,8 @@
     $viewer = auth()->user();
     $socialiteFeedFilter = $socialiteFeedFilter ?? 'all';
     $reworkAsset = fn (string $path): string => \App\Support\HntTheme::asset($path, 'rework');
+    $reworkStyleVersion = @filemtime(public_path('assets/themes/rework/styles.css')) ?: time();
+    $reworkScriptVersion = @filemtime(public_path('assets/themes/rework/script.js')) ?: time();
     $formatCount = fn (int $count): string => number_format($count);
     $feedFilterUrl = function (string $filterKey): string {
         $query = request()->query();
@@ -64,7 +66,40 @@
 <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" rel="stylesheet"/>
 <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css" rel="stylesheet"/>
 <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css" rel="stylesheet"/>
-<link href="{{ \App\Support\HntTheme::asset('styles.css', 'rework') }}" rel="stylesheet"/>
+<link href="{{ \App\Support\HntTheme::asset('styles.css', 'rework') }}?v={{ $reworkStyleVersion }}" rel="stylesheet"/>
+<style>
+/* 111: inline mobile guard, independent from cached external CSS */
+@media (hover: none) and (pointer: coarse), (max-width: 1100px) {
+  .right-col,
+  .right-col *,
+  body > .rework-profile-late-sticky-clone,
+  body > .rework-profile-late-sticky-clone * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .content-grid {
+    display: block !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .left-col {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -607,6 +642,6 @@
 </footer>
 </section>
 </div>
-<script defer src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}"></script>
+<script defer src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}"></script>
 </body>
 </html>
