@@ -4129,3 +4129,97 @@
   window.setTimeout(kill, 900);
   window.setTimeout(kill, 1800);
 })();
+
+/* 121: Rework profile quick media upload, no crop */
+(() => {
+  if (window.__hntReworkProfileMediaUploadReady) return;
+  window.__hntReworkProfileMediaUploadReady = true;
+
+  const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  const status = document.querySelector('[data-rework-profile-media-status]');
+  const endpoint = status?.getAttribute('data-rework-profile-media-url') || '/profile/media';
+  const inputs = {
+    avatar: document.querySelector('[data-rework-profile-media-input="avatar"]'),
+    cover: document.querySelector('[data-rework-profile-media-input="cover"]'),
+  };
+
+  const setStatus = (message = '', isError = false) => {
+    if (!status) return;
+    status.textContent = message;
+    status.hidden = !message;
+    status.classList.toggle('is-error', isError);
+  };
+
+  const updateImages = (payload) => {
+    if (payload.avatar_url) {
+      const avatarUrl = `${payload.avatar_url}${payload.avatar_url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+      document.querySelectorAll('[data-rework-profile-avatar], [data-profile-edit-avatar-preview]').forEach((node) => {
+        if (node instanceof HTMLImageElement) node.src = avatarUrl;
+      });
+    }
+
+    if (payload.cover_url) {
+      const coverUrl = `${payload.cover_url}${payload.cover_url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+      document.querySelectorAll('[data-rework-profile-cover-image]').forEach((node) => {
+        if (node instanceof HTMLImageElement) node.src = coverUrl;
+      });
+      document.querySelectorAll('[data-rework-profile-cover], [data-profile-edit-cover-preview]').forEach((node) => {
+        node.style.backgroundImage = `url('${coverUrl}')`;
+      });
+    }
+  };
+
+  const upload = async (type, file) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('type', type);
+    formData.append('image', file);
+
+    setStatus(type === 'cover' ? 'Cover wird gespeichert...' : 'Avatar wird gespeichert...');
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': csrfToken(),
+        },
+        body: formData,
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const firstError = payload?.errors ? Object.values(payload.errors).flat().filter(Boolean)[0] : null;
+        throw new Error(firstError || payload?.message || 'Upload fehlgeschlagen.');
+      }
+
+      updateImages(payload);
+      setStatus(payload.message || 'Gespeichert.');
+      window.setTimeout(() => setStatus(''), 2200);
+    } catch (error) {
+      setStatus(error?.message || 'Upload fehlgeschlagen.', true);
+    }
+  };
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-rework-profile-media-upload]');
+    if (!trigger) return;
+
+    const type = trigger.getAttribute('data-rework-profile-media-upload') === 'cover' ? 'cover' : 'avatar';
+    const input = inputs[type];
+    if (!input) return;
+
+    event.preventDefault();
+    input.click();
+  });
+
+  Object.entries(inputs).forEach(([type, input]) => {
+    input?.addEventListener('change', () => {
+      const file = input.files?.[0];
+      upload(type, file);
+      input.value = '';
+    });
+  });
+})();

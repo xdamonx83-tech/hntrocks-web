@@ -3365,6 +3365,8 @@ return [
     'rework_profile_reactions' => 'Likes',
     'rework_profile_comments' => 'Kommentare',
     'rework_profile_moments' => 'Moments',
+    'preview_profile_moments_empty_own' => 'Du hast noch keine Moments veroeffentlicht.',
+    'preview_profile_moments_empty_user' => 'Keine sichtbaren Moments.',
     'rework_profile_lfg' => 'LFG',
     'rework_profile_friends' => 'Freunde',
     'offline' => 'Offline',
