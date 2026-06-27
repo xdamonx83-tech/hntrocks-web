@@ -1114,6 +1114,246 @@
 
 
 
+    const profileEditModal = document.querySelector('[data-profile-edit-modal]');
+    const profileEditForm = profileEditModal?.querySelector('[data-profile-edit-form]');
+    const profileEditTabs = profileEditModal?.querySelectorAll('[data-profile-edit-tab]') || [];
+    const profileEditPanels = profileEditModal?.querySelectorAll('[data-profile-edit-panel]') || [];
+    const profileEditCloseButtons = profileEditModal?.querySelectorAll('[data-profile-edit-modal-close]') || [];
+    const profileEditSubmit = profileEditModal?.querySelector('[data-profile-edit-submit]');
+    const profileEditStatus = profileEditModal?.querySelector('[data-profile-edit-status]');
+    const profileEditLabels = profileEditModal?.dataset || {};
+
+    /* 119: Move profile edit modal to body so fixed positioning is viewport-based */
+    if (profileEditModal && profileEditModal.parentElement !== document.body) {
+      document.body.appendChild(profileEditModal);
+    }
+
+    /* 120: Profile edit active tab initial state */
+    if (profileEditModal && !profileEditModal.getAttribute('data-profile-edit-active-tab')) {
+      profileEditModal.setAttribute('data-profile-edit-active-tab', 'basic');
+    }
+
+    const setProfileEditStatus = (message = '', isError = false) => {
+      if (!profileEditStatus) return;
+      profileEditStatus.textContent = message;
+      profileEditStatus.hidden = !message;
+      profileEditStatus.classList.toggle('is-error', isError);
+    };
+
+    const clearProfileEditErrors = () => {
+      if (!profileEditModal) return;
+      profileEditModal.querySelectorAll('[data-profile-edit-error]').forEach((error) => {
+        error.textContent = '';
+      });
+    };
+
+    const activateProfileEditTab = (target) => {
+      if (!target) return;
+      profileEditModal?.setAttribute('data-profile-edit-active-tab', target);
+      profileEditTabs.forEach((tab) => {
+        tab.classList.toggle('is-active', tab.getAttribute('data-profile-edit-tab') === target);
+      });
+      profileEditPanels.forEach((panel) => {
+        panel.classList.toggle('is-active', panel.getAttribute('data-profile-edit-panel') === target);
+      });
+    };
+
+    const firstProfileEditErrorPanel = (errors) => {
+      if (!profileEditModal || !errors) return null;
+      const firstField = Object.keys(errors)[0];
+      const fieldError = firstField ? profileEditModal.querySelector(`[data-profile-edit-error="${CSS.escape(firstField)}"]`) : null;
+      return fieldError?.closest('[data-profile-edit-panel]')?.getAttribute('data-profile-edit-panel') || null;
+    };
+
+    const renderProfileEditErrors = (errors) => {
+      clearProfileEditErrors();
+      if (!profileEditModal || !errors) return;
+      Object.entries(errors).forEach(([field, messages]) => {
+        const error = profileEditModal.querySelector(`[data-profile-edit-error="${CSS.escape(field)}"]`);
+        if (!error) return;
+        error.textContent = Array.isArray(messages) ? messages.join(' ') : String(messages || '');
+      });
+      const firstPanel = firstProfileEditErrorPanel(errors);
+      if (firstPanel) activateProfileEditTab(firstPanel);
+    };
+
+    const bustProfileUrl = (url) => {
+      if (!url) return url;
+      return `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+    };
+
+    const updateProfileEditPreview = (payload = {}) => {
+      const profile = payload.profile || {};
+      const name = profile.name || profileEditForm?.querySelector('[name="name"]')?.value?.trim() || '';
+      const headline = profile.headline || profileEditForm?.querySelector('[name="headline"]')?.value?.trim() || '';
+      const avatarUrl = profile.avatar_url ? bustProfileUrl(profile.avatar_url) : '';
+      const coverUrl = profile.cover_url ? bustProfileUrl(profile.cover_url) : '';
+
+      if (name) {
+        document.querySelectorAll('[data-rework-profile-name], [data-profile-edit-name-preview]').forEach((node) => {
+          node.textContent = name;
+        });
+        document.querySelectorAll('[data-rework-profile-avatar], [data-profile-edit-avatar-preview]').forEach((node) => {
+          if (node instanceof HTMLImageElement) node.alt = name;
+        });
+      }
+
+      document.querySelectorAll('[data-rework-profile-headline], [data-profile-edit-headline-preview]').forEach((node) => {
+        node.textContent = headline || node.getAttribute('data-empty-text') || 'HNT Hunter';
+      });
+
+      if (avatarUrl) {
+        document.querySelectorAll('[data-rework-profile-avatar], [data-profile-edit-avatar-preview], .post-composer-author img, .modal-composer > img').forEach((node) => {
+          if (node instanceof HTMLImageElement) node.src = avatarUrl;
+        });
+      }
+
+      if (coverUrl) {
+        document.querySelectorAll('[data-profile-edit-cover-preview]').forEach((node) => {
+          if (node instanceof HTMLElement) {
+            node.style.backgroundImage = node.classList.contains('profile-edit-cover')
+              ? `linear-gradient(180deg, rgba(17,17,15,.08), rgba(17,17,15,.76)), url('${coverUrl}')`
+              : `url('${coverUrl}')`;
+          }
+        });
+      }
+
+      if (typeof profile.completion !== 'undefined') {
+        document.querySelectorAll('[data-profile-edit-completion]').forEach((node) => {
+          node.textContent = `${profile.completion}%`;
+        });
+      }
+    };
+
+    const closeProfileEditModal = () => {
+      if (!profileEditModal) return;
+      profileEditModal.classList.remove('is-open');
+      profileEditModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('is-modal-open');
+    };
+
+    const openProfileEditModal = () => {
+      if (!profileEditModal) return;
+      closeAllDropdowns();
+      if (typeof closeCommentModal === 'function') closeCommentModal();
+      if (typeof closeReactionsModal === 'function') closeReactionsModal();
+      if (typeof closePostComposerModal === 'function') closePostComposerModal();
+      if (typeof closeSettingsModal === 'function') closeSettingsModal();
+      if (typeof closeMembersFilterModal === 'function') closeMembersFilterModal();
+      setProfileEditStatus('');
+      clearProfileEditErrors();
+      profileEditModal.classList.add('is-open');
+      profileEditModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('is-modal-open');
+      const firstControl = profileEditModal.querySelector('[data-profile-edit-tab], input, select, textarea, button');
+      if (firstControl) window.setTimeout(() => firstControl.focus(), 120);
+    };
+
+    document.querySelectorAll('[data-profile-edit-modal-open]').forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        openProfileEditModal();
+      });
+    });
+
+    profileEditCloseButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        closeProfileEditModal();
+      });
+    });
+
+    profileEditTabs.forEach((tab) => {
+      tab.addEventListener('click', () => activateProfileEditTab(tab.getAttribute('data-profile-edit-tab')));
+    });
+
+    profileEditModal?.addEventListener('click', (event) => {
+      if (event.target === profileEditModal) closeProfileEditModal();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      closeProfileEditModal();
+    });
+
+    profileEditForm?.querySelector('[name="name"]')?.addEventListener('input', (event) => {
+      document.querySelectorAll('[data-profile-edit-name-preview]').forEach((node) => {
+        node.textContent = event.target.value.trim() || 'HNT Hunter';
+      });
+    });
+
+    profileEditForm?.querySelector('[name="headline"]')?.addEventListener('input', (event) => {
+      document.querySelectorAll('[data-profile-edit-headline-preview]').forEach((node) => {
+        node.textContent = event.target.value.trim() || node.getAttribute('data-empty-text') || 'HNT Hunter';
+      });
+    });
+
+    profileEditForm?.addEventListener('change', (event) => {
+      const input = event.target.closest('[data-profile-edit-file]');
+      if (!input || !input.files || !input.files[0]) return;
+      const objectUrl = URL.createObjectURL(input.files[0]);
+      if (input.getAttribute('data-profile-edit-file') === 'avatar') {
+        profileEditModal.querySelectorAll('[data-profile-edit-avatar-preview]').forEach((node) => {
+          if (node instanceof HTMLImageElement) node.src = objectUrl;
+        });
+      } else {
+        profileEditModal.querySelectorAll('[data-profile-edit-cover-preview]').forEach((node) => {
+          if (node instanceof HTMLElement) {
+            node.style.backgroundImage = node.classList.contains('profile-edit-cover')
+              ? `linear-gradient(180deg, rgba(17,17,15,.08), rgba(17,17,15,.76)), url('${objectUrl}')`
+              : `url('${objectUrl}')`;
+          }
+        });
+      }
+    });
+
+    profileEditForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearProfileEditErrors();
+      setProfileEditStatus('');
+      if (profileEditSubmit) {
+        profileEditSubmit.disabled = true;
+        profileEditSubmit.setAttribute('aria-busy', 'true');
+      }
+
+      try {
+        const response = await fetch(profileEditForm.action, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          body: new FormData(profileEditForm),
+        });
+        const contentType = response.headers.get('content-type') || '';
+        const payload = contentType.includes('application/json')
+          ? await response.json().catch(() => ({}))
+          : {};
+
+        if (!response.ok) {
+          if (response.status === 422 && payload.errors) {
+            renderProfileEditErrors(payload.errors);
+            setProfileEditStatus(payload.message || profileEditLabels.labelValidation || 'Please check the marked fields.', true);
+            return;
+          }
+          throw new Error(payload.message || profileEditLabels.labelSaveFailed || 'Profile could not be saved.');
+        }
+
+        updateProfileEditPreview(payload);
+        setProfileEditStatus(payload.message || profileEditLabels.labelSaved || 'Profile has been saved.');
+      } catch (error) {
+        setProfileEditStatus(error?.message || profileEditLabels.labelSaveFailed || 'Profile could not be saved.', true);
+      } finally {
+        if (profileEditSubmit) {
+          profileEditSubmit.disabled = false;
+          profileEditSubmit.setAttribute('aria-busy', 'false');
+        }
+      }
+    });
+
+
+
     const settingsModal = document.querySelector('[data-settings-modal]');
     const settingsCloseButtons = document.querySelectorAll('[data-settings-modal-close]');
     const settingsTabs = document.querySelectorAll('[data-settings-tab]');
