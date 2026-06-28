@@ -13672,3 +13672,63 @@ body.is-avatar-crop-open {
 .search-page-form input[type="search"] {
   font-weight: 500 !important;
 }
+
+/* 055b: Rework dropdown grey button polish */
+.dropdown-footer,
+.request-actions form:first-child button,
+.user-menu-language a.is-active,
+.top-dropdown .user-logout {
+  border: 1px solid rgba(255,255,255,.32);
+  background: rgba(82,82,82,.30);
+  color: #f5f1e8;
+  box-shadow: none;
+}
+
+.dropdown-footer {
+  font-weight: 700;
+}
+
+.request-actions form:first-child button {
+  color: #f5f1e8;
+}
+
+.user-menu-language a.is-active {
+  color: #f5f1e8;
+}
+
+.top-dropdown .user-logout {
+  border-radius: 10px;
+}
+
+.dropdown-footer:hover,
+.request-actions form:first-child button:hover,
+.user-menu-language a.is-active:hover,
+.top-dropdown .user-logout:hover {
+  background: rgba(82,82,82,.44);
+  border-color: rgba(255,255,255,.46);
+  color: #ffffff;
+}
+
+.rework-dropdown-scroll {
+  scrollbar-color: #525252 transparent;
+}
+
+.rework-dropdown-scroll::-webkit-scrollbar-thumb {
+  background: #525252;
+}
+
+.rework-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: #626262;
+}
+
+.rework-dropdown-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rework-dropdown-scroll::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+  background: transparent;
+}
+/* /055b: Rework dropdown grey button polish */
