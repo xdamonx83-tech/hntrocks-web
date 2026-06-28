@@ -46,7 +46,7 @@
     $profileMessageEnabled = $profileUser
         && auth()->check()
         && (int) $profileUser->id !== (int) auth()->id()
-        && (bool) ($profileCanMessage ?? true)
+        && (bool) ($profileCanMessage ?? false)
         && \Illuminate\Support\Facades\Route::has('messages.with-user');
     $profileMessageStartUrl = $profileMessageEnabled ? route('messages.with-user', $profileUser) : '#';
 @endphp
@@ -732,9 +732,20 @@ body.profile-page [data-profile-tab-panel="posts"] .profile-posts-more-real span
 <section class="content-grid">
 <div class="left-col">
 <section class="card hnt-profile-hero">
-<div class="hnt-profile-cover" style="background-image: linear-gradient(180deg, rgba(17,17,15,.08), rgba(17,17,15,.76)), url('{{ $profileCoverUrl }}');">
+<div class="hnt-profile-cover" data-rework-profile-cover style="background-image: linear-gradient(180deg, rgba(17,17,15,.08), rgba(17,17,15,.76)), url('{{ $profileCoverUrl }}');">
 <div class="cover-glow"></div>
-<a aria-label="Coverbild hochladen" class="profile-share-btn" href="#">↗</a>
+<!-- HNT profile cover upload v1 -->
+@if($isOwnProfile)
+<form action="{{ route('profile.media.update') }}" class="profile-cover-upload-form" data-profile-cover-upload-form enctype="multipart/form-data" method="post">
+@csrf
+<input name="type" type="hidden" value="cover"/>
+<label aria-label="Titelbild ändern" class="profile-share-btn profile-cover-upload-trigger" title="Titelbild ändern">
+<i aria-hidden="true" class="ph ph-image-square"></i>
+<input accept="image/jpeg,image/png,image/webp" data-profile-cover-upload-input name="image" type="file"/>
+</label>
+</form>
+@endif
+<!-- /HNT profile cover upload v1 -->
 </div>
 <div class="hnt-profile-mainline profile-mainline-corrected">
 <div class="hnt-profile-stats-left">
@@ -742,19 +753,66 @@ body.profile-page [data-profile-tab-panel="posts"] .profile-posts-more-real span
 <div><strong>{{ $staticProfileFormatCount($profileFriendsCount) }}</strong><span>Freunde</span></div>
 </div>
 <div class="hnt-profile-identity">
-<div class="profile-avatar-badge">
+<div class="profile-avatar-badge" data-profile-avatar-upload-wrap>
 <img alt="{{ $profileDisplayName }}" data-rework-profile-avatar src="{{ $profileAvatarUrl }}"/>
-<span><img alt="Bounty Marks" src="{{ $demoMark }}"/></span>
+<!-- HNT profile avatar upload v1 -->
+@if($isOwnProfile)
+<form action="{{ route('profile.media.update') }}" class="profile-avatar-upload-form" data-profile-avatar-upload-form enctype="multipart/form-data" method="post">
+@csrf
+<input name="type" type="hidden" value="avatar"/>
+<label aria-label="Avatar ändern" class="profile-avatar-upload-trigger" title="Avatar ändern">
+<i aria-hidden="true" class="ph ph-image-square"></i>
+<input accept="image/jpeg,image/png,image/webp" data-profile-avatar-upload-input name="image" type="file"/>
+</label>
+</form>
+@endif
+<!-- /HNT profile avatar upload v1 -->
 </div>
 <h1>{{ $profileDisplayName }}</h1>
 <p>{{ $profileHandle }}</p>
 <div class="hnt-profile-actions">
-<a class="btn" href="#">Freund hinzufügen</a>
+<!-- HNT profile friend action v1 -->
+@if(! $isOwnProfile)
+@php
+    $profileFriendshipStatus = $friendship?->status;
+    $profileFriendshipId = $friendship?->id;
+    $profileFriendActionUrl = $profileFriendshipStatus === \App\Models\Friendship::STATUS_ACCEPTED && $profileFriendshipId
+        ? route('friends.destroy', $friendship)
+        : route('friends.store', $profileUser);
+    $profileFriendActionMethod = $profileFriendshipStatus === \App\Models\Friendship::STATUS_ACCEPTED ? 'DELETE' : 'POST';
+    $profileFriendActionLabel = match ($profileFriendshipStatus) {
+        \App\Models\Friendship::STATUS_ACCEPTED => 'Freund entfernen',
+        \App\Models\Friendship::STATUS_PENDING => 'Angefragt',
+        default => 'Freund hinzufügen',
+    };
+    $profileFriendActionDisabled = $profileFriendshipStatus === \App\Models\Friendship::STATUS_PENDING || (! ($profileCanRequestFriend ?? false) && $profileFriendshipStatus !== \App\Models\Friendship::STATUS_ACCEPTED);
+@endphp
+<form
+    action="{{ $profileFriendActionUrl }}"
+    class="profile-friend-action-form"
+    data-profile-friend-action
+    data-add-url="{{ route('friends.store', $profileUser) }}"
+    data-remove-url="{{ $profileFriendshipId ? route('friends.destroy', $friendship) : '' }}"
+    data-add-label="Freund hinzufügen"
+    data-pending-label="Angefragt"
+    data-remove-label="Freund entfernen"
+    method="post"
+>
+    @csrf
+    @if($profileFriendActionMethod === 'DELETE')
+        @method('DELETE')
+    @endif
+    <button class="btn profile-friend-action-btn" type="submit" @if($profileFriendActionDisabled) disabled aria-disabled="true" @endif>{{ $profileFriendActionLabel }}</button>
+</form>
+@endif
+<!-- /HNT profile friend action v1 -->
+<!-- HNT profile edit button owner only v1 -->
+@if($isOwnProfile)
 <a class="btn ghost" data-profile-edit-open="" href="#">Profil bearbeiten</a>
+@endif
+<!-- /HNT profile edit button owner only v1 -->
 @if($profileMessageEnabled)
 <a class="btn light" href="{{ $profileMessageStartUrl }}" data-profile-message-open data-profile-message-start-url="{{ $profileMessageStartUrl }}" data-ready-label="Nachricht" data-loading-label="Öffnet...">Nachricht</a>
-@else
-<a class="btn light is-disabled profile-message-disabled" href="#" aria-disabled="true">Nachricht</a>
 @endif
 </div>
 </div>
@@ -1564,11 +1622,6 @@ body.profile-page [data-profile-tab-panel="posts"] .profile-posts-load-more-btn[
 
 <!-- HNT static profile message chat-tab bridge v1 -->
 <style>
-body.profile-page .profile-message-disabled {
-  opacity: .55;
-  pointer-events: none;
-}
-
 body.profile-page [data-profile-message-open][aria-busy="true"] {
   opacity: .75;
   pointer-events: none;
@@ -1651,6 +1704,738 @@ body.profile-page [data-profile-message-open][aria-busy="true"] {
 })();
 </script>
 <!-- /HNT static profile message chat-tab bridge v1 -->
+
+
+<!-- HNT profile friend action ajax v1 -->
+<style>
+body.profile-page .profile-friend-action-form {
+  margin: 0;
+  display: inline-flex;
+}
+
+body.profile-page .profile-friend-action-form .btn[disabled] {
+  opacity: .68;
+  cursor: default;
+}
+</style>
+<script>
+(() => {
+  if (window.__hntProfileFriendActionReady) return;
+  window.__hntProfileFriendActionReady = true;
+
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  document.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-profile-friend-action]');
+    if (!form) return;
+
+    event.preventDefault();
+
+    const button = form.querySelector('button[type="submit"]');
+    if (!button || button.disabled) return;
+
+    const addUrl = form.getAttribute('data-add-url') || '';
+    const addLabel = form.getAttribute('data-add-label') || 'Freund hinzufügen';
+    const pendingLabel = form.getAttribute('data-pending-label') || 'Angefragt';
+    const removeLabel = form.getAttribute('data-remove-label') || 'Freund entfernen';
+    const methodInput = form.querySelector('input[name="_method"]');
+    const currentMethod = (methodInput?.value || form.method || 'POST').toUpperCase();
+    const originalLabel = button.textContent;
+
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': csrf,
+        },
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Friend action failed.');
+      }
+
+      const status = payload.friendship_status || null;
+
+      if (currentMethod === 'DELETE') {
+        form.action = addUrl;
+        form.setAttribute('data-remove-url', '');
+        methodInput?.remove();
+        button.textContent = addLabel;
+        button.disabled = false;
+        button.removeAttribute('aria-disabled');
+        return;
+      }
+
+      if (status === 'accepted') {
+        button.textContent = removeLabel;
+        button.disabled = false;
+        button.removeAttribute('aria-disabled');
+        return;
+      }
+
+      button.textContent = pendingLabel;
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    } catch (error) {
+      console.error('[HNT] Profile friend action failed:', error);
+      button.textContent = originalLabel;
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+    } finally {
+      button.removeAttribute('aria-busy');
+    }
+  }, true);
+})();
+</script>
+<!-- /HNT profile friend action ajax v1 -->
+<!-- HNT profile cover crop upload v1 -->
+<script>
+(() => {
+  if (window.__hntProfileCoverCropUploadReady) return;
+  window.__hntProfileCoverCropUploadReady = true;
+
+  const coverGradient = "linear-gradient(180deg, rgba(17,17,15,.08), rgba(17,17,15,.76))";
+  let activeObjectUrl = null;
+
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+  const ensureModal = () => {
+    let modal = document.querySelector('[data-profile-cover-crop-modal]');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.className = 'profile-cover-crop-backdrop';
+    modal.setAttribute('data-profile-cover-crop-modal', '');
+    modal.innerHTML = `
+      <section class="profile-cover-crop-dialog post-composer-modal profile-cover-crop-composer" role="dialog" aria-modal="true" aria-labelledby="profile-cover-crop-title">
+        <div aria-hidden="true" class="post-composer-grip"></div>
+        <header class="profile-cover-crop-head post-composer-header">
+          <div class="post-composer-titleblock">
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>HNT PROFIL</span>
+            <h2 id="profile-cover-crop-title">Titelbild zuschneiden</h2>
+            <p>Ziehe das Bild in den Rahmen. Das Ergebnis passt exakt zum Profil-Titelbild.</p>
+          </div>
+          <button type="button" class="profile-cover-crop-close post-composer-close" data-profile-cover-crop-cancel aria-label="Titelbild zuschneiden schließen"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+        </header>
+        <div class="profile-cover-crop-stage post-composer-body">
+          <div class="profile-cover-crop-frame" data-profile-cover-crop-frame>
+            <img alt="" data-profile-cover-crop-image draggable="false">
+          </div>
+        </div>
+        <footer class="profile-cover-crop-footer post-composer-footer">
+          <label class="profile-cover-crop-zoom">
+            <span>Zoom</span>
+            <input type="range" min="1" max="3" step="0.01" value="1" data-profile-cover-crop-zoom>
+          </label>
+          <div class="profile-cover-crop-actions">
+            <button type="button" class="composer-cancel" data-profile-cover-crop-cancel>Abbrechen</button>
+            <button type="button" class="composer-submit" data-profile-cover-crop-save>Übernehmen</button>
+          </div>
+        </footer>
+      </section>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  };
+
+  const frameSizeForCover = () => {
+    const cover = document.querySelector('[data-rework-profile-cover]');
+    const coverWidth = cover?.getBoundingClientRect?.().width || 1000;
+    const coverHeight = cover?.getBoundingClientRect?.().height || 200;
+    const aspect = clamp(coverWidth / Math.max(coverHeight, 1), 2.4, 7);
+
+    let frameWidth = Math.min(720, Math.max(420, window.innerWidth - 96));
+    let frameHeight = Math.round(frameWidth / aspect);
+
+    const maxHeight = Math.min(260, Math.max(160, window.innerHeight - 360));
+    if (frameHeight > maxHeight) {
+      frameHeight = maxHeight;
+      frameWidth = Math.round(frameHeight * aspect);
+    }
+
+    return { aspect, frameWidth, frameHeight };
+  };
+
+  const openCropper = (form, input, file) => new Promise((resolve) => {
+    const modal = ensureModal();
+    const frame = modal.querySelector('[data-profile-cover-crop-frame]');
+    const img = modal.querySelector('[data-profile-cover-crop-image]');
+    const zoomInput = modal.querySelector('[data-profile-cover-crop-zoom]');
+    const save = modal.querySelector('[data-profile-cover-crop-save]');
+    const cancels = modal.querySelectorAll('[data-profile-cover-crop-cancel]');
+    const { aspect, frameWidth, frameHeight } = frameSizeForCover();
+
+    let state = {
+      naturalWidth: 0,
+      naturalHeight: 0,
+      frameWidth,
+      frameHeight,
+      baseScale: 1,
+      zoom: 1,
+      x: 0,
+      y: 0,
+      dragging: false,
+      startX: 0,
+      startY: 0,
+      startLeft: 0,
+      startTop: 0,
+    };
+
+    const cleanup = (result) => {
+      modal.classList.remove('is-open');
+      document.body.classList.remove('is-cover-crop-open');
+      input.value = '';
+      save.onclick = null;
+      cancels.forEach((cancel) => {
+        cancel.onclick = null;
+      });
+      frame.onpointerdown = null;
+      frame.onpointermove = null;
+      frame.onpointerup = null;
+      frame.onpointercancel = null;
+      zoomInput.oninput = null;
+
+      window.setTimeout(() => {
+        if (activeObjectUrl) {
+          URL.revokeObjectURL(activeObjectUrl);
+          activeObjectUrl = null;
+        }
+        resolve(result);
+      }, 140);
+    };
+
+    const rendered = () => {
+      const scale = state.baseScale * state.zoom;
+      return {
+        scale,
+        width: state.naturalWidth * scale,
+        height: state.naturalHeight * scale,
+      };
+    };
+
+    const clampPosition = () => {
+      const size = rendered();
+      const minX = Math.min(0, state.frameWidth - size.width);
+      const minY = Math.min(0, state.frameHeight - size.height);
+      state.x = clamp(state.x, minX, 0);
+      state.y = clamp(state.y, minY, 0);
+    };
+
+    const render = () => {
+      clampPosition();
+      const size = rendered();
+
+      img.style.width = `${size.width}px`;
+      img.style.height = `${size.height}px`;
+      img.style.transform = `translate(${state.x}px, ${state.y}px)`;
+    };
+
+    const resetImage = () => {
+      state.naturalWidth = img.naturalWidth;
+      state.naturalHeight = img.naturalHeight;
+      state.baseScale = Math.max(state.frameWidth / state.naturalWidth, state.frameHeight / state.naturalHeight);
+      state.zoom = 1;
+      state.x = (state.frameWidth - state.naturalWidth * state.baseScale) / 2;
+      state.y = (state.frameHeight - state.naturalHeight * state.baseScale) / 2;
+      zoomInput.value = '1';
+      render();
+    };
+
+    frame.style.width = `${frameWidth}px`;
+    frame.style.height = `${frameHeight}px`;
+    frame.style.aspectRatio = `${aspect}`;
+    modal.classList.add('is-open');
+    document.body.classList.add('is-cover-crop-open');
+
+    if (activeObjectUrl) {
+      URL.revokeObjectURL(activeObjectUrl);
+    }
+
+    activeObjectUrl = URL.createObjectURL(file);
+    img.onload = resetImage;
+    img.src = activeObjectUrl;
+
+    zoomInput.oninput = () => {
+      const old = rendered();
+      const centerX = state.frameWidth / 2;
+      const centerY = state.frameHeight / 2;
+      const relX = (centerX - state.x) / old.scale;
+      const relY = (centerY - state.y) / old.scale;
+
+      state.zoom = Number(zoomInput.value || 1);
+      const next = rendered();
+      state.x = centerX - relX * next.scale;
+      state.y = centerY - relY * next.scale;
+      render();
+    };
+
+    frame.onpointerdown = (event) => {
+      event.preventDefault();
+      frame.setPointerCapture(event.pointerId);
+      state.dragging = true;
+      state.startX = event.clientX;
+      state.startY = event.clientY;
+      state.startLeft = state.x;
+      state.startTop = state.y;
+      frame.classList.add('is-dragging');
+    };
+
+    frame.onpointermove = (event) => {
+      if (!state.dragging) return;
+      state.x = state.startLeft + event.clientX - state.startX;
+      state.y = state.startTop + event.clientY - state.startY;
+      render();
+    };
+
+    const stopDrag = () => {
+      state.dragging = false;
+      frame.classList.remove('is-dragging');
+    };
+
+    frame.onpointerup = stopDrag;
+    frame.onpointercancel = stopDrag;
+
+    cancels.forEach((cancel) => {
+      cancel.onclick = () => cleanup(null);
+    });
+
+    save.onclick = async () => {
+      save.disabled = true;
+      save.textContent = 'Speichert...';
+
+      try {
+        const size = rendered();
+        const sourceX = clamp(-state.x / size.scale, 0, state.naturalWidth);
+        const sourceY = clamp(-state.y / size.scale, 0, state.naturalHeight);
+        const sourceWidth = clamp(state.frameWidth / size.scale, 1, state.naturalWidth - sourceX);
+        const sourceHeight = clamp(state.frameHeight / size.scale, 1, state.naturalHeight - sourceY);
+
+        const outputWidth = 1800;
+        const outputHeight = Math.round(outputWidth / aspect);
+        const canvas = document.createElement('canvas');
+        canvas.width = outputWidth;
+        canvas.height = outputHeight;
+
+        const context = canvas.getContext('2d');
+        context.drawImage(
+          img,
+          sourceX,
+          sourceY,
+          sourceWidth,
+          sourceHeight,
+          0,
+          0,
+          outputWidth,
+          outputHeight
+        );
+
+        canvas.toBlob((blob) => {
+          save.disabled = false;
+          save.textContent = 'Übernehmen';
+
+          if (!blob) {
+            cleanup(null);
+            return;
+          }
+
+          cleanup(new File([blob], 'cover-crop.jpg', { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.92);
+      } catch (error) {
+        console.error('[HNT] Cover crop failed:', error);
+        save.disabled = false;
+        save.textContent = 'Übernehmen';
+        cleanup(null);
+      }
+    };
+  });
+
+  document.addEventListener('change', async (event) => {
+    const input = event.target.closest('[data-profile-cover-upload-input]');
+    if (!input) return;
+
+    const form = input.closest('[data-profile-cover-upload-form]');
+    const trigger = form?.querySelector('.profile-cover-upload-trigger');
+    const selectedFile = input.files && input.files[0];
+
+    if (!form || !selectedFile) return;
+
+    const croppedFile = await openCropper(form, input, selectedFile);
+    if (!croppedFile) return;
+
+    const originalTitle = trigger?.getAttribute('title') || 'Titelbild ändern';
+
+    if (trigger) {
+      trigger.setAttribute('aria-busy', 'true');
+      trigger.setAttribute('title', 'Lädt...');
+    }
+
+    try {
+      const formData = new FormData(form);
+      formData.delete('image');
+      formData.set('type', 'cover');
+      formData.append('image', croppedFile);
+
+      const response = await fetch(form.action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Cover upload failed.');
+      }
+
+      if (payload.cover_url) {
+        const cacheBust = `${payload.cover_url}${payload.cover_url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+
+        document.querySelectorAll('[data-rework-profile-cover]').forEach((cover) => {
+          cover.style.backgroundImage = `${coverGradient}, url('${cacheBust}')`;
+          cover.style.backgroundSize = '100% 100%';
+          cover.style.backgroundPosition = 'center center';
+        });
+      }
+    } catch (error) {
+      console.error('[HNT] Profile cover crop upload failed:', error);
+      window.alert('Titelbild konnte nicht hochgeladen werden.');
+    } finally {
+      if (trigger) {
+        trigger.removeAttribute('aria-busy');
+        trigger.setAttribute('title', originalTitle);
+      }
+    }
+  }, true);
+})();
+</script>
+<!-- /HNT profile cover crop upload v1 -->
+
+
+<!-- HNT profile avatar crop upload v1 -->
+<script>
+(() => {
+  if (window.__hntProfileAvatarCropUploadReady) return;
+  window.__hntProfileAvatarCropUploadReady = true;
+
+  let activeAvatarObjectUrl = null;
+
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+  const ensureModal = () => {
+    let modal = document.querySelector('[data-profile-avatar-crop-modal]');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.className = 'profile-avatar-crop-backdrop';
+    modal.setAttribute('data-profile-avatar-crop-modal', '');
+    modal.innerHTML = `
+      <section class="profile-avatar-crop-dialog post-composer-modal profile-avatar-crop-composer" role="dialog" aria-modal="true" aria-labelledby="profile-avatar-crop-title">
+        <div aria-hidden="true" class="post-composer-grip"></div>
+        <header class="profile-avatar-crop-head post-composer-header">
+          <div class="post-composer-titleblock">
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>HNT PROFIL</span>
+            <h2 id="profile-avatar-crop-title">Avatar zuschneiden</h2>
+            <p>Ziehe dein Bild in den Rahmen. Das Ergebnis wird quadratisch gespeichert.</p>
+          </div>
+          <button type="button" class="profile-avatar-crop-close post-composer-close" data-profile-avatar-crop-cancel aria-label="Avatar zuschneiden schließen">
+            <i aria-hidden="true" class="ph ph-x ph-icon"></i>
+          </button>
+        </header>
+        <div class="profile-avatar-crop-stage post-composer-body">
+          <div class="profile-avatar-crop-frame" data-profile-avatar-crop-frame>
+            <img alt="" data-profile-avatar-crop-image draggable="false">
+          </div>
+        </div>
+        <footer class="profile-avatar-crop-footer post-composer-footer">
+          <label class="profile-avatar-crop-zoom">
+            <span>Zoom</span>
+            <input type="range" min="1" max="3" step="0.01" value="1" data-profile-avatar-crop-zoom>
+          </label>
+          <div class="profile-avatar-crop-actions">
+            <button type="button" class="composer-cancel" data-profile-avatar-crop-cancel>Abbrechen</button>
+            <button type="button" class="composer-submit" data-profile-avatar-crop-save>Übernehmen</button>
+          </div>
+        </footer>
+      </section>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  };
+
+  const frameSizeForAvatar = () => {
+    const maxAvailable = Math.min(window.innerWidth - 96, window.innerHeight - 330);
+    const size = Math.round(clamp(maxAvailable, 230, 320));
+    return { frameWidth: size, frameHeight: size };
+  };
+
+  const openCropper = (input, file) => new Promise((resolve) => {
+    const modal = ensureModal();
+    const frame = modal.querySelector('[data-profile-avatar-crop-frame]');
+    const img = modal.querySelector('[data-profile-avatar-crop-image]');
+    const zoomInput = modal.querySelector('[data-profile-avatar-crop-zoom]');
+    const save = modal.querySelector('[data-profile-avatar-crop-save]');
+    const cancels = modal.querySelectorAll('[data-profile-avatar-crop-cancel]');
+    const { frameWidth, frameHeight } = frameSizeForAvatar();
+
+    let state = {
+      naturalWidth: 0,
+      naturalHeight: 0,
+      frameWidth,
+      frameHeight,
+      baseScale: 1,
+      zoom: 1,
+      x: 0,
+      y: 0,
+      dragging: false,
+      startX: 0,
+      startY: 0,
+      startLeft: 0,
+      startTop: 0,
+    };
+
+    const cleanup = (result) => {
+      modal.classList.remove('is-open');
+      document.body.classList.remove('is-avatar-crop-open');
+      input.value = '';
+      save.onclick = null;
+      cancels.forEach((cancel) => {
+        cancel.onclick = null;
+      });
+      frame.onpointerdown = null;
+      frame.onpointermove = null;
+      frame.onpointerup = null;
+      frame.onpointercancel = null;
+      zoomInput.oninput = null;
+
+      window.setTimeout(() => {
+        if (activeAvatarObjectUrl) {
+          URL.revokeObjectURL(activeAvatarObjectUrl);
+          activeAvatarObjectUrl = null;
+        }
+        resolve(result);
+      }, 120);
+    };
+
+    const rendered = () => {
+      const scale = state.baseScale * state.zoom;
+      return {
+        scale,
+        width: state.naturalWidth * scale,
+        height: state.naturalHeight * scale,
+      };
+    };
+
+    const clampPosition = () => {
+      const size = rendered();
+      const minX = Math.min(0, state.frameWidth - size.width);
+      const minY = Math.min(0, state.frameHeight - size.height);
+      state.x = clamp(state.x, minX, 0);
+      state.y = clamp(state.y, minY, 0);
+    };
+
+    const render = () => {
+      clampPosition();
+      const size = rendered();
+
+      img.style.width = `${size.width}px`;
+      img.style.height = `${size.height}px`;
+      img.style.transform = `translate(${state.x}px, ${state.y}px)`;
+    };
+
+    const resetImage = () => {
+      state.naturalWidth = img.naturalWidth;
+      state.naturalHeight = img.naturalHeight;
+      state.baseScale = Math.max(state.frameWidth / state.naturalWidth, state.frameHeight / state.naturalHeight);
+      state.zoom = 1;
+      state.x = (state.frameWidth - state.naturalWidth * state.baseScale) / 2;
+      state.y = (state.frameHeight - state.naturalHeight * state.baseScale) / 2;
+      zoomInput.value = '1';
+      render();
+    };
+
+    frame.style.width = `${frameWidth}px`;
+    frame.style.height = `${frameHeight}px`;
+
+    modal.classList.add('is-open');
+    document.body.classList.add('is-avatar-crop-open');
+
+    if (activeAvatarObjectUrl) {
+      URL.revokeObjectURL(activeAvatarObjectUrl);
+    }
+
+    activeAvatarObjectUrl = URL.createObjectURL(file);
+    img.onload = resetImage;
+    img.src = activeAvatarObjectUrl;
+
+    zoomInput.oninput = () => {
+      const old = rendered();
+      const centerX = state.frameWidth / 2;
+      const centerY = state.frameHeight / 2;
+      const relX = (centerX - state.x) / old.scale;
+      const relY = (centerY - state.y) / old.scale;
+
+      state.zoom = Number(zoomInput.value || 1);
+      const next = rendered();
+      state.x = centerX - relX * next.scale;
+      state.y = centerY - relY * next.scale;
+      render();
+    };
+
+    frame.onpointerdown = (event) => {
+      event.preventDefault();
+      frame.setPointerCapture(event.pointerId);
+      state.dragging = true;
+      state.startX = event.clientX;
+      state.startY = event.clientY;
+      state.startLeft = state.x;
+      state.startTop = state.y;
+      frame.classList.add('is-dragging');
+    };
+
+    frame.onpointermove = (event) => {
+      if (!state.dragging) return;
+      state.x = state.startLeft + event.clientX - state.startX;
+      state.y = state.startTop + event.clientY - state.startY;
+      render();
+    };
+
+    const stopDrag = () => {
+      state.dragging = false;
+      frame.classList.remove('is-dragging');
+    };
+
+    frame.onpointerup = stopDrag;
+    frame.onpointercancel = stopDrag;
+
+    cancels.forEach((cancel) => {
+      cancel.onclick = () => cleanup(null);
+    });
+
+    save.onclick = async () => {
+      save.disabled = true;
+      save.textContent = 'Speichert...';
+
+      try {
+        const size = rendered();
+        const sourceX = clamp(-state.x / size.scale, 0, state.naturalWidth);
+        const sourceY = clamp(-state.y / size.scale, 0, state.naturalHeight);
+        const sourceWidth = clamp(state.frameWidth / size.scale, 1, state.naturalWidth - sourceX);
+        const sourceHeight = clamp(state.frameHeight / size.scale, 1, state.naturalHeight - sourceY);
+
+        const outputSize = 800;
+        const canvas = document.createElement('canvas');
+        canvas.width = outputSize;
+        canvas.height = outputSize;
+
+        const context = canvas.getContext('2d');
+        context.drawImage(
+          img,
+          sourceX,
+          sourceY,
+          sourceWidth,
+          sourceHeight,
+          0,
+          0,
+          outputSize,
+          outputSize
+        );
+
+        canvas.toBlob((blob) => {
+          save.disabled = false;
+          save.textContent = 'Übernehmen';
+
+          if (!blob) {
+            cleanup(null);
+            return;
+          }
+
+          cleanup(new File([blob], 'avatar-crop.jpg', { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.92);
+      } catch (error) {
+        console.error('[HNT] Avatar crop failed:', error);
+        save.disabled = false;
+        save.textContent = 'Übernehmen';
+        cleanup(null);
+      }
+    };
+  });
+
+  document.addEventListener('change', async (event) => {
+    const input = event.target.closest('[data-profile-avatar-upload-input]');
+    if (!input) return;
+
+    const form = input.closest('[data-profile-avatar-upload-form]');
+    const trigger = form?.querySelector('.profile-avatar-upload-trigger');
+    const selectedFile = input.files && input.files[0];
+
+    if (!form || !selectedFile) return;
+
+    const croppedFile = await openCropper(input, selectedFile);
+    if (!croppedFile) return;
+
+    const originalTitle = trigger?.getAttribute('title') || 'Avatar ändern';
+
+    if (trigger) {
+      trigger.setAttribute('aria-busy', 'true');
+      trigger.setAttribute('title', 'Lädt...');
+    }
+
+    try {
+      const formData = new FormData(form);
+      formData.delete('image');
+      formData.set('type', 'avatar');
+      formData.append('image', croppedFile);
+
+      const response = await fetch(form.action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Avatar upload failed.');
+      }
+
+      if (payload.avatar_url) {
+        const cacheBust = `${payload.avatar_url}${payload.avatar_url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+
+        document.querySelectorAll('[data-rework-profile-avatar]').forEach((avatar) => {
+          avatar.src = cacheBust;
+        });
+      }
+    } catch (error) {
+      console.error('[HNT] Profile avatar crop upload failed:', error);
+      window.alert('Avatar konnte nicht hochgeladen werden.');
+    } finally {
+      if (trigger) {
+        trigger.removeAttribute('aria-busy');
+        trigger.setAttribute('title', originalTitle);
+      }
+    }
+  }, true);
+})();
+</script>
+<!-- /HNT profile avatar crop upload v1 -->
 
 </body>
 </html>
