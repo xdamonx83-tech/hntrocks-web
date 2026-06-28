@@ -771,7 +771,7 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <!-- /HNT profile friend action v1 -->
 <!-- HNT profile edit button owner only v1 -->
 @if($isOwnProfile)
-<a class="btn ghost" data-profile-edit-open="" href="#">Profil bearbeiten</a>
+<a class="btn ghost" data-profile-edit-modal-open="" href="#">Profil bearbeiten</a>
 @endif
 <!-- /HNT profile edit button owner only v1 -->
 @if($profileMessageEnabled)
@@ -1139,188 +1139,13 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 
 </div>
 </div>
-@include('themes.rework.profile.partials.right-widgets')
+@include('themes.rework.partials.right-widgets')
 </section>
 </main>
 </div>
-<div aria-hidden="true" class="modal-backdrop profile-edit-backdrop" data-profile-edit-modal="">
-<section aria-labelledby="profile-edit-title" aria-modal="true" class="profile-edit-modal" role="dialog">
-<header class="profile-edit-header">
-<div>
-<span class="profile-edit-eyebrow">Profil</span>
-<h2 id="profile-edit-title">Profil bearbeiten</h2>
-<p>Aktualisiere die wichtigsten Angaben für dein HNT.rocks-Profil.</p>
-</div>
-<button aria-label="Profil bearbeiten schließen" class="profile-edit-close" data-profile-edit-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
-</header>
-<div class="profile-edit-body">
-<section class="profile-edit-preview">
-<div class="profile-edit-cover-preview">
-<span>Coverbild</span>
-<a href="#">Ändern</a>
-</div>
-<div class="profile-edit-avatar-row">
-<img alt="{{ $demoName }}" src="{{ $demoAvatar }}"/>
-<div>
-<strong>{{ $demoName }}</strong>
-<small>{{ $demoHandle }}</small>
-</div>
-<a class="profile-edit-mini-btn" href="#">Avatar ändern</a>
-</div>
-</section>
-<form action="#" class="profile-edit-form">
-<label>
-<span>Anzeigename</span>
-<input type="text" value="{{ $demoName }}"/>
-</label>
-<label>
-<span>Handle</span>
-<input type="text" value="{{ $demoHandle }}"/>
-</label>
-<label>
-<span>Plattform</span>
-<select>
-<option>Xbox</option>
-<option>PC</option>
-<option>PlayStation</option>
-<option>Offen</option>
-</select>
-</label>
-<label>
-<span>Region</span>
-<select>
-<option>EU</option>
-<option>US East</option>
-<option>US West</option>
-<option>Offen</option>
-</select>
-</label>
-<label>
-<span>Spielstil</span>
-<select>
-<option>Locker</option>
-<option>Fokus</option>
-<option>Kompetitiv</option>
-<option>Offen</option>
-</select>
-</label>
-<label>
-<span>Sprache</span>
-<select>
-<option>Deutsch</option>
-<option>Englisch</option>
-<option>Deutsch / Englisch</option>
-</select>
-</label>
-<label class="profile-edit-wide">
-<span>Kurzbeschreibung</span>
-<textarea rows="4">Hunt together, die alone...</textarea>
-</label>
-<label class="profile-edit-check">
-<input checked="" type="checkbox"/>
-<span>Als LFG offen anzeigen</span>
-</label>
-</form>
-</div>
-<footer class="profile-edit-footer">
-<button class="profile-edit-cancel" data-profile-edit-close="" type="button">Abbrechen</button>
-<button class="profile-edit-save" type="button">Speichern</button>
-</footer>
-</section>
-</div>
-<div aria-hidden="true" class="modal-backdrop settings-backdrop" data-settings-modal="">
-<section aria-labelledby="settings-modal-title" aria-modal="true" class="settings-modal" role="dialog">
-<header class="settings-modal-header">
-<div>
-<span class="settings-eyebrow">Account</span>
-<h2 id="settings-modal-title">Einstellungen</h2>
-<p>Benachrichtigungen, Datenschutz, blockierte Nutzer und Sicherheit an einem Ort verwalten.</p>
-</div>
-<button aria-label="Einstellungen schließen" class="settings-close" data-settings-modal-close="" type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
-</header>
-<nav aria-label="Einstellungen Tabs" class="settings-tabs">
-<button class="is-active" data-settings-tab="notifications" type="button"><i aria-hidden="true" class="ph ph-bell ph-icon"></i><span>Benachrichtigungen</span></button>
-<button data-settings-tab="privacy" type="button"><i aria-hidden="true" class="ph ph-shield-check ph-icon"></i><span>Datenschutz</span></button>
-<button data-settings-tab="blocked" type="button"><i aria-hidden="true" class="ph ph-prohibit ph-icon"></i><span>Blockierte Nutzer</span></button>
-<button data-settings-tab="security" type="button"><i aria-hidden="true" class="ph ph-lock-key ph-icon"></i><span>Sicherheit</span></button>
-</nav>
-<div class="settings-modal-body">
-<section class="settings-panel is-active" data-settings-panel="notifications">
-<div class="settings-section-head">
-<span>Notification Center</span>
-<h3>Benachrichtigungseinstellungen</h3>
-<p>Lege fest, welche HNT.rocks-Meldungen im System erscheinen sollen.</p>
-</div>
-<div class="settings-toggle-list">
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Feed-Kommentare</strong><p>Wenn jemand deine Feed-Beiträge kommentiert.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Feed-Reaktionen</strong><p>Wenn jemand auf deine Feed-Beiträge reagiert.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Freunde &amp; Netzwerk</strong><p>Anfragen, angenommene Freundschaften und Netzwerk-Aktivität.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Teams</strong><p>Team-Anfragen, Team-Aktivität und Team-LFG.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>LFG</strong><p>Bewerbungen, Annahmen und Ablehnungen in der Mitspielersuche.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Badges &amp; Quests</strong><p>Freigeschaltete Badges und abgeschlossene Quests.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Moments</strong><p>Likes und Kommentare auf deinen Moments.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Cups</strong><p>Cup-Teams, Einreichungen und Ergebnisse.</p></div></label>
-</div>
-</section>
-<section class="settings-panel" data-settings-panel="privacy">
-<div class="settings-section-head">
-<span>Datenschutz</span>
-<h3>Kontakt &amp; Profilsichtbarkeit</h3>
-<p>Steuere, wer dein Profil sehen kann und wer dich direkt kontaktieren darf.</p>
-</div>
-<div class="settings-form-grid">
-<label><span>Profil-Sichtbarkeit</span><select><option>Öffentlich</option><option>Nur angemeldete Nutzer</option><option>Privat</option></select></label>
-<label><span>Nachrichten erlauben von</span><select><option>Allen</option><option>Angemeldeten Nutzern</option><option>Nur Kontakten</option><option>Niemandem</option></select></label>
-</div>
-<div class="settings-toggle-list compact">
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Team-Einladungen erlauben</strong><p>Andere Spieler können dich zu Teams einladen.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>LFG-Einladungen erlauben</strong><p>Andere Spieler können dich für Mitspielersuche kontaktieren.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Online-Status anzeigen</strong><p>Dein Status kann in Profil- und Community-Bereichen erscheinen.</p></div></label>
-<label class="settings-toggle-row"><input checked="" type="checkbox"/><span></span><div><strong>Level, Badges und Quests anzeigen</strong><p>Dein Fortschritt darf öffentlich im Profil sichtbar sein.</p></div></label>
-</div>
-</section>
-<section class="settings-panel" data-settings-panel="blocked">
-<div class="settings-section-head">
-<span>Datenschutz</span>
-<h3>Blockierte Nutzer</h3>
-<p>Blockierte Spieler können später für Nachrichten, Einladungen und Interaktionen ausgeschlossen werden.</p>
-</div>
-<div class="settings-form-grid blocked-form">
-<label><span>Nutzername</span><input placeholder="z. B. huntername" type="text"/></label>
-<label><span>Notiz</span><input placeholder="Optionaler Grund für dich" type="text"/></label>
-<a class="settings-inline-btn" href="#">Blockieren</a>
-</div>
-<div class="blocked-list">
-<div class="blocked-item"><div><strong>ToxicHunter</strong><span>Spam im Chat</span></div><a href="#">Aufheben</a></div>
-<div class="blocked-item"><div><strong>CampKing77</strong><span>Optionaler Grund für dich</span></div><a href="#">Aufheben</a></div>
-</div>
-</section>
-<section class="settings-panel" data-settings-panel="security">
-<div class="settings-section-head">
-<span>Sicherheit</span>
-<h3>Passwort &amp; Datenkontrolle</h3>
-<p>Passwort, 2FA, Datenexport und Kontolöschung verwalten.</p>
-</div>
-<div class="settings-form-grid">
-<label><span>Aktuelles Passwort bestätigen</span><input placeholder="••••••••" type="password"/></label>
-<label><span>Neues Passwort</span><input placeholder="Neues Passwort" type="password"/></label>
-<label><span>Neues Passwort bestätigen</span><input placeholder="Wiederholen" type="password"/></label>
-</div>
-<div class="settings-action-grid">
-<a href="#"><i aria-hidden="true" class="ph ph-lock-key ph-icon"></i><strong>Passwort ändern</strong><span>Login-Daten aktualisieren</span></a>
-<a href="#"><i aria-hidden="true" class="ph ph-device-mobile-camera ph-icon"></i><strong>2FA einrichten</strong><span>Authenticator-App verbinden</span></a>
-<a href="#"><i aria-hidden="true" class="ph ph-download-simple ph-icon"></i><strong>Datenexport</strong><span>Accountdaten herunterladen</span></a>
-<a class="danger" href="#"><i aria-hidden="true" class="ph ph-warning ph-icon"></i><strong>Kontolöschung</strong><span>Löschung vormerken</span></a>
-</div>
-</section>
-</div>
-<footer class="settings-modal-footer">
-<button class="settings-cancel" data-settings-modal-close="" type="button">Abbrechen</button>
-<button class="settings-save" type="button">Speichern</button>
-</footer>
-</section>
-</div>
-
+@include('themes.rework.feed.partials.post-modals')
+@include('themes.rework.profile.partials.profile-edit-modal')
+@include('themes.rework.feed.partials.settings-modal')
 
 <!-- HNT static profile tabs no reload v1 -->
 <style>

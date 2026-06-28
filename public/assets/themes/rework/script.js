@@ -1358,6 +1358,97 @@
     const settingsCloseButtons = document.querySelectorAll('[data-settings-modal-close]');
     const settingsTabs = document.querySelectorAll('[data-settings-tab]');
     const settingsPanels = document.querySelectorAll('[data-settings-panel]');
+    const settingsStatus = settingsModal?.querySelector('[data-settings-status]');
+    const settingsLabels = settingsModal?.dataset || {};
+
+    const setSettingsStatus = (message = '', isError = false) => {
+      if (!settingsStatus) return;
+      settingsStatus.textContent = message;
+      settingsStatus.hidden = !message;
+      settingsStatus.classList.toggle('is-error', isError);
+    };
+
+    const clearSettingsErrors = (root = settingsModal) => {
+      if (!root) return;
+      root.querySelectorAll('[data-settings-error-dynamic]').forEach((node) => node.remove());
+      root.querySelectorAll('.settings-field-error.is-dynamic').forEach((node) => node.remove());
+      root.querySelectorAll('.settings-field-error').forEach((node) => {
+        if (!node.hasAttribute('data-settings-original-error')) return;
+        node.textContent = node.getAttribute('data-settings-original-error') || '';
+      });
+    };
+
+    const renderSettingsErrors = (form, errors = {}) => {
+      clearSettingsErrors(form);
+      Object.entries(errors || {}).forEach(([field, messages]) => {
+        const input = form.querySelector(`[name="${CSS.escape(field)}"]`);
+        const label = input?.closest('label') || input?.parentElement || form;
+        const node = document.createElement('small');
+        node.className = 'settings-field-error is-dynamic';
+        node.setAttribute('data-settings-error-dynamic', '');
+        node.textContent = Array.isArray(messages) ? messages.join(' ') : String(messages || '');
+        label.appendChild(node);
+      });
+    };
+
+    const submitSettingsFormAjax = async (form, submitter = null) => {
+      if (!form || !settingsModal) return;
+      clearSettingsErrors(form);
+      setSettingsStatus(settingsLabels.settingsLabelSaving || 'Speichert...');
+      const buttons = Array.from(form.querySelectorAll('button[type="submit"]'));
+      if (submitter && submitter instanceof HTMLButtonElement && !buttons.includes(submitter)) {
+        buttons.push(submitter);
+      }
+      if (settingsFooterSubmit && !buttons.includes(settingsFooterSubmit)) {
+        buttons.push(settingsFooterSubmit);
+      }
+      buttons.forEach((button) => {
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+      });
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          body: new FormData(form),
+          credentials: 'same-origin',
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+        const payload = contentType.includes('application/json')
+          ? await response.json().catch(() => ({}))
+          : {};
+
+        if (!response.ok) {
+          if (response.status === 422 && payload.errors) {
+            renderSettingsErrors(form, payload.errors);
+            setSettingsStatus(payload.message || settingsLabels.settingsLabelValidation || 'Bitte prüfe die markierten Felder.', true);
+            return;
+          }
+          throw new Error(payload.message || settingsLabels.settingsLabelSaveFailed || 'Einstellungen konnten nicht gespeichert werden.');
+        }
+
+        if (form.querySelector('input[type="password"]')) {
+          form.querySelectorAll('input[type="password"]').forEach((input) => { input.value = ''; });
+        }
+
+        setSettingsStatus(payload.message || form.getAttribute('data-settings-success-label') || settingsLabels.settingsLabelSaved || 'Gespeichert.');
+      } catch (error) {
+        setSettingsStatus(error?.message || settingsLabels.settingsLabelSaveFailed || 'Einstellungen konnten nicht gespeichert werden.', true);
+      } finally {
+        buttons.forEach((button) => {
+          button.disabled = false;
+          button.setAttribute('aria-busy', 'false');
+        });
+        updateSettingsFooterSubmit();
+      }
+    };
+
 
     const closeSettingsModal = () => {
       if (!settingsModal) return;
@@ -1434,6 +1525,13 @@
     });
 
     updateSettingsFooterSubmit();
+
+    settingsModal?.addEventListener('submit', (event) => {
+      const form = event.target.closest('form');
+      if (!form || !settingsModal.contains(form)) return;
+      event.preventDefault();
+      submitSettingsFormAjax(form, event.submitter || null);
+    });
 
     if (settingsModal) {
       settingsModal.addEventListener('click', (event) => {

@@ -13,7 +13,7 @@
     $reworkDeletionRequest = $reworkDeletionRequest ?? null;
 @endphp
 
-<div aria-hidden="{{ $reworkSettingsShouldOpen ? 'false' : 'true' }}" class="modal-backdrop settings-backdrop @if($reworkSettingsShouldOpen) is-open @endif" data-settings-modal="" @if($reworkSettingsShouldOpen) data-settings-modal-autopen="1" @endif>
+<div aria-hidden="{{ $reworkSettingsShouldOpen ? 'false' : 'true' }}" class="modal-backdrop settings-backdrop @if($reworkSettingsShouldOpen) is-open @endif" data-settings-modal="" data-settings-label-saved="{{ app()->getLocale() === 'en' ? 'Saved.' : 'Gespeichert.' }}" data-settings-label-saving="{{ app()->getLocale() === 'en' ? 'Saving...' : 'Speichert...' }}" data-settings-label-save-failed="{{ app()->getLocale() === 'en' ? 'Settings could not be saved.' : 'Einstellungen konnten nicht gespeichert werden.' }}" data-settings-label-validation="{{ __('ui.profile_validation_error') }}" @if($reworkSettingsShouldOpen) data-settings-modal-autopen="1" @endif>
 <section aria-labelledby="settings-modal-title" aria-modal="true" class="settings-modal settings-has-footer-submit" role="dialog">
 <header class="settings-modal-header">
 <div>
@@ -30,6 +30,7 @@
 <button class="@if($reworkSettingsActiveTab === 'security') is-active @endif" data-settings-tab="security" type="button"><i aria-hidden="true" class="ph ph-lock-key ph-icon"></i><span>{{ __('ui.security') }}</span></button>
 </nav>
 <div class="settings-modal-body">
+<div class="settings-status" data-settings-status hidden></div>
 @if (session('status') && in_array(session('status'), $reworkSettingsStatusMessages, true))
 <div class="settings-status">{{ session('status') }}</div>
 @endif
