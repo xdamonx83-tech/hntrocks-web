@@ -4,6 +4,17 @@ namespace App\Http\Controllers\Socialite;
 
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
+use Throwable;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\Moment;
+use App\Models\LfgPost;
+use App\Models\HntMapMarker;
+use App\Models\HntMap;
+use App\Models\FeedPost;
+use App\Models\FeedComment;
+use App\Models\Cup;
 use App\Models\Friendship;
 use App\Models\Team;
 use App\Models\User;
@@ -209,105 +220,242 @@ class HeaderLiveController extends Controller
     public function search(Request $request): JsonResponse
     {
         $viewer = $request->user();
-        $term = trim((string) $request->query('q', ''));
+        $term = trim(Str::limit((string) $request->query('q', ''), 80, ''));
 
-        if (! $viewer || strlen($term) < 2) {
+        if (! $viewer || mb_strlen($term) < 2) {
             return response()->json([
                 'query' => $term,
                 'results' => [],
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
-        $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $term) . '%';
+        $like = '%' . addcslashes($term, '\\%_') . '%';
+        $results = collect();
+
+        $push = static function (
+            string $type,
+            string $title,
+            string $subtitle,
+            string $url,
+            ?string $avatar = null,
+            string $icon = 'ph-magnifying-glass'
+        ) use ($results): void {
+            $results->push([
+                'type' => $type,
+                'title' => $title,
+                'subtitle' => $subtitle,
+                'url' => $url,
+                'avatar' => $avatar,
+                'icon' => $icon,
+            ]);
+        };
+
+        $visiblePost = static function (Builder $query) use ($viewer): Builder {
+            return $query->where('status', 'published')
+                ->where(function (Builder $visibility) use ($viewer): void {
+                    $visibility->where('visibility', '!=', 'private')
+                        ->orWhere('user_id', $viewer->id);
+                });
+        };
 
         $users = User::query()
             ->with('profile')
             ->where('users.status', 'active')
-            ->whereHas('profile', function ($profileQuery) use ($viewer): void {
-                $profileQuery->where(function ($visibilityQuery) use ($viewer): void {
-                    $visibilityQuery
-                        ->whereIn('profile_visibility', ['public', 'registered'])
-                        ->orWhere('user_id', $viewer->id);
-                });
-            })
-            ->where(function ($query) use ($like): void {
-                $query
-                    ->where('name', 'like', $like)
+            ->whereNotNull('username')
+            ->where('username', '!=', '')
+            ->where(function (Builder $query) use ($like): void {
+                $query->where('name', 'like', $like)
                     ->orWhere('username', 'like', $like)
-                    ->orWhereHas('profile', function ($profileQuery) use ($like): void {
-                        $profileQuery
-                            ->where('headline', 'like', $like)
-                            ->orWhere('discord_name', 'like', $like);
+                    ->orWhereHas('profile', function (Builder $profileQuery) use ($like): void {
+                        $profileQuery->where('headline', 'like', $like)
+                            ->orWhere('discord_name', 'like', $like)
+                            ->orWhere('platform', 'like', $like)
+                            ->orWhere('region', 'like', $like)
+                            ->orWhere('playstyle', 'like', $like);
                     });
             })
             ->orderByRaw('CASE WHEN username LIKE ? THEN 0 WHEN name LIKE ? THEN 1 ELSE 2 END', [$like, $like])
             ->orderBy('name')
-            ->limit(6)
+            ->limit(3)
             ->get();
 
         $userIds = $users->pluck('id')->map(fn ($id): int => (int) $id)->all();
 
-        $friendIds = Friendship::query()
-            ->forUser($viewer)
-            ->where('status', Friendship::STATUS_ACCEPTED)
-            ->where(function ($query) use ($userIds): void {
-                $query->whereIn('user_one_id', $userIds)->orWhereIn('user_two_id', $userIds);
-            })
-            ->get(['user_one_id', 'user_two_id'])
-            ->map(fn (Friendship $friendship): int => (int) $friendship->user_one_id === (int) $viewer->id ? (int) $friendship->user_two_id : (int) $friendship->user_one_id)
-            ->all();
-
-        $teams = Team::query()
-            ->withCount(['activeMembers as members_count'])
-            ->where('status', 'active')
-            ->where(function ($query) use ($viewer): void {
-                $query
-                    ->where('visibility', 'public')
-                    ->orWhere('owner_id', $viewer->id)
-                    ->orWhereHas('members', function ($memberQuery) use ($viewer): void {
-                        $memberQuery
-                            ->where('user_id', $viewer->id)
-                            ->where('status', 'active');
-                    });
-            })
-            ->where(function ($query) use ($like): void {
-                $query
-                    ->where('name', 'like', $like)
-                    ->orWhere('tagline', 'like', $like)
-                    ->orWhere('description', 'like', $like);
-            })
-            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', [$like])
-            ->orderBy('name')
-            ->limit(6)
-            ->get();
-
-        $results = collect();
+        $friendIds = empty($userIds)
+            ? []
+            : Friendship::query()
+                ->forUser($viewer)
+                ->where('status', Friendship::STATUS_ACCEPTED)
+                ->where(function (Builder $query) use ($userIds): void {
+                    $query->whereIn('user_one_id', $userIds)->orWhereIn('user_two_id', $userIds);
+                })
+                ->get(['user_one_id', 'user_two_id'])
+                ->map(fn (Friendship $friendship): int => (int) $friendship->user_one_id === (int) $viewer->id ? (int) $friendship->user_two_id : (int) $friendship->user_one_id)
+                ->all();
 
         foreach ($users as $user) {
             $isFriend = in_array((int) $user->id, $friendIds, true);
+            $profile = $user->profile;
+            $meta = collect([$profile?->platform, $profile?->region])->filter()->implode(' · ');
 
-            $results->push([
-                'type' => 'user',
-                'title' => $user->name ?: $user->username,
-                'subtitle' => $isFriend ? __('ui.header_result_friend') : __('ui.members'),
-                'url' => route('profile.public', $user),
-                'avatar' => $user->avatarUrl(),
-            ]);
+            $push(
+                'Spieler',
+                (string) ($user->name ?: $user->username),
+                trim(($isFriend ? __('ui.header_result_friend') : __('ui.members')) . ($meta ? ' · ' . $meta : '')),
+                route('profile.public', $user),
+                $user->avatarUrl(),
+                'ph-user'
+            );
         }
 
-        foreach ($teams as $team) {
-            $results->push([
-                'type' => 'team',
-                'title' => $team->name,
-                'subtitle' => trans_choice('ui.teams_members_count', (int) $team->members_count, ['count' => (int) $team->members_count]),
-                'url' => route('teams.show', $team),
-                'avatar' => $team->avatarUrl(),
-            ]);
+        FeedPost::query()
+            ->with('user.profile')
+            ->tap($visiblePost)
+            ->where('body', 'like', $like)
+            ->latest()
+            ->limit(2)
+            ->get()
+            ->each(fn (FeedPost $post) => $push(
+                'Post',
+                'Post von ' . ($post->user?->name ?: $post->user?->username ?: 'HNT Hunter'),
+                Str::limit($post->excerpt(90), 90),
+                $post->permalink(),
+                $post->user?->avatarUrl(),
+                'ph-note-pencil'
+            ));
+
+        FeedComment::query()
+            ->with(['user.profile', 'post.user.profile'])
+            ->where('body', 'like', $like)
+            ->whereHas('post', $visiblePost)
+            ->latest()
+            ->limit(2)
+            ->get()
+            ->each(fn (FeedComment $comment) => $push(
+                'Kommentar',
+                'Kommentar von ' . ($comment->user?->name ?: $comment->user?->username ?: 'HNT Hunter'),
+                Str::limit(trim(strip_tags((string) $comment->body)), 90),
+                $comment->post?->permalink($comment) ?: route('feed.index'),
+                $comment->user?->avatarUrl(),
+                'ph-chat-circle'
+            ));
+
+        Moment::query()
+            ->with(['user.profile', 'media', 'cover'])
+            ->published()
+            ->where(function (Builder $query) use ($like): void {
+                $query->where('caption', 'like', $like)
+                    ->orWhere('description', 'like', $like);
+            })
+            ->latest('published_at')
+            ->limit(2)
+            ->get()
+            ->each(fn (Moment $moment) => $push(
+                'Moment',
+                (string) ($moment->caption ?: 'HNT Moment'),
+                $moment->user?->name ?: $moment->user?->username ?: 'HNT Hunter',
+                route('moments.show', $moment),
+                $moment->coverUrl(),
+                'ph-play-circle'
+            ));
+
+        LfgPost::query()
+            ->with('user.profile')
+            ->where('visibility', 'public')
+            ->where(function (Builder $query) use ($like): void {
+                $query->where('title', 'like', $like)
+                    ->orWhere('body', 'like', $like)
+                    ->orWhere('platform', 'like', $like)
+                    ->orWhere('playstyle', 'like', $like)
+                    ->orWhere('region', 'like', $like)
+                    ->orWhere('language', 'like', $like);
+            })
+            ->latest()
+            ->limit(2)
+            ->get()
+            ->each(fn (LfgPost $post) => $push(
+                'LFG',
+                (string) $post->title,
+                collect([$post->statusLabel(), ...$post->displayTags()])->filter()->take(3)->implode(' · '),
+                route('lfg.show', $post),
+                $post->user?->avatarUrl(),
+                'ph-crosshair'
+            ));
+
+        try {
+            if (Schema::hasTable('hnt_maps')) {
+                HntMap::query()
+                    ->where('is_active', true)
+                    ->where(function (Builder $query) use ($like): void {
+                        $query->where('name', 'like', $like)
+                            ->orWhere('slug', 'like', $like);
+                    })
+                    ->orderBy('sort_order')
+                    ->limit(2)
+                    ->get()
+                    ->each(fn (HntMap $map) => $push(
+                        'Map',
+                        (string) $map->name,
+                        'Hunt Map',
+                        route('maps.show', $map->slug),
+                        null,
+                        'ph-map-trifold'
+                    ));
+            }
+
+            if (Schema::hasTable('hnt_map_markers')) {
+                HntMapMarker::query()
+                    ->with('map')
+                    ->where('status', 'approved')
+                    ->where(function (Builder $query) use ($like): void {
+                        $query->where('label_de', 'like', $like)
+                            ->orWhere('label_en', 'like', $like)
+                            ->orWhere('type', 'like', $like);
+                    })
+                    ->orderBy('sort_order')
+                    ->limit(2)
+                    ->get()
+                    ->filter(fn (HntMapMarker $marker): bool => $marker->map !== null)
+                    ->each(fn (HntMapMarker $marker) => $push(
+                        'Map',
+                        (string) ($marker->label_de ?: $marker->label_en ?: ucfirst((string) $marker->type)),
+                        ($marker->map?->name ?: 'Map') . ' · ' . ucfirst((string) $marker->type),
+                        route('maps.show', $marker->map?->slug),
+                        null,
+                        'ph-map-pin'
+                    ));
+            }
+        } catch (Throwable) {
+            // Maps are optional in the header preview. Search page remains functional without them.
         }
+
+        Cup::query()
+            ->visible()
+            ->where(function (Builder $query) use ($like): void {
+                $query->where('title', 'like', $like)
+                    ->orWhere('summary', 'like', $like)
+                    ->orWhere('platform', 'like', $like)
+                    ->orWhere('region', 'like', $like)
+                    ->orWhere('language', 'like', $like)
+                    ->orWhere('status', 'like', $like);
+            })
+            ->latest()
+            ->limit(2)
+            ->get()
+            ->each(fn (Cup $cup) => $push(
+                'Cup',
+                (string) $cup->title,
+                collect([$cup->statusLabel(), $cup->platform, $cup->region])->filter()->implode(' · '),
+                route('cups.show', $cup),
+                null,
+                'ph-trophy'
+            ));
 
         return response()->json([
             'query' => $term,
             'results' => $results->take(10)->values(),
+            'all_url' => route('search.index', ['q' => $term, 'type' => 'all']),
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
+
 }

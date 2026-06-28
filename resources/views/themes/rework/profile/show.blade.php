@@ -594,141 +594,104 @@ body.profile-page [data-profile-tab-panel="posts"] .profile-posts-more-real span
 </style>
 <!-- /HNT static profile posts tab layout guard v1 -->
 
+<!-- HNT profile moments exact friends values v1 -->
+<style>
+body.profile-page [data-profile-tab-panel="moments"] .profile-moments-panel-real {
+  padding: 26px !important;
+  border-radius: var(--radius-md) !important;
+  background: #1E1E1D;
+  overflow: hidden;
+}
 
+body.profile-page [data-profile-tab-panel="moments"] .profile-list-head {
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+}
+
+body.profile-page [data-profile-tab-panel="moments"] .profile-list-head span {
+  display: block;
+  color: var(--accent);
+  font-size: 12px !important;
+  line-height: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+}
+
+body.profile-page [data-profile-tab-panel="moments"] .profile-list-head h2 {
+  margin: 6px 0 6px !important;
+  color: #fff;
+  font-size: 26px !important;
+  line-height: 32px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+}
+
+body.profile-page [data-profile-tab-panel="moments"] .profile-list-head p {
+  margin: 0 !important;
+  color: var(--muted-warm);
+  font-size: 15px !important;
+  line-height: 22px !important;
+}
+
+body.profile-page [data-profile-tab-panel="moments"] .profile-moments-grid-real {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: stretch;
+}
+
+body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
+  min-width: 0;
+  margin: 0 !important;
+}
+
+@media (max-width: 1100px) {
+  body.profile-page [data-profile-tab-panel="moments"] .profile-moments-panel-real {
+    padding: 26px !important;
+  }
+
+  body.profile-page [data-profile-tab-panel="moments"] .profile-moments-grid-real {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.profile-page [data-profile-tab-panel="moments"] .profile-moments-panel-real {
+    padding: 18px !important;
+  }
+
+  body.profile-page [data-profile-tab-panel="moments"] .profile-list-head {
+    margin-bottom: 18px !important;
+  }
+
+  body.profile-page [data-profile-tab-panel="moments"] .profile-list-head h2 {
+    font-size: 24px !important;
+    line-height: 30px !important;
+  }
+
+  body.profile-page [data-profile-tab-panel="moments"] .profile-list-head p {
+    font-size: 13px !important;
+    line-height: 19px !important;
+  }
+
+  body.profile-page [data-profile-tab-panel="moments"] .profile-moments-grid-real {
+    grid-template-columns: 1fr;
+    gap: 14px !important;
+  }
+}
+</style>
+<!-- /HNT profile moments exact friends values v1 -->
 
 </head>
 <body class="profile-page">
 <div class="app">
-<aside class="sidebar">
-<div class="logo"><strong>HNT.</strong><span>ROCKS</span></div>
-<button aria-expanded="false" aria-label="Sidebar erweitern" class="sidebar-toggle" data-sidebar-toggle="" type="button"><span></span><span></span></button>
-<nav aria-label="Hauptnavigation" class="nav">
-<a href="{{ route('feed.index') }}"><i aria-hidden="true" class="ph ph-house ph-icon"></i><span>Feed</span></a>
-<a href="#"><i aria-hidden="true" class="ph ph-game-controller ph-icon"></i><span>Games</span></a><a href="{{ \Illuminate\Support\Facades\Route::has('maps.index') ? route('maps.index') : '#' }}"><i aria-hidden="true" class="ph ph-map-trifold ph-icon"></i><span>Maps</span></a>
-<a class="thin" href="#"><i aria-hidden="true" class="ph ph-crosshair ph-icon"></i><span>Hunt</span></a>
-<a href="{{ \Illuminate\Support\Facades\Route::has('gamification.index') ? route('gamification.index') : '#' }}"><i aria-hidden="true" class="ph ph-chart-bar ph-icon"></i><span>Gamification</span></a>
-<a href="{{ \Illuminate\Support\Facades\Route::has('crowns.shop') ? route('crowns.shop') : '#' }}"><i aria-hidden="true" class="ph ph-storefront ph-icon"></i><span>Shop</span></a>
-<a href="{{ \Illuminate\Support\Facades\Route::has('cups.index') ? route('cups.index') : '#' }}"><i aria-hidden="true" class="ph ph-trophy ph-icon"></i><span>Cups</span></a>
-<a class="active" href="{{ route('profile.show') }}"><i aria-hidden="true" class="ph ph-user ph-icon"></i><span>Profil</span></a>
-</nav>
-<div class="nav-bottom">
-<div class="nav-divider"></div>
-<a data-settings-modal-open="" href="#"><i aria-hidden="true" class="ph ph-gear-six ph-icon"></i><span>Einstellungen</span></a>
-<a href="#"><i aria-hidden="true" class="ph ph-sign-out ph-icon"></i><span>Logout</span></a>
-</div>
-</aside>
+@include('themes.rework.partials.sidebar')
 <main class="main">
-<header class="topbar">
-<a class="search-box" href="#"><i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i><span>Search</span></a>
-<div class="top-actions">
-<div class="action-menu notification-menu">
-<a aria-expanded="false" aria-label="Notifications" class="action-btn has-dot" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-bell ph-icon"></i></a>
-<div class="top-dropdown notification-dropdown" data-dropdown-panel="">
-<div class="dropdown-head">
-<div>
-<strong>Notifications</strong>
-<span>Aktuelles aus deiner Lobby</span>
-</div>
-<a href="#">Alle</a>
-</div>
-<div class="dropdown-list">
-<a class="dropdown-item unread" href="#">
-<img alt="" src="{{ $demoPostCover }}"/>
-<span><strong>Summer Cup startet bald</strong><small>Team-Anmeldungen sind jetzt offen.</small></span>
-<em>8m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ $defaultAvatar }}"/>
-<span><strong>Neuer Kommentar</strong><small>Tina hat auf deinen Feed-Post reagiert.</small></span>
-<em>21m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ $demoMark }}"/>
-<span><strong>Loadout bewertet</strong><small>Dein Community-Loadout bekommt gerade Likes.</small></span>
-<em>1h</em>
-</a>
-</div>
-<a class="dropdown-footer" href="#">Alle Notifications öffnen</a>
-</div>
-</div>
-<div class="action-menu friend-request-menu">
-<a aria-expanded="false" aria-label="Freundschaftsanfragen" class="action-btn has-dot" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-user-plus ph-icon"></i></a>
-<div class="top-dropdown friend-request-dropdown" data-dropdown-panel="">
-<div class="dropdown-head">
-<div>
-<strong>Freundschaftsanfragen</strong>
-<span>Neue Hunter wollen sich verbinden</span>
-</div>
-<a href="#">Alle</a>
-</div>
-<div class="dropdown-list request-list">
-<a class="dropdown-item request-item unread" href="#">
-<img alt="{{ $demoName }} Army" src="{{ $defaultAvatar }}"/>
-<span class="request-copy"><strong>{{ $demoName }} Army</strong><small>@krispie-1 · 2 gemeinsame Freunde</small><span class="request-actions"><b>Annehmen</b><em>Ablehnen</em></span></span>
-</a>
-<a class="dropdown-item request-item" href="#">
-<img alt="Babybel" src="{{ $defaultAvatar }}"/>
-<span class="request-copy"><strong>Babybel</strong><small>@Babybel · spielt EU / Xbox</small><span class="request-actions"><b>Annehmen</b><em>Ablehnen</em></span></span>
-</a>
-<a class="dropdown-item request-item" href="#">
-<img alt="Faraz Tariq" src="{{ $defaultAvatar }}"/>
-<span class="request-copy"><strong>Faraz Tariq</strong><small>Hat dich über Members gefunden.</small><span class="request-actions"><b>Annehmen</b><em>Ablehnen</em></span></span>
-</a>
-</div>
-<a class="dropdown-footer" href="#">Alle Anfragen öffnen</a>
-</div>
-</div>
-<div class="action-menu message-menu">
-<a aria-expanded="false" aria-label="Messages" class="action-btn" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i></a>
-<div class="top-dropdown message-dropdown" data-dropdown-panel="">
-<div class="dropdown-head">
-<div>
-<strong>Messages</strong>
-<span>Neue Chats und Antworten</span>
-</div>
-<a href="#">Alle</a>
-</div>
-<div class="dropdown-list">
-<a class="dropdown-item unread" href="#">
-<img alt="" src="{{ $defaultAvatar }}"/>
-<span><strong>Tina Tzoo</strong><small>Bin gleich online, schick mir dein Loadout.</small></span>
-<em>2m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ $defaultAvatar }}"/>
-<span><strong>MKBHD</strong><small>Sieht wild aus. Würde ich testen.</small></span>
-<em>18m</em>
-</a>
-<a class="dropdown-item" href="#">
-<img alt="" src="{{ $defaultAvatar }}"/>
-<span><strong>Faraz Tariq</strong><small>Ready Lobby später?</small></span>
-<em>1h</em>
-</a>
-</div>
-<a class="dropdown-footer" href="#">Alle Messages öffnen</a>
-</div>
-</div>
-<div class="action-menu user-menu">
-<a aria-expanded="false" aria-label="User menu" class="avatar-wrap" data-dropdown-toggle="" href="#"><img alt="{{ $demoName }}" class="header-avatar" src="{{ $demoAvatar }}"/></a>
-<div class="top-dropdown user-dropdown" data-dropdown-panel="">
-<div class="user-dropdown-head">
-<img alt="{{ $demoName }}" src="{{ $demoAvatar }}"/>
-<div>
-<strong>{{ $demoName }}</strong>
-<span>Level 7 · 12,256 Marks</span>
-</div>
-</div>
-<div class="user-menu-list">
-<a href="{{ route('profile.show') }}"><i aria-hidden="true" class="ph ph-user ph-icon"></i><span>Mein Profil</span></a>
-<a data-settings-modal-open="" href="#"><i aria-hidden="true" class="ph ph-gear-six ph-icon"></i><span>Einstellungen</span></a>
-<a href="{{ \Illuminate\Support\Facades\Route::has('crowns.shop') ? route('crowns.shop') : '#' }}"><img alt="" src="{{ $demoMark }}"/><span>Bounty Marks</span></a>
-<a href="{{ \Illuminate\Support\Facades\Route::has('crowns.shop') ? route('crowns.shop') : '#' }}"><i aria-hidden="true" class="ph ph-storefront ph-icon"></i><span>Shop</span></a>
-</div>
-<a class="user-logout" href="#"><i aria-hidden="true" class="ph ph-sign-out ph-icon"></i>Logout</a>
-</div>
-</div>
-</div>
-</header>
+@include('themes.rework.partials.topbar')
 <section class="content-grid">
 <div class="left-col">
 <section class="card hnt-profile-hero">
@@ -833,7 +796,7 @@ body.profile-page [data-profile-tab-panel="posts"] .profile-posts-more-real span
 <a aria-selected="false" data-profile-tab="info" href="#profile-info" role="tab"><i aria-hidden="true" class="ph ph-user ph-icon"></i>Info</a>
 <a aria-selected="false" data-profile-tab="friends" href="#profile-friends" role="tab"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>Freunde <span>{{ $staticProfileFormatCount($profileFriendsCount) }}</span></a>
 <a aria-selected="false" data-profile-tab="moments" href="#profile-moments" role="tab"><i aria-hidden="true" class="ph ph-trophy ph-icon"></i>Moments <span>{{ $staticProfileFormatCount($profileMomentsCount) }}</span></a>
-<a aria-selected="false" data-profile-tab="badges" href="#profile-badges" role="tab"><img alt="" src="{{ $demoMark }}"/>Badges <span>{{ $staticProfileFormatCount($profileBadgesCount) }}</span></a>
+<a aria-selected="false" data-profile-tab="badges" href="#profile-badges" role="tab"><i aria-hidden="true" class="ph ph-medal ph-icon"></i>Badges <span>{{ $staticProfileFormatCount($profileBadgesCount) }}</span></a>
 <a class="profile-create-post" data-post-composer-open="" href="#">Post erstellen</a>
 </div>
 </section>
@@ -1051,7 +1014,7 @@ body.profile-page [data-profile-tab-panel="posts"] .profile-posts-more-real span
     };
 @endphp
 <div class="profile-tab-panel" data-profile-tab-panel="moments">
-<section class="card profile-moments-panel-real">
+<section class="card profile-list-panel profile-moments-panel-real">
 <header class="profile-list-head">
 <div>
 <span>Moments</span>

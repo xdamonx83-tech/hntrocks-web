@@ -4223,3 +4223,125 @@
     });
   });
 })();
+
+/* HNT rework live header search v1 */
+(() => {
+  const form = document.querySelector('[data-rework-global-search]');
+  if (!form) return;
+
+  const input = form.querySelector('input[type="search"]');
+  const panel = form.querySelector('[data-rework-global-search-panel]');
+  const list = form.querySelector('[data-rework-global-search-list]');
+  const allLink = form.querySelector('[data-rework-global-search-all]');
+  const suggestUrl = form.getAttribute('data-suggest-url') || '';
+
+  if (!input || !panel || !list || !suggestUrl) return;
+
+  let timer = null;
+  let controller = null;
+
+  const escapeHtml = (value) => String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+
+  const hide = () => {
+    panel.hidden = true;
+    list.innerHTML = '';
+  };
+
+  const fullSearchUrl = (query) => {
+    const url = new URL(form.action, window.location.origin);
+    url.searchParams.set('q', query);
+    url.searchParams.set('type', 'all');
+    return url.toString();
+  };
+
+  const render = (payload, query) => {
+    const results = Array.isArray(payload?.results) ? payload.results : [];
+    const targetUrl = payload?.all_url || fullSearchUrl(query);
+    allLink.href = targetUrl;
+    allLink.textContent = `Alle Ergebnisse für „${query}” anzeigen`;
+
+    if (!results.length) {
+      list.innerHTML = '<div class="rework-search-suggestions-empty"><strong>Keine Schnelltreffer</strong><span>Enter zeigt die vollständige Suche.</span></div>';
+      panel.hidden = false;
+      return;
+    }
+
+    list.innerHTML = results.map((item) => {
+      const media = item.avatar
+        ? `<img alt="" src="${escapeHtml(item.avatar)}">`
+        : `<i aria-hidden="true" class="ph ${escapeHtml(item.icon || 'ph-magnifying-glass')} ph-icon"></i>`;
+
+      return `
+        <a class="rework-search-suggestion" href="${escapeHtml(item.url || targetUrl)}">
+          <span class="rework-search-suggestion-media">${media}</span>
+          <span class="rework-search-suggestion-copy">
+            <strong>${escapeHtml(item.title || 'Treffer')}</strong>
+            <span>${escapeHtml(item.subtitle || '')}</span>
+            <small>${escapeHtml(item.type || 'Suche')}</small>
+          </span>
+        </a>
+      `;
+    }).join('');
+
+    panel.hidden = false;
+  };
+
+  const request = async () => {
+    const query = input.value.trim();
+
+    if (query.length < 2) {
+      hide();
+      return;
+    }
+
+    if (controller) controller.abort();
+    controller = new AbortController();
+
+    const url = new URL(suggestUrl, window.location.origin);
+    url.searchParams.set('q', query);
+
+    try {
+      const response = await fetch(url.toString(), {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+        signal: controller.signal,
+      });
+
+      if (!response.ok) return;
+      const payload = await response.json().catch(() => null);
+      render(payload, query);
+    } catch (error) {
+      if (error?.name !== 'AbortError') hide();
+    }
+  };
+
+  input.addEventListener('input', () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(request, 260);
+  });
+
+  input.addEventListener('focus', () => {
+    if (input.value.trim().length >= 2 && list.children.length) {
+      panel.hidden = false;
+    }
+  });
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      hide();
+      input.blur();
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-rework-global-search]')) hide();
+  });
+})();

@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\AdminThemePreviewController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\VikingerMappingController;
 use App\Http\Controllers\Reports\ReportController;
+use App\Http\Controllers\Search\SearchController;
 use App\Http\Controllers\Seo\SitemapController;
 use App\Http\Controllers\Settings\NotificationSettingsController;
 use App\Http\Controllers\Settings\PrivacyController;
@@ -412,6 +413,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/overview', [AdminOverviewController::class, 'index'])->name('overview.index');
     Route::get('/feed/gifs/trending', [FeedGifController::class, 'trending'])->name('feed.gifs.trending');
     Route::get('/feed/gifs/search', [FeedGifController::class, 'search'])->name('feed.gifs.search');
+    Route::get('/search', [SearchController::class, 'index'])->name('search.index');
     Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
     Route::get('/feed/posts/{post}', [FeedController::class, 'show'])->name('feed.show');
     Route::get('/hashtags/{tag}', [HashtagController::class, 'show'])->where('tag', '[A-Za-z0-9_\-]+')->name('hashtags.show');
