@@ -4443,3 +4443,302 @@
     if (!event.target.closest('[data-rework-global-search]')) hide();
   });
 })();
+
+/* 063: Rework cup detail tabs demo */
+(() => {
+  const activateCupDetailTab = (target) => {
+    if (!target) return false;
+    const tabs = document.querySelectorAll('[data-cup-detail-tab]');
+    const panels = document.querySelectorAll('[data-cup-detail-panel]');
+    const targetPanel = document.querySelector(`[data-cup-detail-panel="${CSS.escape(target)}"]`);
+    if (!targetPanel) return false;
+    tabs.forEach((tab) => tab.classList.toggle('active', tab.getAttribute('data-cup-detail-tab') === target));
+    panels.forEach((panel) => panel.classList.toggle('is-active', panel.getAttribute('data-cup-detail-panel') === target));
+    return true;
+  };
+
+  document.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-cup-detail-tab]');
+    if (!tab) return;
+    const target = tab.getAttribute('data-cup-detail-tab');
+    if (!activateCupDetailTab(target)) return;
+    event.preventDefault();
+    const hash = tab.getAttribute('href');
+    if (hash && hash.startsWith('#')) history.replaceState(null, '', hash);
+  });
+
+  const initialHash = window.location.hash ? window.location.hash.replace('#cup-', '') : '';
+  if (initialHash) activateCupDetailTab(initialHash);
+})();
+/* /063: Rework cup detail tabs demo */
+
+/* 072: Cup submit progress/result modal */
+(() => {
+  const modal = document.querySelector('[data-cup-submit-progress-modal]');
+  if (!modal) return;
+
+  const dialog = modal.querySelector('.cup-submit-progress-dialog');
+  const kicker = modal.querySelector('[data-cup-submit-progress-kicker]');
+  const title = modal.querySelector('[data-cup-submit-progress-title]');
+  const text = modal.querySelector('[data-cup-submit-progress-text]');
+  const bar = modal.querySelector('[data-cup-submit-progress-bar]');
+  const percent = modal.querySelector('[data-cup-submit-progress-percent]');
+  const result = modal.querySelector('[data-cup-submit-progress-result]');
+  const actions = modal.querySelector('[data-cup-submit-progress-actions]');
+  const resultLink = modal.querySelector('[data-cup-submit-result-link]');
+  const steps = modal.querySelectorAll('[data-cup-submit-step]');
+
+  let processingTimer = null;
+
+  const setStep = (active) => {
+    steps.forEach((step) => {
+      const name = step.getAttribute('data-cup-submit-step');
+      const order = ['upload', 'process', 'result'];
+      step.classList.toggle('is-active', name === active);
+      step.classList.toggle('is-done', order.indexOf(name) < order.indexOf(active));
+    });
+  };
+
+  const setProgress = (value) => {
+    const safe = Math.max(0, Math.min(100, Math.round(value)));
+    if (bar) bar.style.width = `${safe}%`;
+    if (percent) percent.textContent = `${safe}%`;
+  };
+
+  const openModal = () => {
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+  };
+
+  const closeModal = () => {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+  };
+
+  const resetModal = () => {
+    clearInterval(processingTimer);
+    processingTimer = null;
+    dialog?.classList.remove('is-success', 'is-warning', 'is-danger');
+    if (kicker) kicker.textContent = 'Einreichung';
+    if (title) title.textContent = 'Upload startet ...';
+    if (text) text.textContent = 'Dein Screenshot wird hochgeladen.';
+    if (result) {
+      result.hidden = true;
+      result.innerHTML = '';
+    }
+    if (actions) actions.hidden = true;
+    if (resultLink) {
+      resultLink.hidden = true;
+      resultLink.href = '#';
+    }
+    setStep('upload');
+    setProgress(0);
+  };
+
+  const showProcessing = (estimatedSeconds = 45) => {
+    clearInterval(processingTimer);
+    setStep('process');
+    if (title) title.textContent = 'Verarbeitung läuft ...';
+    if (text) text.textContent = 'Der Screenshot wird geprüft. Bitte nicht neu senden.';
+    let current = 75;
+    setProgress(current);
+
+    const interval = Math.max(500, Math.round((Math.max(8, estimatedSeconds) * 1000) / 24));
+    processingTimer = setInterval(() => {
+      current = Math.min(94, current + 1);
+      setProgress(current);
+      if (current >= 94) clearInterval(processingTimer);
+    }, interval);
+  };
+
+  const resultTypeClass = (type) => {
+    if (type === 'success') return 'is-success';
+    if (type === 'danger') return 'is-danger';
+    if (type === 'warning') return 'is-warning';
+    return 'is-warning';
+  };
+
+  const showResult = (payload, fallbackOk = false) => {
+    clearInterval(processingTimer);
+    processingTimer = null;
+    setStep('result');
+    setProgress(100);
+
+    const cupResult = payload?.result || {};
+    const type = cupResult.type || (payload?.ok || fallbackOk ? 'success' : 'danger');
+    dialog?.classList.remove('is-success', 'is-warning', 'is-danger');
+    dialog?.classList.add(resultTypeClass(type));
+
+    if (kicker) kicker.textContent = type === 'success' ? 'Gezählt' : (type === 'danger' ? 'Fehler' : 'Prüfung');
+    if (title) title.textContent = cupResult.title || (payload?.ok ? 'Einreichung verarbeitet' : 'Einreichung fehlgeschlagen');
+    if (text) text.textContent = cupResult.message || payload?.message || 'Die Einreichung wurde verarbeitet.';
+
+    const lines = [];
+    if (cupResult.status) lines.push(['Status', cupResult.status]);
+    if (cupResult.score) lines.push(['Score', cupResult.score]);
+    if (cupResult.summary) lines.push(['Prüfung', cupResult.summary]);
+
+    if (Array.isArray(cupResult.details)) {
+      cupResult.details.forEach((item) => {
+        if (item?.label && item?.value !== undefined) lines.push([item.label, item.value]);
+      });
+    }
+
+    if (result) {
+      result.innerHTML = lines.map(([label, value]) => `<div><strong>${String(label)}</strong><span>${String(value)}</span></div>`).join('');
+      result.hidden = lines.length === 0;
+    }
+
+    if (resultLink && payload?.redirect_url) {
+      resultLink.href = payload.redirect_url;
+      resultLink.hidden = false;
+    }
+
+    if (actions) actions.hidden = false;
+  };
+
+  const showError = (message) => {
+    showResult({
+      ok: false,
+      message,
+      result: {
+        type: 'danger',
+        title: 'Einreichung fehlgeschlagen',
+        message,
+        status: 'Nicht gespeichert',
+      },
+    });
+  };
+
+  modal.querySelectorAll('[data-cup-submit-progress-close]').forEach((button) => {
+    button.addEventListener('click', closeModal);
+  });
+
+  document.querySelectorAll('[data-cup-submit-file-input]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const label = input.closest('.cup-upload-box')?.querySelector('[data-cup-submit-file-name]');
+      const file = input.files && input.files[0] ? input.files[0] : null;
+      if (label && file) label.textContent = file.name;
+    });
+  });
+
+  document.querySelectorAll('[data-cup-submission-form]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const button = form.querySelector('[data-cup-submit-button]');
+      const fileInput = form.querySelector('[data-cup-submit-file-input]');
+      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        openModal();
+        resetModal();
+        showError('Bitte zuerst einen Screenshot auswählen.');
+        return;
+      }
+
+      resetModal();
+      openModal();
+
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Einreichung wird geprüft ...';
+      }
+
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData(form);
+
+      xhr.open('POST', form.action, true);
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.setRequestHeader('Accept', 'application/json');
+
+      xhr.upload.addEventListener('progress', (progressEvent) => {
+        if (!progressEvent.lengthComputable) return;
+        const uploadPercent = Math.round((progressEvent.loaded / progressEvent.total) * 70);
+        setStep('upload');
+        if (title) title.textContent = 'Upload läuft ...';
+        if (text) text.textContent = `${Math.round((progressEvent.loaded / progressEvent.total) * 100)}% hochgeladen.`;
+        setProgress(uploadPercent);
+      });
+
+      xhr.addEventListener('load', () => {
+        let payload = null;
+        try {
+          payload = JSON.parse(xhr.responseText || '{}');
+        } catch (error) {
+          payload = null;
+        }
+
+        if (xhr.status >= 200 && xhr.status < 300 && payload?.ok !== false) {
+          showProcessing(payload?.estimated_total_seconds || 45);
+          window.setTimeout(() => showResult(payload || { ok: true }, true), 500);
+        } else {
+          const message = payload?.message || payload?.errors?.submission?.[0] || 'Die Einreichung konnte nicht verarbeitet werden.';
+          showError(message);
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        showError('Netzwerkfehler beim Upload. Bitte erneut versuchen.');
+      });
+
+      xhr.addEventListener('abort', () => {
+        showError('Upload wurde abgebrochen.');
+      });
+
+      xhr.addEventListener('loadend', () => {
+        if (button) {
+          button.disabled = false;
+          button.textContent = 'Einreichung speichern';
+        }
+      });
+
+      xhr.send(formData);
+    });
+  });
+})();
+/* /072: Cup submit progress/result modal */
+
+/* 078: Cup submission screenshot modal */
+(() => {
+  const modal = document.querySelector('[data-cup-shot-modal]');
+  if (!modal) return;
+
+  const image = modal.querySelector('[data-cup-shot-image]');
+  const title = modal.querySelector('[data-cup-shot-title]');
+  const openNew = modal.querySelector('[data-cup-shot-open-new]');
+
+  const openModal = (url, shotTitle) => {
+    if (!url || !image) return;
+
+    image.src = url;
+    if (title) title.textContent = shotTitle || 'Einreichung';
+    if (openNew) openNew.href = url;
+
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+  };
+
+  const closeModal = () => {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    if (image) image.removeAttribute('src');
+  };
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-cup-submission-shot]');
+    if (!trigger) return;
+
+    event.preventDefault();
+    openModal(trigger.href, trigger.getAttribute('data-shot-title'));
+  });
+
+  modal.querySelectorAll('[data-cup-shot-close]').forEach((button) => {
+    button.addEventListener('click', closeModal);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.hidden) {
+      closeModal();
+    }
+  });
+})();
+/* /078: Cup submission screenshot modal */

@@ -7,6 +7,7 @@ use App\Models\Cup;
 use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Support\HntTheme;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -38,7 +39,34 @@ class CupController extends Controller
                 });
             })
             ->when($filters['status'] !== '', fn ($query) => $query->where('status', $filters['status']))
-            ->when($filters['platform'] !== '', fn ($query) => $query->where('platform', $filters['platform']))
+            ->when($filters['platform'] !== '', function ($query) use ($filters): void {
+                $platform = strtolower(str_replace([' ', '-', '_', '/'], '', $filters['platform']));
+                $aliases = match ($platform) {
+                    'pc', 'steam', 'windows' => ['PC', 'pc', 'Steam', 'Windows'],
+                    'ps', 'ps4', 'ps5', 'playstation', 'playstation4', 'playstation5' => ['PlayStation', 'PS5', 'PS4', 'ps5', 'ps4', 'PlayStation / Xbox', 'PS5/Xbox', 'PS5 / Xbox', 'Konsole', 'Console'],
+                    'xbox', 'xboxseries', 'xboxseriesx', 'xboxseriess', 'xboxseriesxs' => ['Xbox', 'xbox', 'PlayStation / Xbox', 'PS5/Xbox', 'PS5 / Xbox', 'Konsole', 'Console'],
+                    'konsole', 'console' => ['Konsole', 'Console', 'PlayStation', 'PS5', 'PS4', 'Xbox', 'PlayStation / Xbox', 'PS5/Xbox', 'PS5 / Xbox'],
+                    default => [$filters['platform']],
+                };
+
+                $jsonPlatforms = match ($platform) {
+                    'pc', 'steam', 'windows' => ['PC'],
+                    'ps', 'ps4', 'ps5', 'playstation', 'playstation4', 'playstation5' => ['PlayStation'],
+                    'xbox', 'xboxseries', 'xboxseriesx', 'xboxseriess', 'xboxseriesxs' => ['Xbox'],
+                    'konsole', 'console' => ['PlayStation', 'Xbox'],
+                    default => [$filters['platform']],
+                };
+
+                $query->where(function ($platformQuery) use ($aliases, $jsonPlatforms): void {
+                    foreach (array_values(array_unique($aliases)) as $alias) {
+                        $platformQuery->orWhere('platform', 'like', '%'.$alias.'%');
+                    }
+
+                    foreach (array_values(array_unique($jsonPlatforms)) as $jsonPlatform) {
+                        $platformQuery->orWhereJsonContains('settings->platform_gate->allowed_platforms', $jsonPlatform);
+                    }
+                });
+            })
             ->when($filters['mine'] && $viewer !== null, fn ($query) => $query->where('owner_id', $viewer->id))
             ->when(! $viewer?->isAdmin(), function ($query) use ($viewer): void {
                 $query->where(function ($visibilityQuery) use ($viewer): void {
@@ -54,7 +82,18 @@ class CupController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view(HntTheme::resolve('cups.index'), compact('cups', 'filters'));
+        $sidebarData = ReworkFeedSidebar::forViewer($viewer);
+
+        return view(HntTheme::resolve('cups.index'), [
+            'cups' => $cups,
+            'filters' => $filters,
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
+        ]);
     }
 
 
@@ -218,7 +257,27 @@ class CupController extends Controller
             ['id', 'asc'],
         ])->values();
 
-        return view(HntTheme::resolve('cups.show'), compact('cup', 'viewerTeam', 'canManage', 'leaderboard', 'activeSection', 'cupChatMessages', 'cupChatMessagesCount', 'viewerTeamChatMessages', 'viewerTeamChatMessagesCount', 'cupRandomizerDraws', 'cupRandomizerEligibleTeams'));
+        $sidebarData = ReworkFeedSidebar::forViewer(auth()->user());
+
+        return view(HntTheme::resolve('cups.show'), [
+            'cup' => $cup,
+            'viewerTeam' => $viewerTeam,
+            'canManage' => $canManage,
+            'leaderboard' => $leaderboard,
+            'activeSection' => $activeSection,
+            'cupChatMessages' => $cupChatMessages,
+            'cupChatMessagesCount' => $cupChatMessagesCount,
+            'viewerTeamChatMessages' => $viewerTeamChatMessages,
+            'viewerTeamChatMessagesCount' => $viewerTeamChatMessagesCount,
+            'cupRandomizerDraws' => $cupRandomizerDraws,
+            'cupRandomizerEligibleTeams' => $cupRandomizerEligibleTeams,
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
+        ]);
     }
 
     public function edit(Cup $cup): View
