@@ -1,32 +1,13 @@
+@extends('themes.rework.layouts.app')
+
+@section('title', 'Suche · HNT.rocks')
+@section('body_class', 'search-page')
+
+@section('content')
 @php
-    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
-    $reworkStyleVersion = @filemtime(public_path('assets/themes/rework/styles.css')) ?: time();
-    $reworkScriptVersion = @filemtime(public_path('assets/themes/rework/script.js')) ?: time();
     $typeLabels = collect($searchTypes)->except('all');
 @endphp
-<!DOCTYPE html>
-<html lang="{{ $currentLocale }}">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<meta name="csrf-token" content="{{ csrf_token() }}"/>
-<title>Suche · HNT.rocks</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700&amp;family=Bakbak+One&amp;family=Montserrat:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" rel="stylesheet"/>
-<link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css" rel="stylesheet"/>
-<link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css" rel="stylesheet"/>
-<link href="{{ \App\Support\HntTheme::asset('styles.css', 'rework') }}?v={{ $reworkStyleVersion }}" rel="stylesheet"/>
-</head>
-<body class="search-page">
-<div class="app">
-@include('themes.rework.partials.sidebar')
-<main class="main">
-@include('themes.rework.partials.topbar')
 
-<section class="content-grid">
-<div class="left-col">
 <section class="card search-hero-card">
     <div>
         <span class="search-eyebrow"><i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i> HNT Suche</span>
@@ -109,12 +90,4 @@
     @endforeach
     </div>
 @endif
-</div>
-
-@include('themes.rework.partials.right-widgets')
-</section>
-</main>
-</div>
-<script src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}" defer></script>
-</body>
-</html>
+@endsection

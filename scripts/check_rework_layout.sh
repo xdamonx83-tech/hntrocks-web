@@ -8,6 +8,7 @@ REWORK_DIR="resources/views/themes/rework"
 SIDEBAR_PARTIAL="$REWORK_DIR/partials/sidebar.blade.php"
 TOPBAR_PARTIAL="$REWORK_DIR/partials/topbar.blade.php"
 RIGHT_WIDGETS_PARTIAL="$REWORK_DIR/partials/right-widgets.blade.php"
+APP_LAYOUT="$REWORK_DIR/layouts/app.blade.php"
 
 fail=0
 
@@ -21,6 +22,11 @@ report_block() {
     fail=1
   fi
 }
+
+if [ ! -f "$APP_LAYOUT" ]; then
+  echo "FAIL: missing $APP_LAYOUT"
+  fail=1
+fi
 
 if [ ! -f "$SIDEBAR_PARTIAL" ]; then
   echo "FAIL: missing $SIDEBAR_PARTIAL"
@@ -58,32 +64,38 @@ report_block "page-local Rework right widget markup found. Use themes.rework.par
 while IFS= read -r file; do
   [ -f "$file" ] || continue
 
-  # Only complete page templates with their own document shell are checked here.
-  if ! grep -q '<!DOCTYPE html>' "$file"; then
-    continue
-  fi
-
   # Maps are the explicit exception, even if they get moved into rework later.
   case "$file" in
     *"/maps/"*) continue ;;
   esac
 
-  if ! grep -q "themes.rework.partials.sidebar" "$file"; then
-    echo
-    echo "FAIL: $file is a Rework page shell but does not include themes.rework.partials.sidebar"
-    fail=1
+  if [ "$file" = "$APP_LAYOUT" ]; then
+    continue
   fi
 
-  if ! grep -q "themes.rework.partials.topbar" "$file"; then
-    echo
-    echo "FAIL: $file is a Rework page shell but does not include themes.rework.partials.topbar"
-    fail=1
+  if grep -q "themes.rework.layouts.app" "$file"; then
+    continue
   fi
 
-  if grep -q 'content-grid' "$file" && ! grep -q "themes.rework.partials.right-widgets" "$file"; then
-    echo
-    echo "FAIL: $file uses content-grid but does not include themes.rework.partials.right-widgets"
-    fail=1
+  # Complete legacy page templates with their own document shell must still use the central partials.
+  if grep -q '<!DOCTYPE html>' "$file"; then
+    if ! grep -q "themes.rework.partials.sidebar" "$file"; then
+      echo
+      echo "FAIL: $file is a Rework page shell but does not include themes.rework.partials.sidebar"
+      fail=1
+    fi
+
+    if ! grep -q "themes.rework.partials.topbar" "$file"; then
+      echo
+      echo "FAIL: $file is a Rework page shell but does not include themes.rework.partials.topbar"
+      fail=1
+    fi
+
+    if grep -q 'content-grid' "$file" && ! grep -q "themes.rework.partials.right-widgets" "$file"; then
+      echo
+      echo "FAIL: $file uses content-grid but does not include themes.rework.partials.right-widgets"
+      fail=1
+    fi
   fi
 done < <(find "$REWORK_DIR" -type f -name '*.blade.php' | sort)
 

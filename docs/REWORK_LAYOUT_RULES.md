@@ -2,6 +2,21 @@
 
 This file is a guardrail for the Rework theme. Do not invent page-local navigation, headers or right widgets.
 
+## Preferred Blade layout
+
+New normal Rework pages should extend the central layout:
+
+```blade
+@extends('themes.rework.layouts.app')
+@section('title', 'Page title · HNT.rocks')
+@section('body_class', 'optional-page-class')
+@section('content')
+...
+@endsection
+```
+
+The layout owns the document shell, sidebar, topbar, content grid, right widgets, assets and script include.
+
 ## Hard rules
 
 1. Rework pages use the central left sidebar partial:
@@ -30,7 +45,7 @@ This file is a guardrail for the Rework theme. Do not invent page-local navigati
 
 5. Maps are the accepted exception. Maps can keep their own fullscreen/special layout and must not be forced into the normal right-widget column.
 
-6. New Rework pages should follow the existing shell shape until a full Blade layout exists:
+6. Existing Rework pages that have not been migrated yet may temporarily follow the shell shape:
 
    ```blade
    <div class="app">
@@ -49,6 +64,7 @@ This file is a guardrail for the Rework theme. Do not invent page-local navigati
 
 ## Current central files
 
+- `resources/views/themes/rework/layouts/app.blade.php`
 - `resources/views/themes/rework/partials/sidebar.blade.php`
 - `resources/views/themes/rework/partials/topbar.blade.php`
 - `resources/views/themes/rework/partials/right-widgets.blade.php`
