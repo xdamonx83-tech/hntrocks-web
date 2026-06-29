@@ -114,6 +114,55 @@
             @endforelse
         </div>
     </article>
+
+    <article class="cup-panel-card card cup-overview-chat-card" id="cup-chat">
+        <div class="cup-panel-head inline">
+            <div>
+                <span>Cup-Chat</span>
+                <h2>Community-Chat</h2>
+                <p>Kurze Absprachen, Fragen und Updates zum Cup.</p>
+            </div>
+            <strong class="cup-chat-count"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>{{ number_format((int) $cupChatMessagesCount) }} Nachrichten</strong>
+        </div>
+
+        <div class="cup-chat-shell">
+            <div class="cup-chat-list" data-cup-chat-list aria-label="Cup-Chat Nachrichten">
+                @forelse($cupChatMessages as $chatMessage)
+                    @include('themes.rework.cups.partials.chat-message', ['chatMessage' => $chatMessage])
+                @empty
+                    <div class="cup-chat-empty">
+                        <i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>
+                        <strong>Noch keine Nachrichten</strong>
+                        <p>Starte den Cup-Chat mit einer kurzen Frage oder Info für die Community.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            @auth
+                <form class="cup-chat-form" method="post" action="{{ route('cups.chat.store', $cup) }}">
+                    @csrf
+                    <label for="cup-chat-body">Nachricht schreiben</label>
+                    <div class="cup-chat-compose">
+                        <textarea id="cup-chat-body" name="body" rows="3" maxlength="1200" required placeholder="Schreibe eine Nachricht zum Cup ...">{{ old('body') }}</textarea>
+                        <button class="btn" type="submit">
+                            <i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i>
+                            Senden
+                        </button>
+                    </div>
+                    <span>Max. 1200 Zeichen · sichtbar für alle Cup-Besucher.</span>
+                </form>
+            @else
+                <div class="cup-chat-login">
+                    <i aria-hidden="true" class="ph ph-lock-key ph-icon"></i>
+                    <div>
+                        <strong>Einloggen zum Schreiben</strong>
+                        <p>Lesen ist möglich. Zum Antworten brauchst du ein HNT.rocks Konto.</p>
+                    </div>
+                    <a class="btn ghost" href="{{ route('login') }}">Einloggen</a>
+                </div>
+            @endauth
+        </div>
+    </article>
 </section>
 <section class="cup-tab-panel" data-cup-detail-panel="rules" id="cup-rules">
     @php
