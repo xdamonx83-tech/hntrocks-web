@@ -4742,3 +4742,27 @@
   });
 })();
 /* /078: Cup submission screenshot modal */
+
+/* 081: Cup submissions route tab preference */
+(() => {
+  const lastSegment = window.location.pathname.split('/').filter(Boolean).pop();
+  if (lastSegment !== 'submissions') return;
+
+  const preferred = document.querySelector('[data-cup-detail-panel="admin-submissions"]')
+    ? 'admin-submissions'
+    : (document.querySelector('[data-cup-detail-panel="my-submissions"]') ? 'my-submissions' : null);
+
+  if (!preferred) return;
+
+  const tabs = document.querySelectorAll('[data-cup-detail-tab]');
+  const panels = document.querySelectorAll('[data-cup-detail-panel]');
+
+  tabs.forEach((tab) => {
+    tab.classList.toggle('active', tab.getAttribute('data-cup-detail-tab') === preferred);
+  });
+
+  panels.forEach((panel) => {
+    panel.classList.toggle('is-active', panel.getAttribute('data-cup-detail-panel') === preferred);
+  });
+})();
+/* /081: Cup submissions route tab preference */

@@ -4,6 +4,10 @@
     $defaultAvatar = asset('assets/vikinger/img/default-avatar.svg');
     $crownsSummary = $socialiteCrownsSummary ?? ['balance' => 0, 'enabled' => false];
     $profileStats = $socialiteProfileStats ?? [];
+    $socialiteMembers = $socialiteMembers ?? collect();
+    $socialiteHighlightTopPost = $socialiteHighlightTopPost ?? null;
+    $socialiteHighlightLfg = $socialiteHighlightLfg ?? null;
+    $socialiteHighlightCup = $socialiteHighlightCup ?? null;
     $marksBalance = (int) ($crownsSummary['balance'] ?? 0);
     $shopUrl = \Illuminate\Support\Facades\Route::has('crowns.shop') ? route('crowns.shop') : null;
     $membersUrl = \Illuminate\Support\Facades\Route::has('members.index') ? route('members.index') : null;

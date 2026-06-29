@@ -3,6 +3,7 @@
     $reworkStyleVersion = $reworkStyleVersion ?? (@filemtime(public_path('assets/themes/rework/styles.css')) ?: time());
     $reworkScriptVersion = $reworkScriptVersion ?? (@filemtime(public_path('assets/themes/rework/script.js')) ?: time());
     $reworkBodyClass = trim($__env->yieldContent('body_class'));
+    $reworkLeftColClass = trim($__env->yieldContent('left_col_class'));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $currentLocale }}">
@@ -26,13 +27,14 @@
 <main class="main">
 @include('themes.rework.partials.topbar')
 <section class="content-grid">
-<div class="left-col">
+<div class="left-col @if($reworkLeftColClass !== '') {{ $reworkLeftColClass }} @endif">
 @yield('content')
 </div>
 @include('themes.rework.partials.right-widgets')
 </section>
 </main>
 </div>
+@include('themes.rework.feed.partials.settings-modal')
 @stack('rework-modals')
 <script src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}" defer></script>
 @stack('rework-scripts')

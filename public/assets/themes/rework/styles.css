@@ -15005,3 +15005,323 @@ body.is-avatar-crop-open {
   margin-top: 0 !important;
 }
 /* /079: Cup my submissions panel spacing */
+
+/* 081: Cup admin submissions tab */
+.cup-admin-submissions-card {
+  min-height: 320px;
+}
+
+.cup-admin-submission-list {
+  display: grid;
+  gap: 14px;
+}
+
+.cup-admin-submission-card {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(0,0,0,.16);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.cup-admin-submission-card.is-invalid {
+  border-color: rgba(184,70,58,.34);
+}
+
+.cup-admin-submission-card.is-valid {
+  border-color: rgba(101,239,173,.22);
+}
+
+.cup-admin-submission-card.is-review {
+  border-color: rgba(207,161,73,.24);
+}
+
+.cup-admin-submission-top {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 142px;
+  gap: 16px;
+  align-items: start;
+  padding: 18px;
+}
+
+.cup-admin-submission-rank {
+  width: 56px;
+  min-height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: rgba(207,161,73,.10);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.cup-admin-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.cup-admin-title-row strong {
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.15;
+  letter-spacing: -.04em;
+}
+
+.cup-admin-title-row span {
+  min-height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  color: #f5f1e8;
+  background: rgba(82,82,82,.32);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.cup-admin-submission-card.is-invalid .cup-admin-title-row span {
+  background: rgba(184,70,58,.86);
+}
+
+.cup-admin-submission-card.is-valid .cup-admin-title-row span {
+  background: rgba(101,239,173,.16);
+  color: #dfffee;
+}
+
+.cup-admin-submission-card.is-review .cup-admin-title-row span {
+  background: rgba(207,161,73,.16);
+  color: #f8d989;
+}
+
+.cup-admin-submission-main p {
+  margin: 6px 0 0;
+  color: rgba(245,241,232,.68);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cup-admin-note {
+  color: rgba(245,241,232,.82) !important;
+}
+
+.cup-admin-metrics,
+.cup-admin-result,
+.cup-admin-ai-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.cup-admin-metrics span,
+.cup-admin-result span,
+.cup-admin-ai-row span {
+  min-height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  color: rgba(245,241,232,.78);
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.07);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.cup-admin-metrics b {
+  color: #fff;
+  font-size: 14px;
+}
+
+.cup-admin-result span {
+  color: var(--accent);
+  background: rgba(207,161,73,.09);
+  border-color: rgba(207,161,73,.18);
+}
+
+.cup-admin-ai-row {
+  padding: 0 18px 16px 98px;
+  margin-top: 0;
+}
+
+.cup-admin-ai-row span {
+  color: var(--muted-warm);
+  background: rgba(255,255,255,.035);
+}
+
+.cup-admin-shot {
+  min-height: 42px;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #f5f1e8;
+  text-decoration: none;
+  background: rgba(82,82,82,.32);
+  border: 1px solid rgba(255,255,255,.18);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.cup-admin-correction {
+  margin: 0 18px 14px 98px;
+  border-radius: 14px;
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.07);
+  overflow: hidden;
+}
+
+.cup-admin-correction summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.cup-admin-score-form {
+  display: grid;
+  grid-template-columns: 110px 110px 110px minmax(180px, 1fr) 120px;
+  gap: 10px;
+  padding: 0 16px 16px;
+  align-items: end;
+}
+
+.cup-admin-score-form label {
+  display: grid;
+  gap: 5px;
+}
+
+.cup-admin-score-form span {
+  color: var(--muted-warm);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.cup-admin-score-form input,
+.cup-admin-reject-form input {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.22);
+  color: #f5f1e8;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.cup-admin-actions {
+  display: grid;
+  grid-template-columns: 140px 140px minmax(240px, 1fr);
+  gap: 10px;
+  padding: 0 18px 18px 98px;
+  align-items: center;
+}
+
+.cup-admin-actions form,
+.cup-admin-reject-form {
+  min-width: 0;
+}
+
+.cup-admin-reject-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 10px;
+}
+
+.cup-admin-actions .btn,
+.cup-admin-score-form .btn {
+  min-height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f5f1e8;
+  text-decoration: none;
+  background: rgba(82,82,82,.32);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cup-admin-actions .btn.ghost {
+  background: rgba(255,255,255,.045);
+}
+
+.cup-admin-actions .btn.danger {
+  background: rgba(184,70,58,.88);
+  border-color: rgba(228,108,91,.35);
+}
+
+@media (max-width: 900px) {
+  .cup-admin-submission-top {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .cup-admin-shot {
+    grid-column: 2;
+    width: max-content;
+    min-width: 142px;
+  }
+
+  .cup-admin-ai-row,
+  .cup-admin-correction,
+  .cup-admin-actions {
+    margin-left: 18px;
+    padding-left: 0;
+  }
+
+  .cup-admin-score-form,
+  .cup-admin-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-admin-reject-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .cup-admin-submission-top {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 11px;
+    padding: 13px;
+  }
+
+  .cup-admin-submission-rank {
+    width: 40px;
+    min-height: 40px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  .cup-admin-title-row strong {
+    font-size: 16px;
+  }
+
+  .cup-admin-shot {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .cup-admin-ai-row,
+  .cup-admin-correction,
+  .cup-admin-actions {
+    margin-left: 13px;
+    margin-right: 13px;
+  }
+}
+/* /081: Cup admin submissions tab */

@@ -64,6 +64,10 @@
 <a data-cup-detail-tab="prizes" href="#cup-prizes">Preise</a>
 <a data-cup-detail-tab="submit" href="#cup-submit">Einreichen</a>
         <a data-cup-detail-tab="my-submissions" href="#cup-my-submissions">Meine Einreichungen</a>
+        <?php $cupAdminCanManage = auth()->check() && $cup->canManage(auth()->user()); ?>
+        <?php if ($cupAdminCanManage) { ?>
+            <a data-cup-detail-tab="admin-submissions" href="#cup-admin-submissions">Admin Einreichungen</a>
+        <?php } ?>
     </div>
 </section>
 <div class="cup-tab-panels">
@@ -432,6 +436,138 @@
     </article>
 </section>
 <!-- /076 my submissions panel -->
+
+<?php $cupAdminCanManage = $cupAdminCanManage ?? (auth()->check() && $cup->canManage(auth()->user())); ?>
+<?php if ($cupAdminCanManage) { ?>
+<section class="cup-tab-panel" data-cup-detail-panel="admin-submissions" id="cup-admin-submissions">
+    @php
+        $adminSubmissionRows = $cup->submissions
+            ->sortByDesc(fn ($submission) => $submission->submitted_at ?? $submission->created_at)
+            ->values();
+
+        $adminStatusClass = function ($submission): string {
+            return match ($submission->status) {
+                'processed', 'approved', 'approved_manual' => 'is-valid',
+                'invalid', 'rejected', 'rejected_manual' => 'is-invalid',
+                'review_required', 'pending' => 'is-review',
+                default => 'is-review',
+            };
+        };
+
+        $adminStatusText = function ($submission): string {
+            return $submission->statusLabel();
+        };
+    @endphp
+
+    <article class="cup-panel-card card cup-admin-submissions-card">
+        <div class="cup-panel-head inline">
+            <div><span>Admin</span><h2>Alle Einreichungen</h2></div>
+            <strong>{{ $adminSubmissionRows->count() }} Einreichungen</strong>
+        </div>
+
+        <div class="cup-admin-submission-list">
+            @forelse($adminSubmissionRows as $submission)
+                @php
+                    $screenshotUrl = route('cups.submissions.screenshot', [$cup, $submission]);
+                    $submittedAt = $submission->submitted_at ?? $submission->created_at;
+                    $extractLabel = $submission->extracted ? 'JA' : 'NEIN';
+                    $resultText = $submission->resultSummary();
+                    $invalidReason = $submission->invalidReasonLabel();
+                    $confidenceLabel = $submission->ai_confidence !== null ? round(((float) $submission->ai_confidence) * 100).'%' : 'Unbekannt';
+                    $completeLabel = $submission->ai_complete_screenshot === null ? 'Unbekannt' : ($submission->ai_complete_screenshot ? 'Ja' : 'Nein');
+                @endphp
+
+                <article class="cup-admin-submission-card {{ $adminStatusClass($submission) }}">
+                    <div class="cup-admin-submission-top">
+                        <div class="cup-admin-submission-rank">#{{ $submission->id }}</div>
+
+                        <div class="cup-admin-submission-main">
+                            <div class="cup-admin-title-row">
+                                <strong>{{ $submission->team?->name ?? 'Einreichung' }}</strong>
+                                <span>{{ $adminStatusText($submission) }}</span>
+                            </div>
+
+                            <p>
+                                Eingereicht von {{ $submission->submitter?->name ?? $submission->submitter?->username ?? 'HNT Hunter' }}
+                                @if($submittedAt) · {{ $submittedAt->diffForHumans() }} @endif
+                            </p>
+
+                            @if($submission->note)
+                                <p class="cup-admin-note">{{ $submission->note }}</p>
+                            @endif
+
+                            <div class="cup-admin-metrics">
+                                <span><b>{{ number_format((int) $submission->points) }}</b> P</span>
+                                <span><b>{{ number_format((int) $submission->kills) }}</b> K</span>
+                                <span><b>{{ number_format((int) $submission->bounty_tokens) }}</b> B</span>
+                                <span>Extract <b>{{ $extractLabel }}</b></span>
+                            </div>
+
+                            <div class="cup-admin-result">
+                                <span>{{ $resultText }}</span>
+                                @if($invalidReason && $invalidReason !== $resultText)
+                                    <span>{{ $invalidReason }}</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <a class="cup-admin-shot" href="{{ $screenshotUrl }}" data-cup-submission-shot data-shot-title="#{{ $submission->id }} · {{ $submission->team?->name ?? 'Einreichung' }}">
+                            <i aria-hidden="true" class="ph ph-image-square ph-icon"></i> Screenshot
+                        </a>
+                    </div>
+
+                    <div class="cup-admin-ai-row">
+                        <span>Screen: {{ $submission->screen_type ?: 'Unbekannt' }}</span>
+                        <span>KI-Sicherheit: {{ $confidenceLabel }}</span>
+                        <span>Vollständig: {{ $completeLabel }}</span>
+                        <span>Gamertag: {{ $submission->ai_gamertag ?: 'Unbekannt' }}</span>
+                    </div>
+
+                    <details class="cup-admin-correction">
+                        <summary>Punkte korrigieren</summary>
+
+                        <form method="post" action="{{ route('cups.submissions.manual-score', [$cup, $submission]) }}" class="cup-admin-score-form">
+                            @csrf
+                            <label><span>Trophäen</span><input name="bounty_tokens" type="number" min="0" max="4" value="{{ (int) $submission->bounty_tokens }}"></label>
+                            <label><span>Kills</span><input name="kills" type="number" min="0" max="99" value="{{ (int) $submission->kills }}"></label>
+                            <label><span>Punkte</span><input name="points" type="number" min="0" max="999" value="{{ (int) $submission->points }}"></label>
+                            <label class="wide"><span>Notiz</span><input name="review_note" type="text" maxlength="1200" value="{{ $submission->review_note }}" placeholder="Grund oder kurze interne Notiz"></label>
+                            <button class="btn" type="submit">Speichern</button>
+                        </form>
+                    </details>
+
+                    <div class="cup-admin-actions">
+                        <form method="post" action="{{ route('cups.submissions.rescore', [$cup, $submission]) }}">
+                            @csrf
+                            <button class="btn ghost" type="submit">Neu auswerten</button>
+                        </form>
+
+                        <form method="post" action="{{ route('cups.submissions.approve', [$cup, $submission]) }}">
+                            @csrf
+                            <input name="review_note" type="hidden" value="Manuell bestätigt">
+                            <button class="btn ghost" type="submit">Gültig setzen</button>
+                        </form>
+
+                        <form method="post" action="{{ route('cups.submissions.reject', [$cup, $submission]) }}" class="cup-admin-reject-form">
+                            @csrf
+                            <input name="review_note" type="text" maxlength="1200" placeholder="Grund für Disqualifikation">
+                            <button class="btn danger" type="submit">Disqualifizieren</button>
+                        </form>
+                    </div>
+                </article>
+            @empty
+                <div class="cup-submission-empty">
+                    <i aria-hidden="true" class="ph ph-clipboard-text ph-icon"></i>
+                    <strong>Noch keine Einreichungen</strong>
+                    <p>Sobald Teilnehmer Screenshots einreichen, kannst du sie hier prüfen, korrigieren oder neu auswerten.</p>
+                </div>
+            @endforelse
+        </div>
+    </article>
+</section>
+<!-- /081 admin submissions panel -->
+<?php } ?>
+
 
 </div>
 <div class="cup-shot-modal" data-cup-shot-modal hidden>
