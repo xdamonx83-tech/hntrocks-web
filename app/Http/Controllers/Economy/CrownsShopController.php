@@ -8,6 +8,7 @@ use App\Models\CrownInventoryItem;
 use App\Models\CrownShopItem;
 use App\Services\Economy\CrownsService;
 use App\Support\HntTheme;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,21 +23,36 @@ class CrownsShopController extends Controller
 
         $items = CrownShopItem::query()
             ->available()
+            ->withCount('inventoryItems')
             ->orderBy('sort_order')
             ->orderBy('price')
             ->get();
 
-        $ownedItemIds = CrownInventoryItem::query()
+        $inventoryByItemId = CrownInventoryItem::query()
+            ->with('equippedItem')
             ->where('user_id', $user->id)
-            ->pluck('shop_item_id')
+            ->get()
+            ->keyBy('shop_item_id');
+
+        $ownedItemIds = $inventoryByItemId
+            ->keys()
             ->map(fn ($id): int => (int) $id)
             ->all();
+
+        $sidebarData = ReworkFeedSidebar::forViewer($user);
 
         return view($this->themeView('crowns.shop'), [
             'summary' => $crowns->summary($user),
             'items' => $items,
+            'inventoryByItemId' => $inventoryByItemId,
             'ownedItemIds' => $ownedItemIds,
             'nonCashNotice' => (string) config('crowns.non_cash_notice'),
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
         ]);
     }
 

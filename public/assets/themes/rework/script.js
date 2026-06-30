@@ -4828,3 +4828,35 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
     }
   });
 })();
+
+
+/* 200 rework shop category tabs */
+(() => {
+  const tabs = document.querySelector('[data-shop-tabs]');
+  const items = Array.from(document.querySelectorAll('[data-shop-item]'));
+
+  if (!tabs || !items.length) return;
+
+  const links = Array.from(tabs.querySelectorAll('[data-shop-filter]'));
+
+  const applyFilter = (filter) => {
+    links.forEach((link) => {
+      link.classList.toggle('active', link.getAttribute('data-shop-filter') === filter);
+    });
+
+    items.forEach((item) => {
+      const category = item.getAttribute('data-shop-category') || '';
+      const visible = filter === 'all' || category === filter;
+      item.hidden = !visible;
+      item.classList.toggle('is-shop-filter-hidden', !visible);
+    });
+  };
+
+  tabs.addEventListener('click', (event) => {
+    const link = event.target.closest('[data-shop-filter]');
+    if (!link) return;
+
+    event.preventDefault();
+    applyFilter(link.getAttribute('data-shop-filter') || 'all');
+  });
+})();
