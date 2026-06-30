@@ -159,7 +159,7 @@ class CupSubmissionController extends Controller
                 'message' => $exception->getMessage(),
             ]);
 
-            return $this->cupSubmissionError($request, 'Die Einreichung konnte nicht verarbeitet werden. Bitte prüfe das Server-Log und versuche es danach erneut.', status: 500);
+            return $this->cupSubmissionError($request, __('ui.cup_submission_failed_retry_log'), status: 500);
         }
 
         $resultType = match ($submission->status) {
@@ -184,10 +184,10 @@ class CupSubmissionController extends Controller
             'score' => __('ui.cup_submission_score_full', ['points' => $submission->points, 'kills' => $submission->kills, 'tokens' => $submission->bounty_tokens]),
             'summary' => $submission->resultSummary(),
             'details' => [
-                ['label' => 'Punkte', 'value' => (string) $submission->points],
+                ['label' => __('ui.profile_trophy_points'), 'value' => (string) $submission->points],
                 ['label' => 'Kills', 'value' => (string) $submission->kills],
                 ['label' => 'Bounty', 'value' => (string) $submission->bounty_tokens],
-                ['label' => 'Extraktion', 'value' => $submission->extracted ? 'Ja' : 'Nein'],
+                ['label' => __('ui.cup_submission_detail_extraction'), 'value' => $submission->extracted ? __('ui.cup_admin_yes') : __('ui.cup_admin_no')],
                 ['label' => 'Status', 'value' => $submission->statusLabel()],
             ],
         ];

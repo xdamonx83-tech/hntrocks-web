@@ -91,7 +91,7 @@
 >
     <label class="sr-only" for="rework-global-search-input">{{ __('ui.search') }}</label>
     <i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i>
-    <input id="rework-global-search-input" name="q" placeholder="Search" type="search" value="{{ request('q') }}" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-autocomplete="list">
+    <input id="rework-global-search-input" name="q" placeholder="{{ __('ui.rework_search_placeholder_short') }}" type="search" value="{{ request('q') }}" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-autocomplete="list">
     <button aria-label="{{ __('ui.search') }}" type="submit"><i aria-hidden="true" class="ph ph-arrow-right ph-icon"></i></button>
     <div class="rework-search-suggestions" data-rework-global-search-panel hidden>
         <div class="rework-search-suggestions-list" data-rework-global-search-list></div>

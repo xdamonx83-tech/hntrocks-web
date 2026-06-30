@@ -361,7 +361,7 @@
 <a aria-label="{{ __('ui.rework_save_post') }}" href="#"><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></a>
 </div>
 @if($post->ai_user_declared || $post->ai_detected_possible || $post->admin_confirmed_ai)
-<div class="ai-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>KI-Inhalt</div>
+<div class="ai-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>{{ __('ui.rework_ai_content') }}</div>
 @endif
 <div class="metrics">
 <span class="metric"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>{{ __('ui.rework_comment_count', ['count' => $formatCount($commentCount)]) }}</span>

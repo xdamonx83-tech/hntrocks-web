@@ -299,7 +299,7 @@ class HeaderLiveController extends Controller
             $meta = collect([$profile?->platform, $profile?->region])->filter()->implode(' · ');
 
             $push(
-                'Spieler',
+                __('ui.rework_search_result_player'),
                 (string) ($user->name ?: $user->username),
                 trim(($isFriend ? __('ui.header_result_friend') : __('ui.members')) . ($meta ? ' · ' . $meta : '')),
                 route('profile.public', $user),
@@ -317,7 +317,7 @@ class HeaderLiveController extends Controller
             ->get()
             ->each(fn (FeedPost $post) => $push(
                 'Post',
-                'Post von ' . ($post->user?->name ?: $post->user?->username ?: 'HNT Hunter'),
+                __('ui.rework_search_result_post_by', ['name' => $post->user?->name ?: $post->user?->username ?: 'HNT Hunter']),
                 Str::limit($post->excerpt(90), 90),
                 $post->permalink(),
                 $post->user?->avatarUrl(),
@@ -332,8 +332,8 @@ class HeaderLiveController extends Controller
             ->limit(2)
             ->get()
             ->each(fn (FeedComment $comment) => $push(
-                'Kommentar',
-                'Kommentar von ' . ($comment->user?->name ?: $comment->user?->username ?: 'HNT Hunter'),
+                __('ui.rework_search_result_comment'),
+                __('ui.rework_search_result_comment_by', ['name' => $comment->user?->name ?: $comment->user?->username ?: 'HNT Hunter']),
                 Str::limit(trim(strip_tags((string) $comment->body)), 90),
                 $comment->post?->permalink($comment) ?: route('feed.index'),
                 $comment->user?->avatarUrl(),

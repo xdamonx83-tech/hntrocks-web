@@ -59,7 +59,7 @@
 
         $platform = trim((string) $cup->platform);
 
-        return $platform !== '' ? $platform : 'Alle Plattformen';
+        return $platform !== '' ? $platform : __('ui.cup_all_platforms');
     };
 
     $cupBadgeLabel = function ($cup): string {
@@ -67,19 +67,23 @@
         $limit = $cup->participantLimit();
 
         if ($cup->isSoloLeaderboard()) {
-            return $limit ? $teams.'/'.$limit.' Spieler' : $teams.' Spieler';
+            return $limit
+                ? __('ui.rework_cup_players_limited_count', ['count' => $teams, 'limit' => $limit])
+                : __('ui.rework_cup_players_count', ['count' => $teams]);
         }
 
-        return $limit ? $teams.'/'.$limit.' Teams' : $teams.' Teams';
+        return $limit
+            ? __('ui.rework_cup_teams_limited_count', ['count' => $teams, 'limit' => $limit])
+            : __('ui.rework_cup_teams_count', ['count' => $teams]);
     };
 
     $cupStatusLabel = function ($cup): string {
         if ($cup->isRegistrationOpen()) {
-            return 'Anmeldung offen';
+            return __('ui.rework_cup_registration_open');
         }
 
         if ($cup->isSubmissionOpen()) {
-            return 'Aktiv';
+            return __('ui.cup_status_active');
         }
 
         return $cup->statusLabel();
@@ -95,9 +99,9 @@
 
 <section id="cup-filters" aria-label="Cup Filter" class="cups-overview-controls">
     <div class="cups-filter-group">
-        <span>Plattform</span>
-        <div aria-label="Plattformfilter" class="members-tabs cups-filter-tabs" role="tablist">
-            <a @class(['active' => $activePlatform === '']) href="{{ $filterUrl([], ['platform']) }}">Alle Plattformen</a>
+        <span>{{ __('ui.cup_platform_filter') }}</span>
+        <div aria-label="{{ __('ui.cup_platform_filter') }}" class="members-tabs cups-filter-tabs" role="tablist">
+            <a @class(['active' => $activePlatform === '']) href="{{ $filterUrl([], ['platform']) }}">{{ __('ui.cup_all_platforms') }}</a>
             <a @class(['active' => $activePlatform === 'PC']) href="{{ $filterUrl(['platform' => 'PC']) }}">PC</a>
             <a @class(['active' => in_array(strtolower($activePlatform), ['ps', 'ps4', 'ps5', 'playstation', 'playstation4', 'playstation5'], true)]) href="{{ $filterUrl(['platform' => 'ps5']) }}">PS5</a>
             <a @class(['active' => in_array(strtolower($activePlatform), ['xbox', 'xboxseries', 'xboxseriesx', 'xboxseriess', 'xboxseriesxs'], true)]) href="{{ $filterUrl(['platform' => 'Xbox']) }}">Xbox</a>
@@ -108,7 +112,7 @@
         <span>Status</span>
         <div aria-label="Statusfilter" class="members-tabs cups-status-tabs" role="tablist">
             <a @class(['active' => $activeStatus === '']) href="{{ $filterUrl([], ['status']) }}">Alle</a>
-            <a @class(['active' => $activeStatus === 'active']) href="{{ $filterUrl(['status' => 'active']) }}">Aktiv</a>
+            <a @class(['active' => $activeStatus === 'active']) href="{{ $filterUrl(['status' => 'active']) }}">{{ __('ui.cup_status_active') }}</a>
             <a @class(['active' => $activeStatus === 'planned']) href="{{ $filterUrl(['status' => 'planned']) }}">Geplant</a>
             <a @class(['active' => $activeStatus === 'finished']) href="{{ $filterUrl(['status' => 'finished']) }}">Beendet</a>
         </div>

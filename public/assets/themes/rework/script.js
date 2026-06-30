@@ -3086,7 +3086,7 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
 
   const submitPostUpdate = async (trigger, nextBody) => {
     const url = trigger.getAttribute('data-update-url');
-    if (!url) throw new Error('Update-URL fehlt.');
+    if (!url) throw new Error(reworkLabel('postUpdateUrlMissing', 'Update URL is missing.'));
 
     const params = new URLSearchParams();
     params.set('_method', 'PUT');
@@ -3108,7 +3108,7 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
     });
 
     if (!response.ok) {
-      throw new Error('Post konnte nicht gespeichert werden.');
+      throw new Error(reworkLabel('postEditSaveFailed', 'Post could not be saved.'));
     }
   };
 
@@ -3121,14 +3121,14 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
       closeReworkDropdowns();
 
       const currentBody = editTrigger.getAttribute('data-post-body') || '';
-      const nextBody = window.prompt('Post bearbeiten', currentBody);
+      const nextBody = window.prompt(reworkLabel('postEditPrompt', 'Edit post'), currentBody);
 
       if (nextBody === null) return;
 
       const trimmedBody = nextBody.trim();
 
       if (!trimmedBody) {
-        window.alert('Der Post darf nicht leer sein.');
+        window.alert(reworkLabel('postBodyEmpty', 'The post must not be empty.'));
         return;
       }
 
@@ -3136,7 +3136,7 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
         await submitPostUpdate(editTrigger, trimmedBody);
         window.location.reload();
       } catch (error) {
-        window.alert(error?.message || 'Post konnte nicht gespeichert werden.');
+        window.alert(error?.message || reworkLabel('postEditSaveFailed', 'Post could not be saved.'));
       }
 
       return;
@@ -3153,7 +3153,7 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
       const form = formId ? document.getElementById(formId) : null;
 
       if (!form) return;
-      if (!window.confirm('Diesen Post wirklich löschen?')) return;
+      if (!window.confirm(reworkLabel('postDeleteConfirm', 'Really delete this post?'))) return;
 
       if (typeof form.requestSubmit === 'function') {
         form.requestSubmit();
@@ -3303,9 +3303,9 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
         <div aria-hidden="true" class="post-composer-grip"></div>
         <header class="post-composer-header">
           <div class="post-composer-titleblock">
-            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>BESTÄTIGUNG</span>
-            <h2 id="rework-post-delete-title">Post löschen?</h2>
-            <p>Der Post wird dauerhaft entfernt. Diese Aktion kann nicht rückgängig gemacht werden.</p>
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>${reworkLabel('confirm', 'Confirmation')}</span>
+            <h2 id="rework-post-delete-title">${reworkLabel('postDeleteTitle', 'Delete post?')}</h2>
+            <p>${reworkLabel('postDeleteText', 'The post will be permanently removed. This action cannot be undone.')}</p>
           </div>
           <button aria-label="${reworkLabel('postDeleteClose', 'Close delete dialog')}" class="post-composer-close" data-rework-post-delete-close type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
         </header>
@@ -3313,14 +3313,14 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
         <div class="post-composer-body rework-post-delete-body">
           <div class="settings-section-head">
             <span>HNT Feed</span>
-            <h3>Diesen Beitrag wirklich löschen?</h3>
-            <p>Alle zugehörigen Inhalte dieses Posts werden aus dem Feed entfernt.</p>
+            <h3>${reworkLabel('postDeleteQuestion', 'Really delete this post?')}</h3>
+            <p>${reworkLabel('postDeleteContentText', 'All related content for this post will be removed from the feed.')}</p>
           </div>
         </div>
 
         <footer class="post-composer-footer">
-          <a class="composer-cancel" data-rework-post-delete-close href="#">Nein, behalten</a>
-          <a class="composer-submit rework-post-delete-confirm" data-rework-post-delete-confirm href="#">Ja, löschen</a>
+          <a class="composer-cancel" data-rework-post-delete-close href="#">${reworkLabel('postDeleteCancel', 'No, keep it')}</a>
+          <a class="composer-submit rework-post-delete-confirm" data-rework-post-delete-confirm href="#">${reworkLabel('postDeleteConfirmButton', 'Yes, delete')}</a>
         </footer>
       </section>
     `;
@@ -3541,12 +3541,12 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
 
       if (!response.ok || payload.ok === false) {
         const firstError = payload?.errors ? Object.values(payload.errors).flat().filter(Boolean)[0] : null;
-        throw new Error(firstError || payload?.message || 'Post konnte nicht gespeichert werden.');
+        throw new Error(firstError || payload?.message || reworkLabel('postEditSaveFailed', 'Post could not be saved.'));
       }
 
       window.location.reload();
     } catch (error) {
-      showEditError(error?.message || 'Post konnte nicht gespeichert werden.');
+      showEditError(error?.message || reworkLabel('postEditSaveFailed', 'Post could not be saved.'));
       save.textContent = reworkLabel('save', 'Save');
       save.setAttribute('aria-disabled', 'false');
     }

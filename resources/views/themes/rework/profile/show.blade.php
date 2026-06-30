@@ -878,16 +878,16 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 @endphp
 <div class="profile-tab-panel" data-profile-tab-panel="info">
 <section class="card profile-info-panel">
-<h2>Über {{ $infoName }}</h2>
+<h2>{{ __('ui.profile_about_of', ['name' => $infoName]) }}</h2>
 <p>{{ $infoAboutText }}</p>
 <div class="profile-info-grid">
 <div><strong>{{ $infoFormatCount($infoLevel) }}</strong><span>Level</span></div>
 <div><strong>{{ $infoFormatCount($infoXpTotal) }}</strong><span>XP</span></div>
-<div><strong>{{ $infoPlatform }}</strong><span>Plattform</span></div>
+<div><strong>{{ $infoPlatform }}</strong><span>{{ __('ui.platform') }}</span></div>
 <div><strong>{{ $infoRegion }}</strong><span>Region</span></div>
 <div><strong>{{ $infoLanguage }}</strong><span>{{ __('ui.language') }}</span></div>
-<div><strong>{{ $infoPlaystyle }}</strong><span>Spielstil</span></div>
-<div><strong>{{ $infoHuntRole }}</strong><span>Rolle</span></div>
+<div><strong>{{ $infoPlaystyle }}</strong><span>{{ __('ui.playstyle') }}</span></div>
+<div><strong>{{ $infoHuntRole }}</strong><span>{{ __('ui.profile_role') }}</span></div>
 <div><strong>{{ $infoLfgLabel }}</strong><span>{{ __('ui.search') }}</span></div>
 @if($infoDiscord)
 <div><strong>{{ $infoDiscord }}</strong><span>Discord</span></div>
