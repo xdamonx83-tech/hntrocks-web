@@ -89,13 +89,13 @@
     role="search"
     autocomplete="off"
 >
-    <label class="sr-only" for="rework-global-search-input">Suche</label>
+    <label class="sr-only" for="rework-global-search-input">{{ __('ui.search') }}</label>
     <i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i>
-    <input id="rework-global-search-input" name="q" placeholder="Search" type="search" value="{{ request('q') }}" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-autocomplete="list">
-    <button aria-label="Suchen" type="submit"><i aria-hidden="true" class="ph ph-arrow-right ph-icon"></i></button>
+    <input id="rework-global-search-input" name="q" placeholder="{{ __('ui.rework_search_placeholder_short') }}" type="search" value="{{ request('q') }}" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-autocomplete="list">
+    <button aria-label="{{ __('ui.search') }}" type="submit"><i aria-hidden="true" class="ph ph-arrow-right ph-icon"></i></button>
     <div class="rework-search-suggestions" data-rework-global-search-panel hidden>
         <div class="rework-search-suggestions-list" data-rework-global-search-list></div>
-        <a class="rework-search-suggestions-footer" data-rework-global-search-all href="{{ route('search.index') }}">Alle Ergebnisse anzeigen</a>
+        <a class="rework-search-suggestions-footer" data-rework-global-search-all href="{{ route('search.index') }}">{{ __('ui.rework_search_all_results') }}</a>
     </div>
 </form>
 
@@ -174,7 +174,7 @@
         </div>
 
         <div class="action-menu user-menu">
-            <a aria-expanded="false" aria-label="User menu" class="avatar-wrap" data-dropdown-toggle="" href="#">
+            <a aria-expanded="false" aria-label="{{ __('ui.rework_topbar_user_menu') }}" class="avatar-wrap" data-dropdown-toggle="" href="#">
                 <img alt="{{ $headerName }}" class="header-avatar" data-rework-profile-avatar src="{{ $headerAvatar }}"/>
             </a>
             <div class="top-dropdown user-dropdown" data-dropdown-panel="">

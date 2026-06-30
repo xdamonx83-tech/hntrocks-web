@@ -60,7 +60,7 @@
             'active' => $reworkSidebarIsActive(['cups.*', 'hall-of-fame.*', 'loadout-challenges.*']),
         ],
         [
-            'label' => 'Profil',
+            'label' => __('ui.profile'),
             'icon' => 'ph ph-user',
             'url' => $reworkSidebarUrl('profile.show'),
             'active' => $reworkSidebarIsActive(['profile.*']),
@@ -72,9 +72,9 @@
 
 <aside class="sidebar">
     <div class="logo"><strong>HNT.</strong><span>ROCKS</span></div>
-    <button aria-expanded="false" aria-label="Sidebar erweitern" class="sidebar-toggle" data-sidebar-toggle="" type="button"><span></span><span></span></button>
+    <button aria-expanded="false" aria-label="{{ __('ui.rework_nav_expand_sidebar') }}" class="sidebar-toggle" data-sidebar-toggle="" type="button"><span></span><span></span></button>
 
-    <nav aria-label="Hauptnavigation" class="nav">
+    <nav aria-label="{{ __('ui.rework_nav_main_aria') }}" class="nav">
         @foreach($reworkSidebarItems as $item)
             <a @class([
                     $item['class'] ?? null,
@@ -90,8 +90,8 @@
 
     <div class="nav-bottom">
         <div class="nav-divider"></div>
-        <a data-settings-modal-open="" href="{{ $reworkSidebarSettingsUrl }}"><i aria-hidden="true" class="ph ph-gear-six ph-icon"></i><span>Einstellungen</span></a>
-        <a href="#" onclick="event.preventDefault(); this.closest('.app')?.querySelector('[data-rework-sidebar-logout]')?.submit();"><i aria-hidden="true" class="ph ph-sign-out ph-icon"></i><span>Logout</span></a>
+        <a data-settings-modal-open="" href="{{ $reworkSidebarSettingsUrl }}"><i aria-hidden="true" class="ph ph-gear-six ph-icon"></i><span>{{ __('ui.settings') }}</span></a>
+        <a href="#" onclick="event.preventDefault(); this.closest('.app')?.querySelector('[data-rework-sidebar-logout]')?.submit();"><i aria-hidden="true" class="ph ph-sign-out ph-icon"></i><span>{{ __('ui.logout') }}</span></a>
         <form action="{{ route('logout') }}" data-rework-sidebar-logout method="post" hidden>
             @csrf
         </form>

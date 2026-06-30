@@ -13,7 +13,7 @@
     $reworkDeletionRequest = $reworkDeletionRequest ?? null;
 @endphp
 
-<div aria-hidden="{{ $reworkSettingsShouldOpen ? 'false' : 'true' }}" class="modal-backdrop settings-backdrop @if($reworkSettingsShouldOpen) is-open @endif" data-settings-modal="" data-settings-label-saved="{{ app()->getLocale() === 'en' ? 'Saved.' : 'Gespeichert.' }}" data-settings-label-saving="{{ app()->getLocale() === 'en' ? 'Saving...' : 'Speichert...' }}" data-settings-label-save-failed="{{ app()->getLocale() === 'en' ? 'Settings could not be saved.' : 'Einstellungen konnten nicht gespeichert werden.' }}" data-settings-label-validation="{{ __('ui.profile_validation_error') }}" @if($reworkSettingsShouldOpen) data-settings-modal-autopen="1" @endif>
+<div aria-hidden="{{ $reworkSettingsShouldOpen ? 'false' : 'true' }}" class="modal-backdrop settings-backdrop @if($reworkSettingsShouldOpen) is-open @endif" data-settings-modal="" data-settings-label-saved="{{ __('ui.rework_saved') }}" data-settings-label-saving="{{ __('ui.rework_saving') }}" data-settings-label-save-failed="{{ __('ui.rework_settings_save_failed') }}" data-settings-label-validation="{{ __('ui.profile_validation_error') }}" @if($reworkSettingsShouldOpen) data-settings-modal-autopen="1" @endif>
 <section aria-labelledby="settings-modal-title" aria-modal="true" class="settings-modal settings-has-footer-submit" role="dialog">
 <header class="settings-modal-header">
 <div>

@@ -9,7 +9,7 @@
     }
 
     $messageAvatar = $messageUser?->avatarUrl() ?: asset('assets/socialite/images/avatars/avatar-3.jpg');
-    $messageName = $messageUser?->name ?: ($messageUser?->username ?: 'Unbekannter Spieler');
+    $messageName = $messageUser?->name ?: ($messageUser?->username ?: __('ui.rework_unknown_player'));
     $isOwnMessage = auth()->check() && (int) ($messageUser?->id ?? 0) === (int) auth()->id();
 @endphp
 
