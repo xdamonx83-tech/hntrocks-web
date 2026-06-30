@@ -25,11 +25,13 @@
     $profileLfgCount = (int) (($profile?->is_lfg_available ?? false) ? 1 : 0);
     $profileMomentsCount = (int) ($profileUser?->moments_count ?? 0);
     $profileBadgesCount = (int) ($profileUser?->badges_count ?? 0);
-    /* HNT static profile real level vars v1 */
-    $profileLevel = max(1, (int) ($profileUser?->level ?? 1));
+    /* HNT static profile real level vars v2 */
     $profileXpTotal = max(0, (int) ($profileUser?->xp_total ?? 0));
-    $profileNextLevelXp = max(250, $profileLevel * 250);
-    $profileLevelProgress = min(100, (int) round(($profileXpTotal % $profileNextLevelXp) / $profileNextLevelXp * 100));
+    $profileGamification = app(\App\Services\GamificationService::class);
+    $profileLevel = $profileGamification->levelForXp($profileXpTotal);
+    $profileCurrentLevelXp = $profileGamification->xpForCurrentLevel($profileLevel);
+    $profileNextLevelXp = $profileGamification->xpForNextLevel($profileLevel);
+    $profileLevelProgress = (int) min(100, max(0, round((($profileXpTotal - $profileCurrentLevelXp) / max(1, $profileNextLevelXp - $profileCurrentLevelXp)) * 100)));
     /* HNT static profile message button vars v1 */
     $profileMessageEnabled = $profileUser
         && auth()->check()
