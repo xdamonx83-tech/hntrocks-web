@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Friendship;
 use App\Models\User;
 use App\Support\HntTheme;
+use App\Support\ReworkFeedSidebar;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MembersController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:80'],
@@ -36,6 +38,9 @@ class MembersController extends Controller
                 'activeTeams',
                 'feedPosts as visible_feed_posts_count' => function ($postQuery): void {
                     $postQuery->where('status', 'published')->where('visibility', '!=', 'private');
+                },
+                'moments as visible_moments_count' => function ($momentQuery): void {
+                    $momentQuery->where('status', 'published')->where('visibility', '!=', 'private');
                 },
             ])
             ->whereHas('profile', function ($profileQuery) use ($request): void {
@@ -89,9 +94,11 @@ class MembersController extends Controller
             $query->whereIn('users.id', $relationshipIds->isNotEmpty() ? $relationshipIds->all() : [-1]);
         }
 
+        $membersPerPage = 12;
+
         $members = $query
             ->latest('users.created_at')
-            ->paginate(12)
+            ->paginate($membersPerPage)
             ->withQueryString();
 
         $memberIds = $members->getCollection()->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -134,8 +141,33 @@ class MembersController extends Controller
             'pending' => Friendship::query()->forUser($viewer)->where('status', Friendship::STATUS_PENDING)->count(),
         ];
 
+        if ($request->boolean('fragment')) {
+            return response()->json([
+                'html' => view(HntTheme::resolve('members.partials.member-items'), [
+                    'members' => $members,
+                    'filters' => $filters,
+                    'filterOptions' => $filterOptions,
+                    'friendshipMap' => $friendshipMap,
+                    'friendCounts' => $friendCounts,
+                    'relationshipCounts' => $relationshipCounts,
+                ])->render(),
+                'nextPageUrl' => $members->nextPageUrl(),
+                'hasMorePages' => $members->hasMorePages(),
+            ]);
+        }
+
+        $sidebarData = ReworkFeedSidebar::forViewer($viewer);
+
         return view(HntTheme::resolve('members.index'), [
             'members' => $members,
+            'hasMoreMembers' => $members->hasMorePages(),
+            'nextMembersPageUrl' => $members->nextPageUrl(),
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
             'filters' => $filters,
             'filterOptions' => $filterOptions,
             'friendshipMap' => $friendshipMap,

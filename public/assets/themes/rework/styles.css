@@ -17381,3 +17381,98 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .members-reset {
   font-size: 12px !important;
 }
+
+
+/* 189 members real cards functional CSS */
+.member-cover {
+  display: block;
+}
+
+.member-card-topline strong a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.member-actions form {
+  display: block;
+  min-width: 0;
+  margin: 0;
+}
+
+.member-actions form .btn {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+}
+
+.member-meta-grid span.is-active {
+  color: rgba(246, 240, 228, .86);
+}
+
+.members-pager {
+  margin-top: 22px;
+}
+
+
+/* 191 members shell fixes */
+.members-page .members-pager,
+.members-page nav[aria-label*="Page"],
+.members-page nav[aria-label*="Pagination"] {
+  display: none !important;
+}
+
+.members-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0 10px;
+}
+
+.members-load-more {
+  min-width: 170px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 22px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.08);
+  color: #f6f0e4;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.members-load-more:hover {
+  background: rgba(255,255,255,.11);
+}
+
+
+/* 193 members ajax load more button reset */
+.members-load-more {
+  border: 0;
+  cursor: pointer;
+}
+
+.members-load-more:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+
+/* 194 members real filter modal */
+.members-search {
+  border: 0;
+}
+
+.members-filter-form {
+  margin: 0;
+}
+
+.members-filter-footer button.btn {
+  border: 0;
+  cursor: pointer;
+}
+
+.members-filter-footer button.btn:hover {
+  background: rgba(255,255,255,.11);
+}

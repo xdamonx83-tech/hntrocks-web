@@ -4512,4 +4512,17 @@ return [
     'rework_cup_delete' => 'Delete cup',
     'rework_cup_delete_confirm' => 'Really delete or archive this cup?',
 
+    'rework_members_page_title' => 'Members · HNT.rocks',
+    'rework_members_eyebrow' => 'HNT Community',
+    'rework_members_title' => 'Members',
+    'rework_members_filters' => 'Filters',
+    'rework_members_filter_aria' => 'Members filter',
+    'rework_members_view_aria' => 'Member view',
+    'rework_members_all' => 'All',
+    'rework_members_search_aria' => 'Search members',
+
+    'members_all_platforms' => 'All platforms',
+    'members_all_regions' => 'All regions',
+    'members_all_languages' => 'All languages',
+
 ];

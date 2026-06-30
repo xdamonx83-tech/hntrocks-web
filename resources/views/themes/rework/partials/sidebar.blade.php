@@ -23,6 +23,12 @@
             'active' => $reworkSidebarIsActive(['feed.*']),
         ],
         [
+            'label' => __('ui.members'),
+            'icon' => 'ph ph-users-three',
+            'url' => $reworkSidebarUrl('members.index'),
+            'active' => $reworkSidebarIsActive(['members.*']),
+        ],
+        [
             'label' => 'Games',
             'icon' => 'ph ph-game-controller',
             'url' => '#',

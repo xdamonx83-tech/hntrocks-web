@@ -4772,3 +4772,59 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
   });
 })();
 /* /081: Cup submissions route tab preference */
+
+
+/* 193 rework members AJAX load more */
+(() => {
+  if (window.__hntReworkMembersLoadMoreReady) return;
+  window.__hntReworkMembersLoadMoreReady = true;
+
+  const stream = document.querySelector('[data-members-stream]');
+  const button = document.querySelector('[data-members-load-more]');
+
+  if (!stream || !button) return;
+
+  button.addEventListener('click', async () => {
+    const nextUrl = button.getAttribute('data-next-url');
+    if (!nextUrl || button.disabled) return;
+
+    const label = button.querySelector('[data-members-load-more-label]');
+    const loadingLabel = button.getAttribute('data-loading-label') || 'Loading...';
+    const readyLabel = button.getAttribute('data-ready-label') || 'Load more';
+    const errorLabel = button.getAttribute('data-error-label') || 'Try again';
+
+    button.disabled = true;
+    if (label) label.textContent = loadingLabel;
+
+    try {
+      const url = new URL(nextUrl, window.location.href);
+      url.searchParams.set('fragment', '1');
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+      });
+
+      if (!response.ok) throw new Error('Members load more failed');
+
+      const payload = await response.json();
+      const template = document.createElement('template');
+      template.innerHTML = payload.html || '';
+      stream.append(...template.content.childNodes);
+
+      if (payload.hasMorePages && payload.nextPageUrl) {
+        button.setAttribute('data-next-url', payload.nextPageUrl);
+        button.disabled = false;
+        if (label) label.textContent = readyLabel;
+      } else {
+        button.closest('[data-members-load-more-wrap]')?.remove();
+      }
+    } catch (error) {
+      button.disabled = false;
+      if (label) label.textContent = errorLabel;
+    }
+  });
+})();

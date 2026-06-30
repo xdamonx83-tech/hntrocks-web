@@ -4512,4 +4512,17 @@ return [
     'rework_cup_delete' => 'Cup löschen',
     'rework_cup_delete_confirm' => 'Diesen Cup wirklich löschen bzw. archivieren?',
 
+    'rework_members_page_title' => 'Members · HNT.rocks',
+    'rework_members_eyebrow' => 'HNT Community',
+    'rework_members_title' => 'Members',
+    'rework_members_filters' => 'Filters',
+    'rework_members_filter_aria' => 'Members Filter',
+    'rework_members_view_aria' => 'Memberansicht',
+    'rework_members_all' => 'Alle',
+    'rework_members_search_aria' => 'Members durchsuchen',
+
+    'members_all_platforms' => 'Alle Plattformen',
+    'members_all_regions' => 'Alle Regionen',
+    'members_all_languages' => 'Alle Sprachen',
+
 ];

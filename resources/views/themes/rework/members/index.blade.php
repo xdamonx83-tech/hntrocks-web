@@ -1,207 +1,56 @@
 @extends('themes.rework.layouts.app')
 
-@section('title', 'HNT.rocks Members')
+@section('title', __('ui.rework_members_page_title'))
 @section('body_class', 'members-page')
 @section('left_col_class', 'members-left-col')
 
 @section('content')
 <section class="members-head">
     <div>
-        <span class="members-eyebrow">HNT Community</span>
-        <h1>Members</h1>
+        <span class="members-eyebrow">{{ __('ui.rework_members_eyebrow') }}</span>
+        <h1>{{ __('ui.rework_members_title') }}</h1>
     </div>
     <a class="members-filter-btn" data-members-filter-open href="#">
         <i aria-hidden="true" class="ph ph-funnel-simple ph-icon"></i>
-        Filters
+        {{ __('ui.rework_members_filters') }}
     </a>
 </section>
 
-<section aria-label="Members Filter" class="members-controls">
-    <div aria-label="Memberansicht" class="members-tabs" role="tablist">
-        <a class="active" href="#">Alle</a>
-        <a href="#">Freunde</a>
+<section aria-label="{{ __('ui.rework_members_filter_aria') }}" class="members-controls">
+    <div aria-label="{{ __('ui.rework_members_view_aria') }}" class="members-tabs" role="tablist">
+        <a class="{{ ($filters['relationship'] ?? 'all') === 'all' ? 'active' : '' }}" href="{{ route('members.index', array_merge(request()->except(['relationship', 'page']), ['relationship' => 'all'])) }}">{{ __('ui.rework_members_all') }}</a>
+        <a class="{{ ($filters['relationship'] ?? '') === 'friends' ? 'active' : '' }}" href="{{ route('members.index', array_merge(request()->except(['relationship', 'page']), ['relationship' => 'friends'])) }}">{{ __('ui.friends') }}{{ $relationshipCounts['friends'] ? ' ('.$relationshipCounts['friends'].')' : '' }}</a>
     </div>
-    <label aria-label="Members durchsuchen" class="members-search">
+    <form aria-label="{{ __('ui.rework_members_search_aria') }}" class="members-search" method="get" action="{{ route('members.index') }}">
+        @foreach(['relationship', 'platform', 'playstyle', 'region', 'language', 'lfg'] as $membersSearchHiddenKey)
+            @if(filled($filters[$membersSearchHiddenKey] ?? null))
+                <input type="hidden" name="{{ $membersSearchHiddenKey }}" value="{{ $filters[$membersSearchHiddenKey] }}">
+            @endif
+        @endforeach
         <i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i>
-        <input placeholder="Search" type="text"/>
-    </label>
+        <input name="q" placeholder="{{ __('ui.search') }}" type="search" value="{{ $filters['q'] ?? '' }}"/>
+    </form>
 </section>
 
-<section aria-label="Members" class="members-grid">
-    <article class="member-card member-card-featured">
-        <div class="member-cover"><img alt="" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/></div>
-        <div class="member-card-body">
-            <div class="member-card-topline">
-                <div class="member-avatar-wrap">
-                    <img alt="Edward Evans" src="{{ \App\Support\HntTheme::asset('images/profile-avatar-krispie.png', 'rework') }}"/>
-                    <span><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/></span>
-                </div>
-                <div><strong>Edward Evans</strong><small>Level 2</small></div>
-            </div>
-            <p>Noch keine Kurzbeschreibung.</p>
-            <div class="member-mini-stats">
-                <span><b>12</b><small>Posts</small></span>
-                <span><b>7</b><small>Freunde</small></span>
-                <span><b>4</b><small>Moments</small></span>
-            </div>
-            <div class="member-meta-grid">
-                <span>Plattform offen</span>
-                <span>Spielstil offen</span>
-                <span>Region offen</span>
-                <span>LFG offen</span>
-            </div>
-            <div class="member-actions">
-                <a class="btn" href="#">Freund hinzufügen</a>
-                <a class="btn light" href="#">Nachricht</a>
-            </div>
-        </div>
-    </article>
-
-    <article class="member-card">
-        <div class="member-cover"><img alt="" src="{{ \App\Support\HntTheme::asset('images/high-2.png', 'rework') }}"/></div>
-        <div class="member-card-body">
-            <div class="member-card-topline">
-                <div class="member-avatar-wrap">
-                    <img alt="Ted Stinson" src="{{ \App\Support\HntTheme::asset('images/sug-1.png', 'rework') }}"/>
-                    <span><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/></span>
-                </div>
-                <div><strong>Ted Stinson</strong><small>Level 6</small></div>
-            </div>
-            <p>Spielt gern taktisch, ruhig und mit klarer Ansage.</p>
-            <div class="member-mini-stats">
-                <span><b>31</b><small>Posts</small></span>
-                <span><b>18</b><small>Freunde</small></span>
-                <span><b>9</b><small>Moments</small></span>
-            </div>
-            <div class="member-meta-grid">
-                <span>Xbox</span>
-                <span>Locker</span>
-                <span>EU</span>
-                <span>LFG offen</span>
-            </div>
-            <div class="member-actions">
-                <a class="btn" href="#">Freund hinzufügen</a>
-                <a class="btn light" href="#">Nachricht</a>
-            </div>
-        </div>
-    </article>
-
-    <article class="member-card">
-        <div class="member-cover"><img alt="" src="{{ \App\Support\HntTheme::asset('images/high-3.png', 'rework') }}"/></div>
-        <div class="member-card-body">
-            <div class="member-card-topline">
-                <div class="member-avatar-wrap">
-                    <img alt="Lily Aldrian" src="{{ \App\Support\HntTheme::asset('images/sug-2.png', 'rework') }}"/>
-                    <span><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/></span>
-                </div>
-                <div><strong>Lily Aldrian</strong><small>Level 4</small></div>
-            </div>
-            <p>Community Runs, Loadout-Ideen und schnelle Duo-Runden.</p>
-            <div class="member-mini-stats">
-                <span><b>18</b><small>Posts</small></span>
-                <span><b>11</b><small>Freunde</small></span>
-                <span><b>6</b><small>Moments</small></span>
-            </div>
-            <div class="member-meta-grid">
-                <span>PC</span>
-                <span>Fokus</span>
-                <span>EU</span>
-                <span>LFG offen</span>
-            </div>
-            <div class="member-actions">
-                <a class="btn" href="#">Freund hinzufügen</a>
-                <a class="btn light" href="#">Nachricht</a>
-            </div>
-        </div>
-    </article>
-
-    <article class="member-card">
-        <div class="member-cover"><img alt="" src="{{ \App\Support\HntTheme::asset('images/post-cover.png', 'rework') }}"/></div>
-        <div class="member-card-body">
-            <div class="member-card-topline">
-                <div class="member-avatar-wrap">
-                    <img alt="MKBHD" src="{{ \App\Support\HntTheme::asset('images/sug-3.png', 'rework') }}"/>
-                    <span><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/></span>
-                </div>
-                <div><strong>MKBHD</strong><small>Level 9</small></div>
-            </div>
-            <p>Testet Loadouts und sucht meist entspannte Abendrunden.</p>
-            <div class="member-mini-stats">
-                <span><b>44</b><small>Posts</small></span>
-                <span><b>22</b><small>Freunde</small></span>
-                <span><b>14</b><small>Moments</small></span>
-            </div>
-            <div class="member-meta-grid">
-                <span>PS5</span>
-                <span>Push</span>
-                <span>EU</span>
-                <span>LFG offen</span>
-            </div>
-            <div class="member-actions">
-                <a class="btn" href="#">Freund hinzufügen</a>
-                <a class="btn light" href="#">Nachricht</a>
-            </div>
-        </div>
-    </article>
-
-    <article class="member-card">
-        <div class="member-cover"><img alt="" src="{{ \App\Support\HntTheme::asset('images/high-1.png', 'rework') }}"/></div>
-        <div class="member-card-body">
-            <div class="member-card-topline">
-                <div class="member-avatar-wrap">
-                    <img alt="BigDaddy" src="{{ \App\Support\HntTheme::asset('images/high-1.png', 'rework') }}"/>
-                    <span><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/></span>
-                </div>
-                <div><strong>BigDaddy</strong><small>Level 12</small></div>
-            </div>
-            <p>Schießt lieber kontrolliert und spielt meistens Trios.</p>
-            <div class="member-mini-stats">
-                <span><b>27</b><small>Posts</small></span>
-                <span><b>15</b><small>Freunde</small></span>
-                <span><b>5</b><small>Moments</small></span>
-            </div>
-            <div class="member-meta-grid">
-                <span>Xbox</span>
-                <span>Taktisch</span>
-                <span>EU</span>
-                <span>LFG offen</span>
-            </div>
-            <div class="member-actions">
-                <a class="btn" href="#">Freund hinzufügen</a>
-                <a class="btn light" href="#">Nachricht</a>
-            </div>
-        </div>
-    </article>
-
-    <article class="member-card">
-        <div class="member-cover"><img alt="" src="{{ \App\Support\HntTheme::asset('images/high-2.png', 'rework') }}"/></div>
-        <div class="member-card-body">
-            <div class="member-card-topline">
-                <div class="member-avatar-wrap">
-                    <img alt="NoobPlayer69" src="{{ \App\Support\HntTheme::asset('images/high-2.png', 'rework') }}"/>
-                    <span><img alt="" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/></span>
-                </div>
-                <div><strong>NoobPlayer69</strong><small>Level 3</small></div>
-            </div>
-            <p>Neu dabei, aber motiviert für entspannte Community-Runs.</p>
-            <div class="member-mini-stats">
-                <span><b>8</b><small>Posts</small></span>
-                <span><b>5</b><small>Freunde</small></span>
-                <span><b>2</b><small>Moments</small></span>
-            </div>
-            <div class="member-meta-grid">
-                <span>Offen</span>
-                <span>Locker</span>
-                <span>EU</span>
-                <span>LFG offen</span>
-            </div>
-            <div class="member-actions">
-                <a class="btn" href="#">Freund hinzufügen</a>
-                <a class="btn light" href="#">Nachricht</a>
-            </div>
-        </div>
-    </article>
+<section aria-label="{{ __('ui.rework_members_title') }}" class="members-grid" data-members-stream>
+    @include('themes.rework.members.partials.member-items')
 </section>
+
+@if ($hasMoreMembers && $nextMembersPageUrl)
+    <div class="members-load-more-wrap" data-members-load-more-wrap>
+        <button
+            class="members-load-more"
+            type="button"
+            data-members-load-more
+            data-next-url="{{ $nextMembersPageUrl }}"
+            data-loading-label="{{ __('ui.rework_loading') }}"
+            data-ready-label="{{ __('ui.notifications_load_more') }}"
+            data-error-label="{{ __('ui.rework_try_again') }}"
+        >
+            <span data-members-load-more-label>{{ __('ui.notifications_load_more') }}</span>
+        </button>
+    </div>
+@endif
 @endsection
 
 @push('rework-modals')
@@ -209,58 +58,75 @@
     <section aria-labelledby="members-filter-title" aria-modal="true" class="members-filter-modal" role="dialog">
         <header class="members-filter-head">
             <div>
-                <span>Members</span>
-                <h2 id="members-filter-title">Filter</h2>
+                <span>{{ __('ui.rework_members_title') }}</span>
+                <h2 id="members-filter-title">{{ __('ui.rework_members_filters') }}</h2>
             </div>
-            <button aria-label="Filter schließen" data-members-filter-close type="button">
+            <button aria-label="{{ __('ui.close') }}" data-members-filter-close type="button">
                 <i aria-hidden="true" class="ph ph-x ph-icon"></i>
             </button>
         </header>
-        <div class="members-filter-grid">
-            <label class="members-field">
-                <span>Plattform</span>
-                <select>
-                    <option>Alle Plattformen</option>
-                    <option>PC</option>
-                    <option>Xbox</option>
-                    <option>PlayStation</option>
-                </select>
-            </label>
-            <label class="members-field">
-                <span>Spielstil</span>
-                <select>
-                    <option>Alle Spielstile</option>
-                    <option>Locker</option>
-                    <option>Taktisch</option>
-                    <option>Push</option>
-                </select>
-            </label>
-            <label class="members-field">
-                <span>Region</span>
-                <select>
-                    <option>Alle Regionen</option>
-                    <option>EU</option>
-                    <option>US</option>
-                </select>
-            </label>
-            <label class="members-field">
-                <span>Sprache</span>
-                <select>
-                    <option>Alle Sprachen</option>
-                    <option>Deutsch</option>
-                    <option>Englisch</option>
-                </select>
-            </label>
-            <label class="members-check">
-                <input type="checkbox"/>
-                <span></span>
-                <strong>Nur LFG</strong>
-            </label>
-        </div>
-        <footer class="members-filter-footer">
-            <a class="btn" href="#">Suchen</a>
-            <a class="members-reset" href="#">Zurücksetzen</a>
-        </footer>
+
+        <form class="members-filter-form" method="get" action="{{ route('members.index') }}">
+            @if(filled($filters['q'] ?? null))
+                <input type="hidden" name="q" value="{{ $filters['q'] }}">
+            @endif
+            @if(filled($filters['relationship'] ?? null) && ($filters['relationship'] ?? 'all') !== 'all')
+                <input type="hidden" name="relationship" value="{{ $filters['relationship'] }}">
+            @endif
+
+            <div class="members-filter-grid">
+                <label class="members-field">
+                    <span>{{ __('ui.platform') }}</span>
+                    <select name="platform">
+                        <option value="">{{ __('ui.members_all_platforms') }}</option>
+                        @foreach(($filterOptions['platforms'] ?? []) as $option)
+                            <option value="{{ $option }}" @selected(($filters['platform'] ?? '') === $option)>{{ $option }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="members-field">
+                    <span>{{ __('ui.playstyle') }}</span>
+                    <select name="playstyle">
+                        <option value="">{{ __('ui.members_all_playstyles') }}</option>
+                        @foreach(($filterOptions['playstyles'] ?? []) as $option)
+                            <option value="{{ $option }}" @selected(($filters['playstyle'] ?? '') === $option)>{{ $option }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="members-field">
+                    <span>{{ __('ui.region') }}</span>
+                    <select name="region">
+                        <option value="">{{ __('ui.members_all_regions') }}</option>
+                        @foreach(($filterOptions['regions'] ?? []) as $option)
+                            <option value="{{ $option }}" @selected(($filters['region'] ?? '') === $option)>{{ $option }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="members-field">
+                    <span>{{ __('ui.language') }}</span>
+                    <select name="language">
+                        <option value="">{{ __('ui.members_all_languages') }}</option>
+                        @foreach(($filterOptions['languages'] ?? []) as $option)
+                            <option value="{{ $option }}" @selected(($filters['language'] ?? '') === $option)>{{ $option }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="members-check">
+                    <input name="lfg" value="1" type="checkbox" @checked(($filters['lfg'] ?? null) === '1')/>
+                    <span></span>
+                    <strong>{{ __('ui.members_lfg_only') }}</strong>
+                </label>
+            </div>
+
+            <footer class="members-filter-footer">
+                <button class="btn" type="submit">{{ __('ui.search') }}</button>
+                <a class="members-reset" href="{{ route('members.index') }}">{{ __('ui.rework_filters_reset') }}</a>
+            </footer>
+        </form>
     </section>
 </div>
 @endpush
