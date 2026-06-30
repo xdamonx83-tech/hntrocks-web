@@ -116,9 +116,9 @@
             + (int) ($post?->shares_count ?? 0);
     };
     $feedFilters = [
-        'all' => 'All',
-        'friends' => 'Freunde',
-        'media' => 'Medien',
+        'all' => __('ui.feed_filter_all'),
+        'friends' => __('ui.rework_profile_friends'),
+        'media' => __('ui.feed_filter_media'),
         'mentions' => 'Mentions',
     ];
     $reworkNotificationSettings = $reworkNotificationSettings ?? null;
@@ -229,7 +229,7 @@
 <a class="btn" data-post-composer-open="" href="#">{{ __('ui.rework_post_create') }}</a>
 </div>
 </section>
-<nav class="rework-feed-filters" aria-label="Feed Filter">
+<nav class="rework-feed-filters" aria-label="{{ __('ui.rework_feed_filters_aria') }}">
 @foreach($feedFilters as $filterKey => $filterLabel)
 <a @class(['active' => $socialiteFeedFilter === $filterKey]) href="{{ $feedFilterUrl($filterKey) }}">{{ $filterLabel }}</a>
 @endforeach
@@ -244,11 +244,11 @@
     type="button"
     data-rework-load-more
     data-next-url="{{ $socialitePosts->nextPageUrl() }}"
-    data-loading-label="Lädt..."
-    data-ready-label="Weitere Posts laden"
-    data-error-label="Erneut versuchen"
+    data-loading-label="{{ __('ui.rework_loading') }}"
+    data-ready-label="{{ __('ui.feed_load_more_posts') }}"
+    data-error-label="{{ __('ui.rework_try_again') }}"
 >
-    <span data-rework-load-more-label>Weitere Posts laden</span>
+    <span data-rework-load-more-label>{{ __('ui.feed_load_more_posts') }}</span>
 </button>
 </div>
 @endif
@@ -358,6 +358,59 @@
 </section>
 </div>
 @include('themes.rework.feed.partials.settings-modal')
+<script type="application/json" data-rework-i18n>{!! json_encode([
+    'composerBodyRequired' => __('ui.rework_composer_body_required'),
+    'composerBodyOrMediaRequired' => __('ui.rework_composer_body_or_media_required'),
+    'postCreateFailed' => __('ui.rework_post_create_failed'),
+    'postSubmit' => __('ui.rework_post_submit'),
+    'postSubmitting' => __('ui.rework_post_submitting'),
+    'postSave' => __('ui.preview_action_save'),
+    'postSaving' => __('ui.rework_saving'),
+    'postEditSaveFailed' => __('ui.rework_post_edit_save_failed'),
+    'postDeleteClose' => __('ui.rework_post_delete_close_aria'),
+    'cancel' => __('ui.preview_action_cancel'),
+    'save' => __('ui.preview_action_save'),
+    'settingsSaveFailed' => __('ui.rework_settings_save_failed'),
+    'settings' => __('ui.settings'),
+    'logout' => __('ui.logout'),
+    'profileOpen' => __('ui.rework_profile_open'),
+    'profileEdit' => __('ui.profile_edit'),
+    'settingsSaved' => __('ui.rework_saved'),
+    'searchAllResultsFor' => __('ui.rework_search_all_results_for', ['query' => '__query__']),
+    'searchNoQuickResults' => __('ui.rework_search_no_quick_results'),
+    'searchFullHint' => __('ui.rework_search_full_hint'),
+    'searchHit' => __('ui.rework_search_hit'),
+    'searchLabel' => __('ui.search'),
+    'feelsWithLabel' => __('ui.rework_feels_with_label', ['label' => '__label__']),
+    'pollVotes' => __('ui.rework_poll_votes', ['count' => '__count__']),
+    'profileMediaCoverSaving' => __('ui.rework_profile_cover_saving'),
+    'profileMediaAvatarSaving' => __('ui.rework_profile_avatar_saving'),
+    'uploadFailed' => __('ui.rework_upload_failed'),
+    'saved' => __('ui.rework_saved'),
+    'cupSubmission' => __('ui.rework_cup_submission'),
+    'cupUploadStarts' => __('ui.rework_cup_upload_starts'),
+    'cupUploadUploading' => __('ui.rework_cup_upload_uploading'),
+    'cupUploadUploaded' => __('ui.rework_cup_upload_uploaded', ['percent' => '__percent__']),
+    'cupUploadScreenshotUploading' => __('ui.rework_cup_screenshot_uploading'),
+    'cupProcessingRunning' => __('ui.rework_cup_processing_running'),
+    'cupProcessingText' => __('ui.rework_cup_processing_text'),
+    'cupSubmissionProcessed' => __('ui.rework_cup_submission_processed'),
+    'cupSubmissionFailed' => __('ui.rework_cup_submission_failed'),
+    'cupSubmissionProcessedText' => __('ui.rework_cup_submission_processed_text'),
+    'cupUploadSelectScreenshot' => __('ui.rework_cup_upload_select_screenshot'),
+    'cupSubmissionChecking' => __('ui.rework_cup_submission_checking'),
+    'cupSubmissionCouldNotProcess' => __('ui.rework_cup_submission_could_not_process'),
+    'cupUploadNetworkError' => __('ui.rework_cup_upload_network_error'),
+    'cupUploadAborted' => __('ui.rework_cup_upload_aborted'),
+    'cupSubmissionSave' => __('ui.rework_cup_submission_save'),
+    'cupCounted' => __('ui.rework_cup_counted'),
+    'cupError' => __('ui.rework_cup_error'),
+    'cupReview' => __('ui.rework_cup_review'),
+    'cupStatus' => __('ui.rework_cup_status'),
+    'cupScore' => __('ui.rework_cup_score'),
+    'cupCheck' => __('ui.rework_cup_check'),
+    'cupNotSaved' => __('ui.rework_cup_not_saved'),
+], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 <script defer src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}"></script>
 <script defer src="{{ asset('assets/socialite/js/hnt-socialite-chat-tabs.js') }}?v={{ $socialiteChatTabsVersion }}"></script>
 </body>

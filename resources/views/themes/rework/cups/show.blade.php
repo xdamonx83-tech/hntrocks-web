@@ -58,15 +58,15 @@
 </section>
 <section class="card cup-detail-tabs-card">
     <div aria-label="Cup-Bereiche" class="cup-detail-tabs" role="tablist">
-        <a class="active" data-cup-detail-tab="overview" href="#cup-overview">Übersicht</a>
-<a data-cup-detail-tab="rules" href="#cup-rules">Regeln</a>
+        <a class="active" data-cup-detail-tab="overview" href="#cup-overview">{{ __('ui.rework_cup_tab_overview') }}</a>
+<a data-cup-detail-tab="rules" href="#cup-rules">{{ __('ui.rework_cup_tab_rules') }}</a>
 <a data-cup-detail-tab="leaderboard" href="#cup-leaderboard">Leaderboard</a>
-<a data-cup-detail-tab="prizes" href="#cup-prizes">Preise</a>
-<a data-cup-detail-tab="submit" href="#cup-submit">Einreichen</a>
-        <a data-cup-detail-tab="my-submissions" href="#cup-my-submissions">Meine Einreichungen</a>
+<a data-cup-detail-tab="prizes" href="#cup-prizes">{{ __('ui.rework_cup_tab_prizes') }}</a>
+<a data-cup-detail-tab="submit" href="#cup-submit">{{ __('ui.rework_cup_tab_submit') }}</a>
+        <a data-cup-detail-tab="my-submissions" href="#cup-my-submissions">{{ __('ui.rework_cup_tab_my_submissions') }}</a>
         <?php $cupAdminCanManage = auth()->check() && $cup->canManage(auth()->user()); ?>
         <?php if ($cupAdminCanManage) { ?>
-            <a data-cup-detail-tab="admin-submissions" href="#cup-admin-submissions">Admin Einreichungen</a>
+            <a data-cup-detail-tab="admin-submissions" href="#cup-admin-submissions">{{ __('ui.rework_cup_tab_admin_submissions') }}</a>
         <?php } ?>
     </div>
 </section>
@@ -101,16 +101,16 @@
 
     <article class="cup-panel-card card cup-overview-description">
         <div class="cup-panel-head">
-            <span>Übersicht</span>
-            <h2>Beschreibung</h2>
-            <p>Alles Wichtige zum Cup als Einstieg. Die einzelnen Tabs werden danach separat sauber gemacht.</p>
+            <span>{{ __('ui.rework_cup_tab_overview') }}</span>
+            <h2>{{ __('ui.rework_cup_description_title') }}</h2>
+            <p>{{ __('ui.rework_cup_overview_intro') }}</p>
         </div>
 
         <div class="cup-description-copy">
             @forelse($overviewParagraphs as $paragraph)
                 <p>{!! nl2br(e($paragraph)) !!}</p>
             @empty
-                <p>Noch keine Beschreibung hinterlegt.</p>
+                <p>{{ __('ui.rework_cup_no_description') }}</p>
             @endforelse
         </div>
     </article>
@@ -120,20 +120,20 @@
             <div>
                 <span>Cup-Chat</span>
                 <h2>Community-Chat</h2>
-                <p>Kurze Absprachen, Fragen und Updates zum Cup.</p>
+                <p>{{ __('ui.rework_cup_chat_intro') }}</p>
             </div>
-            <strong class="cup-chat-count"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>{{ number_format((int) $cupChatMessagesCount) }} Nachrichten</strong>
+            <strong class="cup-chat-count"><i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>{{ __('ui.rework_cup_chat_message_count', ['count' => number_format((int) $cupChatMessagesCount)]) }}</strong>
         </div>
 
         <div class="cup-chat-shell">
-            <div class="cup-chat-list" data-cup-chat-list aria-label="Cup-Chat Nachrichten">
+            <div class="cup-chat-list" data-cup-chat-list aria-label="{{ __('ui.rework_cup_chat_messages_aria') }}">
                 @forelse($cupChatMessages as $chatMessage)
                     @include('themes.rework.cups.partials.chat-message', ['chatMessage' => $chatMessage])
                 @empty
                     <div class="cup-chat-empty">
                         <i aria-hidden="true" class="ph ph-chat-circle-dots ph-icon"></i>
-                        <strong>Noch keine Nachrichten</strong>
-                        <p>Starte den Cup-Chat mit einer kurzen Frage oder Info für die Community.</p>
+                        <strong>{{ __('ui.rework_cup_chat_empty_title') }}</strong>
+                        <p>{{ __('ui.rework_cup_chat_empty_text') }}</p>
                     </div>
                 @endforelse
             </div>
@@ -141,24 +141,24 @@
             @auth
                 <form class="cup-chat-form" method="post" action="{{ route('cups.chat.store', $cup) }}">
                     @csrf
-                    <label for="cup-chat-body">Nachricht schreiben</label>
+                    <label for="cup-chat-body">{{ __('ui.rework_cup_chat_write_label') }}</label>
                     <div class="cup-chat-compose">
-                        <textarea id="cup-chat-body" name="body" rows="3" maxlength="1200" required placeholder="Schreibe eine Nachricht zum Cup ...">{{ old('body') }}</textarea>
+                        <textarea id="cup-chat-body" name="body" rows="3" maxlength="1200" required placeholder="{{ __('ui.rework_cup_chat_placeholder') }}">{{ old('body') }}</textarea>
                         <button class="btn" type="submit">
                             <i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i>
-                            Senden
+                            {{ __('ui.send') }}
                         </button>
                     </div>
-                    <span>Max. 1200 Zeichen · sichtbar für alle Cup-Besucher.</span>
+                    <span>{{ __('ui.rework_cup_chat_hint') }}</span>
                 </form>
             @else
                 <div class="cup-chat-login">
                     <i aria-hidden="true" class="ph ph-lock-key ph-icon"></i>
                     <div>
-                        <strong>Einloggen zum Schreiben</strong>
-                        <p>Lesen ist möglich. Zum Antworten brauchst du ein HNT.rocks Konto.</p>
+                        <strong>{{ __('ui.rework_cup_chat_login_title') }}</strong>
+                        <p>{{ __('ui.rework_cup_chat_login_text') }}</p>
                     </div>
-                    <a class="btn ghost" href="{{ route('login') }}">Einloggen</a>
+                    <a class="btn ghost" href="{{ route('login') }}">{{ __('ui.login') }}</a>
                 </div>
             @endauth
         </div>
@@ -211,22 +211,22 @@
 
     <article class="cup-panel-card card cup-rules-real-card">
         <div class="cup-panel-head">
-            <span>Regelwerk</span>
-            <h2>Regeln</h2>
-            <p>Die offiziellen Regeln für diesen Cup. Wertung, Plattform und Teilnahmebedingungen werden hier gebündelt.</p>
+            <span>{{ __('ui.rework_cup_rules_kicker') }}</span>
+            <h2>{{ __('ui.rework_cup_tab_rules') }}</h2>
+            <p>{{ __('ui.rework_cup_rules_intro') }}</p>
         </div>
 
         <div class="cup-rules-real-layout">
             <div class="cup-rules-copy">
-                <h3>Regeltext</h3>
+                <h3>{{ __('ui.rework_cup_rules_text_title') }}</h3>
                 @forelse($rulesParagraphs as $paragraph)
                     <p>{!! nl2br(e($paragraph)) !!}</p>
                 @empty
-                    <p>Noch kein Regeltext hinterlegt.</p>
+                    <p>{{ __('ui.rework_cup_no_rules') }}</p>
                 @endforelse
 
                 @if($scoringParagraphs->isNotEmpty())
-                    <h3>Wertung</h3>
+                    <h3>{{ __('ui.rework_cup_scoring') }}</h3>
                     @foreach($scoringParagraphs as $paragraph)
                         <p>{!! nl2br(e($paragraph)) !!}</p>
                     @endforeach
@@ -238,7 +238,7 @@
                 <div><i aria-hidden="true" class="ph ph-users-three ph-icon"></i><span>Teamgröße</span><strong>{{ $cup->isSoloLeaderboard() ? 'Solo' : $cup->team_size.' Spieler' }}</strong></div>
                 <div><i aria-hidden="true" class="ph ph-cloud-arrow-up ph-icon"></i><span>Uploads</span><strong>{{ $maxUploads ? 'max. '.$maxUploads : 'nicht limitiert' }}</strong></div>
                 <div><i aria-hidden="true" class="ph ph-chart-line-up ph-icon"></i><span>Gewertete Runs</span><strong>{{ $maxScored ? 'max. '.$maxScored : 'alle gültigen' }}</strong></div>
-                <div><i aria-hidden="true" class="ph ph-user-check ph-icon"></i><span>Profil</span><strong>{{ $profileRequired ? 'vollständig nötig' : 'nicht zwingend' }}</strong></div>
+                <div><i aria-hidden="true" class="ph ph-user-check ph-icon"></i><span>{{ __('ui.profile') }}</span><strong>{{ $profileRequired ? __('ui.rework_cup_profile_required') : __('ui.rework_cup_profile_optional') }}</strong></div>
                 <div><i aria-hidden="true" class="ph ph-handshake ph-icon"></i><span>Community-Aktionen</span><strong>{{ $minCommunityActions > 0 ? $minCommunityActions.' nötig' : 'keine Pflicht' }}</strong></div>
             </aside>
         </div>
@@ -312,7 +312,7 @@
 
     <article class="cup-panel-card card">
         <div class="cup-panel-head">
-            <span>Einreichen</span>
+            <span>{{ __('ui.rework_cup_tab_submit') }}</span>
             <h2>Match-Nachweis hochladen</h2>
             <p>Demo-Uploadbereich für Captain-Screenshots und Ergebnisprüfung.</p>
         </div>
@@ -357,7 +357,7 @@
     <div class="cup-submit-progress-modal" data-cup-submit-progress-modal hidden>
         <div class="cup-submit-progress-backdrop" data-cup-submit-progress-close></div>
         <div class="cup-submit-progress-dialog" role="dialog" aria-modal="true" aria-labelledby="cup-submit-progress-title">
-            <button class="cup-submit-progress-close" type="button" data-cup-submit-progress-close aria-label="Schließen">
+            <button class="cup-submit-progress-close" type="button" data-cup-submit-progress-close aria-label="{{ __('ui.preview_action_close') }}">
                 <i aria-hidden="true" class="ph ph-x ph-icon"></i>
             </button>
 
@@ -379,8 +379,8 @@
             <div class="cup-submit-progress-result" data-cup-submit-progress-result hidden></div>
 
             <div class="cup-submit-progress-actions" hidden data-cup-submit-progress-actions>
-                <button class="btn" type="button" data-cup-submit-progress-close>Schließen</button>
-                <a class="btn ghost" href="#" data-cup-submit-result-link hidden>Einreichungen ansehen</a>
+                <button class="btn" type="button" data-cup-submit-progress-close>{{ __('ui.preview_action_close') }}</button>
+                <a class="btn ghost" href="#" data-cup-submit-result-link hidden>{{ __('ui.rework_cup_view_submissions') }}</a>
             </div>
         </div>
     </div>
@@ -420,8 +420,8 @@
 
     <article class="cup-panel-card card cup-my-submissions-card">
         <div class="cup-panel-head inline">
-            <div><span>Meine Einreichungen</span><h2>Upload-History</h2></div>
-            <strong>{{ $viewerSubmissionRows->count() }} Einreichungen</strong>
+            <div><span>{{ __('ui.rework_cup_tab_my_submissions') }}</span><h2>{{ __('ui.rework_cup_upload_history') }}</h2></div>
+            <strong>{{ __('ui.rework_cup_submission_count', ['count' => $viewerSubmissionRows->count()]) }}</strong>
         </div>
 
         <div class="cup-submission-list">
@@ -477,8 +477,8 @@
             @empty
                 <div class="cup-submission-empty">
                     <i aria-hidden="true" class="ph ph-cloud-arrow-up ph-icon"></i>
-                    <strong>Noch keine Einreichungen</strong>
-                    <p>Wenn du einen Screenshot einreichst, erscheint hier deine Upload-History mit Auswertung.</p>
+                    <strong>{{ __('ui.rework_cup_no_submissions') }}</strong>
+                    <p>{{ __('ui.rework_cup_no_submissions_text') }}</p>
                 </div>
             @endforelse
         </div>
@@ -510,8 +510,8 @@
 
     <article class="cup-panel-card card cup-admin-submissions-card">
         <div class="cup-panel-head inline">
-            <div><span>Admin</span><h2>Alle Einreichungen</h2></div>
-            <strong>{{ $adminSubmissionRows->count() }} Einreichungen</strong>
+            <div><span>Admin</span><h2>{{ __('ui.rework_cup_all_submissions') }}</h2></div>
+            <strong>{{ __('ui.rework_cup_submission_count', ['count' => $adminSubmissionRows->count()]) }}</strong>
         </div>
 
         <div class="cup-admin-submission-list">
@@ -581,7 +581,7 @@
                             <label><span>Kills</span><input name="kills" type="number" min="0" max="99" value="{{ (int) $submission->kills }}"></label>
                             <label><span>Punkte</span><input name="points" type="number" min="0" max="999" value="{{ (int) $submission->points }}"></label>
                             <label class="wide"><span>Notiz</span><input name="review_note" type="text" maxlength="1200" value="{{ $submission->review_note }}" placeholder="Grund oder kurze interne Notiz"></label>
-                            <button class="btn" type="submit">Speichern</button>
+                            <button class="btn" type="submit">{{ __('ui.preview_action_save') }}</button>
                         </form>
                     </details>
 
@@ -607,8 +607,8 @@
             @empty
                 <div class="cup-submission-empty">
                     <i aria-hidden="true" class="ph ph-clipboard-text ph-icon"></i>
-                    <strong>Noch keine Einreichungen</strong>
-                    <p>Sobald Teilnehmer Screenshots einreichen, kannst du sie hier prüfen, korrigieren oder neu auswerten.</p>
+                    <strong>{{ __('ui.rework_cup_no_submissions') }}</strong>
+                    <p>{{ __('ui.rework_cup_admin_no_submissions_text') }}</p>
                 </div>
             @endforelse
         </div>
@@ -622,7 +622,7 @@
 <div class="cup-shot-modal" data-cup-shot-modal hidden>
     <div class="cup-shot-modal-backdrop" data-cup-shot-close></div>
     <div class="cup-shot-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="cup-shot-modal-title">
-        <button class="cup-shot-modal-close" type="button" data-cup-shot-close aria-label="Schließen">
+        <button class="cup-shot-modal-close" type="button" data-cup-shot-close aria-label="{{ __('ui.preview_action_close') }}">
             <i aria-hidden="true" class="ph ph-x ph-icon"></i>
         </button>
 
@@ -637,7 +637,7 @@
 
         <div class="cup-shot-modal-actions">
             <a class="btn ghost" href="#" target="_blank" rel="noopener" data-cup-shot-open-new>Original öffnen</a>
-            <button class="btn" type="button" data-cup-shot-close>Schließen</button>
+            <button class="btn" type="button" data-cup-shot-close>{{ __('ui.preview_action_close') }}</button>
         </div>
     </div>
 </div>

@@ -49,15 +49,16 @@
         && (bool) ($profileCanMessage ?? false)
         && \Illuminate\Support\Facades\Route::has('messages.with-user');
     $profileMessageStartUrl = $profileMessageEnabled ? route('messages.with-user', $profileUser) : '#';
+    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
 @endphp
 
 <!DOCTYPE html>
 
-<html lang="de">
+<html lang="{{ $currentLocale }}">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>HNT.rocks Profil Template</title>
+<title>{{ __('ui.rework_profile_page_title') }}</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700&amp;family=Bakbak+One&amp;family=Montserrat:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
@@ -702,7 +703,7 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <form action="{{ route('profile.media.update') }}" class="profile-cover-upload-form" data-profile-cover-upload-form enctype="multipart/form-data" method="post">
 @csrf
 <input name="type" type="hidden" value="cover"/>
-<label aria-label="Titelbild ändern" class="profile-share-btn profile-cover-upload-trigger" title="Titelbild ändern">
+<label aria-label="{{ __('ui.rework_profile_cover_change') }}" class="profile-share-btn profile-cover-upload-trigger" title="{{ __('ui.rework_profile_cover_change') }}">
 <i aria-hidden="true" class="ph ph-image-square"></i>
 <input accept="image/jpeg,image/png,image/webp" data-profile-cover-upload-input name="image" type="file"/>
 </label>
@@ -713,7 +714,7 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <div class="hnt-profile-mainline profile-mainline-corrected">
 <div class="hnt-profile-stats-left">
 <div><strong>{{ $staticProfileFormatCount($profilePostsCount) }}</strong><span>Posts</span></div>
-<div><strong>{{ $staticProfileFormatCount($profileFriendsCount) }}</strong><span>Freunde</span></div>
+<div><strong>{{ $staticProfileFormatCount($profileFriendsCount) }}</strong><span>{{ __('ui.rework_profile_friends') }}</span></div>
 </div>
 <div class="hnt-profile-identity">
 <div class="profile-avatar-badge" data-profile-avatar-upload-wrap>
@@ -723,7 +724,7 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <form action="{{ route('profile.media.update') }}" class="profile-avatar-upload-form" data-profile-avatar-upload-form enctype="multipart/form-data" method="post">
 @csrf
 <input name="type" type="hidden" value="avatar"/>
-<label aria-label="Avatar ändern" class="profile-avatar-upload-trigger" title="Avatar ändern">
+<label aria-label="{{ __('ui.rework_profile_avatar_change') }}" class="profile-avatar-upload-trigger" title="{{ __('ui.rework_profile_avatar_change') }}">
 <i aria-hidden="true" class="ph ph-image-square"></i>
 <input accept="image/jpeg,image/png,image/webp" data-profile-avatar-upload-input name="image" type="file"/>
 </label>
@@ -744,9 +745,9 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
         : route('friends.store', $profileUser);
     $profileFriendActionMethod = $profileFriendshipStatus === \App\Models\Friendship::STATUS_ACCEPTED ? 'DELETE' : 'POST';
     $profileFriendActionLabel = match ($profileFriendshipStatus) {
-        \App\Models\Friendship::STATUS_ACCEPTED => 'Freund entfernen',
-        \App\Models\Friendship::STATUS_PENDING => 'Angefragt',
-        default => 'Freund hinzufügen',
+        \App\Models\Friendship::STATUS_ACCEPTED => __('ui.profile_friend_remove'),
+        \App\Models\Friendship::STATUS_PENDING => __('ui.profile_friend_request_sent'),
+        default => __('ui.profile_add_friend'),
     };
     $profileFriendActionDisabled = $profileFriendshipStatus === \App\Models\Friendship::STATUS_PENDING || (! ($profileCanRequestFriend ?? false) && $profileFriendshipStatus !== \App\Models\Friendship::STATUS_ACCEPTED);
 @endphp
@@ -756,9 +757,9 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
     data-profile-friend-action
     data-add-url="{{ route('friends.store', $profileUser) }}"
     data-remove-url="{{ $profileFriendshipId ? route('friends.destroy', $friendship) : '' }}"
-    data-add-label="Freund hinzufügen"
-    data-pending-label="Angefragt"
-    data-remove-label="Freund entfernen"
+    data-add-label="{{ __('ui.profile_add_friend') }}"
+    data-pending-label="{{ __('ui.profile_friend_request_sent') }}"
+    data-remove-label="{{ __('ui.profile_friend_remove') }}"
     method="post"
 >
     @csrf
@@ -771,11 +772,11 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <!-- /HNT profile friend action v1 -->
 <!-- HNT profile edit button owner only v1 -->
 @if($isOwnProfile)
-<a class="btn ghost" data-profile-edit-modal-open="" href="#">Profil bearbeiten</a>
+<a class="btn ghost" data-profile-edit-modal-open="" href="#">{{ __('ui.profile_edit') }}</a>
 @endif
 <!-- /HNT profile edit button owner only v1 -->
 @if($profileMessageEnabled)
-<a class="btn light" href="{{ $profileMessageStartUrl }}" data-profile-message-open data-profile-message-start-url="{{ $profileMessageStartUrl }}" data-ready-label="Nachricht" data-loading-label="Öffnet...">Nachricht</a>
+<a class="btn light" href="{{ $profileMessageStartUrl }}" data-profile-message-open data-profile-message-start-url="{{ $profileMessageStartUrl }}" data-ready-label="{{ __('ui.rework_profile_message') }}" data-loading-label="{{ __('ui.rework_opening') }}">{{ __('ui.rework_profile_message') }}</a>
 @endif
 </div>
 </div>
@@ -791,13 +792,13 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 </div>
 </section>
 <section class="card hnt-profile-tabs-card">
-<div aria-label="Profilbereiche" class="hnt-profile-tabs" role="tablist">
+<div aria-label="{{ __('ui.profile_sections_aria') }}" class="hnt-profile-tabs" role="tablist">
 <a aria-selected="true" class="active" data-profile-tab="posts" href="#profile-posts" role="tab"><i aria-hidden="true" class="ph ph-image ph-icon"></i>Posts <span>{{ $staticProfileFormatCount($profilePostsCount) }}</span></a>
 <a aria-selected="false" data-profile-tab="info" href="#profile-info" role="tab"><i aria-hidden="true" class="ph ph-user ph-icon"></i>Info</a>
-<a aria-selected="false" data-profile-tab="friends" href="#profile-friends" role="tab"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>Freunde <span>{{ $staticProfileFormatCount($profileFriendsCount) }}</span></a>
+<a aria-selected="false" data-profile-tab="friends" href="#profile-friends" role="tab"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>{{ __('ui.rework_profile_friends') }} <span>{{ $staticProfileFormatCount($profileFriendsCount) }}</span></a>
 <a aria-selected="false" data-profile-tab="moments" href="#profile-moments" role="tab"><i aria-hidden="true" class="ph ph-trophy ph-icon"></i>Moments <span>{{ $staticProfileFormatCount($profileMomentsCount) }}</span></a>
 <a aria-selected="false" data-profile-tab="badges" href="#profile-badges" role="tab"><i aria-hidden="true" class="ph ph-medal ph-icon"></i>Badges <span>{{ $staticProfileFormatCount($profileBadgesCount) }}</span></a>
-<a class="profile-create-post" data-post-composer-open="" href="#">Post erstellen</a>
+<a class="profile-create-post" data-post-composer-open="" href="#">{{ __('ui.rework_post_create_title') }}</a>
 </div>
 </section>
 <div class="profile-tab-panels">
@@ -818,8 +819,8 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 @if($profilePostsCollection->isEmpty())
 <div class="card profile-empty-state profile-posts-empty-real">
 <i aria-hidden="true" class="ph ph-images ph-icon"></i>
-<strong>Noch keine Posts sichtbar</strong>
-<p>Wenn {{ $postsProfileName }} Posts veröffentlicht, erscheinen sie hier.</p>
+<strong>{{ __('ui.rework_profile_no_posts_visible') }}</strong>
+<p>{{ __('ui.rework_profile_posts_empty_text', ['name' => $postsProfileName]) }}</p>
 </div>
 @else
 <div class="profile-posts-feed-real" data-profile-posts-stream>
@@ -834,13 +835,13 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
     type="button"
     data-profile-posts-load-more
     data-next-url="{{ $nextProfilePostsUrl }}"
-    data-loading-label="Lädt..."
-    data-ready-label="Weitere Posts laden"
-    data-error-label="Erneut versuchen"
+    data-loading-label="{{ __('ui.rework_loading') }}"
+    data-ready-label="{{ __('ui.feed_load_more_posts') }}"
+    data-error-label="{{ __('ui.rework_try_again') }}"
 >
-    <span data-profile-posts-load-more-label>Weitere Posts laden</span>
+    <span data-profile-posts-load-more-label>{{ __('ui.feed_load_more_posts') }}</span>
 </button>
-<small>{{ $postsFormatCount($postsShown) }} von {{ $postsFormatCount($postsTotal) }} Posts geladen</small>
+<small>{{ __('ui.profile_posts_shown', ['shown' => $postsFormatCount($postsShown), 'total' => $postsFormatCount($postsTotal)]) }}</small>
 </div>
 @endif
 @endif
@@ -855,7 +856,7 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
     $infoName = trim((string) ($profileDisplayName ?? ($infoProfileUser?->name ?: $infoProfileUser?->username ?: 'HNT Hunter')));
     $infoBio = trim((string) ($infoProfile?->bio ?? ''));
     $infoHeadline = trim((string) ($infoProfile?->headline ?? ''));
-    $infoAboutText = $infoBio ?: ($infoHeadline ?: 'Noch keine Profilinformationen hinterlegt.');
+    $infoAboutText = $infoBio ?: ($infoHeadline ?: __('ui.rework_profile_no_info'));
 
     $infoFormatCount = fn ($count): string => number_format((int) $count, 0, ',', '.');
     $infoDash = '—';
@@ -868,7 +869,7 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
     $infoLanguage = filled($infoProfile?->language ?? null) ? $infoProfile->language : $infoDash;
     $infoPlaystyle = filled($infoProfile?->playstyle ?? null) ? $infoProfile->playstyle : $infoDash;
     $infoHuntRole = filled($infoProfile?->hunt_role ?? null) ? $infoProfile->hunt_role : $infoDash;
-    $infoLfgLabel = (bool) ($infoProfile?->is_lfg_available ?? false) ? 'LFG offen' : 'Nicht offen';
+    $infoLfgLabel = (bool) ($infoProfile?->is_lfg_available ?? false) ? __('ui.rework_profile_lfg_open') : __('ui.rework_profile_lfg_not_open');
 
     $infoDiscord = filled($infoProfile?->discord_name ?? null) ? $infoProfile->discord_name : null;
     $infoSteam = filled($infoProfile?->steam_url ?? null) ? $infoProfile->steam_url : null;
@@ -884,10 +885,10 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <div><strong>{{ $infoFormatCount($infoXpTotal) }}</strong><span>XP</span></div>
 <div><strong>{{ $infoPlatform }}</strong><span>Plattform</span></div>
 <div><strong>{{ $infoRegion }}</strong><span>Region</span></div>
-<div><strong>{{ $infoLanguage }}</strong><span>Sprache</span></div>
+<div><strong>{{ $infoLanguage }}</strong><span>{{ __('ui.language') }}</span></div>
 <div><strong>{{ $infoPlaystyle }}</strong><span>Spielstil</span></div>
 <div><strong>{{ $infoHuntRole }}</strong><span>Rolle</span></div>
-<div><strong>{{ $infoLfgLabel }}</strong><span>Suche</span></div>
+<div><strong>{{ $infoLfgLabel }}</strong><span>{{ __('ui.search') }}</span></div>
 @if($infoDiscord)
 <div><strong>{{ $infoDiscord }}</strong><span>Discord</span></div>
 @endif
@@ -931,17 +932,17 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <section class="card profile-list-panel">
 <header class="profile-list-head">
 <div>
-<span>Freunde</span>
-<h2>Freundesliste von {{ $friendsProfileName }}</h2>
-<p>{{ $friendsFormatCount($friendsTotal) }} bestätigte Freunde</p>
+<span>{{ __('ui.rework_profile_friends') }}</span>
+<h2>{{ __('ui.rework_profile_friends_of', ['name' => $friendsProfileName]) }}</h2>
+<p>{{ __('ui.rework_profile_confirmed_friends', ['count' => $friendsFormatCount($friendsTotal)]) }}</p>
 </div>
 </header>
 
 @if($friendsPreview->isEmpty())
 <div class="profile-empty-state">
 <i aria-hidden="true" class="ph ph-users-three ph-icon"></i>
-<strong>Noch keine Freunde sichtbar</strong>
-<p>Sobald Freundschaften bestätigt sind, erscheinen sie hier.</p>
+<strong>{{ __('ui.profile_no_friends_visible') }}</strong>
+<p>{{ __('ui.rework_profile_friends_empty_text') }}</p>
 </div>
 @else
 <div class="profile-friends-grid">
@@ -960,8 +961,8 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
     ])->filter()->values();
     $friendMeta = $metaParts->isNotEmpty() ? $metaParts->take(3)->implode(' · ') : 'HNT Hunter';
     $commonLabel = $commonCount > 0
-        ? $friendsFormatCount($commonCount).' gemeinsame Freunde'
-        : 'Keine gemeinsamen Freunde';
+        ? __('ui.profile_mutual_friends', ['count' => $friendsFormatCount($commonCount)])
+        : __('ui.rework_profile_no_mutual_friends');
 @endphp
 <article class="friend-card-v2">
 <a class="friend-card-main" href="{{ $friendUrl }}">
@@ -975,7 +976,7 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <div class="friend-card-meta">
 <span><i aria-hidden="true" class="ph ph-handshake ph-icon"></i>{{ $commonLabel }}</span>
 @if((bool) ($friendProfile?->is_lfg_available ?? false))
-<span><i aria-hidden="true" class="ph ph-crosshair ph-icon"></i>LFG offen</span>
+<span><i aria-hidden="true" class="ph ph-crosshair ph-icon"></i>{{ __('ui.rework_profile_lfg_open') }}</span>
 @endif
 </div>
 </article>
@@ -1018,8 +1019,8 @@ body.profile-page [data-profile-tab-panel="moments"] .profile-moment-card-real {
 <header class="profile-list-head">
 <div>
 <span>Moments</span>
-<h2>Moments von {{ $momentsProfileName }}</h2>
-<p>{{ $momentsFormatCount($momentsTotal) }} veröffentlichte Moments</p>
+<h2>{{ __('ui.rework_profile_moments_of', ['name' => $momentsProfileName]) }}</h2>
+<p>{{ __('ui.rework_profile_moments_published', ['count' => $momentsFormatCount($momentsTotal)]) }}</p>
 </div>
 </header>
 
@@ -1453,8 +1454,8 @@ body.profile-page [data-profile-message-open][aria-busy="true"] {
     event.stopPropagation();
 
     const startUrl = trigger.getAttribute('data-profile-message-start-url') || trigger.href;
-    const readyLabel = trigger.getAttribute('data-ready-label') || trigger.textContent || 'Nachricht';
-    const loadingLabel = trigger.getAttribute('data-loading-label') || 'Öffnet...';
+    const readyLabel = trigger.getAttribute('data-ready-label') || trigger.textContent || @json(__('ui.rework_profile_message'));
+    const loadingLabel = trigger.getAttribute('data-loading-label') || @json(__('ui.rework_opening'));
 
     if (!startUrl || startUrl === '#') return;
     if (trigger.getAttribute('aria-busy') === 'true') return;
@@ -1609,11 +1610,11 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
         <div aria-hidden="true" class="post-composer-grip"></div>
         <header class="profile-cover-crop-head post-composer-header">
           <div class="post-composer-titleblock">
-            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>HNT PROFIL</span>
-            <h2 id="profile-cover-crop-title">Titelbild zuschneiden</h2>
-            <p>Ziehe das Bild in den Rahmen. Das Ergebnis passt exakt zum Profil-Titelbild.</p>
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>{{ __('ui.rework_profile_crop_kicker') }}</span>
+            <h2 id="profile-cover-crop-title">{{ __('ui.rework_profile_cover_crop_title') }}</h2>
+            <p>{{ __('ui.rework_profile_cover_crop_text') }}</p>
           </div>
-          <button type="button" class="profile-cover-crop-close post-composer-close" data-profile-cover-crop-cancel aria-label="Titelbild zuschneiden schließen"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+          <button type="button" class="profile-cover-crop-close post-composer-close" data-profile-cover-crop-cancel aria-label="{{ __('ui.rework_profile_cover_crop_close') }}"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
         </header>
         <div class="profile-cover-crop-stage post-composer-body">
           <div class="profile-cover-crop-frame" data-profile-cover-crop-frame>
@@ -1626,8 +1627,8 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
             <input type="range" min="1" max="3" step="0.01" value="1" data-profile-cover-crop-zoom>
           </label>
           <div class="profile-cover-crop-actions">
-            <button type="button" class="composer-cancel" data-profile-cover-crop-cancel>Abbrechen</button>
-            <button type="button" class="composer-submit" data-profile-cover-crop-save>Übernehmen</button>
+            <button type="button" class="composer-cancel" data-profile-cover-crop-cancel>{{ __('ui.preview_action_cancel') }}</button>
+            <button type="button" class="composer-submit" data-profile-cover-crop-save>{{ __('ui.rework_apply') }}</button>
           </div>
         </footer>
       </section>
@@ -1799,7 +1800,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 
     save.onclick = async () => {
       save.disabled = true;
-      save.textContent = 'Speichert...';
+      save.textContent = @json(__('ui.rework_saving'));
 
       try {
         const size = rendered();
@@ -1829,7 +1830,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 
         canvas.toBlob((blob) => {
           save.disabled = false;
-          save.textContent = 'Übernehmen';
+          save.textContent = @json(__('ui.rework_apply'));
 
           if (!blob) {
             cleanup(null);
@@ -1841,7 +1842,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
       } catch (error) {
         console.error('[HNT] Cover crop failed:', error);
         save.disabled = false;
-        save.textContent = 'Übernehmen';
+        save.textContent = @json(__('ui.rework_apply'));
         cleanup(null);
       }
     };
@@ -1860,11 +1861,11 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
     const croppedFile = await openCropper(form, input, selectedFile);
     if (!croppedFile) return;
 
-    const originalTitle = trigger?.getAttribute('title') || 'Titelbild ändern';
+    const originalTitle = trigger?.getAttribute('title') || @json(__('ui.rework_profile_cover_change'));
 
     if (trigger) {
       trigger.setAttribute('aria-busy', 'true');
-      trigger.setAttribute('title', 'Lädt...');
+      trigger.setAttribute('title', @json(__('ui.rework_loading')));
     }
 
     try {
@@ -1900,7 +1901,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
       }
     } catch (error) {
       console.error('[HNT] Profile cover crop upload failed:', error);
-      window.alert('Titelbild konnte nicht hochgeladen werden.');
+      window.alert(@json(__('ui.rework_profile_cover_upload_failed')));
     } finally {
       if (trigger) {
         trigger.removeAttribute('aria-busy');
@@ -1935,11 +1936,11 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
         <div aria-hidden="true" class="post-composer-grip"></div>
         <header class="profile-avatar-crop-head post-composer-header">
           <div class="post-composer-titleblock">
-            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>HNT PROFIL</span>
-            <h2 id="profile-avatar-crop-title">Avatar zuschneiden</h2>
-            <p>Ziehe dein Bild in den Rahmen. Das Ergebnis wird quadratisch gespeichert.</p>
+            <span class="composer-eyebrow"><span aria-hidden="true" class="composer-dot"></span>{{ __('ui.rework_profile_crop_kicker') }}</span>
+            <h2 id="profile-avatar-crop-title">{{ __('ui.rework_profile_avatar_crop_title') }}</h2>
+            <p>{{ __('ui.rework_profile_avatar_crop_text') }}</p>
           </div>
-          <button type="button" class="profile-avatar-crop-close post-composer-close" data-profile-avatar-crop-cancel aria-label="Avatar zuschneiden schließen">
+          <button type="button" class="profile-avatar-crop-close post-composer-close" data-profile-avatar-crop-cancel aria-label="{{ __('ui.rework_profile_avatar_crop_close') }}">
             <i aria-hidden="true" class="ph ph-x ph-icon"></i>
           </button>
         </header>
@@ -1954,8 +1955,8 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
             <input type="range" min="1" max="3" step="0.01" value="1" data-profile-avatar-crop-zoom>
           </label>
           <div class="profile-avatar-crop-actions">
-            <button type="button" class="composer-cancel" data-profile-avatar-crop-cancel>Abbrechen</button>
-            <button type="button" class="composer-submit" data-profile-avatar-crop-save>Übernehmen</button>
+            <button type="button" class="composer-cancel" data-profile-avatar-crop-cancel>{{ __('ui.preview_action_cancel') }}</button>
+            <button type="button" class="composer-submit" data-profile-avatar-crop-save>{{ __('ui.rework_apply') }}</button>
           </div>
         </footer>
       </section>
@@ -2115,7 +2116,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 
     save.onclick = async () => {
       save.disabled = true;
-      save.textContent = 'Speichert...';
+      save.textContent = @json(__('ui.rework_saving'));
 
       try {
         const size = rendered();
@@ -2144,7 +2145,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 
         canvas.toBlob((blob) => {
           save.disabled = false;
-          save.textContent = 'Übernehmen';
+          save.textContent = @json(__('ui.rework_apply'));
 
           if (!blob) {
             cleanup(null);
@@ -2156,7 +2157,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
       } catch (error) {
         console.error('[HNT] Avatar crop failed:', error);
         save.disabled = false;
-        save.textContent = 'Übernehmen';
+        save.textContent = @json(__('ui.rework_apply'));
         cleanup(null);
       }
     };
@@ -2175,11 +2176,11 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
     const croppedFile = await openCropper(input, selectedFile);
     if (!croppedFile) return;
 
-    const originalTitle = trigger?.getAttribute('title') || 'Avatar ändern';
+    const originalTitle = trigger?.getAttribute('title') || @json(__('ui.rework_profile_avatar_change'));
 
     if (trigger) {
       trigger.setAttribute('aria-busy', 'true');
-      trigger.setAttribute('title', 'Lädt...');
+      trigger.setAttribute('title', @json(__('ui.rework_loading')));
     }
 
     try {
@@ -2213,7 +2214,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
       }
     } catch (error) {
       console.error('[HNT] Profile avatar crop upload failed:', error);
-      window.alert('Avatar konnte nicht hochgeladen werden.');
+      window.alert(@json(__('ui.rework_profile_avatar_upload_failed')));
     } finally {
       if (trigger) {
         trigger.removeAttribute('aria-busy');

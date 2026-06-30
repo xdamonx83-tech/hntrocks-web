@@ -73,10 +73,10 @@
     $firstReactionName = $reactionUsers[0]['name'] ?? null;
     $remainingReactionCount = max($reactionCount - 1, 0);
     $reactionSummary = $reactionCount <= 0
-        ? 'Noch keine Reaktionen'
+        ? __('ui.rework_no_reactions')
         : ($firstReactionName
-            ? 'Liked by '.$firstReactionName.($remainingReactionCount > 0 ? ' und '.$formatCount($remainingReactionCount).' andere' : '')
-            : $formatCount($reactionCount).' Reaktionen');
+            ? __('ui.rework_liked_by', ['name' => $firstReactionName, 'others' => $remainingReactionCount > 0 ? __('ui.rework_liked_by_others', ['count' => $formatCount($remainingReactionCount)]) : ''])
+            : __('ui.rework_reaction_count', ['count' => $formatCount($reactionCount)]));
     $allComments = ($post->relationLoaded('comments') ? $post->comments : collect())->sortBy('created_at')->values();
     $commentsById = $allComments->keyBy(fn ($item) => (int) $item->id);
     $rootIdFor = function ($comment) use ($commentsById): int {
@@ -256,12 +256,12 @@
 <header class="post-head">
 <a href="{{ $postAuthorUrl($author) }}"><img alt="{{ $authorName }}" class="avatar" src="{{ $authorAvatar }}"/></a>
 <div class="post-user"><a href="{{ $postAuthorUrl($author) }}"><strong>{{ $authorName }}</strong></a><span>{{ $authorMeta }} - {{ $post->team?->name ?: $visibilityLabel }}</span></div>
-<a class="btn large" href="{{ $postUrl }}">Öffnen</a>
+<a class="btn large" href="{{ $postUrl }}">{{ __('ui.rework_open') }}</a>
 <div class="post-options action-menu">
-<a aria-expanded="false" aria-label="Post-Optionen öffnen" class="more" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-dots-three ph-icon"></i></a>
-<div aria-label="Post-Optionen" class="post-dropdown" role="menu">
-<a href="{{ $postUrl }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-arrow-square-out ph-icon"></i></span><strong>Post öffnen</strong></a>
-<a href="{{ $postAuthorUrl($author) }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-user ph-icon"></i></span><strong>Profil öffnen</strong></a>
+<a aria-expanded="false" aria-label="{{ __('ui.rework_post_options_open') }}" class="more" data-dropdown-toggle="" href="#"><i aria-hidden="true" class="ph ph-dots-three ph-icon"></i></a>
+<div aria-label="{{ __('ui.rework_post_options') }}" class="post-dropdown" role="menu">
+<a href="{{ $postUrl }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-arrow-square-out ph-icon"></i></span><strong>{{ __('ui.rework_post_open') }}</strong></a>
+<a href="{{ $postAuthorUrl($author) }}" role="menuitem"><span><i aria-hidden="true" class="ph ph-user ph-icon"></i></span><strong>{{ __('ui.rework_profile_open') }}</strong></a>
 @if($isOwnPost)
 <a
     href="#"
@@ -272,14 +272,14 @@
     data-post-visibility="{{ $post->isTeamPost() ? 'team' : $post->visibility }}"
     data-post-background-style="{{ $post->background_style ?: 'none' }}"
     data-post-feeling-key="{{ $post->feeling_key ?: 'none' }}"
-><span><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i></span><strong>Bearbeiten</strong></a>
-<a href="#" role="menuitem" data-rework-post-delete-trigger data-delete-form="rework-post-delete-{{ $post->id }}"><span><i aria-hidden="true" class="ph ph-trash ph-icon"></i></span><strong>Löschen</strong></a>
+><span><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i></span><strong>{{ __('ui.preview_action_edit') }}</strong></a>
+<a href="#" role="menuitem" data-rework-post-delete-trigger data-delete-form="rework-post-delete-{{ $post->id }}"><span><i aria-hidden="true" class="ph ph-trash ph-icon"></i></span><strong>{{ __('ui.preview_comment_delete') }}</strong></a>
 <form id="rework-post-delete-{{ $post->id }}" action="{{ route('feed.destroy', $post) }}" method="post" hidden>
 @csrf
 @method('DELETE')
 </form>
 @endif
-<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></span><strong>Merken</strong></a>
+<a href="#" role="menuitem"><span><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></span><strong>{{ __('ui.rework_save_post') }}</strong></a>
 @if(! $postAlreadyReported && (int) $post->user_id !== (int) auth()->id())
 <a
     href="#"
@@ -299,7 +299,7 @@
 <div class="rework-post-feeling">
 <span>{{ $feelingMeta['emoji'] ?? '✨' }}</span>
 <strong>{{ $authorName }}</strong>
-<em>fühlt sich {{ $feelingMeta['label'] ?? 'bereit' }}</em>
+<em>{{ __('ui.rework_feels_with_label', ['label' => $feelingMeta['label'] ?? __('ui.rework_feeling_ready')]) }}</em>
 </div>
 @endif
 @if($poll && $pollOptions->isNotEmpty())
@@ -327,7 +327,7 @@
 </form>
 @endforeach
 </div>
-<span class="rework-post-poll-total">{{ number_format((int) $pollTotalVotes) }} Stimmen</span>
+<span class="rework-post-poll-total">{{ __('ui.rework_poll_votes', ['count' => number_format((int) $pollTotalVotes)]) }}</span>
 </div>
 @endif
 </div>
@@ -337,7 +337,7 @@
 @if($firstMedia->isVideo())
 <video controls playsinline preload="metadata" src="{{ $firstMediaUrl }}"></video>
 @else
-<button aria-label="Post mit Bild öffnen" class="post-media-trigger" data-comment-modal-open type="button">
+<button aria-label="{{ __('ui.rework_post_image_open') }}" class="post-media-trigger" data-comment-modal-open type="button">
 <img alt="{{ $firstMediaAlt }}" src="{{ $firstMediaUrl }}"/>
 </button>
 @endif
@@ -356,15 +356,15 @@
     data-reaction-count="{{ $reactionCount }}"
     type="button"
 ><i aria-hidden="true" class="ph ph-heart ph-icon"></i></button>
-<a aria-label="Kommentare öffnen" data-comment-modal-open href="#"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i></a>
-<a aria-label="Teilen" href="#"><i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i></a>
-<a aria-label="Merken" href="#"><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></a>
+<a aria-label="{{ __('ui.rework_comments_open') }}" data-comment-modal-open href="#"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i></a>
+<a aria-label="{{ __('ui.rework_share') }}" href="#"><i aria-hidden="true" class="ph ph-paper-plane-tilt ph-icon"></i></a>
+<a aria-label="{{ __('ui.rework_save_post') }}" href="#"><i aria-hidden="true" class="ph ph-bookmark-simple ph-icon"></i></a>
 </div>
 @if($post->ai_user_declared || $post->ai_detected_possible || $post->admin_confirmed_ai)
 <div class="ai-pill"><img alt="" src="{{ $reworkAsset('images/bounty-mark.png') }}"/>KI-Inhalt</div>
 @endif
 <div class="metrics">
-<span class="metric"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>{{ $formatCount($commentCount) }} Kommentare</span>
+<span class="metric"><i aria-hidden="true" class="ph ph-chat-circle ph-icon"></i>{{ __('ui.rework_comment_count', ['count' => $formatCount($commentCount)]) }}</span>
 <span class="metric"><i aria-hidden="true" class="ph ph-share-network ph-icon"></i>{{ $formatCount($shareCount) }} Shares</span>
 </div>
 </div>
@@ -387,7 +387,7 @@
 <div class="post-text rework-post-body {{ $shouldReadMore ? 'is-collapsed can-expand' : 'is-static' }}" data-rework-post-body>
 <div class="rework-post-body-content">{!! $bodyHtml !!}</div>
 @if($shouldReadMore)
-<button class="rework-read-more" data-rework-read-more data-more-label="Mehr lesen" data-less-label="Weniger lesen" type="button">Mehr lesen</button>
+<button class="rework-read-more" data-rework-read-more data-more-label="{{ __('ui.rework_read_more') }}" data-less-label="{{ __('ui.rework_read_less') }}" type="button">{{ __('ui.rework_read_more') }}</button>
 @endif
 </div>
 @endif

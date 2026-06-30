@@ -1,3 +1,22 @@
+const reworkI18n = (() => {
+  const labels = {};
+  document.querySelectorAll('script[type="application/json"][data-rework-i18n]').forEach((script) => {
+    try {
+      Object.assign(labels, JSON.parse(script.textContent || '{}'));
+    } catch (error) {
+      // Keep neutral fallbacks if a page provides malformed optional labels.
+    }
+  });
+  return labels;
+})();
+
+const reworkLabel = (key, fallback = '', replacements = {}) => {
+  let value = reworkI18n[key] || fallback;
+  Object.entries(replacements).forEach(([name, replacement]) => {
+    value = String(value).replaceAll(`__${name}__`, String(replacement));
+  });
+  return value;
+};
 
     const closeAllDropdowns = () => {
       document.querySelectorAll('.action-menu.is-open').forEach((openMenu) => {
@@ -410,7 +429,7 @@
         if (context.feeling?.label) {
           const feeling = document.createElement('div');
           feeling.className = 'rework-post-feeling';
-          feeling.innerHTML = `<span>${context.feeling.emoji || '✨'}</span><strong>${context.author || 'HNT Hunter'}</strong><em>fühlt sich ${context.feeling.label}</em>`;
+          feeling.innerHTML = `<span>${context.feeling.emoji || '✨'}</span><strong>${context.author || 'HNT Hunter'}</strong><em>${reworkLabel('feelsWithLabel', 'is feeling __label__', { label: context.feeling.label })}</em>`;
           modalExtra.appendChild(feeling);
         }
 
@@ -444,7 +463,7 @@
 
           const total = document.createElement('span');
           total.className = 'rework-post-poll-total';
-          total.textContent = `${formatCount(context.poll.total_votes || 0)} Stimmen`;
+          total.textContent = reworkLabel('pollVotes', '__count__ votes', { count: formatCount(context.poll.total_votes || 0) });
           poll.appendChild(total);
           modalExtra.appendChild(poll);
         }
@@ -1021,7 +1040,7 @@
         .filter(Boolean);
 
       if (!body && files.length === 0 && !(pollQuestion && pollOptions.length >= 2)) {
-        showComposerError('Schreib etwas, wähle Medien aus oder erstelle eine Umfrage mit mindestens zwei Antworten.');
+        showComposerError(reworkLabel('composerBodyRequired', 'Write something, attach media or create a poll with at least two answers.'));
         postComposerTextarea?.focus();
         return;
       }
@@ -1430,16 +1449,16 @@
             setSettingsStatus(payload.message || settingsLabels.settingsLabelValidation || 'Bitte prüfe die markierten Felder.', true);
             return;
           }
-          throw new Error(payload.message || settingsLabels.settingsLabelSaveFailed || 'Einstellungen konnten nicht gespeichert werden.');
+          throw new Error(payload.message || settingsLabels.settingsLabelSaveFailed || reworkLabel('settingsSaveFailed', 'Settings could not be saved.'));
         }
 
         if (form.querySelector('input[type="password"]')) {
           form.querySelectorAll('input[type="password"]').forEach((input) => { input.value = ''; });
         }
 
-        setSettingsStatus(payload.message || form.getAttribute('data-settings-success-label') || settingsLabels.settingsLabelSaved || 'Gespeichert.');
+        setSettingsStatus(payload.message || form.getAttribute('data-settings-success-label') || settingsLabels.settingsLabelSaved || reworkLabel('settingsSaved', 'Saved.'));
       } catch (error) {
-        setSettingsStatus(error?.message || settingsLabels.settingsLabelSaveFailed || 'Einstellungen konnten nicht gespeichert werden.', true);
+        setSettingsStatus(error?.message || settingsLabels.settingsLabelSaveFailed || reworkLabel('settingsSaveFailed', 'Settings could not be saved.'), true);
       } finally {
         buttons.forEach((button) => {
           button.disabled = false;
@@ -2964,7 +2983,7 @@
 
     if (!body && files.length === 0 && !(pollQuestion && pollOptions.length >= 2)) {
       textarea?.focus();
-      window.alert('Schreib etwas, wähle Medien aus oder erstelle eine Umfrage mit mindestens zwei Antworten.');
+      window.alert(reworkLabel('composerBodyRequired', 'Write something, attach media or create a poll with at least two answers.'));
       return;
     }
 
@@ -3261,8 +3280,8 @@
         </div>
 
         <footer class="post-composer-footer">
-          <a class="composer-cancel" data-rework-post-edit-close href="#">Abbrechen</a>
-          <a class="composer-submit" data-rework-post-edit-save href="#">Speichern</a>
+          <a class="composer-cancel" data-rework-post-edit-close href="#">${reworkLabel('cancel', 'Cancel')}</a>
+          <a class="composer-submit" data-rework-post-edit-save href="#">${reworkLabel('save', 'Save')}</a>
         </footer>
       </section>
     `;
@@ -3288,7 +3307,7 @@
             <h2 id="rework-post-delete-title">Post löschen?</h2>
             <p>Der Post wird dauerhaft entfernt. Diese Aktion kann nicht rückgängig gemacht werden.</p>
           </div>
-          <button aria-label="Löschen schließen" class="post-composer-close" data-rework-post-delete-close type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+          <button aria-label="${reworkLabel('postDeleteClose', 'Close delete dialog')}" class="post-composer-close" data-rework-post-delete-close type="button"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
         </header>
 
         <div class="post-composer-body rework-post-delete-body">
@@ -3408,7 +3427,7 @@
     }
 
     if (save) {
-      save.textContent = 'Speichern';
+      save.textContent = reworkLabel('save', 'Save');
       save.setAttribute('aria-disabled', 'false');
     }
 
@@ -3465,7 +3484,7 @@
     const mediaCount = visibleExistingMediaCount() + selectedFiles.length;
 
     if (!body && mediaCount < 1 && !hasPoll) {
-      showEditError('Schreib etwas oder füge mindestens ein Medium hinzu.');
+      showEditError(reworkLabel('composerBodyOrMediaRequired', 'Write something or attach at least one media item.'));
       textarea.focus();
       return;
     }
@@ -3528,7 +3547,7 @@
       window.location.reload();
     } catch (error) {
       showEditError(error?.message || 'Post konnte nicht gespeichert werden.');
-      save.textContent = 'Speichern';
+      save.textContent = reworkLabel('save', 'Save');
       save.setAttribute('aria-disabled', 'false');
     }
   };
@@ -4074,25 +4093,12 @@
   if (window.__hntReworkLateStickyProfileActionsReady) return;
   window.__hntReworkLateStickyProfileActionsReady = true;
 
-  const labels = () => {
-    const lang = (document.documentElement.getAttribute('lang') || 'de').toLowerCase();
-
-    if (lang.startsWith('en')) {
-      return {
-        open: 'Open profile',
-        edit: 'Edit profile',
-        settings: 'Settings',
-        logout: 'Logout',
-      };
-    }
-
-    return {
-      open: 'Profil öffnen',
-      edit: 'Profil bearbeiten',
-      settings: 'Einstellungen',
-      logout: 'Logout',
-    };
-  };
+  const labels = () => ({
+      open: reworkLabel('profileOpen', 'Open profile'),
+      edit: reworkLabel('profileEdit', 'Edit profile'),
+      settings: reworkLabel('settings', 'Settings'),
+      logout: reworkLabel('logout', 'Logout'),
+    });
 
   const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
@@ -4273,7 +4279,7 @@
     formData.append('type', type);
     formData.append('image', file);
 
-    setStatus(type === 'cover' ? 'Cover wird gespeichert...' : 'Avatar wird gespeichert...');
+    setStatus(type === 'cover' ? reworkLabel('profileMediaCoverSaving', 'Cover is being saved...') : reworkLabel('profileMediaAvatarSaving', 'Avatar is being saved...'));
 
     try {
       const response = await fetch(endpoint, {
@@ -4290,14 +4296,14 @@
 
       if (!response.ok) {
         const firstError = payload?.errors ? Object.values(payload.errors).flat().filter(Boolean)[0] : null;
-        throw new Error(firstError || payload?.message || 'Upload fehlgeschlagen.');
+        throw new Error(firstError || payload?.message || reworkLabel('uploadFailed', 'Upload failed.'));
       }
 
       updateImages(payload);
-      setStatus(payload.message || 'Gespeichert.');
+      setStatus(payload.message || reworkLabel('saved', 'Saved.'));
       window.setTimeout(() => setStatus(''), 2200);
     } catch (error) {
-      setStatus(error?.message || 'Upload fehlgeschlagen.', true);
+      setStatus(error?.message || reworkLabel('uploadFailed', 'Upload failed.'), true);
     }
   };
 
@@ -4361,10 +4367,10 @@
     const results = Array.isArray(payload?.results) ? payload.results : [];
     const targetUrl = payload?.all_url || fullSearchUrl(query);
     allLink.href = targetUrl;
-    allLink.textContent = `Alle Ergebnisse für „${query}” anzeigen`;
+    allLink.textContent = reworkLabel('searchAllResultsFor', 'Show all results for "__query__"', { query });
 
     if (!results.length) {
-      list.innerHTML = '<div class="rework-search-suggestions-empty"><strong>Keine Schnelltreffer</strong><span>Enter zeigt die vollständige Suche.</span></div>';
+      list.innerHTML = `<div class="rework-search-suggestions-empty"><strong>${escapeHtml(reworkLabel('searchNoQuickResults', 'No quick results'))}</strong><span>${escapeHtml(reworkLabel('searchFullHint', 'Press Enter to show the full search.'))}</span></div>`;
       panel.hidden = false;
       return;
     }
@@ -4378,9 +4384,9 @@
         <a class="rework-search-suggestion" href="${escapeHtml(item.url || targetUrl)}">
           <span class="rework-search-suggestion-media">${media}</span>
           <span class="rework-search-suggestion-copy">
-            <strong>${escapeHtml(item.title || 'Treffer')}</strong>
+            <strong>${escapeHtml(item.title || reworkLabel('searchHit', 'Result'))}</strong>
             <span>${escapeHtml(item.subtitle || '')}</span>
-            <small>${escapeHtml(item.type || 'Suche')}</small>
+            <small>${escapeHtml(item.type || reworkLabel('searchLabel', 'Search'))}</small>
           </span>
         </a>
       `;
@@ -4519,9 +4525,9 @@
     clearInterval(processingTimer);
     processingTimer = null;
     dialog?.classList.remove('is-success', 'is-warning', 'is-danger');
-    if (kicker) kicker.textContent = 'Einreichung';
-    if (title) title.textContent = 'Upload startet ...';
-    if (text) text.textContent = 'Dein Screenshot wird hochgeladen.';
+    if (kicker) kicker.textContent = reworkLabel('cupSubmission', 'Submission');
+    if (title) title.textContent = reworkLabel('cupUploadStarts', 'Upload starts ...');
+    if (text) text.textContent = reworkLabel('cupUploadScreenshotUploading', 'Your screenshot is being uploaded.');
     if (result) {
       result.hidden = true;
       result.innerHTML = '';
@@ -4538,8 +4544,8 @@
   const showProcessing = (estimatedSeconds = 45) => {
     clearInterval(processingTimer);
     setStep('process');
-    if (title) title.textContent = 'Verarbeitung läuft ...';
-    if (text) text.textContent = 'Der Screenshot wird geprüft. Bitte nicht neu senden.';
+    if (title) title.textContent = reworkLabel('cupProcessingRunning', 'Processing ...');
+    if (text) text.textContent = reworkLabel('cupProcessingText', 'The screenshot is being checked. Please do not send it again.');
     let current = 75;
     setProgress(current);
 
@@ -4569,14 +4575,14 @@
     dialog?.classList.remove('is-success', 'is-warning', 'is-danger');
     dialog?.classList.add(resultTypeClass(type));
 
-    if (kicker) kicker.textContent = type === 'success' ? 'Gezählt' : (type === 'danger' ? 'Fehler' : 'Prüfung');
-    if (title) title.textContent = cupResult.title || (payload?.ok ? 'Einreichung verarbeitet' : 'Einreichung fehlgeschlagen');
-    if (text) text.textContent = cupResult.message || payload?.message || 'Die Einreichung wurde verarbeitet.';
+    if (kicker) kicker.textContent = type === 'success' ? reworkLabel('cupCounted', 'Counted') : (type === 'danger' ? reworkLabel('cupError', 'Error') : reworkLabel('cupReview', 'Review'));
+    if (title) title.textContent = cupResult.title || (payload?.ok ? reworkLabel('cupSubmissionProcessed', 'Submission processed') : reworkLabel('cupSubmissionFailed', 'Submission failed'));
+    if (text) text.textContent = cupResult.message || payload?.message || reworkLabel('cupSubmissionProcessedText', 'The submission has been processed.');
 
     const lines = [];
-    if (cupResult.status) lines.push(['Status', cupResult.status]);
-    if (cupResult.score) lines.push(['Score', cupResult.score]);
-    if (cupResult.summary) lines.push(['Prüfung', cupResult.summary]);
+    if (cupResult.status) lines.push([reworkLabel('cupStatus', 'Status'), cupResult.status]);
+    if (cupResult.score) lines.push([reworkLabel('cupScore', 'Score'), cupResult.score]);
+    if (cupResult.summary) lines.push([reworkLabel('cupCheck', 'Check'), cupResult.summary]);
 
     if (Array.isArray(cupResult.details)) {
       cupResult.details.forEach((item) => {
@@ -4603,9 +4609,9 @@
       message,
       result: {
         type: 'danger',
-        title: 'Einreichung fehlgeschlagen',
+        title: reworkLabel('cupSubmissionFailed', 'Submission failed'),
         message,
-        status: 'Nicht gespeichert',
+        status: reworkLabel('cupNotSaved', 'Not saved'),
       },
     });
   };
@@ -4631,7 +4637,7 @@
       if (!fileInput || !fileInput.files || !fileInput.files[0]) {
         openModal();
         resetModal();
-        showError('Bitte zuerst einen Screenshot auswählen.');
+        showError(reworkLabel('cupUploadSelectScreenshot', 'Please select a screenshot first.'));
         return;
       }
 
@@ -4640,7 +4646,7 @@
 
       if (button) {
         button.disabled = true;
-        button.textContent = 'Einreichung wird geprüft ...';
+        button.textContent = reworkLabel('cupSubmissionChecking', 'Submission is being checked ...');
       }
 
       const xhr = new XMLHttpRequest();
@@ -4654,8 +4660,8 @@
         if (!progressEvent.lengthComputable) return;
         const uploadPercent = Math.round((progressEvent.loaded / progressEvent.total) * 70);
         setStep('upload');
-        if (title) title.textContent = 'Upload läuft ...';
-        if (text) text.textContent = `${Math.round((progressEvent.loaded / progressEvent.total) * 100)}% hochgeladen.`;
+        if (title) title.textContent = reworkLabel('cupUploadUploading', 'Upload running ...');
+        if (text) text.textContent = reworkLabel('cupUploadUploaded', '__percent__% uploaded.', { percent: Math.round((progressEvent.loaded / progressEvent.total) * 100) });
         setProgress(uploadPercent);
       });
 
@@ -4671,23 +4677,23 @@
           showProcessing(payload?.estimated_total_seconds || 45);
           window.setTimeout(() => showResult(payload || { ok: true }, true), 500);
         } else {
-          const message = payload?.message || payload?.errors?.submission?.[0] || 'Die Einreichung konnte nicht verarbeitet werden.';
+          const message = payload?.message || payload?.errors?.submission?.[0] || reworkLabel('cupSubmissionCouldNotProcess', 'The submission could not be processed.');
           showError(message);
         }
       });
 
       xhr.addEventListener('error', () => {
-        showError('Netzwerkfehler beim Upload. Bitte erneut versuchen.');
+        showError(reworkLabel('cupUploadNetworkError', 'Network error during upload. Please try again.'));
       });
 
       xhr.addEventListener('abort', () => {
-        showError('Upload wurde abgebrochen.');
+        showError(reworkLabel('cupUploadAborted', 'Upload was cancelled.'));
       });
 
       xhr.addEventListener('loadend', () => {
         if (button) {
           button.disabled = false;
-          button.textContent = 'Einreichung speichern';
+          button.textContent = reworkLabel('cupSubmissionSave', 'Save submission');
         }
       });
 
@@ -4710,7 +4716,7 @@
     if (!url || !image) return;
 
     image.src = url;
-    if (title) title.textContent = shotTitle || 'Einreichung';
+    if (title) title.textContent = shotTitle || reworkLabel('cupSubmission', 'Submission');
     if (openNew) openNew.href = url;
 
     modal.hidden = false;
