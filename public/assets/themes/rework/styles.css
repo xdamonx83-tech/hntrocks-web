@@ -15622,3 +15622,390 @@ body.is-avatar-crop-open {
   }
 }
 /* /100: Cup overview chat card */
+
+/* 179 cup detail real hero: cover background, feed-like dark card, reduced gold */
+.rework-cup-hero-real {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 34px 40px 36px !important;
+  min-height: 0 !important;
+  background: #1e1e1d !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.rework-cup-hero-real .rework-cup-hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(26,26,24,.52) 0%, rgba(26,26,24,.78) 48%, #1e1e1d 100%),
+    linear-gradient(90deg, rgba(26,26,24,.96) 0%, rgba(26,26,24,.72) 42%, rgba(26,26,24,.92) 100%),
+    var(--cup-cover);
+  background-size: cover;
+  background-position: center top;
+  filter: saturate(.82) brightness(.72);
+  opacity: .92;
+  pointer-events: none;
+}
+
+.rework-cup-hero-real::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 44%;
+  background: linear-gradient(180deg, rgba(30,30,29,0), #1e1e1d 82%);
+  pointer-events: none;
+}
+
+.rework-cup-hero-real > *:not(.rework-cup-hero-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+.rework-cup-hero-real .cup-detail-hero-head {
+  margin-bottom: 52px !important;
+}
+
+.rework-cup-hero-real .cup-eyebrow {
+  color: rgba(207,161,73,.78) !important;
+  font-weight: 700 !important;
+}
+
+.rework-cup-hero-real h1 {
+  max-width: 760px;
+  font-size: 42px !important;
+  line-height: 1.06 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.025em !important;
+}
+
+.rework-cup-hero-real .rework-cup-hero-content {
+  max-width: 850px;
+  margin-left: auto;
+}
+
+.rework-cup-hero-real .cup-info-column {
+  display: block !important;
+}
+
+.rework-cup-hero-real .cup-title-row {
+  align-items: flex-start !important;
+  gap: 22px !important;
+}
+
+.rework-cup-hero-real .cup-title-row h2 {
+  font-size: 30px !important;
+  line-height: 1.12 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.02em !important;
+}
+
+.rework-cup-hero-real .cup-title-row span,
+.rework-cup-hero-real .cup-summary,
+.rework-cup-hero-real .cup-progress-label span,
+.rework-cup-hero-real .cup-bar-grid label {
+  color: rgba(242,232,216,.72) !important;
+  font-weight: 500 !important;
+}
+
+.rework-cup-hero-real .cup-summary {
+  max-width: 720px;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+.rework-cup-hero-real .cup-rarity {
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #f6f0e4 !important;
+  box-shadow: none !important;
+}
+
+.rework-cup-hero-real .rework-cup-hero-rules {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0 22px;
+}
+
+.rework-cup-hero-real .rework-cup-hero-rules span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(242,232,216,.78);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.rework-cup-hero-real .rework-cup-hero-rules i {
+  color: rgba(207,161,73,.72);
+}
+
+.rework-cup-hero-real .cup-progress span,
+.rework-cup-hero-real .cup-bar-grid i {
+  background: rgba(207,161,73,.48) !important;
+  box-shadow: none !important;
+}
+
+.rework-cup-hero-real .cup-progress,
+.rework-cup-hero-real .cup-bar-grid span {
+  background: rgba(255,255,255,.08) !important;
+}
+
+.rework-cup-hero-real .cup-stat-row span {
+  background: rgba(20,20,18,.72) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.rework-cup-hero-real .cup-stat-row small {
+  font-weight: 600 !important;
+  color: rgba(242,232,216,.60) !important;
+}
+
+.rework-cup-hero-real .cup-stat-row b {
+  font-weight: 700 !important;
+  color: #f6f0e4 !important;
+}
+
+.rework-cup-hero-real .cup-side-actions {
+  display: flex !important;
+  gap: 12px !important;
+  margin-top: 24px !important;
+}
+
+.rework-cup-hero-real .cup-side-actions .btn {
+  background: rgba(255,255,255,.09) !important;
+  background-image: none !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #f6f0e4 !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+}
+
+.rework-cup-hero-real .cup-side-actions .btn.ghost {
+  background: rgba(20,20,18,.64) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  color: rgba(242,232,216,.78) !important;
+}
+
+.rework-cup-hero-real .cup-more {
+  background: rgba(20,20,18,.72) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  color: #f6f0e4 !important;
+}
+
+.rework-cup-hero-real .cup-hero-options {
+  position: relative;
+}
+
+.rework-cup-hero-real .cup-hero-options .post-dropdown button {
+  width: 100%;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.rework-cup-hero-real .cup-hero-options .post-dropdown form {
+  margin: 0;
+}
+
+
+
+/* 180 cup detail hero visibility tuning */
+.rework-cup-hero-real .rework-cup-hero-bg {
+  background:
+    linear-gradient(180deg, rgba(26,26,24,.28) 0%, rgba(26,26,24,.58) 48%, #1e1e1d 100%),
+    linear-gradient(90deg, rgba(26,26,24,.88) 0%, rgba(26,26,24,.58) 42%, rgba(26,26,24,.82) 100%),
+    var(--cup-cover) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  filter: saturate(.92) brightness(.86) !important;
+  opacity: 1 !important;
+}
+
+.rework-cup-hero-real::after {
+  height: 36% !important;
+  background: linear-gradient(180deg, rgba(30,30,29,0), #1e1e1d 88%) !important;
+}
+
+.rework-cup-hero-real .cup-rarity {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: max-content !important;
+  padding: 11px 18px !important;
+  white-space: nowrap !important;
+  line-height: 1.1 !important;
+}
+
+.rework-cup-hero-real h1 {
+  text-shadow: 0 2px 18px rgba(0,0,0,.48) !important;
+}
+
+.rework-cup-hero-real .cup-title-row h2,
+.rework-cup-hero-real .cup-summary {
+  text-shadow: 0 2px 14px rgba(0,0,0,.42) !important;
+}
+
+/* 181 cup detail hero cleanup: remove fake progress UI/buttons and fix dropdown action row */
+.rework-cup-hero-real .cup-progress-wrap,
+.rework-cup-hero-real .cup-bar-grid {
+  display: none !important;
+}
+
+.rework-cup-hero-real .rework-cup-hero-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  margin-top: 24px !important;
+}
+
+.rework-cup-hero-real .rework-cup-hero-stats span {
+  min-height: 66px !important;
+  padding: 14px 18px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+
+.rework-cup-hero-real .rework-cup-hero-stats small {
+  font-size: 12px !important;
+  letter-spacing: .035em !important;
+}
+
+.rework-cup-hero-real .rework-cup-hero-stats b {
+  font-size: 15px !important;
+  line-height: 1.18 !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+.rework-cup-hero-real .cup-dropdown-form {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.rework-cup-hero-real .cup-dropdown-action {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: rgba(242,232,216,.92) !important;
+  font: inherit !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.rework-cup-hero-real .cup-dropdown-action span {
+  width: 34px !important;
+  height: 34px !important;
+  flex: 0 0 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  background: rgba(255,255,255,.07) !important;
+  color: rgba(242,232,216,.88) !important;
+}
+
+.rework-cup-hero-real .cup-dropdown-action strong {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+  color: inherit !important;
+}
+
+.rework-cup-hero-real .cup-dropdown-action:hover {
+  background: rgba(255,255,255,.06) !important;
+}
+
+.rework-cup-hero-real .cup-dropdown-action.is-danger span {
+  background: rgba(184,70,58,.16) !important;
+  color: rgba(255,210,204,.95) !important;
+}
+
+.rework-cup-hero-real .cup-dropdown-action.is-danger:hover {
+  background: rgba(184,70,58,.10) !important;
+}
+
+.rework-cup-hero-real .cup-hero-options .post-dropdown {
+  min-width: 230px !important;
+  padding: 10px !important;
+}
+
+@media (max-width: 900px) {
+  .rework-cup-hero-real .rework-cup-hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+
+/* 184 cup detail hero stat cards wrapping */
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+  gap: 14px !important;
+  margin-top: 28px !important;
+  align-items: stretch !important;
+}
+
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span {
+  min-height: 56px !important;
+  height: auto !important;
+  aspect-ratio: auto !important;
+  padding: 13px 18px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  text-align: left !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: rgba(18, 18, 17, .64) !important;
+  box-shadow: none !important;
+}
+
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span small {
+  flex: 0 0 auto !important;
+  display: block !important;
+  margin: 0 !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  letter-spacing: .055em !important;
+  white-space: nowrap !important;
+  color: rgba(242, 232, 216, .56) !important;
+  font-weight: 600 !important;
+}
+
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span b {
+  flex: 1 1 auto !important;
+  display: block !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.01em !important;
+  color: #f6f0e4 !important;
+  font-weight: 600 !important;
+  text-align: right !important;
+}
+
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span:nth-child(1) b,
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span:nth-child(2) b,
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span:nth-child(3) b,
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span:nth-child(4) b {
+  white-space: nowrap !important;
+}
+
+@media (max-width: 760px) {
+  .rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats {
+    grid-template-columns: 1fr !important;
+  }
+}

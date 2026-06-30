@@ -4502,4 +4502,14 @@ return [
     'rework_cups_empty_text' => 'There are no cups for these filters right now. Reset the filters or check back later.',
     'rework_filters_reset' => 'Reset filters',
 
+    'rework_cup_team_size_players' => ':count players per team',
+    'rework_cup_team_size_solo' => 'Solo',
+    'rework_cup_region_open' => 'Region open',
+
+    'rework_cup_tab_leaderboard' => 'Leaderboard',
+    'rework_cup_options' => 'Cup options',
+    'rework_cup_edit' => 'Edit cup',
+    'rework_cup_delete' => 'Delete cup',
+    'rework_cup_delete_confirm' => 'Really delete or archive this cup?',
+
 ];

@@ -1,61 +1,124 @@
 @extends('themes.rework.layouts.app')
 
-@section('title', 'Summer Cup · Cup · HNT.rocks')
+@section('title', $cup->title.' · Cup · HNT.rocks')
 @section('body_class', 'cup-detail-page')
 @section('left_col_class', 'cup-detail-left')
 
 @section('content')
 
-<section class="cup-detail-hero card">
-<div class="cup-detail-hero-head">
-<div>
-<span class="cup-eyebrow">HNT Cup</span>
-<h1>Summer Cup</h1>
-</div>
-<a aria-label="{{ __('ui.rework_cup_menu_aria') }}" class="cup-more" href="#"><i aria-hidden="true" class="ph ph-dots-three ph-icon"></i></a>
-</div>
-<div class="cup-detail-main">
-<div class="cup-visual-column">
-<div class="cup-emblem">
-<img alt="Summer Cup" src="{{ \App\Support\HntTheme::asset('images/bounty-mark.png', 'rework') }}"/>
-</div>
-<div class="cup-skill-list">
-<span><i aria-hidden="true" class="ph ph-trophy ph-icon"></i> {{ __('ui.rework_cup_trophies') }}</span>
-<span><i aria-hidden="true" class="ph ph-crosshair ph-icon"></i> Hunter-Kills</span>
-<span><i aria-hidden="true" class="ph ph-image-square ph-icon"></i> Screenshots</span>
-</div>
-<div class="cup-side-actions">
-<a class="btn" href="#">{{ __('ui.rework_cup_register_team') }}</a>
-<a class="btn ghost" href="#">{{ __('ui.rework_cup_submission') }}</a>
-</div>
-</div>
-<div class="cup-info-column">
-<div class="cup-title-row">
-<div>
-<h2>HNT Summer Cup</h2>
-<span>Trio Console · PS5/Xbox · EU</span>
-</div>
-<strong class="cup-rarity">{{ __('ui.rework_cup_registration_open') }}</strong>
-</div>
-<p class="cup-summary">Erste Trophäen-Extraktion zählt, Hunter-Kills bringen Bonuspunkte. Captains laden Screenshots hoch und halten ihr Trio sauber im Rennen.</p>
-<div class="cup-progress-wrap">
-<div class="cup-progress-label"><span>{{ __('ui.rework_cup_participants') }}</span><strong>18 / 32 Teams</strong></div>
-<div class="cup-progress"><span style="width:56%"></span><em>56%</em></div>
-</div>
-<div class="cup-stat-row">
-<span><small>{{ __('ui.rework_cup_period') }}</small><b>26.06.–05.07.</b></span>
-<span><small>{{ __('ui.rework_cup_mode') }}</small><b>Trio</b></span>
-<span><small>{{ __('ui.rework_cup_status') }}</small><b>{{ __('ui.rework_cup_planned') }}</b></span>
-</div>
-<div class="cup-bar-grid">
-<div><label>{{ __('ui.rework_cup_tab_my_submissions') }}</label><span><i style="width:68%"></i></span></div>
-<div><label>Leaderboard</label><span><i style="width:42%"></i></span></div>
-<div><label>{{ __('ui.rework_cup_chat_activity') }}</label><span><i style="width:74%"></i></span></div>
-<div><label>{{ __('ui.rework_cup_prize_pool') }}</label><span><i style="width:100%"></i></span></div>
-</div>
-</div>
-</div>
+@php
+    $activeTeamCount = (int) ($cup->active_teams_count ?? $cup->activeTeams()->count());
+    $participantLimit = $cup->participantLimit();
+
+    $participantLabel = $participantLimit
+        ? __('ui.rework_cup_teams_limited_count', ['count' => $activeTeamCount, 'limit' => $participantLimit])
+        : __('ui.rework_cup_teams_count', ['count' => $activeTeamCount]);
+
+    $teamSize = (int) ($cup->team_size ?? 0);
+    $teamSizeLabel = $teamSize > 1
+        ? trans_choice('ui.rework_cup_team_size_players', $teamSize, ['count' => $teamSize])
+        : __('ui.rework_cup_team_size_solo');
+
+    $platforms = $cup->allowedPlatforms();
+    $platformLabel = $platforms !== []
+        ? implode(' / ', $platforms)
+        : (trim((string) $cup->platform) !== '' ? trim((string) $cup->platform) : __('ui.cup_all_platforms'));
+
+    $regionLabel = trim((string) $cup->region) !== ''
+        ? trim((string) $cup->region)
+        : __('ui.rework_cup_region_open');
+
+    $metaParts = array_values(array_filter([$teamSizeLabel, $platformLabel, $regionLabel]));
+
+    $statusLabel = $cup->isSubmissionOpen()
+        ? __('ui.cup_status_active')
+        : ($cup->isRegistrationOpen() ? __('ui.rework_cup_registration_open') : $cup->statusLabel());
+
+    if ($cup->starts_at && $cup->ends_at) {
+        $periodLabel = $cup->starts_at->translatedFormat('d.m.').'–'.$cup->ends_at->translatedFormat('d.m.Y');
+    } elseif ($cup->starts_at) {
+        $periodLabel = $cup->starts_at->translatedFormat('d.m.Y');
+    } elseif ($cup->ends_at) {
+        $periodLabel = __('ui.rework_cup_until_date', ['date' => $cup->ends_at->translatedFormat('d.m.Y')]);
+    } else {
+        $periodLabel = __('ui.rework_cup_date_open');
+    }
+
+
+
+
+
+    $ruleRows = collect($cup->rulesSummary())->take(3)->values();
+    if ($ruleRows->isEmpty()) {
+        $ruleRows = collect([
+            $teamSizeLabel,
+            $platformLabel,
+            __('ui.rework_cup_tab_submit'),
+        ]);
+    }
+
+    $coverUrl = $cup->coverUrl();
+@endphp
+
+<section class="cup-detail-hero card rework-cup-hero-real" style="--cup-cover: url('{{ $coverUrl }}');">
+    <div class="rework-cup-hero-bg" aria-hidden="true"></div>
+
+    <div class="cup-detail-hero-head">
+        <div>
+            <span class="cup-eyebrow">HNT Cup</span>
+            <h1>{{ $cup->title }}</h1>
+        </div>
+
+        @if($canManage)
+            <div class="post-options action-menu cup-hero-options">
+                <a aria-expanded="false" aria-label="{{ __('ui.rework_cup_options') }}" class="more cup-more" data-dropdown-toggle href="#">
+                    <i aria-hidden="true" class="ph ph-dots-three ph-icon"></i>
+                </a>
+                <div aria-label="{{ __('ui.rework_cup_options') }}" class="post-dropdown" role="menu">
+                    <a href="{{ route('cups.edit', $cup) }}" role="menuitem">
+                        <span><i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i></span>
+                        <strong>{{ __('ui.rework_cup_edit') }}</strong>
+                    </a>
+                    <form action="{{ route('cups.destroy', $cup) }}" class="cup-dropdown-form" method="post" onsubmit="return confirm('{{ __('ui.rework_cup_delete_confirm') }}');">
+                        @csrf
+                        @method('DELETE')
+                        <button class="cup-dropdown-action is-danger" type="submit" role="menuitem">
+                            <span><i aria-hidden="true" class="ph ph-trash ph-icon"></i></span>
+                            <strong>{{ __('ui.rework_cup_delete') }}</strong>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <div class="rework-cup-hero-content">
+        <div class="cup-info-column">
+            <div class="cup-title-row">
+                <div class="cup-title-meta">
+                    <span>{{ implode(' · ', $metaParts) }}</span>
+                </div>
+                <strong class="cup-rarity">{{ $statusLabel }}</strong>
+            </div>
+
+            <p class="cup-summary">{{ $cup->displaySummary() }}</p>
+
+            <div class="rework-cup-hero-rules">
+                @foreach($ruleRows as $ruleRow)
+                    <span><i aria-hidden="true" class="ph ph-check-circle ph-icon"></i> {{ $ruleRow }}</span>
+                @endforeach
+            </div>
+
+            <div class="cup-stat-row rework-cup-hero-stats">
+                <span><small>{{ __('ui.rework_cup_participants') }}</small><b>{{ $participantLabel }}</b></span>
+                <span><small>{{ __('ui.rework_cup_period') }}</small><b>{{ $periodLabel }}</b></span>
+                <span><small>{{ __('ui.rework_cup_mode') }}</small><b>{{ $teamSizeLabel }}</b></span>
+                <span><small>{{ __('ui.rework_cup_status') }}</small><b>{{ $statusLabel }}</b></span>
+            </div>
+        </div>
+    </div>
 </section>
+
 <section class="card cup-detail-tabs-card">
     <div aria-label="{{ __('ui.rework_cup_sections_aria') }}" class="cup-detail-tabs" role="tablist">
         <a class="active" data-cup-detail-tab="overview" href="#cup-overview">{{ __('ui.rework_cup_tab_overview') }}</a>
