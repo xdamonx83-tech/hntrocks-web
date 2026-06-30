@@ -468,7 +468,7 @@ a { color: inherit; }
   margin: 0;
   font-family: var(--font-body);
   font-weight: 800;
-  font-size: 34px;
+  font-size: 25px;
   line-height: 38px;
   letter-spacing: .01em;
   text-transform: capitalize;
@@ -3673,7 +3673,7 @@ body.is-modal-open { overflow: hidden; }
 .members-head h1 {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 30px;
+  font-size: 25px;
   line-height: 38px;
   font-weight: 900;
   color: #fff;
@@ -6079,7 +6079,7 @@ body.is-modal-open { overflow: hidden; }
 .cup-panel-head h2 {
   margin: 0;
   color: #F6F0E4;
-  font-size: 24px;
+  font-size: 18px;
   line-height: 30px;
   font-weight: 900;
   letter-spacing: -.03em;
@@ -6482,7 +6482,7 @@ body.is-modal-open { overflow: hidden; }
 }
 .cup-overview-card {
   overflow:hidden;
-  background:#20201E;
+  background: var(--surface);
   border-radius:20px;
   min-height:230px;
   transition:transform .16s ease, background .16s ease;
@@ -6511,7 +6511,7 @@ body.is-modal-open { overflow: hidden; }
 }
 .cup-card-title h2 {
   margin:0;
-  font-size:18px;
+  font-size:13px;
   line-height:1.2;
   font-weight:900;
   letter-spacing:-.035em;
@@ -6618,8 +6618,7 @@ body.is-modal-open { overflow: hidden; }
   grid-template-columns: 54px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 18px;
-  background: linear-gradient(135deg, rgba(207,161,73,.10), rgba(32,32,30,.96));
-  border: 1px solid rgba(207,161,73,.22);
+
   border-radius: 12px;
 }
 .hall-cta-icon {
@@ -6628,7 +6627,7 @@ body.is-modal-open { overflow: hidden; }
   border-radius: 16px;
   display: grid;
   place-items: center;
-  background: rgba(207,161,73,.13);
+ background: rgb(23 23 21);
   color: var(--accent);
   font-size: 27px;
 }
@@ -15346,14 +15345,14 @@ body.is-avatar-crop-open {
 }
 
 .cup-overview-chat-card .cup-panel-head h2 {
-  font-size: 30px !important;
+  font-size: 18px !important;
   line-height: 1.05 !important;
   margin-top: 8px !important;
 }
 
 .cup-overview-chat-card .cup-panel-head p {
   max-width: 640px;
-  font-size: 15px !important;
+  font-size: 12px !important;
   line-height: 1.45 !important;
   margin-top: 10px !important;
 }
@@ -15471,9 +15470,9 @@ body.is-avatar-crop-open {
 }
 
 .cup-chat-message.is-own .cup-chat-bubble {
-  border-color: rgba(214, 168, 79, 0.22);
-  background: rgba(214, 168, 79, 0.08);
-  border-radius: 11px 11px 4px 11px;
+    border-color: rgb(45 43 35);
+    background: rgb(23 23 21);
+    border-radius: 11px 11px 4px 11px;
 }
 
 .cup-chat-bubble p {
@@ -15566,19 +15565,11 @@ body.is-avatar-crop-open {
 }
 
 .cup-chat-compose button.btn {
-  min-width: 0;
-  min-height: 38px !important;
-  height: 38px !important;
-  align-self: start;
-  justify-content: center;
-  border-radius: 11px;
-  background: #d6a84f !important;
-  color: #141412 !important;
-  border-color: #d6a84f !important;
-  font-weight: 800;
-  font-size: 12px !important;
-  line-height: 1 !important;
-  padding: 0 12px !important;
+    background: var(--button-test-bg) !important;
+    background-image: none !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
 }
 
 .cup-chat-compose button.btn i {
