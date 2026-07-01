@@ -2,6 +2,7 @@
     $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
     $reworkStyleVersion = $reworkStyleVersion ?? (@filemtime(public_path('assets/themes/rework/styles.css')) ?: time());
     $reworkScriptVersion = $reworkScriptVersion ?? (@filemtime(public_path('assets/themes/rework/script.js')) ?: time());
+    $reworkChatTabsVersion = $reworkChatTabsVersion ?? (@filemtime(public_path('assets/socialite/js/hnt-socialite-chat-tabs.js')) ?: time());
     $reworkBodyClass = trim($__env->yieldContent('body_class'));
     $reworkLeftColClass = trim($__env->yieldContent('left_col_class'));
 @endphp
@@ -89,6 +90,9 @@
     'cupNotSaved' => __('ui.rework_cup_not_saved'),
 ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 <script src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}" defer></script>
+@auth
+<script defer src="{{ asset('assets/socialite/js/hnt-socialite-chat-tabs.js') }}?v={{ $reworkChatTabsVersion }}"></script>
+@endauth
 @stack('rework-scripts')
 </body>
 </html>
