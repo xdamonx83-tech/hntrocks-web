@@ -1,9 +1,3 @@
-@extends('themes.rework.layouts.app')
-
-@section('title', __('ui.rework_profile_page_title'))
-@section('body_class', 'profile-page')
-@section('left_col_class', 'profile-left')
-
 @php
     /* HNT static profile real hero media vars v1 */
     $viewer = auth()->user();
@@ -45,12 +39,38 @@
         && (bool) ($profileCanMessage ?? false)
         && \Illuminate\Support\Facades\Route::has('messages.with-user');
     $profileMessageStartUrl = $profileMessageEnabled ? route('messages.with-user', $profileUser) : '#';
+    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
 @endphp
 
-@section('content')
+<!DOCTYPE html>
+
+<html lang="{{ $currentLocale }}">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>{{ __('ui.rework_profile_page_title') }}</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700&amp;family=Bakbak+One&amp;family=Montserrat:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" rel="stylesheet"/>
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css" rel="stylesheet"/>
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css" rel="stylesheet"/>
+<link href="{{ \App\Support\HntTheme::asset('styles.css', 'rework') }}?v={{ $reworkStyleVersion }}" rel="stylesheet"/>
+
+
+
+
+
+</head>
+<body class="profile-page">
+<div class="app">
+@include('themes.rework.partials.sidebar')
+<main class="main">
+@include('themes.rework.partials.topbar')
+<section class="content-grid">
+<div class="left-col">
 <section class="card hnt-profile-hero">
-<div class="hnt-profile-cover" data-rework-profile-cover>
-<img alt="" class="hnt-profile-cover-image" data-rework-profile-cover-image src="{{ $profileCoverUrl }}">
+<div class="hnt-profile-cover" data-rework-profile-cover style="background-image: linear-gradient(180deg, rgba(17,17,15,.08), rgba(17,17,15,.76)), url('{{ $profileCoverUrl }}');">
 <div class="cover-glow"></div>
 <!-- HNT profile cover upload v1 -->
 @if($isOwnProfile)
@@ -491,15 +511,16 @@
 </section>
 </div>
 
-@endsection
 
-@push('rework-modals')
+</div>
+</div>
+@include('themes.rework.partials.right-widgets')
+</section>
+</main>
+</div>
 @include('themes.rework.feed.partials.post-modals')
 @include('themes.rework.profile.partials.profile-edit-modal')
-@include('themes.socialite.partials.chat-tabs')
-@endpush
-
-@push('rework-scripts')
+@include('themes.rework.feed.partials.settings-modal')
 <script>
 (() => {
   if (window.__hntStaticProfileTabsNoReloadReady) return;
@@ -612,6 +633,10 @@
 </script>
 <!-- /HNT static profile tabs no reload v1 -->
 
+<!-- HNT static profile real feed post modals v2 safe -->
+@include('themes.rework.feed.partials.post-modals')
+
+<script src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion ?? time() }}" defer></script>
 <script>
 (() => {
   if (window.__hntProfilePostsAjaxLoadMoreReady) return;
@@ -718,6 +743,8 @@
 })();
 </script>
 <!-- /HNT static profile posts ajax load more v1 -->
+@include('themes.socialite.partials.chat-tabs')
+<script defer src="{{ asset('assets/socialite/js/hnt-socialite-chat-tabs.js') }}?v={{ $socialiteChatTabsVersion ?? time() }}"></script>
 <script>
 (() => {
   if (window.__hntProfileMessageChatTabBridgeReady) return;
@@ -1187,10 +1214,6 @@
           cover.style.backgroundSize = '100% 100%';
           cover.style.backgroundPosition = 'center center';
         });
-
-        document.querySelectorAll('[data-rework-profile-cover-image]').forEach((coverImage) => {
-          coverImage.src = cacheBust;
-        });
       }
     } catch (error) {
       console.error('[HNT] Profile cover crop upload failed:', error);
@@ -1519,4 +1542,5 @@
 </script>
 <!-- /HNT profile avatar crop upload v1 -->
 
-@endpush
+</body>
+</html>

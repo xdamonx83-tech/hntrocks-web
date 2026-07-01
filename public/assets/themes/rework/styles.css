@@ -11927,7 +11927,7 @@ body.is-modal-open {
   .profile-edit-backdrop .profile-edit-summary-row img {
     width: 56px !important;
     height: 56px !important;
-    border-radius: 50% !important;
+    border-radius: 18px !important;
   }
 
   .profile-edit-backdrop .profile-edit-summary-row em {
@@ -12811,7 +12811,7 @@ body.is-cover-crop-open {
 .profile-cover-crop-dialog.profile-cover-crop-composer {
   width: min(820px, calc(100vw - 72px)) !important;
   border: 0 !important;
-  border-radius: 12px !important;
+  border-radius: 14px !important;
   box-shadow: 0 28px 86px rgba(0,0,0,.58) !important;
 }
 
@@ -15965,7 +15965,7 @@ body.is-avatar-crop-open {
   gap: 20px !important;
   text-align: left !important;
   border: 0 !important;
-  border-radius: 10px !important;
+  border-radius: 14px !important;
   background: rgba(18, 18, 17, .64) !important;
   box-shadow: none !important;
 }
@@ -18160,7 +18160,6 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   line-height: 1.35;
 }
 
-
 /* 206 rework visual unification cleanup */
 .members-page .card,
 .wallet-page .card,
@@ -18168,10 +18167,8 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .gamification-page .card,
 .cups-page .card,
 .cup-detail-page .card,
-.profile-page .card,
 .members-filter-modal,
 .settings-modal,
-.profile-edit-modal,
 .top-dropdown,
 .post-dropdown,
 .user-dropdown {
@@ -18184,8 +18181,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .shop-head h1,
 .gamification-head h1,
 .cups-overview-head h1,
-.cup-detail-hero h1,
-.hnt-profile-identity h1 {
+.cup-detail-hero h1 {
   color: #f6f0e4;
   font-size: clamp(25px, 3vw, 34px);
   line-height: 1.08;
@@ -18198,7 +18194,6 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .shop-head p,
 .gamification-head p,
 .cup-detail-hero p,
-.hnt-profile-identity p,
 .shop-desc,
 .cup-card-body p,
 .wallet-action-card p,
@@ -18217,13 +18212,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .shop-item-card,
 .gamification-overview-card,
 .gamification-item-card,
-.gamification-quest-card,
-.hnt-profile-hero,
-.profile-info-card,
-.profile-feed-card,
-.profile-friend-card,
-.profile-moment-card,
-.profile-badge-card {
+.gamification-quest-card {
   background: #20201e;
   border: 1px solid rgba(255,255,255,.055);
   box-shadow: none;
@@ -18316,8 +18305,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .wallet-section-head h2,
 .wallet-action-card h2,
 .cup-card-title h2,
-.cup-card-title h2 a,
-.profile-badge-card strong {
+.cup-card-title h2 a {
   color: #f6f0e4;
   font-weight: 700;
   letter-spacing: 0;
@@ -18336,28 +18324,24 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .gamification-page strong,
 .cups-page strong,
 .cup-detail-page strong,
-.profile-page strong,
 .members-page h1,
 .wallet-page h1,
 .shop-page h1,
 .gamification-page h1,
 .cups-page h1,
 .cup-detail-page h1,
-.profile-page h1,
 .members-page h2,
 .wallet-page h2,
 .shop-page h2,
 .gamification-page h2,
 .cups-page h2,
 .cup-detail-page h2,
-.profile-page h2,
 .members-page h3,
 .wallet-page h3,
 .shop-page h3,
 .gamification-page h3,
 .cups-page h3,
-.cup-detail-page h3,
-.profile-page h3 {
+.cup-detail-page h3 {
   font-weight: 700;
 }
 
@@ -18377,9 +18361,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .shop-rarity,
 .shop-tabs a,
 .wallet-progress,
-.shop-progress,
-.profile-progress-track,
-.badge-card-progress i {
+.shop-progress {
   border-radius: 999px;
 }
 
@@ -18420,10 +18402,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   background: none;
 }
 
-.rework-cup-hero-real .rework-cup-hero-bg img,
-.hnt-profile-cover-image,
-.profile-edit-cover img,
-.profile-edit-upload div[data-profile-edit-cover-preview] img {
+.rework-cup-hero-real .rework-cup-hero-bg img {
   width: 100%;
   height: 100%;
   display: block;
@@ -18431,53 +18410,12 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   filter: saturate(.82) brightness(.78);
 }
 
-.rework-cup-hero-real .rework-cup-hero-bg::after,
-.hnt-profile-cover::after,
-.profile-edit-cover::after {
+.rework-cup-hero-real .rework-cup-hero-bg::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: linear-gradient(180deg, rgba(17,17,15,.10), rgba(17,17,15,.76));
-}
-
-.hnt-profile-cover,
-.profile-edit-cover,
-.profile-edit-upload div[data-profile-edit-cover-preview] {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  background: #151514;
-}
-
-.profile-avatar-badge,
-.profile-avatar-badge img,
-.profile-edit-summary-row img,
-.badge-card-avatar {
-  border-radius: 50%;
-}
-
-.profile-share-btn,
-.profile-avatar-upload-trigger,
-.profile-cover-upload-trigger,
-.profile-edit-tabbar button,
-.profile-tabs a,
-.profile-tab-trigger {
-  border-radius: 10px;
-  font-weight: 700;
-  box-shadow: none;
-}
-
-.profile-page .left-col.profile-left {
-  max-width: 760px;
-}
-
-.profile-page .content-grid {
-  align-items: flex-start;
-}
-
-.profile-page .right-col {
-  display: flex;
 }
 
 @media (max-width: 900px) {
@@ -18486,8 +18424,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   .shop-head h1,
   .gamification-head h1,
   .cups-overview-head h1,
-  .cup-detail-hero h1,
-  .hnt-profile-identity h1 {
+  .cup-detail-hero h1 {
     font-size: 25px;
   }
 
