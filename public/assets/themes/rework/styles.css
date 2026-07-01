@@ -18174,6 +18174,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .user-dropdown {
   border-radius: 12px;
   box-shadow: none;
+  padding: 31px 28px 24px;
 }
 
 .members-head h1,
@@ -18213,8 +18214,8 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .gamification-overview-card,
 .gamification-item-card,
 .gamification-quest-card {
-  background: #20201e;
-  border: 1px solid rgba(255,255,255,.055);
+background: var(--surface);
+    border-radius: var(--radius-md);
   box-shadow: none;
 }
 
@@ -18362,7 +18363,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 .shop-tabs a,
 .wallet-progress,
 .shop-progress {
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .shop-item-icon {
