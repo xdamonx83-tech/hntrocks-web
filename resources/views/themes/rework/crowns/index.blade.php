@@ -72,7 +72,7 @@
     <div>
         <span class="members-eyebrow">Bounty Marks</span>
         <h1>Wallet</h1>
-        <p>Sammle, verwalte und hole deine Bounty Marks direkt ab.</p>
+        <p>Sammle und verwalte deine Bounty Marks direkt im Wallet.</p>
     </div>
     <div class="wallet-head-actions">
         <a class="members-filter-btn" href="{{ route('crowns.shop') }}"><i aria-hidden="true" class="ph ph-storefront ph-icon"></i>Shop</a>
@@ -91,15 +91,17 @@
             <p>Bounty Marks sind dein virtuelles HNT.rocks-Guthaben für Shop-Items, Profil-Upgrades und Sammlerbelohnungen.</p>
         </div>
         <div class="wallet-claim-box">
-            <span>Bereit zum Abholen</span>
-            <strong>+{{ $walletNumber($walletPendingTotal) }}</strong>
             @if($walletPendingTotal > 0)
+                <span>Alte Marks bereit</span>
+                <strong>+{{ $walletNumber($walletPendingTotal) }}</strong>
                 <form method="post" action="{{ route('crowns.collect') }}">
                     @csrf
                     <button class="btn" type="submit">Marks abholen</button>
                 </form>
             @else
-                <button class="btn" type="button" disabled>Nichts offen</button>
+                <span>Direkt gebucht</span>
+                <strong>+0</strong>
+                <button class="btn" type="button" disabled>Keine offenen Marks</button>
             @endif
         </div>
     </div>
