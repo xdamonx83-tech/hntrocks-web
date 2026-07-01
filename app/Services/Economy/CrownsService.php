@@ -414,12 +414,18 @@ class CrownsService
 
     private function alreadyRewardedForSource(User $user, string $action, Model $source): bool
     {
-        return CrownTransaction::query()
+        $query = CrownTransaction::query()
             ->where('user_id', $user->id)
             ->where('type', CrownTransaction::TYPE_CREDIT)
             ->where('action', $action)
             ->where('source_type', $source->getMorphClass())
-            ->where('source_id', $source->getKey())
-            ->exists();
+            ->where('source_id', $source->getKey());
+
+        $sourceCreatedAt = $source->getAttribute('created_at');
+        if ($sourceCreatedAt) {
+            $query->where('created_at', '>=', $sourceCreatedAt);
+        }
+
+        return $query->exists();
     }
 }

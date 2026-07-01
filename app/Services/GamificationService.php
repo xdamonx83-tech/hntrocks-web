@@ -202,6 +202,11 @@ class GamificationService
         if ($source) {
             $query->where('source_type', $source->getMorphClass())
                 ->where('source_id', $source->getKey());
+
+            $sourceCreatedAt = $source->getAttribute('created_at');
+            if ($sourceCreatedAt) {
+                $query->where('created_at', '>=', $sourceCreatedAt);
+            }
         } else {
             $query->whereNull('source_type')->whereNull('source_id');
         }
