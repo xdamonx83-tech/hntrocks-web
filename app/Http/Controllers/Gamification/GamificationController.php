@@ -7,6 +7,7 @@ use App\Models\Badge;
 use App\Models\Quest;
 use App\Services\GamificationService;
 use App\Support\HntTheme;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -37,6 +38,8 @@ class GamificationController extends Controller
 
         $progressByQuestId = $user->questProgress->keyBy('quest_id');
 
+        $sidebarData = ReworkFeedSidebar::forViewer($user);
+
         return view(HntTheme::resolve('gamification.index'), [
             'user' => $user,
             'recentEvents' => $recentEvents,
@@ -45,6 +48,12 @@ class GamificationController extends Controller
             'progressByQuestId' => $progressByQuestId,
             'levelProgressPercent' => $gamification->progressPercent($user),
             'xpToNextLevel' => $user->xpToNextLevel(),
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
         ]);
     }
 }

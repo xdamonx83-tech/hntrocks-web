@@ -7454,7 +7454,6 @@ body.is-modal-open { overflow: hidden; }
   .wallet-action-card .btn { grid-column: 1 / -1; }
 }
 
-
 /* 045: Gamification page - shop-like cards, HNT colors */
 .gamification-page-grid { align-items: flex-start; }
 .gamification-left { min-width: 0; }
@@ -7596,7 +7595,6 @@ body.is-modal-open { overflow: hidden; }
   .gamification-item-card:hover,
   .gamification-quest-card:hover { transform: none; }
 }
-
 
 /* 046: Maps overview page - static overview only, standard right widgets preserved */
 .maps-page-grid { align-items: flex-start; }
