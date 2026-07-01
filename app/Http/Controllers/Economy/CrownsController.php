@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CrownTransaction;
 use App\Services\Economy\CrownsService;
 use App\Support\HntTheme;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,12 +19,30 @@ class CrownsController extends Controller
         $user = $request->user();
         $crowns->rewardCompletedProfileIfEligible($user);
 
+        $recentTransactions = $crowns->enabled()
+            ? CrownTransaction::query()
+                ->where('user_id', $user->id)
+                ->latest()
+                ->limit(8)
+                ->get()
+            : collect();
+
+
+        $sidebarData = ReworkFeedSidebar::forViewer($user);
+
         return view($this->themeView('crowns.index'), [
             'user' => $user,
             'summary' => $crowns->summary($user),
             'pendingCollection' => $crowns->pendingCollection($user, 6, true),
+            'recentTransactions' => $recentTransactions,
             'rewardDefinitions' => config('crowns.rewards', []),
             'nonCashNotice' => (string) config('crowns.non_cash_notice'),
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
         ]);
     }
 

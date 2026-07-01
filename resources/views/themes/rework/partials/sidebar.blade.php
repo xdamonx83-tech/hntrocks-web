@@ -57,7 +57,7 @@
             'label' => 'Shop',
             'icon' => 'ph ph-storefront',
             'url' => $reworkSidebarUrl('crowns.shop'),
-            'active' => $reworkSidebarIsActive(['crowns.shop', 'crowns.shop.*']),
+            'active' => $reworkSidebarIsActive(['crowns.index', 'crowns.history', 'crowns.inventory', 'crowns.shop', 'crowns.shop.*']),
         ],
         [
             'label' => 'Cups',
