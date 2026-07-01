@@ -17204,7 +17204,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   width: 58px !important;
   height: 58px !important;
   border-width: 3px !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
 }
 
 .member-avatar-wrap > span {
@@ -17544,7 +17544,7 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 /* 197 shop demo detail match */
 .shop-page .shop-wallet,
 .shop-page .shop-item-card {
-  border-radius: 16px !important;
+  border-radius: 12px !important;
 }
 
 .shop-page .shop-wallet {
@@ -18158,4 +18158,279 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   text-transform: none;
   letter-spacing: 0;
   line-height: 1.35;
+}
+
+/* 206 rework visual unification cleanup */
+.members-page .card,
+.wallet-page .card,
+.shop-page .card,
+.gamification-page .card,
+.cups-page .card,
+.cup-detail-page .card,
+.members-filter-modal,
+.settings-modal,
+.top-dropdown,
+.post-dropdown,
+.user-dropdown {
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.members-head h1,
+.wallet-head h1,
+.shop-head h1,
+.gamification-head h1,
+.cups-overview-head h1,
+.cup-detail-hero h1 {
+  color: #f6f0e4;
+  font-size: clamp(25px, 3vw, 34px);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.members-head p,
+.wallet-head p,
+.shop-head p,
+.gamification-head p,
+.cup-detail-hero p,
+.shop-desc,
+.cup-card-body p,
+.wallet-action-card p,
+.gamification-quest-card p {
+  color: rgba(242,232,216,.62);
+  font-weight: 500;
+}
+
+.wallet-hero,
+.gamification-hero,
+.shop-wallet,
+.hall-cta,
+.cup-overview-card,
+.wallet-section,
+.wallet-action-card,
+.shop-item-card,
+.gamification-overview-card,
+.gamification-item-card,
+.gamification-quest-card {
+  background: #20201e;
+  border: 1px solid rgba(255,255,255,.055);
+  box-shadow: none;
+}
+
+.wallet-hero,
+.gamification-hero,
+.shop-wallet,
+.hall-cta,
+.shop-item-card,
+.gamification-overview-card,
+.gamification-item-card,
+.gamification-quest-card,
+.wallet-action-card.wallet-action-primary {
+  background-image: none;
+}
+
+.wallet-coin-wrap,
+.wallet-action-icon,
+.shop-item-icon,
+.gamification-level-orb,
+.gamification-quest-icon,
+.hall-cta-icon,
+.wallet-reward-grid i,
+.wallet-history-list i {
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  color: rgba(207,161,73,.78);
+  box-shadow: none;
+}
+
+.wallet-coin-wrap img,
+.shop-wallet-main img,
+.shop-item-footer img {
+  filter: saturate(.82) brightness(.9);
+}
+
+.members-filter-btn,
+.members-tabs a,
+.shop-tabs a,
+.btn,
+.wallet-small-link,
+.shop-wallet-actions .btn,
+.shop-item-footer a,
+.shop-item-footer button,
+.wallet-action-card button.btn,
+.cup-side-actions .btn,
+.hall-cta-button {
+  min-height: 34px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.members-tabs a,
+.shop-tabs a {
+  background: rgba(255,255,255,.055);
+  color: rgba(242,232,216,.68);
+}
+
+.members-tabs a.active,
+.shop-tabs a.active,
+.members-filter-btn:hover,
+.shop-wallet-actions .btn:hover,
+.shop-item-footer a:hover,
+.shop-item-footer button:hover:not(:disabled) {
+  background: rgba(255,255,255,.12);
+  color: #f6f0e4;
+}
+
+.wallet-kicker,
+.members-eyebrow,
+.shop-rarity,
+.cup-eyebrow,
+.wallet-small-link,
+.wallet-reward-grid em,
+.wallet-history-list em {
+  color: rgba(207,161,73,.82);
+}
+
+.wallet-hero-copy h2,
+.wallet-claim-box strong,
+.gamification-hero-copy h2,
+.gamification-claim-card strong,
+.wallet-stats-grid strong,
+.gamification-stats-grid strong,
+.gamification-overview-card > strong,
+.shop-item-card h2,
+.wallet-section-head h2,
+.wallet-action-card h2,
+.cup-card-title h2,
+.cup-card-title h2 a {
+  color: #f6f0e4;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.wallet-hero-copy h2,
+.gamification-hero-copy h2,
+.wallet-section-head h2,
+.shop-item-card h2 {
+  font-size: clamp(18px, 2.1vw, 24px);
+}
+
+.members-page strong,
+.wallet-page strong,
+.shop-page strong,
+.gamification-page strong,
+.cups-page strong,
+.cup-detail-page strong,
+.members-page h1,
+.wallet-page h1,
+.shop-page h1,
+.gamification-page h1,
+.cups-page h1,
+.cup-detail-page h1,
+.members-page h2,
+.wallet-page h2,
+.shop-page h2,
+.gamification-page h2,
+.cups-page h2,
+.cup-detail-page h2,
+.members-page h3,
+.wallet-page h3,
+.shop-page h3,
+.gamification-page h3,
+.cups-page h3,
+.cup-detail-page h3 {
+  font-weight: 700;
+}
+
+.wallet-stats-grid article,
+.gamification-stats-grid article,
+.shop-stats,
+.wallet-reward-grid article,
+.wallet-history-list > div,
+.cup-card-meta,
+.rework-cup-hero-real .rework-cup-hero-rules,
+.rework-cup-hero-real .cup-stat-row.rework-cup-hero-stats > span {
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+  box-shadow: none;
+}
+
+.shop-rarity,
+.shop-tabs a,
+.wallet-progress,
+.shop-progress {
+  border-radius: 999px;
+}
+
+.shop-item-icon {
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+}
+
+.shop-item-card {
+  min-height: 260px;
+  padding: 16px;
+}
+
+.shop-stats {
+  padding: 10px;
+}
+
+.cup-overview-card {
+  overflow: hidden;
+}
+
+.cup-card-cover,
+.cup-card-cover img {
+  border-radius: 10px;
+}
+
+.hall-cta-preview {
+  opacity: .68;
+}
+
+.rework-cup-hero-real {
+  overflow: hidden;
+  background: #20201e;
+}
+
+.rework-cup-hero-real .rework-cup-hero-bg {
+  background: none;
+}
+
+.rework-cup-hero-real .rework-cup-hero-bg img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  filter: saturate(.82) brightness(.78);
+}
+
+.rework-cup-hero-real .rework-cup-hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(17,17,15,.10), rgba(17,17,15,.76));
+}
+
+@media (max-width: 900px) {
+  .members-head h1,
+  .wallet-head h1,
+  .shop-head h1,
+  .gamification-head h1,
+  .cups-overview-head h1,
+  .cup-detail-hero h1 {
+    font-size: 25px;
+  }
+
+  .shop-wallet,
+  .hall-cta,
+  .wallet-action-card {
+    border-radius: 12px;
+  }
 }

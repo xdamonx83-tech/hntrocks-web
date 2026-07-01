@@ -60,8 +60,10 @@
     $coverUrl = $cup->coverUrl();
 @endphp
 
-<section class="cup-detail-hero card rework-cup-hero-real" style="--cup-cover: url('{{ $coverUrl }}');">
-    <div class="rework-cup-hero-bg" aria-hidden="true"></div>
+<section class="cup-detail-hero card rework-cup-hero-real">
+    <div class="rework-cup-hero-bg" aria-hidden="true">
+        <img alt="" src="{{ $coverUrl }}">
+    </div>
 
     <div class="cup-detail-hero-head">
         <div>
