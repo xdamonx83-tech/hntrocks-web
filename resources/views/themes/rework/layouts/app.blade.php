@@ -4,6 +4,7 @@
     $reworkScriptVersion = $reworkScriptVersion ?? (@filemtime(public_path('assets/themes/rework/script.js')) ?: time());
     $reworkChatTabsVersion = $reworkChatTabsVersion ?? (@filemtime(public_path('assets/socialite/js/hnt-socialite-chat-tabs.js')) ?: time());
     $reworkBodyClass = trim($__env->yieldContent('body_class'));
+    $reworkContentGridClass = trim($__env->yieldContent('content_grid_class'));
     $reworkLeftColClass = trim($__env->yieldContent('left_col_class'));
 @endphp
 <!DOCTYPE html>
@@ -27,7 +28,7 @@
 @include('themes.rework.partials.sidebar')
 <main class="main">
 @include('themes.rework.partials.topbar')
-<section class="content-grid">
+<section class="content-grid @if($reworkContentGridClass !== '') {{ $reworkContentGridClass }} @endif">
 <div class="left-col @if($reworkLeftColClass !== '') {{ $reworkLeftColClass }} @endif">
 @yield('content')
 </div>

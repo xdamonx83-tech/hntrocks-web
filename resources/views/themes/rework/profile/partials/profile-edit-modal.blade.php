@@ -53,7 +53,9 @@
 @method('PUT')
 <div class="settings-modal-body profile-edit-modal-body">
 <div class="profile-edit-summary">
-<div class="profile-edit-cover" style="background-image: linear-gradient(180deg, rgba(17,17,15,.08), rgba(17,17,15,.76)), url('{{ $viewerCover }}');" data-profile-edit-cover-preview></div>
+<div class="profile-edit-cover" data-profile-edit-cover-preview>
+<img alt="" src="{{ $viewerCover }}">
+</div>
 <div class="profile-edit-summary-row">
 <img alt="{{ $viewer?->name ?: 'HNT Hunter' }}" data-profile-edit-avatar-preview data-rework-profile-avatar src="{{ $viewerAvatar }}">
 <div>
@@ -97,7 +99,7 @@
 <div class="settings-section-head"><span>{{ __('ui.profile_media') }}</span><h3>{{ __('ui.profile_media') }}</h3><p>{{ __('ui.profile_upload_hint') }}</p></div>
 <div class="profile-edit-upload-grid">
 <label class="profile-edit-upload" for="rework-profile-avatar"><span>{{ __('ui.profile_avatar') }}</span><img alt="{{ __('ui.profile_avatar') }}" data-profile-edit-avatar-preview src="{{ $viewerAvatar }}"><input accept="image/jpeg,image/png,image/webp" id="rework-profile-avatar" name="avatar" type="file" data-profile-edit-file="avatar"><em>{{ __('ui.avatar_upload_hint') }}</em><small class="settings-field-error" data-profile-edit-error="avatar"></small></label>
-<label class="profile-edit-upload" for="rework-profile-cover"><span>{{ __('ui.profile_cover') }}</span><div style="background-image: url('{{ $viewerCover }}');" data-profile-edit-cover-preview></div><input accept="image/jpeg,image/png,image/webp" id="rework-profile-cover" name="cover" type="file" data-profile-edit-file="cover"><em>{{ __('ui.cover_upload_hint') }}</em><small class="settings-field-error" data-profile-edit-error="cover"></small></label>
+<label class="profile-edit-upload" for="rework-profile-cover"><span>{{ __('ui.profile_cover') }}</span><div data-profile-edit-cover-preview><img alt="" src="{{ $viewerCover }}"></div><input accept="image/jpeg,image/png,image/webp" id="rework-profile-cover" name="cover" type="file" data-profile-edit-file="cover"><em>{{ __('ui.cover_upload_hint') }}</em><small class="settings-field-error" data-profile-edit-error="cover"></small></label>
 </div>
 </section>
 </div>
