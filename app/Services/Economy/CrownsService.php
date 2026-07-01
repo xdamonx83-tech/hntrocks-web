@@ -152,19 +152,21 @@ class CrownsService
                 }
             }
 
-            // Rewards are earned first and only added to the wallet when the user collects them.
-            // This keeps the visible balance consistent with the user's explicit collect action.
+            $wallet->balance = max(0, (int) $wallet->balance + $rewardAmount);
+            $wallet->lifetime_earned = max(0, (int) $wallet->lifetime_earned + $rewardAmount);
+
             if ($action === 'daily_login') {
                 $wallet->last_daily_login_reward_at = now();
-                $wallet->save();
             }
+
+            $wallet->save();
 
             if ($claim) {
                 $claim->claims_count = (int) $claim->claims_count + 1;
                 $claim->save();
             }
 
-            return CrownTransaction::create([
+            $transactionData = [
                 'user_id' => $user->id,
                 'wallet_id' => $wallet->id,
                 'type' => CrownTransaction::TYPE_CREDIT,
@@ -175,7 +177,13 @@ class CrownsService
                 'source_id' => $source?->getKey(),
                 'description' => $description,
                 'metadata' => $metadata ?: null,
-            ]);
+            ];
+
+            if (Schema::hasColumn('crown_transactions', 'collected_at')) {
+                $transactionData['collected_at'] = now();
+            }
+
+            return CrownTransaction::create($transactionData);
         });
     }
 
