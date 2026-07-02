@@ -95,10 +95,6 @@
         <span class="members-eyebrow">HNT Cups</span>
         <h1>Cups</h1>
     </div>
-    <a class="members-filter-btn cups-filter-button" data-members-filter-open href="#cup-filter-modal">
-        <i aria-hidden="true" class="ph ph-funnel-simple ph-icon"></i>
-        {{ __('ui.rework_members_filters') }}
-    </a>
 </section>
 
 <section id="cup-filters" aria-label="{{ __('ui.rework_cup_filter_aria') }}" class="cups-overview-controls">
@@ -175,45 +171,4 @@
         {{ $cups->links() }}
     </div>
 @endif
-
-<div aria-hidden="true" class="modal-backdrop members-filter-backdrop cups-filter-backdrop" data-members-filter-modal id="cup-filter-modal">
-    <section aria-labelledby="cups-filter-modal-title" aria-modal="true" class="members-filter-modal cups-filter-modal" role="dialog">
-        <header class="members-filter-head">
-            <div>
-                <span>Cups</span>
-                <h2 id="cups-filter-modal-title">{{ __('ui.rework_cup_filter_aria') }}</h2>
-            </div>
-            <button aria-label="{{ __('ui.close') }}" data-members-filter-close type="button">
-                <i aria-hidden="true" class="ph ph-x ph-icon"></i>
-            </button>
-        </header>
-
-        <div class="members-filter-grid cup-filter-modal-grid">
-            <div class="cups-modal-filter-group">
-                <span>{{ __('ui.cup_platform_filter') }}</span>
-                <div class="cups-modal-filter-options">
-                    <a @class(['active' => $activePlatform === '']) href="{{ $filterUrl([], ['platform']) }}">{{ __('ui.cup_all_platforms') }}</a>
-                    <a @class(['active' => $activePlatform === 'PC']) href="{{ $filterUrl(['platform' => 'PC']) }}">PC</a>
-                    <a @class(['active' => in_array(strtolower($activePlatform), ['ps', 'ps4', 'ps5', 'playstation', 'playstation4', 'playstation5'], true)]) href="{{ $filterUrl(['platform' => 'ps5']) }}">PS5</a>
-                    <a @class(['active' => in_array(strtolower($activePlatform), ['xbox', 'xboxseries', 'xboxseriesx', 'xboxseriess', 'xboxseriesxs'], true)]) href="{{ $filterUrl(['platform' => 'Xbox']) }}">Xbox</a>
-                    <a @class(['active' => strcasecmp($activePlatform, 'Konsole') === 0 || strcasecmp($activePlatform, 'Console') === 0]) href="{{ $filterUrl(['platform' => 'Konsole']) }}">{{ __('ui.rework_platform_console') }}</a>
-                </div>
-            </div>
-
-            <div class="cups-modal-filter-group">
-                <span>{{ __('ui.rework_cup_status') }}</span>
-                <div class="cups-modal-filter-options">
-                    <a @class(['active' => $activeStatus === '']) href="{{ $filterUrl([], ['status']) }}">{{ __('ui.rework_all') }}</a>
-                    <a @class(['active' => $activeStatus === 'active']) href="{{ $filterUrl(['status' => 'active']) }}">{{ __('ui.cup_status_active') }}</a>
-                    <a @class(['active' => $activeStatus === 'planned']) href="{{ $filterUrl(['status' => 'planned']) }}">{{ __('ui.rework_cup_planned') }}</a>
-                    <a @class(['active' => $activeStatus === 'finished']) href="{{ $filterUrl(['status' => 'finished']) }}">{{ __('ui.rework_cup_finished') }}</a>
-                </div>
-            </div>
-        </div>
-
-        <footer class="members-filter-footer">
-            <a class="members-reset" href="{{ $cupsUrl }}">{{ __('ui.rework_filters_reset') }}</a>
-        </footer>
-    </section>
-</div>
 @endsection
