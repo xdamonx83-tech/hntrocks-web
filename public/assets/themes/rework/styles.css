@@ -14193,29 +14193,43 @@ body.is-avatar-crop-open {
 }
 /* /072: Cup submit progress/result modal */
 
-/* 073: Cup detail tabs mobile polish */
-.cup-detail-tabs {
+/* 073-075: Cup detail tabs profile-style polish */
+.cup-detail-page .left-col.cup-detail-left {
+  min-width: 0;
+}
+
+.cup-detail-page .card.cup-detail-tabs-card {
+  height: auto;
+  padding: 0 28px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cup-detail-page .cup-detail-tabs {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  padding: 0;
+  display: flex;
   flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 26px;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  scrollbar-color: #525252 transparent;
+  scrollbar-width: none;
+  scroll-padding-inline: 28px;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
 }
 
-.cup-detail-tabs::-webkit-scrollbar {
-  height: 6px;
+.cup-detail-page .cup-detail-tabs::-webkit-scrollbar {
+  display: none;
 }
 
-.cup-detail-tabs::-webkit-scrollbar-thumb {
-  background: #525252;
-  border-radius: 999px;
-}
-
-.cup-detail-tabs::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.cup-detail-tabs a {
+.cup-detail-page .cup-detail-tabs a {
   height: 64px;
   min-height: 64px;
   display: inline-flex;
@@ -14232,148 +14246,48 @@ body.is-avatar-crop-open {
   white-space: nowrap;
 }
 
-.cup-detail-tabs a.active,
-.cup-detail-tabs a:hover {
-  color: var(--accent);
-}
-
-@media (max-width: 760px) {
-  .cup-detail-tabs {
-    justify-content: flex-start;
-    padding: 0 16px;
-    gap: 24px;
-  }
-
-  .cup-detail-tabs a {
-    padding: 0;
-  }
-}
-/* /073: Cup detail tabs mobile polish */
-
-/* 074: Cup detail mobile tabs reachable */
-.cup-detail-page .left-col.cup-detail-left {
-  min-width: 0;
-}
-
-.cup-detail-page .cup-detail-tabs {
-  max-width: 100%;
-  min-width: 0;
-  justify-content: flex-start;
-}
-
-@media (max-width: 760px) {
-  .cup-detail-page .cup-detail-tabs {
-    width: 100%;
-    max-width: calc(100vw - 32px);
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    justify-content: flex-start !important;
-    gap: 28px;
-    padding: 0 92px 0 28px;
-    scroll-padding-left: 28px;
-    scroll-padding-right: 92px;
-    touch-action: pan-x;
-    overscroll-behavior-x: contain;
-  }
-
-  .cup-detail-page .cup-detail-tabs a {
-    flex: 0 0 auto;
-    min-width: max-content;
-    white-space: nowrap;
-  }
-
-  .cup-detail-page .cup-detail-tabs::after {
-    content: "";
-    flex: 0 0 72px;
-    width: 72px;
-    height: 1px;
-  }
-}
-/* /074: Cup detail mobile tabs reachable */
-
-/* 075: Cup tabs profile-like mobile behavior */
-.cup-detail-tabs-card {
-  overflow: visible !important;
-}
-
-.cup-detail-tabs-card .cup-detail-tabs {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-color: #525252 transparent;
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-}
-
-.cup-detail-tabs-card .cup-detail-tabs::-webkit-scrollbar {
-  height: 6px;
-}
-
-.cup-detail-tabs-card .cup-detail-tabs::-webkit-scrollbar-thumb {
-  background: #525252;
-  border-radius: 999px;
-}
-
-.cup-detail-tabs-card .cup-detail-tabs::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.cup-detail-tabs-card .cup-detail-tabs a {
-  height: 64px;
+.cup-detail-page .cup-detail-tabs a .ph-icon {
+  width: 19px;
+  height: 19px;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  position: relative;
-  flex: 0 0 auto;
-  color: rgba(255,255,255,.45);
-  text-decoration: none;
-  font-size: 10px;
-  line-height: 20px;
-  font-weight: 800;
-  text-transform: uppercase;
-  white-space: nowrap;
+  justify-content: center;
+  color: currentColor;
+  font-size: 18px;
+  line-height: 1;
+  opacity: .82;
 }
 
-.cup-detail-tabs-card .cup-detail-tabs a.active {
+.cup-detail-page .cup-detail-tabs a.active,
+.cup-detail-page .cup-detail-tabs a:hover {
   color: var(--accent);
+}
+
+.cup-detail-page .cup-detail-tabs a.active::after {
+  bottom: -1px;
+  height: 4px;
+  border-radius: 4px 4px 0 0;
 }
 
 @media (max-width: 700px) {
-  .cup-detail-page .card.cup-detail-tabs-card,
-  .cup-detail-page .card.cup-detail-tabs-card .cup-detail-tabs {
-    overflow-x: auto !important;
-    max-width: none !important;
+  .cup-detail-page .card.cup-detail-tabs-card {
+    padding: 0 14px;
+    border-radius: 18px;
   }
 
-  .cup-detail-tabs-card {
-    padding: 0 !important;
-    margin-left: 0;
-    margin-right: 0;
+  .cup-detail-page .cup-detail-tabs {
+    min-height: 58px;
+    gap: 18px;
+    scroll-padding-inline: 14px;
   }
 
-  .cup-detail-tabs-card .cup-detail-tabs {
-    gap: 30px;
-    padding: 0 90px 0 28px;
-    scroll-padding-left: 28px;
-    scroll-padding-right: 90px;
-    touch-action: pan-x;
-    overscroll-behavior-x: contain;
-  }
-
-  .cup-detail-tabs-card .cup-detail-tabs::after {
-    content: "";
-    flex: 0 0 80px;
-    width: 80px;
-    height: 1px;
+  .cup-detail-page .cup-detail-tabs a {
+    height: 58px;
+    min-height: 58px;
+    font-size: 12px;
   }
 }
-/* /075: Cup tabs profile-like mobile behavior */
+/* /073-075: Cup detail tabs profile-style polish */
 
 /* 076: Cup detail my submissions */
 .cup-my-submissions-card {

@@ -1571,7 +1571,9 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
     const activateCupDetailTab = (target) => {
       if (!target) return;
       cupDetailTabs.forEach((tab) => {
-        tab.classList.toggle('active', tab.getAttribute('data-cup-detail-tab') === target);
+        const isActive = tab.getAttribute('data-cup-detail-tab') === target;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
       });
       cupDetailPanels.forEach((panel) => {
         panel.classList.toggle('is-active', panel.getAttribute('data-cup-detail-panel') === target);
@@ -4458,7 +4460,11 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
     const panels = document.querySelectorAll('[data-cup-detail-panel]');
     const targetPanel = document.querySelector(`[data-cup-detail-panel="${CSS.escape(target)}"]`);
     if (!targetPanel) return false;
-    tabs.forEach((tab) => tab.classList.toggle('active', tab.getAttribute('data-cup-detail-tab') === target));
+    tabs.forEach((tab) => {
+      const isActive = tab.getAttribute('data-cup-detail-tab') === target;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
     panels.forEach((panel) => panel.classList.toggle('is-active', panel.getAttribute('data-cup-detail-panel') === target));
     return true;
   };
@@ -4764,7 +4770,9 @@ const reworkLabel = (key, fallback = '', replacements = {}) => {
   const panels = document.querySelectorAll('[data-cup-detail-panel]');
 
   tabs.forEach((tab) => {
-    tab.classList.toggle('active', tab.getAttribute('data-cup-detail-tab') === preferred);
+    const isActive = tab.getAttribute('data-cup-detail-tab') === preferred;
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
   });
 
   panels.forEach((panel) => {
