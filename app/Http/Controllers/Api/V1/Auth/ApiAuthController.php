@@ -52,27 +52,35 @@ class ApiAuthController extends Controller
             ], 422);
         }
 
-        $user = User::query()->create([
-            'name' => $request->string('name'),
-            'username' => $request->string('username'),
-            'email' => $request->string('email'),
-            'password' => $request->string('password'),
-            'status' => 'active',
-        ]);
+        $user = DB::transaction(function () use ($request, $gamification, $referrals): User {
+            $user = User::query()->create([
+                'name' => $request->string('name'),
+                'username' => $request->string('username'),
+                'email' => $request->string('email'),
+                'password' => $request->string('password'),
+                'status' => 'active',
+            ]);
 
-        $user->profile()->create([
-            'profile_visibility' => 'public',
-        ]);
+            $user->profile()->create([
+                'profile_visibility' => 'public',
+            ]);
 
-        $gamification->award($user, 'account.created', 25, 'Account erstellt');
+            $user->privacySettings()->firstOrCreate([], [
+                'profile_visibility' => 'public',
+            ]);
 
-        $code = $request->string('referral_code')->trim()->value();
-        if ($code !== '') {
-            $link = ReferralLink::query()->where('code', $code)->first();
-            if ($link) {
-                $referrals->recordSignup($link, $user, $request->ip(), (string) $request->userAgent());
+            $gamification->award($user, 'account_created', source: $user, description: 'Account erstellt');
+
+            $code = $request->string('referral_code')->trim()->value();
+            if ($code !== '') {
+                $link = ReferralLink::query()->where('code', $code)->first();
+                if ($link) {
+                    $referrals->recordSignup($link, $user, $request->ip(), (string) $request->userAgent());
+                }
             }
-        }
+
+            return $user;
+        });
 
         $tokenData = ApiAccessToken::createForUser($user, $request->string('device_name')->trim()->value() ?: 'Android App');
 
