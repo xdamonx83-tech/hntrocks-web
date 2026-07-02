@@ -36,7 +36,7 @@
         $end = $cup->ends_at;
 
         if ($start && $end) {
-            return $start->translatedFormat('d.m.').'–'.$end->translatedFormat('d.m.');
+            return $start->translatedFormat('d.m.').' - '.$end->translatedFormat('d.m.');
         }
 
         if ($start) {
