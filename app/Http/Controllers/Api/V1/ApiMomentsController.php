@@ -184,9 +184,9 @@ class ApiMomentsController extends Controller
         abort_unless($moment->canBeManagedBy($request->user()), 403);
 
         $validated = $request->validate([
-            'caption' => ['nullable', 'string', 'max:220'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'visibility' => ['nullable', 'in:public,registered,private'],
+            'caption' => ['sometimes', 'nullable', 'string', 'max:220'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'visibility' => ['sometimes', 'required', 'in:public,registered,private'],
         ]);
 
         $updates = [];
