@@ -179,6 +179,55 @@ class ApiMomentsController extends Controller
         return response()->json($payload);
     }
 
+    public function update(Request $request, Moment $moment): JsonResponse
+    {
+        abort_unless($moment->canBeManagedBy($request->user()), 403);
+
+        $validated = $request->validate([
+            'caption' => ['nullable', 'string', 'max:220'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'visibility' => ['nullable', 'in:public,registered,private'],
+        ]);
+
+        $updates = [];
+        foreach (['caption', 'description', 'visibility'] as $field) {
+            if ($request->exists($field)) {
+                $updates[$field] = $validated[$field] ?? null;
+            }
+        }
+
+        if ($updates !== []) {
+            $moment->update($updates);
+        }
+
+        $moment->refresh()->load([
+            'user.profile',
+            'media',
+            'cover',
+            'reactions' => fn ($query) => $query->where('user_id', $request->user()->id)->where('type', 'like'),
+            'bookmarks' => fn ($query) => $query->where('user_id', $request->user()->id),
+        ]);
+
+        return response()->json([
+            'message' => 'Moment wurde aktualisiert.',
+            'data' => new MomentResource($moment),
+        ]);
+    }
+
+    public function destroy(Request $request, Moment $moment): JsonResponse
+    {
+        abort_unless($moment->canBeManagedBy($request->user()), 403);
+
+        $moment->update(['status' => 'archived']);
+        $moment->delete();
+
+        return response()->json([
+            'message' => 'Moment wurde gelöscht.',
+            'ok' => true,
+            'id' => (int) $moment->id,
+        ]);
+    }
+
     public function toggleLike(Request $request, Moment $moment, GamificationService $gamification, NotificationService $notifications): JsonResponse
     {
         $this->authorizeMomentVisible($request, $moment);
