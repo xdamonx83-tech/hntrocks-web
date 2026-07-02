@@ -123,15 +123,15 @@
 
 <section class="card cup-detail-tabs-card">
     <div aria-label="{{ __('ui.rework_cup_sections_aria') }}" class="cup-detail-tabs" role="tablist">
-        <a class="active" data-cup-detail-tab="overview" href="#cup-overview">{{ __('ui.rework_cup_tab_overview') }}</a>
-<a data-cup-detail-tab="rules" href="#cup-rules">{{ __('ui.rework_cup_tab_rules') }}</a>
-<a data-cup-detail-tab="leaderboard" href="#cup-leaderboard">Leaderboard</a>
-<a data-cup-detail-tab="prizes" href="#cup-prizes">{{ __('ui.rework_cup_tab_prizes') }}</a>
-<a data-cup-detail-tab="submit" href="#cup-submit">{{ __('ui.rework_cup_tab_submit') }}</a>
-        <a data-cup-detail-tab="my-submissions" href="#cup-my-submissions">{{ __('ui.rework_cup_tab_my_submissions') }}</a>
+        <a aria-selected="true" class="active" data-cup-detail-tab="overview" href="#cup-overview" role="tab"><i aria-hidden="true" class="ph ph-list-bullets ph-icon"></i>{{ __('ui.rework_cup_tab_overview') }}</a>
+        <a aria-selected="false" data-cup-detail-tab="rules" href="#cup-rules" role="tab"><i aria-hidden="true" class="ph ph-scroll ph-icon"></i>{{ __('ui.rework_cup_tab_rules') }}</a>
+        <a aria-selected="false" data-cup-detail-tab="leaderboard" href="#cup-leaderboard" role="tab"><i aria-hidden="true" class="ph ph-trophy ph-icon"></i>Leaderboard</a>
+        <a aria-selected="false" data-cup-detail-tab="prizes" href="#cup-prizes" role="tab"><i aria-hidden="true" class="ph ph-gift ph-icon"></i>{{ __('ui.rework_cup_tab_prizes') }}</a>
+        <a aria-selected="false" data-cup-detail-tab="submit" href="#cup-submit" role="tab"><i aria-hidden="true" class="ph ph-upload-simple ph-icon"></i>{{ __('ui.rework_cup_tab_submit') }}</a>
+        <a aria-selected="false" data-cup-detail-tab="my-submissions" href="#cup-my-submissions" role="tab"><i aria-hidden="true" class="ph ph-images ph-icon"></i>{{ __('ui.rework_cup_tab_my_submissions') }}</a>
         <?php $cupAdminCanManage = auth()->check() && $cup->canManage(auth()->user()); ?>
         <?php if ($cupAdminCanManage) { ?>
-            <a data-cup-detail-tab="admin-submissions" href="#cup-admin-submissions">{{ __('ui.rework_cup_tab_admin_submissions') }}</a>
+            <a aria-selected="false" data-cup-detail-tab="admin-submissions" href="#cup-admin-submissions" role="tab"><i aria-hidden="true" class="ph ph-shield-star ph-icon"></i>{{ __('ui.rework_cup_tab_admin_submissions') }}</a>
         <?php } ?>
     </div>
 </section>
