@@ -19810,3 +19810,454 @@ background: var(--surface);
     gap: 8px;
   }
 }
+
+/* 209 rework LFG follow-up calm filters and create modal */
+body.rework-lfg-modal-open {
+  overflow: hidden;
+}
+
+.lfg-page .lfg-hero {
+  border-color: rgba(255,255,255,.07);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255,255,255,.045), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,.035), rgba(30,30,29,.98));
+}
+
+.lfg-page .lfg-hero::before {
+  content: "";
+  grid-column: 1 / -1;
+  width: 54px;
+  height: 2px;
+  border-radius: 99px;
+  background: rgba(207,161,73,.58);
+}
+
+.lfg-page .lfg-hero-progress {
+  height: 7px;
+  background: rgba(255,255,255,.06);
+}
+
+.lfg-page .lfg-hero-progress span {
+  background: linear-gradient(90deg, rgba(207,161,73,.28), rgba(207,161,73,.46));
+}
+
+.lfg-page .lfg-hero-stats span {
+  position: relative;
+  background: rgba(255,255,255,.04);
+}
+
+.lfg-page .lfg-hero-stats span::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  width: 18px;
+  height: 2px;
+  border-radius: 99px;
+  background: rgba(207,161,73,.42);
+}
+
+.lfg-page .lfg-hero-stats strong {
+  color: #f6f0e4;
+}
+
+.lfg-page .lfg-hero-stats em,
+.lfg-page .lfg-card-title span,
+.lfg-page .lfg-section-head span {
+  color: rgba(242,232,216,.58);
+}
+
+.lfg-page .lfg-card-fallback,
+.lfg-page .lfg-empty-state .ph-icon {
+  color: rgba(242,232,216,.52);
+}
+
+.lfg-page .lfg-card-badges strong {
+  background: rgba(255,255,255,.075);
+  color: rgba(242,232,216,.76);
+}
+
+.lfg-page .lfg-hero-actions .btn,
+.lfg-page .lfg-empty-state .btn {
+  border: 1px solid rgba(207,161,73,.28);
+  background: rgba(255,255,255,.10);
+  color: #f6f0e4;
+  cursor: pointer;
+}
+
+.lfg-page .lfg-filter-form {
+  grid-template-columns: minmax(240px, 1fr) minmax(138px, 170px) minmax(150px, 184px) minmax(112px, auto);
+  grid-template-areas:
+    "search platform sort submit"
+    "checkVoice checkMine . .";
+}
+
+.lfg-page .lfg-search-field {
+  grid-area: search;
+}
+
+.lfg-page .lfg-filter-form label:nth-of-type(2) {
+  grid-area: platform;
+}
+
+.lfg-page .lfg-filter-form label:nth-of-type(3) {
+  grid-area: sort;
+}
+
+.lfg-page .lfg-filter-form .btn {
+  grid-area: submit;
+  width: 100%;
+  min-width: 112px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.10);
+  color: #f6f0e4;
+  cursor: pointer;
+}
+
+.lfg-page .lfg-check {
+  min-width: 0;
+}
+
+.lfg-page .lfg-check:nth-of-type(4) {
+  grid-area: checkVoice;
+}
+
+.lfg-page .lfg-check:nth-of-type(5) {
+  grid-area: checkMine;
+}
+
+.lfg-page .lfg-check span {
+  overflow: hidden;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lfg-page .lfg-filter-form input[type="search"],
+.lfg-page .lfg-filter-form select,
+.lfg-page .lfg-check {
+  background: rgba(255,255,255,.05);
+}
+
+.lfg-page .lfg-filter-form input[type="search"]:focus,
+.lfg-page .lfg-filter-form select:focus {
+  border-color: rgba(255,255,255,.18);
+}
+
+.lfg-page .lfg-status-tabs a.active {
+  background: rgba(255,255,255,.12);
+}
+
+.rework-lfg-create-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10,10,9,.72);
+  backdrop-filter: blur(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease;
+}
+
+.rework-lfg-create-modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rework-lfg-create-modal {
+  width: min(820px, calc(100vw - 48px));
+  max-height: min(860px, calc(100vh - 48px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px;
+  background: #1f1f1d;
+  box-shadow: 0 30px 80px rgba(0,0,0,.36);
+}
+
+.rework-lfg-create-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.rework-lfg-create-header span,
+.rework-lfg-fieldset legend,
+.rework-lfg-field > span {
+  color: rgba(242,232,216,.58);
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+}
+
+.rework-lfg-create-header h2 {
+  margin: 6px 0 7px;
+  color: #f6f0e4;
+  font-size: 25px;
+  line-height: 1.12;
+  font-weight: 700;
+}
+
+.rework-lfg-create-header p {
+  max-width: 560px;
+  margin: 0;
+  color: rgba(242,232,216,.62);
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.rework-lfg-create-close {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.07);
+  color: rgba(246,240,228,.86);
+  cursor: pointer;
+}
+
+.rework-lfg-create-form {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.rework-lfg-create-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 24px 22px;
+}
+
+.rework-lfg-fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+
+.rework-lfg-fieldset:last-child {
+  margin-bottom: 0;
+}
+
+.rework-lfg-fieldset legend {
+  grid-column: 1 / -1;
+  margin-bottom: 1px;
+  color: rgba(207,161,73,.60);
+}
+
+.rework-lfg-field {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.rework-lfg-field-wide {
+  grid-column: 1 / -1;
+}
+
+.rework-lfg-field small {
+  color: rgba(242,232,216,.44);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.rework-lfg-field input,
+.rework-lfg-field select,
+.rework-lfg-field textarea {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 10px;
+  outline: 0;
+  background: rgba(255,255,255,.05);
+  color: #f6f0e4;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rework-lfg-field input,
+.rework-lfg-field select {
+  padding: 0 12px;
+}
+
+.rework-lfg-field textarea {
+  min-height: 96px;
+  resize: vertical;
+  padding: 12px;
+  line-height: 1.45;
+}
+
+.rework-lfg-field input:focus,
+.rework-lfg-field select:focus,
+.rework-lfg-field textarea:focus {
+  border-color: rgba(255,255,255,.18);
+}
+
+.rework-lfg-field em {
+  color: rgba(228,108,91,.92);
+  font-size: 11px;
+  line-height: 1.35;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.rework-lfg-modal-check {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+}
+
+.rework-lfg-modal-check input {
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.rework-lfg-modal-check span {
+  display: grid;
+  gap: 4px;
+}
+
+.rework-lfg-modal-check strong {
+  color: #f6f0e4;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.rework-lfg-modal-check small {
+  color: rgba(242,232,216,.56);
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.rework-lfg-create-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  background: rgba(21,21,20,.72);
+}
+
+.rework-lfg-create-secondary,
+.rework-lfg-create-submit {
+  min-height: 38px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 16px;
+  color: #f6f0e4;
+  background: rgba(255,255,255,.08);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.rework-lfg-create-submit {
+  background: rgba(207,161,73,.72);
+  color: #151514;
+}
+
+@media (max-width: 1180px) {
+  .lfg-page .lfg-filter-form {
+    grid-template-columns: minmax(220px, 1fr) minmax(130px, 160px) minmax(140px, 174px) minmax(104px, auto);
+    grid-template-areas:
+      "search platform sort submit"
+      "checkVoice checkMine . .";
+  }
+}
+
+@media (max-width: 900px) {
+  .lfg-page .lfg-filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "search search"
+      "platform sort"
+      "checkVoice checkMine"
+      "submit submit";
+  }
+
+  .lfg-page .lfg-check:nth-of-type(4) {
+    grid-area: checkVoice;
+  }
+
+  .lfg-page .lfg-check:nth-of-type(5) {
+    grid-area: checkMine;
+    margin-left: 0;
+  }
+
+  .lfg-page .lfg-check span {
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .rework-lfg-create-modal-backdrop {
+    padding: 0;
+  }
+
+  .rework-lfg-create-modal {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-width: 0;
+    border-radius: 0;
+  }
+
+  .rework-lfg-create-header {
+    padding: 18px 16px 15px;
+  }
+
+  .rework-lfg-create-header h2 {
+    font-size: 22px;
+  }
+
+  .rework-lfg-create-body {
+    padding: 16px 14px 18px;
+  }
+
+  .rework-lfg-fieldset,
+  .lfg-page .lfg-filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .lfg-page .lfg-filter-form {
+    grid-template-areas:
+      "search"
+      "platform"
+      "sort"
+      "checkVoice"
+      "checkMine"
+      "submit";
+  }
+
+  .rework-lfg-create-footer {
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .rework-lfg-create-secondary,
+  .rework-lfg-create-submit {
+    flex: 1 1 0;
+  }
+}

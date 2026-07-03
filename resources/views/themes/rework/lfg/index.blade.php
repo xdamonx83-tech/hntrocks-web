@@ -34,6 +34,14 @@
             'featured_cups' => 'Aktive Cups',
             'active_hunters' => 'Aktive Hunter',
             'no_body' => 'Keine Beschreibung hinterlegt.',
+            'create_modal_title' => 'LFG erstellen',
+            'create_modal_text' => 'Beschreibe kurz deine Runde, die gesuchten Slots und wie andere Hunter zu dir passen.',
+            'cancel' => 'Abbrechen',
+            'publish' => 'Veröffentlichen',
+            'basic_data' => 'Basis',
+            'hunt_data' => 'Hunt-Details',
+            'settings' => 'Einstellungen',
+            'optional' => 'optional',
         ],
         'en' => [
             'eyebrow' => 'Hunter Board',
@@ -54,6 +62,14 @@
             'featured_cups' => 'Active cups',
             'active_hunters' => 'Active hunters',
             'no_body' => 'No description added.',
+            'create_modal_title' => 'Create LFG',
+            'create_modal_text' => 'Briefly describe your round, the open slots and which hunters fit.',
+            'cancel' => 'Cancel',
+            'publish' => 'Publish',
+            'basic_data' => 'Basics',
+            'hunt_data' => 'Hunt details',
+            'settings' => 'Settings',
+            'optional' => 'optional',
         ],
     ][$currentLocale];
 
@@ -93,6 +109,20 @@
     $socialiteMembers = $memberSuggestions;
     $socialiteHighlightLfg = $postsCollection->first();
     $socialiteHighlightCup = $featuredCups->first();
+    $hhLfgOptionLabel = fn (string $field, string $value): string => \App\Models\LfgPost::localizedOptionLabelFor($field, $value) ?? $value;
+    $createModalOpen = old('hh_lfg_modal') === 'create';
+    $titleValue = old('title', '');
+    $bodyValue = old('body', '');
+    $platformValue = old('platform', '');
+    $playstyleValue = old('playstyle', '');
+    $regionValue = old('region', '');
+    $languageValue = old('language', '');
+    $preferredTimeValue = old('preferred_time', '');
+    $experienceValue = old('experience_level', '');
+    $slotsTotalValue = (int) old('slots_total', 2);
+    $visibilityValue = old('visibility', 'public');
+    $expiresAtValue = old('expires_at', '');
+    $voiceRequiredValue = (bool) old('voice_required', false);
 @endphp
 
 @section('content')
@@ -104,7 +134,7 @@
         <div class="lfg-hero-progress" aria-hidden="true"><span style="width: {{ $progressPercent }}%"></span></div>
     </div>
     <div class="lfg-hero-actions">
-        <a class="btn" href="{{ route('lfg.create') }}"><i aria-hidden="true" class="ph ph-plus ph-icon"></i>{{ __('ui.lfg_create') }}</a>
+        <button class="btn" type="button" data-rework-lfg-create-open><i aria-hidden="true" class="ph ph-plus ph-icon"></i>{{ __('ui.lfg_create') }}</button>
     </div>
     <div class="lfg-hero-stats" aria-label="{{ __('ui.lfg_overview') }}">
         <span><strong>{{ number_format($postTotal) }}</strong><em>{{ $lfgUi['visible_posts'] }}</em></span>
@@ -200,7 +230,7 @@
         <i aria-hidden="true" class="ph ph-binoculars ph-icon"></i>
         <strong>{{ __('ui.lfg_empty_title') }}</strong>
         <p>{{ __('ui.lfg_empty_text') }}</p>
-        <a class="btn" href="{{ route('lfg.create') }}">{{ __('ui.lfg_create') }}</a>
+        <button class="btn" type="button" data-rework-lfg-create-open>{{ __('ui.lfg_create') }}</button>
     </section>
 @else
     <div class="lfg-grid">
@@ -209,7 +239,7 @@
                 $author = $post->user;
                 $slotsOpen = $post->slotsOpen();
                 $tags = $post->displayTags();
-                $coverUrl = $post->cover_path ? $post->coverUrl() : null;
+                $coverUrl = $author?->coverUrl() ?: $post->coverUrl();
                 $body = trim((string) $post->body);
             @endphp
             <article class="lfg-card card">
@@ -297,4 +327,150 @@
         </ul>
     </article>
 </section>
+
+<div
+    class="rework-lfg-create-modal-backdrop @if($createModalOpen) is-open @endif"
+    data-rework-lfg-create-modal
+    @if(! $createModalOpen) hidden @endif
+>
+    <section class="rework-lfg-create-modal" role="dialog" aria-modal="true" aria-labelledby="rework-lfg-create-title">
+        <header class="rework-lfg-create-header">
+            <div>
+                <span>{{ __('ui.lfg_index_title') }}</span>
+                <h2 id="rework-lfg-create-title">{{ $lfgUi['create_modal_title'] }}</h2>
+                <p>{{ $lfgUi['create_modal_text'] }}</p>
+            </div>
+            <button type="button" class="rework-lfg-create-close" data-rework-lfg-create-close aria-label="{{ __('ui.close') }}"><i aria-hidden="true" class="ph ph-x ph-icon"></i></button>
+        </header>
+
+        <form class="rework-lfg-create-form" method="POST" action="{{ route('lfg.store') }}">
+            @csrf
+            <input type="hidden" name="hh_lfg_modal" value="create">
+
+            <div class="rework-lfg-create-body">
+                <fieldset class="rework-lfg-fieldset">
+                    <legend>{{ $lfgUi['basic_data'] }}</legend>
+                    <label class="rework-lfg-field rework-lfg-field-wide" for="rework-lfg-title">
+                        <span>{{ __('ui.lfg_form_title') }}</span>
+                        <input id="rework-lfg-title" type="text" name="title" value="{{ $titleValue }}" maxlength="120" required placeholder="{{ __('ui.lfg_form_title_placeholder') }}">
+                        @error('title') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field rework-lfg-field-wide" for="rework-lfg-body">
+                        <span>{{ __('ui.lfg_form_body') }} <small>{{ $lfgUi['optional'] }}</small></span>
+                        <textarea id="rework-lfg-body" name="body" rows="4" maxlength="2800" placeholder="{{ __('ui.lfg_form_body_placeholder') }}">{{ $bodyValue }}</textarea>
+                        @error('body') <em>{{ $message }}</em> @enderror
+                    </label>
+                </fieldset>
+
+                <fieldset class="rework-lfg-fieldset">
+                    <legend>{{ $lfgUi['hunt_data'] }}</legend>
+                    <label class="rework-lfg-field" for="rework-lfg-platform">
+                        <span>{{ __('ui.lfg_detail_platform') }}</span>
+                        <select id="rework-lfg-platform" name="platform">
+                            <option value="">{{ __('ui.select_option') }}</option>
+                            @foreach($platformOptions as $option)
+                                <option value="{{ $option }}" @selected($platformValue === $option)>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                        @error('platform') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field" for="rework-lfg-playstyle">
+                        <span>{{ __('ui.lfg_detail_playstyle') }}</span>
+                        <select id="rework-lfg-playstyle" name="playstyle">
+                            <option value="">{{ __('ui.select_option') }}</option>
+                            @foreach(['Entspannt', 'Taktisch', 'Aggressiv', 'Competitive', 'Einsteigerfreundlich'] as $option)
+                                <option value="{{ $option }}" @selected($playstyleValue === $option)>{{ $hhLfgOptionLabel('playstyle', $option) }}</option>
+                            @endforeach
+                        </select>
+                        @error('playstyle') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field" for="rework-lfg-region">
+                        <span>{{ __('ui.lfg_detail_region') }}</span>
+                        <select id="rework-lfg-region" name="region">
+                            <option value="">{{ __('ui.select_option') }}</option>
+                            @foreach(['EU', 'US East', 'US West', 'Asia', 'Oceania'] as $option)
+                                <option value="{{ $option }}" @selected($regionValue === $option)>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                        @error('region') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field" for="rework-lfg-language">
+                        <span>{{ __('ui.language') }}</span>
+                        <select id="rework-lfg-language" name="language">
+                            <option value="">{{ __('ui.select_option') }}</option>
+                            @foreach(['Deutsch', 'Englisch', 'Deutsch / Englisch', 'Mehrsprachig'] as $option)
+                                <option value="{{ $option }}" @selected($languageValue === $option)>{{ $hhLfgOptionLabel('language', $option) }}</option>
+                            @endforeach
+                        </select>
+                        @error('language') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field" for="rework-lfg-preferred-time">
+                        <span>{{ __('ui.lfg_form_preferred_time') }}</span>
+                        <select id="rework-lfg-preferred-time" name="preferred_time">
+                            <option value="">{{ __('ui.select_option') }}</option>
+                            @foreach(['Morgens', 'Mittags', 'Abends', 'Nachts', 'Wochenende', 'Flexibel'] as $option)
+                                <option value="{{ $option }}" @selected($preferredTimeValue === $option)>{{ $hhLfgOptionLabel('preferred_time', $option) }}</option>
+                            @endforeach
+                        </select>
+                        @error('preferred_time') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field" for="rework-lfg-experience">
+                        <span>{{ __('ui.lfg_form_experience_level') }}</span>
+                        <select id="rework-lfg-experience" name="experience_level">
+                            <option value="">{{ __('ui.select_option') }}</option>
+                            @foreach(['Einsteiger', 'Fortgeschritten', 'Erfahren', 'Competitive', 'Egal'] as $option)
+                                <option value="{{ $option }}" @selected($experienceValue === $option)>{{ $hhLfgOptionLabel('experience_level', $option) }}</option>
+                            @endforeach
+                        </select>
+                        @error('experience_level') <em>{{ $message }}</em> @enderror
+                    </label>
+                </fieldset>
+
+                <fieldset class="rework-lfg-fieldset">
+                    <legend>{{ $lfgUi['settings'] }}</legend>
+                    <label class="rework-lfg-field" for="rework-lfg-slots-total">
+                        <span>{{ __('ui.lfg_form_slots_total') }}</span>
+                        <select id="rework-lfg-slots-total" name="slots_total" required>
+                            @foreach([2, 3] as $option)
+                                <option value="{{ $option }}" @selected($slotsTotalValue === $option)>{{ __('ui.lfg_form_players_count', ['count' => $option]) }}</option>
+                            @endforeach
+                        </select>
+                        @error('slots_total') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field" for="rework-lfg-visibility">
+                        <span>{{ __('ui.lfg_visibility') }}</span>
+                        <select id="rework-lfg-visibility" name="visibility" required>
+                            <option value="public" @selected($visibilityValue === 'public')>{{ __('ui.lfg_visibility_public') }}</option>
+                            <option value="private" @selected($visibilityValue === 'private')>{{ __('ui.lfg_visibility_private') }}</option>
+                        </select>
+                        @error('visibility') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-field" for="rework-lfg-expires-at">
+                        <span>{{ __('ui.lfg_form_expires_at') }} <small>{{ $lfgUi['optional'] }}</small></span>
+                        <input id="rework-lfg-expires-at" type="datetime-local" name="expires_at" value="{{ $expiresAtValue }}">
+                        @error('expires_at') <em>{{ $message }}</em> @enderror
+                    </label>
+
+                    <label class="rework-lfg-modal-check" for="rework-lfg-voice-required">
+                        <input id="rework-lfg-voice-required" type="checkbox" name="voice_required" value="1" @checked($voiceRequiredValue)>
+                        <span><strong>{{ __('ui.lfg_form_voice_required') }}</strong><small>{{ __('ui.lfg_form_voice_required_text') }}</small></span>
+                    </label>
+                </fieldset>
+            </div>
+
+            <footer class="rework-lfg-create-footer">
+                <button type="button" class="rework-lfg-create-secondary" data-rework-lfg-create-close>{{ $lfgUi['cancel'] }}</button>
+                <button type="submit" class="rework-lfg-create-submit">{{ $lfgUi['publish'] }}</button>
+            </footer>
+        </form>
+    </section>
+</div>
 @endsection
