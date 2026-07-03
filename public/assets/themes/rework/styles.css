@@ -20524,11 +20524,22 @@ body.rework-lfg-modal-open {
     width: auto;
     max-height: min(78vh, 680px);
     max-height: min(78dvh, 680px);
-    display: flex;
+    display: block;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     transform: translateY(calc(100% + 28px));
     transition: transform .22s ease;
     border-radius: 18px;
     box-shadow: 0 -20px 70px rgba(0, 0, 0, .58);
+  }
+
+  .rework-map-tools::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 
   .rework-map-tools.is-open {
@@ -20540,9 +20551,7 @@ body.rework-lfg-modal-open {
   }
 
   .rework-map-tools .hnt-map-tools-scroll {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -20550,6 +20559,13 @@ body.rework-lfg-modal-open {
   .rework-map-tools .hnt-map-tools-scroll::-webkit-scrollbar {
     width: 0;
     height: 0;
+    display: none;
+  }
+
+  .rework-map-tools .hnt-map-tools-footer {
+    position: static;
+    padding-bottom: 20px;
+    background: transparent;
   }
 
   .rework-map-stage .leaflet-top.leaflet-left {
@@ -20596,9 +20612,13 @@ body.rework-lfg-modal-open {
   }
 
   .rework-map-tools {
-    inset: auto 10px calc(84px + env(safe-area-inset-bottom)) 10px;
+    inset: auto 10px calc(96px + env(safe-area-inset-bottom)) 10px;
     max-height: min(74vh, 640px);
     max-height: min(74dvh, 640px);
+  }
+
+  .rework-map-layout .hnt-map-tools-backdrop {
+    bottom: calc(74px + env(safe-area-inset-bottom));
   }
 
   .rework-map-stage .leaflet-top.leaflet-left {
