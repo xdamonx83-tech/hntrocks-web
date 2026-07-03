@@ -20264,7 +20264,7 @@ body.rework-lfg-modal-open {
 
 /* Rework HNT Maps detail: exception page with the map as the primary canvas. */
 .rework-map-body {
-  overflow: auto;
+  overflow: hidden;
   background: #1A1A18;
 }
 
@@ -20285,48 +20285,37 @@ body.rework-lfg-modal-open {
 }
 
 .rework-map-main {
-  position: relative;
   min-height: 100vh;
   min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-  padding-bottom: 24px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 28px;
 }
 
 .rework-map-main .topbar {
-  position: relative;
-  z-index: 820;
-  height: 82px;
-  pointer-events: auto;
-}
-
-.rework-map-main .search-box,
-.rework-map-main .action-btn,
-.rework-map-main .avatar-wrap {
-  box-shadow: 0 16px 38px rgba(0, 0, 0, .24);
+  flex: 0 0 auto;
 }
 
 .rework-map-layout {
-  position: absolute;
-  inset: 0 37px 24px 41px;
   min-height: 0;
+  height: calc(100vh - 150px);
+  height: calc(100dvh - 150px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 336px);
   gap: 24px;
-  overflow: hidden;
+  overflow: visible;
   background: transparent;
 }
 
 .rework-map-stage {
-  position: relative;
   height: 100%;
-  min-height: 0;
+  min-height: 620px;
   overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  background: #0E0F0D;
-  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 8px;
+  background: #11110F;
+  box-shadow: inset 0 0 0 1px rgba(207, 161, 73, .06), 0 18px 48px rgba(0, 0, 0, .28);
 }
 
 .rework-map-stage .hnt-map-canvas {
@@ -20340,20 +20329,17 @@ body.rework-lfg-modal-open {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 22% 16%, rgba(207, 161, 73, .07), transparent 28%),
-    linear-gradient(180deg, rgba(26, 26, 24, .06), transparent 34%, rgba(26, 26, 24, .08)),
-    radial-gradient(circle at center, transparent 62%, rgba(5, 5, 4, .20));
+    radial-gradient(circle at 22% 16%, rgba(207, 161, 73, .10), transparent 28%),
+    linear-gradient(180deg, rgba(26, 26, 24, .08), transparent 36%, rgba(26, 26, 24, .12)),
+    radial-gradient(circle at center, transparent 58%, rgba(5, 5, 4, .28));
   mix-blend-mode: soft-light;
 }
 
 .rework-map-tools {
-  align-self: start;
   width: 100%;
   min-width: 0;
   min-height: 0;
-  height: calc(100vh - 150px);
-  height: calc(100dvh - 150px);
-  margin-top: 126px;
+  height: 100%;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .07);
   border-radius: 20px;
@@ -20391,13 +20377,6 @@ body.rework-lfg-modal-open {
 
 .rework-map-tools .hnt-map-tools-scroll {
   padding-inline: 18px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.rework-map-tools .hnt-map-tools-scroll::-webkit-scrollbar {
-  width: 0;
-  height: 0;
 }
 
 .rework-map-tools .hnt-map-tool-section {
@@ -20441,49 +20420,26 @@ body.rework-lfg-modal-open {
   background: rgba(20, 20, 18, .72);
 }
 
-.rework-map-stage .leaflet-top.leaflet-left {
-  top: 112px;
-}
-
-.rework-map-stage .leaflet-control-zoom {
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.rework-map-stage .leaflet-control-zoom a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
 @media (max-width: 1180px) {
   .rework-map-body {
     overflow: auto;
   }
 
   .rework-map-main {
-    height: auto;
     min-height: 100vh;
-    min-height: 100dvh;
-    overflow: visible;
   }
 
   .rework-map-layout {
-    position: static;
-    inset: auto;
     height: auto;
     grid-template-columns: 1fr;
     gap: 18px;
-    overflow: visible;
   }
 
   .rework-map-stage {
-    height: min(72vh, 680px);
-    height: min(72dvh, 680px);
-    min-height: 520px;
+    min-height: min(72vh, 680px);
   }
 
   .rework-map-tools {
-    margin-top: 0;
     height: auto;
     max-height: none;
   }
@@ -20508,80 +20464,8 @@ body.rework-lfg-modal-open {
   }
 
   .rework-map-stage {
-    height: 70vh;
-    height: 70dvh;
-    min-height: 520px;
+    min-height: 68vh;
     border-radius: 0;
-  }
-
-  .rework-map-tools-trigger {
-    position: fixed;
-    z-index: 940;
-    top: max(16px, env(safe-area-inset-top));
-    left: calc(78px + 18px);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    padding: 0 14px;
-    border: 1px solid rgba(255, 255, 255, .10);
-    border-radius: 12px;
-    background: rgba(30, 30, 29, .94);
-    box-shadow: 0 12px 34px rgba(0, 0, 0, .42);
-    color: var(--text);
-    font: inherit;
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-  }
-
-  .rework-map-layout .hnt-map-tools-backdrop {
-    position: fixed;
-    z-index: 950;
-    inset: 0;
-    display: block;
-    border: 0;
-    background: rgba(5, 5, 4, .62);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s ease;
-  }
-
-  .rework-map-layout .hnt-map-tools-backdrop.is-open {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .rework-map-tools {
-    position: fixed;
-    z-index: 980;
-    inset: auto 16px max(16px, env(safe-area-inset-bottom)) calc(78px + 16px);
-    width: auto;
-    max-height: min(78vh, 680px);
-    max-height: min(78dvh, 680px);
-    display: flex;
-    transform: translateY(calc(100% + 28px));
-    transition: transform .22s ease;
-    border-radius: 18px;
-    box-shadow: 0 -20px 70px rgba(0, 0, 0, .58);
-  }
-
-  .rework-map-tools.is-open {
-    transform: translateY(0);
-  }
-
-  .rework-map-tools .hnt-map-tools-close {
-    display: grid;
-  }
-
-  .rework-map-tools .hnt-map-tools-scroll {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .rework-map-stage .leaflet-top.leaflet-left {
-    top: 62px;
   }
 }
 
@@ -20592,9 +20476,7 @@ body.rework-lfg-modal-open {
   }
 
   .rework-map-stage {
-    height: 68vh;
-    height: 68dvh;
-    min-height: 460px;
+    min-height: 62vh;
   }
 
   .rework-map-tools {
@@ -20603,37 +20485,5 @@ body.rework-lfg-modal-open {
 
   .rework-map-tools .hnt-map-filter-options {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 700px) {
-  .rework-map-main {
-    margin-left: 0;
-    padding: 0 0 calc(74px + env(safe-area-inset-bottom));
-  }
-
-  .rework-map-stage {
-    height: calc(100vh - 74px);
-    height: calc(100dvh - 74px);
-    min-height: 0;
-  }
-
-  .rework-map-tools-trigger {
-    left: 14px;
-    top: max(12px, env(safe-area-inset-top));
-  }
-
-  .rework-map-tools {
-    inset: auto 10px calc(84px + env(safe-area-inset-bottom)) 10px;
-    max-height: min(74vh, 640px);
-    max-height: min(74dvh, 640px);
-  }
-
-  .rework-map-stage .leaflet-top.leaflet-left {
-    top: 60px;
-  }
-
-  .rework-map-stage .hnt-map-disclaimer {
-    bottom: calc(84px + env(safe-area-inset-bottom));
   }
 }
