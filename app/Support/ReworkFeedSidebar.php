@@ -44,6 +44,13 @@ class ReworkFeedSidebar
             ->whereNotNull('username')
             ->where('username', '!=', '')
             ->whereNotIn('id', $friendshipExcludedIds->all())
+            ->whereHas('profile', function ($profileQuery) use ($viewerId): void {
+                $profileQuery->where(function ($visibilityQuery) use ($viewerId): void {
+                    $visibilityQuery
+                        ->whereIn('profile_visibility', ['public', 'registered'])
+                        ->orWhere('user_id', $viewerId);
+                });
+            })
             ->whereDoesntHave('blockedUsers', fn ($query) => $query->where('blocked_user_id', $viewerId))
             ->whereDoesntHave('blockedByUsers', fn ($query) => $query->where('user_id', $viewerId))
             ->inRandomOrder()
