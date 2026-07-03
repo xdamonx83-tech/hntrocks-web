@@ -28,6 +28,16 @@
         'equip' => $isEnglish ? 'Equip' : 'Ausrüsten',
         'equipped' => $isEnglish ? 'Active' : 'Aktiv',
         'notEnough' => $isEnglish ? 'Not enough Marks' : 'Zu wenig Marks',
+        'availableKicker' => 'Bounty Marks',
+        'availableTitle' => $isEnglish ? 'Available in shop' : 'Verfügbar im Shop',
+        'allOwnedText' => $isEnglish ? 'You currently own all available shop items.' : 'Du besitzt aktuell alle verfügbaren Shop-Items.',
+        'ownedKicker' => $isEnglish ? 'Inventory' : 'Inventar',
+        'ownedTitle' => $isEnglish ? 'Already in inventory' : 'Bereits im Inventar',
+        'ownedText' => $isEnglish
+            ? 'You already own these items. Activatable items can be equipped here or in your inventory.'
+            : 'Diese Items besitzt du bereits. Du kannst aktivierbare Items hier oder im Inventar ausrüsten.',
+        'ownedBadge' => $isEnglish ? 'Owned' : 'Bereits im Inventar',
+        'viewInventory' => $isEnglish ? 'View inventory' : 'Im Inventar ansehen',
         'emptyTitle' => $isEnglish ? 'No shop items available' : 'Keine Shop-Items verfügbar',
         'emptyText' => $isEnglish ? 'New cosmetics will appear here later.' : 'Neue Cosmetics erscheinen später hier.',
     ];
@@ -126,6 +136,14 @@
         ->unique()
         ->sort()
         ->all();
+
+    $availableShopItems = collect($items)->reject(function ($item) use ($inventoryByItemId, $ownedItemIds): bool {
+        return $inventoryByItemId->has($item->id) || in_array((int) $item->id, $ownedItemIds ?? [], true);
+    });
+
+    $ownedShopItems = collect($items)->filter(function ($item) use ($inventoryByItemId, $ownedItemIds): bool {
+        return $inventoryByItemId->has($item->id) || in_array((int) $item->id, $ownedItemIds ?? [], true);
+    });
 @endphp
 
 <section class="members-head shop-head">
@@ -158,64 +176,127 @@
     @endforeach
 </section>
 
-<section aria-label="Shop Items" class="shop-grid">
-    @forelse($items as $item)
-        @php
-            $inventoryItem = $inventoryByItemId->get($item->id);
-            $isOwned = $inventoryItem !== null || in_array((int) $item->id, $ownedItemIds ?? [], true);
-            $isEquipped = $inventoryItem?->isEquipped() ?? false;
-            $isAffordable = $balance >= (int) $item->price;
-            $typeLabel = $shopLabelFor($item->slot ?: $item->type);
-            $iconClass = $shopIconFor($item);
-        @endphp
+<section class="shop-section shop-available-section">
+    <div class="shop-section-head">
+        <span>{{ $shopUi['availableKicker'] }}</span>
+        <h2>{{ $shopUi['availableTitle'] }}</h2>
+    </div>
 
-        <article class="shop-item-card card {{ $isOwned ? 'is-owned' : '' }}" data-shop-item data-shop-category="{{ $shopCategoryKeyFor($item->slot ?: $item->type ?: $item->key) }}">
-            <div class="shop-item-top">
-                <span class="shop-rarity">{{ $typeLabel }}</span>
-                <div class="shop-item-icon"><i aria-hidden="true" class="ph {{ $iconClass }} ph-icon"></i></div>
-            </div>
+    <section aria-label="Shop Items" class="shop-grid">
+        @forelse($availableShopItems as $item)
+            @php
+                $inventoryItem = $inventoryByItemId->get($item->id);
+                $isOwned = $inventoryItem !== null || in_array((int) $item->id, $ownedItemIds ?? [], true);
+                $isEquipped = $inventoryItem?->isEquipped() ?? false;
+                $isAffordable = $balance >= (int) $item->price;
+                $typeLabel = $shopLabelFor($item->slot ?: $item->type);
+                $iconClass = $shopIconFor($item);
+            @endphp
 
-            <h2>{{ $item->displayName() }}</h2>
-            <p class="shop-slot">{{ $typeLabel }}</p>
-            <p class="shop-desc">{{ $item->displayDescription() }}</p>
+            <article class="shop-item-card card" data-shop-item data-shop-category="{{ $shopCategoryKeyFor($item->slot ?: $item->type ?: $item->key) }}">
+                <div class="shop-item-top">
+                    <span class="shop-rarity">{{ $typeLabel }}</span>
+                    <div class="shop-item-icon"><i aria-hidden="true" class="ph {{ $iconClass }} ph-icon"></i></div>
+                </div>
 
-            <div class="shop-stats">
-                <span>{{ $shopUi['owned'] }}</span>
-                <strong>{{ $isOwned ? $shopUi['yes'] : $shopUi['no'] }}</strong>
-                <span>{{ $shopUi['active'] }}</span>
-                <strong>{{ $isEquipped ? $shopUi['yes'] : $shopUi['no'] }}</strong>
-            </div>
+                <h2>{{ $item->displayName() }}</h2>
+                <p class="shop-slot">{{ $typeLabel }}</p>
+                <p class="shop-desc">{{ $item->displayDescription() }}</p>
 
-            <div class="shop-item-footer">
-                <b><img alt="" src="{{ \App\Support\HntTheme::asset('images/shop-coin.webp', 'rework') }}"/>{{ number_format((int) $item->price, 0, ',', '.') }}</b>
+                <div class="shop-stats">
+                    <span>{{ $shopUi['owned'] }}</span>
+                    <strong>{{ $isOwned ? $shopUi['yes'] : $shopUi['no'] }}</strong>
+                    <span>{{ $shopUi['active'] }}</span>
+                    <strong>{{ $isEquipped ? $shopUi['yes'] : $shopUi['no'] }}</strong>
+                </div>
 
-                @if(! $isOwned)
+                <div class="shop-item-footer">
+                    <b><img alt="" src="{{ \App\Support\HntTheme::asset('images/shop-coin.webp', 'rework') }}"/>{{ number_format((int) $item->price, 0, ',', '.') }}</b>
+
                     <form method="post" action="{{ route('crowns.shop.purchase', $item) }}">
                         @csrf
                         <button type="submit" @disabled(! $isAffordable)>{{ $isAffordable ? $shopUi['buy'] : $shopUi['notEnough'] }}</button>
                     </form>
-                @elseif($item->isActivatable() && ! $isEquipped && $inventoryItem)
-                    <form method="post" action="{{ route('crowns.inventory.equip', $inventoryItem) }}">
-                        @csrf
-                        <button type="submit">{{ $shopUi['equip'] }}</button>
-                    </form>
-                @elseif($isEquipped)
-                    <button type="button" disabled>{{ $shopUi['equipped'] }}</button>
-                @else
-                    <a href="{{ route('crowns.inventory') }}">{{ $shopUi['inventory'] }}</a>
-                @endif
-            </div>
-        </article>
-    @empty
-        <article class="shop-item-card card">
-            <div class="shop-item-top">
-                <span class="shop-rarity">{{ $shopUi['title'] }}</span>
-                <div class="shop-item-icon"><i aria-hidden="true" class="ph ph-shopping-bag-open ph-icon"></i></div>
-            </div>
-            <h2>{{ $shopUi['emptyTitle'] }}</h2>
-            <p class="shop-slot">{{ $shopUi['eyebrow'] }}</p>
-            <p class="shop-desc">{{ $shopUi['emptyText'] }}</p>
-        </article>
-    @endforelse
+                </div>
+            </article>
+        @empty
+            @if(collect($items)->isEmpty())
+                <article class="shop-item-card card">
+                    <div class="shop-item-top">
+                        <span class="shop-rarity">{{ $shopUi['title'] }}</span>
+                        <div class="shop-item-icon"><i aria-hidden="true" class="ph ph-shopping-bag-open ph-icon"></i></div>
+                    </div>
+                    <h2>{{ $shopUi['emptyTitle'] }}</h2>
+                    <p class="shop-slot">{{ $shopUi['eyebrow'] }}</p>
+                    <p class="shop-desc">{{ $shopUi['emptyText'] }}</p>
+                </article>
+            @else
+                <article class="shop-owned-empty card">
+                    <p>{{ $shopUi['allOwnedText'] }}</p>
+                </article>
+            @endif
+        @endforelse
+    </section>
 </section>
+
+@if($ownedShopItems->isNotEmpty())
+    <section class="shop-section shop-owned-section">
+        <div class="shop-section-head">
+            <span>{{ $shopUi['ownedKicker'] }}</span>
+            <h2>{{ $shopUi['ownedTitle'] }}</h2>
+            <p>{{ $shopUi['ownedText'] }}</p>
+        </div>
+
+        <section aria-label="{{ $shopUi['ownedTitle'] }}" class="shop-grid">
+            @foreach($ownedShopItems as $item)
+                @php
+                    $inventoryItem = $inventoryByItemId->get($item->id);
+                    $isEquipped = $inventoryItem?->isEquipped() ?? false;
+                    $typeLabel = $shopLabelFor($item->slot ?: $item->type);
+                    $iconClass = $shopIconFor($item);
+                @endphp
+
+                <article class="shop-item-card card is-owned shop-owned-card" data-shop-item data-shop-category="{{ $shopCategoryKeyFor($item->slot ?: $item->type ?: $item->key) }}">
+                    <div class="shop-item-top">
+                        <span class="shop-rarity">{{ $typeLabel }}</span>
+                        <div class="shop-owned-badges">
+                            <span class="shop-owned-badge">{{ $shopUi['ownedBadge'] }}</span>
+                            @if($isEquipped)
+                                <span class="shop-owned-badge is-active">{{ $shopUi['equipped'] }}</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="shop-item-icon"><i aria-hidden="true" class="ph {{ $iconClass }} ph-icon"></i></div>
+
+                    <h2>{{ $item->displayName() }}</h2>
+                    <p class="shop-slot">{{ $typeLabel }}</p>
+                    <p class="shop-desc">{{ $item->displayDescription() }}</p>
+
+                    <div class="shop-stats">
+                        <span>{{ $shopUi['owned'] }}</span>
+                        <strong>{{ $shopUi['yes'] }}</strong>
+                        <span>{{ $shopUi['active'] }}</span>
+                        <strong>{{ $isEquipped ? $shopUi['yes'] : $shopUi['no'] }}</strong>
+                    </div>
+
+                    <div class="shop-item-footer">
+                        <span class="shop-owned-price"><img alt="" src="{{ \App\Support\HntTheme::asset('images/shop-coin.webp', 'rework') }}"/>{{ number_format((int) $item->price, 0, ',', '.') }}</span>
+
+                        @if($item->isActivatable() && ! $isEquipped && $inventoryItem)
+                            <form method="post" action="{{ route('crowns.inventory.equip', $inventoryItem) }}">
+                                @csrf
+                                <button type="submit">{{ $shopUi['equip'] }}</button>
+                            </form>
+                        @elseif($isEquipped)
+                            <button type="button" disabled>{{ $shopUi['equipped'] }}</button>
+                        @else
+                            <a href="{{ route('crowns.inventory') }}">{{ $shopUi['viewInventory'] }}</a>
+                        @endif
+                    </div>
+                </article>
+            @endforeach
+        </section>
+    </section>
+@endif
 @endsection
