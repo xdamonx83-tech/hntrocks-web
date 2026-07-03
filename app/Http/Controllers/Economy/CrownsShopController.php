@@ -73,10 +73,18 @@ class CrownsShopController extends Controller
             ->get()
             ->keyBy('slot');
 
+        $sidebarData = ReworkFeedSidebar::forViewer($user);
+
         return view($this->themeView('crowns.inventory'), [
             'summary' => $crowns->summary($user),
             'inventoryItems' => $inventoryItems,
             'equippedBySlot' => $equippedBySlot,
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
         ]);
     }
 
