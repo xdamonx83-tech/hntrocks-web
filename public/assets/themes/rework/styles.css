@@ -19177,3 +19177,1087 @@ background: var(--surface);
     grid-template-columns: 1fr;
   }
 }
+
+/* 208 rework LFG overview */
+.lfg-page .lfg-overview-left {
+  gap: 22px;
+  max-width: 900px;
+}
+
+.lfg-page .lfg-hero,
+.lfg-page .lfg-managed,
+.lfg-page .lfg-filter-card,
+.lfg-page .lfg-empty-state,
+.lfg-page .lfg-side-widget,
+.lfg-page .lfg-card {
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.lfg-page .lfg-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(207,161,73,.16);
+  background:
+    radial-gradient(circle at 16% 14%, rgba(207,161,73,.12), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.035), rgba(32,32,30,.98));
+}
+
+.lfg-page .lfg-hero-main h1 {
+  margin: 7px 0 8px;
+  color: #f6f0e4;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.lfg-page .lfg-hero-main p {
+  max-width: 560px;
+  margin: 0;
+  color: rgba(242,232,216,.66);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.lfg-page .lfg-hero-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.lfg-page .lfg-hero-actions .btn,
+.lfg-page .lfg-filter-form .btn,
+.lfg-page .lfg-empty-state .btn {
+  min-height: 38px;
+  gap: 8px;
+  border-radius: 10px;
+  background: rgba(207,161,73,.86);
+  color: #151514;
+}
+
+.lfg-page .lfg-hero-progress {
+  height: 10px;
+  max-width: 560px;
+  margin-top: 24px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.075);
+}
+
+.lfg-page .lfg-hero-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: rgba(207,161,73,.78);
+}
+
+.lfg-page .lfg-hero-stats {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lfg-page .lfg-hero-stats span {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+}
+
+.lfg-page .lfg-hero-stats strong {
+  display: block;
+  color: #f6f0e4;
+  font-size: 23px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-hero-stats em {
+  display: block;
+  margin-top: 6px;
+  color: rgba(242,232,216,.55);
+  font-size: 10px;
+  line-height: 1.2;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.lfg-page .lfg-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: rgba(246,240,228,.92);
+  background: rgba(255,255,255,.055);
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-alert-success .ph-icon {
+  color: var(--green);
+}
+
+.lfg-page .lfg-alert-danger {
+  background: rgba(228,108,91,.12);
+}
+
+.lfg-page .lfg-alert-danger ul {
+  margin: 7px 0 0;
+  padding-left: 18px;
+}
+
+.lfg-page .lfg-managed,
+.lfg-page .lfg-filter-card,
+.lfg-page .lfg-side-widget {
+  padding: 20px 22px;
+}
+
+.lfg-page .lfg-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.lfg-page .lfg-section-head span {
+  color: rgba(207,161,73,.82);
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.lfg-page .lfg-section-head a {
+  color: rgba(246,240,228,.78);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lfg-page .lfg-managed-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lfg-page .lfg-managed-item,
+.lfg-page .lfg-widget-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.lfg-page .lfg-managed-item {
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+}
+
+.lfg-page .lfg-managed-item img,
+.lfg-page .lfg-widget-row img {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.lfg-page .lfg-managed-item span,
+.lfg-page .lfg-widget-row span {
+  min-width: 0;
+}
+
+.lfg-page .lfg-managed-item strong,
+.lfg-page .lfg-widget-row strong {
+  display: block;
+  overflow: hidden;
+  color: #f6f0e4;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lfg-page .lfg-managed-item em,
+.lfg-page .lfg-widget-row em {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: rgba(242,232,216,.54);
+  font-size: 10px;
+  line-height: 1.25;
+  font-style: normal;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lfg-page .lfg-filter-form {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.4fr) minmax(140px, .8fr) minmax(150px, .8fr) auto auto auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.lfg-page .lfg-filter-form label {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.lfg-page .lfg-filter-form label > span,
+.lfg-page .lfg-check span {
+  color: rgba(242,232,216,.58);
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+}
+
+.lfg-page .lfg-filter-form input[type="search"],
+.lfg-page .lfg-filter-form select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  outline: 0;
+  background: rgba(255,255,255,.055);
+  color: #f6f0e4;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-filter-form input[type="search"] {
+  padding: 0 14px;
+}
+
+.lfg-page .lfg-filter-form select {
+  padding: 0 12px;
+}
+
+.lfg-page .lfg-check {
+  min-height: 42px;
+  display: flex !important;
+  align-items: center;
+  gap: 9px !important;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+}
+
+.lfg-page .lfg-check input {
+  accent-color: var(--accent);
+}
+
+.lfg-page .lfg-status-tabs {
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.lfg-page .lfg-status-tabs a {
+  min-height: 38px;
+  height: auto;
+  padding: 0 16px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 9px;
+  background: rgba(255,255,255,.045);
+  color: rgba(242,232,216,.72);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-status-tabs a.active {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.16);
+  color: #f6f0e4;
+}
+
+.lfg-page .lfg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.lfg-page .lfg-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.lfg-page .lfg-card-media {
+  position: relative;
+  height: 142px;
+  display: block;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(207,161,73,.17), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,.06), rgba(21,21,20,.92));
+  color: inherit;
+  text-decoration: none;
+}
+
+.lfg-page .lfg-card-media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  filter: saturate(.88) brightness(.78);
+}
+
+.lfg-page .lfg-card-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(207,161,73,.76);
+  font-size: 34px;
+}
+
+.lfg-page .lfg-status-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: rgba(21,21,20,.82);
+  color: rgba(246,240,228,.90);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.lfg-page .lfg-status-badge.is-open {
+  color: rgba(213,247,224,.95);
+}
+
+.lfg-page .lfg-card-body {
+  padding: 16px 18px 17px;
+}
+
+.lfg-page .lfg-card-title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.lfg-page .lfg-card-title h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #f6f0e4;
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-card-title h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.lfg-page .lfg-card-title span {
+  color: rgba(207,161,73,.92);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.lfg-page .lfg-card-author {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+  color: rgba(242,232,216,.68);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-card-author img {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.lfg-page .lfg-card-body p {
+  min-height: 51px;
+  margin: 13px 0 15px;
+  color: rgba(242,232,216,.58);
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.lfg-page .lfg-card-badges {
+  min-height: 56px;
+  display: flex;
+  align-items: flex-start;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.lfg-page .lfg-card-badges span,
+.lfg-page .lfg-card-badges strong {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.06);
+  color: rgba(242,232,216,.70);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-card-badges strong {
+  background: rgba(207,161,73,.12);
+  color: rgba(236,205,145,.94);
+}
+
+.lfg-page .lfg-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.lfg-page .lfg-card-footer > span {
+  color: rgba(242,232,216,.50);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-card-footer .btn {
+  min-width: 86px;
+  min-height: 34px;
+  color: #f6f0e4;
+  background: rgba(255,255,255,.10);
+}
+
+.lfg-page .lfg-empty-state {
+  min-height: 230px;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 28px;
+  text-align: center;
+}
+
+.lfg-page .lfg-empty-state .ph-icon {
+  color: rgba(207,161,73,.82);
+  font-size: 32px;
+}
+
+.lfg-page .lfg-empty-state strong {
+  color: #f6f0e4;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.lfg-page .lfg-empty-state p {
+  max-width: 420px;
+  margin: 0;
+  color: rgba(242,232,216,.62);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.lfg-page .lfg-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lfg-page .lfg-pagination a,
+.lfg-page .lfg-pagination span,
+.lfg-page .lfg-pagination strong {
+  min-height: 36px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.055);
+  color: rgba(242,232,216,.72);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lfg-page .lfg-pagination strong {
+  background: rgba(207,161,73,.82);
+  color: #151514;
+}
+
+.lfg-page .lfg-pagination span {
+  opacity: .48;
+}
+
+.lfg-page .lfg-side-widgets {
+  display: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lfg-page .lfg-side-widget {
+  min-width: 0;
+}
+
+.lfg-page .lfg-widget-row + .lfg-widget-row {
+  margin-top: 12px;
+}
+
+.lfg-page .lfg-widget-empty {
+  margin: 0;
+  color: rgba(242,232,216,.56);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.lfg-page .lfg-tips {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(242,232,216,.62);
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+@media (max-width: 1180px) {
+  .lfg-page .lfg-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lfg-page .lfg-filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .lfg-page .lfg-side-widgets {
+    display: grid;
+  }
+}
+
+@media (max-width: 760px) {
+  .lfg-page .lfg-hero {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+
+  .lfg-page .lfg-hero-actions {
+    justify-content: flex-start;
+  }
+
+  .lfg-page .lfg-hero-actions .btn,
+  .lfg-page .lfg-filter-form .btn,
+  .lfg-page .lfg-empty-state .btn {
+    width: 100%;
+  }
+
+  .lfg-page .lfg-hero-stats,
+  .lfg-page .lfg-managed-list,
+  .lfg-page .lfg-filter-form,
+  .lfg-page .lfg-grid,
+  .lfg-page .lfg-side-widgets {
+    grid-template-columns: 1fr;
+  }
+
+  .lfg-page .lfg-status-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .lfg-page .lfg-status-tabs a {
+    flex: 0 0 auto;
+  }
+
+  .lfg-page .lfg-card-media {
+    height: 160px;
+  }
+
+  .lfg-page .lfg-card-title {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* 209 rework LFG follow-up calm filters and create modal */
+body.rework-lfg-modal-open {
+  overflow: hidden;
+}
+
+.lfg-page .lfg-hero {
+  border-color: rgba(255,255,255,.07);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255,255,255,.045), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,.035), rgba(30,30,29,.98));
+}
+
+.lfg-page .lfg-hero::before {
+  content: "";
+  grid-column: 1 / -1;
+  width: 54px;
+  height: 2px;
+  border-radius: 99px;
+  background: rgba(207,161,73,.58);
+}
+
+.lfg-page .lfg-hero-progress {
+  height: 7px;
+  background: rgba(255,255,255,.06);
+}
+
+.lfg-page .lfg-hero-progress span {
+  background: linear-gradient(90deg, rgba(207,161,73,.28), rgba(207,161,73,.46));
+}
+
+.lfg-page .lfg-hero-stats span {
+  position: relative;
+  background: rgba(255,255,255,.04);
+}
+
+.lfg-page .lfg-hero-stats span::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  width: 18px;
+  height: 2px;
+  border-radius: 99px;
+  background: rgba(207,161,73,.42);
+}
+
+.lfg-page .lfg-hero-stats strong {
+  color: #f6f0e4;
+}
+
+.lfg-page .lfg-hero-stats em,
+.lfg-page .lfg-card-title span,
+.lfg-page .lfg-section-head span {
+  color: rgba(242,232,216,.58);
+}
+
+.lfg-page .lfg-card-fallback,
+.lfg-page .lfg-empty-state .ph-icon {
+  color: rgba(242,232,216,.52);
+}
+
+.lfg-page .lfg-card-badges strong {
+  background: rgba(255,255,255,.075);
+  color: rgba(242,232,216,.76);
+}
+
+.lfg-page .lfg-hero-actions .btn,
+.lfg-page .lfg-empty-state .btn {
+  border: 1px solid rgba(207,161,73,.28);
+  background: rgba(255,255,255,.10);
+  color: #f6f0e4;
+  cursor: pointer;
+}
+
+.lfg-page .lfg-filter-form {
+  grid-template-columns: minmax(240px, 1fr) minmax(138px, 170px) minmax(150px, 184px) minmax(112px, auto);
+  grid-template-areas:
+    "search platform sort submit"
+    "checkVoice checkMine . .";
+}
+
+.lfg-page .lfg-search-field {
+  grid-area: search;
+}
+
+.lfg-page .lfg-filter-form label:nth-of-type(2) {
+  grid-area: platform;
+}
+
+.lfg-page .lfg-filter-form label:nth-of-type(3) {
+  grid-area: sort;
+}
+
+.lfg-page .lfg-filter-form .btn {
+  grid-area: submit;
+  width: 100%;
+  min-width: 112px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.10);
+  color: #f6f0e4;
+  cursor: pointer;
+}
+
+.lfg-page .lfg-check {
+  min-width: 0;
+}
+
+.lfg-page .lfg-check:nth-of-type(4) {
+  grid-area: checkVoice;
+}
+
+.lfg-page .lfg-check:nth-of-type(5) {
+  grid-area: checkMine;
+}
+
+.lfg-page .lfg-check span {
+  overflow: hidden;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lfg-page .lfg-filter-form input[type="search"],
+.lfg-page .lfg-filter-form select,
+.lfg-page .lfg-check {
+  background: rgba(255,255,255,.05);
+}
+
+.lfg-page .lfg-filter-form input[type="search"]:focus,
+.lfg-page .lfg-filter-form select:focus {
+  border-color: rgba(255,255,255,.18);
+}
+
+.lfg-page .lfg-status-tabs a.active {
+  background: rgba(255,255,255,.12);
+}
+
+.rework-lfg-create-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10,10,9,.72);
+  backdrop-filter: blur(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease;
+}
+
+.rework-lfg-create-modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rework-lfg-create-modal {
+  width: min(820px, calc(100vw - 48px));
+  max-height: min(860px, calc(100vh - 48px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px;
+  background: #1f1f1d;
+  box-shadow: 0 30px 80px rgba(0,0,0,.36);
+}
+
+.rework-lfg-create-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.rework-lfg-create-header span,
+.rework-lfg-fieldset legend,
+.rework-lfg-field > span {
+  color: rgba(242,232,216,.58);
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+}
+
+.rework-lfg-create-header h2 {
+  margin: 6px 0 7px;
+  color: #f6f0e4;
+  font-size: 25px;
+  line-height: 1.12;
+  font-weight: 700;
+}
+
+.rework-lfg-create-header p {
+  max-width: 560px;
+  margin: 0;
+  color: rgba(242,232,216,.62);
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.rework-lfg-create-close {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.07);
+  color: rgba(246,240,228,.86);
+  cursor: pointer;
+}
+
+.rework-lfg-create-form {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.rework-lfg-create-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 24px 22px;
+}
+
+.rework-lfg-fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+
+.rework-lfg-fieldset:last-child {
+  margin-bottom: 0;
+}
+
+.rework-lfg-fieldset legend {
+  grid-column: 1 / -1;
+  margin-bottom: 1px;
+  color: rgba(207,161,73,.60);
+}
+
+.rework-lfg-field {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.rework-lfg-field-wide {
+  grid-column: 1 / -1;
+}
+
+.rework-lfg-field small {
+  color: rgba(242,232,216,.44);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.rework-lfg-field input,
+.rework-lfg-field select,
+.rework-lfg-field textarea {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 10px;
+  outline: 0;
+  background: rgba(255,255,255,.05);
+  color: #f6f0e4;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rework-lfg-field input,
+.rework-lfg-field select {
+  padding: 0 12px;
+}
+
+.rework-lfg-field textarea {
+  min-height: 96px;
+  resize: vertical;
+  padding: 12px;
+  line-height: 1.45;
+}
+
+.rework-lfg-field input:focus,
+.rework-lfg-field select:focus,
+.rework-lfg-field textarea:focus {
+  border-color: rgba(255,255,255,.18);
+}
+
+.rework-lfg-field em {
+  color: rgba(228,108,91,.92);
+  font-size: 11px;
+  line-height: 1.35;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.rework-lfg-modal-check {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+}
+
+.rework-lfg-modal-check input {
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.rework-lfg-modal-check span {
+  display: grid;
+  gap: 4px;
+}
+
+.rework-lfg-modal-check strong {
+  color: #f6f0e4;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.rework-lfg-modal-check small {
+  color: rgba(242,232,216,.56);
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.rework-lfg-create-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  background: rgba(21,21,20,.72);
+}
+
+.rework-lfg-create-secondary,
+.rework-lfg-create-submit {
+  min-height: 38px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 16px;
+  color: #f6f0e4;
+  background: rgba(255,255,255,.08);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.rework-lfg-create-submit {
+  background: rgba(207,161,73,.72);
+  color: #151514;
+}
+
+@media (max-width: 1180px) {
+  .lfg-page .lfg-filter-form {
+    grid-template-columns: minmax(220px, 1fr) minmax(130px, 160px) minmax(140px, 174px) minmax(104px, auto);
+    grid-template-areas:
+      "search platform sort submit"
+      "checkVoice checkMine . .";
+  }
+}
+
+@media (max-width: 900px) {
+  .lfg-page .lfg-filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "search search"
+      "platform sort"
+      "checkVoice checkMine"
+      "submit submit";
+  }
+
+  .lfg-page .lfg-check:nth-of-type(4) {
+    grid-area: checkVoice;
+  }
+
+  .lfg-page .lfg-check:nth-of-type(5) {
+    grid-area: checkMine;
+    margin-left: 0;
+  }
+
+  .lfg-page .lfg-check span {
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .rework-lfg-create-modal-backdrop {
+    padding: 0;
+  }
+
+  .rework-lfg-create-modal {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-width: 0;
+    border-radius: 0;
+  }
+
+  .rework-lfg-create-header {
+    padding: 18px 16px 15px;
+  }
+
+  .rework-lfg-create-header h2 {
+    font-size: 22px;
+  }
+
+  .rework-lfg-create-body {
+    padding: 16px 14px 18px;
+  }
+
+  .rework-lfg-fieldset,
+  .lfg-page .lfg-filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .lfg-page .lfg-filter-form {
+    grid-template-areas:
+      "search"
+      "platform"
+      "sort"
+      "checkVoice"
+      "checkMine"
+      "submit";
+  }
+
+  .rework-lfg-create-footer {
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .rework-lfg-create-secondary,
+  .rework-lfg-create-submit {
+    flex: 1 1 0;
+  }
+}

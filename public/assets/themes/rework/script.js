@@ -10,6 +10,59 @@ const reworkI18n = (() => {
   return labels;
 })();
 
+/* 209 rework LFG create modal */
+(() => {
+  const modal = document.querySelector('[data-rework-lfg-create-modal]');
+  if (!modal) return;
+
+  const openModal = () => {
+    modal.hidden = false;
+    window.requestAnimationFrame(() => {
+      modal.classList.add('is-open');
+      document.body.classList.add('rework-lfg-modal-open');
+    });
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('is-open');
+    document.body.classList.remove('rework-lfg-modal-open');
+    window.setTimeout(() => {
+      if (!modal.classList.contains('is-open')) {
+        modal.hidden = true;
+      }
+    }, 170);
+  };
+
+  if (modal.classList.contains('is-open')) {
+    modal.hidden = false;
+    document.body.classList.add('rework-lfg-modal-open');
+  }
+
+  document.querySelectorAll('[data-rework-lfg-create-open]').forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      openModal();
+    });
+  });
+
+  modal.querySelectorAll('[data-rework-lfg-create-close]').forEach((trigger) => {
+    trigger.addEventListener('click', closeModal);
+  });
+
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+      closeModal();
+    }
+  });
+})();
+/* /209 rework LFG create modal */
+
 const reworkLabel = (key, fallback = '', replacements = {}) => {
   let value = reworkI18n[key] || fallback;
   Object.entries(replacements).forEach(([name, replacement]) => {
