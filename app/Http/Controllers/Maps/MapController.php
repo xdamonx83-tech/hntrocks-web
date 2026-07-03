@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Maps;
 
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
+use App\Support\HntTheme;
 use App\Support\MapVoteVisitorIdentity;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -90,8 +91,11 @@ class MapController extends Controller
         $data = $this->readMapData($slug, $map['data'], $viewerVisitorHash);
         $imageAvailable = File::isFile(public_path($map['image']));
         $linesAvailable = File::isFile(public_path($map['lines']));
+        $view = HntTheme::previewActive($request->user())
+            ? 'themes.rework.maps.show'
+            : 'themes.hnt_preview.maps.show';
 
-        return view('themes.rework.maps.show', [
+        return view($view, [
             'map' => [
                 ...$map,
                 'slug' => $slug,
