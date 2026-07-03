@@ -17657,6 +17657,360 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   display: none !important;
 }
 
+/* 200b rework inventory shop sibling */
+.shop-inventory-page .shop-left {
+  width: min(900px, 100%) !important;
+  max-width: 900px !important;
+}
+
+.shop-inventory-page .shop-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 28px !important;
+}
+
+.shop-inventory-page .shop-wallet,
+.shop-inventory-page .shop-item-card,
+.shop-inventory-page .inventory-equipped-section {
+  border-radius: 12px !important;
+  background: #20201e;
+  box-shadow: none;
+}
+
+.shop-inventory-page .shop-wallet {
+  padding: 18px !important;
+}
+
+.shop-inventory-page .shop-wallet-main img {
+  width: 64px !important;
+  height: 64px !important;
+}
+
+.shop-inventory-page .shop-wallet-main span {
+  font-size: 11px !important;
+}
+
+.shop-inventory-page .shop-wallet-main strong {
+  font-size: 21px !important;
+  font-weight: 700 !important;
+}
+
+.shop-inventory-page .shop-wallet-main p {
+  font-size: 12px !important;
+  line-height: 1.42 !important;
+}
+
+.shop-inventory-page .shop-wallet-actions {
+  flex-wrap: wrap;
+}
+
+.shop-inventory-page .shop-wallet-actions .btn {
+  min-height: 38px !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.inventory-alert {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  color: rgba(246,240,228,.88);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inventory-alert.success {
+  background: rgba(86,184,128,.14);
+  color: rgba(208,247,220,.94);
+}
+
+.inventory-alert.warning {
+  background: rgba(207,161,73,.16);
+  color: rgba(246,240,228,.92);
+}
+
+.inventory-equipped-section {
+  margin-bottom: 22px;
+  padding: 16px;
+}
+
+.inventory-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.inventory-section-head span {
+  display: block;
+  color: rgba(207,161,73,.78);
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.inventory-section-head h2 {
+  margin: 3px 0 0;
+  color: #f6f0e4;
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.inventory-equipped-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.inventory-equipped-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.045);
+}
+
+.inventory-equipped-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(255,255,255,.06);
+  color: rgba(207,161,73,.86);
+  font-size: 19px;
+}
+
+.inventory-equipped-card span {
+  display: block;
+  color: rgba(242,232,216,.52);
+  font-size: 9px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.inventory-equipped-card strong {
+  display: block;
+  min-width: 0;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #f6f0e4;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-equipped-card form,
+.shop-inventory-page .shop-item-footer form {
+  margin: 0;
+}
+
+.inventory-equipped-card button,
+.shop-inventory-page .shop-item-footer button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,.10);
+  color: #f6f0e4;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inventory-equipped-card button:hover,
+.shop-inventory-page .shop-item-footer button:hover {
+  background: rgba(255,255,255,.13);
+}
+
+.shop-inventory-page .shop-item-card {
+  min-height: 286px !important;
+  padding: 16px !important;
+}
+
+.shop-inventory-page .shop-item-card.is-equipped {
+  background: radial-gradient(circle at 84% 12%, rgba(86,184,128,.16), transparent 30%), #20201e;
+}
+
+.inventory-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.shop-inventory-page .shop-rarity {
+  min-height: 24px !important;
+  max-width: 140px;
+  overflow: hidden;
+  border-radius: 10px !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-active-badge,
+.inventory-passive-pill {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgba(86,184,128,.16);
+  color: rgba(208,247,220,.94);
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inventory-passive-pill {
+  background: rgba(255,255,255,.08);
+  color: rgba(242,232,216,.76);
+}
+
+.shop-inventory-page .shop-item-icon {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+  font-size: 21px !important;
+}
+
+.shop-inventory-page .shop-item-card h2 {
+  font-size: 19px !important;
+  line-height: 1.08 !important;
+  font-weight: 700 !important;
+}
+
+.shop-inventory-page .shop-slot {
+  margin-bottom: 10px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+.shop-inventory-page .shop-desc {
+  min-height: 48px !important;
+  margin-bottom: 14px !important;
+  font-size: 11px !important;
+  line-height: 1.42 !important;
+  font-weight: 500 !important;
+}
+
+.shop-inventory-page .shop-stats {
+  grid-template-columns: auto 1fr !important;
+  margin-bottom: 18px !important;
+  padding: 9px 10px !important;
+  border-radius: 10px !important;
+}
+
+.shop-inventory-page .inventory-stats-compact {
+  display: inline-grid;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 128px;
+}
+
+.shop-inventory-page .shop-stats span {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+}
+
+.shop-inventory-page .shop-stats strong {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+.shop-inventory-page .inventory-item-footer {
+  justify-content: flex-end;
+}
+
+.shop-inventory-page .shop-item-footer a {
+  min-height: 34px !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.inventory-empty-card {
+  grid-column: 1 / -1;
+  min-height: 238px !important;
+}
+
+@media (max-width: 1180px) {
+  .shop-inventory-page .shop-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .shop-inventory-page .shop-grid,
+  .inventory-equipped-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .inventory-equipped-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .inventory-equipped-card form {
+    grid-column: 1 / -1;
+  }
+
+  .inventory-equipped-card button,
+  .shop-inventory-page .shop-item-footer button,
+  .shop-inventory-page .shop-item-footer a {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .shop-inventory-page .shop-wallet-main {
+    align-items: flex-start;
+  }
+
+  .shop-inventory-page .shop-wallet-main img {
+    width: 62px !important;
+    height: 62px !important;
+  }
+
+  .shop-inventory-page .shop-wallet-actions {
+    width: 100%;
+  }
+
+  .shop-inventory-page .shop-wallet-actions .btn {
+    flex: 1 1 120px;
+  }
+
+  .shop-inventory-page .shop-stats {
+    grid-template-columns: auto 1fr !important;
+  }
+
+  .shop-inventory-page .shop-item-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 
 /* 201 rework wallet demo */
 .wallet-page .wallet-left {
