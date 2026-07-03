@@ -25,11 +25,7 @@
         'equip' => $isEnglish ? 'Equip' : 'Ausrüsten',
         'unequip' => $isEnglish ? 'Unequip' : 'Ablegen',
         'active' => $isEnglish ? 'Active' : 'Aktiv',
-        'available' => $isEnglish ? 'Available' : 'Verfügbar',
-        'passive' => $isEnglish ? 'Passive reward' : 'Passive Belohnung',
         'bought' => $isEnglish ? 'Bought' : 'Gekauft',
-        'yes' => $isEnglish ? 'Yes' : 'Ja',
-        'no' => $isEnglish ? 'No' : 'Nein',
         'emptyTitle' => $isEnglish ? 'Your inventory is still empty' : 'Dein Inventar ist noch leer',
         'emptyText' => $isEnglish ? 'Purchased cosmetics and unlocked items will appear here.' : 'Gekaufte Cosmetics und freigeschaltete Items erscheinen hier.',
         'toShop' => $isEnglish ? 'Go to shop' : 'Zum Shop',
@@ -213,19 +209,13 @@
             <p class="shop-slot">{{ $typeLabel }}</p>
             <p class="shop-desc">{{ $item->displayDescription() }}</p>
 
-            <div class="shop-stats inventory-stats">
-                <span>{{ $inventoryUi['owned'] }}</span>
-                <strong>{{ $inventoryUi['yes'] }}</strong>
-                <span>{{ $inventoryUi['active'] }}</span>
-                <strong>{{ $isEquipped ? $inventoryUi['yes'] : $inventoryUi['no'] }}</strong>
+            <div class="shop-stats inventory-stats inventory-stats-compact">
                 <span>{{ $inventoryUi['bought'] }}</span>
                 <strong>{{ $boughtAt }}</strong>
             </div>
 
             <div class="shop-item-footer inventory-item-footer">
                 @if($item->isActivatable())
-                    <b>{{ $isEquipped ? $inventoryUi['active'] : $inventoryUi['available'] }}</b>
-
                     @if($isEquipped)
                         <form method="post" action="{{ route('crowns.inventory.unequip', $item->slot) }}">
                             @csrf
@@ -238,7 +228,6 @@
                         </form>
                     @endif
                 @else
-                    <b>{{ $inventoryUi['passive'] }}</b>
                     <span class="inventory-passive-pill">{{ $inventoryUi['owned'] }}</span>
                 @endif
             </div>

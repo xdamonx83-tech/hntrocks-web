@@ -17917,10 +17917,17 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
 }
 
 .shop-inventory-page .shop-stats {
-  grid-template-columns: auto 1fr auto 1fr auto 1fr !important;
+  grid-template-columns: auto 1fr !important;
   margin-bottom: 18px !important;
   padding: 9px 10px !important;
   border-radius: 10px !important;
+}
+
+.shop-inventory-page .inventory-stats-compact {
+  display: inline-grid;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 128px;
 }
 
 .shop-inventory-page .shop-stats span {
@@ -17933,10 +17940,8 @@ body.profile-page .profile-friend-action-form .btn[disabled] {
   font-weight: 700 !important;
 }
 
-.shop-inventory-page .shop-item-footer b {
-  color: #f6f0e4;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+.shop-inventory-page .inventory-item-footer {
+  justify-content: flex-end;
 }
 
 .shop-inventory-page .shop-item-footer a {
