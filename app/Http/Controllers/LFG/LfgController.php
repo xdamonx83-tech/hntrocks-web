@@ -12,6 +12,7 @@ use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Services\MentionService;
 use App\Services\NotificationService;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -122,6 +123,8 @@ class LfgController extends Controller
             ->take(4)
             ->get();
 
+        $sidebarData = ReworkFeedSidebar::forViewer($request->user());
+
         return view($view, [
             'posts' => $posts,
             'managedLfgPosts' => $managedLfgPosts,
@@ -141,6 +144,12 @@ class LfgController extends Controller
             'memberSuggestions' => $memberSuggestions,
             'openTeams' => $openTeams,
             'featuredCups' => $featuredCups,
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
         ]);
     }
 

@@ -106,9 +106,6 @@
         'full' => __('ui.lfg_status_full'),
         'closed' => __('ui.lfg_status_closed'),
     ];
-    $socialiteMembers = $memberSuggestions;
-    $socialiteHighlightLfg = $postsCollection->first();
-    $socialiteHighlightCup = $featuredCups->first();
     $hhLfgOptionLabel = fn (string $field, string $value): string => \App\Models\LfgPost::localizedOptionLabelFor($field, $value) ?? $value;
     $createModalOpen = old('hh_lfg_modal') === 'create';
     $titleValue = old('title', '');
