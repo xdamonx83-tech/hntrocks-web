@@ -17,7 +17,7 @@
     $lfgUi = [
         'de' => [
             'eyebrow' => 'Hunter Board',
-            'subtitle' => 'Finde Hunter fuer deine naechste Runde.',
+            'subtitle' => 'Finde Hunter für deine nächste Runde.',
             'visible_posts' => 'sichtbare LFGs',
             'own_active' => 'eigene aktive',
             'voice_wanted' => 'Voice gesucht',
