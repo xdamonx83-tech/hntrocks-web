@@ -91,7 +91,7 @@ class MapController extends Controller
         $imageAvailable = File::isFile(public_path($map['image']));
         $linesAvailable = File::isFile(public_path($map['lines']));
 
-        return view('themes.hnt_preview.maps.show', [
+        return view('themes.rework.maps.show', [
             'map' => [
                 ...$map,
                 'slug' => $slug,

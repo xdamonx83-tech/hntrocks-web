@@ -1,0 +1,299 @@
+@php
+    $viewer = auth()->user();
+    $viewerName = $viewer?->name ?: $viewer?->username;
+    $backUrl = $viewer ? route('feed.index') : route('home');
+    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
+    $reworkStyleVersion = @filemtime(public_path('assets/themes/rework/styles.css')) ?: time();
+    $reworkScriptVersion = @filemtime(public_path('assets/themes/rework/script.js')) ?: time();
+@endphp
+<!DOCTYPE html>
+<html lang="{{ $currentLocale }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="robots" content="index,follow">
+    <meta name="description" content="{{ __('ui.maps_detail_meta_description', ['map' => $map['name']]) }}">
+    <link rel="canonical" href="{{ route('maps.show', $map['slug']) }}">
+    <meta property="og:title" content="{{ __('ui.maps_detail_og_title', ['map' => $map['name']]) }}">
+    <meta property="og:description" content="{{ __('ui.maps_detail_og_description', ['map' => $map['name']]) }}">
+    <meta property="og:url" content="{{ route('maps.show', $map['slug']) }}">
+    <meta property="og:image" content="{{ asset($map['image']) }}">
+    <title>{{ __('ui.maps_detail_meta_title', ['map' => $map['name']]) }}</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700&amp;family=Bakbak+One&amp;family=Montserrat:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" rel="stylesheet">
+    <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css" rel="stylesheet">
+    <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}?v=1.9.4">
+    <link rel="stylesheet" href="{{ asset('assets/hnt/maps/maps.css') }}?v=13">
+    <link rel="stylesheet" href="{{ \App\Support\HntTheme::asset('styles.css', 'rework') }}?v={{ $reworkStyleVersion }}">
+</head>
+<body class="rework-map-body">
+<div class="app rework-map-app">
+    @include('themes.rework.partials.sidebar')
+    <main class="main rework-map-main">
+        @include('themes.rework.partials.topbar')
+
+        <section class="rework-map-layout hnt-map-app" data-map-app>
+            <button class="hnt-map-tools-trigger rework-map-tools-trigger" type="button" data-map-tools-toggle aria-controls="hntMapTools" aria-expanded="false">
+                <i class="ph ph-sliders-horizontal" aria-hidden="true"></i>
+                <span>{{ __('ui.maps_tools_open') }}</span>
+            </button>
+            <button class="hnt-map-tools-backdrop" type="button" data-map-tools-backdrop aria-label="{{ __('ui.maps_tools_close') }}" tabindex="-1"></button>
+
+            <main class="hnt-map-stage rework-map-stage">
+                @if(! $imageAvailable || $dataError)
+                    <section class="hnt-map-error" role="status">
+                        <i class="ph ph-map-trifold" aria-hidden="true"></i>
+                        <div>
+                            <span>{{ __('ui.maps_unavailable_kicker') }}</span>
+                            <h1>{{ __('ui.maps_unavailable_title') }}</h1>
+                            <p>
+                                @if(! $imageAvailable)
+                                    {{ __('ui.maps_image_missing') }}
+                                @else
+                                    {{ $dataError === 'missing' ? __('ui.maps_data_missing') : __('ui.maps_data_invalid') }}
+                                @endif
+                            </p>
+                        </div>
+                    </section>
+                @else
+                    <div id="hntMap" class="hnt-map-canvas" aria-label="{{ __('ui.maps_canvas_aria', ['map' => $map['name']]) }}"></div>
+                    <div class="rework-map-atmosphere" aria-hidden="true"></div>
+                    <p class="hnt-map-measure-hint" data-map-measure-hint hidden>{{ __('ui.maps_measure_point_a') }}</p>
+                    <p class="hnt-map-measure-hint" data-map-cash-spot-hint hidden>{{ __('ui.maps_cash_spot_select') }}</p>
+                    @if(empty($markers))
+                        <p class="hnt-map-empty-markers">{{ __('ui.maps_no_markers') }}</p>
+                    @endif
+                    <script id="hntMapConfig" type="application/json">{!! json_encode([
+                        'imageUrl' => $map['image_url'],
+                        'linesUrl' => $map['lines_url'],
+                        'width' => $map['width'],
+                        'height' => $map['height'],
+                        'markers' => $markers,
+                        'typeLabels' => collect($markerTypes)->mapWithKeys(fn ($type) => [$type => __('ui.maps_type_'.$type)]),
+                        'searchEmptyText' => __('ui.maps_search_empty'),
+                        'measureStartText' => __('ui.maps_measure_start'),
+                        'measureEndText' => __('ui.maps_measure_end'),
+                        'measureIdleText' => __('ui.maps_measure_idle'),
+                        'measurePointAText' => __('ui.maps_measure_point_a'),
+                        'measurePointBText' => __('ui.maps_measure_point_b'),
+                        'measureSavedText' => __('ui.maps_measure_saved'),
+                        'measureDistanceText' => __('ui.maps_measure_distance'),
+                        'measureMarkerAText' => __('ui.maps_measure_marker_a'),
+                        'measureMarkerBText' => __('ui.maps_measure_marker_b'),
+                        'shareSuccessText' => __('ui.maps_share_success'),
+                        'viewerIsAuthenticated' => auth()->check(),
+                        'cashSpotSubmissionUrl' => $map['cash_spot_submission_url'],
+                        'cashScreenshotText' => __('ui.maps_cash_screenshot'),
+                        'cashScreenshotErrorText' => __('ui.maps_cash_screenshot_error'),
+                        'cashSpotSelectText' => __('ui.maps_cash_spot_select'),
+                        'cashSpotRunningText' => __('ui.maps_cash_spot_running'),
+                        'cashSpotPendingText' => __('ui.maps_cash_spot_pending'),
+                        'cashSpotErrorText' => __('ui.maps_cash_spot_error'),
+                        'cashSpotDetailTitle' => __('ui.maps_cash_spot_detail_title'),
+                        'cashSpotEyebrowText' => __('ui.maps_cash_spot_eyebrow'),
+                        'cashSpotHelpfulText' => __('ui.maps_cash_spot_helpful'),
+                        'cashSpotUpvoteText' => __('ui.maps_cash_spot_upvote'),
+                        'cashSpotDownvoteText' => __('ui.maps_cash_spot_downvote'),
+                        'cashSpotVoteAnonymousHintText' => __('ui.maps_cash_spot_vote_anonymous_hint'),
+                        'cashSpotCommentsTitleText' => __('ui.maps_cash_spot_comments_title'),
+                        'cashSpotCommentsLoadingText' => __('ui.maps_cash_spot_comments_loading'),
+                        'cashSpotCommentsEmptyText' => __('ui.maps_cash_spot_comments_empty'),
+                        'cashSpotCommentPlaceholderText' => __('ui.maps_cash_spot_comment_placeholder'),
+                        'cashSpotCommentSendText' => __('ui.maps_cash_spot_comment_send'),
+                        'cashSpotCommentLoginText' => __('ui.maps_cash_spot_comment_login'),
+                        'cashSpotCommentErrorText' => __('ui.maps_cash_spot_comment_error'),
+                        'cashSpotCommentEditText' => __('ui.maps_cash_spot_comment_edit'),
+                        'cashSpotCommentDeleteText' => __('ui.maps_cash_spot_comment_delete'),
+                        'cashSpotCommentDeleteConfirmText' => __('ui.maps_cash_spot_comment_delete_confirm'),
+                        'cashSpotCommentSaveText' => __('ui.maps_cash_spot_comment_save'),
+                        'cashSpotCommentCancelText' => __('ui.maps_cash_spot_comment_cancel'),
+                        'cashSpotCommentDeletedText' => __('ui.maps_cash_spot_comment_deleted'),
+                        'cashSpotCommentUpdatedText' => __('ui.maps_cash_spot_comment_updated'),
+                        'cashSpotVoteErrorText' => __('ui.maps_cash_spot_vote_error'),
+                        'closeText' => __('ui.maps_close'),
+                    ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+
+                    <div class="hnt-map-lightbox hnt-map-cash-submission-modal" data-map-cash-spot-modal hidden>
+                        <div class="hnt-map-lightbox-panel hnt-map-cash-submission-panel" role="dialog" aria-modal="true" aria-labelledby="hntCashSpotSubmissionTitle">
+                            <header class="hnt-map-lightbox-header">
+                                <h2 id="hntCashSpotSubmissionTitle">{{ __('ui.maps_cash_spot_form_title') }}</h2>
+                                <button type="button" class="hnt-map-lightbox-close" data-map-cash-spot-cancel aria-label="{{ __('ui.maps_close') }}"><i class="ph ph-x" aria-hidden="true"></i></button>
+                            </header>
+                            <form class="hnt-map-cash-submission-form" data-map-cash-spot-form>
+                                <p>{{ __('ui.maps_cash_spot_form_help') }}</p>
+                                <input type="hidden" name="x">
+                                <input type="hidden" name="y">
+                                <label><span>{{ __('ui.maps_cash_spot_screenshot') }}</span><input type="file" name="image" accept="image/jpeg,image/png,image/webp" required></label>
+                                <label data-map-cash-spot-guest-field @auth hidden @endauth><span>{{ __('ui.maps_cash_spot_name') }}</span><input type="text" name="submitter_name" maxlength="80" @auth disabled @endauth></label>
+                                <label data-map-cash-spot-guest-field @auth hidden @endauth><span>{{ __('ui.maps_cash_spot_email') }}</span><input type="email" name="submitter_email" maxlength="160" @auth disabled @endauth></label>
+                                <input class="hnt-map-upload-honeypot" type="text" name="website" maxlength="120" tabindex="-1" autocomplete="off" aria-hidden="true">
+                                <p class="hnt-map-cash-submission-status" data-map-cash-spot-status role="status"></p>
+                                <div class="hnt-map-cash-submission-actions">
+                                    <button type="button" class="hnt-map-popup-action" data-map-cash-spot-cancel>{{ __('ui.maps_cash_spot_cancel') }}</button>
+                                    <button type="submit" class="hnt-map-popup-action">{{ __('ui.maps_cash_spot_send') }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+
+                <p class="hnt-map-toast" data-map-toast role="status" hidden></p>
+                <p class="hnt-map-disclaimer">{{ __('ui.maps_disclaimer') }}</p>
+            </main>
+
+            <aside class="hnt-map-tools rework-map-tools" id="hntMapTools" data-map-tools-panel aria-label="{{ __('ui.maps_tools_aria') }}">
+                <header class="hnt-map-tools-head">
+                    <div>
+                        <span class="hnt-map-tools-brand">HNT Maps</span>
+                        <strong>{{ $map['name'] }}</strong>
+                    </div>
+                    <button type="button" class="hnt-map-tools-close" data-map-tools-close aria-label="{{ __('ui.maps_tools_close') }}">
+                        <i class="ph ph-x" aria-hidden="true"></i>
+                    </button>
+                </header>
+
+                <a class="hnt-map-home-link" href="{{ $backUrl }}">
+                    <i class="ph ph-arrow-left" aria-hidden="true"></i>
+                    {{ $viewer ? __('ui.maps_back_feed') : __('ui.maps_back_home') }}
+                </a>
+
+                <section class="hnt-map-account">
+                    @if($viewer)
+                        <span class="hnt-map-account-avatar">
+                            @if($viewer->avatarUrl())
+                                <img src="{{ $viewer->avatarUrl() }}" alt="">
+                            @else
+                                <i class="ph ph-user" aria-hidden="true"></i>
+                            @endif
+                        </span>
+                        <div>
+                            <span>{{ __('ui.maps_signed_in_as') }}</span>
+                            <strong>{{ $viewerName }}</strong>
+                            <a href="{{ route('profile.show') }}">{{ __('ui.preview_nav_profile') }}</a>
+                        </div>
+                    @else
+                        <span class="hnt-map-account-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>{{ __('ui.maps_guest_title') }}</strong>
+                            <span>{{ __('ui.maps_guest_text') }}</span>
+                            <span class="hnt-map-account-links"><a href="{{ route('login') }}">{{ __('ui.login') }}</a><a href="{{ route('register') }}">{{ __('ui.register') }}</a></span>
+                        </div>
+                    @endif
+                </section>
+
+                <div class="hnt-map-tools-scroll">
+                    <section class="hnt-map-tool-section">
+                        <label for="hntMapSelect">{{ __('ui.maps_choose_map') }}</label>
+                        <div class="hnt-map-select-wrap">
+                            <i class="ph ph-map-trifold" aria-hidden="true"></i>
+                            <select id="hntMapSelect" data-map-select>
+                                @foreach($availableMaps as $availableMap)
+                                    <option value="{{ $availableMap['url'] }}" @selected($availableMap['slug'] === $map['slug'])>{{ $availableMap['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <a class="hnt-map-overview-link" href="{{ route('maps.index') }}">{{ __('ui.maps_back') }}</a>
+                    </section>
+
+                    <section class="hnt-map-tool-section">
+                        <label for="hntMapSearch">{{ __('ui.maps_search') }}</label>
+                        <div class="hnt-map-search-wrap">
+                            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                            <input id="hntMapSearch" type="search" placeholder="{{ __('ui.maps_search_placeholder') }}" autocomplete="off" aria-controls="hntMapSearchResults" aria-expanded="false">
+                        </div>
+                        <div id="hntMapSearchResults" class="hnt-map-search-results" role="listbox" aria-label="{{ __('ui.maps_search_results') }}" hidden></div>
+                        <small>{{ __('ui.maps_search_help') }}</small>
+                    </section>
+
+                    <section class="hnt-map-tool-section" aria-label="{{ __('ui.maps_filters') }}">
+                        <div class="hnt-map-tool-title">
+                            <span>{{ __('ui.maps_filters') }}</span>
+                            <small>{{ __('ui.maps_filter_help') }}</small>
+                        </div>
+                        <div class="hnt-map-filter-options">
+                            @foreach($markerTypes as $type)
+                                <label class="hnt-map-filter-chip hnt-map-filter-chip--{{ $type }}">
+                                    <input type="checkbox" value="{{ $type }}" checked data-map-filter>
+                                    <span aria-hidden="true"></span>{{ __('ui.maps_type_'.$type) }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </section>
+
+                    @if($map['lines_url'])
+                        <section class="hnt-map-tool-section">
+                            <div class="hnt-map-tool-title">
+                                <span>{{ __('ui.maps_layers') }}</span>
+                            </div>
+                            <label class="hnt-map-layer-toggle">
+                                <span><i class="ph ph-path" aria-hidden="true"></i>{{ __('ui.maps_layer_lines') }}</span>
+                                <input type="checkbox" checked data-map-lines-toggle>
+                            </label>
+                        </section>
+                    @endif
+
+                    <section class="hnt-map-tool-section" aria-labelledby="hntMapMeasureTitle">
+                        <div class="hnt-map-tool-title">
+                            <span id="hntMapMeasureTitle">{{ __('ui.maps_measure') }}</span>
+                            <small>{{ __('ui.maps_measure_help') }}</small>
+                        </div>
+                        <div class="hnt-map-tool-actions">
+                            <button type="button" class="hnt-map-tool-button" data-map-measure-toggle aria-pressed="false">
+                                <i class="ph ph-ruler" aria-hidden="true"></i><span>{{ __('ui.maps_measure_start') }}</span>
+                            </button>
+                            <button type="button" class="hnt-map-tool-button hnt-map-tool-button--muted" data-map-measure-reset disabled>
+                                <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>{{ __('ui.maps_measure_reset') }}</span>
+                            </button>
+                        </div>
+                        <p class="hnt-map-measure-status" data-map-measure-status role="status">{{ __('ui.maps_measure_idle') }}</p>
+                    </section>
+
+                    <section class="hnt-map-tool-section">
+                        <div class="hnt-map-tool-title">
+                            <span>{{ __('ui.maps_share_view') }}</span>
+                            <small>{{ __('ui.maps_share_help') }}</small>
+                        </div>
+                        <button type="button" class="hnt-map-tool-button" data-map-share>
+                            <i class="ph ph-link" aria-hidden="true"></i><span>{{ __('ui.maps_share_view') }}</span>
+                        </button>
+                        <label class="hnt-map-share-fallback" data-map-share-fallback hidden>
+                            <span>{{ __('ui.maps_share_fallback') }}</span>
+                            <input type="text" readonly data-map-share-url>
+                        </label>
+                    </section>
+
+                    <section class="hnt-map-tool-section">
+                        <div class="hnt-map-tool-title">
+                            <span>{{ __('ui.maps_cash_spot_submit') }}</span>
+                            <small>{{ __('ui.maps_cash_spot_submit_help') }}</small>
+                        </div>
+                        <button type="button" class="hnt-map-tool-button" data-map-cash-spot-toggle aria-pressed="false">
+                            <i class="ph ph-map-pin-plus" aria-hidden="true"></i><span>{{ __('ui.maps_cash_spot_submit') }}</span>
+                        </button>
+                    </section>
+                </div>
+
+                <footer class="hnt-map-tools-footer">
+                    <button type="button" class="btn-create hnt-map-reset" data-map-reset>
+                        <i class="ph ph-arrows-out-cardinal" aria-hidden="true"></i>{{ __('ui.maps_reset_view') }}
+                    </button>
+                    <span>{{ __('ui.maps_read_only') }}</span>
+                </footer>
+            </aside>
+        </section>
+    </main>
+</div>
+
+@include('partials.cookie-consent')
+
+@if($imageAvailable && ! $dataError)
+    <script src="{{ asset('assets/vendor/leaflet/leaflet.js') }}?v=1.9.4" defer></script>
+@endif
+<script src="{{ asset('assets/hnt/maps/maps.js') }}?v=12" defer></script>
+<script src="{{ \App\Support\HntTheme::asset('script.js', 'rework') }}?v={{ $reworkScriptVersion }}" defer></script>
+</body>
+</html>

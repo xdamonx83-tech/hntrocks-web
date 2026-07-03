@@ -20261,3 +20261,229 @@ body.rework-lfg-modal-open {
     flex: 1 1 0;
   }
 }
+
+/* Rework HNT Maps detail: exception page with the map as the primary canvas. */
+.rework-map-body {
+  overflow: hidden;
+  background: #1A1A18;
+}
+
+.rework-map-app {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  --bg-app: var(--bg);
+  --bg-outer: var(--bg);
+  --card-bg: #1E1E1D;
+  --border-color: rgba(255, 255, 255, .08);
+  --accent-primary: var(--accent);
+  --text-main: var(--text);
+  --text-muted: var(--muted);
+  --tag-bg: rgba(207, 161, 73, .13);
+}
+
+.rework-map-main {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 28px;
+}
+
+.rework-map-main .topbar {
+  flex: 0 0 auto;
+}
+
+.rework-map-layout {
+  min-height: 0;
+  height: calc(100vh - 150px);
+  height: calc(100dvh - 150px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 336px);
+  gap: 24px;
+  overflow: visible;
+  background: transparent;
+}
+
+.rework-map-stage {
+  height: 100%;
+  min-height: 620px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 8px;
+  background: #11110F;
+  box-shadow: inset 0 0 0 1px rgba(207, 161, 73, .06), 0 18px 48px rgba(0, 0, 0, .28);
+}
+
+.rework-map-stage .hnt-map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.rework-map-atmosphere {
+  position: absolute;
+  z-index: 410;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 22% 16%, rgba(207, 161, 73, .10), transparent 28%),
+    linear-gradient(180deg, rgba(26, 26, 24, .08), transparent 36%, rgba(26, 26, 24, .12)),
+    radial-gradient(circle at center, transparent 58%, rgba(5, 5, 4, .28));
+  mix-blend-mode: soft-light;
+}
+
+.rework-map-tools {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 82% 0, rgba(207, 161, 73, .11), transparent 30%),
+    #1E1E1D;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, .22);
+}
+
+.rework-map-tools .hnt-map-tools-head {
+  padding: 24px 24px 16px;
+}
+
+.rework-map-tools .hnt-map-tools-brand {
+  color: #FFFFFF;
+  letter-spacing: .08em;
+}
+
+.rework-map-tools .hnt-map-tools-head strong {
+  color: #FFFFFF;
+  font-size: 18px;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+
+.rework-map-tools .hnt-map-home-link {
+  margin-inline: 18px;
+  background: rgba(255, 255, 255, .03);
+}
+
+.rework-map-tools .hnt-map-account {
+  margin-inline: 18px;
+  background: rgba(21, 21, 20, .72);
+}
+
+.rework-map-tools .hnt-map-tools-scroll {
+  padding-inline: 18px;
+}
+
+.rework-map-tools .hnt-map-tool-section {
+  padding: 17px 0;
+}
+
+.rework-map-tools .hnt-map-filter-options {
+  grid-template-columns: 1fr 1fr;
+}
+
+.rework-map-tools .hnt-map-filter-chip,
+.rework-map-tools .hnt-map-layer-toggle,
+.rework-map-tools .hnt-map-select-wrap select,
+.rework-map-tools .hnt-map-search-wrap input,
+.rework-map-tools .hnt-map-tool-button {
+  border-radius: 8px;
+}
+
+.rework-map-tools .hnt-map-filter-chip {
+  min-height: 38px;
+  background: rgba(21, 21, 20, .52);
+  text-decoration: none;
+}
+
+.rework-map-tools .hnt-map-filter-chip:has(input:not(:checked)) {
+  opacity: .5;
+  text-decoration: none;
+}
+
+.rework-map-tools .hnt-map-tool-actions {
+  grid-template-columns: 1fr;
+}
+
+.rework-map-tools-trigger {
+  display: none;
+}
+
+.rework-map-stage .hnt-map-disclaimer {
+  max-width: min(520px, calc(100% - 24px));
+  border-color: rgba(255, 255, 255, .08);
+  background: rgba(20, 20, 18, .72);
+}
+
+@media (max-width: 1180px) {
+  .rework-map-body {
+    overflow: auto;
+  }
+
+  .rework-map-main {
+    min-height: 100vh;
+  }
+
+  .rework-map-layout {
+    height: auto;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .rework-map-stage {
+    min-height: min(72vh, 680px);
+  }
+
+  .rework-map-tools {
+    height: auto;
+    max-height: none;
+  }
+
+  .rework-map-tools .hnt-map-tools-scroll {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 900px) {
+  .rework-map-main {
+    padding-top: 24px;
+  }
+
+  .rework-map-main .topbar {
+    display: none;
+  }
+
+  .rework-map-layout {
+    height: auto;
+  }
+
+  .rework-map-stage {
+    min-height: 68vh;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .rework-map-main {
+    margin-left: 78px;
+    padding: 18px 14px 18px;
+  }
+
+  .rework-map-stage {
+    min-height: 62vh;
+  }
+
+  .rework-map-tools {
+    border-radius: 14px;
+  }
+
+  .rework-map-tools .hnt-map-filter-options {
+    grid-template-columns: 1fr;
+  }
+}
