@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Maps;
 
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
+use App\Support\HntTheme;
 use App\Support\MapVoteVisitorIdentity;
+use App\Support\ReworkFeedSidebar;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -61,7 +63,7 @@ class MapController extends Controller
         ],
     ];
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $maps = collect(self::MAPS)->map(function (array $map, string $slug): array {
             $data = $this->readMapData($slug, $map['data']);
@@ -76,7 +78,21 @@ class MapController extends Controller
             ];
         })->values();
 
-        return view('themes.hnt_preview.maps.index', compact('maps'));
+        if (! HntTheme::previewActive($request->user())) {
+            return view('themes.hnt_preview.maps.index', compact('maps'));
+        }
+
+        $sidebarData = ReworkFeedSidebar::forViewer($request->user());
+
+        return view('themes.rework.maps.index', [
+            'maps' => $maps,
+            'socialiteMembers' => $sidebarData['members'],
+            'socialiteProfileStats' => $sidebarData['profileStats'],
+            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
+            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
+            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
+            'socialiteHighlightCup' => $sidebarData['highlightCup'],
+        ]);
     }
 
     public function show(Request $request, MapVoteVisitorIdentity $visitorIdentity, string $slug): View
