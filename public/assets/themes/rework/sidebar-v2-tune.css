@@ -1,18 +1,25 @@
 /* Rework sidebar v2 visual tune layer.
    Keep this file small: only overrides for the Figma sidebar prototype. */
 :root {
-  --rework-sidebar-v2-gap: -82px;
+  --rework-sidebar-v2-gap: -105px;
   --rework-sidebar-v2-main-offset: calc(var(--rework-sidebar-v2-left) + var(--rework-sidebar-v2-current) + var(--rework-sidebar-v2-gap));
 }
 
 body.rework-sidebar-collapsed {
-  --rework-sidebar-v2-gap: -72px;
+  --rework-sidebar-v2-gap: -98px;
 }
 
-/* Pull the whole page closer to the floating rail.
-   The existing Rework content has its own inner spacing, so the visual gap is still safe. */
-.main {
-  margin-left: var(--rework-sidebar-v2-main-offset) !important;
+@media (min-width: 981px) {
+  /* Pull the main shell closer to the floating rail. */
+  .main {
+    margin-left: var(--rework-sidebar-v2-main-offset) !important;
+  }
+
+  /* The content grid was visually ending right of the header avatar.
+     Pull only the feed/widgets grid left so the right widgets end near the avatar column. */
+  .content-grid {
+    transform: translateX(-124px);
+  }
 }
 
 /* Darker/greener Figma direction instead of the earlier red rail. */
@@ -45,15 +52,27 @@ body.rework-sidebar-collapsed {
   opacity: .38 !important;
 }
 
-/* First dashboard icon: keep the Phosphor mark centered and a bit stronger. */
+/* First dashboard icon: stronger, centered, closer to Figma's four-tile icon. */
 .sidebar-v2 .dashboard-icon {
-  font-size: 24px !important;
+  width: 25px !important;
+  min-width: 25px !important;
+  height: 25px !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
   transform: translateY(.5px);
 }
 
 body.rework-sidebar-collapsed .sidebar-v2 .dashboard-icon {
-  font-size: 24px !important;
-  transform: translateY(0);
+  font-size: 25px !important;
+  transform: translate(-.5px, 0);
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active {
+  width: 56px !important;
+  height: 56px !important;
+  padding: 16px !important;
+  display: grid !important;
+  place-items: center !important;
 }
 
 /* Expanded arrow: closer to the Figma demo. */
@@ -235,8 +254,17 @@ body.rework-sidebar-collapsed .sidebar-v2 .message-row:nth-child(4) {
   display: none !important;
 }
 
+/* New sidebar is desktop-only for now. Do not let this prototype affect mobile. */
 @media (max-width: 980px) {
-  :root {
-    --rework-sidebar-v2-gap: -62px;
+  .sidebar.sidebar-v2 {
+    display: none !important;
+  }
+
+  .main {
+    margin-left: 0 !important;
+  }
+
+  .content-grid {
+    transform: none !important;
   }
 }
