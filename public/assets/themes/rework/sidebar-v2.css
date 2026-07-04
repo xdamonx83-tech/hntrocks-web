@@ -61,13 +61,8 @@ body.rework-sidebar-collapsed .sidebar.sidebar-v2 {
     linear-gradient(180deg, rgba(39, 45, 42, .78) 0%, rgba(19, 24, 22, .92) 54%, rgba(12, 15, 14, .94) 100%),
     var(--rework-sidebar-v2-bg-glass);
   border: 1px solid rgba(255, 255, 255, .075);
-  box-shadow:
-    0 54px 70px -24px rgba(0, 0, 0, .62),
-    0 22px 90px -34px rgba(101, 116, 104, .38),
-    inset 0 1px 0 rgba(255,255,255,.035);
-  backdrop-filter: blur(80px);
-  -webkit-backdrop-filter: blur(80px);
-  border-radius: 28px;
+
+  border-radius: 12px;
   z-index: 1;
   transition: width .34s var(--rework-sidebar-v2-ease), box-shadow .34s var(--rework-sidebar-v2-ease), background .34s var(--rework-sidebar-v2-ease);
 }
@@ -86,10 +81,7 @@ body.rework-sidebar-collapsed .sidebar-v2 .rail-bg {
   right: -62px;
   top: 32px;
   bottom: -76px;
-  background:
-    radial-gradient(270px 480px at 54% 42%, rgba(184, 189, 177, .16), transparent 70%),
-    radial-gradient(220px 500px at 50% 100%, rgba(41, 48, 41, .40), transparent 72%);
-  transition: width .34s var(--rework-sidebar-v2-ease), background .34s var(--rework-sidebar-v2-ease);
+
 }
 
 body.rework-sidebar-collapsed .sidebar-v2::before {

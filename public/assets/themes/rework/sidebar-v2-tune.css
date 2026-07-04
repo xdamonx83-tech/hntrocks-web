@@ -22,21 +22,12 @@ body.rework-sidebar-collapsed {
 /* Darker/greener Figma direction instead of the earlier red rail. */
 .sidebar-v2 .rail-bg {
   background:
-    radial-gradient(circle at 74% 18%, rgba(255, 255, 255, .075), transparent 28%),
-    radial-gradient(circle at 28% 46%, rgba(182, 194, 180, .10), transparent 40%),
-    linear-gradient(180deg, rgba(38, 45, 42, .82) 0%, rgba(18, 23, 21, .94) 56%, rgba(8, 11, 10, .98) 100%) !important;
+    radial-gradient(circle at 74% 18%, rgba(255, 255, 255, .075), transparent 28%), radial-gradient(circle at 28% 46%, rgba(182, 194, 180, .10), transparent 40%), linear-gradient(180deg, rgba(38, 45, 42, .82) 0%, rgb(23 23 21) 56%, rgb(23 23 21) 100%) !important;
   border-color: rgba(255, 255, 255, .075) !important;
-  box-shadow:
-    0 54px 70px -24px rgba(0, 0, 0, .68),
-    0 22px 90px -34px rgba(101, 116, 104, .34),
-    inset 0 1px 0 rgba(255,255,255,.04) !important;
+
 }
 
-.sidebar-v2::before {
-  background:
-    radial-gradient(270px 480px at 54% 42%, rgba(184, 189, 177, .16), transparent 70%),
-    radial-gradient(220px 500px at 50% 100%, rgba(41, 48, 41, .40), transparent 72%) !important;
-}
+
 
 .sidebar-v2 .divider {
   background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 100%) !important;
