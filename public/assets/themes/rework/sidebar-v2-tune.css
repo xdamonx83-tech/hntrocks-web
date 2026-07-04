@@ -10,15 +10,12 @@ body.rework-sidebar-collapsed {
 }
 
 @media (min-width: 981px) {
-  /* Pull the main shell closer to the floating rail. */
   .main {
     margin-left: var(--rework-sidebar-v2-main-offset) !important;
   }
 
-  /* The content grid was visually ending right of the header avatar.
-     Pull only the feed/widgets grid left so the right widgets end near the avatar column. */
   .content-grid {
-    transform: translateX(-124px);
+    transform: translateX(-50px);
   }
 }
 
@@ -75,25 +72,29 @@ body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active {
   place-items: center !important;
 }
 
-/* Expanded arrow: closer to the Figma demo. */
-.sidebar-v2 .side-arrow {
-  width: 48px !important;
-  height: 48px !important;
-  left: 244px !important;
-  border: 0 !important;
-  color: rgba(255, 255, 255, .86) !important;
-  background: rgba(255, 255, 255, .18) !important;
-  backdrop-filter: blur(60px) !important;
-  -webkit-backdrop-filter: blur(60px) !important;
-}
-
+/* Collapse/expand toggle must look identical in both states. */
+.sidebar-v2 .side-arrow,
 body.rework-sidebar-collapsed .sidebar-v2 .side-arrow {
   width: 24px !important;
   height: 24px !important;
-  left: 92px !important;
+  left: 244px !important;
+  border-radius: 24px !important;
   color: rgba(255,255,255,.62) !important;
   background: rgba(15, 18, 17, .42) !important;
   border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(90px) !important;
+  -webkit-backdrop-filter: blur(90px) !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .side-arrow {
+  left: 92px !important;
+}
+
+.sidebar-v2 .side-arrow:hover,
+body.rework-sidebar-collapsed .sidebar-v2 .side-arrow:hover {
+  color: rgba(255,255,255,.88) !important;
+  background: rgba(22, 27, 25, .62) !important;
+  transform: scale(1.04);
 }
 
 /* Add New Task CTA removed completely for this pass. */
@@ -102,156 +103,84 @@ body.rework-sidebar-collapsed .sidebar-v2 .side-arrow {
   display: none !important;
 }
 
-/* Messages box like the dark Figma card. */
-.sidebar-v2 .messages-menu {
-  height: 266px !important;
-}
-
-.sidebar-v2 .messages-arrows {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  color: rgba(255,255,255,.44);
-  font-size: 18px;
-}
-
-.sidebar-v2 .message-card {
-  position: relative;
+/* Account section replaces the demo Messages block. */
+.sidebar-v2 .account-menu {
+  position: absolute;
+  z-index: 2;
+  left: 24px;
+  top: 550px;
   width: 208px;
-  min-height: 204px;
-  margin-top: 14px;
-  padding: 14px 8px 48px;
-  border-radius: 16px;
-  background:
-    linear-gradient(180deg, rgba(9, 11, 11, .82), rgba(5, 6, 6, .72)),
-    rgba(0, 0, 0, .45);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 28px 44px rgba(0,0,0,.30);
-  overflow: visible;
+  transition: width .34s var(--rework-sidebar-v2-ease);
 }
 
-.sidebar-v2 .message-list {
-  width: 192px !important;
+.sidebar-v2 .account-title {
+  width: 208px;
+  padding: 0 4px 0 20px;
+}
+
+.sidebar-v2 .account-list {
+  width: 208px;
   display: flex;
   flex-direction: column;
-  align-items: stretch !important;
+  align-items: center;
+  gap: 4px;
 }
 
-.sidebar-v2 .message-row {
-  position: relative;
-  width: 192px !important;
-  height: 42px !important;
+.sidebar-v2 .account-item {
+  width: 208px;
+  height: 56px;
   display: flex;
   align-items: center;
-  padding: 9px 10px !important;
-  gap: 14px !important;
+  padding: 16px 20px;
+  gap: 16px;
   border-radius: 12px;
-  color: #fff;
+  color: var(--rework-sidebar-v2-muted);
   text-decoration: none;
-  font-size: 13px !important;
+  font-size: 14px;
   font-weight: 600;
   line-height: 20px;
 }
 
-.sidebar-v2 .message-row:hover {
-  background: rgba(255,255,255,.035);
-}
-
-.sidebar-v2 .message-name {
-  width: 112px !important;
-}
-
-.sidebar-v2 .message-badge {
-  margin-left: auto;
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: rgba(255,255,255,.28);
+.sidebar-v2 .account-item:hover,
+.sidebar-v2 .account-item.is-current {
   color: #fff;
-  font-size: 12px;
-  line-height: 1;
-  font-weight: 600;
+  background: rgba(255,255,255,.045);
+  text-shadow: 0 0 16px rgba(255,255,255,.62);
 }
 
-.sidebar-v2 .all-messages {
-  position: absolute;
-  left: 50%;
-  bottom: -20px;
-  width: 120px;
-  height: 44px;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
+.sidebar-v2 .logout-item:hover {
+  background: rgba(184,70,58,.12);
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .account-menu {
+  left: 24px;
+  width: 56px;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .account-title {
+  width: 56px;
   justify-content: center;
-  gap: 8px;
-  border-radius: 999px;
-  color: #fff;
-  background: #116DFF;
-  box-shadow: 0 18px 34px rgba(17,109,255,.34);
-  text-decoration: none;
-  font-size: 12px;
-  line-height: 1;
-  font-weight: 600;
+  padding: 0 4px;
+  text-align: center;
 }
 
-.sidebar-v2 .all-messages .ph {
-  font-size: 14px;
+body.rework-sidebar-collapsed .sidebar-v2 .account-list {
+  width: 56px;
 }
 
-body.rework-sidebar-collapsed .sidebar-v2 .messages-menu {
-  left: 0 !important;
-  width: 104px !important;
-}
-
-body.rework-sidebar-collapsed .sidebar-v2 .messages-head {
-  width: 104px !important;
-  padding: 0 12px !important;
-}
-
-body.rework-sidebar-collapsed .sidebar-v2 .messages-head span {
-  width: 80px !important;
-  justify-content: center !important;
-  text-align: center !important;
-}
-
-body.rework-sidebar-collapsed .sidebar-v2 .messages-arrows {
-  display: none !important;
-}
-
-body.rework-sidebar-collapsed .sidebar-v2 .message-card {
-  width: 104px !important;
-  min-height: 168px !important;
-  margin-top: 4px !important;
-  padding: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-body.rework-sidebar-collapsed .sidebar-v2 .message-list {
-  width: 104px !important;
-  height: 168px !important;
-  align-items: center !important;
-}
-
-body.rework-sidebar-collapsed .sidebar-v2 .message-row {
-  width: 64px !important;
+body.rework-sidebar-collapsed .sidebar-v2 .account-item {
+  width: 56px !important;
   height: 56px !important;
   justify-content: center !important;
-  padding: 16px 20px !important;
+  padding: 16px !important;
   gap: 0 !important;
 }
 
-body.rework-sidebar-collapsed .sidebar-v2 .message-name,
-body.rework-sidebar-collapsed .sidebar-v2 .message-badge,
-body.rework-sidebar-collapsed .sidebar-v2 .all-messages {
-  display: none !important;
-}
-
-body.rework-sidebar-collapsed .sidebar-v2 .message-row:nth-child(4) {
-  display: none !important;
+body.rework-sidebar-collapsed .sidebar-v2 .account-item .menu-text {
+  width: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-8px);
+  pointer-events: none;
 }
 
 /* New sidebar is desktop-only for now. Do not let this prototype affect mobile. */
