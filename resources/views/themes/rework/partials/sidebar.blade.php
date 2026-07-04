@@ -23,6 +23,8 @@
     $sidebarName = $viewer?->name ?: ($viewer?->username ?: 'Andrew Smith');
 
     $feedActive = $reworkSidebarIsActive(['feed.*']);
+    $profileActive = $reworkSidebarIsActive(['profile.*']);
+    $reworkSidebarSettingsUrl = $reworkSidebarUrl('account.settings.edit');
     $reworkSidebarV2StyleVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.css')) ?: time();
     $reworkSidebarV2TuneVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2-tune.css')) ?: time();
     $reworkSidebarV2ScriptVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.js')) ?: time();
@@ -98,43 +100,30 @@
 
     <span class="divider divider-mid" aria-hidden="true"></span>
 
-    <section class="messages-menu" aria-label="Messages">
-        <div class="messages-head">
-            <span>Messages</span>
-            <div class="messages-arrows" aria-hidden="true">
-                <i class="ph ph-caret-left"></i>
-                <i class="ph ph-caret-right"></i>
-            </div>
-        </div>
+    <nav class="account-menu" aria-label="Account">
+        <div class="section-title account-title">Account</div>
 
-        <div class="message-card">
-            <div class="message-list">
-                <a class="message-row" href="#" data-sidebar-tooltip="Max Maraston">
-                    <span class="mini-avatar mini-avatar-1"><span class="status online"></span></span>
-                    <span class="message-name">Max Maraston</span>
-                    <span class="message-badge">2</span>
-                </a>
-                <a class="message-row" href="#" data-sidebar-tooltip="Celia W McCombs">
-                    <span class="mini-avatar mini-avatar-2"><span class="status offline"></span></span>
-                    <span class="message-name">Celia W McCombs</span>
-                </a>
-                <a class="message-row" href="#" data-sidebar-tooltip="Edna J Critchlow">
-                    <span class="mini-avatar mini-avatar-3"><span class="status online"></span></span>
-                    <span class="message-name">Edna J Critchlow</span>
-                    <span class="message-badge">1</span>
-                </a>
-                <a class="message-row" href="#" data-sidebar-tooltip="Dima Groshev">
-                    <span class="mini-avatar mini-avatar-4"></span>
-                    <span class="message-name">Dima Groshev</span>
-                </a>
-            </div>
+        <div class="account-list">
+            <a class="menu-item account-item {{ $profileActive ? 'is-current' : '' }}" href="{{ $reworkSidebarUrl('profile.show') }}" data-route="user-menu" data-sidebar-tooltip="User Menu" @if($profileActive) aria-current="page" @endif>
+                <i aria-hidden="true" class="ph ph-user-circle icon"></i>
+                <span class="menu-text">User Menu</span>
+            </a>
 
-            <a class="all-messages" href="#">
-                <i aria-hidden="true" class="ph ph-caret-down"></i>
-                <span>All messages</span>
+            <a class="menu-item account-item" data-settings-modal-open href="{{ $reworkSidebarSettingsUrl }}" data-route="settings" data-sidebar-tooltip="Einstellungen">
+                <i aria-hidden="true" class="ph ph-gear-six icon"></i>
+                <span class="menu-text">Einstellungen</span>
+            </a>
+
+            <a class="menu-item account-item logout-item" href="#" data-route="logout" data-sidebar-tooltip="Logout" onclick="event.preventDefault(); this.closest('.app')?.querySelector('[data-rework-sidebar-logout]')?.submit();">
+                <i aria-hidden="true" class="ph ph-sign-out icon"></i>
+                <span class="menu-text">Logout</span>
             </a>
         </div>
-    </section>
+    </nav>
+
+    <form action="{{ route('logout') }}" data-rework-sidebar-logout method="post" hidden>
+        @csrf
+    </form>
 </aside>
 
 <script defer src="{{ asset('assets/themes/rework/sidebar-v2.js') }}?v={{ $reworkSidebarV2ScriptVersion }}"></script>
