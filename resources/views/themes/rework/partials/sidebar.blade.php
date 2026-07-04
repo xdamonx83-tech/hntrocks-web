@@ -99,21 +99,37 @@
     <section class="messages-menu" aria-label="Messages">
         <div class="messages-head">
             <span>Messages</span>
-            <i aria-hidden="true" class="ph ph-plus"></i>
+            <div class="messages-arrows" aria-hidden="true">
+                <i class="ph ph-caret-left"></i>
+                <i class="ph ph-caret-right"></i>
+            </div>
         </div>
 
-        <div class="message-list">
-            <a class="message-row" href="#" data-sidebar-tooltip="Erik Gunsel">
-                <span class="mini-avatar mini-avatar-1"><span class="status online"></span></span>
-                <span class="message-name">Erik Gunsel</span>
-            </a>
-            <a class="message-row" href="#" data-sidebar-tooltip="Emily Smith">
-                <span class="mini-avatar mini-avatar-2"><span class="status offline"></span></span>
-                <span class="message-name">Emily Smith</span>
-            </a>
-            <a class="message-row" href="#" data-sidebar-tooltip="Arthur Adelk">
-                <span class="mini-avatar mini-avatar-3"><span class="status online"></span></span>
-                <span class="message-name">Arthur Adelk</span>
+        <div class="message-card">
+            <div class="message-list">
+                <a class="message-row" href="#" data-sidebar-tooltip="Max Maraston">
+                    <span class="mini-avatar mini-avatar-1"><span class="status online"></span></span>
+                    <span class="message-name">Max Maraston</span>
+                    <span class="message-badge">2</span>
+                </a>
+                <a class="message-row" href="#" data-sidebar-tooltip="Celia W McCombs">
+                    <span class="mini-avatar mini-avatar-2"><span class="status offline"></span></span>
+                    <span class="message-name">Celia W McCombs</span>
+                </a>
+                <a class="message-row" href="#" data-sidebar-tooltip="Edna J Critchlow">
+                    <span class="mini-avatar mini-avatar-3"><span class="status online"></span></span>
+                    <span class="message-name">Edna J Critchlow</span>
+                    <span class="message-badge">1</span>
+                </a>
+                <a class="message-row" href="#" data-sidebar-tooltip="Dima Groshev">
+                    <span class="mini-avatar mini-avatar-4"></span>
+                    <span class="message-name">Dima Groshev</span>
+                </a>
+            </div>
+
+            <a class="all-messages" href="#">
+                <i aria-hidden="true" class="ph ph-caret-down"></i>
+                <span>All messages</span>
             </a>
         </div>
     </section>
