@@ -1,0 +1,242 @@
+/* Rework sidebar v2 visual tune layer.
+   Keep this file small: only overrides for the Figma sidebar prototype. */
+:root {
+  --rework-sidebar-v2-gap: -82px;
+  --rework-sidebar-v2-main-offset: calc(var(--rework-sidebar-v2-left) + var(--rework-sidebar-v2-current) + var(--rework-sidebar-v2-gap));
+}
+
+body.rework-sidebar-collapsed {
+  --rework-sidebar-v2-gap: -72px;
+}
+
+/* Pull the whole page closer to the floating rail.
+   The existing Rework content has its own inner spacing, so the visual gap is still safe. */
+.main {
+  margin-left: var(--rework-sidebar-v2-main-offset) !important;
+}
+
+/* Darker/greener Figma direction instead of the earlier red rail. */
+.sidebar-v2 .rail-bg {
+  background:
+    radial-gradient(circle at 74% 18%, rgba(255, 255, 255, .075), transparent 28%),
+    radial-gradient(circle at 28% 46%, rgba(182, 194, 180, .10), transparent 40%),
+    linear-gradient(180deg, rgba(38, 45, 42, .82) 0%, rgba(18, 23, 21, .94) 56%, rgba(8, 11, 10, .98) 100%) !important;
+  border-color: rgba(255, 255, 255, .075) !important;
+  box-shadow:
+    0 54px 70px -24px rgba(0, 0, 0, .68),
+    0 22px 90px -34px rgba(101, 116, 104, .34),
+    inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+.sidebar-v2::before {
+  background:
+    radial-gradient(270px 480px at 54% 42%, rgba(184, 189, 177, .16), transparent 70%),
+    radial-gradient(220px 500px at 50% 100%, rgba(41, 48, 41, .40), transparent 72%) !important;
+}
+
+.sidebar-v2 .divider {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 100%) !important;
+  opacity: .42 !important;
+}
+
+.sidebar-v2 .lights,
+.sidebar-v2 .sub-light {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.26) 0%, rgba(255,255,255,0) 100%) !important;
+  opacity: .38 !important;
+}
+
+/* First dashboard icon: keep the Phosphor mark centered and a bit stronger. */
+.sidebar-v2 .dashboard-icon {
+  font-size: 24px !important;
+  transform: translateY(.5px);
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard-icon {
+  font-size: 24px !important;
+  transform: translateY(0);
+}
+
+/* Expanded arrow: closer to the Figma demo. */
+.sidebar-v2 .side-arrow {
+  width: 48px !important;
+  height: 48px !important;
+  left: 244px !important;
+  border: 0 !important;
+  color: rgba(255, 255, 255, .86) !important;
+  background: rgba(255, 255, 255, .18) !important;
+  backdrop-filter: blur(60px) !important;
+  -webkit-backdrop-filter: blur(60px) !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .side-arrow {
+  width: 24px !important;
+  height: 24px !important;
+  left: 92px !important;
+  color: rgba(255,255,255,.62) !important;
+  background: rgba(15, 18, 17, .42) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+}
+
+/* Add New Task CTA removed completely for this pass. */
+.sidebar-v2 .promo-card,
+.sidebar-v2 .small-add {
+  display: none !important;
+}
+
+/* Messages box like the dark Figma card. */
+.sidebar-v2 .messages-menu {
+  height: 266px !important;
+}
+
+.sidebar-v2 .messages-arrows {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: rgba(255,255,255,.44);
+  font-size: 18px;
+}
+
+.sidebar-v2 .message-card {
+  position: relative;
+  width: 208px;
+  min-height: 204px;
+  margin-top: 14px;
+  padding: 14px 8px 48px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(9, 11, 11, .82), rgba(5, 6, 6, .72)),
+    rgba(0, 0, 0, .45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 28px 44px rgba(0,0,0,.30);
+  overflow: visible;
+}
+
+.sidebar-v2 .message-list {
+  width: 192px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch !important;
+}
+
+.sidebar-v2 .message-row {
+  position: relative;
+  width: 192px !important;
+  height: 42px !important;
+  display: flex;
+  align-items: center;
+  padding: 9px 10px !important;
+  gap: 14px !important;
+  border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px !important;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.sidebar-v2 .message-row:hover {
+  background: rgba(255,255,255,.035);
+}
+
+.sidebar-v2 .message-name {
+  width: 112px !important;
+}
+
+.sidebar-v2 .message-badge {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.28);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.sidebar-v2 .all-messages {
+  position: absolute;
+  left: 50%;
+  bottom: -20px;
+  width: 120px;
+  height: 44px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  color: #fff;
+  background: #116DFF;
+  box-shadow: 0 18px 34px rgba(17,109,255,.34);
+  text-decoration: none;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.sidebar-v2 .all-messages .ph {
+  font-size: 14px;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .messages-menu {
+  left: 0 !important;
+  width: 104px !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .messages-head {
+  width: 104px !important;
+  padding: 0 12px !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .messages-head span {
+  width: 80px !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .messages-arrows {
+  display: none !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .message-card {
+  width: 104px !important;
+  min-height: 168px !important;
+  margin-top: 4px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .message-list {
+  width: 104px !important;
+  height: 168px !important;
+  align-items: center !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .message-row {
+  width: 64px !important;
+  height: 56px !important;
+  justify-content: center !important;
+  padding: 16px 20px !important;
+  gap: 0 !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .message-name,
+body.rework-sidebar-collapsed .sidebar-v2 .message-badge,
+body.rework-sidebar-collapsed .sidebar-v2 .all-messages {
+  display: none !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .message-row:nth-child(4) {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+  :root {
+    --rework-sidebar-v2-gap: -62px;
+  }
+}
