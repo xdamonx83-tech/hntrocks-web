@@ -24,10 +24,12 @@
 
     $feedActive = $reworkSidebarIsActive(['feed.*']);
     $reworkSidebarV2StyleVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.css')) ?: time();
+    $reworkSidebarV2TuneVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2-tune.css')) ?: time();
     $reworkSidebarV2ScriptVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.js')) ?: time();
 @endphp
 
 <link href="{{ asset('assets/themes/rework/sidebar-v2.css') }}?v={{ $reworkSidebarV2StyleVersion }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/rework/sidebar-v2-tune.css') }}?v={{ $reworkSidebarV2TuneVersion }}" rel="stylesheet">
 
 <aside class="sidebar sidebar-v2 is-expanded" id="appSidebar" data-rework-sidebar aria-label="Main sidebar">
     <div class="rail-bg" aria-hidden="true"></div>
@@ -59,7 +61,7 @@
         <div class="main-list">
             <a class="menu-item menu-active dashboard {{ $feedActive ? 'is-current' : '' }}" href="{{ $reworkSidebarUrl('feed.index') }}" id="dashboardToggle" data-route="dashboard" @if($feedActive) aria-current="page" @endif>
                 <span class="lights" aria-hidden="true"></span>
-                <i aria-hidden="true" class="ph ph-squares-four icon"></i>
+                <i aria-hidden="true" class="ph ph-squares-four icon dashboard-icon"></i>
                 <span class="menu-text">Dashboard</span>
                 <i aria-hidden="true" class="ph ph-caret-up icon chevron-up"></i>
             </a>
@@ -133,21 +135,6 @@
             </a>
         </div>
     </section>
-
-    <section class="promo-card" aria-label="Create task">
-        <div class="promo-text">
-            <h2>Let&apos;s start!</h2>
-            <p>Creating or adding new tasks couldn&apos;t be easier</p>
-        </div>
-        <a class="orange-button" href="{{ $reworkSidebarUrl('lfg.create', $reworkSidebarUrl('lfg.index', '#')) }}">
-            <i aria-hidden="true" class="ph ph-plus"></i>
-            <span>Add New Task</span>
-        </a>
-    </section>
-
-    <a class="small-add" href="{{ $reworkSidebarUrl('lfg.create', $reworkSidebarUrl('lfg.index', '#')) }}" aria-label="Add New Task">
-        <i aria-hidden="true" class="ph ph-plus"></i>
-    </a>
 </aside>
 
 <script defer src="{{ asset('assets/themes/rework/sidebar-v2.js') }}?v={{ $reworkSidebarV2ScriptVersion }}"></script>
