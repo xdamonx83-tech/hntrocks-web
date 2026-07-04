@@ -188,3 +188,52 @@ body.rework-sidebar-collapsed .sidebar-v2 .account-item .menu-text {
     transform: none !important;
   }
 }
+
+/* Test: subtle sidebar-style glass surface for feed cards only */
+@media (min-width: 981px) {
+  .left-col > .hero-card,
+  .left-col .post-card {
+    background:
+      radial-gradient(circle at 78% 16%, rgba(255, 255, 255, .045), transparent 30%),
+      radial-gradient(circle at 18% 48%, rgba(182, 194, 180, .055), transparent 42%),
+      linear-gradient(180deg, rgba(34, 39, 36, .54) 0%, rgba(23, 23, 21, .90) 58%, rgba(18, 18, 16, .94) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, .055);
+    box-shadow:
+      0 28px 56px -38px rgba(0, 0, 0, .62),
+      inset 0 1px 0 rgba(255, 255, 255, .028);
+    backdrop-filter: blur(26px);
+    -webkit-backdrop-filter: blur(26px);
+  }
+
+  .left-col > .hero-card {
+    border-radius: 20px;
+  }
+
+  .left-col .post-card {
+    border-radius: 18px;
+  }
+
+  .left-col > .hero-card:hover,
+  .left-col .post-card:hover {
+    border-color: rgba(255, 255, 255, .075);
+    box-shadow:
+      0 34px 64px -40px rgba(0, 0, 0, .68),
+      inset 0 1px 0 rgba(255, 255, 255, .04);
+  }
+
+  .left-col .composer-mini,
+  .left-col .comment-input {
+    background: rgba(8, 10, 10, .42) !important;
+    border: 1px solid rgba(255, 255, 255, .035);
+  }
+
+  .rework-feed-filters a {
+    background: rgba(8, 10, 10, .26);
+    border-color: rgba(255, 255, 255, .12);
+  }
+
+  .rework-feed-filters a.active {
+    background: rgba(255, 255, 255, .045);
+    border-color: rgba(255, 255, 255, .10);
+  }
+}
