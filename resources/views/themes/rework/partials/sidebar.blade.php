@@ -20,56 +20,9 @@
 
     $defaultAvatar = asset('assets/vikinger/img/default-avatar.svg');
     $sidebarAvatar = $viewer?->avatarUrl() ?: $defaultAvatar;
-    $sidebarName = $viewer?->name ?: ($viewer?->username ?: 'HNT Hunter');
-    $sidebarHandle = $viewer?->username ? '@'.$viewer->username : 'HNT.rocks';
-
-    $reworkSidebarMainItems = [
-        [
-            'label' => 'Players',
-            'icon' => 'ph ph-users-three',
-            'url' => $reworkSidebarUrl('members.index'),
-            'active' => $reworkSidebarIsActive(['members.*']),
-        ],
-        [
-            'label' => 'Games',
-            'icon' => 'ph ph-game-controller',
-            'url' => '#',
-            'active' => false,
-        ],
-        [
-            'label' => 'Maps',
-            'icon' => 'ph ph-map-trifold',
-            'url' => $reworkSidebarUrl('maps.index'),
-            'active' => $reworkSidebarIsActive(['maps.*']),
-        ],
-        [
-            'label' => 'Hunt',
-            'icon' => 'ph ph-crosshair',
-            'url' => '#',
-            'active' => false,
-        ],
-        [
-            'label' => 'Gamification',
-            'icon' => 'ph ph-chart-bar',
-            'url' => $reworkSidebarUrl('gamification.index'),
-            'active' => $reworkSidebarIsActive(['gamification.*']),
-        ],
-        [
-            'label' => 'Shop',
-            'icon' => 'ph ph-storefront',
-            'url' => $reworkSidebarUrl('crowns.shop'),
-            'active' => $reworkSidebarIsActive(['crowns.index', 'crowns.history', 'crowns.inventory', 'crowns.shop', 'crowns.shop.*']),
-        ],
-        [
-            'label' => 'Cups',
-            'icon' => 'ph ph-trophy',
-            'url' => $reworkSidebarUrl('cups.index'),
-            'active' => $reworkSidebarIsActive(['cups.*', 'hall-of-fame.*', 'loadout-challenges.*']),
-        ],
-    ];
+    $sidebarName = $viewer?->name ?: ($viewer?->username ?: 'Andrew Smith');
 
     $feedActive = $reworkSidebarIsActive(['feed.*']);
-    $reworkSidebarSettingsUrl = $reworkSidebarUrl('account.settings.edit');
     $reworkSidebarV2StyleVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.css')) ?: time();
     $reworkSidebarV2ScriptVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.js')) ?: time();
 @endphp
@@ -93,21 +46,21 @@
     <header class="profile">
         <img src="{{ $sidebarAvatar }}" alt="{{ $sidebarName }}" class="profile-avatar" data-rework-profile-avatar>
         <div class="profile-copy">
-            <p>{{ $sidebarHandle }}</p>
+            <p>Product Designer</p>
             <strong>{{ $sidebarName }}</strong>
         </div>
     </header>
 
     <span class="divider divider-top" aria-hidden="true"></span>
 
-    <nav class="main-menu" aria-label="{{ __('ui.rework_nav_main_aria') }}">
+    <nav class="main-menu" aria-label="Demo sidebar navigation">
         <div class="section-title">Main</div>
 
         <div class="main-list">
-            <a class="menu-item menu-active dashboard {{ $feedActive ? 'is-current' : '' }}" href="{{ $reworkSidebarUrl('feed.index') }}" id="dashboardToggle" data-route="feed" @if($feedActive) aria-current="page" @endif>
+            <a class="menu-item menu-active dashboard {{ $feedActive ? 'is-current' : '' }}" href="{{ $reworkSidebarUrl('feed.index') }}" id="dashboardToggle" data-route="dashboard" @if($feedActive) aria-current="page" @endif>
                 <span class="lights" aria-hidden="true"></span>
-                <i aria-hidden="true" class="ph ph-house icon"></i>
-                <span class="menu-text">Feed</span>
+                <i aria-hidden="true" class="ph ph-squares-four icon"></i>
+                <span class="menu-text">Dashboard</span>
                 <i aria-hidden="true" class="ph ph-caret-up icon chevron-up"></i>
             </a>
 
@@ -118,70 +71,67 @@
                     <path d="M1 80v22c0 5.5 4.5 10 10 10h4"/>
                 </svg>
                 <div class="sub-list" role="list">
-                    <a href="{{ $reworkSidebarUrl('feed.index') }}" class="sub-item sub-active" data-route="feed-all"><span class="sub-light" aria-hidden="true"></span>All</a>
-                    <a href="{{ $reworkSidebarUrl('feed.index') }}?filter=friends" class="sub-item" data-route="feed-friends">Friends</a>
-                    <a href="{{ $reworkSidebarUrl('feed.index') }}?filter=media" class="sub-item" data-route="feed-media">Media</a>
+                    <a href="{{ $reworkSidebarUrl('feed.index') }}" class="sub-item" data-route="activity">Activity</a>
+                    <a href="{{ $reworkSidebarUrl('feed.index') }}" class="sub-item" data-route="traffic">Trafic</a>
+                    <a href="{{ $reworkSidebarUrl('feed.index') }}" class="sub-item sub-active" data-route="statistic"><span class="sub-light" aria-hidden="true"></span>Statistic</a>
                 </div>
             </div>
 
-            @foreach($reworkSidebarMainItems as $item)
-                <a @class([
-                        'menu-item',
-                        'is-current' => $item['active'],
-                    ])
-                    href="{{ $item['url'] }}"
-                    data-route="{{ \Illuminate\Support\Str::slug($item['label']) }}"
-                    data-sidebar-tooltip="{{ $item['label'] }}"
-                    @if($item['active']) aria-current="page" @endif
-                >
-                    <i aria-hidden="true" class="{{ $item['icon'] }} icon"></i>
-                    <span class="menu-text">{{ $item['label'] }}</span>
-                </a>
-            @endforeach
+            <a class="menu-item" href="#" data-route="invoices" data-sidebar-tooltip="Invoices">
+                <i aria-hidden="true" class="ph ph-files icon"></i>
+                <span class="menu-text">Invoices</span>
+            </a>
+
+            <a class="menu-item" href="#" data-route="wallet" data-sidebar-tooltip="Wallet">
+                <i aria-hidden="true" class="ph ph-wallet icon"></i>
+                <span class="menu-text">Wallet</span>
+            </a>
+
+            <a class="menu-item" href="#" data-route="notification" data-sidebar-tooltip="Notification">
+                <i aria-hidden="true" class="ph ph-bell icon"></i>
+                <span class="menu-text">Notification</span>
+            </a>
         </div>
     </nav>
 
     <span class="divider divider-mid" aria-hidden="true"></span>
 
-    <nav class="account-menu" aria-label="Account">
-        <div class="account-head">
-            <span>Account</span>
+    <section class="messages-menu" aria-label="Messages">
+        <div class="messages-head">
+            <span>Messages</span>
+            <i aria-hidden="true" class="ph ph-plus"></i>
         </div>
 
-        <a class="account-row {{ $reworkSidebarIsActive(['profile.*']) ? 'is-current' : '' }}" href="{{ $reworkSidebarUrl('profile.show') }}" data-sidebar-tooltip="{{ __('ui.profile') }}">
-            <i aria-hidden="true" class="ph ph-user icon"></i>
-            <span>{{ __('ui.profile') }}</span>
-        </a>
+        <div class="message-list">
+            <a class="message-row" href="#" data-sidebar-tooltip="Erik Gunsel">
+                <span class="mini-avatar mini-avatar-1"><span class="status online"></span></span>
+                <span class="message-name">Erik Gunsel</span>
+            </a>
+            <a class="message-row" href="#" data-sidebar-tooltip="Emily Smith">
+                <span class="mini-avatar mini-avatar-2"><span class="status offline"></span></span>
+                <span class="message-name">Emily Smith</span>
+            </a>
+            <a class="message-row" href="#" data-sidebar-tooltip="Arthur Adelk">
+                <span class="mini-avatar mini-avatar-3"><span class="status online"></span></span>
+                <span class="message-name">Arthur Adelk</span>
+            </a>
+        </div>
+    </section>
 
-        <a class="account-row" data-settings-modal-open href="{{ $reworkSidebarSettingsUrl }}" data-sidebar-tooltip="{{ __('ui.settings') }}">
-            <i aria-hidden="true" class="ph ph-gear-six icon"></i>
-            <span>{{ __('ui.settings') }}</span>
-        </a>
-
-        <a class="account-row logout-row" href="#" data-sidebar-tooltip="{{ __('ui.logout') }}" onclick="event.preventDefault(); this.closest('.app')?.querySelector('[data-rework-sidebar-logout]')?.submit();">
-            <i aria-hidden="true" class="ph ph-sign-out icon"></i>
-            <span>{{ __('ui.logout') }}</span>
-        </a>
-    </nav>
-
-    <section class="promo-card" aria-label="Create LFG">
+    <section class="promo-card" aria-label="Create task">
         <div class="promo-text">
-            <h2>Let&apos;s hunt!</h2>
-            <p>Find hunters or create your next session.</p>
+            <h2>Let&apos;s start!</h2>
+            <p>Creating or adding new tasks couldn&apos;t be easier</p>
         </div>
         <a class="orange-button" href="{{ $reworkSidebarUrl('lfg.create', $reworkSidebarUrl('lfg.index', '#')) }}">
             <i aria-hidden="true" class="ph ph-plus"></i>
-            <span>Create LFG</span>
+            <span>Add New Task</span>
         </a>
     </section>
 
-    <a class="small-add" href="{{ $reworkSidebarUrl('lfg.create', $reworkSidebarUrl('lfg.index', '#')) }}" aria-label="Create LFG">
+    <a class="small-add" href="{{ $reworkSidebarUrl('lfg.create', $reworkSidebarUrl('lfg.index', '#')) }}" aria-label="Add New Task">
         <i aria-hidden="true" class="ph ph-plus"></i>
     </a>
-
-    <form action="{{ route('logout') }}" data-rework-sidebar-logout method="post" hidden>
-        @csrf
-    </form>
 </aside>
 
 <script defer src="{{ asset('assets/themes/rework/sidebar-v2.js') }}?v={{ $reworkSidebarV2ScriptVersion }}"></script>
