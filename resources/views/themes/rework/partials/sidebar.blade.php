@@ -61,7 +61,7 @@
         <div class="main-list">
             <a class="menu-item menu-active dashboard {{ $feedActive ? 'is-current' : '' }}" href="{{ $reworkSidebarUrl('feed.index') }}" id="dashboardToggle" data-route="dashboard" @if($feedActive) aria-current="page" @endif>
                 <span class="lights" aria-hidden="true"></span>
-                <i aria-hidden="true" class="ph ph-squares-four icon dashboard-icon"></i>
+                <i aria-hidden="true" class="ph-bold ph-squares-four icon dashboard-icon"></i>
                 <span class="menu-text">Dashboard</span>
                 <i aria-hidden="true" class="ph ph-caret-up icon chevron-up"></i>
             </a>
