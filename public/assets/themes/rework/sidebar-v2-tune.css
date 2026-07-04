@@ -1,0 +1,199 @@
+/* Rework sidebar v2 visual tune layer.
+   Keep this file small: only overrides for the Figma sidebar prototype. */
+:root {
+  --rework-sidebar-v2-gap: -105px;
+  --rework-sidebar-v2-main-offset: calc(var(--rework-sidebar-v2-left) + var(--rework-sidebar-v2-current) + var(--rework-sidebar-v2-gap));
+}
+
+body.rework-sidebar-collapsed {
+  --rework-sidebar-v2-gap: -98px;
+}
+
+@media (min-width: 981px) {
+  .main {
+    margin-left: var(--rework-sidebar-v2-main-offset) !important;
+  }
+
+  .content-grid {
+    transform: translateX(-50px);
+  }
+}
+
+/* Darker/greener Figma direction instead of the earlier red rail. */
+.sidebar-v2 .rail-bg {
+  background:
+    radial-gradient(circle at 74% 18%, rgba(255, 255, 255, .075), transparent 28%),
+    radial-gradient(circle at 28% 46%, rgba(182, 194, 180, .10), transparent 40%),
+    linear-gradient(180deg, rgba(38, 45, 42, .82) 0%, rgba(18, 23, 21, .94) 56%, rgba(8, 11, 10, .98) 100%) !important;
+  border-color: rgba(255, 255, 255, .075) !important;
+  box-shadow:
+    0 54px 70px -24px rgba(0, 0, 0, .68),
+    0 22px 90px -34px rgba(101, 116, 104, .34),
+    inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+.sidebar-v2::before {
+  background:
+    radial-gradient(270px 480px at 54% 42%, rgba(184, 189, 177, .16), transparent 70%),
+    radial-gradient(220px 500px at 50% 100%, rgba(41, 48, 41, .40), transparent 72%) !important;
+}
+
+.sidebar-v2 .divider {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 100%) !important;
+  opacity: .42 !important;
+}
+
+.sidebar-v2 .lights,
+.sidebar-v2 .sub-light {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.26) 0%, rgba(255,255,255,0) 100%) !important;
+  opacity: .38 !important;
+}
+
+/* First dashboard icon: stronger, centered, closer to Figma's four-tile icon. */
+.sidebar-v2 .dashboard-icon {
+  width: 25px !important;
+  min-width: 25px !important;
+  height: 25px !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+  transform: translateY(.5px);
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard-icon {
+  font-size: 25px !important;
+  transform: translate(-.5px, 0);
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active {
+  width: 56px !important;
+  height: 56px !important;
+  padding: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+/* Collapse/expand toggle must look identical in both states. */
+.sidebar-v2 .side-arrow,
+body.rework-sidebar-collapsed .sidebar-v2 .side-arrow {
+  width: 24px !important;
+  height: 24px !important;
+  left: 244px !important;
+  border-radius: 24px !important;
+  color: rgba(255,255,255,.62) !important;
+  background: rgba(15, 18, 17, .42) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(90px) !important;
+  -webkit-backdrop-filter: blur(90px) !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .side-arrow {
+  left: 92px !important;
+}
+
+.sidebar-v2 .side-arrow:hover,
+body.rework-sidebar-collapsed .sidebar-v2 .side-arrow:hover {
+  color: rgba(255,255,255,.88) !important;
+  background: rgba(22, 27, 25, .62) !important;
+  transform: scale(1.04);
+}
+
+/* Add New Task CTA removed completely for this pass. */
+.sidebar-v2 .promo-card,
+.sidebar-v2 .small-add {
+  display: none !important;
+}
+
+/* Account section replaces the demo Messages block. */
+.sidebar-v2 .account-menu {
+  position: absolute;
+  z-index: 2;
+  left: 24px;
+  top: 550px;
+  width: 208px;
+  transition: width .34s var(--rework-sidebar-v2-ease);
+}
+
+.sidebar-v2 .account-title {
+  width: 208px;
+  padding: 0 4px 0 20px;
+}
+
+.sidebar-v2 .account-list {
+  width: 208px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sidebar-v2 .account-item {
+  width: 208px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 16px;
+  border-radius: 12px;
+  color: var(--rework-sidebar-v2-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.sidebar-v2 .account-item:hover,
+.sidebar-v2 .account-item.is-current {
+  color: #fff;
+  background: rgba(255,255,255,.045);
+  text-shadow: 0 0 16px rgba(255,255,255,.62);
+}
+
+.sidebar-v2 .logout-item:hover {
+  background: rgba(184,70,58,.12);
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .account-menu {
+  left: 24px;
+  width: 56px;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .account-title {
+  width: 56px;
+  justify-content: center;
+  padding: 0 4px;
+  text-align: center;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .account-list {
+  width: 56px;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .account-item {
+  width: 56px !important;
+  height: 56px !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  gap: 0 !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .account-item .menu-text {
+  width: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-8px);
+  pointer-events: none;
+}
+
+/* New sidebar is desktop-only for now. Do not let this prototype affect mobile. */
+@media (max-width: 980px) {
+  .sidebar.sidebar-v2 {
+    display: none !important;
+  }
+
+  .main {
+    margin-left: 0 !important;
+  }
+
+  .content-grid {
+    transform: none !important;
+  }
+}
