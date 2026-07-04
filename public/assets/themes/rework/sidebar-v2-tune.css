@@ -237,3 +237,523 @@ body.rework-sidebar-collapsed .sidebar-v2 .account-item .menu-text {
     border-color: rgba(255, 255, 255, .10);
   }
 }
+
+/* Test: subtle sidebar/feed glass look for right widgets */
+@media (min-width: 981px) {
+  .right-col .profile-card,
+  .right-col .side-card {
+    background:
+      radial-gradient(circle at 78% 14%, rgba(255, 255, 255, .035), transparent 30%),
+      radial-gradient(circle at 18% 44%, rgba(182, 194, 180, .045), transparent 42%),
+      linear-gradient(180deg, rgba(28, 33, 30, .48) 0%, rgba(18, 19, 17, .88) 58%, rgba(13, 14, 13, .94) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, .045);
+    box-shadow:
+      0 24px 52px -40px rgba(0, 0, 0, .68),
+      inset 0 1px 0 rgba(255, 255, 255, .026);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .right-col .profile-card {
+    border-radius: 20px;
+  }
+
+  .right-col .side-card {
+    border-radius: 20px;
+  }
+
+  .right-col .profile-card:hover,
+  .right-col .side-card:hover {
+    border-color: rgba(255, 255, 255, .065);
+    box-shadow:
+      0 30px 60px -42px rgba(0, 0, 0, .72),
+      inset 0 1px 0 rgba(255, 255, 255, .038);
+  }
+
+  .right-col .profile-stat,
+  .right-col .stat-card,
+  .right-col .profile-card .profile-stat,
+  .right-col .profile-card [class*="stat"] {
+    background: rgba(255, 255, 255, .035) !important;
+    border: 1px solid rgba(255, 255, 255, .035);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .022);
+  }
+
+  .right-col .btn,
+  .right-col button,
+  .right-col .profile-card a.btn {
+    background: rgba(255, 255, 255, .18);
+    border: 1px solid rgba(255, 255, 255, .055);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+  }
+
+  .right-col .btn:hover,
+  .right-col button:hover,
+  .right-col .profile-card a.btn:hover {
+    background: rgba(255, 255, 255, .24);
+  }
+
+  .right-col .suggestion,
+  .right-col .highlight-card {
+    border-radius: 14px;
+  }
+}
+
+/* Fix: stats wrapper inside profile widget must stay transparent */
+@media (min-width: 981px) {
+  .right-col .profile-card [class*="stats"],
+  .right-col .profile-card .profile-stats,
+  .right-col .profile-card .stats-grid,
+  .right-col .profile-card .profile-stat-grid {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .right-col .profile-card [class*="stats"] > *,
+  .right-col .profile-card .profile-stats > *,
+  .right-col .profile-card .stats-grid > *,
+  .right-col .profile-card .profile-stat-grid > * {
+    background: rgba(255, 255, 255, .035) !important;
+    border: 1px solid rgba(255, 255, 255, .035);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .022);
+  }
+}
+
+/* Test: header/top dropdowns in subtle Rework glass style */
+@media (min-width: 981px) {
+  .topbar .search-box {
+    background:
+      radial-gradient(circle at 82% 20%, rgba(255,255,255,.035), transparent 30%),
+      linear-gradient(180deg, rgba(18, 21, 19, .72), rgba(8, 10, 10, .68)) !important;
+    border: 1px solid rgba(255,255,255,.045);
+    box-shadow:
+      0 18px 44px -34px rgba(0,0,0,.72),
+      inset 0 1px 0 rgba(255,255,255,.026);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .topbar .action-btn {
+    background:
+      linear-gradient(180deg, rgba(18, 21, 19, .70), rgba(8, 10, 10, .72)) !important;
+    border: 1px solid rgba(255,255,255,.045);
+    box-shadow:
+      0 18px 42px -34px rgba(0,0,0,.72),
+      inset 0 1px 0 rgba(255,255,255,.026);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .topbar .action-btn:hover {
+    background:
+      linear-gradient(180deg, rgba(30, 35, 32, .76), rgba(12, 14, 13, .78)) !important;
+    border-color: rgba(255,255,255,.075);
+  }
+
+  .topbar .avatar-wrap {
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,.34));
+  }
+
+  .topbar .header-avatar {
+    border: 1px solid rgba(255,255,255,.075);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+  }
+
+  .top-dropdown {
+    background:
+      radial-gradient(circle at 78% 10%, rgba(255,255,255,.045), transparent 30%),
+      radial-gradient(circle at 18% 45%, rgba(182,194,180,.045), transparent 42%),
+      linear-gradient(180deg, rgba(24, 28, 26, .92), rgba(10, 12, 12, .94)) !important;
+    border: 1px solid rgba(255,255,255,.07) !important;
+    border-radius: 20px !important;
+    box-shadow:
+      0 36px 70px -36px rgba(0,0,0,.82),
+      inset 0 1px 0 rgba(255,255,255,.035) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+  }
+
+  .top-dropdown::before {
+    background: rgba(24, 28, 26, .94) !important;
+    border-left-color: rgba(255,255,255,.07) !important;
+    border-top-color: rgba(255,255,255,.07) !important;
+  }
+
+  .dropdown-head {
+    border-bottom-color: rgba(255,255,255,.07) !important;
+  }
+
+  .dropdown-item {
+    border-radius: 14px !important;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(255,255,255,.045) !important;
+  }
+
+  .dropdown-item.unread {
+    background: rgba(255,255,255,.035) !important;
+  }
+
+  .dropdown-footer {
+    background: rgba(255,255,255,.055) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+  }
+
+  .dropdown-footer:hover {
+    background: rgba(255,255,255,.085) !important;
+  }
+
+  .rework-dropdown-scroll {
+    scrollbar-color: rgba(255,255,255,.22) transparent;
+  }
+
+  .rework-dropdown-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.18) !important;
+  }
+
+  .rework-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,.28) !important;
+  }
+}
+
+/* Magic right widget: sticky but premium/subtle */
+@media (min-width: 981px) {
+  .right-col {
+    position: sticky !important;
+    top: 112px !important;
+    align-self: start;
+    max-height: calc(100vh - 128px);
+    overflow: visible;
+  }
+
+  .right-col .profile-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .right-col .profile-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 26% 26%, rgba(207, 161, 73, .075), transparent 34%),
+      radial-gradient(circle at 80% 12%, rgba(255, 255, 255, .035), transparent 28%);
+    opacity: .75;
+  }
+
+  .right-col .profile-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .right-col .profile-card {
+    box-shadow:
+      0 34px 72px -44px rgba(0, 0, 0, .78),
+      0 0 0 1px rgba(255, 255, 255, .035),
+      inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+  }
+
+  .right-col .profile-buttons .btn,
+  .right-col .profile-card .btn {
+    background: rgba(255, 255, 255, .075) !important;
+    border: 1px solid rgba(255, 255, 255, .055);
+    color: #fff !important;
+  }
+
+  .right-col .profile-buttons .btn:hover,
+  .right-col .profile-card .btn:hover {
+    background: rgba(255, 255, 255, .12) !important;
+  }
+}
+
+/* Fix: only the profile/magic widget should be sticky, not the whole right column */
+@media (min-width: 981px) {
+  .right-col {
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .right-col .profile-card {
+    position: sticky !important;
+    top: 112px !important;
+    z-index: 5;
+  }
+
+  .right-col .side-card,
+  .right-col .suggested,
+  .right-col .highlights {
+    position: relative !important;
+    top: auto !important;
+    z-index: 1;
+  }
+}
+
+/* Fix: Magic widget is the late sticky clone, not the whole right column */
+@media (min-width: 981px) {
+  .right-col {
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .right-col > .profile-card {
+    position: relative !important;
+    top: auto !important;
+    z-index: 1 !important;
+  }
+
+  body > .rework-profile-late-sticky-clone {
+    background:
+      radial-gradient(circle at 78% 14%, rgba(255, 255, 255, .035), transparent 30%),
+      radial-gradient(circle at 18% 44%, rgba(182, 194, 180, .045), transparent 42%),
+      linear-gradient(180deg, rgba(28, 33, 30, .48) 0%, rgba(18, 19, 17, .88) 58%, rgba(13, 14, 13, .94) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, .055) !important;
+    box-shadow:
+      0 34px 72px -44px rgba(0, 0, 0, .78),
+      0 0 0 1px rgba(255, 255, 255, .035),
+      inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    overflow: hidden;
+  }
+
+  body > .rework-profile-late-sticky-clone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 26% 26%, rgba(207, 161, 73, .065), transparent 34%),
+      radial-gradient(circle at 80% 12%, rgba(255, 255, 255, .03), transparent 28%);
+    opacity: .72;
+  }
+
+  body > .rework-profile-late-sticky-clone > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  body > .rework-profile-late-sticky-clone .profile-stat-grid {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body > .rework-profile-late-sticky-clone .profile-stat-grid > span {
+    background: rgba(255, 255, 255, .035) !important;
+    border: 1px solid rgba(255, 255, 255, .035);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .022);
+  }
+
+  body > .rework-profile-late-sticky-clone .profile-late-actions a,
+  body > .rework-profile-late-sticky-clone .profile-late-actions button {
+    background: rgba(255, 255, 255, .055) !important;
+    border: 1px solid rgba(255, 255, 255, .045) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .026);
+  }
+
+  body > .rework-profile-late-sticky-clone .profile-late-actions a:hover,
+  body > .rework-profile-late-sticky-clone .profile-late-actions button:hover {
+    background: rgba(255, 255, 255, .09) !important;
+  }
+}
+
+/* Final visual consistency: 12px radius + 0.5px border for tuned glass surfaces */
+@media (min-width: 981px) {
+  :root {
+    --rework-glass-radius: 12px;
+    --rework-glass-border: .5px solid rgba(255, 255, 255, .075);
+  }
+
+  /* Sidebar visual rail */
+  .sidebar-v2 .rail-bg {
+    border-radius: var(--rework-glass-radius) !important;
+    border: var(--rework-glass-border) !important;
+  }
+
+  /* Feed cards */
+  .left-col > .hero-card,
+  .left-col .post-card {
+    border-radius: var(--rework-glass-radius) !important;
+    border: var(--rework-glass-border) !important;
+  }
+
+  /* Right widgets */
+  .right-col .profile-card,
+  .right-col .side-card {
+    border-radius: var(--rework-glass-radius) !important;
+    border: var(--rework-glass-border) !important;
+  }
+
+  /* Magic profile clone */
+  body > .rework-profile-late-sticky-clone {
+    border-radius: var(--rework-glass-radius) !important;
+    border: var(--rework-glass-border) !important;
+  }
+
+  /* Header controls */
+  .topbar .search-box,
+  .topbar .action-btn,
+  .topbar .header-avatar {
+    border-radius: var(--rework-glass-radius) !important;
+    border: var(--rework-glass-border) !important;
+  }
+
+  /* Header dropdowns */
+  .top-dropdown {
+    border-radius: var(--rework-glass-radius) !important;
+    border: var(--rework-glass-border) !important;
+  }
+
+  .top-dropdown::before {
+    border-left: var(--rework-glass-border) !important;
+    border-top: var(--rework-glass-border) !important;
+  }
+
+  /* Inputs / composer bars */
+  .left-col .composer-mini,
+  .left-col .comment-input,
+  .post-card input,
+  .post-card textarea {
+    border-radius: var(--rework-glass-radius) !important;
+    border: .5px solid rgba(255, 255, 255, .045) !important;
+  }
+
+  /* Buttons inside tuned cards */
+  .left-col .btn,
+  .right-col .btn,
+  .right-col button,
+  .top-dropdown .dropdown-footer,
+  body > .rework-profile-late-sticky-clone .profile-late-actions a,
+  body > .rework-profile-late-sticky-clone .profile-late-actions button {
+    border-radius: var(--rework-glass-radius) !important;
+    border: .5px solid rgba(255, 255, 255, .075) !important;
+  }
+
+  /* Stat wrapper must stay invisible, only the six boxes get borders */
+  .right-col .profile-stat-grid,
+  body > .rework-profile-late-sticky-clone .profile-stat-grid {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .right-col .profile-stat-grid > span,
+  body > .rework-profile-late-sticky-clone .profile-stat-grid > span {
+    border-radius: var(--rework-glass-radius) !important;
+    border: .5px solid rgba(255, 255, 255, .055) !important;
+  }
+
+  /* Small inner cards/items */
+  .dropdown-item,
+  .rework-feed-filters a,
+  .suggestion,
+  .highlight-card {
+    border-radius: var(--rework-glass-radius) !important;
+  }
+}
+
+/* Mobile: apply subtle glass style to feed/header only, sidebar stays disabled */
+@media (max-width: 980px) {
+  :root {
+    --rework-mobile-glass-radius: 12px;
+    --rework-mobile-glass-border: .5px solid rgba(255, 255, 255, .07);
+  }
+
+  .sidebar.sidebar-v2 {
+    display: none !important;
+  }
+
+  .main {
+    margin-left: 0 !important;
+  }
+
+  .content-grid {
+    transform: none !important;
+  }
+
+  .topbar .search-box,
+  .topbar .action-btn,
+  .topbar .header-avatar {
+    border-radius: var(--rework-mobile-glass-radius) !important;
+    border: var(--rework-mobile-glass-border) !important;
+    background:
+      radial-gradient(circle at 82% 20%, rgba(255,255,255,.035), transparent 30%),
+      linear-gradient(180deg, rgba(18, 21, 19, .72), rgba(8, 10, 10, .70)) !important;
+    box-shadow:
+      0 16px 34px -28px rgba(0,0,0,.72),
+      inset 0 1px 0 rgba(255,255,255,.026);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .left-col > .hero-card,
+  .left-col .post-card {
+    border-radius: var(--rework-mobile-glass-radius) !important;
+    border: var(--rework-mobile-glass-border) !important;
+    background:
+      radial-gradient(circle at 78% 16%, rgba(255, 255, 255, .04), transparent 30%),
+      radial-gradient(circle at 18% 48%, rgba(182, 194, 180, .05), transparent 42%),
+      linear-gradient(180deg, rgba(32, 37, 34, .50) 0%, rgba(23, 23, 21, .90) 58%, rgba(18, 18, 16, .95) 100%) !important;
+    box-shadow:
+      0 24px 48px -36px rgba(0, 0, 0, .66),
+      inset 0 1px 0 rgba(255, 255, 255, .028);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .left-col .composer-mini,
+  .left-col .comment-input,
+  .post-card input,
+  .post-card textarea {
+    border-radius: var(--rework-mobile-glass-radius) !important;
+    border: .5px solid rgba(255, 255, 255, .045) !important;
+    background: rgba(8, 10, 10, .48) !important;
+  }
+
+  .rework-feed-filters a {
+    border-radius: var(--rework-mobile-glass-radius) !important;
+    border: .5px solid rgba(255, 255, 255, .12) !important;
+    background: rgba(8, 10, 10, .28) !important;
+  }
+
+  .rework-feed-filters a.active {
+    background: rgba(255, 255, 255, .045) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+  }
+
+  .left-col .btn,
+  .post-card .btn,
+  .composer-mini .btn,
+  .comment-form button,
+  .post-card button {
+    border-radius: var(--rework-mobile-glass-radius) !important;
+    border: .5px solid rgba(255, 255, 255, .075) !important;
+  }
+
+  .top-dropdown {
+    border-radius: var(--rework-mobile-glass-radius) !important;
+    border: var(--rework-mobile-glass-border) !important;
+    background:
+      radial-gradient(circle at 78% 10%, rgba(255,255,255,.045), transparent 30%),
+      linear-gradient(180deg, rgba(24, 28, 26, .94), rgba(10, 12, 12, .96)) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .dropdown-item,
+  .dropdown-footer {
+    border-radius: var(--rework-mobile-glass-radius) !important;
+  }
+}
