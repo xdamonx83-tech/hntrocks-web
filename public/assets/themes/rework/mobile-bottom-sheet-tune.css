@@ -3,6 +3,14 @@
     display: none !important;
   }
 
+  .rework-mobile-menu-sheet h2 {
+    margin-bottom: 24px !important;
+  }
+
+  .rework-mobile-account-row {
+    margin-bottom: 30px !important;
+  }
+
   .rework-mobile-menu-section {
     position: relative;
     padding-top: 14px;
