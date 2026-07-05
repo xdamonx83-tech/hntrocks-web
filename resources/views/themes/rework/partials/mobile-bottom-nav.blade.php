@@ -34,14 +34,11 @@
                 ['label' => 'Mitglieder', 'icon' => 'ph ph-users', 'url' => $routeUrl('members.index', '/members'), 'active' => ['members.*']],
                 ['label' => 'Moments', 'icon' => 'ph ph-play-circle', 'url' => $routeUrl('moments.index', '/moments'), 'active' => ['moments.*']],
                 ['label' => 'Maps', 'icon' => 'ph ph-map-trifold', 'url' => $routeUrl('maps.index', '/maps'), 'active' => ['maps.*']],
-                ['label' => 'Media', 'icon' => 'ph ph-images', 'url' => $routeUrl('media.index', '/media'), 'active' => ['media.*']],
             ],
         ],
         [
-            'title' => 'Hunt & LFG',
+            'title' => 'LFG',
             'items' => [
-                ['label' => 'Hunt', 'icon' => 'ph ph-crosshair', 'url' => $routeUrl('loadout-challenges.index', '/loadout-challenges'), 'active' => ['loadout-challenges.*']],
-                ['label' => 'Trophy Room', 'icon' => 'ph ph-cube-focus', 'url' => $routeUrl('trophy-room.index', '/trophy-room'), 'active' => ['trophy-room.*']],
                 ['label' => 'LFG finden', 'icon' => 'ph ph-clock-countdown', 'url' => $routeUrl('lfg.index', '/lfg'), 'active' => ['lfg.index', 'lfg.show']],
                 ['label' => 'LFG erstellen', 'icon' => 'ph ph-plus-circle', 'url' => $routeUrl('lfg.create', '/lfg/create'), 'active' => ['lfg.create']],
             ],
