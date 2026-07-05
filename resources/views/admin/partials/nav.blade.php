@@ -16,6 +16,9 @@
         ['label' => 'Kampagnenlinks', 'route' => 'admin.campaign-links.index', 'active' => 'admin.campaign-links.*', 'icon' => 'GO'],
         ['label' => 'Badges & Quests', 'route' => 'admin.gamification.index', 'active' => 'admin.gamification.*', 'icon' => 'BQ'],
         ['label' => 'Navigation', 'route' => 'admin.navigation.index', 'active' => 'admin.navigation.*', 'icon' => 'NV'],
+        ['label' => 'App Remote Config', 'route' => 'admin.app-remote-config.index', 'active' => 'admin.app-remote-config.*', 'icon' => 'RC'],
+        ['label' => 'Feed Cards', 'route' => 'admin.app-remote-feed-cards.index', 'active' => 'admin.app-remote-feed-cards.*', 'icon' => 'FC'],
+        ['label' => 'App Push', 'route' => 'admin.app-push.index', 'active' => 'admin.app-push.*', 'icon' => 'PS'],
         ['label' => 'Theme Preview', 'route' => 'admin.theme-preview.index', 'active' => 'admin.theme-preview.*', 'icon' => 'TP'],
         ['label' => 'Template-Mapping', 'route' => 'admin.vikinger-mapping.index', 'active' => 'admin.vikinger-mapping.*', 'icon' => 'TM'],
     ];
