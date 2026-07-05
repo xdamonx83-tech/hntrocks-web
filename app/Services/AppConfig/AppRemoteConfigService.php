@@ -61,6 +61,26 @@ class AppRemoteConfigService
         '#^/u/[A-Za-z0-9_.-]+$#',
     ];
 
+    private const STORAGE_BRANDING_PATTERN = '#^/storage/app-branding/[A-Za-z0-9._/-]+$#';
+
+    private const DEFAULT_THEME_PALETTE = [
+        'canvas' => '#1A1A18',
+        'canvas_deep' => '#141412',
+        'surface' => '#20201E',
+        'surface_raised' => '#262622',
+        'surface_soft' => '#2F302D',
+        'primary' => '#CFA149',
+        'primary_strong' => '#D6A84F',
+        'primary_muted' => '#8F7337',
+        'text' => '#F2E8D8',
+        'text_muted' => '#A79C8E',
+        'text_faint' => '#746B60',
+        'line' => '#343025',
+        'danger' => '#B8463A',
+        'success' => '#8FAF72',
+        'warning' => '#D6A84F',
+    ];
+
     public function defaults(): array
     {
         return [
@@ -88,6 +108,14 @@ class AppRemoteConfigService
             'theme' => [
                 'variant' => 'hnt_default',
                 'accent_token' => 'gold',
+                'palette_enabled' => false,
+                'palette' => self::DEFAULT_THEME_PALETTE,
+            ],
+            'branding' => [
+                'logo_enabled' => false,
+                'logo_url' => null,
+                'logo_dark_url' => null,
+                'logo_updated_at' => null,
             ],
             'limits' => [
                 'moment_upload_max_mb' => 250,
@@ -121,6 +149,7 @@ class AppRemoteConfigService
             'features',
             'maintenance',
             'theme',
+            'branding',
             'limits',
         ]));
 
@@ -149,6 +178,14 @@ class AppRemoteConfigService
             $config['theme']['accent_token'] = $defaults['theme']['accent_token'];
         }
 
+        $config['theme']['palette_enabled'] = (bool) $config['theme']['palette_enabled'];
+        $config['theme']['palette'] = $this->normalizePalette($config['theme']['palette'] ?? [], $defaults['theme']['palette']);
+
+        $config['branding']['logo_enabled'] = (bool) $config['branding']['logo_enabled'];
+        $config['branding']['logo_url'] = $this->normalizeBrandingUrl($config['branding']['logo_url'] ?? null);
+        $config['branding']['logo_dark_url'] = $this->normalizeBrandingUrl($config['branding']['logo_dark_url'] ?? null);
+        $config['branding']['logo_updated_at'] = $this->normalizeNullableString($config['branding']['logo_updated_at'] ?? null, 80);
+
         $config['limits']['moment_upload_max_mb'] = $this->clampInt($config['limits']['moment_upload_max_mb'], 1, 500, 250);
         $config['limits']['feed_video_upload_max_mb'] = $this->clampInt($config['limits']['feed_video_upload_max_mb'], 1, 500, 250);
 
@@ -174,6 +211,45 @@ class AppRemoteConfigService
         }
 
         return null;
+    }
+
+    public function normalizeBrandingUrl(mixed $url): ?string
+    {
+        $url = trim((string) $url);
+
+        if ($url === '' || preg_match('#^(javascript|data):#i', $url) === 1 || str_contains($url, '<svg')) {
+            return null;
+        }
+
+        if (preg_match(self::STORAGE_BRANDING_PATTERN, $url) === 1 && ! str_contains($url, '..')) {
+            return $url;
+        }
+
+        $parts = parse_url($url);
+
+        if (! is_array($parts) || ! isset($parts['scheme'], $parts['host'], $parts['path'])) {
+            return null;
+        }
+
+        if (! in_array(strtolower((string) $parts['scheme']), ['http', 'https'], true)) {
+            return null;
+        }
+
+        $host = strtolower((string) $parts['host']);
+        $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+        $allowedHosts = array_filter(array_unique([$appHost, 'hnt.rocks']));
+
+        if (! in_array($host, $allowedHosts, true)) {
+            return null;
+        }
+
+        $path = (string) $parts['path'];
+
+        if (preg_match(self::STORAGE_BRANDING_PATTERN, $path) !== 1 || str_contains($path, '..')) {
+            return null;
+        }
+
+        return $parts['scheme'].'://'.$parts['host'].$path;
     }
 
     public function cardStyleVariant(?string $variant): string
@@ -252,5 +328,31 @@ class AppRemoteConfigService
         $value = is_numeric($value) ? (int) $value : $fallback;
 
         return min($max, max($min, $value));
+    }
+
+    private function normalizePalette(mixed $palette, array $defaults): array
+    {
+        $palette = is_array($palette) ? $palette : [];
+        $normalized = [];
+
+        foreach ($defaults as $key => $default) {
+            $normalized[$key] = $this->normalizeHexColor($palette[$key] ?? null, $default);
+        }
+
+        return $normalized;
+    }
+
+    private function normalizeHexColor(mixed $value, string $default): string
+    {
+        $value = strtoupper(trim((string) $value));
+
+        return preg_match('/^#[0-9A-F]{6}$/', $value) === 1 ? $value : $default;
+    }
+
+    private function normalizeNullableString(mixed $value, int $limit): ?string
+    {
+        $value = trim((string) $value);
+
+        return $value === '' ? null : Str::limit($value, $limit, '');
     }
 }
