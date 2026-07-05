@@ -52,7 +52,7 @@
                 <option value="">Bitte auswählen</option>
                 @foreach($users as $user)
                     <option value="{{ $user->id }}" @selected(old('target_user_id') == $user->id)>
-                        {{ $user->name }} / @{{ $user->username }} / {{ $user->email }}
+                        {{ $user->name }} / {{ '@'.$user->username }} / {{ $user->email }}
                     </option>
                 @endforeach
             </select>
