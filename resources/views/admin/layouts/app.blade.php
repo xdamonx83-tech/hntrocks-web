@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#f6f4ef">
     <title>@yield('title', 'Admin · hnt.rocks')</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/socialite/images/logo-icon.png') }}">
-    <link rel="stylesheet" href="{{ asset('assets/admin/admin.css') }}?v=520">
+    <link rel="stylesheet" href="{{ asset('assets/admin/admin.css') }}?v=521">
     @stack('head')
 </head>
 <body class="hnt-admin-shell">
