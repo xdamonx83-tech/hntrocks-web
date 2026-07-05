@@ -1,12 +1,12 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Remote Config - Admin')
+@section('title', 'Remote Config · Admin')
 @section('admin_heading', 'App Remote Config')
 
 @section('content')
 <section class="hh-page-header">
     <div>
-        <p class="hh-kicker">Admin - App-Steuerung</p>
+        <p class="hh-kicker">Admin · App-Steuerung</p>
         <h1>Remote Config</h1>
         <p>Globale App-Konfiguration mit sicheren Defaults, Feature Flags und Android-Versionen.</p>
     </div>
@@ -48,7 +48,7 @@
     <div class="hh-card-title-row">
         <div>
             <h2>Config JSON</h2>
-            <p class="hh-muted">Beim Speichern werden fehlende Keys ergaenzt und riskante Werte normalisiert.</p>
+            <p class="hh-muted">Beim Speichern werden fehlende Keys ergänzt und riskante Werte normalisiert.</p>
         </div>
         <button class="hh-primary-button" type="submit" form="remote-config-form">Speichern</button>
     </div>

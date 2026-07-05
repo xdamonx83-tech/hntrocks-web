@@ -284,6 +284,44 @@ class AppRemoteConfigApiTest extends TestCase
             ->assertJsonPath('config.branding.logo_dark_url', null);
     }
 
+    public function test_remote_config_allows_hnt_rocks_https_branding_logo_url(): void
+    {
+        AppRemoteConfig::query()->create([
+            'key' => 'default',
+            'is_active' => true,
+            'config_json' => [
+                'branding' => [
+                    'logo_url' => 'https://hnt.rocks/storage/app-branding/logo.svg',
+                ],
+            ],
+        ]);
+
+        $this->getAs($this->user(), '/api/v1/app/remote-config')
+            ->assertOk()
+            ->assertJsonPath('config.branding.logo_url', 'https://hnt.rocks/storage/app-branding/logo.svg');
+    }
+
+    public function test_remote_config_rejects_http_branding_logo_url_for_allowed_hosts(): void
+    {
+        config(['app.url' => 'https://preview.hnt.rocks']);
+
+        AppRemoteConfig::query()->create([
+            'key' => 'default',
+            'is_active' => true,
+            'config_json' => [
+                'branding' => [
+                    'logo_url' => 'http://hnt.rocks/storage/app-branding/logo.svg',
+                    'logo_dark_url' => 'http://preview.hnt.rocks/storage/app-branding/logo.webp',
+                ],
+            ],
+        ]);
+
+        $this->getAs($this->user(), '/api/v1/app/remote-config')
+            ->assertOk()
+            ->assertJsonPath('config.branding.logo_url', null)
+            ->assertJsonPath('config.branding.logo_dark_url', null);
+    }
+
     public function test_remote_config_accepts_app_host_branding_logo_url(): void
     {
         config(['app.url' => 'https://preview.hnt.rocks']);
