@@ -7,6 +7,8 @@ use App\Models\AppRemoteConfig;
 use App\Services\AppConfig\AppRemoteConfigService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use JsonException;
 
@@ -27,12 +29,17 @@ class AdminAppRemoteConfigController extends Controller
             ]
         );
 
+        $normalizedConfig = $remoteConfig->previewConfig($config);
+
         return view('admin.app-remote-config.index', [
             'config' => $config,
-            'configJson' => json_encode($remoteConfig->previewConfig($config), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+            'configJson' => json_encode($normalizedConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+            'themePalette' => $normalizedConfig['theme']['palette'],
+            'defaultThemePalette' => $remoteConfig->defaults()['theme']['palette'],
+            'branding' => $normalizedConfig['branding'],
             'preview' => [
                 'message' => 'Remote config loaded.',
-                'config' => $remoteConfig->previewConfig($config),
+                'config' => $normalizedConfig,
                 'feed_cards' => [],
                 'server_time' => now()->toIso8601String(),
             ],
@@ -46,7 +53,13 @@ class AdminAppRemoteConfigController extends Controller
         $data = $request->validate([
             'is_active' => ['nullable', 'boolean'],
             'publish_now' => ['nullable', 'boolean'],
-            'config_json' => ['required', 'string', 'max:20000'],
+            'config_json' => ['required', 'string', 'max:30000'],
+            'theme_palette' => ['nullable', 'array'],
+            'theme_palette.*' => ['nullable', 'string', 'max:20'],
+            'palette_enabled' => ['nullable', 'boolean'],
+            'logo_enabled' => ['nullable', 'boolean'],
+            'logo_file' => ['nullable', 'file', 'mimes:svg,png,webp', 'max:1024'],
+            'logo_dark_file' => ['nullable', 'file', 'mimes:svg,png,webp', 'max:1024'],
         ]);
 
         try {
@@ -57,6 +70,10 @@ class AdminAppRemoteConfigController extends Controller
 
         if (! is_array($decoded)) {
             return back()->withInput()->withErrors(['config_json' => 'Die Config muss ein JSON-Objekt sein.']);
+        }
+
+        if ($this->hasBrandingFormFields($request)) {
+            $decoded = $this->mergeBrandingFields($decoded, $request, $remoteConfig);
         }
 
         $config = AppRemoteConfig::query()->firstOrNew(['key' => AppRemoteConfigService::DEFAULT_KEY]);
@@ -79,5 +96,49 @@ class AdminAppRemoteConfigController extends Controller
     private function guardAdmin(Request $request): void
     {
         abort_unless($request->user()?->isAdmin(), 403);
+    }
+
+    private function hasBrandingFormFields(Request $request): bool
+    {
+        return $request->boolean('remote_branding_form')
+            || $request->hasFile('logo_file')
+            || $request->hasFile('logo_dark_file');
+    }
+
+    private function mergeBrandingFields(array $decoded, Request $request, AppRemoteConfigService $remoteConfig): array
+    {
+        $defaults = $remoteConfig->defaults();
+        $palette = [];
+
+        foreach (array_keys($defaults['theme']['palette']) as $key) {
+            $palette[$key] = $request->input('theme_palette.'.$key);
+        }
+
+        data_set($decoded, 'theme.palette_enabled', $request->boolean('palette_enabled'));
+        data_set($decoded, 'theme.palette', $palette);
+        data_set($decoded, 'branding.logo_enabled', $request->boolean('logo_enabled'));
+        data_set($decoded, 'branding.logo_url', $this->uploadedLogoUrl($request, 'logo_file') ?? data_get($decoded, 'branding.logo_url'));
+        data_set($decoded, 'branding.logo_dark_url', $this->uploadedLogoUrl($request, 'logo_dark_file') ?? data_get($decoded, 'branding.logo_dark_url'));
+
+        if ($request->hasFile('logo_file') || $request->hasFile('logo_dark_file')) {
+            data_set($decoded, 'branding.logo_updated_at', now()->toIso8601String());
+        }
+
+        return $decoded;
+    }
+
+    private function uploadedLogoUrl(Request $request, string $key): ?string
+    {
+        if (! $request->hasFile($key)) {
+            return null;
+        }
+
+        $file = $request->file($key);
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+        $prefix = $key === 'logo_dark_file' ? 'logo-dark' : 'logo-main';
+        $filename = $prefix.'-'.now()->format('Ymd-His').'-'.Str::lower(Str::random(8)).'.'.$extension;
+        $path = $file->storeAs('app-branding', $filename, 'public');
+
+        return Storage::disk('public')->url($path);
     }
 }
