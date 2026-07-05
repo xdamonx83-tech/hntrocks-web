@@ -43,11 +43,20 @@
     }, 240);
   };
 
+  const toggleSheet = () => {
+    if (sheet.classList.contains('is-open')) {
+      closeSheet();
+      return;
+    }
+
+    openSheet();
+  };
+
   sheet.setAttribute('inert', '');
 
   openButton.addEventListener('click', (event) => {
     event.preventDefault();
-    openSheet();
+    toggleSheet();
   });
 
   overlay.addEventListener('click', closeSheet);
