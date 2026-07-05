@@ -74,7 +74,7 @@
         </a>
 
         <button type="button" class="rework-mobile-bottom-item rework-mobile-menu-trigger" data-rework-mobile-menu-open aria-expanded="false" aria-controls="reworkMobileMenuSheet">
-            <i aria-hidden="true" class="ph ph-user ph-icon"></i>
+            <i aria-hidden="true" class="ph ph-list ph-icon"></i>
             <span>Menü</span>
         </button>
     </div>
