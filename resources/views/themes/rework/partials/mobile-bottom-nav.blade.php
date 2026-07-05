@@ -14,7 +14,7 @@
     };
 
     $routeUrl = static function (string $name, string $fallback = '#'): string {
-        return \Illuminate\Support\Facades\Route::has($name) ? route($name) : $fallback;
+        return \Illuminate\Support\Facades\Route::has($name) ? route($name) : url($fallback);
     };
 
     $defaultAvatar = asset('assets/vikinger/img/default-avatar.svg');
@@ -27,24 +27,112 @@
 
     $menuLinks = [
         [
+            'label' => 'Feed',
+            'icon' => 'ph ph-newspaper',
+            'url' => $routeUrl('feed.index', '/feed'),
+            'active' => ['feed.*'],
+        ],
+        [
+            'label' => 'Mitglieder',
+            'icon' => 'ph ph-users',
+            'url' => $routeUrl('members.index', '/members'),
+            'active' => ['members.*'],
+        ],
+        [
+            'label' => 'Moments',
+            'icon' => 'ph ph-video-camera',
+            'url' => $routeUrl('moments.index', '/moments'),
+            'active' => ['moments.*'],
+        ],
+        [
+            'label' => 'Maps',
+            'icon' => 'ph ph-map-trifold',
+            'url' => $routeUrl('maps.index', '/maps'),
+            'active' => ['maps.*'],
+        ],
+        [
+            'label' => 'Hunt',
+            'icon' => 'ph ph-crosshair',
+            'url' => $routeUrl('loadout-challenges.index', '/loadout-challenges'),
+            'active' => ['loadout-challenges.*'],
+        ],
+        [
+            'label' => 'Badges',
+            'icon' => 'ph ph-medal',
+            'url' => $routeUrl('gamification.index', '/gamification'),
+            'active' => ['gamification.*'],
+        ],
+        [
+            'label' => 'Trophy Room',
+            'icon' => 'ph ph-cube-focus',
+            'url' => $routeUrl('trophy-room.index', '/trophy-room'),
+            'active' => ['trophy-room.*'],
+        ],
+        [
+            'label' => 'Media',
+            'icon' => 'ph ph-images',
+            'url' => $routeUrl('media.index', '/media'),
+            'active' => ['media.*'],
+        ],
+        [
             'label' => 'Cups',
             'icon' => 'ph ph-trophy',
-            'url' => $routeUrl('cups.index'),
+            'url' => $routeUrl('cups.index', '/cups'),
+            'active' => ['cups.*'],
         ],
         [
             'label' => 'Hall of Fame',
-            'icon' => 'ph ph-medal',
-            'url' => $routeUrl('hall-of-fame.index'),
+            'icon' => 'ph ph-medal-military',
+            'url' => $routeUrl('hall-of-fame.index', '/hall-of-fame'),
+            'active' => ['hall-of-fame.*'],
         ],
         [
             'label' => 'Feedback',
             'icon' => 'ph ph-chat-centered-text',
-            'url' => $routeUrl('cup-feedback.index', url('/cup-feedback')),
+            'url' => $routeUrl('cup-feedback.create', \Illuminate\Support\Facades\Route::has('cup-feedback.index') ? route('cup-feedback.index') : '/cup-feedback'),
+            'active' => ['cup-feedback.*'],
         ],
         [
             'label' => 'Cup Ideen',
             'icon' => 'ph ph-bookmark-simple',
-            'url' => $routeUrl('cup-ideas.index'),
+            'url' => $routeUrl('cup-ideas.index', '/cup-ideas'),
+            'active' => ['cup-ideas.*'],
+        ],
+        [
+            'label' => 'LFG finden',
+            'icon' => 'ph ph-clock-countdown',
+            'url' => $routeUrl('lfg.index', '/lfg'),
+            'active' => ['lfg.index', 'lfg.show'],
+        ],
+        [
+            'label' => 'LFG erstellen',
+            'icon' => 'ph ph-plus-circle',
+            'url' => $routeUrl('lfg.create', '/lfg/create'),
+            'active' => ['lfg.create'],
+        ],
+        [
+            'label' => 'Bounty Marks',
+            'icon' => 'ph ph-coins',
+            'url' => $routeUrl('crowns.index', '/crowns'),
+            'active' => ['crowns.index'],
+        ],
+        [
+            'label' => 'Inventar',
+            'icon' => 'ph ph-package',
+            'url' => $routeUrl('crowns.inventory', '/crowns/inventory'),
+            'active' => ['crowns.inventory'],
+        ],
+        [
+            'label' => 'Shop',
+            'icon' => 'ph ph-storefront',
+            'url' => $routeUrl('crowns.shop', '/crowns/shop'),
+            'active' => ['crowns.shop'],
+        ],
+        [
+            'label' => 'Verlauf',
+            'icon' => 'ph ph-clock-counter-clockwise',
+            'url' => $routeUrl('crowns.history', '/crowns/history'),
+            'active' => ['crowns.history'],
         ],
     ];
 @endphp
@@ -53,22 +141,22 @@
 
 <nav class="rework-mobile-bottom-nav" aria-label="Mobile navigation">
     <div class="rework-mobile-bottom-list">
-        <a href="{{ $routeUrl('feed.index') }}" @class(['rework-mobile-bottom-item', 'is-active' => $isActive(['feed.*'])])>
+        <a href="{{ $routeUrl('feed.index', '/feed') }}" @class(['rework-mobile-bottom-item', 'is-active' => $isActive(['feed.*'])])>
             <i aria-hidden="true" class="ph ph-house ph-icon"></i>
             <span>Home</span>
         </a>
 
-        <a href="{{ $routeUrl('search.index') }}" @class(['rework-mobile-bottom-item', 'is-active' => $isActive(['search.*'])])>
+        <a href="{{ $routeUrl('search.index', '/search') }}" @class(['rework-mobile-bottom-item', 'is-active' => $isActive(['search.*'])])>
             <i aria-hidden="true" class="ph ph-magnifying-glass ph-icon"></i>
             <span>Search</span>
         </a>
 
-        <a href="{{ $routeUrl('moments.index') }}" @class(['rework-mobile-bottom-item', 'rework-mobile-bottom-center', 'is-active' => $isActive(['moments.*'])]) aria-label="Moments">
-            <span class="rework-mobile-center-orb"><i aria-hidden="true" class="ph-bold ph-scan ph-icon"></i></span>
+        <a href="{{ $routeUrl('moments.index', '/moments') }}" @class(['rework-mobile-bottom-item', 'rework-mobile-bottom-center', 'is-active' => $isActive(['moments.*'])]) aria-label="Moments">
+            <span class="rework-mobile-center-orb"><i aria-hidden="true" class="ph-bold ph-video-camera ph-icon"></i></span>
             <span class="sr-only">Moments</span>
         </a>
 
-        <a href="{{ $routeUrl('lfg.index') }}" @class(['rework-mobile-bottom-item', 'is-active' => $isActive(['lfg.*'])])>
+        <a href="{{ $routeUrl('lfg.index', '/lfg') }}" @class(['rework-mobile-bottom-item', 'is-active' => $isActive(['lfg.*'])])>
             <i aria-hidden="true" class="ph ph-clock ph-icon"></i>
             <span>LFG</span>
         </a>
@@ -97,14 +185,14 @@
             </div>
         </div>
 
-        <a class="rework-mobile-profile-button" href="{{ $routeUrl('profile.show', $routeUrl('login')) }}">Profil</a>
+        <a class="rework-mobile-profile-button" href="{{ $routeUrl('profile.show', '/profile') }}">Profil</a>
     </div>
 
     <div class="rework-mobile-sheet-line" aria-hidden="true"></div>
 
     <div class="rework-mobile-quick-links">
         @foreach($menuLinks as $link)
-            <a href="{{ $link['url'] }}">
+            <a href="{{ $link['url'] }}" @class(['is-active' => $isActive($link['active'] ?? [])])>
                 <span class="rework-mobile-quick-icon"><i aria-hidden="true" class="{{ $link['icon'] }} ph-icon"></i></span>
                 <span>{{ $link['label'] }}</span>
             </a>
@@ -114,11 +202,11 @@
     <div class="rework-mobile-sheet-line" aria-hidden="true"></div>
 
     <div class="rework-mobile-sheet-actions">
-        <a href="{{ $routeUrl('profile.edit', $routeUrl('profile.show', '#')) }}" data-profile-edit-modal-open>
+        <a href="{{ $routeUrl('profile.edit', '/profile/edit') }}" data-profile-edit-modal-open>
             <i aria-hidden="true" class="ph ph-pencil-simple ph-icon"></i>
             <span>Profil bearbeiten</span>
         </a>
-        <a href="{{ $routeUrl('account.settings.edit', '#') }}" data-settings-modal-open>
+        <a href="{{ $routeUrl('account.settings.edit', '/account/settings') }}" data-settings-modal-open>
             <i aria-hidden="true" class="ph ph-gear-six ph-icon"></i>
             <span>Einstellungen</span>
         </a>
