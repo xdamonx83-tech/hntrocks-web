@@ -256,6 +256,7 @@
 @include('themes.rework.partials.right-widgets')
 </section>
 </main>
+@include('themes.rework.partials.mobile-bottom-nav')
 </div>
 @include('themes.rework.feed.partials.post-modals')
 <div
