@@ -44,8 +44,10 @@ button, input, select, textarea { font: inherit; }
   position: sticky;
   top: 0;
   height: 100vh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   padding: 24px 18px;
   background:
     radial-gradient(circle at 40% 0%, rgba(216, 173, 79, .12), transparent 28%),
@@ -55,6 +57,7 @@ button, input, select, textarea { font: inherit; }
 }
 
 .hnt-admin-brand {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -74,7 +77,26 @@ button, input, select, textarea { font: inherit; }
   text-transform: uppercase;
 }
 
-.hnt-admin-nav { display: grid; gap: 6px; }
+.hnt-admin-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(216, 173, 79, .46) rgba(255, 255, 255, .04);
+}
+.hnt-admin-nav::-webkit-scrollbar { width: 7px; }
+.hnt-admin-nav::-webkit-scrollbar-track { background: rgba(255, 255, 255, .035); border-radius: 999px; }
+.hnt-admin-nav::-webkit-scrollbar-thumb {
+  background: rgba(216, 173, 79, .42);
+  border-radius: 999px;
+}
+.hnt-admin-nav::-webkit-scrollbar-thumb:hover { background: rgba(216, 173, 79, .62); }
 .hnt-admin-nav-title {
   display: block;
   padding: 10px 12px;
@@ -122,7 +144,8 @@ button, input, select, textarea { font: inherit; }
 .hnt-admin-nav a.is-active .hnt-admin-nav-icon { background: rgba(216, 173, 79, .18); }
 
 .hnt-admin-sidebar-footer {
-  margin-top: auto;
+  flex: 0 0 auto;
+  margin-top: 12px;
   display: grid;
   gap: 8px;
   padding: 16px 12px 4px;
