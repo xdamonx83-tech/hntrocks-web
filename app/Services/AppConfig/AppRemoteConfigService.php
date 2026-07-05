@@ -231,7 +231,7 @@ class AppRemoteConfigService
             return null;
         }
 
-        if (! in_array(strtolower((string) $parts['scheme']), ['http', 'https'], true)) {
+        if (strtolower((string) $parts['scheme']) !== 'https') {
             return null;
         }
 
