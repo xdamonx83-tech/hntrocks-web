@@ -22,9 +22,7 @@
     border-radius: 24px;
     background: linear-gradient(180deg, rgba(30,33,38,.94), rgba(23,25,29,.98));
     border: .5px solid rgba(255,255,255,.075);
-    box-shadow: 0 28px 54px -32px rgba(0,0,0,.78), inset 0 1px 0 rgba(255,255,255,.035);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
+
   }
 
   .rework-mobile-bottom-list {
@@ -144,7 +142,7 @@
   .rework-mobile-account-tag strong,
   .rework-mobile-account-tag span { display: block; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rework-mobile-account-tag strong { color: #F9FFFF; font-size: 20px; line-height: 26px; font-weight: 700; }
-  .rework-mobile-account-tag span { color: #94A3B8; font-size: 16px; line-height: 24px; font-weight: 400; }
+  .rework-mobile-account-tag span { color: #94A3B8; font-size: 12px; line-height: 24px; font-weight: 400; }
 
   .rework-mobile-profile-button {
     min-width: 96px;
@@ -162,13 +160,13 @@
   }
 
   .rework-mobile-quick-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-  .rework-mobile-quick-links a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #94A3B8; text-align: center; text-decoration: none; font-size: 14px; line-height: 18px; font-weight: 500; }
+  .rework-mobile-quick-links a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #94A3B8; text-align: center; text-decoration: none; font-size: 12px; line-height: 18px; font-weight: 500; }
   .rework-mobile-quick-icon { width: 52px; height: 52px; display: grid; place-items: center; border: 1.5px solid #334155; border-radius: 999px; background: rgba(255,255,255,.015); }
   .rework-mobile-quick-icon .ph-icon { font-size: 24px; color: #94A3B8; }
 
   .rework-mobile-sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .rework-mobile-sheet-actions a,
-  .rework-mobile-menu-close { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; border: .5px solid rgba(255,255,255,.075); background: rgba(255,255,255,.045); color: #F9FFFF; text-decoration: none; font-size: 13px; font-weight: 700; }
+  .rework-mobile-menu-close { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; border: .5px solid rgba(255,255,255,.075); background: rgba(255,255,255,.045); color: #F9FFFF; text-decoration: none; font-size: 13px;  }
   .rework-mobile-sheet-actions .ph-icon { font-size: 18px; color: #CFA149; }
   .rework-mobile-menu-close { width: 100%; margin-top: 14px; cursor: pointer; }
   .rework-mobile-menu-sheet::after { content: ''; width: 149px; height: 4px; align-self: center; margin-top: auto; border-radius: 100px; background: #fff; }
@@ -194,11 +192,7 @@
       radial-gradient(circle at 18% 45%, rgba(182, 194, 180, .055), transparent 42%),
       linear-gradient(180deg, rgba(28, 33, 30, .86) 0%, rgba(17, 18, 17, .96) 58%, rgba(12, 13, 12, .98) 100%) !important;
     border: .5px solid rgba(255, 255, 255, .075) !important;
-    box-shadow:
-      0 26px 58px -34px rgba(0, 0, 0, .82),
-      inset 0 1px 0 rgba(255, 255, 255, .035) !important;
-    backdrop-filter: blur(24px) !important;
-    -webkit-backdrop-filter: blur(24px) !important;
+
   }
 
   .rework-mobile-bottom-list {
@@ -284,7 +278,7 @@
 
   .rework-mobile-menu-sheet h2 {
     min-height: 26px !important;
-    font-size: 22px !important;
+    font-size: 18px !important;
     line-height: 26px !important;
     font-weight: 600 !important;
     color: #F2E8D8 !important;
@@ -297,7 +291,7 @@
 
   .rework-mobile-account-tag strong {
     color: #F2E8D8 !important;
-    font-size: 20px !important;
+    font-size: 18px !important;
   }
 
   .rework-mobile-account-tag span {
