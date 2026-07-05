@@ -35,6 +35,7 @@
 @include('themes.rework.partials.right-widgets')
 </section>
 </main>
+@include('themes.rework.partials.mobile-bottom-nav')
 </div>
 @include('themes.rework.feed.partials.settings-modal')
 @stack('rework-modals')
