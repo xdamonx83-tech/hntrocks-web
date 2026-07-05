@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\ApiMomentOfWeekController;
 use App\Http\Controllers\Api\V1\ApiNotificationController;
 use App\Http\Controllers\Api\V1\ApiPushDeviceController;
 use App\Http\Controllers\Api\V1\ApiSearchController;
+use App\Http\Controllers\Api\V1\AppRemoteConfigController;
 use App\Http\Controllers\Api\V1\ApiTeamLfgController;
 use App\Http\Controllers\Api\V1\ApiTeamsController;
 use App\Http\Controllers\Api\V1\ApiUserLoadoutController;
@@ -62,6 +63,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
 
     Route::middleware('api.token')->group(function (): void {
+        Route::get('/app/remote-config', [AppRemoteConfigController::class, 'show'])->name('app.remote-config.show');
+        Route::post('/app/remote-feed-cards/{remote_id}/dismiss', [AppRemoteConfigController::class, 'dismiss'])
+            ->where('remote_id', '[A-Za-z0-9_\-:]+')
+            ->name('app.remote-feed-cards.dismiss');
         Route::post('/maps/markers/{marker}/comments', [MapMarkerInteractionController::class, 'storeComment'])->name('maps.markers.comments.store');
         Route::patch('/maps/marker-comments/{comment}', [MapMarkerInteractionController::class, 'updateComment'])->name('maps.marker-comments.update');
         Route::delete('/maps/marker-comments/{comment}', [MapMarkerInteractionController::class, 'destroyComment'])->name('maps.marker-comments.destroy');

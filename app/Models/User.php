@@ -446,6 +446,11 @@ class User extends Authenticatable
         return $this->hasOne(UserNotificationSetting::class);
     }
 
+    public function remoteFeedCardDismissals(): HasMany
+    {
+        return $this->hasMany(AppRemoteFeedCardDismissal::class);
+    }
+
     public function blockedUsers(): HasMany
     {
         return $this->hasMany(UserBlock::class);
