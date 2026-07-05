@@ -23,6 +23,7 @@
     $mobileHandle = $viewer?->username ? '@'.$viewer->username : 'HNT.rocks';
 
     $mobileBottomCssVersion = @filemtime(public_path('assets/themes/rework/mobile-bottom-nav.css')) ?: time();
+    $mobileBottomSheetTuneVersion = @filemtime(public_path('assets/themes/rework/mobile-bottom-sheet-tune.css')) ?: time();
     $mobileBottomJsVersion = @filemtime(public_path('assets/themes/rework/mobile-bottom-nav.js')) ?: time();
 
     $menuSections = [
@@ -68,6 +69,7 @@
 @endphp
 
 <link href="{{ asset('assets/themes/rework/mobile-bottom-nav.css') }}?v={{ $mobileBottomCssVersion }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/rework/mobile-bottom-sheet-tune.css') }}?v={{ $mobileBottomSheetTuneVersion }}" rel="stylesheet">
 
 <nav class="rework-mobile-bottom-nav" aria-label="Mobile navigation">
     <div class="rework-mobile-bottom-list">
