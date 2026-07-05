@@ -636,6 +636,9 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/app-remote-feed-cards', [AdminAppRemoteFeedCardController::class, 'store'])->name('app-remote-feed-cards.store');
         Route::get('/app-remote-feed-cards/{card}/edit', [AdminAppRemoteFeedCardController::class, 'edit'])->name('app-remote-feed-cards.edit');
         Route::put('/app-remote-feed-cards/{card}', [AdminAppRemoteFeedCardController::class, 'update'])->name('app-remote-feed-cards.update');
+        Route::post('/app-remote-feed-cards/{card}/duplicate', [AdminAppRemoteFeedCardController::class, 'duplicate'])->name('app-remote-feed-cards.duplicate');
+        Route::post('/app-remote-feed-cards/{card}/version', [AdminAppRemoteFeedCardController::class, 'version'])->name('app-remote-feed-cards.version');
+        Route::post('/app-remote-feed-cards/{card}/reset-dismissals', [AdminAppRemoteFeedCardController::class, 'resetDismissals'])->name('app-remote-feed-cards.reset-dismissals');
         Route::post('/app-remote-feed-cards/{card}/deactivate', [AdminAppRemoteFeedCardController::class, 'deactivate'])->name('app-remote-feed-cards.deactivate');
         Route::get('/app-push', [AdminAppPushController::class, 'index'])->name('app-push.index');
         Route::post('/app-push', [AdminAppPushController::class, 'send'])->name('app-push.send');

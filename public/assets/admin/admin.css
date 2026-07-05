@@ -463,6 +463,75 @@ tr:last-child td { border-bottom: 0; }
 .hh-admin-menu-check,
 .hh-admin-menu-create-check { display: flex; align-items: center; gap: 7px; }
 
+.hh-remote-card-admin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 18px;
+  align-items: start;
+}
+.hh-remote-card-preview-wrap {
+  position: sticky;
+  top: 96px;
+}
+.hh-remote-card-preview {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid #343025;
+  border-radius: 8px;
+  background: #20201E;
+  color: #F2E8D8;
+  box-shadow: 0 18px 38px rgba(32, 32, 30, .18);
+}
+.hh-remote-card-preview[data-variant="warning"] { border-color: #CFA149; }
+.hh-remote-card-preview[data-variant="maintenance"] { border-color: #A79C8E; }
+.hh-remote-card-preview[data-variant="neutral"] { border-color: #343025; }
+.hh-remote-card-preview strong {
+  display: block;
+  padding-right: 30px;
+  font-size: 17px;
+  line-height: 1.25;
+}
+.hh-remote-card-preview p {
+  margin: 0;
+  color: #A79C8E;
+  line-height: 1.45;
+}
+.hh-remote-card-preview-kicker,
+.hh-remote-card-preview-cta {
+  color: #D6A84F;
+  font-size: 12px;
+  font-weight: 900;
+}
+.hh-remote-card-preview-cta {
+  justify-self: start;
+  padding: 7px 10px;
+  border: 1px solid rgba(214, 168, 79, .5);
+  border-radius: 8px;
+  background: rgba(214, 168, 79, .08);
+}
+.hh-remote-card-preview-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #343025;
+  border-radius: 999px;
+  background: transparent;
+  color: #F2E8D8;
+  cursor: default;
+}
+.hh-remote-card-badges,
+.hh-remote-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hh-remote-card-actions form { margin: 0; }
+.hh-remote-card-actions .hh-secondary-button { min-height: 34px; padding: 7px 10px; }
+
 .hh-pagination { margin-top: 20px; }
 .hh-pagination nav { display: flex; gap: 8px; flex-wrap: wrap; }
 .hh-pagination a,
@@ -513,8 +582,10 @@ tr:last-child td { border-bottom: 0; }
   .hnt-admin-user-chip div { display: none; }
   .hh-admin-grid,
   .hh-admin-gamification-grid,
+  .hh-remote-card-admin-grid,
   .hh-design-map-columns,
   .hh-design-rule-grid { grid-template-columns: 1fr; }
+  .hh-remote-card-preview-wrap { position: static; }
   .hh-page-header { padding: 22px; }
   .hh-card,
   .hh-card-compact { padding: 18px; }

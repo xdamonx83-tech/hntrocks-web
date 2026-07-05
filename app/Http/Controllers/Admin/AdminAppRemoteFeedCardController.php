@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AppRemoteFeedCard;
+use App\Models\AppRemoteFeedCardDismissal;
 use App\Services\AppConfig\AppRemoteConfigService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -19,7 +22,7 @@ class AdminAppRemoteFeedCardController extends Controller
         $this->guardAdmin($request);
 
         return view('admin.app-remote-feed-cards.index', [
-            'cards' => AppRemoteFeedCard::query()->latest()->paginate(20),
+            'cards' => $this->cardsQuery()->paginate(20),
             'editingCard' => null,
         ]);
     }
@@ -29,7 +32,7 @@ class AdminAppRemoteFeedCardController extends Controller
         $this->guardAdmin($request);
 
         return view('admin.app-remote-feed-cards.index', [
-            'cards' => AppRemoteFeedCard::query()->latest()->paginate(20),
+            'cards' => $this->cardsQuery()->paginate(20),
             'editingCard' => $card,
         ]);
     }
@@ -69,6 +72,39 @@ class AdminAppRemoteFeedCardController extends Controller
         ]);
 
         return back()->with('status', 'Feed Card deaktiviert.');
+    }
+
+    public function duplicate(Request $request, AppRemoteFeedCard $card): RedirectResponse
+    {
+        $this->guardAdmin($request);
+
+        $copy = $this->copyCard($request, $card, $this->uniqueRemoteId($card->remote_id.'_copy_'.now()->format('Ymd_His')));
+
+        return redirect()
+            ->route('admin.app-remote-feed-cards.edit', $copy)
+            ->with('status', 'Feed Card dupliziert. Die neue Card ist inaktiv.');
+    }
+
+    public function version(Request $request, AppRemoteFeedCard $card): RedirectResponse
+    {
+        $this->guardAdmin($request);
+
+        $copy = $this->copyCard($request, $card, $this->nextVersionRemoteId($card->remote_id));
+
+        return redirect()
+            ->route('admin.app-remote-feed-cards.edit', $copy)
+            ->with('status', 'Neue Version erstellt. Die neue Card ist inaktiv.');
+    }
+
+    public function resetDismissals(Request $request, AppRemoteFeedCard $card): RedirectResponse
+    {
+        $this->guardAdmin($request);
+
+        AppRemoteFeedCardDismissal::query()
+            ->where('remote_id', $card->remote_id)
+            ->delete();
+
+        return back()->with('status', 'Dismissals für diese Card wurden zurückgesetzt.');
     }
 
     private function validated(Request $request, AppRemoteConfigService $remoteConfig, ?AppRemoteFeedCard $card = null): array
@@ -130,6 +166,63 @@ class AdminAppRemoteFeedCardController extends Controller
             'audience_type' => $remoteConfig->audienceType($data['audience_type'] ?? null),
             'audience_payload' => is_array($audiencePayload) ? $audiencePayload : null,
         ];
+    }
+
+    private function cardsQuery(): Builder
+    {
+        return AppRemoteFeedCard::query()
+            ->withCount('dismissals')
+            ->latest();
+    }
+
+    private function copyCard(Request $request, AppRemoteFeedCard $card, string $remoteId): AppRemoteFeedCard
+    {
+        $userId = $request->user()->id;
+
+        return AppRemoteFeedCard::query()->create([
+            'remote_id' => $remoteId,
+            'title_de' => $card->title_de,
+            'title_en' => $card->title_en,
+            'body_de' => $card->body_de,
+            'body_en' => $card->body_en,
+            'cta_label_de' => $card->cta_label_de,
+            'cta_label_en' => $card->cta_label_en,
+            'action_url' => $card->action_url,
+            'style_variant' => $card->style_variant,
+            'priority' => $card->priority,
+            'is_active' => false,
+            'dismissible' => $card->dismissible,
+            'audience_type' => $card->audience_type,
+            'audience_payload' => $card->audience_payload,
+            'created_by' => $userId,
+            'updated_by' => $userId,
+        ]);
+    }
+
+    private function nextVersionRemoteId(string $remoteId): string
+    {
+        if (preg_match('/_v(\d+)$/', $remoteId, $matches) === 1) {
+            $base = substr($remoteId, 0, -strlen($matches[0]));
+            $candidate = $base.'_v'.((int) $matches[1] + 1);
+        } else {
+            $candidate = $remoteId.'_v2';
+        }
+
+        return $this->uniqueRemoteId($candidate);
+    }
+
+    private function uniqueRemoteId(string $candidate): string
+    {
+        $candidate = Str::limit($candidate, 170, '');
+        $remoteId = $candidate;
+        $suffix = 1;
+
+        while (AppRemoteFeedCard::query()->where('remote_id', $remoteId)->exists()) {
+            $remoteId = Str::limit($candidate, 170, '').'_'.Str::lower(Str::random(6)).($suffix > 1 ? '_'.$suffix : '');
+            $suffix++;
+        }
+
+        return $remoteId;
     }
 
     private function guardAdmin(Request $request): void
