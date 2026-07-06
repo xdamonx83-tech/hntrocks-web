@@ -9,7 +9,16 @@ return [
         'daily_login' => [
             'amount' => 10,
             'daily_limit' => 1,
+            'enabled' => false,
+            'legacy' => true,
             'description' => 'Täglicher Login-Bonus',
+        ],
+        'daily_login_streak' => [
+            'enabled' => true,
+            'max_days' => 7,
+            'rewards' => [5, 7, 10, 12, 15, 20, 30],
+            'description' => 'Tägliche Login-Serie',
+            'app_only' => true,
         ],
         'account_created' => [
             'amount' => 25,

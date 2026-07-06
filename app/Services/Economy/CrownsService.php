@@ -63,14 +63,16 @@ class CrownsService
 
         $wallet = $this->wallet($user);
         $pending = $this->pendingCollection($user, 1, true);
+        $dailyLoginDefinition = $this->definition('daily_login');
+        $dailyLoginEnabled = $this->rewardDefinitionEnabled($dailyLoginDefinition);
 
         return [
             'enabled' => true,
             'balance' => (int) $wallet->balance,
             'lifetime_earned' => (int) $wallet->lifetime_earned,
             'lifetime_spent' => (int) $wallet->lifetime_spent,
-            'daily_login_claimed' => ! $this->canClaimActionToday($user, 'daily_login'),
-            'daily_login_amount' => (int) data_get($this->definition('daily_login'), 'amount', 0),
+            'daily_login_claimed' => ! $dailyLoginEnabled || ! $this->canClaimActionToday($user, 'daily_login'),
+            'daily_login_amount' => $dailyLoginEnabled ? (int) data_get($dailyLoginDefinition, 'amount', 0) : 0,
             'pending_total' => (int) ($pending['total'] ?? 0),
             'pending_count' => (int) ($pending['count'] ?? 0),
         ];
@@ -125,6 +127,10 @@ class CrownsService
 
         $definition = $this->definition($action);
         if ($definition === null && $amount === null) {
+            return null;
+        }
+
+        if ($definition !== null && ! $this->rewardDefinitionEnabled($definition)) {
             return null;
         }
 
@@ -427,5 +433,13 @@ class CrownsService
         }
 
         return $query->exists();
+    }
+
+    /**
+     * @param array<string, mixed>|null $definition
+     */
+    private function rewardDefinitionEnabled(?array $definition): bool
+    {
+        return $definition === null || (bool) data_get($definition, 'enabled', true);
     }
 }

@@ -8,7 +8,6 @@ use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\Auth\SocialIdentity;
 use App\Services\Auth\SocialProviderService;
-use App\Services\Economy\CrownsService;
 use App\Services\GamificationService;
 use App\Services\ReferralService;
 use App\Services\SecurityLogService;
@@ -131,12 +130,6 @@ class SocialAuthController extends Controller
 
             Auth::login($user, true);
             $request->session()->regenerate();
-
-            try {
-                app(CrownsService::class)->rewardDailyLogin($user);
-            } catch (\Throwable $exception) {
-                report($exception);
-            }
 
             return redirect()->intended(route('feed.index'));
         } catch (RuntimeException $exception) {

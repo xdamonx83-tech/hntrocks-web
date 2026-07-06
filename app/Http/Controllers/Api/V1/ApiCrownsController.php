@@ -7,6 +7,7 @@ use App\Models\CrownEquippedItem;
 use App\Models\CrownInventoryItem;
 use App\Models\CrownShopItem;
 use App\Models\CrownTransaction;
+use App\Services\Economy\CrownDailyStreakService;
 use App\Services\Economy\CrownsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -160,10 +161,12 @@ class ApiCrownsController extends Controller
     private function payload(Request $request, CrownsService $crowns): array
     {
         $user = $request->user();
+        $dailyStreak = app(CrownDailyStreakService::class)->status($user);
 
         if (! $this->shopTablesReady()) {
             return [
                 'summary' => $crowns->summary($user),
+                'daily_streak' => $dailyStreak,
                 'pending_collection' => $this->pendingCollectionPayload($crowns->pendingCollection($user, 8, true)),
                 'pending_popup' => $this->pendingCollectionPayload($crowns->pendingCollection($user, 3, false)),
                 'history' => $this->historyPayload($user->id),
@@ -221,6 +224,7 @@ class ApiCrownsController extends Controller
 
         return [
             'summary' => $crowns->summary($user),
+            'daily_streak' => $dailyStreak,
             'pending_collection' => $this->pendingCollectionPayload($crowns->pendingCollection($user, 8, true)),
             'pending_popup' => $this->pendingCollectionPayload($crowns->pendingCollection($user, 3, false)),
             'history' => $this->historyPayload($user->id),

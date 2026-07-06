@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Auth\TwoFactorService;
-use App\Services\Economy\CrownsService;
 use App\Services\SecurityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -171,10 +170,5 @@ class AuthenticatedSessionController extends Controller
 
         $securityLog->record($user, $event, $request);
 
-        try {
-            app(CrownsService::class)->rewardDailyLogin($user);
-        } catch (\Throwable $exception) {
-            report($exception);
-        }
     }
 }
