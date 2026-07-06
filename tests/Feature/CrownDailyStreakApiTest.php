@@ -6,6 +6,7 @@ use App\Models\ApiAccessToken;
 use App\Models\CrownTransaction;
 use App\Models\CrownWallet;
 use App\Models\User;
+use App\Services\Economy\CrownsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -149,6 +150,39 @@ class CrownDailyStreakApiTest extends TestCase
             'user_id' => $user->id,
             'action' => 'daily_login_streak',
         ]);
+    }
+
+    public function test_legacy_web_daily_login_route_does_not_pay_old_bonus(): void
+    {
+        Carbon::setTestNow('2026-07-06 09:00:00');
+        $user = $this->user();
+
+        $this->actingAs($user)
+            ->from('/crowns')
+            ->post('/crowns/daily-login')
+            ->assertRedirect('/crowns')
+            ->assertSessionHas('error', 'Die tägliche Belohnung ist nur in der App verfügbar.');
+
+        $this->assertDatabaseMissing('crown_transactions', [
+            'user_id' => $user->id,
+            'action' => 'daily_login',
+        ]);
+        $this->assertSame(0, CrownWallet::query()->where('user_id', $user->id)->count());
+    }
+
+    public function test_disabled_legacy_daily_login_reward_returns_null(): void
+    {
+        Carbon::setTestNow('2026-07-06 09:00:00');
+        $user = $this->user();
+
+        $transaction = app(CrownsService::class)->rewardDailyLogin($user);
+
+        $this->assertNull($transaction);
+        $this->assertDatabaseMissing('crown_transactions', [
+            'user_id' => $user->id,
+            'action' => 'daily_login',
+        ]);
+        $this->assertSame(0, CrownWallet::query()->where('user_id', $user->id)->count());
     }
 
     private function getAs(User $user, string $uri)

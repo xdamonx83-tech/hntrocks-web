@@ -47,12 +47,7 @@
                 <button class="btn-create crowns-claim" type="submit">+{{ number_format($pendingTotal, 0, ',', '.') }} {{ __('ui.preview_crowns_collect') }}</button>
             </form>
         @else
-            <form method="POST" action="{{ route('crowns.daily-login') }}">
-                @csrf
-                <button class="btn-create crowns-claim" type="submit" @if($dailyLoginClaimed) disabled @endif>
-                    {{ $dailyLoginClaimed ? __('ui.preview_crowns_daily_claimed') : '+' . number_format($dailyLoginAmount, 0, ',', '.') . ' ' . __('ui.preview_crowns_login_bonus') }}
-                </button>
-            </form>
+            <p class="crowns-claim-note">Daily Login Serie ist in der App verfügbar.</p>
         @endif
 
         <div class="crowns-stats">

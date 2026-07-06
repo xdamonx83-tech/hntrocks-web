@@ -65,20 +65,9 @@ class CrownsController extends Controller
         ]);
     }
 
-    public function claimDailyLogin(Request $request, CrownsService $crowns): RedirectResponse
+    public function claimDailyLogin(Request $request): RedirectResponse
     {
-        $transaction = $crowns->rewardDailyLogin($request->user());
-
-        if ($transaction) {
-            // The explicit daily-login button is already a collect action.
-            // It may also collect other waiting rewards from the Crowns page.
-            $crowns->collectPending($request->user());
-        }
-
-        return back()->with(
-            $transaction ? 'status' : 'error',
-            $transaction ? __('ui.crowns_daily_claimed') : __('ui.crowns_daily_already_claimed')
-        );
+        return back()->with('error', 'Die tägliche Belohnung ist nur in der App verfügbar.');
     }
 
     public function collectPending(Request $request, CrownsService $crowns): RedirectResponse
