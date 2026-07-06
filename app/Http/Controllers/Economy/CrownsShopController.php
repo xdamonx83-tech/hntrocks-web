@@ -116,13 +116,24 @@ class CrownsShopController extends Controller
                 return null;
             }
 
+            $offerActive = $item->offerActive();
+            $effectivePrice = $item->effectivePrice();
+
             $transaction = $crowns->spend(
                 $user,
-                (int) $item->price,
+                $effectivePrice,
                 'shop_purchase',
                 $item,
                 __('ui.crowns_shop_transaction_purchase', ['item' => $item->displayName()]),
-                ['shop_item_key' => $item->key, 'slot' => $item->slot, 'rarity' => $item->rarity]
+                [
+                    'shop_item_key' => $item->key,
+                    'slot' => $item->slot,
+                    'rarity' => $item->rarity,
+                    'original_price' => (int) $item->price,
+                    'effective_price' => $effectivePrice,
+                    'sale_price' => $offerActive ? (int) $item->sale_price : null,
+                    'offer_active' => $offerActive,
+                ]
             );
 
             if (! $transaction) {
