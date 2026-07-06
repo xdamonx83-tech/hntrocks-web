@@ -80,13 +80,24 @@ class ApiCrownsController extends Controller
                 return null;
             }
 
+            $offerActive = $item->offerActive();
+            $effectivePrice = $item->effectivePrice();
+
             $transaction = $crowns->spend(
                 $user,
-                (int) $item->price,
+                $effectivePrice,
                 'shop_purchase',
                 $item,
                 'Shop-Kauf: ' . $item->displayName(),
-                ['shop_item_key' => $item->key, 'slot' => $item->slot, 'rarity' => $item->rarity]
+                [
+                    'shop_item_key' => $item->key,
+                    'slot' => $item->slot,
+                    'rarity' => $item->rarity,
+                    'original_price' => (int) $item->price,
+                    'effective_price' => $effectivePrice,
+                    'sale_price' => $offerActive ? (int) $item->sale_price : null,
+                    'offer_active' => $offerActive,
+                ]
             );
 
             if (! $transaction) {
@@ -303,6 +314,9 @@ class ApiCrownsController extends Controller
 
     private function shopItemPayload(CrownShopItem $item, bool $owned = false): array
     {
+        $offerActive = $item->offerActive();
+        $effectivePrice = $item->effectivePrice();
+
         return [
             'id' => (int) $item->id,
             'key' => (string) $item->key,
@@ -314,7 +328,14 @@ class ApiCrownsController extends Controller
             'description' => $item->displayDescription(),
             'description_de' => (string) ($item->description_de ?? ''),
             'description_en' => (string) ($item->description_en ?: $item->description_de),
-            'price' => (int) $item->price,
+            'price' => $effectivePrice,
+            'original_price' => (int) $item->price,
+            'effective_price' => $effectivePrice,
+            'sale_price' => $offerActive ? (int) $item->sale_price : null,
+            'offer_active' => $offerActive,
+            'offer_ends_at' => $offerActive ? optional($item->offer_ends_at)->toIso8601String() : null,
+            'badge' => (string) ($item->badge ?? ''),
+            'sort_order' => (int) $item->sort_order,
             'rarity' => (string) $item->rarity,
             'icon' => (string) ($item->icon ?? ''),
             'preview_class' => (string) ($item->preview_class ?? ''),
