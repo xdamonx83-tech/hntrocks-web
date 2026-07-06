@@ -124,17 +124,10 @@
         <div class="wallet-action-icon"><i aria-hidden="true" class="ph ph-calendar-check ph-icon"></i></div>
         <div>
             <h2>Täglicher Login-Bonus</h2>
-            <p>{{ $walletDailyClaimed ? 'Heute bereits abgeholt.' : 'Hole deinen täglichen Bonus ab und halte deine Serie am Laufen.' }}</p>
+            <p>Daily Login Serie ist in der App verfügbar.</p>
         </div>
-        <strong>+{{ $walletNumber($walletDailyAmount) }}</strong>
-        @if(! $walletDailyClaimed && $walletDailyAmount > 0)
-            <form method="post" action="{{ route('crowns.daily-login') }}">
-                @csrf
-                <button class="btn" type="submit">Abholen</button>
-            </form>
-        @else
-            <button class="btn" type="button" disabled>Abgeholt</button>
-        @endif
+        <strong>App</strong>
+        <button class="btn" type="button" disabled>App-only</button>
     </article>
 
     <article class="wallet-action-card card">

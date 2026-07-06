@@ -75,12 +75,9 @@
                                 </button>
                             </form>
                         @else
-                            <form method="POST" action="{{ route('crowns.daily-login') }}">
-                                @csrf
-                                <button type="submit" class="button bg-primary text-white shadow-lg disabled:opacity-60 disabled:cursor-not-allowed" @disabled($dailyLoginClaimed)>
-                                    {{ $dailyLoginClaimed ? __('ui.crowns_daily_done') : __('ui.crowns_daily_claim', ['amount' => $dailyLoginAmount]) }}
-                                </button>
-                            </form>
+                            <p class="max-w-xs text-sm font-semibold text-white/75">
+                                Daily Login Serie ist in der App verfügbar.
+                            </p>
                         @endif
                     </div>
                     <div class="relative z-10 grid sm:grid-cols-3 gap-3 mt-6">

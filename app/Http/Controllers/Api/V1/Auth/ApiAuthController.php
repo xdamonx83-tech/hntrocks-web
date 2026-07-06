@@ -15,7 +15,6 @@ use App\Models\UserTwoFactorChallenge;
 use App\Services\Auth\NativeGoogleTokenVerifier;
 use App\Services\Auth\SocialIdentityUserResolver;
 use App\Services\Auth\TwoFactorService;
-use App\Services\Economy\CrownsService;
 use App\Services\GamificationService;
 use App\Services\SecurityLogService;
 use App\Services\UserDataExportService;
@@ -200,12 +199,6 @@ class ApiAuthController extends Controller
             'token_id' => $tokenData['token']->id,
         ]);
 
-        try {
-            app(CrownsService::class)->rewardDailyLogin($user);
-        } catch (\Throwable $exception) {
-            report($exception);
-        }
-
         return response()->json([
             'message' => 'Logged in.',
             'access_token' => $tokenData['access_token'],
@@ -275,12 +268,6 @@ class ApiAuthController extends Controller
                 'provider_user_id' => $identity->providerUserId,
                 'token_id' => $tokenData['token']->id,
             ]);
-
-            try {
-                app(CrownsService::class)->rewardDailyLogin($user);
-            } catch (\Throwable $exception) {
-                report($exception);
-            }
 
             return response()->json([
                 'message' => 'Logged in.',
@@ -893,12 +880,6 @@ class ApiAuthController extends Controller
         $securityLog->record($user, $event, $request, [
             'token_id' => $tokenData['token']->id,
         ] + $meta);
-
-        try {
-            app(CrownsService::class)->rewardDailyLogin($user);
-        } catch (\Throwable $exception) {
-            report($exception);
-        }
 
         return response()->json([
             'message' => 'Logged in.',

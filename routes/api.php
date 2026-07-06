@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\ApiBootstrapController;
+use App\Http\Controllers\Api\V1\ApiCrownDailyStreakController;
 use App\Http\Controllers\Api\V1\ApiCupsController;
 use App\Http\Controllers\Api\V1\ApiCupRegistrationController;
 use App\Http\Controllers\Api\V1\ApiCupTeamChatController;
@@ -215,6 +216,9 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/hall-of-fame', [ApiHallOfFameController::class, 'index'])->name('hall-of-fame.index');
         Route::get('/moment-of-week', [ApiMomentOfWeekController::class, 'index'])->name('moment-of-week.index');
         Route::get('/crowns', [ApiCrownsController::class, 'index'])->name('crowns.index');
+        Route::get('/crowns/daily-streak', [ApiCrownDailyStreakController::class, 'show'])->name('crowns.daily-streak.show');
+        Route::post('/crowns/daily-streak/claim', [ApiCrownDailyStreakController::class, 'claim'])->middleware('throttle:20,1')->name('crowns.daily-streak.claim');
+        Route::post('/crowns/daily-streak/dismiss', [ApiCrownDailyStreakController::class, 'dismiss'])->middleware('throttle:20,1')->name('crowns.daily-streak.dismiss');
         Route::post('/crowns/collect', [ApiCrownsController::class, 'collect'])->middleware('throttle:20,1')->name('crowns.collect');
         Route::post('/crowns/dismiss', [ApiCrownsController::class, 'dismiss'])->middleware('throttle:20,1')->name('crowns.dismiss');
         Route::post('/crowns/shop/{item:key}/purchase', [ApiCrownsController::class, 'purchase'])->middleware('throttle:12,1')->name('crowns.shop.purchase');
