@@ -11,11 +11,15 @@ class Badge extends Model
     protected $fillable = [
         'slug',
         'name',
+        'name_de',
+        'name_en',
         'category',
         'rarity',
         'icon',
         'icon_path',
         'description',
+        'description_de',
+        'description_en',
         'xp_reward',
         'sort_order',
         'is_active',
@@ -47,6 +51,24 @@ class Badge extends Model
         }
 
         return null;
+    }
+
+    public function displayName(?string $locale = null): string
+    {
+        $locale = $locale === 'en' ? 'en' : 'de';
+
+        return (string) ($locale === 'en'
+            ? ($this->name_en ?: $this->name ?: $this->name_de)
+            : ($this->name_de ?: $this->name ?: $this->name_en));
+    }
+
+    public function displayDescription(?string $locale = null): string
+    {
+        $locale = $locale === 'en' ? 'en' : 'de';
+
+        return (string) ($locale === 'en'
+            ? ($this->description_en ?: $this->description ?: $this->description_de)
+            : ($this->description_de ?: $this->description ?: $this->description_en));
     }
 
     public function rarityLabel(): string

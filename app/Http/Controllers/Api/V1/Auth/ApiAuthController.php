@@ -569,7 +569,7 @@ class ApiAuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return $this->mobileProfileResponse($request->user());
+        return $this->mobileProfileResponse($request->user(), null, $request);
     }
 
 
@@ -914,14 +914,14 @@ class ApiAuthController extends Controller
     }
 
 
-    private function mobileProfileResponse(User $user, ?string $message = null): JsonResponse
+    private function mobileProfileResponse(User $user, ?string $message = null, ?Request $request = null): JsonResponse
     {
         $user->loadMissing('profile');
 
         $payload = [
             'user' => new UserResource($user),
             'counts' => $this->mobileCounts($user),
-            'profile_summary' => $this->mobileProfileSummary($user),
+            'profile_summary' => $this->mobileProfileSummary($user, $request),
         ];
 
         if ($message) {
@@ -939,9 +939,110 @@ class ApiAuthController extends Controller
         ];
     }
 
-    private function mobileProfileSummary(User $user): array
+    private function badgePayload($badge, string $locale = 'de'): array
+    {
+        return [
+            'id' => (int) $badge->id,
+            'slug' => (string) $badge->slug,
+            'name' => method_exists($badge, 'displayName') ? $badge->displayName($locale) : (string) $badge->name,
+            'name_de' => (string) ($badge->name_de ?: $badge->name),
+            'name_en' => (string) ($badge->name_en ?: $badge->name),
+            'category' => (string) ($badge->category ?? ''),
+            'rarity' => (string) ($badge->rarity ?? 'common'),
+            'rarity_label' => method_exists($badge, 'rarityLabel') ? $badge->rarityLabel() : ucfirst((string) ($badge->rarity ?? 'common')),
+            'icon' => (string) ($badge->icon ?? ''),
+            'icon_url' => $badge->iconUrl(),
+            'description' => method_exists($badge, 'displayDescription') ? $badge->displayDescription($locale) : (string) ($badge->description ?? ''),
+            'description_de' => (string) ($badge->description_de ?: $badge->description),
+            'description_en' => (string) ($badge->description_en ?: $badge->description),
+            'xp_reward' => (int) ($badge->xp_reward ?? 0),
+            'awarded_at' => $badge->pivot?->awarded_at ? (string) $badge->pivot->awarded_at : null,
+            'award_reason' => $badge->pivot?->award_reason,
+        ];
+    }
+
+    private function questPayload(Quest $quest, string $locale = 'de'): array
+    {
+        $progress = $quest->progress->first();
+        $target = max(1, (int) $quest->target_count);
+        $current = min($target, max(0, (int) ($progress?->progress_count ?? 0)));
+        $completed = $progress?->completed_at !== null;
+
+        return [
+            'id' => (int) $quest->id,
+            'slug' => (string) $quest->slug,
+            'name' => $quest->displayName($locale),
+            'name_de' => (string) ($quest->name_de ?: $quest->name),
+            'name_en' => (string) ($quest->name_en ?: $quest->name),
+            'category' => (string) ($quest->category ?? ''),
+            'description' => $quest->displayDescription($locale),
+            'description_de' => (string) ($quest->description_de ?: $quest->description),
+            'description_en' => (string) ($quest->description_en ?: $quest->description),
+            'period' => (string) ($quest->period ?? ''),
+            'period_label' => method_exists($quest, 'periodLabel') ? $quest->periodLabel() : ucfirst((string) ($quest->period ?? 'once')),
+            'target_count' => $target,
+            'progress_count' => $current,
+            'progress_percent' => min(100, (int) floor(($current / $target) * 100)),
+            'completed' => $completed,
+            'completed_at' => $progress?->completed_at?->toISOString(),
+            'xp_reward' => (int) ($quest->xp_reward ?? 0),
+            'badge_slug' => $quest->badge_slug,
+            'icon' => (string) ($quest->icon ?? ''),
+            'icon_url' => $quest->iconUrl(),
+        ];
+    }
+
+    private function resolveApiLocale(Request $request): string
+    {
+        $queryLocale = $this->validApiLocale($request->query('locale'));
+        if ($queryLocale !== null) {
+            return $queryLocale;
+        }
+
+        $headerLocale = $this->validApiLocale($request->header('X-HNT-Locale'));
+        if ($headerLocale !== null) {
+            return $headerLocale;
+        }
+
+        return $this->localeFromAcceptLanguage((string) $request->headers->get('Accept-Language', '')) ?? 'de';
+    }
+
+    private function validApiLocale(mixed $locale, bool $allowLanguageTag = false): ?string
+    {
+        if (! is_string($locale)) {
+            return null;
+        }
+
+        $locale = strtolower(trim($locale));
+        $locale = str_replace('_', '-', $locale);
+
+        if (! $allowLanguageTag && str_contains($locale, '-')) {
+            return null;
+        }
+
+        $locale = explode('-', $locale, 2)[0] ?? $locale;
+
+        return in_array($locale, ['de', 'en'], true) ? $locale : null;
+    }
+
+    private function localeFromAcceptLanguage(string $acceptLanguage): ?string
+    {
+        foreach (explode(',', strtolower($acceptLanguage)) as $part) {
+            $language = trim(explode(';', $part, 2)[0] ?? '');
+            $locale = $this->validApiLocale($language, true);
+
+            if ($locale !== null) {
+                return $locale;
+            }
+        }
+
+        return null;
+    }
+
+    private function mobileProfileSummary(User $user, ?Request $request = null): array
     {
         $profile = $user->profile;
+        $locale = $request ? $this->resolveApiLocale($request) : 'de';
         $level = max(1, (int) ($user->level ?: 1));
         $xpTotal = max(0, (int) ($user->xp_total ?: 0));
         $nextLevelXp = max(250, $level * 250);
@@ -957,20 +1058,7 @@ class ApiAuthController extends Controller
             ->orderBy('badges.sort_order')
             ->limit(12)
             ->get()
-            ->map(fn ($badge): array => [
-                'id' => (int) $badge->id,
-                'slug' => (string) $badge->slug,
-                'name' => (string) $badge->name,
-                'category' => (string) ($badge->category ?? ''),
-                'rarity' => (string) ($badge->rarity ?? 'common'),
-                'rarity_label' => method_exists($badge, 'rarityLabel') ? $badge->rarityLabel() : ucfirst((string) ($badge->rarity ?? 'common')),
-                'icon' => (string) ($badge->icon ?? ''),
-                'icon_url' => $badge->iconUrl(),
-                'description' => (string) ($badge->description ?? ''),
-                'xp_reward' => (int) ($badge->xp_reward ?? 0),
-                'awarded_at' => $badge->pivot?->awarded_at ? (string) $badge->pivot->awarded_at : null,
-                'award_reason' => $badge->pivot?->award_reason,
-            ])
+            ->map(fn ($badge): array => $this->badgePayload($badge, $locale))
             ->values();
 
         $quests = Quest::query()
@@ -980,31 +1068,7 @@ class ApiAuthController extends Controller
             ->orderBy('name')
             ->limit(8)
             ->get()
-            ->map(function (Quest $quest): array {
-                $progress = $quest->progress->first();
-                $target = max(1, (int) $quest->target_count);
-                $current = min($target, max(0, (int) ($progress?->progress_count ?? 0)));
-                $completed = $progress?->completed_at !== null;
-
-                return [
-                    'id' => (int) $quest->id,
-                    'slug' => (string) $quest->slug,
-                    'name' => (string) $quest->name,
-                    'category' => (string) ($quest->category ?? ''),
-                    'description' => (string) ($quest->description ?? ''),
-                    'period' => (string) ($quest->period ?? ''),
-                    'period_label' => method_exists($quest, 'periodLabel') ? $quest->periodLabel() : ucfirst((string) ($quest->period ?? 'once')),
-                    'target_count' => $target,
-                    'progress_count' => $current,
-                    'progress_percent' => min(100, (int) floor(($current / $target) * 100)),
-                    'completed' => $completed,
-                    'completed_at' => $progress?->completed_at?->toISOString(),
-                    'xp_reward' => (int) ($quest->xp_reward ?? 0),
-                    'badge_slug' => $quest->badge_slug,
-                    'icon' => (string) ($quest->icon ?? ''),
-                    'icon_url' => $quest->iconUrl(),
-                ];
-            })
+            ->map(fn (Quest $quest): array => $this->questPayload($quest, $locale))
             ->values();
 
         $friendsPreview = Friendship::query()
