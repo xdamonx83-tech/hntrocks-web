@@ -439,28 +439,57 @@ class DatabaseSeeder extends Seeder
                 $badge['name_de'] ??= $badge['name'];
                 $badge['description_de'] ??= $badge['description'] ?? null;
                 $badge = array_merge($badge, match ($badge['slug']) {
+                    'early-hunter' => [
+                        'name_en' => 'Early Hunter',
+                        'description_en' => 'You collected your first XP.',
+                    ],
+                    'profile-scout' => [
+                        'name_en' => 'Profile Scout',
+                        'description_en' => 'Your profile is at least half complete.',
+                    ],
+                    'profile-complete' => [
+                        'name_en' => 'Profile Completed',
+                        'description_en' => 'Your profile is fully filled out.',
+                    ],
+                    'wall-starter' => [
+                        'name_en' => 'Wall Starter',
+                        'description_en' => 'You created your first feed post.',
+                    ],
                     'conversation-starter' => [
                         'name_en' => 'Conversation Starter',
                         'description_en' => 'You wrote your first comment.',
                     ],
-                    'level-5' => [
-                        'description_en' => 'You reached level 5.',
-                    ],
-                    'cup-contender' => [
-                        'name_en' => 'Cup Participant',
-                        'description_en' => 'You joined a Cup team.',
+                    'team-founder' => [
+                        'name_en' => 'Team Founder',
+                        'description_en' => 'You created a team.',
                     ],
                     'lfg-hunter' => [
                         'name_en' => 'LFG Hunter',
                         'description_en' => 'You created an LFG.',
                     ],
+                    'team-recruiter' => [
+                        'name_en' => 'Team Recruiter',
+                        'description_en' => 'You created a Team LFG.',
+                    ],
+                    'media-scout' => [
+                        'name_en' => 'Media Scout',
+                        'description_en' => 'You uploaded media to the media library.',
+                    ],
                     'moment-maker' => [
                         'name_en' => 'Moment Maker',
                         'description_en' => 'You published your first Moment.',
                     ],
-                    'profile-complete' => [
-                        'name_en' => 'Profile Completed',
-                        'description_en' => 'Your profile is fully filled out.',
+                    'cup-organizer' => [
+                        'name_en' => 'Cup Organizer',
+                        'description_en' => 'You created your first Cup.',
+                    ],
+                    'cup-contender' => [
+                        'name_en' => 'Cup Participant',
+                        'description_en' => 'You joined a Cup team.',
+                    ],
+                    'level-5' => [
+                        'name_en' => 'Veteran I',
+                        'description_en' => 'You reached level 5.',
                     ],
                     default => [],
                 });
@@ -487,15 +516,35 @@ class DatabaseSeeder extends Seeder
                 $quest = array_merge($quest, match ($quest['slug']) {
                     'first-wall-post' => [
                         'name_en' => 'First Wall Post',
+                        'description_en' => 'Create your first feed post.',
                     ],
                     'first-comment' => [
                         'name_en' => 'Join the Conversation',
+                        'description_en' => 'Write your first comment.',
                     ],
                     'create-lfg' => [
                         'name_en' => 'Looking for Teammates',
+                        'description_en' => 'Create a global LFG.',
+                    ],
+                    'create-team' => [
+                        'name_en' => 'Create a Team',
+                        'description_en' => 'Create your first team.',
+                    ],
+                    'create-team-lfg' => [
+                        'name_en' => 'Start Recruiting',
+                        'description_en' => 'Create a Team LFG.',
+                    ],
+                    'upload-media' => [
+                        'name_en' => 'First Media Upload',
+                        'description_en' => 'Upload media to your media library.',
                     ],
                     'first-moment' => [
                         'name_en' => 'Moment Maker',
+                        'description_en' => 'Publish your first Moment.',
+                    ],
+                    'first-cup-team' => [
+                        'name_en' => 'Cup Entry',
+                        'description_en' => 'Create your first Cup team.',
                     ],
                     default => [],
                 });
