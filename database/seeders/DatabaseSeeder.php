@@ -436,6 +436,35 @@ class DatabaseSeeder extends Seeder
             ];
 
             foreach ($badges as $badge) {
+                $badge['name_de'] ??= $badge['name'];
+                $badge['description_de'] ??= $badge['description'] ?? null;
+                $badge = array_merge($badge, match ($badge['slug']) {
+                    'conversation-starter' => [
+                        'name_en' => 'Conversation Starter',
+                        'description_en' => 'You wrote your first comment.',
+                    ],
+                    'level-5' => [
+                        'description_en' => 'You reached level 5.',
+                    ],
+                    'cup-contender' => [
+                        'name_en' => 'Cup Participant',
+                        'description_en' => 'You joined a Cup team.',
+                    ],
+                    'lfg-hunter' => [
+                        'name_en' => 'LFG Hunter',
+                        'description_en' => 'You created an LFG.',
+                    ],
+                    'moment-maker' => [
+                        'name_en' => 'Moment Maker',
+                        'description_en' => 'You published your first Moment.',
+                    ],
+                    'profile-complete' => [
+                        'name_en' => 'Profile Completed',
+                        'description_en' => 'Your profile is fully filled out.',
+                    ],
+                    default => [],
+                });
+
                 Badge::updateOrCreate(['slug' => $badge['slug']], $badge + ['is_active' => true]);
             }
         }
@@ -453,6 +482,24 @@ class DatabaseSeeder extends Seeder
             ];
 
             foreach ($quests as $quest) {
+                $quest['name_de'] ??= $quest['name'];
+                $quest['description_de'] ??= $quest['description'] ?? null;
+                $quest = array_merge($quest, match ($quest['slug']) {
+                    'first-wall-post' => [
+                        'name_en' => 'First Wall Post',
+                    ],
+                    'first-comment' => [
+                        'name_en' => 'Join the Conversation',
+                    ],
+                    'create-lfg' => [
+                        'name_en' => 'Looking for Teammates',
+                    ],
+                    'first-moment' => [
+                        'name_en' => 'Moment Maker',
+                    ],
+                    default => [],
+                });
+
                 Quest::updateOrCreate(['slug' => $quest['slug']], $quest + [
                     'period' => null,
                     'is_repeatable' => false,
