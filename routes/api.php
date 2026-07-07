@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\ApiBootstrapController;
 use App\Http\Controllers\Api\V1\ApiCrownDailyStreakController;
+use App\Http\Controllers\Api\V1\ApiCupChatController;
 use App\Http\Controllers\Api\V1\ApiCupsController;
 use App\Http\Controllers\Api\V1\ApiCupRegistrationController;
 use App\Http\Controllers\Api\V1\ApiCupTeamChatController;
@@ -226,6 +227,8 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/crowns/inventory/slots/{slot}/unequip', [ApiCrownsController::class, 'unequip'])->middleware('throttle:20,1')->name('crowns.inventory.unequip');
         Route::get('/cups', [ApiCupsController::class, 'index'])->name('cups.index');
         Route::get('/cups/{cup:slug}', [ApiCupsController::class, 'show'])->name('cups.show');
+        Route::get('/cups/{cup:slug}/chat', [ApiCupChatController::class, 'index'])->name('cups.chat.index');
+        Route::post('/cups/{cup:slug}/chat', [ApiCupChatController::class, 'store'])->middleware('throttle:30,1')->name('cups.chat.store');
         Route::get('/cups/{cup:slug}/teams', [ApiCupTeamsController::class, 'index'])->name('cups.teams.index');
         Route::post('/cups/{cup:slug}/register', ApiCupRegistrationController::class)->name('cups.register');
         Route::get('/cups/{cup:slug}/teams/{team}/chat', [ApiCupTeamChatController::class, 'index'])->name('cups.teams.chat.index');
