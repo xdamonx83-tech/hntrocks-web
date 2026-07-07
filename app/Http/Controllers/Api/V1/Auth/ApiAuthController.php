@@ -750,7 +750,7 @@ class ApiAuthController extends Controller
 
         $user->load('profile');
 
-        return $this->mobileProfileResponse($user, 'Profile updated.');
+        return $this->mobileProfileResponse($user, 'Profile updated.', $request);
     }
 
 
@@ -793,7 +793,7 @@ class ApiAuthController extends Controller
 
         $user->load('profile');
 
-        return $this->mobileProfileResponse($user, 'Avatar updated.');
+        return $this->mobileProfileResponse($user, 'Avatar updated.', $request);
     }
 
 
@@ -836,7 +836,7 @@ class ApiAuthController extends Controller
 
         $user->load('profile');
 
-        return $this->mobileProfileResponse($user, 'Cover updated.');
+        return $this->mobileProfileResponse($user, 'Cover updated.', $request);
     }
 
     private function twoFactorRequiredResponse(User $user, Request $request, SecurityLogService $securityLog, string $purpose, string $deviceName, array $meta = []): JsonResponse

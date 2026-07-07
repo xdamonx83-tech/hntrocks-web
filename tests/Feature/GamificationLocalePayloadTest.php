@@ -94,9 +94,61 @@ class GamificationLocalePayloadTest extends TestCase
             ->assertJsonPath('items.0.name', 'Join the Conversation');
     }
 
+    public function test_standard_gamification_entries_have_complete_english_payloads(): void
+    {
+        $user = $this->user();
+
+        $this->attachBadge($user, 'early-hunter', 'Early Hunter', 'Du hast deine ersten XP gesammelt.', 'Early Hunter', 'You collected your first XP.', 10);
+        $this->attachBadge($user, 'profile-scout', 'Profil-Scout', 'Dein Profil ist mindestens zur Hälfte gepflegt.', 'Profile Scout', 'Your profile is at least half complete.', 20);
+        $this->attachBadge($user, 'team-founder', 'Team-Gründer', 'Du hast ein Team erstellt.', 'Team Founder', 'You created a team.', 30);
+        $this->attachBadge($user, 'media-scout', 'Medien-Scout', 'Du hast Medien in die Mediathek geladen.', 'Media Scout', 'You uploaded media to the media library.', 40);
+        $this->attachBadge($user, 'cup-organizer', 'Cup-Organizer', 'Du hast deinen ersten Cup erstellt.', 'Cup Organizer', 'You created your first Cup.', 50);
+
+        $this->createQuest('create-team', 'Team gründen', 'Erstelle dein erstes Team.', 'Create a Team', 'Create your first team.', 10);
+        $this->createQuest('upload-media', 'Erstes Medium', 'Lade ein Medium in deine Mediathek.', 'First Media Upload', 'Upload media to your media library.', 20);
+        $this->createQuest('first-cup-team', 'Cup-Einstieg', 'Erstelle dein erstes Cup-Team.', 'Cup Entry', 'Create your first Cup team.', 30);
+        $this->createQuest('first-comment', 'Misch dich ein', 'Schreibe deinen ersten Kommentar.', 'Join the Conversation', 'Write your first comment.', 40);
+
+        $payload = $this->withHeader('X-HNT-Locale', 'en')
+            ->getAs($user, '/api/v1/me')
+            ->assertOk()
+            ->json('profile_summary');
+
+        $badges = collect($payload['latest_badges'])->keyBy('slug');
+        $quests = collect($payload['quests'])->keyBy('slug');
+
+        $this->assertSame('Media Scout', $badges['media-scout']['name']);
+        $this->assertSame('Team Founder', $badges['team-founder']['name']);
+        $this->assertSame('Cup Organizer', $badges['cup-organizer']['name']);
+        $this->assertSame('You collected your first XP.', $badges['early-hunter']['description']);
+        $this->assertSame('Profile Scout', $badges['profile-scout']['name']);
+        $this->assertSame('Create a Team', $quests['create-team']['name']);
+        $this->assertSame('First Media Upload', $quests['upload-media']['name']);
+        $this->assertSame('Cup Entry', $quests['first-cup-team']['name']);
+        $this->assertSame('Create your first team.', $quests['create-team']['description']);
+        $this->assertNotSame('Erstelle dein erstes Team.', $quests['create-team']['description']);
+    }
+
+    public function test_profile_update_response_keeps_request_locale_for_gamification_summary(): void
+    {
+        $user = $this->userWithGamification();
+
+        $this->withHeader('X-HNT-Locale', 'en')
+            ->postAs($user, '/api/v1/me/profile', ['headline' => 'Ready for the Bayou'])
+            ->assertOk()
+            ->assertJsonPath('profile_summary.latest_badges.0.name', 'Conversation Starter')
+            ->assertJsonPath('profile_summary.quests.0.name', 'Join the Conversation')
+            ->assertJsonPath('profile_summary.quests.0.description', 'Write your first comment.');
+    }
+
     private function getAs(User $user, string $uri)
     {
         return $this->withToken($this->token($user))->getJson($uri);
+    }
+
+    private function postAs(User $user, string $uri, array $payload = [])
+    {
+        return $this->withToken($this->token($user))->postJson($uri, $payload);
     }
 
     private function token(User $user): string
@@ -148,6 +200,64 @@ class GamificationLocalePayloadTest extends TestCase
         ]);
 
         return $user;
+    }
+
+    private function attachBadge(
+        User $user,
+        string $slug,
+        string $name,
+        string $description,
+        string $nameEn,
+        string $descriptionEn,
+        int $sortOrder,
+    ): void {
+        $badge = Badge::query()->create([
+            'slug' => $slug,
+            'name' => $name,
+            'name_de' => $name,
+            'name_en' => $nameEn,
+            'category' => 'test',
+            'rarity' => 'common',
+            'icon' => '*',
+            'description' => $description,
+            'description_de' => $description,
+            'description_en' => $descriptionEn,
+            'xp_reward' => 15,
+            'sort_order' => $sortOrder,
+            'is_active' => true,
+        ]);
+
+        $user->badges()->attach($badge->id, [
+            'awarded_at' => now()->addSeconds($sortOrder),
+        ]);
+    }
+
+    private function createQuest(
+        string $slug,
+        string $name,
+        string $description,
+        string $nameEn,
+        string $descriptionEn,
+        int $sortOrder,
+    ): void {
+        Quest::query()->create([
+            'slug' => $slug,
+            'name' => $name,
+            'name_de' => $name,
+            'name_en' => $nameEn,
+            'category' => 'test',
+            'action' => $slug,
+            'target_count' => 1,
+            'xp_reward' => 15,
+            'badge_slug' => null,
+            'description' => $description,
+            'description_de' => $description,
+            'description_en' => $descriptionEn,
+            'period' => null,
+            'is_repeatable' => false,
+            'is_active' => true,
+            'sort_order' => $sortOrder,
+        ]);
     }
 
     private function user(): User
