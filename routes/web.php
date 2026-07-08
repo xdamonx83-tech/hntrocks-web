@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminContentController;
 use App\Http\Controllers\Admin\AdminCupFeedbackController;
 use App\Http\Controllers\Admin\AdminCupIdeaController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminFeedbackTicketController;
 use App\Http\Controllers\Admin\AdminOverviewController;
 use App\Http\Controllers\Admin\AdminNavigationController;
 use App\Http\Controllers\Admin\AdminMomentOfWeekController;
@@ -587,6 +588,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/users/{user}/admin', [AdminUserController::class, 'toggleAdmin'])->name('users.admin');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/{report}', [AdminReportController::class, 'update'])->name('reports.update');
+        Route::get('/feedback-tickets', [AdminFeedbackTicketController::class, 'index'])->name('feedback-tickets.index');
+        Route::post('/feedback-tickets/{ticket}', [AdminFeedbackTicketController::class, 'update'])->name('feedback-tickets.update');
         Route::get('/cup-feedback', [AdminCupFeedbackController::class, 'index'])->name('cup-feedback.index');
         Route::post('/cup-feedback/{feedback}', [AdminCupFeedbackController::class, 'update'])->name('cup-feedback.update');
         Route::get('/cup-ideas', [AdminCupIdeaController::class, 'index'])->name('cup-ideas.index');

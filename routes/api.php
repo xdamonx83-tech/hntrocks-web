@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ApiContractsController;
 use App\Http\Controllers\Api\V1\ApiCupIdeasController;
 use App\Http\Controllers\Api\V1\ApiFeedController;
 use App\Http\Controllers\Api\V1\ApiFeedEngagementController;
+use App\Http\Controllers\Api\V1\ApiFeedbackTicketController;
 use App\Http\Controllers\Api\V1\ApiGifController;
 use App\Http\Controllers\Api\V1\ApiHallOfFameController;
 use App\Http\Controllers\Api\V1\ApiHashtagController;
@@ -112,6 +113,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/search', ApiSearchController::class)->name('search');
 
         Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:8,1')->name('reports.store');
+        Route::post('/feedback-tickets', [ApiFeedbackTicketController::class, 'store'])->middleware('throttle:6,1')->name('feedback-tickets.store');
 
         Route::get('/feed', [ApiFeedController::class, 'index'])->name('feed.index');
         Route::post('/feed', [ApiFeedController::class, 'store'])->name('feed.store');
