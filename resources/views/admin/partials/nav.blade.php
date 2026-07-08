@@ -3,6 +3,7 @@
         ['label' => 'Übersicht', 'route' => 'admin.index', 'active' => 'admin.index', 'icon' => '01'],
         ['label' => 'Nutzer', 'route' => 'admin.users.index', 'active' => 'admin.users.*', 'icon' => 'NU'],
         ['label' => 'Reports', 'route' => 'admin.reports.index', 'active' => 'admin.reports.*', 'icon' => 'RP'],
+        ['label' => 'Feedback & Tickets', 'route' => 'admin.feedback-tickets.index', 'active' => 'admin.feedback-tickets.*', 'icon' => 'FT'],
         ['label' => 'Cup-Feedback', 'route' => 'admin.cup-feedback.index', 'active' => 'admin.cup-feedback.*', 'icon' => 'CF'],
         ['label' => 'Cup-Ideen', 'route' => 'admin.cup-ideas.index', 'active' => 'admin.cup-ideas.*', 'icon' => 'CI'],
         ['label' => 'Moment der Woche', 'route' => 'admin.moment-of-week.index', 'active' => 'admin.moment-of-week.*', 'icon' => 'MW'],
