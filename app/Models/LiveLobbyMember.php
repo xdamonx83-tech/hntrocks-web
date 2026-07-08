@@ -11,12 +11,16 @@ class LiveLobbyMember extends Model
     use HasFactory;
 
     protected $fillable = [
-        'live_lobby_id', 'user_id', 'role', 'platform', 'platform_handle', 'joined_at', 'left_at',
+        'live_lobby_id', 'user_id', 'role', 'platform', 'platform_handle', 'mmr_stars', 'joined_at', 'left_at',
     ];
 
     protected function casts(): array
     {
-        return ['joined_at' => 'datetime', 'left_at' => 'datetime'];
+        return [
+            'mmr_stars' => 'integer',
+            'joined_at' => 'datetime',
+            'left_at' => 'datetime',
+        ];
     }
 
     public function lobby(): BelongsTo
