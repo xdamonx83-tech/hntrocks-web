@@ -36,7 +36,7 @@ class FeedPostResource extends JsonResource
                 'reaction' => $this->whenLoaded('viewerReaction', fn () => $this->viewerReaction?->type),
                 'bookmarked' => $this->whenLoaded('viewerBookmark', fn () => $this->viewerBookmark !== null),
                 'can_edit' => $request->user() && (int) $request->user()->id === (int) $this->user_id,
-                'can_delete' => $request->user() && (int) $request->user()->id === (int) $this->user_id,
+                'can_delete' => $request->user() && ((int) $request->user()->id === (int) $this->user_id || $request->user()->isAdmin()),
             ],
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

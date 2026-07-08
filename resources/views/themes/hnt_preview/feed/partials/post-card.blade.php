@@ -33,6 +33,9 @@
     $viewerPollOptionId = $viewerPollVote?->feed_post_poll_option_id;
     $viewer = auth()->user();
     $isOwnPost = $author && $viewer && (int) $author->id === (int) $viewer->id;
+    $viewerIsAdmin = $viewer && method_exists($viewer, 'isAdmin') && $viewer->isAdmin();
+    $canEditPost = $isOwnPost;
+    $canDeletePost = $isOwnPost || $viewerIsAdmin;
     $friendship = null;
     $friendButtonLabel = __('ui.preview_profile_friend_add');
     $reportedFeedKeys = $reportedFeedKeys ?? collect();
@@ -94,7 +97,7 @@
                 <span class="icon-btn-green" title="{{ __('ui.preview_post_pinned') }}"><i class="ph ph-push-pin" aria-hidden="true"></i></span>
             @endif
 
-            @if($author && ! $isOwnPost)
+            @if($author && ! $canDeletePost)
                 <button class="icon-btn-green hnt-post-report-button {{ $postAlreadyReported ? 'is-reported' : '' }}" type="button" title="{{ $postAlreadyReported ? __('ui.preview_post_reported') : __('ui.preview_post_report') }}" aria-label="{{ $postAlreadyReported ? __('ui.preview_report_already_reported_aria') : __('ui.preview_post_report_aria') }}" data-hnt-report-open data-report-type="feed_post" data-report-id="{{ $post->id }}" data-report-label="{{ __('ui.preview_post_report_label', ['name' => $authorName]) }}" data-report-reported="{{ $postAlreadyReported ? '1' : '0' }}" @disabled($postAlreadyReported)>
                     <i class="ph ph-shield-check" aria-hidden="true"></i>
                 </button>
@@ -115,12 +118,16 @@
                     </button>
                     <div class="nav-submenu hnt-post-options-menu" aria-hidden="true">
                         <button class="hnt-post-options-close" type="button" aria-label="{{ __('ui.preview_nav_close_menu') }}" data-hnt-post-options-close><i class="ph ph-x" aria-hidden="true"></i></button>
-                        <button class="nav-subitem hnt-post-option-action" type="button" data-hnt-post-edit-open>{{ __('ui.preview_post_edit') }}</button>
-                        <form method="post" action="{{ route('feed.destroy', $post) }}" class="hnt-post-delete-form" data-hnt-post-delete-form>
-                            @csrf
-                            @method('DELETE')
-                            <button class="nav-subitem hnt-post-option-action hnt-post-option-danger" type="submit">{{ __('ui.preview_post_delete') }}</button>
-                        </form>
+                        @if($canEditPost)
+                            <button class="nav-subitem hnt-post-option-action" type="button" data-hnt-post-edit-open>{{ __('ui.preview_post_edit') }}</button>
+                        @endif
+                        @if($canDeletePost)
+                            <form method="post" action="{{ route('feed.destroy', $post) }}" class="hnt-post-delete-form" data-hnt-post-delete-form>
+                                @csrf
+                                @method('DELETE')
+                                <button class="nav-subitem hnt-post-option-action hnt-post-option-danger" type="submit">{{ __('ui.preview_post_delete') }}</button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -302,7 +309,7 @@
     @endphp
     {!! $pollHtml !!}
 
-    @if($isOwnPost)
+    @if($canEditPost)
         <form class="hnt-post-edit-form" method="post" action="{{ route('feed.update', $post) }}" data-hnt-post-edit-form hidden>
             @csrf
             @method('PUT')
