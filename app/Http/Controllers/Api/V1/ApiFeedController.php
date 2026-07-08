@@ -270,7 +270,13 @@ class ApiFeedController extends Controller
         GifProviderService $gifs,
         FeedTranslationService $translations
     ): JsonResponse {
-        abort_unless((int) $post->user_id === (int) $request->user()->id, 403);
+        $viewer = $request->user();
+
+        abort_unless(
+            (int) $post->user_id === (int) $viewer->id
+            || ($viewer && method_exists($viewer, 'isAdmin') && $viewer->isAdmin()),
+            403
+        );
 
         $validated = $request->validate([
             'body' => ['required', 'string', 'max:5000'],
