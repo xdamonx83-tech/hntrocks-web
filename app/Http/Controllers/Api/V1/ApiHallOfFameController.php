@@ -15,7 +15,7 @@ class ApiHallOfFameController extends Controller
     {
         $cups = Cup::query()
             ->visible()
-            ->whereIn('status', ['finished', 'archived'])
+            ->where('status', 'finished')
             ->with([
                 'owner.profile',
                 'teams' => function ($query): void {
