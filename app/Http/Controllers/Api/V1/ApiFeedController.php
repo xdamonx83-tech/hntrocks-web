@@ -334,7 +334,13 @@ class ApiFeedController extends Controller
 
     public function destroy(Request $request, FeedPost $post, MediaService $mediaService): JsonResponse
     {
-        abort_unless((int) $post->user_id === (int) $request->user()->id, 403);
+        $viewer = $request->user();
+
+        abort_unless(
+            (int) $post->user_id === (int) $viewer->id
+            || ($viewer && method_exists($viewer, 'isAdmin') && $viewer->isAdmin()),
+            403
+        );
 
         $postId = (int) $post->id;
         $post->loadMissing(['media.mediaAsset']);
