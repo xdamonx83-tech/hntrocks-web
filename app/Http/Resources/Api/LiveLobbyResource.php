@@ -51,6 +51,7 @@ class LiveLobbyResource extends JsonResource
                 ...$this->userSummary($member->user),
                 'role' => $member->role,
                 'platform' => $member->platform,
+                'mmr_stars' => $member->mmr_stars,
             ])->values()->all(),
             'viewer' => [
                 'is_creator' => (bool) $isCreator,

@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Models\ApiAccessToken;
 use App\Models\LiveLobby;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Models\UserProfile;
 use App\Services\LiveLobbyNotificationService;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class LiveLobbyApiTest extends TestCase
@@ -44,11 +47,13 @@ class LiveLobbyApiTest extends TestCase
             'platform' => 'pc',
             'voice_required' => true,
             'lobby_code' => 'HUNT-123',
+            'mmr_stars' => 5,
         ])->assertCreated()
             ->assertJsonPath('data.mode', 'duo')
             ->assertJsonPath('data.slots_total', 2)
             ->assertJsonPath('data.slots_filled', 1)
             ->assertJsonPath('data.crossplay_pool', 'pc')
+            ->assertJsonPath('data.members.0.mmr_stars', 5)
             ->assertJsonPath('data.viewer.is_creator', true)
             ->assertJsonPath('data.contact.lobby_code', 'HUNT-123');
 
@@ -57,6 +62,7 @@ class LiveLobbyApiTest extends TestCase
             'live_lobby_id' => $lobby->id,
             'user_id' => $user->id,
             'role' => 'creator',
+            'mmr_stars' => 5,
         ]);
         $this->assertTrue($lobby->expires_at->between(now()->addMinutes(14), now()->addMinutes(16)));
         $this->assertSame(1, $this->notifications->announcements);
@@ -97,6 +103,18 @@ class LiveLobbyApiTest extends TestCase
             ->assertJsonValidationErrors('mood');
     }
 
+    public function test_invalid_mmr_stars_are_rejected(): void
+    {
+        foreach ([0, 7, 'many'] as $value) {
+            $this->postAs($this->user(), '/api/v1/live-lobbies', [
+                'mode' => 'duo',
+                'platform' => 'pc',
+                'mmr_stars' => $value,
+            ])->assertUnprocessable()
+                ->assertJsonValidationErrors('mmr_stars');
+        }
+    }
+
     public function test_mood_is_optional_for_existing_requests(): void
     {
         $this->postAs($this->user(), '/api/v1/live-lobbies', [
@@ -129,6 +147,25 @@ class LiveLobbyApiTest extends TestCase
 
         $xbox = $this->createLobby($this->user(), ['platform' => 'xbox']);
         $this->postAs($this->user(), $this->action($xbox, 'join'), ['platform' => 'playstation'])->assertOk();
+    }
+
+    public function test_join_can_store_member_mmr_stars(): void
+    {
+        $lobby = $this->createLobby($this->user(), ['platform' => 'pc']);
+        $member = $this->user();
+
+        $this->postAs($member, $this->action($lobby, 'join'), [
+            'platform' => 'pc',
+            'mmr_stars' => 3,
+        ])->assertOk()
+            ->assertJsonPath('data.members.1.mmr_stars', 3);
+
+        $this->assertDatabaseHas('live_lobby_members', [
+            'live_lobby_id' => $lobby->id,
+            'user_id' => $member->id,
+            'role' => 'member',
+            'mmr_stars' => 3,
+        ]);
     }
 
     public function test_contact_fields_are_hidden_until_viewer_joins(): void
@@ -331,6 +368,50 @@ class LiveLobbyApiTest extends TestCase
             ->assertJsonMissingPath('data.creator.profile');
     }
 
+    public function test_live_lobby_announcement_matches_push_lfg_platform_region_and_language(): void
+    {
+        Cache::flush();
+
+        $creator = $this->user();
+        $this->profile($creator, ['platform' => 'pc', 'region' => 'EU', 'language' => 'de']);
+        $lobby = $this->createLobby($creator, [
+            'mode' => 'trio',
+            'platform' => 'playstation',
+            'region' => 'EU',
+            'language' => 'de',
+        ]);
+
+        $matchingPlayStation = $this->userWithPushProfile(['platform' => 'playstation', 'region' => 'EU', 'language' => 'de']);
+        $matchingXbox = $this->userWithPushProfile(['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+        $this->userWithPushProfile(['platform' => 'pc', 'region' => 'EU', 'language' => 'de']);
+        $this->userWithPushProfile(['platform' => 'xbox', 'region' => 'US', 'language' => 'de']);
+        $this->userWithPushProfile(['platform' => 'xbox', 'region' => 'EU', 'language' => 'en']);
+        $disabled = $this->userWithPushProfile(['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+        $disabled->notificationSettings()->create(['lfg' => false]);
+        $withoutPush = $this->user();
+        $this->profile($withoutPush, ['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+
+        $fakeNotifications = new class extends NotificationService {
+            public array $sent = [];
+
+            public function send(?User $recipient, ?User $actor, string $type, string $title, string $body, ?string $actionUrl = null): ?UserNotification
+            {
+                $this->sent[] = compact('recipient', 'actor', 'type', 'title', 'body', 'actionUrl');
+
+                return null;
+            }
+        };
+
+        (new LiveLobbyNotificationService($fakeNotifications))->announce($lobby->fresh(['creator', 'activeMembers.user.profile']));
+
+        $recipientIds = collect($fakeNotifications->sent)->pluck('recipient.id')->all();
+        $this->assertEqualsCanonicalizing([$matchingPlayStation->id, $matchingXbox->id], $recipientIds);
+        $this->assertSame('lfg_live_lobby_ready', $fakeNotifications->sent[0]['type']);
+        $this->assertSame('Ein Hunter ist ready', $fakeNotifications->sent[0]['title']);
+        $this->assertSame('Trio sucht noch 2 Hunter.', $fakeNotifications->sent[0]['body']);
+        $this->assertSame('/ready-lobbies/'.$lobby->public_id, $fakeNotifications->sent[0]['actionUrl']);
+    }
+
     public function test_creator_receives_self_common_ground(): void
     {
         $creator = $this->user();
@@ -437,6 +518,21 @@ class LiveLobbyApiTest extends TestCase
             'hunt_role' => null,
             'hunter_dna' => null,
         ], $attributes));
+    }
+
+    private function userWithPushProfile(array $profileAttributes): User
+    {
+        $user = $this->user();
+        $this->profile($user, $profileAttributes);
+        $user->pushDevices()->create([
+            'provider' => 'fcm',
+            'platform' => 'android',
+            'token' => 'token-'.$user->id,
+            'token_hash' => hash('sha256', 'token-'.$user->id),
+            'last_seen_at' => now(),
+        ]);
+
+        return $user;
     }
 
     private function getAs(User $user, string $uri)

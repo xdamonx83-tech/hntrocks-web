@@ -99,6 +99,7 @@ class ApiLiveLobbyController extends Controller
                 'role' => 'creator',
                 'platform' => $validated['platform'],
                 'platform_handle' => $validated['platform_handle'] ?? null,
+                'mmr_stars' => $validated['mmr_stars'] ?? null,
                 'joined_at' => now(),
             ]);
 
@@ -126,6 +127,7 @@ class ApiLiveLobbyController extends Controller
         $validated = $request->validate([
             'platform' => ['required', Rule::in(['pc', 'playstation', 'xbox'])],
             'platform_handle' => ['nullable', 'string', 'max:100', $this->noExternalLinksRule()],
+            'mmr_stars' => ['nullable', 'integer', 'min:1', 'max:6'],
         ]);
         $user = $request->user();
 
@@ -149,6 +151,7 @@ class ApiLiveLobbyController extends Controller
                 'role' => 'member',
                 'platform' => $validated['platform'],
                 'platform_handle' => $validated['platform_handle'] ?? null,
+                'mmr_stars' => $validated['mmr_stars'] ?? null,
                 'joined_at' => now(),
             ]);
 
@@ -236,6 +239,7 @@ class ApiLiveLobbyController extends Controller
             'xbox_gamertag' => ['nullable', 'string', 'max:100', $safeText],
             'discord_handle' => ['nullable', 'string', 'max:100', $safeText],
             'platform_handle' => ['nullable', 'string', 'max:100', $safeText],
+            'mmr_stars' => ['nullable', 'integer', 'min:1', 'max:6'],
         ]);
     }
 
