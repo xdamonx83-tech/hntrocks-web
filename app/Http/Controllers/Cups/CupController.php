@@ -101,7 +101,7 @@ class CupController extends Controller
     {
         $cups = Cup::query()
             ->visible()
-            ->whereIn('status', ['finished', 'archived'])
+            ->where('status', 'finished')
             ->with([
                 'owner:id,name,username,avatar_path,level',
                 'teams' => function ($query): void {
