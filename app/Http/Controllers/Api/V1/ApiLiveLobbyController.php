@@ -100,6 +100,7 @@ class ApiLiveLobbyController extends Controller
                 'platform' => $validated['platform'],
                 'platform_handle' => $validated['platform_handle'] ?? null,
                 'mmr_stars' => $validated['mmr_stars'] ?? null,
+                'hunter_number' => $this->assignHunterNumber($lobby, $user->id),
                 'joined_at' => now(),
             ]);
 
@@ -152,6 +153,7 @@ class ApiLiveLobbyController extends Controller
                 'platform' => $validated['platform'],
                 'platform_handle' => $validated['platform_handle'] ?? null,
                 'mmr_stars' => $validated['mmr_stars'] ?? null,
+                'hunter_number' => $this->assignHunterNumber($locked, $user->id),
                 'joined_at' => now(),
             ]);
 
@@ -264,6 +266,25 @@ class ApiLiveLobbyController extends Controller
     private function expireDueLobbies(): void
     {
         LiveLobby::query()->whereIn('status', LiveLobby::ACTIVE_STATUSES)->where('expires_at', '<=', now())->update(['status' => 'expired']);
+    }
+
+    private function assignHunterNumber(LiveLobby $lobby, int $userId): int
+    {
+        $used = $lobby->activeMembers()
+            ->whereNotNull('hunter_number')
+            ->pluck('hunter_number')
+            ->map(fn ($value) => (int) $value)
+            ->all();
+        $start = (int) (crc32($lobby->public_id.':'.$userId) % 15) + 1;
+
+        for ($offset = 0; $offset < 15; $offset++) {
+            $candidate = (($start + $offset - 1) % 15) + 1;
+            if (! in_array($candidate, $used, true)) {
+                return $candidate;
+            }
+        }
+
+        return $start;
     }
 
     private function freshLobby(LiveLobby $lobby): LiveLobby

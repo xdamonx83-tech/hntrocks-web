@@ -52,6 +52,7 @@ class LiveLobbyResource extends JsonResource
                 'role' => $member->role,
                 'platform' => $member->platform,
                 'mmr_stars' => $member->mmr_stars,
+                'hunter_number' => $member->hunter_number,
             ])->values()->all(),
             'viewer' => [
                 'is_creator' => (bool) $isCreator,
