@@ -16,7 +16,6 @@ class LiveLobbyNotificationService
     {
         User::query()
             ->where('id', '!=', $lobby->creator_id)
-            ->whereHas('pushDevices', fn ($query) => $query->active())
             ->where(function ($query): void {
                 $query->whereDoesntHave('notificationSettings')
                     ->orWhereHas('notificationSettings', fn ($settings) => $settings->where('lfg', true));

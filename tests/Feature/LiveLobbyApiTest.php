@@ -64,6 +64,7 @@ class LiveLobbyApiTest extends TestCase
             'role' => 'creator',
             'mmr_stars' => 5,
         ]);
+        $this->assertHunterNumber((int) $response->json('data.members.0.hunter_number'));
         $this->assertTrue($lobby->expires_at->between(now()->addMinutes(14), now()->addMinutes(16)));
         $this->assertSame(1, $this->notifications->announcements);
     }
@@ -166,6 +167,29 @@ class LiveLobbyApiTest extends TestCase
             'role' => 'member',
             'mmr_stars' => 3,
         ]);
+    }
+
+    public function test_hunter_numbers_are_unique_and_stable_within_a_lobby(): void
+    {
+        $creator = $this->user();
+        $lobby = $this->createLobby($creator, ['mode' => 'trio', 'platform' => 'playstation']);
+        $creatorNumber = (int) $lobby->activeMembers()->where('user_id', $creator->id)->value('hunter_number');
+        $firstMember = $this->user();
+        $secondMember = $this->user();
+
+        $this->postAs($firstMember, $this->action($lobby, 'join'), ['platform' => 'xbox'])->assertOk();
+        $firstNumber = (int) $lobby->activeMembers()->where('user_id', $firstMember->id)->value('hunter_number');
+
+        $this->postAs($secondMember, $this->action($lobby, 'join'), ['platform' => 'playstation'])
+            ->assertOk()
+            ->assertJsonCount(3, 'data.members');
+        $secondNumber = (int) $lobby->activeMembers()->where('user_id', $secondMember->id)->value('hunter_number');
+
+        $this->assertHunterNumber($creatorNumber);
+        $this->assertHunterNumber($firstNumber);
+        $this->assertHunterNumber($secondNumber);
+        $this->assertCount(3, array_unique([$creatorNumber, $firstNumber, $secondNumber]));
+        $this->assertSame($creatorNumber, (int) $lobby->activeMembers()->where('user_id', $creator->id)->value('hunter_number'));
     }
 
     public function test_contact_fields_are_hidden_until_viewer_joins(): void
@@ -405,11 +429,34 @@ class LiveLobbyApiTest extends TestCase
         (new LiveLobbyNotificationService($fakeNotifications))->announce($lobby->fresh(['creator', 'activeMembers.user.profile']));
 
         $recipientIds = collect($fakeNotifications->sent)->pluck('recipient.id')->all();
-        $this->assertEqualsCanonicalizing([$matchingPlayStation->id, $matchingXbox->id], $recipientIds);
+        $this->assertEqualsCanonicalizing([$matchingPlayStation->id, $matchingXbox->id, $withoutPush->id], $recipientIds);
         $this->assertSame('lfg_live_lobby_ready', $fakeNotifications->sent[0]['type']);
         $this->assertSame('Ein Hunter ist ready', $fakeNotifications->sent[0]['title']);
         $this->assertSame('Trio sucht noch 2 Hunter.', $fakeNotifications->sent[0]['body']);
         $this->assertSame('/ready-lobbies/'.$lobby->public_id, $fakeNotifications->sent[0]['actionUrl']);
+    }
+
+    public function test_bootstrap_counts_open_matching_ready_lobbies(): void
+    {
+        $viewer = $this->user();
+        $this->profile($viewer, ['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+        $matching = $this->createLobby($this->user(), ['platform' => 'playstation', 'region' => 'EU', 'language' => 'de']);
+        $this->createLobby($this->user(), ['platform' => 'pc', 'region' => 'EU', 'language' => 'de']);
+        $this->createLobby($this->user(), ['platform' => 'xbox', 'region' => 'US', 'language' => 'de']);
+        $full = $this->createLobby($this->user(), ['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+        $full->update(['status' => 'full']);
+        $closed = $this->createLobby($this->user(), ['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+        $closed->update(['status' => 'closed']);
+
+        $this->getAs($viewer, '/api/v1/bootstrap')
+            ->assertOk()
+            ->assertJsonPath('counts.active_matching_ready_lobbies', 1);
+
+        $this->postAs($viewer, $this->action($matching, 'join'), ['platform' => 'xbox'])->assertOk();
+
+        $this->getAs($viewer, '/api/v1/bootstrap')
+            ->assertOk()
+            ->assertJsonPath('counts.active_matching_ready_lobbies', 0);
     }
 
     public function test_creator_receives_self_common_ground(): void
@@ -501,6 +548,12 @@ class LiveLobbyApiTest extends TestCase
         ], $overrides))->assertCreated();
 
         return LiveLobby::where('public_id', $response->json('data.id'))->firstOrFail();
+    }
+
+    private function assertHunterNumber(int $value): void
+    {
+        $this->assertGreaterThanOrEqual(1, $value);
+        $this->assertLessThanOrEqual(15, $value);
     }
 
     private function action(LiveLobby $lobby, string $action): string
