@@ -55,7 +55,7 @@
   }
 
   setCollapsed(stored === 'collapsed', false);
-  setDashboardSubmenuClosed(storedSubmenu === 'closed', false);
+  setDashboardSubmenuClosed(storedSubmenu !== 'open', false);
 
   sidebarToggle.addEventListener('click', () => {
     setCollapsed(!sidebar.classList.contains('is-collapsed'));
