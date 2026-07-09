@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&display=swap');
+
+/* HNT Rework global polish layer.
+   Keep this small: typography, text warmth and the first radius sharpening pass only. */
+:root {
+  --text: #F2E8D8;
+  --radius-md: 8px;
+  --font-body: 'Urbanist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body) !important;
+}
+
+body {
+  color: var(--text);
+}
+
+.card,
+.top-dropdown,
+.dropdown-empty,
+.members-filter-modal,
+.search-result-group,
+.search-empty-card,
+.lfg-alert,
+.lfg-filter-card,
+.lfg-empty-state,
+.cups-empty-card,
+.wallet-section,
+.gamification-overview-card,
+.gamification-item-card {
+  border-radius: 8px;
+}
+
+.dropdown-item img,
+.request-item .request-avatar img,
+.suggestion img,
+.highlight img,
+.suggestion-avatar img,
+.comment-row img,
+.search-result-media,
+.search-result-media img,
+.members-field select,
+.members-search,
+.lfg-filter-form select,
+.lfg-search-field input,
+.rework-post-poll-option,
+.sidebar-v2 .rail-bg,
+.sidebar-v2 .account-item {
+  border-radius: 8px !important;
+}
+
+.sidebar.sidebar-v2,
+.sidebar-v2 *,
+.topbar,
+.content-grid,
+.left-col,
+.right-col,
+.post-card,
+.post-card *,
+.profile-page,
+.profile-page * {
+  font-family: var(--font-body) !important;
+}
