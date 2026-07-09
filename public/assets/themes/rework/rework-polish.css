@@ -1,0 +1,180 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&display=swap');
+
+/* HNT Rework global polish layer.
+   Keep this small: typography, text warmth and the first radius sharpening pass only. */
+:root {
+  --text: #F2E8D8;
+  --radius-md: 8px;
+  --rework-glass-radius: 8px;
+  --font-body: 'Urbanist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body) !important;
+}
+
+body {
+  color: var(--text);
+}
+
+/* Apply Urbanist through inheritance only. Do not target descendants with * here:
+   Phosphor icons need their own icon font-family. */
+.sidebar.sidebar-v2,
+.topbar,
+.content-grid,
+.left-col,
+.right-col,
+.post-card,
+.profile-page {
+  font-family: var(--font-body) !important;
+}
+
+.card,
+.top-dropdown,
+.dropdown-empty,
+.members-filter-modal,
+.search-result-group,
+.search-empty-card,
+.lfg-alert,
+.lfg-filter-card,
+.lfg-empty-state,
+.cups-empty-card,
+.wallet-section,
+.gamification-overview-card,
+.gamification-item-card {
+  border-radius: 8px;
+}
+
+/* Feed cards are tuned by sidebar-v2-tune.css with a stronger selector.
+   Keep the polish override explicit so the first radius pass is actually visible. */
+.left-col > .hero-card,
+.left-col .post-card,
+.left-col .post-card.card,
+.profile-posts-feed-real .post-card,
+[data-rework-post-card] {
+  border-radius: 8px !important;
+}
+
+.dropdown-item img,
+.request-item .request-avatar img,
+.suggestion img,
+.highlight img,
+.suggestion-avatar img,
+.comment-row img,
+.search-result-media,
+.search-result-media img,
+.members-field select,
+.members-search,
+.lfg-filter-form select,
+.lfg-search-field input,
+.rework-post-poll-option,
+.sidebar-v2 .rail-bg,
+.sidebar-v2 .account-item {
+  border-radius: 8px !important;
+}
+
+/* Rework polish 2: improve Feed readability without making Urbanist too heavy. */
+.post-card .post-text,
+.post-card .rework-post-body,
+.post-card .rework-post-body-content,
+.post-card .rework-post-body-content p,
+.post-card .rework-post-body-content li {
+  color: rgba(242, 232, 216, .78) !important;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.post-card .post-user strong,
+.post-card .post-user a,
+.right-col .profile-top strong,
+.right-col .balance strong {
+  color: var(--text) !important;
+}
+
+.post-card .post-user span,
+.post-card .liked,
+.post-card .metrics,
+.right-col .balance span,
+.right-col .suggestion-info span,
+.right-col .highlight-card small {
+  color: rgba(242, 232, 216, .60) !important;
+}
+
+/* Flat HNT glass buttons: no 3D, no inset glow, only surface + subtle border. */
+.btn.large,
+.comment-row .btn,
+.profile-buttons .btn,
+.right-col .btn,
+.dropdown-footer,
+.hall-cta-button,
+.members-load-more,
+.rework-load-more {
+  background: rgba(242, 232, 216, .075) !important;
+  border: 1px solid rgba(242, 232, 216, .10) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+.btn.large:hover,
+.comment-row .btn:hover,
+.profile-buttons .btn:hover,
+.right-col .btn:hover,
+.dropdown-footer:hover,
+.hall-cta-button:hover,
+.members-load-more:hover,
+.rework-load-more:hover {
+  background: rgba(207, 161, 73, .13) !important;
+  border-color: rgba(207, 161, 73, .30) !important;
+  color: #F2E8D8 !important;
+  box-shadow: none !important;
+}
+
+.comment-row .comment-input,
+.composer-mini,
+.search-box,
+.top-dropdown {
+  color: rgba(242, 232, 216, .76) !important;
+}
+
+.comment-row .comment-input::placeholder,
+.composer-mini,
+.search-box input::placeholder {
+  color: rgba(242, 232, 216, .44) !important;
+}
+
+/* Right widgets: flat, not raised. */
+.right-col .profile-stat-grid span,
+.right-col .level-badge,
+.right-col .highlight-card,
+.right-col .suggestion .btn,
+.right-col .profile-buttons .btn {
+  background: rgba(242, 232, 216, .045) !important;
+  border: 1px solid rgba(242, 232, 216, .075) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+.right-col .profile-stat-grid span:hover,
+.right-col .highlight-card:hover,
+.right-col .suggestion .btn:hover,
+.right-col .profile-buttons .btn:hover {
+  background: rgba(242, 232, 216, .065) !important;
+  border-color: rgba(207, 161, 73, .20) !important;
+  box-shadow: none !important;
+}
+
+.right-col .profile-stat-grid em,
+.right-col .level-badge,
+.right-col .highlight-pills em {
+  color: rgba(242, 232, 216, .66) !important;
+}
+
+.right-col .profile-stat-grid strong,
+.right-col .highlight-card strong {
+  color: var(--text) !important;
+}

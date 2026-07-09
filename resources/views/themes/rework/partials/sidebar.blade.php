@@ -27,11 +27,13 @@
     $reworkSidebarSettingsUrl = $reworkSidebarUrl('account.settings.edit');
     $reworkSidebarV2StyleVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.css')) ?: time();
     $reworkSidebarV2TuneVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2-tune.css')) ?: time();
+    $reworkPolishVersion = @filemtime(public_path('assets/themes/rework/rework-polish.css')) ?: time();
     $reworkSidebarV2ScriptVersion = @filemtime(public_path('assets/themes/rework/sidebar-v2.js')) ?: time();
 @endphp
 
 <link href="{{ asset('assets/themes/rework/sidebar-v2.css') }}?v={{ $reworkSidebarV2StyleVersion }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/rework/sidebar-v2-tune.css') }}?v={{ $reworkSidebarV2TuneVersion }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/rework/rework-polish.css') }}?v={{ $reworkPolishVersion }}" rel="stylesheet">
 
 <aside class="sidebar sidebar-v2 is-expanded" id="appSidebar" data-rework-sidebar aria-label="Main sidebar">
     <div class="rail-bg" aria-hidden="true"></div>
