@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\LiveLobby;
 use App\Models\User;
+use App\Support\LiveLobbyPlatform;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class LiveLobbyNotificationService
 {
@@ -21,8 +23,8 @@ class LiveLobbyNotificationService
                     ->orWhereHas('notificationSettings', fn ($settings) => $settings->where('lfg', true));
             })
             ->whereHas('profile', function ($query) use ($lobby): void {
-                $platforms = $lobby->crossplay_pool === 'pc' ? ['pc'] : ['playstation', 'xbox'];
-                $query->whereIn('platform', $platforms)
+                $platforms = LiveLobbyPlatform::profileAliasesForPool($lobby->crossplay_pool);
+                $query->whereIn(DB::raw('LOWER(TRIM(platform))'), $platforms)
                     ->when($lobby->region, fn ($profile) => $profile->where('region', $lobby->region))
                     ->when($lobby->language, fn ($profile) => $profile->where('language', $lobby->language));
             })

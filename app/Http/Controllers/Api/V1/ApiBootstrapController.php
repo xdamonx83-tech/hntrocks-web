@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\UserResource;
 use App\Models\LiveLobby;
+use App\Support\LiveLobbyPlatform;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -76,12 +77,10 @@ class ApiBootstrapController extends Controller
         }
 
         $profile = $user->profile;
-        $platform = $profile?->platform;
-        if (! in_array($platform, ['pc', 'playstation', 'xbox'], true)) {
+        $pool = LiveLobbyPlatform::poolForProfile($profile?->platform);
+        if ($pool === null) {
             return 0;
         }
-
-        $pool = $platform === 'pc' ? 'pc' : 'console';
 
         return LiveLobby::query()
             ->where('status', 'open')
