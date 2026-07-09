@@ -178,3 +178,60 @@ body {
 .right-col .highlight-card strong {
   color: var(--text) !important;
 }
+
+/* Sidebar links polish: collapsed active states must match the Dashboard tile. */
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard,
+body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current,
+body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current,
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active {
+  width: 56px !important;
+  height: 56px !important;
+  padding: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+/* Dashboard is a parent item, so its icon must stay centered even when another page is active. */
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard .dashboard-icon {
+  width: 25px !important;
+  min-width: 25px !important;
+  height: 25px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+  transform: translate(-.5px, 0) !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard .menu-text,
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard .chevron-up {
+  width: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-8px) !important;
+  pointer-events: none !important;
+}
+
+/* Normal Phosphor icons look cleaner at their native collapsed size. */
+body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current .icon:not(.dashboard-icon),
+body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current .icon:not(.dashboard-icon) {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+  transform: none !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current .menu-text,
+body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current .menu-text,
+body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current .chevron-up,
+body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current .chevron-up {
+  width: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-8px) !important;
+  pointer-events: none !important;
+}

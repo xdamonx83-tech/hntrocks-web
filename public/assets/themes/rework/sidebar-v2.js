@@ -1,12 +1,28 @@
 (() => {
   const sidebar = document.getElementById('appSidebar') || document.querySelector('[data-rework-sidebar]');
   const sidebarToggle = document.getElementById('sidebarToggle') || document.querySelector('[data-sidebar-toggle]');
-  const dashboardToggle = document.getElementById('dashboardToggle');
+  const dashboardToggle = document.getElementById('dashboardToggle') || document.querySelector('[data-sidebar-submenu-toggle]');
   const routes = sidebar ? sidebar.querySelectorAll('[data-route]') : [];
 
   if (!sidebar || !sidebarToggle) return;
 
   const storageKey = 'hnt.rework.sidebar.v2.state';
+  const submenuStorageKey = 'hnt.rework.sidebar.v2.dashboardSubmenu';
+
+  const setDashboardSubmenuClosed = (closed, persist = true) => {
+    sidebar.classList.toggle('is-sub-closed', closed);
+    if (dashboardToggle) {
+      dashboardToggle.setAttribute('aria-expanded', String(!closed));
+    }
+
+    if (persist) {
+      try {
+        window.localStorage.setItem(submenuStorageKey, closed ? 'closed' : 'open');
+      } catch (error) {
+        // Sidebar submenu preference is optional.
+      }
+    }
+  };
 
   const setCollapsed = (collapsed, persist = true) => {
     sidebar.classList.toggle('is-collapsed', collapsed);
@@ -29,13 +45,17 @@
   };
 
   let stored = null;
+  let storedSubmenu = null;
   try {
     stored = window.localStorage.getItem(storageKey);
+    storedSubmenu = window.localStorage.getItem(submenuStorageKey);
   } catch (error) {
     stored = null;
+    storedSubmenu = null;
   }
 
   setCollapsed(stored === 'collapsed', false);
+  setDashboardSubmenuClosed(storedSubmenu !== 'open', false);
 
   sidebarToggle.addEventListener('click', () => {
     setCollapsed(!sidebar.classList.contains('is-collapsed'));
@@ -43,19 +63,15 @@
 
   if (dashboardToggle) {
     dashboardToggle.addEventListener('click', (event) => {
+      event.preventDefault();
       const collapsed = sidebar.classList.contains('is-collapsed');
 
       if (collapsed) {
-        event.preventDefault();
         sidebar.classList.toggle('is-flyout-open');
         return;
       }
 
-      // Keep Feed navigable on normal click. Alt-click toggles the visual submenu for testing.
-      if (event.altKey) {
-        event.preventDefault();
-        sidebar.classList.toggle('is-sub-closed');
-      }
+      setDashboardSubmenuClosed(!sidebar.classList.contains('is-sub-closed'));
     });
   }
 
