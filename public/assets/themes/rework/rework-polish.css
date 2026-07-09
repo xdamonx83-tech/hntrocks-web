@@ -178,3 +178,216 @@ body {
 .right-col .highlight-card strong {
   color: var(--text) !important;
 }
+
+/* Profile edit modal first pass: match the new flat Rework/Feed polish. */
+.profile-edit-backdrop {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(207, 161, 73, .055), transparent 38%),
+    rgba(0, 0, 0, .72) !important;
+  backdrop-filter: blur(11px) !important;
+  -webkit-backdrop-filter: blur(11px) !important;
+}
+
+.profile-edit-modal.settings-modal {
+  width: min(760px, calc(100vw - 56px)) !important;
+  max-height: calc(100dvh - 58px) !important;
+  background:
+    radial-gradient(circle at 78% 14%, rgba(242, 232, 216, .032), transparent 32%),
+    linear-gradient(180deg, rgba(30, 31, 29, .96) 0%, rgba(21, 22, 20, .98) 100%) !important;
+  border: 1px solid rgba(242, 232, 216, .075) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .58) !important;
+  color: var(--text) !important;
+  overflow: hidden !important;
+}
+
+.profile-edit-modal .settings-modal-header {
+  padding: 28px 34px 22px !important;
+  border-bottom: 1px solid rgba(242, 232, 216, .065) !important;
+  background: rgba(12, 13, 12, .18) !important;
+}
+
+.profile-edit-modal .settings-eyebrow,
+.profile-edit-modal .settings-section-head span {
+  color: var(--accent) !important;
+  letter-spacing: .12em !important;
+}
+
+.profile-edit-modal .settings-modal-header h2 {
+  color: var(--text) !important;
+  font-size: 27px !important;
+  line-height: 32px !important;
+  letter-spacing: -.02em !important;
+}
+
+.profile-edit-modal .settings-modal-header p,
+.profile-edit-modal .settings-section-head p {
+  color: rgba(242, 232, 216, .58) !important;
+  font-weight: 400 !important;
+}
+
+.profile-edit-modal .settings-close {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 10px !important;
+  background: rgba(242, 232, 216, .06) !important;
+  border: 1px solid rgba(242, 232, 216, .07) !important;
+  color: rgba(242, 232, 216, .82) !important;
+  box-shadow: none !important;
+}
+
+.profile-edit-modal .settings-close:hover {
+  background: rgba(207, 161, 73, .12) !important;
+  border-color: rgba(207, 161, 73, .28) !important;
+  color: var(--text) !important;
+}
+
+.profile-edit-modal .settings-tabs {
+  margin: 0 !important;
+  padding: 14px 34px !important;
+  gap: 8px !important;
+  border-bottom: 1px solid rgba(242, 232, 216, .055) !important;
+  background: rgba(10, 11, 10, .22) !important;
+}
+
+.profile-edit-modal .settings-tabs button {
+  min-height: 38px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: rgba(242, 232, 216, .62) !important;
+  box-shadow: none !important;
+}
+
+.profile-edit-modal .settings-tabs button:hover {
+  background: rgba(242, 232, 216, .045) !important;
+  border-color: rgba(242, 232, 216, .065) !important;
+  color: var(--text) !important;
+}
+
+.profile-edit-modal .settings-tabs button.is-active {
+  background: rgba(242, 232, 216, .075) !important;
+  border-color: rgba(242, 232, 216, .10) !important;
+  color: var(--text) !important;
+}
+
+.profile-edit-modal .settings-modal-body {
+  padding: 24px 34px 26px !important;
+  background: transparent !important;
+}
+
+.profile-edit-modal .settings-panel,
+.profile-edit-modal .profile-edit-summary,
+.profile-edit-modal .settings-toggle-row,
+.profile-edit-modal .profile-edit-upload {
+  background: rgba(242, 232, 216, .032) !important;
+  border: 1px solid rgba(242, 232, 216, .065) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.profile-edit-modal .settings-section-head h3 {
+  color: var(--text) !important;
+}
+
+.profile-edit-modal .settings-form-grid label > span,
+.profile-edit-modal .profile-edit-upload > span {
+  color: rgba(242, 232, 216, .70) !important;
+  font-weight: 700 !important;
+}
+
+.profile-edit-modal input,
+.profile-edit-modal textarea,
+.profile-edit-modal select {
+  background: rgba(8, 9, 8, .48) !important;
+  border: 1px solid rgba(242, 232, 216, .08) !important;
+  border-radius: 8px !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.profile-edit-modal input:focus,
+.profile-edit-modal textarea:focus,
+.profile-edit-modal select:focus {
+  border-color: rgba(207, 161, 73, .38) !important;
+  background: rgba(8, 9, 8, .62) !important;
+}
+
+.profile-edit-modal textarea {
+  min-height: 98px !important;
+  resize: vertical !important;
+}
+
+.profile-edit-modal .profile-edit-lfg {
+  padding: 14px 16px !important;
+  margin-top: 14px !important;
+}
+
+.profile-edit-modal .profile-edit-lfg strong {
+  color: var(--text) !important;
+}
+
+.profile-edit-modal .profile-edit-lfg p,
+.profile-edit-modal .profile-edit-upload em {
+  color: rgba(242, 232, 216, .56) !important;
+}
+
+.profile-edit-modal .settings-modal-footer {
+  padding: 16px 34px 24px !important;
+  background: rgba(10, 11, 10, .28) !important;
+  border-top: 1px solid rgba(242, 232, 216, .055) !important;
+}
+
+.profile-edit-modal .settings-cancel,
+.profile-edit-modal .settings-save {
+  height: 40px !important;
+  min-width: 126px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+.profile-edit-modal .settings-cancel {
+  background: rgba(242, 232, 216, .055) !important;
+  border: 1px solid rgba(242, 232, 216, .075) !important;
+  color: var(--text) !important;
+}
+
+.profile-edit-modal .settings-save {
+  background: rgba(207, 161, 73, .88) !important;
+  border: 1px solid rgba(207, 161, 73, .34) !important;
+  color: #141412 !important;
+}
+
+.profile-edit-modal .settings-cancel:hover,
+.profile-edit-modal .settings-save:hover {
+  filter: none !important;
+  transform: none !important;
+}
+
+@media (max-width: 700px) {
+  .profile-edit-modal.settings-modal {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+  }
+
+  .profile-edit-modal .settings-modal-header,
+  .profile-edit-modal .settings-tabs,
+  .profile-edit-modal .settings-modal-body,
+  .profile-edit-modal .settings-modal-footer {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .profile-edit-modal .settings-tabs {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .profile-edit-modal .settings-tabs button {
+    flex: 0 0 auto !important;
+  }
+}
