@@ -37,6 +37,16 @@ body {
   border-radius: 8px;
 }
 
+/* Feed cards are tuned by sidebar-v2-tune.css with a stronger selector.
+   Keep the polish override explicit so the first radius pass is actually visible. */
+.left-col > .hero-card,
+.left-col .post-card,
+.left-col .post-card.card,
+.profile-posts-feed-real .post-card,
+[data-rework-post-card] {
+  border-radius: 8px !important;
+}
+
 .dropdown-item img,
 .request-item .request-avatar img,
 .suggestion img,
