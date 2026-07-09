@@ -78,14 +78,14 @@ body {
   border-radius: 8px !important;
 }
 
-/* Rework polish 2: improve Feed readability without changing layout. */
+/* Rework polish 2: improve Feed readability without making Urbanist too heavy. */
 .post-card .post-text,
 .post-card .rework-post-body,
 .post-card .rework-post-body-content,
 .post-card .rework-post-body-content p,
 .post-card .rework-post-body-content li {
-  color: rgba(242, 232, 216, .82) !important;
-  font-weight: 450;
+  color: rgba(242, 232, 216, .78) !important;
+  font-weight: 400;
   line-height: 1.55;
 }
 
@@ -102,10 +102,10 @@ body {
 .right-col .balance span,
 .right-col .suggestion-info span,
 .right-col .highlight-card small {
-  color: rgba(242, 232, 216, .62) !important;
+  color: rgba(242, 232, 216, .60) !important;
 }
 
-/* Grey action buttons should feel like HNT glass, not generic template buttons. */
+/* Flat HNT glass buttons: no 3D, no inset glow, only surface + subtle border. */
 .btn.large,
 .comment-row .btn,
 .profile-buttons .btn,
@@ -114,11 +114,10 @@ body {
 .hall-cta-button,
 .members-load-more,
 .rework-load-more {
-  background:
-    linear-gradient(180deg, rgba(242, 232, 216, .105) 0%, rgba(12, 13, 12, .56) 100%) !important;
-  border: 1px solid rgba(242, 232, 216, .105) !important;
+  background: rgba(242, 232, 216, .075) !important;
+  border: 1px solid rgba(242, 232, 216, .10) !important;
   color: var(--text) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+  box-shadow: none !important;
 }
 
 .btn.large:hover,
@@ -129,42 +128,50 @@ body {
 .hall-cta-button:hover,
 .members-load-more:hover,
 .rework-load-more:hover {
-  background:
-    linear-gradient(180deg, rgba(207, 161, 73, .22) 0%, rgba(22, 18, 12, .66) 100%) !important;
-  border-color: rgba(207, 161, 73, .42) !important;
-  color: #F8E7BB !important;
+  background: rgba(207, 161, 73, .13) !important;
+  border-color: rgba(207, 161, 73, .30) !important;
+  color: #F2E8D8 !important;
+  box-shadow: none !important;
 }
 
 .comment-row .comment-input,
 .composer-mini,
 .search-box,
 .top-dropdown {
-  color: rgba(242, 232, 216, .78) !important;
+  color: rgba(242, 232, 216, .76) !important;
 }
 
 .comment-row .comment-input::placeholder,
 .composer-mini,
 .search-box input::placeholder {
-  color: rgba(242, 232, 216, .46) !important;
+  color: rgba(242, 232, 216, .44) !important;
 }
 
-/* Right widgets: less flat grey, closer to Feed/Sidebar glass. */
+/* Right widgets: flat, not raised. */
 .right-col .profile-stat-grid span,
 .right-col .level-badge,
 .right-col .highlight-card,
 .right-col .suggestion .btn,
 .right-col .profile-buttons .btn {
-  background:
-    linear-gradient(180deg, rgba(242, 232, 216, .055) 0%, rgba(12, 13, 12, .42) 100%) !important;
+  background: rgba(242, 232, 216, .045) !important;
   border: 1px solid rgba(242, 232, 216, .075) !important;
   color: var(--text) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .026) !important;
+  box-shadow: none !important;
+}
+
+.right-col .profile-stat-grid span:hover,
+.right-col .highlight-card:hover,
+.right-col .suggestion .btn:hover,
+.right-col .profile-buttons .btn:hover {
+  background: rgba(242, 232, 216, .065) !important;
+  border-color: rgba(207, 161, 73, .20) !important;
+  box-shadow: none !important;
 }
 
 .right-col .profile-stat-grid em,
 .right-col .level-badge,
 .right-col .highlight-pills em {
-  color: rgba(242, 232, 216, .68) !important;
+  color: rgba(242, 232, 216, .66) !important;
 }
 
 .right-col .profile-stat-grid strong,
