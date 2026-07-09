@@ -235,3 +235,65 @@ body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current .chevron-up {
   transform: translateX(-8px) !important;
   pointer-events: none !important;
 }
+
+/* Feed hero copy: replace the old template text visually without touching feed logic. */
+.left-col > .hero-card > h1,
+.left-col > .hero-card > p {
+  font-size: 0 !important;
+}
+
+.left-col > .hero-card > h1::before,
+.left-col > .hero-card > p::before {
+  display: block;
+  font-size: initial;
+}
+
+html[lang="de"] .left-col > .hero-card > h1::before {
+  content: "Was läuft bei den Hunters?";
+}
+
+html[lang="en"] .left-col > .hero-card > h1::before {
+  content: "What are the Hunters up to?";
+}
+
+.left-col > .hero-card > h1::before {
+  color: var(--text);
+  font-size: clamp(34px, 3.2vw, 56px);
+  line-height: 1.08;
+  letter-spacing: -.03em;
+  font-weight: 800;
+}
+
+html[lang="de"] .left-col > .hero-card > p::before {
+  content: "Teile Updates, Clips, Fragen oder kurze Gedanken mit der Community. Alles rund um Hunt, LFG, Cups und HNT.rocks an einem Ort.";
+}
+
+html[lang="en"] .left-col > .hero-card > p::before {
+  content: "Share updates, clips, questions or quick thoughts with the community. Everything around Hunt, LFG, Cups and HNT.rocks in one place.";
+}
+
+.left-col > .hero-card > p::before {
+  max-width: 980px;
+  color: rgba(242, 232, 216, .72);
+  font-size: clamp(17px, 1.25vw, 22px);
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.left-col > .hero-card .composer-mini > .btn {
+  font-size: 0 !important;
+}
+
+.left-col > .hero-card .composer-mini > .btn::before {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+html[lang="de"] .left-col > .hero-card .composer-mini > .btn::before {
+  content: "Posten";
+}
+
+html[lang="en"] .left-col > .hero-card .composer-mini > .btn::before {
+  content: "Post";
+}
