@@ -21,6 +21,18 @@ body {
   color: var(--text);
 }
 
+/* Apply Urbanist through inheritance only. Do not target descendants with * here:
+   Phosphor icons need their own icon font-family. */
+.sidebar.sidebar-v2,
+.topbar,
+.content-grid,
+.left-col,
+.right-col,
+.post-card,
+.profile-page {
+  font-family: var(--font-body) !important;
+}
+
 .card,
 .top-dropdown,
 .dropdown-empty,
@@ -63,17 +75,4 @@ body {
 .sidebar-v2 .rail-bg,
 .sidebar-v2 .account-item {
   border-radius: 8px !important;
-}
-
-.sidebar.sidebar-v2,
-.sidebar-v2 *,
-.topbar,
-.content-grid,
-.left-col,
-.right-col,
-.post-card,
-.post-card *,
-.profile-page,
-.profile-page * {
-  font-family: var(--font-body) !important;
 }
