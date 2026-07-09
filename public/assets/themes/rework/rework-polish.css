@@ -192,15 +192,27 @@ body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active {
   gap: 0 !important;
 }
 
-body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current .icon,
-body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current .icon,
-body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active .icon {
+/* Only the Dashboard grid icon needs the larger Figma size.
+   Normal Phosphor icons look cleaner at their native collapsed size. */
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active .dashboard-icon {
   width: 25px !important;
   min-width: 25px !important;
   height: 25px !important;
   display: grid !important;
   place-items: center !important;
   font-size: 25px !important;
+  line-height: 1 !important;
+  transform: translate(-.5px, 0) !important;
+}
+
+body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current .icon:not(.dashboard-icon),
+body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current .icon:not(.dashboard-icon) {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 21px !important;
   line-height: 1 !important;
   transform: none !important;
 }
