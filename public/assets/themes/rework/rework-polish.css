@@ -77,3 +77,97 @@ body {
 .sidebar-v2 .account-item {
   border-radius: 8px !important;
 }
+
+/* Rework polish 2: improve Feed readability without changing layout. */
+.post-card .post-text,
+.post-card .rework-post-body,
+.post-card .rework-post-body-content,
+.post-card .rework-post-body-content p,
+.post-card .rework-post-body-content li {
+  color: rgba(242, 232, 216, .82) !important;
+  font-weight: 450;
+  line-height: 1.55;
+}
+
+.post-card .post-user strong,
+.post-card .post-user a,
+.right-col .profile-top strong,
+.right-col .balance strong {
+  color: var(--text) !important;
+}
+
+.post-card .post-user span,
+.post-card .liked,
+.post-card .metrics,
+.right-col .balance span,
+.right-col .suggestion-info span,
+.right-col .highlight-card small {
+  color: rgba(242, 232, 216, .62) !important;
+}
+
+/* Grey action buttons should feel like HNT glass, not generic template buttons. */
+.btn.large,
+.comment-row .btn,
+.profile-buttons .btn,
+.right-col .btn,
+.dropdown-footer,
+.hall-cta-button,
+.members-load-more,
+.rework-load-more {
+  background:
+    linear-gradient(180deg, rgba(242, 232, 216, .105) 0%, rgba(12, 13, 12, .56) 100%) !important;
+  border: 1px solid rgba(242, 232, 216, .105) !important;
+  color: var(--text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+}
+
+.btn.large:hover,
+.comment-row .btn:hover,
+.profile-buttons .btn:hover,
+.right-col .btn:hover,
+.dropdown-footer:hover,
+.hall-cta-button:hover,
+.members-load-more:hover,
+.rework-load-more:hover {
+  background:
+    linear-gradient(180deg, rgba(207, 161, 73, .22) 0%, rgba(22, 18, 12, .66) 100%) !important;
+  border-color: rgba(207, 161, 73, .42) !important;
+  color: #F8E7BB !important;
+}
+
+.comment-row .comment-input,
+.composer-mini,
+.search-box,
+.top-dropdown {
+  color: rgba(242, 232, 216, .78) !important;
+}
+
+.comment-row .comment-input::placeholder,
+.composer-mini,
+.search-box input::placeholder {
+  color: rgba(242, 232, 216, .46) !important;
+}
+
+/* Right widgets: less flat grey, closer to Feed/Sidebar glass. */
+.right-col .profile-stat-grid span,
+.right-col .level-badge,
+.right-col .highlight-card,
+.right-col .suggestion .btn,
+.right-col .profile-buttons .btn {
+  background:
+    linear-gradient(180deg, rgba(242, 232, 216, .055) 0%, rgba(12, 13, 12, .42) 100%) !important;
+  border: 1px solid rgba(242, 232, 216, .075) !important;
+  color: var(--text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .026) !important;
+}
+
+.right-col .profile-stat-grid em,
+.right-col .level-badge,
+.right-col .highlight-pills em {
+  color: rgba(242, 232, 216, .68) !important;
+}
+
+.right-col .profile-stat-grid strong,
+.right-col .highlight-card strong {
+  color: var(--text) !important;
+}
