@@ -180,6 +180,7 @@ body {
 }
 
 /* Sidebar links polish: collapsed active states must match the Dashboard tile. */
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard,
 body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current,
 body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current,
 body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active {
@@ -192,9 +193,8 @@ body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active {
   gap: 0 !important;
 }
 
-/* Only the Dashboard grid icon needs the larger Figma size.
-   Normal Phosphor icons look cleaner at their native collapsed size. */
-body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active .dashboard-icon {
+/* Dashboard is a parent item, so its icon must stay centered even when another page is active. */
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard .dashboard-icon {
   width: 25px !important;
   min-width: 25px !important;
   height: 25px !important;
@@ -205,6 +205,15 @@ body.rework-sidebar-collapsed .sidebar-v2 .dashboard.menu-active .dashboard-icon
   transform: translate(-.5px, 0) !important;
 }
 
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard .menu-text,
+body.rework-sidebar-collapsed .sidebar-v2 .dashboard .chevron-up {
+  width: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-8px) !important;
+  pointer-events: none !important;
+}
+
+/* Normal Phosphor icons look cleaner at their native collapsed size. */
 body.rework-sidebar-collapsed .sidebar-v2 .menu-item.is-current .icon:not(.dashboard-icon),
 body.rework-sidebar-collapsed .sidebar-v2 .account-item.is-current .icon:not(.dashboard-icon) {
   width: 24px !important;
