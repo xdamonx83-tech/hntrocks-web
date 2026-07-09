@@ -405,8 +405,10 @@ class LiveLobbyApiTest extends TestCase
             'language' => 'de',
         ]);
 
-        $matchingPlayStation = $this->userWithPushProfile(['platform' => 'playstation', 'region' => 'EU', 'language' => 'de']);
-        $matchingXbox = $this->userWithPushProfile(['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+        $matchingPlayStation = $this->userWithPushProfile(['platform' => 'PlayStation', 'region' => 'EU', 'language' => 'de']);
+        $matchingXbox = $this->userWithPushProfile(['platform' => 'Xbox', 'region' => 'EU', 'language' => 'de']);
+        $matchingCrossplay = $this->userWithPushProfile(['platform' => 'Crossplay', 'region' => 'EU', 'language' => 'de']);
+        $matchingPs5 = $this->userWithPushProfile(['platform' => 'PS5', 'region' => 'EU', 'language' => 'de']);
         $this->userWithPushProfile(['platform' => 'pc', 'region' => 'EU', 'language' => 'de']);
         $this->userWithPushProfile(['platform' => 'xbox', 'region' => 'US', 'language' => 'de']);
         $this->userWithPushProfile(['platform' => 'xbox', 'region' => 'EU', 'language' => 'en']);
@@ -429,7 +431,13 @@ class LiveLobbyApiTest extends TestCase
         (new LiveLobbyNotificationService($fakeNotifications))->announce($lobby->fresh(['creator', 'activeMembers.user.profile']));
 
         $recipientIds = collect($fakeNotifications->sent)->pluck('recipient.id')->all();
-        $this->assertEqualsCanonicalizing([$matchingPlayStation->id, $matchingXbox->id, $withoutPush->id], $recipientIds);
+        $this->assertEqualsCanonicalizing([
+            $matchingPlayStation->id,
+            $matchingXbox->id,
+            $matchingCrossplay->id,
+            $matchingPs5->id,
+            $withoutPush->id,
+        ], $recipientIds);
         $this->assertSame('lfg_live_lobby_ready', $fakeNotifications->sent[0]['type']);
         $this->assertSame('Ein Hunter ist ready', $fakeNotifications->sent[0]['title']);
         $this->assertSame('Trio sucht noch 2 Hunter.', $fakeNotifications->sent[0]['body']);
@@ -439,7 +447,7 @@ class LiveLobbyApiTest extends TestCase
     public function test_bootstrap_counts_open_matching_ready_lobbies(): void
     {
         $viewer = $this->user();
-        $this->profile($viewer, ['platform' => 'xbox', 'region' => 'EU', 'language' => 'de']);
+        $this->profile($viewer, ['platform' => 'Xbox', 'region' => 'EU', 'language' => 'de']);
         $matching = $this->createLobby($this->user(), ['platform' => 'playstation', 'region' => 'EU', 'language' => 'de']);
         $this->createLobby($this->user(), ['platform' => 'pc', 'region' => 'EU', 'language' => 'de']);
         $this->createLobby($this->user(), ['platform' => 'xbox', 'region' => 'US', 'language' => 'de']);
