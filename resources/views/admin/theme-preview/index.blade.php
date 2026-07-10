@@ -12,9 +12,9 @@
         <p>Der Preview-Modus wird nur in deiner aktuellen Session gesetzt. Fehlt eine Preview-View, fällt HNT.rocks automatisch auf das konfigurierte Fallback-Theme zurück.</p>
     </div>
     <div class="hh-admin-dashboard-hero-actions">
-        <a class="hh-secondary-button" href="{{ route('feed.index') }}" target="_blank" rel="noopener">Website öffnen</a>
+        <a class="hh-secondary-button" href="{{ route('feed.index') }}" target="_blank" rel="noopener">Aktuellen Feed öffnen</a>
         @if($previewActive)
-            <a class="hh-secondary-button" href="{{ route('admin.theme-preview.shell') }}" target="_blank" rel="noopener">Preview-Shell öffnen</a>
+            <a class="hh-secondary-button" href="{{ route('admin.theme-preview.shell') }}" target="_blank" rel="noopener">Neuen Feed öffnen</a>
         @endif
         @if($previewActive)
             <form method="post" action="{{ route('admin.theme-preview.stop') }}">
@@ -151,14 +151,14 @@
         </article>
 
         <article class="hh-card">
-            <h2>Preview-Shell</h2>
-            <p class="hh-muted">Die globale Layout-Hülle ist als isolierte Admin-Testseite vorhanden. Sie ersetzt noch keine echte Nutzerseite.</p>
+            <h2>Dashboard Feed Preview</h2>
+            <p class="hh-muted">Die neue Feed-/Dashboard-Demo läuft als isolierte Admin-Testseite. Sie ersetzt noch keine echte Nutzerseite und schreibt keine Demo-Aktionen in die Datenbank.</p>
             @if($previewActive)
                 <div class="hh-admin-dashboard-hero-actions" style="margin-top: 1rem;">
-                    <a class="hh-primary-button" href="{{ route('admin.theme-preview.shell') }}" target="_blank" rel="noopener">Shell ansehen</a>
+                    <a class="hh-primary-button" href="{{ route('admin.theme-preview.shell') }}" target="_blank" rel="noopener">Neuen Feed ansehen</a>
                 </div>
             @else
-                <p class="hh-empty-state">Aktiviere zuerst die Preview-Session, dann wird die Shell-Testseite freigeschaltet.</p>
+                <p class="hh-empty-state">Aktiviere zuerst die Preview-Session, dann wird die neue Feed-Testseite freigeschaltet.</p>
             @endif
         </article>
     </aside>
