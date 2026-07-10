@@ -151,8 +151,8 @@
         </article>
 
         <article class="hh-card">
-            <h2>Dashboard Feed Preview</h2>
-            <p class="hh-muted">Die neue Feed-/Dashboard-Demo läuft als isolierte Admin-Testseite. Sie ersetzt noch keine echte Nutzerseite und schreibt keine Demo-Aktionen in die Datenbank.</p>
+            <h2>Neue Feed-Preview</h2>
+            <p class="hh-muted">Die neue Dashboard-/Feed-Ansicht ist isoliert und nur in deiner freigeschalteten Preview-Session erreichbar.</p>
             @if($previewActive)
                 <div class="hh-admin-dashboard-hero-actions" style="margin-top: 1rem;">
                     <a class="hh-primary-button" href="{{ route('admin.theme-preview.shell') }}" target="_blank" rel="noopener">Neuen Feed ansehen</a>
