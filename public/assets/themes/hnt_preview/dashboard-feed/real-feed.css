@@ -1,9 +1,16 @@
 /* Real Laravel feed preview integration.
    Only dynamically injected cards use these additions; the original demo
-   remains pixel-identical underneath. */
+   remains available as fallback when no real posts are returned. */
 .post-list.is-loading-real-feed {
   opacity: .72;
   transition: opacity .16s ease;
+}
+
+/* As soon as real Laravel posts are present, the static template cards no
+   longer mix into the live feed. They remain in the markup as a visual
+   fallback/reference for future content types. */
+.post-list:has(> [data-real-feed-post]) > .social-post:not([data-real-feed-post]) {
+  display: none;
 }
 
 .real-feed-post {
@@ -85,8 +92,11 @@
   text-decoration: none;
 }
 
+/* Single media stays deliberately flatter in the feed. The complete image
+   will later open uncropped in the media/comments modal. */
 .real-post-media-count-1 .real-post-media-item {
-  min-height: clamp(260px, 35vw, 620px);
+  height: clamp(240px, 28vw, 420px);
+  min-height: 0;
 }
 
 .real-post-media-count-3 .real-post-media-item:first-child {
@@ -100,6 +110,7 @@
   min-height: inherit;
   display: block;
   object-fit: cover;
+  object-position: center;
 }
 
 .real-post-video-item {
@@ -154,6 +165,7 @@
   }
 
   .real-post-media-count-1 .real-post-media-item {
-    min-height: min(72vw, 430px);
+    height: min(62vw, 360px);
+    min-height: 220px;
   }
 }
