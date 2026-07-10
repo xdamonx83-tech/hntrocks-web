@@ -15,13 +15,23 @@
 }
 
 .real-feed-post .real-feed-author-avatar {
-  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  display: block;
+  flex: 0 0 38px;
+  overflow: hidden;
   border-radius: 50%;
   text-decoration: none;
 }
 
 .real-feed-post .real-feed-author-avatar img {
+  width: 100%;
+  height: 100%;
   display: block;
+  border-radius: inherit;
+  object-fit: cover;
+  object-position: center;
 }
 
 .real-feed-post .post-author a {
