@@ -61,7 +61,7 @@ class AdminThemePreviewController extends Controller
 
         abort_unless(HntTheme::previewActive($request->user()), 403);
 
-        return view('themes.hnt_preview.preview.shell');
+        return view('themes.hnt_preview.feed.live');
     }
 
     private function guardAdmin(Request $request): void
@@ -95,7 +95,7 @@ class AdminThemePreviewController extends Controller
     private function templateReferences(): array
     {
         return [
-            'index.html' => 'Rework Feed Preview / globale Shell',
+            'feed.html' => 'Dashboard Feed Preview / globale Shell',
             'profile.html' => 'Profil',
             'profile-edit.html' => 'Profil bearbeiten',
             'members.html' => 'Mitglieder',
