@@ -71,19 +71,47 @@ class AdminThemePreviewController extends Controller
             return $this->dashboardFeedData($request);
         }
 
+        $viewer = $request->user();
+        $viewerName = $viewer->name ?: ($viewer->username ?: 'HNT Hunter');
+        $viewerHandle = $viewer->username ? '@' . $viewer->username : '@hunter';
+        $viewerAvatar = $viewer->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+
         $html = view('themes.hnt_preview.feed.live')->render();
         $stylePath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed.css');
         $scriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed.js');
+        $liveStylePath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css');
+        $liveScriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-live.js');
         $styleVersion = is_file($stylePath) ? filemtime($stylePath) : time();
         $scriptVersion = is_file($scriptPath) ? filemtime($scriptPath) : time();
+        $liveStyleVersion = is_file($liveStylePath) ? filemtime($liveStylePath) : time();
+        $liveScriptVersion = is_file($liveScriptPath) ? filemtime($liveScriptPath) : time();
+
+        $html = str_replace(
+            [
+                'Hello Valentina',
+                '>Valentina<',
+                '@valentina',
+                asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg'),
+            ],
+            [
+                'Hello ' . e($viewerName),
+                '>' . e($viewerName) . '<',
+                e($viewerHandle),
+                e($viewerAvatar),
+            ],
+            $html
+        );
 
         $html = str_replace(
             '</head>',
-            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.css') . '?v=' . $styleVersion . '" rel="stylesheet"></head>',
+            '<meta name="csrf-token" content="' . e(csrf_token()) . '">' .
+            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.css') . '?v=' . $styleVersion . '" rel="stylesheet">' .
+            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css') . '?v=' . $liveStyleVersion . '" rel="stylesheet"></head>',
             $html
         );
         $html = str_replace(
             '</body>',
+            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.js') . '?v=' . $liveScriptVersion . '"></script>' .
             '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.js') . '?v=' . $scriptVersion . '"></script></body>',
             $html
         );
@@ -96,6 +124,8 @@ class AdminThemePreviewController extends Controller
         $viewer = $request->user();
         $viewerId = (int) $viewer->id;
         $mode = $request->query('mode') === 'following' ? 'following' : 'for-you';
+        $page = max(1, min(100, (int) $request->query('page', 1)));
+        $perPage = 6;
 
         $friendIds = Friendship::query()
             ->forUser($viewer)
@@ -147,8 +177,7 @@ class AdminThemePreviewController extends Controller
             ->orderByDesc('is_pinned')
             ->orderByDesc('pinned_at')
             ->latest()
-            ->limit(8)
-            ->get();
+            ->paginate($perPage, ['*'], 'page', $page);
 
         $viewer->loadMissing(['profile', 'crownWallet']);
 
@@ -169,6 +198,7 @@ class AdminThemePreviewController extends Controller
 
         return response()->json([
             'profile' => [
+                'id' => $viewerId,
                 'name' => $viewer->name ?: ($viewer->username ?: 'HNT Hunter'),
                 'handle' => $viewer->username ? '@' . $viewer->username : '@hunter',
                 'avatar' => $viewer->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'),
@@ -186,7 +216,16 @@ class AdminThemePreviewController extends Controller
                 'friends' => $friendRequestCount,
             ],
             'mode' => $mode,
-            'posts' => $posts->map(fn (FeedPost $post): array => $this->serializePreviewPost($post, $viewerId))->values(),
+            'posts' => $posts->getCollection()
+                ->map(fn (FeedPost $post): array => $this->serializePreviewPost($post, $viewerId))
+                ->values(),
+            'pagination' => [
+                'page' => $posts->currentPage(),
+                'per_page' => $posts->perPage(),
+                'total' => $posts->total(),
+                'has_more' => $posts->hasMorePages(),
+                'next_page' => $posts->hasMorePages() ? $posts->currentPage() + 1 : null,
+            ],
         ]);
     }
 
@@ -270,7 +309,7 @@ class AdminThemePreviewController extends Controller
                     : '#',
             ],
             'badge' => $post->team ? 'Team' : ($pollPayload ? 'Diskussion' : 'Beitrag'),
-            'badge_class' => $post->team ? 'team' : ($pollPayload ? 'discussion' : 'discussion'),
+            'badge_class' => $post->team ? 'team' : 'discussion',
             'counts' => [
                 'reactions' => (int) ($post->reactions_count ?? 0),
                 'comments' => (int) ($post->comments_count ?? 0),
@@ -281,6 +320,15 @@ class AdminThemePreviewController extends Controller
                 'reacted' => (bool) $post->viewerReaction,
                 'reaction_type' => $post->viewerReaction?->type,
                 'bookmarked' => (bool) $post->viewerBookmark,
+                'is_owner' => (int) $post->user_id === $viewerId,
+                'can_delete' => (int) $post->user_id === $viewerId || (bool) request()->user()?->isAdmin(),
+            ],
+            'routes' => [
+                'reaction' => route('feed.reactions.toggle', $post),
+                'bookmark' => route('feed.bookmarks.toggle', $post),
+                'poll' => route('feed.poll.vote', $post),
+                'comments' => route('feed.comments.store', $post),
+                'delete' => route('feed.destroy', $post),
             ],
             'media' => $media,
             'poll' => $pollPayload,
