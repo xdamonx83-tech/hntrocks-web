@@ -321,9 +321,47 @@
     });
   });
 
+  const openStaticPreviewComments = (button) => {
+    if (!commentsModal) return;
+
+    const post = button.closest(".social-post");
+    if (!post) return;
+
+    const staticPosts = [...document.querySelectorAll(".social-post:not([data-real-feed-post])")];
+    const postIndex = Math.max(0, staticPosts.indexOf(post));
+
+    commentsModal.dataset.realPreview = "0";
+    activeCommentButton = button;
+    activeCommentData = commentSets[postIndex % commentSets.length].map((comment) => ({ ...comment }));
+    commentsSortNewest = false;
+
+    const postImage = post.querySelector(".post-head > img");
+    const postAuthor = post.querySelector(".post-author strong");
+    const postMeta = post.querySelector(".post-author span");
+    const postExcerpt = post.querySelector(".post-body > p");
+    const postBadge = post.querySelector(".post-badge");
+    const count = Number.parseInt(button.querySelector("span")?.textContent || "0", 10);
+
+    if (commentsPostAvatar && postImage) commentsPostAvatar.src = postImage.src;
+    if (commentsPostAuthor && postAuthor) commentsPostAuthor.textContent = postAuthor.textContent;
+    if (commentsPostMeta && postMeta) commentsPostMeta.textContent = postMeta.textContent;
+    if (commentsPostExcerpt && postExcerpt) commentsPostExcerpt.textContent = postExcerpt.textContent;
+    if (commentsPostBadge) commentsPostBadge.textContent = postBadge?.textContent || "Post";
+
+    updateModalCommentCount(count);
+    renderModalComments();
+
+    commentsModal.classList.add("is-open");
+    commentsModal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("comments-open");
+    window.setTimeout(() => commentsInput?.focus(), 120);
+  };
+
   document.querySelectorAll(".social-post:not([data-real-feed-post]) .comment-button").forEach((button) => {
-    button.addEventListener("click", () => {
-      if (commentsModal) commentsModal.dataset.realPreview = "0";
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openStaticPreviewComments(button);
     }, true);
   });
 
