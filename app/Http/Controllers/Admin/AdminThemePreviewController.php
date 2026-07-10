@@ -9,6 +9,7 @@ use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Throwable;
@@ -60,7 +61,7 @@ class AdminThemePreviewController extends Controller
         return back()->with('status', 'Theme-Preview wurde für deine aktuelle Session beendet.');
     }
 
-    public function shell(Request $request): View|JsonResponse
+    public function shell(Request $request): Response|JsonResponse
     {
         $this->guardAdmin($request);
 
@@ -70,7 +71,24 @@ class AdminThemePreviewController extends Controller
             return $this->dashboardFeedData($request);
         }
 
-        return view('themes.hnt_preview.feed.live');
+        $html = view('themes.hnt_preview.feed.live')->render();
+        $stylePath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed.css');
+        $scriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed.js');
+        $styleVersion = is_file($stylePath) ? filemtime($stylePath) : time();
+        $scriptVersion = is_file($scriptPath) ? filemtime($scriptPath) : time();
+
+        $html = str_replace(
+            '</head>',
+            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.css') . '?v=' . $styleVersion . '" rel="stylesheet"></head>',
+            $html
+        );
+        $html = str_replace(
+            '</body>',
+            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.js') . '?v=' . $scriptVersion . '"></script></body>',
+            $html
+        );
+
+        return response($html);
     }
 
     private function dashboardFeedData(Request $request): JsonResponse
