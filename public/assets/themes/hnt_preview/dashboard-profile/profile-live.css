@@ -6,3 +6,8 @@
 @import url('./profile-source-06.css');
 @import url('./profile-source-07.css');
 @import url('./profile-source-08.css');
+
+.profile-edit-main{text-decoration:none}
+.profile-photo-shell>a{position:absolute;right:11px;bottom:11px;width:36px;height:36px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(255,255,255,.88);color:var(--ink);text-decoration:none}
+.profile-info-head>a{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:50%;background:#f3f0e7;color:var(--ink);text-decoration:none}
+.profile-summary-actions>a{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.88);color:var(--ink);text-decoration:none}
