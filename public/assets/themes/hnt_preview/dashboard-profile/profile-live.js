@@ -71,5 +71,79 @@
     document.getElementById('openPostComposer')?.click();
   });
 
+  const setActiveFilter = (buttons, activeButton) => {
+    buttons.forEach((button) => button.classList.toggle('active', button === activeButton));
+  };
+
+  const friendFilterButtons = [...document.querySelectorAll('[data-profile-friend-filter]')];
+  const friendCards = [...document.querySelectorAll('[data-profile-friend-card]')];
+  const friendFilterEmpty = document.querySelector('[data-profile-friends-filter-empty]');
+
+  friendFilterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const filter = button.dataset.profileFriendFilter || 'all';
+      setActiveFilter(friendFilterButtons, button);
+      let visible = 0;
+
+      friendCards.forEach((card) => {
+        const matches = filter === 'all'
+          || (filter === 'online' && card.dataset.friendOnline === '1')
+          || (filter === 'ready' && card.dataset.friendReady === '1');
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+
+      if (friendFilterEmpty) friendFilterEmpty.hidden = visible > 0;
+    });
+  });
+
+  const momentSortButtons = [...document.querySelectorAll('[data-profile-moment-sort]')];
+  const momentGallery = document.querySelector('[data-profile-moment-gallery]');
+
+  momentSortButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!momentGallery) return;
+      const mode = button.dataset.profileMomentSort || 'newest';
+      setActiveFilter(momentSortButtons, button);
+      const cards = [...momentGallery.querySelectorAll('[data-profile-moment-card]')];
+
+      cards.sort((left, right) => {
+        const leftDate = Number(left.dataset.momentPublished || 0);
+        const rightDate = Number(right.dataset.momentPublished || 0);
+        const leftLikes = Number(left.dataset.momentLikes || 0);
+        const rightLikes = Number(right.dataset.momentLikes || 0);
+
+        if (mode === 'popular') return rightLikes - leftLikes || rightDate - leftDate;
+        if (mode === 'oldest') return leftDate - rightDate;
+        return rightDate - leftDate;
+      });
+
+      cards.forEach((card) => momentGallery.appendChild(card));
+    });
+  });
+
+  const badgeFilterButtons = [...document.querySelectorAll('[data-profile-badge-filter]')];
+  const badgeCards = [...document.querySelectorAll('[data-profile-badge-card]')];
+  const badgeFilterEmpty = document.querySelector('[data-profile-badges-filter-empty]');
+
+  badgeFilterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const filter = button.dataset.profileBadgeFilter || 'all';
+      setActiveFilter(badgeFilterButtons, button);
+      let visible = 0;
+
+      badgeCards.forEach((card) => {
+        const rarity = card.dataset.badgeRarity || 'common';
+        const matches = filter === 'all'
+          || (filter === 'rare' && ['rare', 'epic', 'legendary'].includes(rarity))
+          || (filter === 'recent' && card.dataset.badgeRecent === '1');
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+
+      if (badgeFilterEmpty) badgeFilterEmpty.hidden = visible > 0;
+    });
+  });
+
   activateProfileTab('posts');
 })();
