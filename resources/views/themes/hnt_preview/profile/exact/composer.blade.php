@@ -1,3 +1,9 @@
+@php
+    $composerUser = auth()->user();
+    $composerName = trim((string) ($composerUser?->name ?: $composerUser?->username ?: 'HNT Hunter'));
+    $composerHandle = $composerUser?->username ? '@'.$composerUser->username : '@hunter';
+    $composerAvatar = $composerUser?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+@endphp
 <div aria-hidden="true" class="post-composer-backdrop" id="postComposerModal">
 <section aria-labelledby="postComposerTitle" aria-modal="true" class="post-composer-modal" role="dialog">
 <header class="post-composer-head">
@@ -11,7 +17,7 @@
 <span>Öffentlich</span>
 <svg class="composer-chevron"><use href="#i-chevron"></use></svg>
 </button>
-<button aria-label="Post-Composer schließen" class="post-composer-close" id="postComposerClose">
+<button aria-label="Post-Composer schließen" class="post-composer-close" id="postComposerClose" type="button">
 <svg><use href="#i-x"></use></svg>
 </button>
 </div>
@@ -19,12 +25,12 @@
 <div class="post-composer-body">
 <div class="composer-identity">
 <div class="composer-avatar">
-<img alt="Valentina" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg') }}"/>
+<img alt="{{ $composerName }}" src="{{ $composerAvatar }}"/>
 <i></i>
 </div>
 <div>
-<strong>Valentina</strong>
-<span>@valentina</span>
+<strong>{{ $composerName }}</strong>
+<span>{{ $composerHandle }}</span>
 </div>
 </div>
 <div aria-label="Post-Typ" class="composer-types" role="tablist">
@@ -43,18 +49,7 @@
 <strong>Teile Gedanken, Updates oder einen kurzen Bericht.</strong>
 </div>
 </section>
-<div class="composer-attachment" hidden="" id="composerAttachment">
-<div class="composer-attachment-preview">
-<div>
-<span>MEDIEN-VORSCHAU</span>
-<strong>Bayou moment.jpg</strong>
-<small>1920 × 1080 · 2,4 MB</small>
-</div>
-<button aria-label="Anhang entfernen" id="removeComposerAttachment" type="button">
-<svg><use href="#i-x"></use></svg>
-</button>
-</div>
-</div>
+<div class="composer-attachment" hidden id="composerAttachment"></div>
 <div class="composer-tools">
 <span>Zum Post hinzufügen</span>
 <div>
