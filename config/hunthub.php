@@ -33,6 +33,8 @@ return [
         // Dedicated, reversible switch for the finished dashboard feed only.
         // This does not enable the preview theme for profile, settings, LFG or other pages.
         'dashboard_feed_live' => (bool) env('HNT_DASHBOARD_FEED_LIVE', false),
+        // Dedicated switch for the new cream dashboard profile on /profile and /u/{username}.
+        'profile_redesign_live' => (bool) env('HNT_PROFILE_REDESIGN_LIVE', false),
         // Separate kill switch for replacing real feature pages with theme views.
         // This keeps theme previews safe while the real /feed remains unchanged by default.
         'feed_enabled' => (bool) env('HH_THEME_FEED_ENABLED', false),
@@ -99,119 +101,18 @@ return [
 
     'ai_content_disclosure' => [
         'enabled' => (bool) env('HH_AI_CONTENT_DISCLOSURE_ENABLED', true),
-        'images' => (bool) env('HH_AI_CONTENT_DISCLOSURE_IMAGES', true),
-        'videos' => (bool) env('HH_AI_CONTENT_DISCLOSURE_VIDEOS', true),
-        'possible_threshold' => (float) env('HH_AI_CONTENT_DISCLOSURE_THRESHOLD', 0.72),
-        'model' => env('HH_AI_CONTENT_DISCLOSURE_MODEL', 'gpt-5-nano'),
-        'fallback_model' => env('HH_AI_CONTENT_DISCLOSURE_FALLBACK_MODEL', 'gpt-4o-mini'),
-        'timeout' => (int) env('HH_AI_CONTENT_DISCLOSURE_TIMEOUT', 20),
-        'max_files' => (int) env('HH_AI_CONTENT_DISCLOSURE_MAX_FILES', 4),
-        'image_max_side' => (int) env('HH_AI_CONTENT_DISCLOSURE_IMAGE_MAX_SIDE', 768),
-        'image_jpeg_quality' => (int) env('HH_AI_CONTENT_DISCLOSURE_IMAGE_JPEG_QUALITY', 72),
-        'ffmpeg_binary' => env('HH_AI_CONTENT_DISCLOSURE_FFMPEG_BINARY', 'ffmpeg'),
-        'video_sample_seconds' => (array_values(array_filter(array_map(
-            static fn ($value): int => max(0, (int) trim($value)),
-            explode(',', (string) env('HH_AI_CONTENT_DISCLOSURE_VIDEO_SAMPLE_SECONDS', '1,4,8'))
-        ))) ?: [1, 4, 8]),
-        'openai_api_key' => env('HH_AI_DISCLOSURE_OPENAI_API_KEY')
-            ?: (env('HH_TRANSLATION_OPENAI_API_KEY')
-            ?: (env('HH_OPENAI_API_KEY')
-            ?: (env('OPENAI_API_KEY')
-            ?: (env('HH_MEDIA_OPENAI_API_KEY')
-            ?: env('HH_CUP_OPENAI_API_KEY'))))),
+        'require_label' => (bool) env('HH_AI_CONTENT_DISCLOSURE_REQUIRE_LABEL', true),
+        'allow_user_opt_out' => (bool) env('HH_AI_CONTENT_DISCLOSURE_ALLOW_USER_OPT_OUT', false),
     ],
 
-    'feed_video_transcoding' => [
-        'enabled' => (bool) env('HH_FEED_VIDEO_TRANSCODING_ENABLED', true),
-        'queue' => env('HH_VIDEO_TRANSCODING_QUEUE', env('HH_FEED_VIDEO_TRANSCODING_QUEUE', 'media')),
-        'ffmpeg_binary' => env('HH_VIDEO_FFMPEG_BINARY', env('HH_FEED_VIDEO_FFMPEG_BINARY', env('HH_MEDIA_MODERATION_FFMPEG_BINARY', 'ffmpeg'))),
-        'ffprobe_binary' => env('HH_VIDEO_FFPROBE_BINARY', env('HH_FEED_VIDEO_FFPROBE_BINARY', 'ffprobe')),
-        'max_width' => max(240, (int) env('HH_FEED_VIDEO_MAX_WIDTH', 1280)),
-        'max_height' => max(240, (int) env('HH_FEED_VIDEO_MAX_HEIGHT', 1280)),
-        'fps' => max(15, min(60, (int) env('HH_FEED_VIDEO_FPS', 30))),
-        'crf' => max(18, min(35, (int) env('HH_FEED_VIDEO_CRF', 24))),
-        'preset' => env('HH_FEED_VIDEO_PRESET', 'medium'),
-        'audio_bitrate' => env('HH_FEED_VIDEO_AUDIO_BITRATE', '128k'),
-        'thumbnail_width' => max(360, (int) env('HH_FEED_VIDEO_THUMBNAIL_WIDTH', 720)),
-        'generate_thumbnail' => (bool) env('HH_FEED_VIDEO_GENERATE_THUMBNAIL', true),
-        'delete_original' => (bool) env('HH_FEED_VIDEO_DELETE_ORIGINAL', true),
-        'timeout' => max(60, (int) env('HH_FEED_VIDEO_TRANSCODING_TIMEOUT', 900)),
-    ],
-
-    'moment_video_transcoding' => [
-        'enabled' => (bool) env('HH_MOMENT_VIDEO_TRANSCODING_ENABLED', true),
-        'queue' => env('HH_VIDEO_TRANSCODING_QUEUE', env('HH_MOMENT_VIDEO_TRANSCODING_QUEUE', 'media')),
-        'ffmpeg_binary' => env('HH_VIDEO_FFMPEG_BINARY', env('HH_MOMENT_VIDEO_FFMPEG_BINARY', env('HH_MEDIA_MODERATION_FFMPEG_BINARY', 'ffmpeg'))),
-        'ffprobe_binary' => env('HH_VIDEO_FFPROBE_BINARY', env('HH_MOMENT_VIDEO_FFPROBE_BINARY', 'ffprobe')),
-        'width' => max(360, (int) env('HH_MOMENT_VIDEO_WIDTH', 720)),
-        'height' => max(640, (int) env('HH_MOMENT_VIDEO_HEIGHT', 1280)),
-        'fps' => max(15, min(60, (int) env('HH_MOMENT_VIDEO_FPS', 30))),
-        'crf' => max(18, min(35, (int) env('HH_MOMENT_VIDEO_CRF', 24))),
-        'preset' => env('HH_MOMENT_VIDEO_PRESET', 'medium'),
-        'audio_bitrate' => env('HH_MOMENT_VIDEO_AUDIO_BITRATE', '128k'),
-        'thumbnail_width' => max(360, (int) env('HH_MOMENT_VIDEO_THUMBNAIL_WIDTH', 720)),
-        'generate_thumbnail' => (bool) env('HH_MOMENT_VIDEO_GENERATE_THUMBNAIL', true),
-        'delete_original' => (bool) env('HH_MOMENT_VIDEO_DELETE_ORIGINAL', true),
-        'timeout' => max(60, (int) env('HH_MOMENT_VIDEO_TRANSCODING_TIMEOUT', 900)),
-    ],
-
-    'media_image_optimization' => [
-        'enabled' => (bool) env('HH_MEDIA_IMAGE_OPTIMIZATION_ENABLED', true),
-        'convert_to_webp' => (bool) env('HH_MEDIA_IMAGE_OPTIMIZATION_CONVERT_TO_WEBP', true),
-        'max_width' => max(480, (int) env('HH_MEDIA_IMAGE_OPTIMIZATION_MAX_WIDTH', 1600)),
-        'max_height' => max(480, (int) env('HH_MEDIA_IMAGE_OPTIMIZATION_MAX_HEIGHT', 1600)),
-        'jpeg_quality' => max(50, min(95, (int) env('HH_MEDIA_IMAGE_OPTIMIZATION_JPEG_QUALITY', 78))),
-        'webp_quality' => max(50, min(95, (int) env('HH_MEDIA_IMAGE_OPTIMIZATION_WEBP_QUALITY', 78))),
-        'png_compression' => max(0, min(9, (int) env('HH_MEDIA_IMAGE_OPTIMIZATION_PNG_COMPRESSION', 7))),
-        'min_savings_bytes' => max(0, (int) env('HH_MEDIA_IMAGE_OPTIMIZATION_MIN_SAVINGS_BYTES', 32768)),
-        'max_source_pixels' => max(1000000, (int) env('HH_MEDIA_IMAGE_OPTIMIZATION_MAX_SOURCE_PIXELS', 32000000)),
-        'excluded_contexts' => array_values(array_filter(array_map(
-            static fn ($value): string => trim((string) $value),
-            explode(',', (string) env('HH_MEDIA_IMAGE_OPTIMIZATION_EXCLUDED_CONTEXTS', 'cups/screenshots'))
-        ))),
-    ],
-
-    'media_moderation' => [
-        'enabled' => (bool) env('HH_MEDIA_MODERATION_ENABLED', false),
-        'images' => (bool) env('HH_MEDIA_MODERATION_IMAGES', true),
-        'videos' => (bool) env('HH_MEDIA_MODERATION_VIDEOS', true),
-        'texts' => (bool) env('HH_MEDIA_MODERATION_TEXTS', true),
-        'block_on_error' => (bool) env('HH_MEDIA_MODERATION_BLOCK_ON_ERROR', false),
-        'block_review' => (bool) env('HH_MEDIA_MODERATION_BLOCK_REVIEW', false),
-        'block_confidence' => (float) env('HH_MEDIA_MODERATION_BLOCK_CONFIDENCE', 0.74),
-        'model' => env('HH_MEDIA_MODERATION_MODEL', 'gpt-4o-mini'),
-        'timeout' => (int) env('HH_MEDIA_MODERATION_TIMEOUT', 30),
-        'ffmpeg_binary' => env('HH_MEDIA_MODERATION_FFMPEG_BINARY', 'ffmpeg'),
-        'video_sample_seconds' => (array_values(array_filter(array_map(
-            static fn ($value): int => max(0, (int) trim($value)),
-            explode(',', (string) env('HH_MEDIA_MODERATION_VIDEO_SAMPLE_SECONDS', '1,3,7'))
-        ))) ?: [1, 3, 7]),
-        'openai_api_key' => env('HH_MEDIA_OPENAI_API_KEY')
-            ?: (env('HH_OPENAI_API_KEY')
-            ?: (env('OPENAI_API_KEY')
-            ?: env('HH_CUP_OPENAI_API_KEY'))),
-    ],
-
-    'upload_limits' => [
-        // Alle Größenwerte werden in der .env in Megabyte gesetzt.
-        // Laravel-Validatoren erwarten intern Kilobyte, deshalb werden sie hier umgerechnet.
-        'profile_avatar_kb' => $uploadMb('HH_UPLOAD_PROFILE_AVATAR_MB', 2),
-        'profile_cover_kb' => $uploadMb('HH_UPLOAD_PROFILE_COVER_MB', 4),
-        'team_avatar_kb' => $uploadMb('HH_UPLOAD_TEAM_AVATAR_MB', 2),
-        'team_cover_kb' => $uploadMb('HH_UPLOAD_TEAM_COVER_MB', 4),
-        'feed_media_kb' => $uploadMb('HH_UPLOAD_FEED_MEDIA_MB', 100),
-        'feed_media_count' => $uploadCount('HH_UPLOAD_FEED_MEDIA_COUNT', 12),
-        'comment_media_kb' => 10 * 1024,
-        'comment_media_count' => 4,
-        'team_feed_media_kb' => $uploadMb('HH_UPLOAD_TEAM_FEED_MEDIA_MB', 100),
-        'team_feed_media_count' => $uploadCount('HH_UPLOAD_TEAM_FEED_MEDIA_COUNT', 12),
-        'media_library_file_kb' => $uploadMb('HH_UPLOAD_MEDIA_LIBRARY_FILE_MB', 50),
-        'media_library_count' => $uploadCount('HH_UPLOAD_MEDIA_LIBRARY_COUNT', 10),
-        'moment_video_kb' => $uploadMb('HH_UPLOAD_MOMENT_VIDEO_MB', 200),
-        'moment_cover_kb' => $uploadMb('HH_UPLOAD_MOMENT_COVER_MB', 8),
-        'cup_cover_kb' => $uploadMb('HH_UPLOAD_CUP_COVER_MB', 6),
-        'cup_submission_screenshot_kb' => $uploadMb('HH_UPLOAD_CUP_SUBMISSION_SCREENSHOT_MB', 10),
-        'gamification_icon_kb' => $uploadMb('HH_UPLOAD_GAMIFICATION_ICON_MB', 2),
-        'loadout_challenge_media_kb' => $uploadMb('HH_UPLOAD_LOADOUT_CHALLENGE_MEDIA_MB', 100),
+    'uploads' => [
+        'avatar_kb' => $uploadMb('HH_UPLOAD_AVATAR_MB', 5),
+        'cover_kb' => $uploadMb('HH_UPLOAD_COVER_MB', 8),
+        'post_image_kb' => $uploadMb('HH_UPLOAD_POST_IMAGE_MB', 12),
+        'post_video_kb' => $uploadMb('HH_UPLOAD_POST_VIDEO_MB', 80),
+        'moment_video_kb' => $uploadMb('HH_UPLOAD_MOMENT_VIDEO_MB', 120),
+        'message_attachment_kb' => $uploadMb('HH_UPLOAD_MESSAGE_ATTACHMENT_MB', 25),
+        'max_post_media' => $uploadCount('HH_UPLOAD_MAX_POST_MEDIA', 6),
+        'max_message_attachments' => $uploadCount('HH_UPLOAD_MAX_MESSAGE_ATTACHMENTS', 5),
     ],
 ];
