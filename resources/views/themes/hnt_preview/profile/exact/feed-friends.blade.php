@@ -1,66 +1,50 @@
-<section class="profile-tab-panel" data-profile-panel="friends" hidden="" id="profileTabFriends" role="tabpanel">
+@php
+    $profileFriendsLive = collect($profileFriendsPreview ?? []);
+@endphp
+<section class="profile-tab-panel" data-profile-panel="friends" hidden id="profileTabFriends" role="tabpanel">
 <div class="profile-panel-toolbar">
-<div><span>128 FREUNDE</span><strong>Freundesliste</strong></div>
-<div class="profile-panel-filters">
-<button class="active" data-toast="Alle Freunde">Alle</button>
-<button data-toast="Online-Freunde">Online</button>
-<button data-toast="Ready Lobby Freunde">Ready</button>
+<div><span>{{ $profileFormatCount($profileFriendsCount ?? $profileFriendsLive->count()) }} FREUNDE</span><strong>Freundesliste</strong></div>
+<div class="profile-panel-filters" aria-label="Freunde filtern">
+<button class="active" data-profile-friend-filter="all" type="button">Alle</button>
+<button data-profile-friend-filter="online" type="button">Online</button>
+<button data-profile-friend-filter="ready" type="button">Ready</button>
 </div>
 </div>
-<div class="profile-friends-grid">
-<article class="profile-friend-card">
-<div class="friend-avatar"><img alt="Katy Fuller" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/katy.jpg') }}"/><i></i></div>
-<div><strong>Katy Fuller</strong><span>@katy · Online</span><small>EU · Console · Competitive</small></div>
-<span class="friend-state ready">Ready</span>
+<div class="profile-friends-grid" data-profile-friends-grid>
+@forelse($profileFriendsLive as $friend)
+@php
+    $friendProfile = $friend->profile;
+    $friendName = trim((string) ($friend->name ?: $friend->username ?: 'HNT Hunter'));
+    $friendHandle = $friend->username ? '@'.$friend->username : '@hunter';
+    $friendAvatar = $friend->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+    $friendOnline = $friend->allowsOnlineStatusVisibility($viewer) && $friend->isOnline();
+    $friendReady = (bool) ($friendProfile?->is_lfg_available ?? false);
+    $friendState = $friendReady ? 'ready' : ($friendOnline ? 'online' : 'offline');
+    $friendStateLabel = $friendReady ? 'Ready' : ($friendOnline ? 'Online' : 'Offline');
+    $friendMeta = collect([$friendProfile?->region, $friendProfile?->platform, $friendProfile?->playstyle])->filter()->join(' · ');
+    $friendProfileUrl = $viewer?->is($friend) ? route('profile.show') : route('profile.public', $friend);
+    $friendMessageUrl = $viewer && ! $viewer->is($friend) && \Illuminate\Support\Facades\Route::has('messages.with-user')
+        ? route('messages.with-user', $friend)
+        : null;
+@endphp
+<article class="profile-friend-card" data-profile-friend-card data-friend-online="{{ $friendOnline ? '1' : '0' }}" data-friend-ready="{{ $friendReady ? '1' : '0' }}">
+<a class="friend-avatar" href="{{ $friendProfileUrl }}"><img alt="{{ $friendName }}" src="{{ $friendAvatar }}"/>@if($friendOnline)<i></i>@endif</a>
+<div><strong>{{ $friendName }}</strong><span>{{ $friendHandle }} · {{ $friendOnline ? 'Online' : 'Offline' }}</span><small>{{ $friendMeta !== '' ? $friendMeta : 'HNT.ROCKS Hunter' }}</small></div>
+<span class="friend-state {{ $friendState }}">{{ $friendStateLabel }}</span>
 <div class="friend-actions">
-<button data-toast="Nachricht an Katy"><svg><use href="#i-comment"></use></svg> Nachricht</button>
-<button data-toast="Katy in Ready Lobby eingeladen"><svg><use href="#i-users"></use></svg></button>
+@if($friendMessageUrl)
+<a href="{{ $friendMessageUrl }}"><svg><use href="#i-comment"></use></svg> Nachricht</a>
+@endif
+<a aria-label="Profil von {{ $friendName }} öffnen" href="{{ $friendProfileUrl }}"><svg><use href="#i-arrow"></use></svg></a>
 </div>
 </article>
-<article class="profile-friend-card">
-<div class="friend-avatar"><img alt="Jonathan Kelly" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/><i></i></div>
-<div><strong>Jonathan Kelly</strong><span>@jonathan · Online</span><small>EU · Console · Teamplayer</small></div>
-<span class="friend-state online">Online</span>
-<div class="friend-actions">
-<button data-toast="Nachricht an Jonathan"><svg><use href="#i-comment"></use></svg> Nachricht</button>
-<button data-toast="Jonathan in Ready Lobby eingeladen"><svg><use href="#i-users"></use></svg></button>
+@empty
+<div class="profile-tab-empty profile-friends-empty">
+<strong>Noch keine Freunde</strong>
+<p>Angenommene Freundschaften erscheinen hier.</p>
+<a href="{{ route('members.index') }}">Hunter entdecken <svg><use href="#i-arrow"></use></svg></a>
 </div>
-</article>
-<article class="profile-friend-card">
-<div class="friend-avatar"><img alt="Sarah Page" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/sarah.jpg') }}"/></div>
-<div><strong>Sarah Page</strong><span>@sarah · vor 18 Min.</span><small>EU · PC · Ruhige Runden</small></div>
-<span class="friend-state offline">Offline</span>
-<div class="friend-actions">
-<button data-toast="Nachricht an Sarah"><svg><use href="#i-comment"></use></svg> Nachricht</button>
-<button data-toast="Sarahs Profil geöffnet"><svg><use href="#i-arrow"></use></svg></button>
+@endforelse
 </div>
-</article>
-<article class="profile-friend-card">
-<div class="friend-avatar"><img alt="Erica Wyatt" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/><i></i></div>
-<div><strong>Erica Wyatt</strong><span>@erica · Online</span><small>EU · Console · Cup-Team</small></div>
-<span class="friend-state ready">Ready</span>
-<div class="friend-actions">
-<button data-toast="Nachricht an Erica"><svg><use href="#i-comment"></use></svg> Nachricht</button>
-<button data-toast="Erica in Ready Lobby eingeladen"><svg><use href="#i-users"></use></svg></button>
-</div>
-</article>
-<article class="profile-friend-card">
-<div class="friend-avatar"><img alt="Noah Brandt" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/team-1.jpg') }}"/></div>
-<div><strong>Noah Brandt</strong><span>@noah · vor 2 Std.</span><small>EU · PC · Guide-Autor</small></div>
-<span class="friend-state offline">Offline</span>
-<div class="friend-actions">
-<button data-toast="Nachricht an Noah"><svg><use href="#i-comment"></use></svg> Nachricht</button>
-<button data-toast="Noahs Profil geöffnet"><svg><use href="#i-arrow"></use></svg></button>
-</div>
-</article>
-<article class="profile-friend-card">
-<div class="friend-avatar"><img alt="Mara Voss" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/team-2.jpg') }}"/><i></i></div>
-<div><strong>Mara Voss</strong><span>@mara · Online</span><small>EU · Console · Moments</small></div>
-<span class="friend-state online">Online</span>
-<div class="friend-actions">
-<button data-toast="Nachricht an Mara"><svg><use href="#i-comment"></use></svg> Nachricht</button>
-<button data-toast="Mara in Ready Lobby eingeladen"><svg><use href="#i-users"></use></svg></button>
-</div>
-</article>
-</div>
+<div class="profile-filter-empty" data-profile-friends-filter-empty hidden>Für diesen Filter wurden keine Freunde gefunden.</div>
 </section>
