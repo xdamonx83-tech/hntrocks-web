@@ -15,7 +15,7 @@
 </head>
 <body data-page="profile">
 @include('themes.hnt_preview.partials.icons')
-<main class="app-shell profile-page-shell">
+<main class="app-shell feed-shell profile-page-shell">
 @include('themes.hnt_preview.partials.header')
 @include('themes.hnt_preview.profile.exact.heading')
 <section class="profile-page-layout">
