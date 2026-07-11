@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\AddSecurityHeaders::class,
             \App\Http\Middleware\PreviewDashboardStreak::class,
             \App\Http\Middleware\PreviewDashboardCommunity::class,
+            \App\Http\Middleware\PreviewDashboardHeader::class,
         ]);
 
         $middleware->alias([
