@@ -33,7 +33,7 @@
     if (document.querySelector('script[data-real-dashboard-agenda]')) return;
 
     const script = document.createElement('script');
-    script.src = `${base}real-dashboard-agenda.js?v=20260711-2`;
+    script.src = `${base}real-dashboard-agenda.js?v=20260711-3`;
     script.dataset.realDashboardAgenda = '1';
     script.defer = true;
     document.body.appendChild(script);
