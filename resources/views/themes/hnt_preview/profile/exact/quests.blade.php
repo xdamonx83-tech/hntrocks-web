@@ -1,98 +1,76 @@
+@php
+    $profileQuests = collect($profileQuestPreview ?? [])->take(4)->values();
+    $profileQuestClasses = ['quest-weekly', 'quest-daily', 'quest-moments', 'quest-social'];
+    $profileQuestIcons = ['i-check', 'i-sliders', 'i-image', 'i-users'];
+@endphp
 <aside class="profile-section-nav profile-browser-column profile-quest-column">
 <div class="profile-quest-list">
-<article class="profile-quest-card quest-weekly">
+@forelse($profileQuests as $index => $quest)
+@php
+    $questProgress = $quest->progress->first();
+    $questTarget = max(1, (int) ($quest->target_count ?? 1));
+    $questCurrent = min($questTarget, max(0, (int) ($questProgress?->progress_count ?? 0)));
+    $questPercent = (int) min(100, round(($questCurrent / $questTarget) * 100));
+    $questClass = $profileQuestClasses[$index] ?? 'quest-weekly';
+    $questIcon = $profileQuestIcons[$index] ?? 'i-check';
+    $questLabel = $quest->is_weekly_contract
+        ? 'WOCHENAUFTRAG'
+        : match ($quest->period) {
+            'daily' => 'TAGESAUFGABE',
+            'weekly' => 'WOCHENAUFGABE',
+            'monthly' => 'MONATSAUFGABE',
+            default => strtoupper((string) ($quest->category ?: 'AUFGABE')),
+        };
+    $questDescription = trim((string) $quest->displayDescription(app()->getLocale()));
+    if ($questDescription === '') {
+        $questDescription = $quest->actionLabel();
+    }
+    $questTimeLabel = $quest->contract_ends_at && $quest->contract_ends_at->isFuture()
+        ? 'Noch '.$quest->contract_ends_at->diffForHumans(now(), true)
+        : $quest->periodLabel();
+@endphp
+<article class="profile-quest-card {{ $questClass }}">
+<div class="profile-quest-head">
+<span class="profile-quest-icon"><svg><use href="#{{ $questIcon }}"></use></svg></span>
+<div>
+<span>{{ $questLabel }}</span>
+<h2>{{ $quest->displayName(app()->getLocale()) }}</h2>
+</div>
+<a aria-label="{{ $quest->displayName(app()->getLocale()) }} öffnen" class="profile-quest-arrow" href="{{ route('gamification.index') }}">
+<svg><use href="#i-arrow"></use></svg>
+</a>
+</div>
+<p>{{ $questDescription }}</p>
+<div class="profile-quest-meta">
+<strong>{{ $questCurrent }} / {{ $questTarget }}</strong>
+<span>{{ $questPercent }}%</span>
+</div>
+<div class="profile-quest-progress"><i style="width:{{ $questPercent }}%"></i></div>
+<footer>
+<span>{{ $questTimeLabel }}</span>
+<strong>+{{ (int) $quest->xp_reward }} XP</strong>
+</footer>
+</article>
+@empty
+<article class="profile-quest-card quest-weekly profile-quest-empty">
 <div class="profile-quest-head">
 <span class="profile-quest-icon"><svg><use href="#i-check"></use></svg></span>
-<div>
-<span>WOCHENAUFTRAG</span>
-<h2>Bayou Contractor</h2>
+<div><span>AUFGABEN</span><h2>Alles erledigt</h2></div>
+<a aria-label="Aufgaben öffnen" class="profile-quest-arrow" href="{{ route('gamification.index') }}"><svg><use href="#i-arrow"></use></svg></a>
 </div>
-<button aria-label="Bayou Contractor öffnen" class="profile-quest-arrow" data-toast="Bayou Contractor geöffnet">
-<svg><use href="#i-arrow"></use></svg>
-</button>
-</div>
-<p>Extrahiere erfolgreich mit einem Kopfgeld.</p>
-<div class="profile-quest-meta">
-<strong>25 / 100</strong>
-<span>25%</span>
-</div>
-<div class="profile-quest-progress"><i style="width:25%"></i></div>
-<footer>
-<span>Noch 2 Tage</span>
-<strong>+50 Rocks</strong>
-</footer>
+<p>Aktuell sind keine offenen Aufgaben vorhanden.</p>
+<div class="profile-quest-meta"><strong>0 / 0</strong><span>100%</span></div>
+<div class="profile-quest-progress"><i style="width:100%"></i></div>
+<footer><span>Erledigt</span><strong>Sauber!</strong></footer>
 </article>
-<article class="profile-quest-card quest-daily">
-<div class="profile-quest-head">
-<span class="profile-quest-icon"><svg><use href="#i-sliders"></use></svg></span>
-<div>
-<span>TAGESAUFGABE</span>
-<h2>Hunter Eliminations</h2>
-</div>
-<button aria-label="Hunter Eliminations öffnen" class="profile-quest-arrow" data-toast="Hunter Eliminations geöffnet">
-<svg><use href="#i-arrow"></use></svg>
-</button>
-</div>
-<p>Eliminiere gegnerische Hunter in Bounty Hunt.</p>
-<div class="profile-quest-meta">
-<strong>18 / 25</strong>
-<span>72%</span>
-</div>
-<div class="profile-quest-progress"><i style="width:72%"></i></div>
-<footer>
-<span>Heute</span>
-<strong>+30 Rocks</strong>
-</footer>
-</article>
-<article class="profile-quest-card quest-moments">
-<div class="profile-quest-head">
-<span class="profile-quest-icon"><svg><use href="#i-image"></use></svg></span>
-<div>
-<span>COMMUNITY</span>
-<h2>Moments Creator</h2>
-</div>
-<button aria-label="Moments Creator öffnen" class="profile-quest-arrow" data-toast="Moments Creator geöffnet">
-<svg><use href="#i-arrow"></use></svg>
-</button>
-</div>
-<p>Veröffentliche fünf Moments im Community Feed.</p>
-<div class="profile-quest-meta">
-<strong>2 / 5</strong>
-<span>40%</span>
-</div>
-<div class="profile-quest-progress"><i style="width:40%"></i></div>
-<footer>
-<span>Diese Woche</span>
-<strong>+20 Rocks</strong>
-</footer>
-</article>
-<article class="profile-quest-card quest-social">
-<div class="profile-quest-head">
-<span class="profile-quest-icon"><svg><use href="#i-users"></use></svg></span>
-<div>
-<span>SOZIAL</span>
-<h2>Teamplayer</h2>
-</div>
-<button aria-label="Teamplayer öffnen" class="profile-quest-arrow" data-toast="Teamplayer geöffnet">
-<svg><use href="#i-arrow"></use></svg>
-</button>
-</div>
-<p>Schließe fünf Runden mit Freunden oder deinem Team ab.</p>
-<div class="profile-quest-meta">
-<strong>3 / 5</strong>
-<span>60%</span>
-</div>
-<div class="profile-quest-progress"><i style="width:60%"></i></div>
-<footer>
-<span>Noch 4 Tage</span>
-<strong>Badge + 25 Rocks</strong>
-</footer>
-</article>
+@endforelse
 </div>
 <div class="profile-quest-footer">
-<button data-toast="Alle offenen Aufgaben geöffnet">
-<span><b>4</b> offene Aufgaben</span>
+<form action="{{ route('gamification.index') }}" method="get">
+<button type="submit">
+<span><b>{{ collect($profileQuestPreview ?? [])->count() }}</b> offene Aufgaben</span>
 <span>Alle ansehen <svg><use href="#i-arrow"></use></svg></span>
 </button>
+</form>
 </div>
 </aside>
