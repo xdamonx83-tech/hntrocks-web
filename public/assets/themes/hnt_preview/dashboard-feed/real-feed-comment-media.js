@@ -24,7 +24,7 @@
   }
 })();
 
-/* Load real dashboard blocks. Agenda and community start immediately to remove static demo content. */
+/* Load real dashboard blocks. Agenda, community and header start immediately to remove static demo content. */
 (() => {
   const base = '/assets/themes/hnt_preview/dashboard-feed/';
 
@@ -79,6 +79,16 @@
     document.body.appendChild(script);
   };
 
+  const loadHeader = () => {
+    if (document.querySelector('script[data-real-dashboard-header]')) return;
+
+    const script = document.createElement('script');
+    script.src = `${base}real-dashboard-header.js?v=20260711-1`;
+    script.dataset.realDashboardHeader = '1';
+    script.defer = true;
+    document.body.appendChild(script);
+  };
+
   const loadStreakRocksAndActivity = () => {
     if (document.querySelector('script[data-real-dashboard-streak-rocks]')) return;
 
@@ -101,6 +111,7 @@
 
   loadAgenda();
   loadCommunity();
+  loadHeader();
   loadProgress();
   loadStreakRocksAndActivity();
 })();
