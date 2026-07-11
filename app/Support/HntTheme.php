@@ -22,6 +22,11 @@ class HntTheme
         return (bool) config('hunthub.theme.preview_live', false);
     }
 
+    public static function dashboardFeedLive(): bool
+    {
+        return (bool) config('hunthub.theme.dashboard_feed_live', false);
+    }
+
     public static function feedEnabled(): bool
     {
         if (self::previewLive() || self::previewActive()) {
@@ -133,6 +138,12 @@ class HntTheme
 
     public static function previewActive(?User $user = null): bool
     {
+        if (self::dashboardFeedRequestActive()) {
+            $user ??= self::authenticatedUser();
+
+            return $user instanceof User;
+        }
+
         return self::previewSessionEnabled() && self::previewAvailableFor($user);
     }
 
@@ -259,6 +270,19 @@ class HntTheme
             static fn ($value): string => Str::of((string) $value)->lower()->trim()->toString(),
             (array) config('hunthub.theme.preview.allowed_emails', [])
         ), static fn (string $value): bool => $value !== '')));
+    }
+
+    private static function dashboardFeedRequestActive(): bool
+    {
+        if (! self::dashboardFeedLive()) {
+            return false;
+        }
+
+        try {
+            return (bool) request()->attributes->get('hnt_dashboard_feed_live', false);
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     private static function previewSessionEnabled(): bool
