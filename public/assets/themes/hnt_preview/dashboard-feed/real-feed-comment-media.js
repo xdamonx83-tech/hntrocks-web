@@ -24,3 +24,15 @@
   progress.onerror = loadMediaBridge;
   document.body.appendChild(progress);
 })();
+
+/* Load the first real dashboard-data block without changing the preview controller. */
+(() => {
+  const base = '/assets/themes/hnt_preview/dashboard-feed/';
+  if (document.querySelector('script[data-real-dashboard-progress]')) return;
+
+  const script = document.createElement('script');
+  script.src = `${base}real-dashboard-progress.js?v=20260711-1`;
+  script.dataset.realDashboardProgress = '1';
+  script.defer = true;
+  document.body.appendChild(script);
+})();
