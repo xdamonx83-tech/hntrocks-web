@@ -27,15 +27,16 @@ class DashboardFeedLiveController extends Controller
 
         abort_unless($viewer, 401);
 
+        $seenAt = now();
+
+        // Every live dashboard request is itself a reliable presence signal.
+        // This keeps the online count correct even when a background heartbeat
+        // is throttled or blocked by the browser.
+        DB::table('users')
+            ->where('id', $viewer->id)
+            ->update(['last_seen_at' => $seenAt]);
+
         if ($request->boolean('dashboard_community')) {
-            $seenAt = now();
-
-            // The community refresh itself is a reliable presence signal. This keeps
-            // the online value correct even when a background heartbeat is blocked.
-            DB::table('users')
-                ->where('id', $viewer->id)
-                ->update(['last_seen_at' => $seenAt]);
-
             $community = $this->invokePrivate(
                 app(PreviewDashboardCommunity::class),
                 'communityPayload',
