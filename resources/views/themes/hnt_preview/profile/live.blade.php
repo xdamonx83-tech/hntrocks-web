@@ -79,6 +79,7 @@
 @endif
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live-compose.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live-compose.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live-actions.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live-actions.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-media-viewer.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-media-viewer.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comment-upload-progress.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comment-upload-progress.js')) ?: time() }}"></script>
