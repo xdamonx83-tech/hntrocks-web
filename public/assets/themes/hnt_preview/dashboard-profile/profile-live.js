@@ -1,20 +1,20 @@
 (() => {
-  const profileTabs = [...document.querySelectorAll("[data-profile-tab]")];
-  const profilePanels = [...document.querySelectorAll("[data-profile-panel]")];
-  const profileTabTitle = document.getElementById("profileTabTitle");
-  const profileMainScroller = document.querySelector(".profile-page-main");
+  const profileTabs = [...document.querySelectorAll('[data-profile-tab]')];
+  const profilePanels = [...document.querySelectorAll('[data-profile-panel]')];
+  const profileTabTitle = document.getElementById('profileTabTitle');
+  const profileMainScroller = document.querySelector('.profile-page-main');
 
   function activateProfileTab(tabName, shouldFocus = false) {
     profileTabs.forEach((button) => {
       const active = button.dataset.profileTab === tabName;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-selected", String(active));
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
       if (active && shouldFocus) button.focus();
     });
 
     profilePanels.forEach((panel) => {
       const active = panel.dataset.profilePanel === tabName;
-      panel.classList.toggle("active", active);
+      panel.classList.toggle('active', active);
       panel.hidden = !active;
     });
 
@@ -23,23 +23,53 @@
       profileTabTitle.textContent = activeButton.dataset.title || activeButton.textContent.trim();
     }
 
-    if (profileMainScroller && window.matchMedia("(min-width: 900px)").matches) {
-      const feedTop = document.querySelector(".profile-post-feed")?.offsetTop || 0;
-      profileMainScroller.scrollTo({ top: Math.max(0, feedTop - 8), behavior: "smooth" });
+    if (profileMainScroller && window.matchMedia('(min-width: 900px)').matches) {
+      const feedTop = document.querySelector('.profile-post-feed')?.offsetTop || 0;
+      profileMainScroller.scrollTo({ top: Math.max(0, feedTop - 8), behavior: 'smooth' });
     }
   }
 
   profileTabs.forEach((button) => {
-    button.addEventListener("click", () => activateProfileTab(button.dataset.profileTab));
-    button.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    button.addEventListener('click', () => activateProfileTab(button.dataset.profileTab));
+    button.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
       event.preventDefault();
       const currentIndex = profileTabs.indexOf(button);
-      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
       const nextIndex = (currentIndex + direction + profileTabs.length) % profileTabs.length;
       activateProfileTab(profileTabs[nextIndex].dataset.profileTab, true);
     });
   });
 
-  activateProfileTab("posts");
+  const share = async (url, title = document.title) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+        return;
+      }
+
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        if (typeof window.showToast === 'function') window.showToast('Link kopiert');
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError' && typeof window.showToast === 'function') {
+        window.showToast('Teilen war nicht möglich');
+      }
+    }
+  };
+
+  document.querySelectorAll('[data-profile-share]').forEach((button) => {
+    button.addEventListener('click', () => share(window.location.href));
+  });
+
+  document.querySelectorAll('[data-profile-share-url]').forEach((button) => {
+    button.addEventListener('click', () => share(button.dataset.profileShareUrl || window.location.href, 'HNT.ROCKS Beitrag'));
+  });
+
+  document.getElementById('openEmptyPostComposer')?.addEventListener('click', () => {
+    document.getElementById('openPostComposer')?.click();
+  });
+
+  activateProfileTab('posts');
 })();
