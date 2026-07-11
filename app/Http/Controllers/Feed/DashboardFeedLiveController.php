@@ -11,6 +11,7 @@ use App\Http\Middleware\PreviewDashboardStreak;
 use App\Models\User;
 use App\Services\Economy\CrownDailyStreakService;
 use App\Support\DashboardProgressPayload;
+use App\Support\DashboardPrototypeSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -30,8 +31,6 @@ class DashboardFeedLiveController extends Controller
         $seenAt = now();
 
         // Every live dashboard request is itself a reliable presence signal.
-        // This keeps the online count correct even when a background heartbeat
-        // is throttled or blocked by the browser.
         DB::table('users')
             ->where('id', $viewer->id)
             ->update(['last_seen_at' => $seenAt]);
@@ -110,10 +109,19 @@ class DashboardFeedLiveController extends Controller
 
     private function renderDashboard(Request $request): Response
     {
+        /** @var User $viewer */
         $viewer = $request->user();
         $viewerName = $viewer->name ?: ($viewer->username ?: 'HNT Hunter');
         $viewerHandle = $viewer->username ? '@'.$viewer->username : '@hunter';
         $viewerAvatar = $viewer->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+
+        $initialHeader = $this->invokePrivate(
+            app(PreviewDashboardHeader::class),
+            'payload',
+            [$viewer]
+        );
+        $initialProgress = app(DashboardProgressPayload::class)->forUser($viewer);
+        $initialStreak = app(CrownDailyStreakService::class)->status($viewer);
 
         $html = view('themes.hnt_preview.feed.live')->render();
 
@@ -148,6 +156,14 @@ class DashboardFeedLiveController extends Controller
                 '<title>HNT.rocks — Feed</title>',
             ],
             $html
+        );
+
+        $html = app(DashboardPrototypeSanitizer::class)->sanitize(
+            $html,
+            $viewer,
+            $initialHeader,
+            $initialProgress,
+            $initialStreak
         );
 
         $styles = '<meta name="csrf-token" content="'.e(csrf_token()).'">'
