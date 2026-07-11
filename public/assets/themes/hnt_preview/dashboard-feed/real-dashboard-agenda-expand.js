@@ -1,4 +1,4 @@
-/* Animated expansion for the real HNT agenda card. */
+/* Anchored expansion for the real HNT agenda card. */
 (() => {
   const panel = document.querySelector('.hnt-agenda-panel');
   const trigger = panel?.querySelector('.section-head .circle-button');
@@ -28,22 +28,22 @@
     default: 90,
   };
   const expandedDesktopRows = {
-    message: 88,
-    lfg: 118,
-    cup: 104,
-    contract: 108,
-    challenge: 112,
-    moment: 108,
-    default: 104,
+    message: 64,
+    lfg: 92,
+    cup: 82,
+    contract: 84,
+    challenge: 86,
+    moment: 84,
+    default: 82,
   };
   const expandedMobileRows = {
-    message: 82,
+    message: 80,
     lfg: 108,
-    cup: 98,
-    contract: 102,
-    challenge: 106,
-    moment: 102,
-    default: 98,
+    cup: 96,
+    contract: 98,
+    challenge: 102,
+    moment: 98,
+    default: 96,
   };
 
   let expanded = false;
@@ -52,8 +52,6 @@
   let originNextSibling = null;
   let originRect = null;
   let originalStyle = null;
-  let originalRole = null;
-  let originalAriaModal = null;
   let originalTriggerLabel = trigger.getAttribute('aria-label');
   let backdrop = null;
   let finishTimer = 0;
@@ -72,11 +70,9 @@
         position: fixed;
         inset: 0;
         z-index: 1190;
-        background: rgba(35, 34, 29, .42);
-        backdrop-filter: blur(12px) saturate(.82);
-        -webkit-backdrop-filter: blur(12px) saturate(.82);
+        background: rgba(35, 34, 29, .10);
         opacity: 0;
-        transition: opacity .38s ease;
+        transition: opacity .34s ease;
       }
 
       .hnt-agenda-expand-backdrop.is-visible {
@@ -93,216 +89,162 @@
         max-height: none !important;
         margin: 0 !important;
         transform: translateZ(0);
-        transform-origin: top left;
+        transform-origin: left bottom;
         will-change: top, left, width, height, border-radius, box-shadow;
         transition:
-          top .46s cubic-bezier(.2,.8,.2,1),
-          left .46s cubic-bezier(.2,.8,.2,1),
-          width .46s cubic-bezier(.2,.8,.2,1),
-          height .46s cubic-bezier(.2,.8,.2,1),
-          padding .46s cubic-bezier(.2,.8,.2,1),
-          border-radius .46s cubic-bezier(.2,.8,.2,1),
-          box-shadow .46s cubic-bezier(.2,.8,.2,1),
-          background .3s ease;
+          top .44s cubic-bezier(.2,.8,.2,1),
+          left .44s cubic-bezier(.2,.8,.2,1),
+          width .44s cubic-bezier(.2,.8,.2,1),
+          height .44s cubic-bezier(.2,.8,.2,1),
+          padding .44s cubic-bezier(.2,.8,.2,1),
+          border-radius .44s cubic-bezier(.2,.8,.2,1),
+          box-shadow .44s cubic-bezier(.2,.8,.2,1),
+          background .28s ease;
       }
 
       .hnt-agenda-panel.hnt-agenda-floating.is-expanded {
         overflow-x: hidden !important;
         overflow-y: auto !important;
-        padding: clamp(26px, 3.2vw, 44px) !important;
-        border-radius: 38px !important;
+        padding: 22px 22px 20px !important;
+        border-radius: 31px !important;
         background: rgba(255, 253, 247, .985) !important;
         box-shadow:
-          0 34px 100px rgba(31, 30, 25, .27),
+          0 24px 72px rgba(31, 30, 25, .20),
           0 0 0 1px rgba(255, 255, 255, .72) inset !important;
         scrollbar-width: thin;
       }
 
       .hnt-agenda-panel.hnt-agenda-floating .section-head .circle-button svg {
-        transition: transform .42s cubic-bezier(.2,.8,.2,1);
+        transition: transform .38s cubic-bezier(.2,.8,.2,1);
       }
 
       .hnt-agenda-panel.hnt-agenda-floating.is-expanded .section-head .circle-button svg {
-        transform: rotate(180deg) scale(1.06);
+        transform: rotate(180deg) scale(1.03);
       }
 
       .hnt-agenda-panel.is-expanded .hnt-section-kicker {
-        margin-bottom: 8px !important;
-        font-size: 10px !important;
+        margin-bottom: 5px !important;
+        font-size: 8px !important;
       }
 
       .hnt-agenda-panel.is-expanded .section-head h2 {
-        font-size: clamp(31px, 3.2vw, 48px) !important;
+        font-size: clamp(22px, 2vw, 31px) !important;
         line-height: 1 !important;
-        letter-spacing: -1.4px !important;
+        letter-spacing: -.8px !important;
       }
 
       .hnt-agenda-panel.is-expanded .section-head .circle-button {
-        width: 58px !important;
-        height: 58px !important;
-        flex: 0 0 58px !important;
+        width: 44px !important;
+        height: 44px !important;
+        flex: 0 0 44px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-row {
-        gap: 10px !important;
-        margin-top: 26px !important;
+        gap: 7px !important;
+        margin-top: 18px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-row button {
-        min-height: 64px !important;
-        border-radius: 22px !important;
+        min-height: 48px !important;
+        border-radius: 17px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-row b {
-        font-size: 13px !important;
+        font-size: 10px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-row small {
-        font-size: 10px !important;
+        font-size: 8px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-timeline {
         height: auto !important;
         min-height: 0 !important;
-        grid-template-columns: 82px minmax(0, 1fr) !important;
-        gap: 18px !important;
-        margin-top: 26px !important;
+        grid-template-columns: 58px minmax(0, 1fr) !important;
+        gap: 11px !important;
+        margin-top: 18px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-axis,
       .hnt-agenda-panel.is-expanded .hnt-agenda-items {
-        gap: 12px !important;
+        gap: 8px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-axis span {
-        width: 70px !important;
-        height: 38px !important;
-        border-radius: 20px !important;
-        font-size: 10px !important;
+        width: 52px !important;
+        height: 29px !important;
+        border-radius: 15px !important;
+        font-size: 8px !important;
       }
 
       .hnt-agenda-panel.is-expanded .time-dot {
-        width: 22px !important;
-        height: 22px !important;
-        font-size: 12px !important;
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 10px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-card {
-        gap: 18px !important;
-        padding: 18px 22px !important;
-        border-radius: 24px !important;
+        gap: 10px !important;
+        padding: 12px 14px !important;
+        border-radius: 18px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-copy {
-        gap: 4px !important;
+        gap: 3px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-copy > span {
-        font-size: 9px !important;
+        font-size: 7px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-copy h3 {
-        font-size: 17px !important;
+        font-size: 12px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-copy p {
-        font-size: 12px !important;
+        font-size: 9px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-card > button,
       .hnt-agenda-panel.is-expanded .hnt-agenda-card-footer > button {
-        min-width: 110px !important;
-        height: 46px !important;
-        padding-inline: 18px !important;
-        border-radius: 24px !important;
-        font-size: 12px !important;
+        min-width: 76px !important;
+        height: 34px !important;
+        padding-inline: 12px !important;
+        border-radius: 18px !important;
+        font-size: 9px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-card.highlight > button {
-        width: 50px !important;
-        min-width: 50px !important;
+        width: 38px !important;
+        min-width: 38px !important;
         padding: 0 !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-mini-avatars img {
-        width: 34px !important;
-        height: 34px !important;
+        width: 27px !important;
+        height: 27px !important;
       }
 
       .hnt-agenda-panel.is-expanded .hnt-agenda-progress {
-        right: 22px !important;
-        bottom: 14px !important;
-        left: 22px !important;
-        height: 8px !important;
+        right: 14px !important;
+        bottom: 10px !important;
+        left: 14px !important;
+        height: 6px !important;
       }
 
       @media (max-width: 720px) {
         .hnt-agenda-panel.hnt-agenda-floating.is-expanded {
-          padding: 22px 18px 26px !important;
-          border-radius: 28px !important;
+          padding: 20px 17px 20px !important;
+          border-radius: 27px !important;
         }
 
         .hnt-agenda-panel.is-expanded .section-head h2 {
-          font-size: clamp(28px, 8vw, 38px) !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .section-head .circle-button {
-          width: 50px !important;
-          height: 50px !important;
-          flex-basis: 50px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-row {
-          gap: 6px !important;
-          margin-top: 22px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-row button {
-          min-height: 58px !important;
-          border-radius: 19px !important;
+          font-size: clamp(24px, 7vw, 31px) !important;
         }
 
         .hnt-agenda-panel.is-expanded .hnt-agenda-timeline {
-          grid-template-columns: 64px minmax(0, 1fr) !important;
-          gap: 10px !important;
-          margin-top: 22px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-axis,
-        .hnt-agenda-panel.is-expanded .hnt-agenda-items {
+          grid-template-columns: 56px minmax(0, 1fr) !important;
           gap: 9px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-axis span {
-          width: 58px !important;
-          height: 34px !important;
-          font-size: 9px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-card {
-          gap: 10px !important;
-          padding: 15px 16px !important;
-          border-radius: 21px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-copy > span {
-          font-size: 8px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-copy h3 {
-          font-size: 15px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-copy p {
-          font-size: 10px !important;
-        }
-
-        .hnt-agenda-panel.is-expanded .hnt-agenda-card > button,
-        .hnt-agenda-panel.is-expanded .hnt-agenda-card-footer > button {
-          min-width: 82px !important;
-          height: 42px !important;
-          padding-inline: 14px !important;
-          font-size: 10px !important;
         }
 
         .hnt-agenda-panel.is-expanded .hnt-mini-avatars {
@@ -346,15 +288,30 @@
 
   const targetRect = () => {
     const narrow = window.matchMedia('(max-width: 720px)').matches;
-    const margin = narrow ? 8 : 24;
-    const maxWidth = narrow ? window.innerWidth - (margin * 2) : Math.min(1120, window.innerWidth - (margin * 2));
-    const maxHeight = window.innerHeight - (margin * 2);
+    const margin = narrow ? 8 : 16;
+    const left = Math.max(margin, originRect.left);
+    const bottomGap = Math.max(margin, window.innerHeight - originRect.bottom);
+    const availableWidth = Math.max(originRect.width, window.innerWidth - left - margin);
+    const availableHeight = Math.max(originRect.height, window.innerHeight - bottomGap - margin);
+
+    const preferredWidth = narrow
+      ? window.innerWidth - left - margin
+      : Math.max(originRect.width + 260, originRect.width * 1.72);
+    const width = Math.min(preferredWidth, 840, availableWidth);
+
+    const contentHeight = panel.scrollHeight + 12;
+    const preferredHeight = Math.max(
+      originRect.height,
+      Math.min(contentHeight, originRect.height + 180),
+    );
+    const height = Math.min(preferredHeight, availableHeight);
+    const bottom = window.innerHeight - bottomGap;
 
     return {
-      top: margin,
-      left: Math.max(margin, (window.innerWidth - maxWidth) / 2),
-      width: maxWidth,
-      height: maxHeight,
+      top: Math.max(margin, bottom - height),
+      left,
+      width,
+      height,
     };
   };
 
@@ -365,17 +322,10 @@
     panel.style.height = `${Math.round(rect.height)}px`;
   };
 
-  const restoreAttribute = (name, value) => {
-    if (value === null) panel.removeAttribute(name);
-    else panel.setAttribute(name, value);
-  };
-
   const finishClose = () => {
     window.clearTimeout(finishTimer);
 
     panel.classList.remove('hnt-agenda-floating', 'is-expanded');
-    restoreAttribute('role', originalRole);
-    restoreAttribute('aria-modal', originalAriaModal);
 
     if (originalStyle === null) panel.removeAttribute('style');
     else panel.setAttribute('style', originalStyle);
@@ -394,8 +344,7 @@
     if (originalTriggerLabel === null) trigger.removeAttribute('aria-label');
     else trigger.setAttribute('aria-label', originalTriggerLabel);
 
-    const activeTab = panel.querySelector('.hnt-agenda-row button.active');
-    activeTab?.click();
+    syncRows(false);
     trigger.focus({ preventScroll: true });
   };
 
@@ -408,7 +357,7 @@
     setRect(originRect);
     backdrop?.classList.remove('is-visible');
 
-    finishTimer = window.setTimeout(finishClose, 520);
+    finishTimer = window.setTimeout(finishClose, 500);
   };
 
   const open = () => {
@@ -420,8 +369,6 @@
     originNextSibling = panel.nextSibling;
     originRect = panel.getBoundingClientRect();
     originalStyle = panel.getAttribute('style');
-    originalRole = panel.getAttribute('role');
-    originalAriaModal = panel.getAttribute('aria-modal');
 
     backdrop = document.createElement('div');
     backdrop.className = 'hnt-agenda-expand-backdrop';
@@ -433,11 +380,8 @@
     document.body.classList.add('hnt-agenda-expanded');
 
     panel.classList.add('hnt-agenda-floating');
-    panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-modal', 'true');
-    panel.setAttribute('aria-label', 'Heute und als Nächstes');
     trigger.setAttribute('aria-expanded', 'true');
-    trigger.setAttribute('aria-label', 'Große Aufgabenansicht schließen');
+    trigger.setAttribute('aria-label', 'Aufgabenansicht verkleinern');
 
     panel.style.position = 'fixed';
     panel.style.right = 'auto';
@@ -453,7 +397,7 @@
       backdrop?.classList.add('is-visible');
       finishTimer = window.setTimeout(() => {
         animating = false;
-      }, 500);
+      }, 480);
     });
   };
 
@@ -466,7 +410,7 @@
 
   addStyle();
   trigger.setAttribute('aria-expanded', 'false');
-  trigger.setAttribute('aria-label', 'Große Aufgabenansicht öffnen');
+  trigger.setAttribute('aria-label', 'Aufgabenansicht vergrößern');
   trigger.addEventListener('click', toggle, true);
 
   document.addEventListener('keydown', (event) => {
@@ -477,7 +421,11 @@
   });
 
   const observer = new MutationObserver(() => {
-    if (expanded) window.requestAnimationFrame(() => syncRows(true));
+    if (!expanded) return;
+    window.requestAnimationFrame(() => {
+      syncRows(true);
+      setRect(targetRect());
+    });
   });
   observer.observe(itemsHost, { childList: true });
 
