@@ -29,13 +29,28 @@
 (() => {
   const base = '/assets/themes/hnt_preview/dashboard-feed/';
 
+  const loadAgenda = () => {
+    if (document.querySelector('script[data-real-dashboard-agenda]')) return;
+
+    const script = document.createElement('script');
+    script.src = `${base}real-dashboard-agenda.js?v=20260711-1`;
+    script.dataset.realDashboardAgenda = '1';
+    script.defer = true;
+    document.body.appendChild(script);
+  };
+
   const loadStreakRocksAndActivity = () => {
-    if (document.querySelector('script[data-real-dashboard-streak-rocks]')) return;
+    if (document.querySelector('script[data-real-dashboard-streak-rocks]')) {
+      loadAgenda();
+      return;
+    }
 
     const script = document.createElement('script');
     script.src = `${base}real-dashboard-streak-rocks.js?v=20260711-2`;
     script.dataset.realDashboardStreakRocks = '1';
     script.defer = true;
+    script.onload = loadAgenda;
+    script.onerror = loadAgenda;
     document.body.appendChild(script);
   };
 
