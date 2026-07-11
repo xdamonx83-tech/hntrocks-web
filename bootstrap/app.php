@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrackVisitorEvent::class,
             \App\Http\Middleware\AddSecurityHeaders::class,
             \App\Http\Middleware\PreviewDashboardStreak::class,
+            \App\Http\Middleware\PreviewDashboardCommunity::class,
         ]);
 
         $middleware->alias([
