@@ -58,7 +58,7 @@
     if (document.querySelector('script[data-real-dashboard-community]')) return;
 
     const script = document.createElement('script');
-    script.src = `${base}real-dashboard-community.js?v=20260711-1`;
+    script.src = `${base}real-dashboard-community.js?v=20260711-2`;
     script.dataset.realDashboardCommunity = '1';
     script.defer = true;
     document.body.appendChild(script);
