@@ -1,0 +1,381 @@
+.profile-detail-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(220,214,194,.55);
+  border-radius: 22px;
+  background: rgba(255,255,255,.76);
+}
+
+.profile-detail-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.profile-detail-card > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.profile-detail-card header span,
+.profile-panel-toolbar > div:first-child > span,
+.profile-badge-card > div:nth-child(2) > span {
+  color: #98781d;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.profile-detail-card h3,
+.profile-panel-toolbar strong {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-detail-card header button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f2efe6;
+  cursor: pointer;
+}
+
+.profile-detail-card header svg,
+.profile-friend-card svg,
+.profile-moment-card svg,
+.profile-badge-card svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile-about-card p {
+  margin: 0;
+  color: #6e6a62;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.profile-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.profile-detail-tags span {
+  height: 27px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: rgba(255,213,90,.28);
+  color: #836712;
+  font-size: 8px;
+}
+
+.profile-detail-list {
+  display: grid;
+  margin: 0;
+}
+
+.profile-detail-list div {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px dashed #dfd8c3;
+}
+
+.profile-detail-list div:last-child {
+  border-bottom: 0;
+}
+
+.profile-detail-list dt {
+  color: #98948b;
+  font-size: 8px;
+}
+
+.profile-detail-list dd {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.availability-week {
+  height: 150px;
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+  align-items: end;
+  gap: 7px;
+  padding-top: 8px;
+}
+
+.availability-week span {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 18px minmax(0,1fr) 18px;
+  align-items: end;
+  justify-items: center;
+  gap: 4px;
+}
+
+.availability-week b,
+.availability-week small {
+  font-size: 7px;
+  font-weight: 400;
+}
+
+.availability-week i {
+  width: 12px;
+  min-height: 15px;
+  border-radius: 8px;
+  background: var(--dark);
+}
+
+.availability-week span.active i {
+  background: var(--yellow);
+}
+
+.profile-favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 8px;
+}
+
+.profile-favorite-grid span {
+  min-width: 0;
+  min-height: 66px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 16px;
+  background: #f5f2e9;
+}
+
+.profile-favorite-grid small {
+  color: #99958d;
+  font-size: 7px;
+}
+
+.profile-favorite-grid strong {
+  overflow: hidden;
+  font-size: 9px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.profile-panel-toolbar {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 4px 2px;
+}
+
+.profile-panel-toolbar > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.profile-panel-filters {
+  display: flex;
+  gap: 5px;
+}
+
+.profile-panel-filters button {
+  height: 31px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 16px;
+  background: #f3f0e7;
+  color: #8c887f;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.profile-panel-filters button.active {
+  background: var(--dark);
+  color: white;
+}
+
+.profile-friends-grid,
+.profile-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+
+.profile-friend-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr) auto;
+  grid-template-areas:
+    "avatar copy state"
+    "avatar actions actions";
+  gap: 7px 10px;
+  padding: 13px;
+  border: 1px solid rgba(220,214,194,.55);
+  border-radius: 21px;
+  background: rgba(255,255,255,.76);
+}
+
+.friend-avatar {
+  grid-area: avatar;
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.friend-avatar img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.friend-avatar i {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #7fb728;
+}
+
+.profile-friend-card > div:nth-child(2) {
+  grid-area: copy;
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+}
+
+.profile-friend-card strong {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.profile-friend-card span,
+.profile-friend-card small {
+  overflow: hidden;
+  color: #969189;
+  font-size: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.friend-state {
+  grid-area: state;
+  align-self: start;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 12px;
+  font-size: 7px !important;
+}
+
+.friend-state.ready {
+  background: #fff0bc;
+  color: #886913;
+}
+
+.friend-state.online {
+  background: #e7f4d6;
+  color: #699637;
+}
+
+.friend-state.offline {
+  background: #eceae6;
+  color: #8b8780;
+}
+
+.friend-actions {
+  grid-area: actions;
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.friend-actions button {
+  height: 31px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 16px;
+  background: #f2efe6;
+  color: #69665f;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.friend-actions button:last-child {
+  width: 31px;
+  padding: 0;
+  background: var(--yellow);
+  color: var(--dark);
+}
+
+.profile-moments-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+}
+
+.profile-moment-card {
+  overflow: hidden;
+  border: 1px solid rgba(220,214,194,.55);
+  border-radius: 22px;
+  background: rgba(255,255,255,.76);
+}
+
+.profile-moment-visual {
+  position: relative;
+  min-height: 185px;
+  display: grid;
+  align-content: end;
+  gap: 5px;
+  padding: 17px;
+  color: white;
+}
+
+.profile-moment-card.gold .profile-moment-visual {
+  background: radial-gradient(circle at 82% 20%,rgba(228,185,63,.88),transparent 38%),linear-gradient(135deg,#252622,#3c3d35);
+}
+
+.profile-moment-card.forest .profile-moment-visual {
+  background: radial-gradient(circle at 20% 18%,rgba(130,158,82,.68),transparent 42%),linear-gradient(145deg,#1f2923,#363b31);
+}
+
+.profile-moment-card.red .profile-moment-visual {
+  background: radial-gradient(circle at 82% 18%,rgba(185,83,72,.75),transparent 39%),linear-gradient(145deg,#2c2321,#42342e);
+}
+
+.profile-moment-card.night .profile-moment-visual {
+  background: radial-gradient(circle at 60% 0,rgba(90,102,139,.58),transparent 40%),linear-gradient(145deg,#1d1f25,#33342f);
+}
