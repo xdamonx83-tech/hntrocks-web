@@ -1,0 +1,263 @@
+/* Live post composer + post edit/report for the isolated dashboard preview. */
+
+.post-composer-modal.is-editing .composer-types,
+.post-composer-modal.is-editing .composer-tools #composerLfgButton {
+  display: none;
+}
+
+.composer-attachment[hidden] {
+  display: none !important;
+}
+
+.composer-attachment {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.real-composer-media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.real-composer-media-item {
+  position: relative;
+  min-height: 118px;
+  overflow: hidden;
+  border: 1px solid rgba(41, 38, 29, .12);
+  border-radius: 18px;
+  background: #f4f1e8;
+}
+
+.real-composer-media-item img,
+.real-composer-media-item video {
+  width: 100%;
+  height: 138px;
+  display: block;
+  object-fit: cover;
+}
+
+.real-composer-media-file {
+  height: 138px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.real-composer-media-file strong,
+.real-composer-media-file small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.real-composer-media-item > button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(20, 20, 18, .78);
+  cursor: pointer;
+}
+
+.real-composer-media-item > button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.real-composer-media-note {
+  grid-column: 1 / -1;
+  padding: 13px 15px;
+  border: 1px dashed rgba(41, 38, 29, .18);
+  border-radius: 14px;
+  font-size: 12px;
+  color: #777168;
+  background: rgba(246, 243, 234, .78);
+}
+
+.real-composer-poll {
+  display: grid;
+  gap: 10px;
+}
+
+.real-composer-poll > span {
+  color: #a17814;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.real-composer-poll > strong {
+  font-size: 15px;
+}
+
+.real-composer-poll input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(41, 38, 29, .14);
+  border-radius: 14px;
+  color: #29261f;
+  background: rgba(255, 255, 255, .72);
+  outline: none;
+}
+
+.real-composer-poll input:focus {
+  border-color: rgba(214, 168, 79, .72);
+  box-shadow: 0 0 0 3px rgba(214, 168, 79, .12);
+}
+
+.real-composer-publish-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.real-composer-publish-state::before {
+  width: 14px;
+  height: 14px;
+  content: "";
+  border: 2px solid rgba(41, 38, 29, .18);
+  border-top-color: #29261f;
+  border-radius: 50%;
+  animation: realComposerSpin .7s linear infinite;
+}
+
+@keyframes realComposerSpin {
+  to { transform: rotate(360deg); }
+}
+
+.real-post-report {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.real-post-report[hidden] {
+  display: none !important;
+}
+
+.real-post-report__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 18, 16, .58);
+  backdrop-filter: blur(10px);
+}
+
+.real-post-report__card {
+  position: relative;
+  width: min(480px, 100%);
+  padding: 28px;
+  border: 1px solid rgba(41, 38, 29, .12);
+  border-radius: 28px;
+  background: #fbf8ef;
+  box-shadow: 0 28px 80px rgba(14, 14, 12, .24);
+}
+
+.real-post-report__card > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #a17814;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+
+.real-post-report__card h3 {
+  margin: 0 0 8px;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.real-post-report__card p {
+  margin: 0 0 20px;
+  color: #777168;
+  line-height: 1.55;
+}
+
+.real-post-report__card label {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+  color: #625d54;
+  font-size: 12px;
+}
+
+.real-post-report__card select,
+.real-post-report__card textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid rgba(41, 38, 29, .14);
+  border-radius: 14px;
+  color: #29261f;
+  background: #fff;
+  font: inherit;
+  outline: none;
+}
+
+.real-post-report__card textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.real-post-report__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.real-post-report__actions button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.real-post-report__cancel {
+  color: #625d54;
+  background: #ece8dd;
+}
+
+.real-post-report__submit {
+  color: #fff;
+  background: #2f2f2b;
+}
+
+.real-feed-menu--anchored [data-compose-edit],
+.real-feed-menu--anchored [data-compose-report] {
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 699px) {
+  .real-composer-media-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .real-post-report {
+    padding: 14px;
+  }
+
+  .real-post-report__card {
+    padding: 22px;
+    border-radius: 22px;
+  }
+}
