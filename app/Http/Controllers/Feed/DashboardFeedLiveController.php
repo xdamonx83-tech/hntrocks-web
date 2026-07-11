@@ -9,6 +9,7 @@ use App\Http\Middleware\PreviewDashboardHeader;
 use App\Http\Middleware\PreviewDashboardNoFlash;
 use App\Http\Middleware\PreviewDashboardStreak;
 use App\Services\Economy\CrownDailyStreakService;
+use App\Support\DashboardProgressPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -62,6 +63,12 @@ class DashboardFeedLiveController extends Controller
                     'activityPayload',
                     [(int) $viewer->id]
                 ),
+            ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        if ($request->boolean('dashboard_progress')) {
+            return response()->json([
+                'progress' => app(DashboardProgressPayload::class)->forUser($viewer),
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
@@ -120,7 +127,9 @@ class DashboardFeedLiveController extends Controller
             $html
         );
 
-        $styles = '<meta name="csrf-token" content="'.e(csrf_token()).'">';
+        $styles = '<meta name="csrf-token" content="'.e(csrf_token()).'">'
+            .'<script>window.HNT_DASHBOARD_FEED_LIVE=true;</script>';
+
         foreach ($assets as $asset) {
             $path = public_path('assets/themes/hnt_preview/dashboard-feed/'.$asset);
             $version = is_file($path) ? filemtime($path) : time();
@@ -133,6 +142,14 @@ class DashboardFeedLiveController extends Controller
             $version = is_file($path) ? filemtime($path) : time();
             $javascript .= '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/'.$script).'?v='.$version.'"></script>';
         }
+
+        $heartbeatPath = public_path('assets/socialite/js/hnt-presence-heartbeat.js');
+        $heartbeatVersion = is_file($heartbeatPath) ? filemtime($heartbeatPath) : time();
+        $javascript .= '<script src="'.asset('assets/socialite/js/hnt-presence-heartbeat.js').'?v='.$heartbeatVersion.'"></script>';
+
+        $presenceSyncPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-presence-sync.js');
+        $presenceSyncVersion = is_file($presenceSyncPath) ? filemtime($presenceSyncPath) : time();
+        $javascript .= '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-presence-sync.js').'?v='.$presenceSyncVersion.'"></script>';
 
         $html = str_replace('</head>', $styles.'</head>', $html);
         $html = str_replace('</body>', $javascript.'</body>', $html);
