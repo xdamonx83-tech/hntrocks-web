@@ -3,6 +3,11 @@
   const feedList = document.querySelector('.post-list');
   if (!feedList) return;
 
+  const english = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+  const labels = english
+    ? { post: 'Post', poll: 'Poll', video: 'Video', image: 'Image' }
+    : { post: 'Beitrag', poll: 'Umfrage', video: 'Video', image: 'Bild' };
+
   const classify = (article) => {
     if (!(article instanceof Element) || !article.matches('[data-real-feed-post]')) return;
 
@@ -13,17 +18,17 @@
     const hasVideo = Boolean(article.querySelector('.real-post-video-item, video'));
     const hasMedia = Boolean(article.querySelector('.real-post-media-grid, .profile-real-media-grid'));
 
-    let label = 'Beitrag';
+    let label = labels.post;
     let variant = 'discussion';
 
     if (hasPoll) {
-      label = 'Umfrage';
+      label = labels.poll;
       variant = 'cup';
     } else if (hasVideo) {
-      label = 'Video';
+      label = labels.video;
       variant = 'moment';
     } else if (hasMedia) {
-      label = 'Bild';
+      label = labels.image;
       variant = '';
     }
 
