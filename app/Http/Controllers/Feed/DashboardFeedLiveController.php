@@ -138,6 +138,7 @@ class DashboardFeedLiveController extends Controller
             'real-dashboard-progress-live.js',
             'real-feed-polish.js',
             'real-feed-comments.js',
+            'real-feed-content-badges.js',
         ];
 
         $html = str_replace(
