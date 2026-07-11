@@ -54,13 +54,28 @@
     document.body.appendChild(script);
   };
 
+  const loadCommunityGuard = () => {
+    if (document.querySelector('script[data-real-dashboard-community-guard]')) return;
+
+    const guard = document.createElement('script');
+    guard.src = `${base}real-dashboard-community-guard.js?v=20260711-1`;
+    guard.dataset.realDashboardCommunityGuard = '1';
+    guard.defer = true;
+    document.body.appendChild(guard);
+  };
+
   const loadCommunity = () => {
-    if (document.querySelector('script[data-real-dashboard-community]')) return;
+    if (document.querySelector('script[data-real-dashboard-community]')) {
+      loadCommunityGuard();
+      return;
+    }
 
     const script = document.createElement('script');
-    script.src = `${base}real-dashboard-community.js?v=20260711-2`;
+    script.src = `${base}real-dashboard-community.js?v=20260711-3`;
     script.dataset.realDashboardCommunity = '1';
     script.defer = true;
+    script.onload = loadCommunityGuard;
+    script.onerror = loadCommunityGuard;
     document.body.appendChild(script);
   };
 
