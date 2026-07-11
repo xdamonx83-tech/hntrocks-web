@@ -1,0 +1,204 @@
+/* Interaction and media polish for the isolated dashboard feed preview. */
+.real-feed-post {
+  overflow: visible !important;
+}
+
+.real-feed-menu--anchored {
+  position: absolute;
+  z-index: 120;
+  width: 190px;
+  opacity: 0;
+  transform: translateY(-4px) scale(.985);
+  transform-origin: top right;
+  transition: opacity .14s ease, transform .14s ease;
+}
+
+.real-feed-menu--anchored.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.real-feed-confirm[hidden] {
+  display: none;
+}
+
+.real-feed-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.real-feed-confirm__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(35, 34, 30, .48);
+  backdrop-filter: blur(12px);
+}
+
+.real-feed-confirm__dialog {
+  position: relative;
+  width: min(430px, 100%);
+  padding: 34px;
+  border: 1px solid rgba(214, 208, 188, .82);
+  border-radius: 28px;
+  background: #fffdf7;
+  box-shadow: 0 28px 90px rgba(45, 42, 32, .2);
+  color: #2f302d;
+}
+
+.real-feed-confirm__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f4f1e7;
+  color: #3a3934;
+  font: inherit;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.real-feed-confirm__kicker {
+  display: block;
+  margin-bottom: 12px;
+  color: #b64e44;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .13em;
+}
+
+.real-feed-confirm__dialog h2 {
+  max-width: 320px;
+  margin: 0 0 12px;
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.real-feed-confirm__dialog p {
+  margin: 0;
+  color: #817d72;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.real-feed-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.real-feed-confirm__actions button {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.real-feed-confirm__cancel {
+  border: 1px solid rgba(214, 208, 188, .82);
+  background: #fffdf7;
+  color: #4f4d47;
+}
+
+.real-feed-confirm__delete {
+  border: 1px solid #b64e44;
+  background: #b64e44;
+  color: #fff;
+}
+
+.real-feed-confirm__delete:disabled {
+  cursor: wait;
+  opacity: .66;
+}
+
+body.real-feed-confirm-open {
+  overflow: hidden;
+}
+
+/* Compact multi-media presentation. Single media keeps the existing wide
+   preview; galleries use controlled rows instead of image intrinsic height. */
+.real-post-media-grid.real-post-media-count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: clamp(210px, 23vw, 330px);
+}
+
+.real-post-media-grid.real-post-media-count-3,
+.real-post-media-grid.real-post-media-count-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: clamp(145px, 15vw, 215px);
+}
+
+.real-post-media-count-2 .real-post-media-item,
+.real-post-media-count-3 .real-post-media-item,
+.real-post-media-count-4 .real-post-media-item {
+  min-height: 0 !important;
+  height: 100%;
+}
+
+.real-post-media-count-3 .real-post-media-item:first-child {
+  grid-row: span 2;
+}
+
+.real-post-media-count-2 img,
+.real-post-media-count-2 video,
+.real-post-media-count-3 img,
+.real-post-media-count-3 video,
+.real-post-media-count-4 img,
+.real-post-media-count-4 video {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+@media (max-width: 899px) {
+  .real-feed-menu--anchored {
+    width: min(200px, calc(100% - 28px));
+  }
+
+  .real-feed-confirm {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .real-feed-confirm__dialog {
+    width: 100%;
+    padding: 28px 22px 22px;
+    border-radius: 26px;
+  }
+
+  .real-feed-confirm__dialog h2 {
+    padding-right: 36px;
+    font-size: 22px;
+  }
+
+  .real-feed-confirm__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .real-feed-confirm__delete {
+    order: -1;
+  }
+
+  .real-post-media-grid.real-post-media-count-2 {
+    grid-template-rows: min(42vw, 220px);
+  }
+
+  .real-post-media-grid.real-post-media-count-3,
+  .real-post-media-grid.real-post-media-count-4 {
+    grid-auto-rows: min(31vw, 160px);
+  }
+}

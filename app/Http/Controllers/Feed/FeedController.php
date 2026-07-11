@@ -13,6 +13,7 @@ use App\Models\MediaAsset;
 use App\Models\Quest;
 use App\Models\Report;
 use App\Models\Team;
+use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\Gifs\GifProviderService;
 use App\Services\MediaService;

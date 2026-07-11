@@ -25,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\TrackVisitorEvent::class,
             \App\Http\Middleware\AddSecurityHeaders::class,
+            \App\Http\Middleware\PreviewDashboardStreak::class,
+            \App\Http\Middleware\PreviewDashboardCommunity::class,
+            \App\Http\Middleware\PreviewDashboardHeader::class,
+            \App\Http\Middleware\PreviewDashboardNoFlash::class,
         ]);
 
         $middleware->alias([

@@ -197,6 +197,13 @@ class HntTheme
         $candidates = [];
 
         foreach (array_unique([self::active(), self::fallback()]) as $theme) {
+            // The dashboard prototype is a private, session-bound admin preview.
+            // Never let a production theme/fallback ENV accidentally expose it
+            // (or trigger its intentional 404 guard) for normal users.
+            if ($theme === 'hnt_preview' && ! self::previewActive()) {
+                continue;
+            }
+
             $candidates[] = self::themeViewName($view, $theme);
         }
 
