@@ -1,4 +1,17 @@
 (() => {
+  const ensureSharedHeaderStyles = () => {
+    const href = '/assets/themes/hnt_preview/dashboard-feed/feed.css';
+    if ([...document.styleSheets].some((sheet) => sheet.href?.includes(href))) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `${href}?v=${Date.now()}`;
+    link.dataset.hntSharedHeaderStyles = '1';
+    document.head.appendChild(link);
+  };
+
+  ensureSharedHeaderStyles();
+
   const tabs = [...document.querySelectorAll('[data-profile-tab]')];
   const panels = [...document.querySelectorAll('[data-profile-panel]')];
   const title = document.getElementById('profileTabTitle');
