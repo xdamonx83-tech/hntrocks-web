@@ -83,12 +83,16 @@ class AdminThemePreviewController extends Controller
         $liveScriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-live.js');
         $polishStylePath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css');
         $polishScriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.js');
+        $commentsStylePath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css');
+        $commentsScriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js');
         $styleVersion = is_file($stylePath) ? filemtime($stylePath) : time();
         $scriptVersion = is_file($scriptPath) ? filemtime($scriptPath) : time();
         $liveStyleVersion = is_file($liveStylePath) ? filemtime($liveStylePath) : time();
         $liveScriptVersion = is_file($liveScriptPath) ? filemtime($liveScriptPath) : time();
         $polishStyleVersion = is_file($polishStylePath) ? filemtime($polishStylePath) : time();
         $polishScriptVersion = is_file($polishScriptPath) ? filemtime($polishScriptPath) : time();
+        $commentsStyleVersion = is_file($commentsStylePath) ? filemtime($commentsStylePath) : time();
+        $commentsScriptVersion = is_file($commentsScriptPath) ? filemtime($commentsScriptPath) : time();
 
         $html = str_replace(
             [
@@ -111,14 +115,16 @@ class AdminThemePreviewController extends Controller
             '<meta name="csrf-token" content="' . e(csrf_token()) . '">' .
             '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.css') . '?v=' . $styleVersion . '" rel="stylesheet">' .
             '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css') . '?v=' . $liveStyleVersion . '" rel="stylesheet">' .
-            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css') . '?v=' . $polishStyleVersion . '" rel="stylesheet"></head>',
+            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css') . '?v=' . $polishStyleVersion . '" rel="stylesheet">' .
+            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css') . '?v=' . $commentsStyleVersion . '" rel="stylesheet"></head>',
             $html
         );
         $html = str_replace(
             '</body>',
             '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.js') . '?v=' . $liveScriptVersion . '"></script>' .
             '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.js') . '?v=' . $scriptVersion . '"></script>' .
-            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.js') . '?v=' . $polishScriptVersion . '"></script></body>',
+            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.js') . '?v=' . $polishScriptVersion . '"></script>' .
+            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js') . '?v=' . $commentsScriptVersion . '"></script></body>',
             $html
         );
 
@@ -129,6 +135,11 @@ class AdminThemePreviewController extends Controller
     {
         $viewer = $request->user();
         $viewerId = (int) $viewer->id;
+
+        if ($request->filled('post_id')) {
+            return $this->dashboardPostData($request, $viewerId);
+        }
+
         $mode = $request->query('mode') === 'following' ? 'following' : 'for-you';
         $page = max(1, min(100, (int) $request->query('page', 1)));
         $perPage = 6;
@@ -151,6 +162,7 @@ class AdminThemePreviewController extends Controller
                 'media.mediaAsset',
                 'comments.user.profile',
                 'comments.reactions',
+                'comments.viewerReaction',
                 'viewerReaction',
                 'viewerBookmark',
                 'poll.options.votes',
@@ -235,7 +247,32 @@ class AdminThemePreviewController extends Controller
         ]);
     }
 
-    private function serializePreviewPost(FeedPost $post, int $viewerId): array
+    private function dashboardPostData(Request $request, int $viewerId): JsonResponse
+    {
+        $post = FeedPost::query()
+            ->with([
+                'user.profile',
+                'team',
+                'media.mediaAsset',
+                'comments.user.profile',
+                'comments.reactions',
+                'comments.viewerReaction',
+                'viewerReaction',
+                'viewerBookmark',
+                'poll.options.votes',
+                'poll.votes',
+            ])
+            ->withCount(['comments', 'reactions', 'bookmarks', 'sharedByPosts as shares_count'])
+            ->findOrFail((int) $request->query('post_id'));
+
+        abort_unless($post->status === 'published' && $post->canBeViewedBy($request->user()), 404);
+
+        return response()->json([
+            'post' => $this->serializePreviewPost($post, $viewerId, true),
+        ]);
+    }
+
+    private function serializePreviewPost(FeedPost $post, int $viewerId, bool $allComments = false): array
     {
         $author = $post->user;
         $poll = $post->poll;
@@ -281,17 +318,39 @@ class AdminThemePreviewController extends Controller
             ];
         }
 
+        $viewerIsAdmin = (bool) request()->user()?->isAdmin();
+        $commentLimit = $allComments ? 200 : 8;
         $comments = $post->comments
-            ->take(8)
-            ->map(fn ($comment): array => [
-                'id' => (int) $comment->id,
-                'name' => $comment->user?->name ?: ($comment->user?->username ?: 'HNT Hunter'),
-                'handle' => $comment->user?->username ? '@' . $comment->user->username : '@hunter',
-                'time' => $comment->created_at?->diffForHumans() ?: 'gerade eben',
-                'avatar' => $comment->user?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'),
-                'text' => trim((string) $comment->body),
-                'likes' => $comment->reactions->count(),
-            ])
+            ->take($commentLimit)
+            ->map(function ($comment) use ($viewerId, $viewerIsAdmin, $post): array {
+                $isOwner = (int) $comment->user_id === $viewerId;
+
+                return [
+                    'id' => (int) $comment->id,
+                    'parent_id' => $comment->parent_id ? (int) $comment->parent_id : null,
+                    'root_id' => $comment->parent_id ? (int) $comment->parent_id : (int) $comment->id,
+                    'is_reply' => (bool) $comment->parent_id,
+                    'name' => $comment->user?->name ?: ($comment->user?->username ?: 'HNT Hunter'),
+                    'handle' => $comment->user?->username ? '@' . $comment->user->username : '@hunter',
+                    'time' => $comment->created_at?->diffForHumans() ?: 'gerade eben',
+                    'created_at' => $comment->created_at?->toIso8601String(),
+                    'avatar' => $comment->user?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'),
+                    'text' => trim((string) $comment->body),
+                    'likes' => $comment->reactions->count(),
+                    'reacted' => (bool) $comment->viewerReaction,
+                    'viewer' => [
+                        'can_edit' => $isOwner,
+                        'can_delete' => $isOwner || $viewerIsAdmin || (int) $post->user_id === $viewerId,
+                        'can_report' => ! $isOwner,
+                    ],
+                    'routes' => [
+                        'reaction' => route('feed.comments.reactions.toggle', $comment),
+                        'update' => route('feed.comments.update', $comment),
+                        'delete' => route('feed.comments.destroy', $comment),
+                        'report' => route('reports.store'),
+                    ],
+                ];
+            })
             ->values();
 
         return [
@@ -327,14 +386,18 @@ class AdminThemePreviewController extends Controller
                 'reaction_type' => $post->viewerReaction?->type,
                 'bookmarked' => (bool) $post->viewerBookmark,
                 'is_owner' => (int) $post->user_id === $viewerId,
+                'can_edit' => (int) $post->user_id === $viewerId,
                 'can_delete' => (int) $post->user_id === $viewerId || (bool) request()->user()?->isAdmin(),
+                'can_report' => (int) $post->user_id !== $viewerId,
             ],
             'routes' => [
                 'reaction' => route('feed.reactions.toggle', $post),
                 'bookmark' => route('feed.bookmarks.toggle', $post),
                 'poll' => route('feed.poll.vote', $post),
                 'comments' => route('feed.comments.store', $post),
+                'update' => route('feed.update', $post),
                 'delete' => route('feed.destroy', $post),
+                'report' => route('reports.store'),
             ],
             'media' => $media,
             'poll' => $pollPayload,
