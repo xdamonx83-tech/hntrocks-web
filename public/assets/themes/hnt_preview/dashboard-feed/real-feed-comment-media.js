@@ -28,13 +28,29 @@
 (() => {
   const base = '/assets/themes/hnt_preview/dashboard-feed/';
 
+  const loadAgendaExpand = () => {
+    if (document.querySelector('script[data-real-dashboard-agenda-expand]')) return;
+
+    const script = document.createElement('script');
+    script.src = `${base}real-dashboard-agenda-expand.js?v=20260711-1`;
+    script.dataset.realDashboardAgendaExpand = '1';
+    script.defer = true;
+    document.body.appendChild(script);
+  };
+
   const loadAgenda = () => {
-    if (document.querySelector('script[data-real-dashboard-agenda]')) return;
+    const existing = document.querySelector('script[data-real-dashboard-agenda]');
+    if (existing) {
+      loadAgendaExpand();
+      return;
+    }
 
     const script = document.createElement('script');
     script.src = `${base}real-dashboard-agenda.js?v=20260711-4`;
     script.dataset.realDashboardAgenda = '1';
     script.defer = true;
+    script.onload = loadAgendaExpand;
+    script.onerror = loadAgendaExpand;
     document.body.appendChild(script);
   };
 
