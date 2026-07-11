@@ -108,7 +108,6 @@ class DashboardFeedLiveController extends Controller
                 '>Valentina<',
                 '@valentina',
                 asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg'),
-                '<meta content="noindex,nofollow,noarchive" name="robots"/>',
                 '<title>HNT.rocks — Feed Preview</title>',
             ],
             [
@@ -116,7 +115,6 @@ class DashboardFeedLiveController extends Controller
                 '>'.e($viewerName).'<',
                 e($viewerHandle),
                 e($viewerAvatar),
-                '<meta content="index,follow" name="robots"/>',
                 '<title>HNT.rocks — Feed</title>',
             ],
             $html
