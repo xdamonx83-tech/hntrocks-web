@@ -11,6 +11,7 @@
     $postAuthorAvatar = $postAuthor?->avatarUrl() ?: $profileAvatarUrl;
     $postUrl = $post->permalink();
     $postMedia = $post->relationLoaded('media') ? $post->media->values() : collect();
+    $postMediaCount = min(4, $postMedia->count());
     $postPoll = $post->relationLoaded('poll') ? $post->poll : null;
     $postPollOptions = $postPoll && $postPoll->relationLoaded('options') ? $postPoll->options : collect();
     $postPollVotes = $postPoll && $postPoll->relationLoaded('votes') ? $postPoll->votes : collect();
@@ -46,10 +47,10 @@
 </a>
 @endif
 @if($postMedia->isNotEmpty())
-<div class="profile-real-media-grid profile-real-media-count-{{ min(4, $postMedia->count()) }}">
+<div class="profile-real-media-grid real-post-media-grid profile-real-media-count-{{ $postMediaCount }} real-post-media-count-{{ $postMediaCount }}">
 @foreach($postMedia->take(4) as $media)
 @php $mediaUrl = $media->url(); @endphp
-<a class="profile-real-media-item {{ $media->isVideo() ? 'is-video' : '' }}" href="{{ $postUrl }}">
+<a class="profile-real-media-item real-post-media-item {{ $media->isVideo() ? 'is-video real-post-video-item' : '' }}" href="{{ $postUrl }}">
 @if($media->isImage())
 <img alt="{{ $media->original_name ?: 'Beitragsbild' }}" loading="lazy" src="{{ $mediaUrl }}"/>
 @elseif($media->isVideo())
@@ -58,14 +59,14 @@
 <span>Datei öffnen</span>
 @endif
 @if($loop->last && $postMedia->count() > 4)
-<b class="profile-real-media-more">+{{ $postMedia->count() - 4 }}</b>
+<b class="profile-real-media-more real-post-media-more">+{{ $postMedia->count() - 4 }}</b>
 @endif
 </a>
 @endforeach
 </div>
 @elseif($postGif)
-<a class="profile-real-media-grid profile-real-media-count-1" href="{{ $postUrl }}">
-<span class="profile-real-media-item"><img alt="{{ $postGif['title'] ?: 'GIF' }}" loading="lazy" src="{{ $postGif['gif_url'] }}"/></span>
+<a class="profile-real-media-grid real-post-media-grid profile-real-media-count-1 real-post-media-count-1" href="{{ $postUrl }}">
+<span class="profile-real-media-item real-post-media-item"><img alt="{{ $postGif['title'] ?: 'GIF' }}" loading="lazy" src="{{ $postGif['gif_url'] }}"/></span>
 </a>
 @endif
 @if($postPoll && $postPollOptions->isNotEmpty())
