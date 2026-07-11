@@ -21,18 +21,19 @@
     $postBookmarkActive = $post->relationLoaded('viewerBookmark') && (bool) $post->viewerBookmark;
     $postFeeling = method_exists($post, 'feelingMeta') ? $post->feelingMeta() : null;
     $postGif = method_exists($post, 'gifPayload') ? $post->gifPayload() : null;
-    $postBadge = $postPoll
-        ? 'Umfrage'
-        : ($postMedia->contains(fn ($media) => $media->isVideo()) ? 'Video' : ($postMedia->isNotEmpty() || $postGif ? 'Bild' : 'Beitrag'));
+    $postHasVideo = $postMedia->contains(fn ($media) => $media->isVideo());
+    $postHasImage = $postMedia->contains(fn ($media) => $media->isImage()) || $postGif;
+    $postBadge = $postPoll ? 'Umfrage' : ($postHasVideo ? 'Video' : ($postHasImage ? 'Bild' : 'Beitrag'));
+    $postBadgeClass = $postPoll ? 'cup' : ($postHasVideo ? 'moment' : ($postHasImage ? '' : 'discussion'));
 @endphp
-<article class="social-post profile-real-post" data-profile-post-id="{{ $post->id }}">
+<article class="social-post real-feed-post profile-real-post" data-profile-post-id="{{ $post->id }}" data-real-feed-post="{{ $post->id }}" data-real-permalink="{{ $postUrl }}">
 <header class="post-head">
 <img alt="{{ $postAuthorName }}" src="{{ $postAuthorAvatar }}"/>
 <div class="post-author">
 <strong>{{ $postAuthorName }}</strong>
 <span>{{ $postAuthorHandle }} · {{ $post->created_at?->diffForHumans() }}@if($postFeeling) · {{ trim(($postFeeling['emoji'] ?? '').' '.($postFeeling['label'] ?? '')) }}@endif</span>
 </div>
-<span class="post-badge">{{ $postBadge }}</span>
+<span class="post-badge {{ $postBadgeClass }}">{{ $postBadge }}</span>
 <a aria-label="Beitrag öffnen" class="post-more" href="{{ $postUrl }}"><svg><use href="#i-arrow"></use></svg></a>
 </header>
 <div class="post-body">
@@ -85,7 +86,7 @@
 </div>
 <footer class="post-actions">
 <a class="{{ $post->viewerReaction ? 'is-active' : '' }}" href="{{ $postUrl }}"><svg><use href="#i-heart"></use></svg><span>{{ $profileFormatCount($postReactionCount) }}</span></a>
-<a href="{{ $postUrl }}"><svg><use href="#i-comment"></use></svg><span>{{ $profileFormatCount($postCommentCount) }}</span></a>
+<button aria-label="Kommentare öffnen" class="comment-button" data-real-preview-comments type="button"><svg><use href="#i-comment"></use></svg><span>{{ $profileFormatCount($postCommentCount) }}</span></button>
 <button data-profile-share-url="{{ $postUrl }}" type="button"><svg><use href="#i-share"></use></svg><span>Teilen</span></button>
 <a aria-label="Beitrag {{ $postBookmarkActive ? 'gespeichert' : 'speichern' }}" class="profile-post-save {{ $postBookmarkActive ? 'is-active' : '' }}" href="{{ $postUrl }}"><svg><use href="#i-bookmark"></use></svg></a>
 </footer>
