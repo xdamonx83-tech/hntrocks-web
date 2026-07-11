@@ -8,11 +8,13 @@ use App\Http\Middleware\PreviewDashboardCommunity;
 use App\Http\Middleware\PreviewDashboardHeader;
 use App\Http\Middleware\PreviewDashboardNoFlash;
 use App\Http\Middleware\PreviewDashboardStreak;
+use App\Models\User;
 use App\Services\Economy\CrownDailyStreakService;
 use App\Support\DashboardProgressPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use ReflectionMethod;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -26,12 +28,31 @@ class DashboardFeedLiveController extends Controller
         abort_unless($viewer, 401);
 
         if ($request->boolean('dashboard_community')) {
+            $seenAt = now();
+
+            // The community refresh itself is a reliable presence signal. This keeps
+            // the online value correct even when a background heartbeat is blocked.
+            DB::table('users')
+                ->where('id', $viewer->id)
+                ->update(['last_seen_at' => $seenAt]);
+
+            $community = $this->invokePrivate(
+                app(PreviewDashboardCommunity::class),
+                'communityPayload',
+                [$viewer]
+            );
+
+            $onlineWindowSeconds = max(User::ONLINE_WINDOW_SECONDS, 180);
+            $community['online_now'] = max(
+                1,
+                User::query()
+                    ->whereNotNull('last_seen_at')
+                    ->where('last_seen_at', '>=', $seenAt->copy()->subSeconds($onlineWindowSeconds))
+                    ->count()
+            );
+
             return response()->json([
-                'community' => $this->invokePrivate(
-                    app(PreviewDashboardCommunity::class),
-                    'communityPayload',
-                    [$viewer]
-                ),
+                'community' => $community,
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
