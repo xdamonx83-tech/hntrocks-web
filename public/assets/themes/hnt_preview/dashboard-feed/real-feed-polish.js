@@ -258,3 +258,16 @@
     document.body.appendChild(script);
   }
 })();
+
+/* Load existing comment media and the real comment image uploader. */
+(() => {
+  const base = '/assets/themes/hnt_preview/dashboard-feed/';
+
+  if (!document.querySelector('script[data-real-comment-media]')) {
+    const script = document.createElement('script');
+    script.src = `${base}real-feed-comment-media.js?v=20260711-3`;
+    script.dataset.realCommentMedia = '1';
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+})();
