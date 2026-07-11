@@ -79,7 +79,33 @@
     document.body.appendChild(script);
   };
 
+  const ensureHeaderFooterContrast = () => {
+    if (document.getElementById('real-dashboard-header-footer-contrast')) return;
+
+    const style = document.createElement('style');
+    style.id = 'real-dashboard-header-footer-contrast';
+    style.textContent = `
+      .header-dropdown a.header-dropdown-footer,
+      .header-dropdown button.header-dropdown-footer {
+        color: #fff !important;
+      }
+
+      .header-dropdown .header-dropdown-footer svg,
+      .header-dropdown .header-dropdown-footer svg * {
+        color: #fff !important;
+        stroke: currentColor !important;
+      }
+
+      .header-dropdown .header-dropdown-footer:hover,
+      .header-dropdown .header-dropdown-footer:focus-visible {
+        color: #fff !important;
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
   const loadHeader = () => {
+    ensureHeaderFooterContrast();
     if (document.querySelector('script[data-real-dashboard-header]')) return;
 
     const script = document.createElement('script');
