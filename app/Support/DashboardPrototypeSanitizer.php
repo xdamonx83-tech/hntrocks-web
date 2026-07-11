@@ -38,11 +38,7 @@ class DashboardPrototypeSanitizer
         $handle = $this->escape($viewer->username ? '@'.$viewer->username : '@hunter');
         $avatar = $this->escape($viewer->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'));
 
-        $html = str_replace(
-            ['Valentina', '@valentina'],
-            [$name, $handle],
-            $html
-        );
+        $html = str_replace(['Valentina', '@valentina'], [$name, $handle], $html);
 
         $html = str_replace(
             [
@@ -72,17 +68,17 @@ class DashboardPrototypeSanitizer
 
         $html = $this->replaceOne(
             '~<div class="header-request-list">.*?(?=<button class="header-dropdown-footer")~s',
-            '<div class="header-request-list">'.$friends.'</div>\n',
+            "<div class=\"header-request-list\">{$friends}</div>\n",
             $html
         );
         $html = $this->replaceOne(
             '~<div class="header-message-list">.*?(?=<button class="header-dropdown-footer")~s',
-            '<div class="header-message-list">'.$messages.'</div>\n',
+            "<div class=\"header-message-list\">{$messages}</div>\n",
             $html
         );
         $html = $this->replaceOne(
             '~<div class="header-notification-list">.*?(?=<button class="header-dropdown-footer")~s',
-            '<div class="header-notification-list">'.$notifications.'</div>\n',
+            "<div class=\"header-notification-list\">{$notifications}</div>\n",
             $html
         );
 
@@ -147,6 +143,7 @@ HTML;
         $handle = $this->escape($profile['handle'] ?? '@hunter');
         $avatar = $this->escape($profile['avatar'] ?? asset('assets/vikinger/img/default-avatar.svg'));
         $level = max(1, (int) ($profile['level'] ?? 1));
+        $nextLevel = $level + 1;
         $levelProgress = max(0, min(100, (int) ($progress['level_progress'] ?? 0)));
         $rocks = max(0, (int) ($profile['rocks'] ?? 0));
         $friends = max(0, (int) ($profile['friends'] ?? 0));
@@ -168,7 +165,7 @@ HTML;
 <div class="profile-level">
 <div class="level-row"><span>Level {$level}</span><strong>{$levelProgress}%</strong></div>
 <div class="level-bar"><i style="width:{$levelProgress}%"></i></div>
-<small>Fortschritt zu Level {$levelNext = $level + 1}</small>
+<small>Fortschritt zu Level {$nextLevel}</small>
 </div>
 <div class="profile-links">
 <button><svg><use href="#i-user"></use></svg><span>Profil</span></button>
@@ -387,7 +384,7 @@ HTML;
     {
         return $this->replaceOne(
             '~<div class="post-list">.*?</div>\s*</section>\s*</div>\s*</section>(?=\s*<div aria-hidden="true" class="mobile-stats-panel")~s',
-            '<div class="post-list"></div>\n</section>\n</div>\n</section>',
+            "<div class=\"post-list\"></div>\n</section>\n</div>\n</section>",
             $html
         );
     }
@@ -423,11 +420,12 @@ HTML;
 HTML;
 
         $html = $this->replaceOne('~<article class="comments-post-context">.*?</article>~s', $context, $html);
+        $composerMarkup = '<form class="comments-composer" id="commentsComposer">'
+            .'<img alt="'.$name.'" src="'.$avatar.'"/>';
         $html = $this->replaceOne(
-            '~(<form class="comments-composer" id="commentsComposer">\s*)<img[^>]*>~s',
-            '$1<img alt="'.$name.'" src="'.$avatar.'"/>',
-            $html,
-            false
+            '~<form class="comments-composer" id="commentsComposer">\s*<img[^>]*>~s',
+            $composerMarkup,
+            $html
         );
 
         return $html;
