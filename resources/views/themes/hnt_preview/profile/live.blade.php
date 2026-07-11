@@ -38,6 +38,8 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live.css')) ?: time() }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed.css')) ?: time() }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css')) ?: time() }}" rel="stylesheet"/>
 </head>
 <body data-page="profile">
 @include('themes.hnt_preview.partials.icons')
