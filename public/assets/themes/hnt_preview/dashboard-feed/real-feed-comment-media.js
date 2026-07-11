@@ -144,7 +144,9 @@
     if (document.querySelector('script[data-real-dashboard-progress]')) return;
 
     const script = document.createElement('script');
-    script.src = `${base}real-dashboard-progress.js?v=20260711-1`;
+    script.src = window.HNT_DASHBOARD_FEED_LIVE === true
+      ? `${base}real-dashboard-progress-live.js?v=20260711-1`
+      : `${base}real-dashboard-progress.js?v=20260711-1`;
     script.dataset.realDashboardProgress = '1';
     script.defer = true;
     document.body.appendChild(script);
