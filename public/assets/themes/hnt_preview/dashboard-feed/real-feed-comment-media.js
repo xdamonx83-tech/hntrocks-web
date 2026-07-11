@@ -104,14 +104,29 @@
     document.head.appendChild(style);
   };
 
+  const loadHeaderLive = () => {
+    if (document.querySelector('script[data-real-dashboard-header-live]')) return;
+
+    const live = document.createElement('script');
+    live.src = `${base}real-dashboard-header-live.js?v=20260711-1`;
+    live.dataset.realDashboardHeaderLive = '1';
+    live.defer = true;
+    document.body.appendChild(live);
+  };
+
   const loadHeader = () => {
     ensureHeaderFooterContrast();
-    if (document.querySelector('script[data-real-dashboard-header]')) return;
+    if (document.querySelector('script[data-real-dashboard-header]')) {
+      loadHeaderLive();
+      return;
+    }
 
     const script = document.createElement('script');
     script.src = `${base}real-dashboard-header.js?v=20260711-1`;
     script.dataset.realDashboardHeader = '1';
     script.defer = true;
+    script.onload = loadHeaderLive;
+    script.onerror = loadHeaderLive;
     document.body.appendChild(script);
   };
 
