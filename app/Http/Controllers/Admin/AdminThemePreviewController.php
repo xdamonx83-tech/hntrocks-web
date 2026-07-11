@@ -32,7 +32,7 @@ class AdminThemePreviewController extends Controller
             'previewAvailable' => HntTheme::previewAvailableFor($user),
             'previewRestrictionConfigured' => HntTheme::previewRestrictionConfigured(),
             'allowedUserIds' => HntTheme::previewAllowedUserIds(),
-            'allowedEmails' => HntTheme::previewAllowedUserEmails(),
+            'allowedEmails' => HntTheme::previewAllowedEmails(),
             'allowAnyAdmin' => (bool) config('hunthub.theme.preview.allow_any_admin', false),
             'sessionKey' => HntTheme::PREVIEW_SESSION_KEY,
             'sampleResolutions' => $this->sampleResolutions(),
