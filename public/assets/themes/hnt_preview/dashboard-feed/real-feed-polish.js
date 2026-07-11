@@ -218,3 +218,22 @@
     closeMenu();
   });
 })();
+
+/* Load the live composer as an isolated optional enhancement. */
+(() => {
+  const base = '/assets/themes/hnt_preview/dashboard-feed/';
+  if (!document.querySelector('link[data-real-feed-compose]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `${base}real-feed-compose.css?v=20260711-1`;
+    link.dataset.realFeedCompose = '1';
+    document.head.appendChild(link);
+  }
+  if (!document.querySelector('script[data-real-feed-compose]')) {
+    const script = document.createElement('script');
+    script.src = `${base}real-feed-compose.js?v=20260711-1`;
+    script.dataset.realFeedCompose = '1';
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+})();
