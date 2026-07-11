@@ -18,6 +18,7 @@
     $postPollVoteTotal = $postPollVotes->count();
     $postReactionCount = (int) ($post->reactions_count ?? ($post->relationLoaded('reactions') ? $post->reactions->count() : 0));
     $postCommentCount = (int) ($post->comments_count ?? ($post->relationLoaded('comments') ? $post->comments->count() : 0));
+    $postReactionActive = $post->relationLoaded('viewerReaction') && (bool) $post->viewerReaction;
     $postBookmarkActive = $post->relationLoaded('viewerBookmark') && (bool) $post->viewerBookmark;
     $postFeeling = method_exists($post, 'feelingMeta') ? $post->feelingMeta() : null;
     $postGif = method_exists($post, 'gifPayload') ? $post->gifPayload() : null;
@@ -85,10 +86,10 @@
 @endif
 </div>
 <footer class="post-actions">
-<a class="{{ $post->viewerReaction ? 'is-active' : '' }}" href="{{ $postUrl }}"><svg><use href="#i-heart"></use></svg><span>{{ $profileFormatCount($postReactionCount) }}</span></a>
+<button class="like-button {{ $postReactionActive ? 'liked is-active' : '' }}" data-profile-like-url="{{ route('feed.reactions.toggle', $post) }}" type="button"><svg><use href="#i-heart"></use></svg><span>{{ $profileFormatCount($postReactionCount) }}</span></button>
 <button aria-label="Kommentare öffnen" class="comment-button" data-real-preview-comments type="button"><svg><use href="#i-comment"></use></svg><span>{{ $profileFormatCount($postCommentCount) }}</span></button>
 <button data-profile-share-url="{{ $postUrl }}" type="button"><svg><use href="#i-share"></use></svg><span>Teilen</span></button>
-<a aria-label="Beitrag {{ $postBookmarkActive ? 'gespeichert' : 'speichern' }}" class="profile-post-save {{ $postBookmarkActive ? 'is-active' : '' }}" href="{{ $postUrl }}"><svg><use href="#i-bookmark"></use></svg></a>
+<button aria-label="Beitrag {{ $postBookmarkActive ? 'gespeichert' : 'speichern' }}" class="profile-post-save save-button {{ $postBookmarkActive ? 'saved is-active' : '' }}" data-profile-bookmark-url="{{ route('feed.bookmarks.toggle', $post) }}" type="button"><svg><use href="#i-bookmark"></use></svg></button>
 </footer>
 </article>
 @empty
