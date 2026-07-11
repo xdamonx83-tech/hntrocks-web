@@ -36,9 +36,9 @@ class PreviewDashboardNoFlash
   html.hnt-preview-hydrating .personal-activity-values > *,
   html.hnt-preview-hydrating .personal-heatmap > *,
   html.hnt-preview-hydrating .personal-activity-summary > *,
-  html.hnt-preview-hydrating .overview-progress .bar,
-  html.hnt-preview-hydrating .overview-counts strong,
-  html.hnt-preview-hydrating .personal-attention-strip button {
+  html.hnt-preview-hydrating .overview-progress > *,
+  html.hnt-preview-hydrating .overview-counts > *,
+  html.hnt-preview-hydrating .personal-attention-strip > * {
     visibility: hidden !important;
   }
 
