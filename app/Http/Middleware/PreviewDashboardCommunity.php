@@ -8,11 +8,11 @@ use App\Models\LfgPost;
 use App\Models\Moment;
 use App\Models\QuestProgress;
 use App\Models\User;
+use App\Support\Hashtag;
 use App\Support\HntTheme;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,11 +32,11 @@ class PreviewDashboardCommunity
         );
 
         return response()->json([
-            'community' => $this->communityPayload(),
+            'community' => $this->communityPayload($user),
         ]);
     }
 
-    private function communityPayload(): array
+    private function communityPayload(User $viewer): array
     {
         $timezone = (string) config('app.timezone', 'UTC');
         $now = now($timezone);
@@ -50,8 +50,10 @@ class PreviewDashboardCommunity
             ->where('last_seen_at', '>=', $today)
             ->count();
         $onlineNow = (clone $memberQuery)
-            ->whereNotNull('last_seen_at')
-            ->where('last_seen_at', '>=', $now->copy()->subSeconds(User::ONLINE_WINDOW_SECONDS))
+            ->where(function ($query) use ($now, $viewer): void {
+                $query->where('last_seen_at', '>=', $now->copy()->subSeconds(User::ONLINE_WINDOW_SECONDS))
+                    ->orWhereKey($viewer->id);
+            })
             ->count();
         $newThisWeek = (clone $memberQuery)
             ->where('created_at', '>=', $weekStart)
@@ -99,6 +101,7 @@ class PreviewDashboardCommunity
             'moments_today' => $momentsToday,
             'active_cup_teams' => $activeCupTeams,
             'activity' => $this->recentActivity($now),
+            'hashtags' => $this->trendingHashtags($now->copy()->subDays(30)),
         ];
     }
 
@@ -223,6 +226,57 @@ class PreviewDashboardCommunity
 
                 return $item;
             })
+            ->values()
+            ->all();
+    }
+
+    private function trendingHashtags(Carbon $since): array
+    {
+        $tags = collect();
+
+        FeedPost::query()
+            ->where('status', 'published')
+            ->where('visibility', '!=', 'private')
+            ->where('created_at', '>=', $since)
+            ->whereNotNull('body')
+            ->latest()
+            ->limit(120)
+            ->pluck('body')
+            ->each(fn (?string $text) => $tags->push(...Hashtag::extract($text)));
+
+        Moment::query()
+            ->published()
+            ->where('created_at', '>=', $since)
+            ->latest()
+            ->limit(120)
+            ->get(['caption', 'description'])
+            ->each(function (Moment $moment) use ($tags): void {
+                $tags->push(...Hashtag::extract($moment->caption));
+                $tags->push(...Hashtag::extract($moment->description));
+            });
+
+        LfgPost::query()
+            ->where('visibility', 'public')
+            ->where('created_at', '>=', $since)
+            ->latest()
+            ->limit(120)
+            ->get(['title', 'body'])
+            ->each(function (LfgPost $post) use ($tags): void {
+                $tags->push(...Hashtag::extract($post->title));
+                $tags->push(...Hashtag::extract($post->body));
+            });
+
+        return $tags
+            ->filter()
+            ->countBy()
+            ->sortDesc()
+            ->take(6)
+            ->map(fn (int $count, string $tag): array => [
+                'tag' => $tag,
+                'label' => '#'.$tag,
+                'count' => $count,
+                'url' => route('hashtags.show', $tag),
+            ])
             ->values()
             ->all();
     }
