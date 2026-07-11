@@ -29,52 +29,70 @@ class PreviewDashboardNoFlash
         $head = <<<'HTML'
 <script>document.documentElement.classList.add('hnt-preview-hydrating');</script>
 <style id="hnt-preview-no-flash-style">
-  html.hnt-preview-hydrating .post-list > *,
-  html.hnt-preview-hydrating .hnt-agenda-timeline > *,
+  html.hnt-preview-hydrating .profile-panel > *,
+  html.hnt-preview-hydrating .hnt-agenda-panel > *,
   html.hnt-preview-hydrating #compositionPanel > *,
-  html.hnt-preview-hydrating .personal-progress-table > *,
-  html.hnt-preview-hydrating .personal-activity-values > *,
-  html.hnt-preview-hydrating .personal-heatmap > *,
-  html.hnt-preview-hydrating .personal-activity-summary > *,
-  html.hnt-preview-hydrating .overview-progress > *,
-  html.hnt-preview-hydrating .overview-counts > *,
-  html.hnt-preview-hydrating .personal-attention-strip > * {
-    visibility: hidden !important;
+  html.hnt-preview-hydrating .feed-overview > *,
+  html.hnt-preview-hydrating .salary-attendance-card > *,
+  html.hnt-preview-hydrating .post-list > *,
+  html.hnt-preview-hydrating .header-actions > * {
+    filter: blur(7px) !important;
+    opacity: .16 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    transition: filter .22s ease, opacity .22s ease;
   }
 
-  html.hnt-preview-hydrating .post-list,
-  html.hnt-preview-hydrating .hnt-agenda-timeline,
+  html.hnt-preview-hydrating .profile-panel,
+  html.hnt-preview-hydrating .hnt-agenda-panel,
   html.hnt-preview-hydrating #compositionPanel,
-  html.hnt-preview-hydrating .personal-progress-table {
+  html.hnt-preview-hydrating .feed-overview,
+  html.hnt-preview-hydrating .salary-attendance-card,
+  html.hnt-preview-hydrating .post-list,
+  html.hnt-preview-hydrating .header-actions {
     position: relative;
   }
 
-  html.hnt-preview-hydrating .post-list::before,
-  html.hnt-preview-hydrating .hnt-agenda-timeline::before,
+  html.hnt-preview-hydrating .profile-panel::before,
+  html.hnt-preview-hydrating .hnt-agenda-panel::before,
   html.hnt-preview-hydrating #compositionPanel::before,
-  html.hnt-preview-hydrating .personal-progress-table::before {
+  html.hnt-preview-hydrating .feed-overview::before,
+  html.hnt-preview-hydrating .salary-attendance-card::before,
+  html.hnt-preview-hydrating .post-list::before,
+  html.hnt-preview-hydrating .header-actions::before {
     content: 'Echte Inhalte werden geladen …';
-    visibility: visible !important;
     position: absolute;
-    inset: 18px;
-    z-index: 5;
+    inset: 10px;
+    z-index: 80;
     display: grid;
     place-items: center;
-    min-height: 92px;
-    border-radius: 24px;
-    color: #9b978d;
-    font-size: 13px;
+    border-radius: 22px;
+    color: #8f8b80;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: .01em;
+    letter-spacing: .02em;
+    pointer-events: none;
     background:
-      linear-gradient(100deg, rgba(255,255,255,.5) 20%, rgba(255,255,255,.92) 42%, rgba(255,255,255,.5) 64%)
-      rgba(255,255,255,.52);
+      linear-gradient(100deg, rgba(255,255,255,.58) 18%, rgba(255,255,255,.96) 42%, rgba(255,255,255,.58) 66%)
+      rgba(249,247,238,.88);
     background-size: 220% 100%;
-    animation: hntPreviewHydration 1.35s linear infinite;
+    box-shadow: inset 0 0 0 1px rgba(47,47,44,.035);
+    animation: hntPreviewHydration 1.25s linear infinite;
   }
 
-  html.hnt-preview-hydrating #compositionPanel::before {
-    min-height: 320px;
+  html.hnt-preview-hydrating .header-actions::before {
+    inset: 0;
+    border-radius: 999px;
+    font-size: 10px;
+  }
+
+  html.hnt-preview-hydrating .post-list::before {
+    min-height: 180px;
+  }
+
+  html.hnt-preview-hydrating #compositionPanel::before,
+  html.hnt-preview-hydrating .salary-attendance-card::before {
+    min-height: 280px;
   }
 
   @keyframes hntPreviewHydration {
@@ -82,10 +100,13 @@ class PreviewDashboardNoFlash
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html.hnt-preview-hydrating .post-list::before,
-    html.hnt-preview-hydrating .hnt-agenda-timeline::before,
+    html.hnt-preview-hydrating .profile-panel::before,
+    html.hnt-preview-hydrating .hnt-agenda-panel::before,
     html.hnt-preview-hydrating #compositionPanel::before,
-    html.hnt-preview-hydrating .personal-progress-table::before {
+    html.hnt-preview-hydrating .feed-overview::before,
+    html.hnt-preview-hydrating .salary-attendance-card::before,
+    html.hnt-preview-hydrating .post-list::before,
+    html.hnt-preview-hydrating .header-actions::before {
       animation: none;
     }
   }
@@ -108,33 +129,25 @@ class PreviewDashboardNoFlash
     neutralHeader('.header-notification-list', 'Keine Benachrichtigungen', 'Neue Hinweise erscheinen automatisch hier.');
 
     const agenda = document.querySelector('.hnt-agenda-panel');
-    if (agenda && agenda.dataset.realAgenda !== '1') {
-      const items = agenda.querySelector('.hnt-agenda-items');
-      const axis = agenda.querySelector('.hnt-agenda-axis');
-      if (items) {
-        items.innerHTML = '<article class="hnt-agenda-card"><div class="hnt-agenda-copy"><span>HNT.ROCKS</span><h3>Agenda wird geladen</h3><p>Echte Inhalte werden vorbereitet.</p></div></article>';
-      }
-      if (axis) axis.innerHTML = '<span class="dark">JETZT</span>';
+    const agendaItems = agenda?.querySelector('.hnt-agenda-items');
+    if (agendaItems?.textContent?.includes('Agenda wird geladen')) {
+      agendaItems.innerHTML = '<article class="hnt-agenda-card"><div class="hnt-agenda-copy"><span>HNT.ROCKS</span><h3>Agenda nicht verfügbar</h3><p>Die Daten konnten gerade nicht geladen werden.</p></div></article>';
     }
 
     const community = document.getElementById('compositionPanel');
-    if (community && community.dataset.realCommunity !== '1') {
-      const title = community.querySelector('.composition-top h2');
-      const activity = community.querySelector('#compositionActivity');
-      const activityState = community.querySelector('#activityState');
-      const trending = community.querySelector('.composition-trending');
-      if (title) title.textContent = 'Community';
-      if (activity) activity.innerHTML = '<article class="activity-item" data-community-real="1"><img src="/assets/vikinger/img/default-avatar.svg" alt=""><div><strong>Community wird geladen</strong><small>Echte Ereignisse werden vorbereitet.</small></div><span>…</span></article>';
-      if (activityState) activityState.textContent = 'Wird geladen';
-      if (trending) trending.innerHTML = '<div class="activity-title"><h3>Hashtags</h3><span>Letzte 30 Tage</span></div><div class="trend-tags"><button type="button" disabled>Wird geladen …</button></div>';
+    const note = community?.querySelector('.community-note');
+    if (note?.textContent?.includes('Community wird geladen')) {
+      note.innerHTML = '<span>HNT.ROCKS</span><strong>Community-Daten nicht verfügbar</strong><small>Die Werte konnten gerade nicht geladen werden.</small>';
     }
 
     const progress = document.querySelector('.personal-progress-table');
-    if (progress && !progress.querySelector('[data-real-dashboard-row]') && progress.dataset.realLoading !== '1') {
-      progress.innerHTML = '<div class="personal-progress-labels"><span>Aktivität</span><span>Fortschritt</span><span>Belohnung</span><span>Status</span></div><article class="personal-progress-row"><div class="personal-progress-copy"><strong>Fortschritt wird geladen</strong><small>Echte Auftragsdaten werden vorbereitet.</small></div></article>';
+    if (progress && !progress.querySelector('[data-real-dashboard-row]')) {
+      progress.innerHTML = '<article class="personal-progress-row" data-real-dashboard-row><div class="personal-progress-copy"><strong>Fortschritt nicht verfügbar</strong><small>Die echten Werte konnten gerade nicht geladen werden.</small></div></article>';
     }
 
-    document.querySelectorAll('.personal-activity-values strong').forEach((node) => { node.textContent = '—'; });
+    document.querySelectorAll('.personal-activity-values strong').forEach((node) => {
+      if (!node.textContent?.trim() || /^(12|47)$/.test(node.textContent.trim())) node.textContent = '—';
+    });
     document.querySelectorAll('.personal-heatmap .y').forEach((node) => node.classList.remove('y'));
   };
 
@@ -158,18 +171,33 @@ class PreviewDashboardNoFlash
   };
 
   const moduleReady = () => {
-    const agendaReady = Boolean(document.querySelector('.hnt-agenda-panel[data-real-agenda="1"]'));
-    const communityReady = Boolean(document.querySelector('#compositionPanel[data-real-community="1"]'));
+    const agenda = document.querySelector('.hnt-agenda-panel[data-real-agenda="1"]');
+    const agendaText = agenda?.querySelector('.hnt-agenda-items')?.textContent || '';
+    const agendaReady = Boolean(agenda) && !agendaText.includes('Agenda wird geladen');
+
+    const community = document.querySelector('#compositionPanel[data-real-community="1"]');
+    const communityLive = community?.querySelector('.composition-live')?.textContent || '';
+    const communityNote = community?.querySelector('.community-note')?.textContent || '';
+    const communityReady = Boolean(community)
+      && !communityLive.includes('Live-Daten')
+      && !communityNote.includes('Community wird geladen');
+
+    const progress = document.querySelector('.personal-progress-table');
+    const progressReady = Boolean(progress?.querySelector('[data-real-dashboard-row]'))
+      && progress?.dataset.realLoading !== '1';
+
+    const activityReady = Boolean(document.querySelector('.personal-heatmap[data-real-activity="1"]'));
+
     const feedList = document.querySelector('.post-list');
     const feedReady = Boolean(feedList?.querySelector('.real-feed-loader'))
       && !feedList.classList.contains('is-loading-real-feed');
-    const progressReady = Boolean(document.querySelector('.personal-progress-table[data-real-loading="1"], .personal-progress-table [data-real-dashboard-row]'));
+
     const headerReady = ['.header-request-list', '.header-message-list', '.header-notification-list'].every((selector) => {
       const host = document.querySelector(selector);
       return Boolean(host?.querySelector('.header-live-state, [data-real-friend-request], .header-message-item, .header-notification-item'));
     });
 
-    return agendaReady && communityReady && feedReady && progressReady && headerReady;
+    return agendaReady && communityReady && progressReady && activityReady && feedReady && headerReady;
   };
 
   const recalculateResponsivePositions = () => {
@@ -190,13 +218,21 @@ class PreviewDashboardNoFlash
 
   const start = () => {
     const startedAt = performance.now();
+    const minimumMs = 520;
+    const maximumMs = 8000;
+
     const wait = () => {
-      if (moduleReady() || performance.now() - startedAt > 5000) {
+      const elapsed = performance.now() - startedAt;
+      const ready = elapsed >= minimumMs && moduleReady();
+
+      if (ready || elapsed > maximumMs) {
         requestAnimationFrame(() => requestAnimationFrame(release));
         return;
       }
+
       requestAnimationFrame(wait);
     };
+
     wait();
   };
 
