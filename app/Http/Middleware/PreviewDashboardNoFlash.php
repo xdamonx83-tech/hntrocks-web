@@ -29,84 +29,82 @@ class PreviewDashboardNoFlash
         $head = <<<'HTML'
 <script>document.documentElement.classList.add('hnt-preview-hydrating');</script>
 <style id="hnt-preview-no-flash-style">
-  html.hnt-preview-hydrating .profile-panel > *,
-  html.hnt-preview-hydrating .hnt-agenda-panel > *,
-  html.hnt-preview-hydrating #compositionPanel > *,
-  html.hnt-preview-hydrating .feed-overview > *,
-  html.hnt-preview-hydrating .salary-attendance-card > *,
-  html.hnt-preview-hydrating .post-list > *,
-  html.hnt-preview-hydrating .header-actions > * {
-    filter: blur(7px) !important;
-    opacity: .16 !important;
+  html.hnt-preview-hydrating {
+    background: #f6f2e6;
+  }
+
+  html.hnt-preview-hydrating body {
+    overflow: hidden !important;
+    background:
+      radial-gradient(circle at 72% 14%, rgba(255, 226, 95, .34), transparent 32%),
+      radial-gradient(circle at 26% 76%, rgba(255, 240, 173, .28), transparent 36%),
+      #f6f2e6 !important;
+  }
+
+  html.hnt-preview-hydrating body > * {
+    visibility: hidden !important;
+    opacity: 0 !important;
     pointer-events: none !important;
     user-select: none !important;
-    transition: filter .22s ease, opacity .22s ease;
   }
 
-  html.hnt-preview-hydrating .profile-panel,
-  html.hnt-preview-hydrating .hnt-agenda-panel,
-  html.hnt-preview-hydrating #compositionPanel,
-  html.hnt-preview-hydrating .feed-overview,
-  html.hnt-preview-hydrating .salary-attendance-card,
-  html.hnt-preview-hydrating .post-list,
-  html.hnt-preview-hydrating .header-actions {
-    position: relative;
+  html.hnt-preview-hydrating body::before,
+  html.hnt-preview-hydrating body::after {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
   }
 
-  html.hnt-preview-hydrating .profile-panel::before,
-  html.hnt-preview-hydrating .hnt-agenda-panel::before,
-  html.hnt-preview-hydrating #compositionPanel::before,
-  html.hnt-preview-hydrating .feed-overview::before,
-  html.hnt-preview-hydrating .salary-attendance-card::before,
-  html.hnt-preview-hydrating .post-list::before,
-  html.hnt-preview-hydrating .header-actions::before {
-    content: 'Echte Inhalte werden geladen …';
-    position: absolute;
-    inset: 10px;
-    z-index: 80;
-    display: grid;
-    place-items: center;
-    border-radius: 22px;
-    color: #8f8b80;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .02em;
-    pointer-events: none;
-    background:
-      linear-gradient(100deg, rgba(255,255,255,.58) 18%, rgba(255,255,255,.96) 42%, rgba(255,255,255,.58) 66%)
-      rgba(249,247,238,.88);
-    background-size: 220% 100%;
-    box-shadow: inset 0 0 0 1px rgba(47,47,44,.035);
-    animation: hntPreviewHydration 1.25s linear infinite;
-  }
-
-  html.hnt-preview-hydrating .header-actions::before {
+  html.hnt-preview-hydrating body::before {
+    content: '';
+    position: fixed;
     inset: 0;
-    border-radius: 999px;
-    font-size: 10px;
+    z-index: 2147483646;
+    background:
+      linear-gradient(100deg, rgba(255,255,255,.12) 18%, rgba(255,255,255,.72) 42%, rgba(255,255,255,.12) 66%);
+    background-size: 220% 100%;
+    animation: hntFullPageHydration 1.25s linear infinite;
   }
 
-  html.hnt-preview-hydrating .post-list::before {
-    min-height: 180px;
+  html.hnt-preview-hydrating body::after {
+    content: 'HNT.ROCKS\A Dein Feed wird geladen …';
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 2147483647;
+    transform: translate(-50%, -50%);
+    min-width: min(440px, calc(100vw - 48px));
+    padding: 34px 40px;
+    border: 1px solid rgba(47,47,44,.08);
+    border-radius: 30px;
+    box-sizing: border-box;
+    color: #2f2f2c;
+    background: rgba(255, 253, 246, .92);
+    box-shadow: 0 28px 80px rgba(47,47,44,.12);
+    text-align: center;
+    white-space: pre;
+    font-family: Poppins, system-ui, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.85;
+    letter-spacing: .01em;
   }
 
-  html.hnt-preview-hydrating #compositionPanel::before,
-  html.hnt-preview-hydrating .salary-attendance-card::before {
-    min-height: 280px;
-  }
-
-  @keyframes hntPreviewHydration {
+  @keyframes hntFullPageHydration {
     to { background-position: -220% 0; }
   }
 
+  @media (max-width: 640px) {
+    html.hnt-preview-hydrating body::after {
+      min-width: calc(100vw - 32px);
+      padding: 28px 24px;
+      border-radius: 24px;
+      font-size: 16px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    html.hnt-preview-hydrating .profile-panel::before,
-    html.hnt-preview-hydrating .hnt-agenda-panel::before,
-    html.hnt-preview-hydrating #compositionPanel::before,
-    html.hnt-preview-hydrating .feed-overview::before,
-    html.hnt-preview-hydrating .salary-attendance-card::before,
-    html.hnt-preview-hydrating .post-list::before,
-    html.hnt-preview-hydrating .header-actions::before {
+    html.hnt-preview-hydrating body::before {
       animation: none;
     }
   }
