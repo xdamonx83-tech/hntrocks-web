@@ -1,67 +1,45 @@
 (() => {
-  const ensureSharedHeaderStyles = () => {
-    const href = '/assets/themes/hnt_preview/dashboard-feed/feed.css';
-    if ([...document.styleSheets].some((sheet) => sheet.href?.includes(href))) return;
+  const profileTabs = [...document.querySelectorAll("[data-profile-tab]")];
+  const profilePanels = [...document.querySelectorAll("[data-profile-panel]")];
+  const profileTabTitle = document.getElementById("profileTabTitle");
+  const profileMainScroller = document.querySelector(".profile-page-main");
 
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = `${href}?v=${Date.now()}`;
-    link.dataset.hntSharedHeaderStyles = '1';
-    document.head.appendChild(link);
-  };
-
-  ensureSharedHeaderStyles();
-
-  const tabs = [...document.querySelectorAll('[data-profile-tab]')];
-  const panels = [...document.querySelectorAll('[data-profile-panel]')];
-  const title = document.getElementById('profileTabTitle');
-
-  const activate = (name, focus = false) => {
-    tabs.forEach((tab) => {
-      const active = tab.dataset.profileTab === name;
-      tab.classList.toggle('active', active);
-      tab.setAttribute('aria-selected', String(active));
-      if (active && focus) tab.focus();
+  function activateProfileTab(tabName, shouldFocus = false) {
+    profileTabs.forEach((button) => {
+      const active = button.dataset.profileTab === tabName;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+      if (active && shouldFocus) button.focus();
     });
 
-    panels.forEach((panel) => {
-      const active = panel.dataset.profilePanel === name;
+    profilePanels.forEach((panel) => {
+      const active = panel.dataset.profilePanel === tabName;
+      panel.classList.toggle("active", active);
       panel.hidden = !active;
-      panel.classList.toggle('active', active);
     });
 
-    const activeTab = tabs.find((tab) => tab.dataset.profileTab === name);
-    if (title && activeTab) title.textContent = activeTab.dataset.title || activeTab.textContent.trim();
-  };
+    const activeButton = profileTabs.find((button) => button.dataset.profileTab === tabName);
+    if (profileTabTitle && activeButton) {
+      profileTabTitle.textContent = activeButton.dataset.title || activeButton.textContent.trim();
+    }
 
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => activate(tab.dataset.profileTab));
-    tab.addEventListener('keydown', (event) => {
-      if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    if (profileMainScroller && window.matchMedia("(min-width: 900px)").matches) {
+      const feedTop = document.querySelector(".profile-post-feed")?.offsetTop || 0;
+      profileMainScroller.scrollTo({ top: Math.max(0, feedTop - 8), behavior: "smooth" });
+    }
+  }
+
+  profileTabs.forEach((button) => {
+    button.addEventListener("click", () => activateProfileTab(button.dataset.profileTab));
+    button.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
       event.preventDefault();
-      const index = tabs.indexOf(tab);
-      const direction = event.key === 'ArrowRight' ? 1 : -1;
-      const next = tabs[(index + direction + tabs.length) % tabs.length];
-      activate(next.dataset.profileTab, true);
+      const currentIndex = profileTabs.indexOf(button);
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const nextIndex = (currentIndex + direction + profileTabs.length) % profileTabs.length;
+      activateProfileTab(profileTabs[nextIndex].dataset.profileTab, true);
     });
   });
 
-  document.querySelectorAll('[data-profile-share]').forEach((button) => {
-    button.addEventListener('click', async () => {
-      try {
-        if (navigator.share) {
-          await navigator.share({ title: document.title, url: window.location.href });
-        } else if (navigator.clipboard) {
-          await navigator.clipboard.writeText(window.location.href);
-          if (typeof window.showToast === 'function') window.showToast('Profil-Link kopiert');
-        }
-      } catch (error) {
-        if (error?.name !== 'AbortError' && typeof window.showToast === 'function') {
-          window.showToast('Teilen war nicht möglich');
-        }
-      }
-    });
-  });
-
-  activate('posts');
+  activateProfileTab("posts");
 })();
