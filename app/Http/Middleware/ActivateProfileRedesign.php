@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Feed\DashboardFeedLiveController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Middleware\PreviewDashboardHeader;
 use App\Models\User;
@@ -50,6 +51,15 @@ class ActivateProfileRedesign
             return response()->json([
                 'header' => $method->invoke(app(PreviewDashboardHeader::class), $viewer),
             ])->header('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        // The profile deliberately reuses the already tested feed comments and
+        // media viewer. Those scripts request the active page with data=1 and a
+        // post_id, so route that narrow request through the live feed payload.
+        if ($request->boolean('data') && $request->filled('post_id')) {
+            abort_unless($viewer instanceof User, 401);
+
+            return app(DashboardFeedLiveController::class)($request);
         }
 
         $profileUser = $request->route('user');
