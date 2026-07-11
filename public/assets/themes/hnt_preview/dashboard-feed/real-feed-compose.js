@@ -185,6 +185,222 @@
     return payload.post || null;
   };
 
+  const feedList = document.querySelector('.post-list');
+
+  const savedPostStyle = document.createElement('style');
+  savedPostStyle.textContent = `
+    .real-feed-post.real-feed-post-saved {
+      animation: hntSavedPostPulse 2.4s ease;
+      scroll-margin-top: 112px;
+    }
+
+    @keyframes hntSavedPostPulse {
+      0%, 100% {
+        box-shadow: none;
+        border-color: inherit;
+      }
+      18%, 62% {
+        box-shadow: 0 0 0 5px rgba(255, 204, 68, .22);
+        border-color: rgba(212, 164, 37, .65);
+      }
+    }
+  `;
+  document.head.appendChild(savedPostStyle);
+
+  const renderSavedMedia = (media = [], permalink = '#') => {
+    if (!Array.isArray(media) || media.length === 0) return '';
+
+    const visible = media.slice(0, 4);
+    const items = visible.map((item, index) => {
+      const extra = index === visible.length - 1 && media.length > visible.length
+        ? `<span class="real-post-media-more">+${media.length - visible.length}</span>`
+        : '';
+
+      if (item.type === 'image') {
+        return `
+          <a class="real-post-media-item" href="${escapeHtml(permalink)}" aria-label="Beitrag öffnen">
+            <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt || '')}" loading="lazy">
+            ${extra}
+          </a>
+        `;
+      }
+
+      if (item.type === 'video') {
+        return `
+          <div class="real-post-media-item real-post-video-item">
+            <video controls muted playsinline preload="metadata">
+              <source src="${escapeHtml(item.url)}" type="${escapeHtml(item.mime || 'video/mp4')}">
+            </video>
+            ${extra}
+          </div>
+        `;
+      }
+
+      return `
+        <a class="real-post-media-item real-post-file-item" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
+          <span>Datei öffnen</span>
+          ${extra}
+        </a>
+      `;
+    }).join('');
+
+    return `<div class="real-post-media-grid real-post-media-count-${Math.min(media.length, 4)}">${items}</div>`;
+  };
+
+  const renderSavedPoll = (poll) => {
+    if (!poll || !Array.isArray(poll.options) || poll.options.length === 0) return '';
+
+    const options = poll.options.map((option) => `
+      <button type="button"
+              class="${option.selected ? 'selected' : ''}"
+              data-real-poll-option
+              data-option-id="${Number(option.id)}"
+              style="--poll:${Number(option.percent) || 0}%">
+        <span>${escapeHtml(option.body)}</span>
+        <b>${Number(option.percent) || 0}%</b>
+      </button>
+    `).join('');
+
+    return `
+      <div class="poll real-feed-poll">
+        <strong class="real-feed-poll-question">${escapeHtml(poll.question || 'Community-Umfrage')}</strong>
+        ${options}
+        <small>${Number(poll.total_votes) || 0} Stimmen</small>
+      </div>
+    `;
+  };
+
+  const annotatePost = (article) => {
+    const postId = Number.parseInt(article?.dataset.realFeedPost || '0', 10);
+    if (!postId) return null;
+    article.id = `post-${postId}`;
+    return article;
+  };
+
+  const annotatePosts = () => {
+    document.querySelectorAll('[data-real-feed-post]').forEach(annotatePost);
+  };
+
+  const postObserver = new MutationObserver(annotatePosts);
+  if (feedList) postObserver.observe(feedList, { childList: true, subtree: true });
+  annotatePosts();
+
+  const focusPost = (article, postId) => {
+    if (!article) return;
+
+    annotatePost(article);
+    const nextHash = `#post-${postId}`;
+    history.replaceState(null, '', `${window.location.pathname}${window.location.search}${nextHash}`);
+    article.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    article.classList.remove('real-feed-post-saved');
+    void article.offsetWidth;
+    article.classList.add('real-feed-post-saved');
+    window.setTimeout(() => article.classList.remove('real-feed-post-saved'), 2600);
+  };
+
+  const waitForPost = (postId, timeoutMs = 6500) => new Promise((resolve) => {
+    const selector = `[data-real-feed-post="${Number(postId)}"]`;
+    const existing = document.querySelector(selector);
+    if (existing) {
+      resolve(existing);
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      const article = document.querySelector(selector);
+      if (!article) return;
+      observer.disconnect();
+      resolve(article);
+    });
+
+    observer.observe(feedList || document.body, { childList: true, subtree: true });
+    window.setTimeout(() => {
+      observer.disconnect();
+      resolve(document.querySelector(selector));
+    }, timeoutMs);
+  });
+
+  const patchEditedPost = (post) => {
+    const article = document.querySelector(`[data-real-feed-post="${Number(post.id)}"]`);
+    if (!article) return null;
+
+    article.dataset.realPermalink = post.permalink || article.dataset.realPermalink || '#';
+
+    const body = post.body
+      ? `<p>${escapeHtml(post.body).replace(/\n/g, '<br>')}</p>`
+      : '';
+    const postBody = article.querySelector('.post-body');
+    if (postBody) {
+      postBody.innerHTML = `
+        ${body}
+        ${renderSavedMedia(post.media, post.permalink)}
+        ${renderSavedPoll(post.poll)}
+      `;
+    }
+
+    const meta = article.querySelector('.post-author span');
+    if (meta) {
+      const suffix = post.team?.name || post.visibility || 'Öffentlich';
+      meta.textContent = `${post.author?.handle || '@hunter'} · ${post.created_at || 'gerade eben'} · ${suffix}`;
+    }
+
+    const badge = article.querySelector('.post-badge');
+    if (badge) {
+      badge.className = `post-badge ${post.badge_class || 'discussion'}`;
+      badge.textContent = post.badge || 'Beitrag';
+    }
+
+    focusPost(article, post.id);
+    return article;
+  };
+
+  const closeComposerAfterSave = () => {
+    state.busy = false;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('composer-open');
+
+    input.value = '';
+    input.style.height = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    localStorage.removeItem('hnt_preview_post_draft');
+
+    resetComposerState();
+    openButton?.focus();
+  };
+
+  const syncSavedPost = async (postId, isEdit) => {
+    const post = await fetchPost(postId);
+    if (!post) throw new Error('Gespeicherter Beitrag konnte nicht geladen werden');
+
+    if (isEdit) {
+      const article = patchEditedPost(post);
+      if (!article) throw new Error('Bearbeiteter Beitrag ist nicht mehr im sichtbaren Feed');
+      closeComposerAfterSave();
+      return;
+    }
+
+    closeComposerAfterSave();
+
+    const firstTab = document.querySelector('.feed-tabs > button:not(.compose-button)');
+    firstTab?.click();
+
+    const article = await waitForPost(postId);
+    if (!article) throw new Error('Neuer Beitrag wurde gespeichert, konnte aber nicht eingeblendet werden');
+
+    focusPost(article, postId);
+  };
+
+  const restoreHashTarget = async () => {
+    const match = window.location.hash.match(/^#post-(\d+)$/);
+    if (!match) return;
+
+    const article = await waitForPost(Number(match[1]), 4500);
+    if (article) focusPost(article, Number(match[1]));
+  };
+
+  window.setTimeout(restoreHashTarget, 500);
+
   const openEdit = async (postId) => {
     try {
       const post = await fetchPost(postId);
@@ -275,8 +491,21 @@
     try {
       const url = editId ? `/feed/${encodeURIComponent(String(editId))}` : '/feed';
       const payload = await requestJson(url, { method: 'POST', formData });
+      const savedId = Number(payload.post_id || payload.id || editId || 0);
+
+      if (!savedId) {
+        throw new Error('Der Server hat keine Beitrags-ID zurückgegeben');
+      }
+
       toast(payload.message || (editId ? 'Beitrag aktualisiert' : 'Post veröffentlicht'));
-      window.setTimeout(() => window.location.reload(), 350);
+
+      try {
+        await syncSavedPost(savedId, Boolean(editId));
+      } catch (syncError) {
+        console.error('HNT feed ad-hoc refresh failed', syncError);
+        history.replaceState(null, '', `${window.location.pathname}${window.location.search}#post-${savedId}`);
+        window.location.reload();
+      }
     } catch (error) {
       toast(error.message || 'Post konnte nicht gespeichert werden');
       setBusy(false);
