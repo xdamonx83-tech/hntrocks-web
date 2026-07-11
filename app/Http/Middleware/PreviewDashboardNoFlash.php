@@ -172,10 +172,20 @@ class PreviewDashboardNoFlash
     return agendaReady && communityReady && feedReady && progressReady && headerReady;
   };
 
+  const recalculateResponsivePositions = () => {
+    const feedScroll = document.getElementById('feedScroll');
+    window.dispatchEvent(new Event('resize'));
+    feedScroll?.dispatchEvent(new Event('scroll'));
+  };
+
   const release = () => {
     neutralizeFallbacks();
     removeStaticFeedDemo();
     document.documentElement.classList.remove('hnt-preview-hydrating');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(recalculateResponsivePositions);
+    });
   };
 
   const start = () => {
