@@ -15,6 +15,10 @@
   if (panel.dataset.realCommunity === '1') return;
   panel.dataset.realCommunity = '1';
 
+  let realActivityItems = [];
+  let communityLoaded = false;
+  let repairScheduled = false;
+
   const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (character) => ({
     '&': '&amp;',
     '<': '&lt;',
@@ -92,8 +96,12 @@
         white-space: nowrap;
       }
 
-      .composition-panel[data-real-community="1"] .trend-tags button {
-        cursor: default;
+      .composition-panel[data-real-community="1"] .trend-tags button[data-hashtag-url] {
+        cursor: pointer;
+      }
+
+      .composition-panel[data-real-community="1"] .trend-tags button[data-hashtag-url]:hover {
+        transform: translateY(-1px);
       }
 
       .composition-panel[data-real-community="1"] .community-loading {
@@ -114,7 +122,7 @@
   };
 
   const setLoading = () => {
-    title.textContent = 'Community im Überblick';
+    title.textContent = 'Community';
     live.innerHTML = '<i></i> Live-Daten';
     ring.classList.add('community-loading');
     ring.querySelector('strong').textContent = '—';
@@ -131,7 +139,7 @@
       <article><span>Cup-Teams</span><strong>—</strong><small>aktiv</small></article>
     `;
     activityList.innerHTML = `
-      <article class="activity-item community-loading">
+      <article class="activity-item community-loading" data-community-real="1">
         <img src="/assets/vikinger/img/default-avatar.svg" alt="">
         <div><strong>Community-Aktivität wird geladen</strong><small>Echte Ereignisse werden vorbereitet.</small></div>
         <span>…</span>
@@ -140,10 +148,17 @@
     if (activityState) activityState.textContent = 'Wird geladen';
   };
 
-  const renderActivity = (items = []) => {
-    if (!Array.isArray(items) || items.length === 0) {
+  const expectedActivityState = () => realActivityItems.length > 0
+    ? `${realActivityItems.length} neu`
+    : '0 neu';
+
+  const renderActivity = (items = [], updateCache = true) => {
+    const safeItems = Array.isArray(items) ? items : [];
+    if (updateCache) realActivityItems = safeItems;
+
+    if (safeItems.length === 0) {
       activityList.innerHTML = `
-        <article class="activity-item">
+        <article class="activity-item" data-community-real="1">
           <img src="/assets/vikinger/img/default-avatar.svg" alt="">
           <div><strong>Noch keine neue Aktivität</strong><small>Hier erscheinen neue Community-Ereignisse.</small></div>
           <span>—</span>
@@ -153,15 +168,29 @@
       return;
     }
 
-    activityList.innerHTML = items.map((item) => `
-      <article class="activity-item"${item.url ? ` data-community-url="${escapeHtml(item.url)}" tabindex="0" role="link"` : ''}>
+    activityList.innerHTML = safeItems.map((item) => `
+      <article class="activity-item" data-community-real="1"${item.url ? ` data-community-url="${escapeHtml(item.url)}" tabindex="0" role="link"` : ''}>
         <img src="${escapeHtml(item.avatar)}" alt="">
         <div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.meta)}</small></div>
         <span>${escapeHtml(item.time)}</span>
       </article>
     `).join('');
 
-    if (activityState) activityState.textContent = `${items.length} neu`;
+    if (activityState) activityState.textContent = `${safeItems.length} neu`;
+  };
+
+  const renderHashtags = (hashtags = []) => {
+    if (!trending) return;
+
+    const safeTags = Array.isArray(hashtags) ? hashtags.slice(0, 6) : [];
+    const tagsMarkup = safeTags.length > 0
+      ? safeTags.map((item) => `<button type="button" data-hashtag-url="${escapeHtml(item.url)}">${escapeHtml(item.label)}</button>`).join('')
+      : '<button type="button" disabled>Noch keine Hashtags</button>';
+
+    trending.innerHTML = `
+      <div class="activity-title"><h3>Hashtags</h3><span>Letzte 30 Tage</span></div>
+      <div class="trend-tags">${tagsMarkup}</div>
+    `;
   };
 
   const render = (community) => {
@@ -171,7 +200,7 @@
     const activeRate = Math.max(0, Math.min(100, Number(community.active_rate) || 0));
     const ringDegrees = Math.round((342 * activeRate) / 100);
 
-    title.textContent = 'Community im Überblick';
+    title.textContent = 'Community';
     live.innerHTML = `<i></i> ${formatNumber(onlineNow)} online`;
 
     ring.classList.remove('community-loading');
@@ -199,18 +228,8 @@
     `;
 
     renderActivity(community.activity);
-
-    if (trending) {
-      trending.innerHTML = `
-        <div class="activity-title"><h3>Schnellübersicht</h3><span>Echte Daten</span></div>
-        <div class="trend-tags">
-          <button type="button">${formatNumber(community.open_lfgs)} LFGs</button>
-          <button type="button">${formatNumber(community.moments_today)} Moments heute</button>
-          <button type="button">${formatNumber(community.active_cup_teams)} Cup-Teams</button>
-          <button type="button">${formatNumber(total)} Hunter</button>
-        </div>
-      `;
-    }
+    renderHashtags(community.hashtags);
+    communityLoaded = true;
   };
 
   const showError = () => {
@@ -219,13 +238,38 @@
     note.innerHTML = '<span>HNT.ROCKS</span><strong>Community-Daten nicht verfügbar</strong><small>Die Werte konnten gerade nicht geladen werden.</small>';
     if (activityState) activityState.textContent = 'Fehler';
     activityList.innerHTML = `
-      <article class="activity-item">
+      <article class="activity-item" data-community-real="1">
         <img src="/assets/vikinger/img/default-avatar.svg" alt="">
         <div><strong>Keine Live-Daten</strong><small>Bitte die Preview neu laden.</small></div>
         <span>—</span>
       </article>
     `;
   };
+
+  const scheduleActivityRepair = () => {
+    if (!communityLoaded || repairScheduled) return;
+    repairScheduled = true;
+
+    window.requestAnimationFrame(() => {
+      repairScheduled = false;
+      const rows = [...activityList.children];
+      const containsDemo = rows.length === 0 || rows.some((row) => row.dataset.communityReal !== '1');
+      const wrongState = activityState && activityState.textContent.trim() !== expectedActivityState();
+
+      if (containsDemo || wrongState) {
+        renderActivity(realActivityItems, false);
+      }
+    });
+  };
+
+  new MutationObserver(scheduleActivityRepair).observe(activityList, { childList: true });
+  if (activityState) {
+    new MutationObserver(scheduleActivityRepair).observe(activityState, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+  }
 
   activityList.addEventListener('click', (event) => {
     const item = event.target.closest('[data-community-url]');
@@ -238,6 +282,11 @@
     if (!item?.dataset.communityUrl) return;
     event.preventDefault();
     window.location.assign(item.dataset.communityUrl);
+  });
+
+  trending?.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-hashtag-url]');
+    if (button?.dataset.hashtagUrl) window.location.assign(button.dataset.hashtagUrl);
   });
 
   const load = async () => {
