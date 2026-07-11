@@ -25,7 +25,6 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\TrackVisitorEvent::class,
             \App\Http\Middleware\AddSecurityHeaders::class,
-            \App\Http\Middleware\PreviewFeedCommentMedia::class,
         ]);
 
         $middleware->alias([
