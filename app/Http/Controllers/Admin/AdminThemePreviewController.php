@@ -32,7 +32,7 @@ class AdminThemePreviewController extends Controller
             'previewAvailable' => HntTheme::previewAvailableFor($user),
             'previewRestrictionConfigured' => HntTheme::previewRestrictionConfigured(),
             'allowedUserIds' => HntTheme::previewAllowedUserIds(),
-            'allowedEmails' => HntTheme::previewAllowedEmails(),
+            'allowedEmails' => HntTheme::previewAllowedUserEmails(),
             'allowAnyAdmin' => (bool) config('hunthub.theme.preview.allow_any_admin', false),
             'sessionKey' => HntTheme::PREVIEW_SESSION_KEY,
             'sampleResolutions' => $this->sampleResolutions(),
@@ -81,10 +81,14 @@ class AdminThemePreviewController extends Controller
         $scriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed.js');
         $liveStylePath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css');
         $liveScriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-live.js');
+        $polishStylePath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css');
+        $polishScriptPath = public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.js');
         $styleVersion = is_file($stylePath) ? filemtime($stylePath) : time();
         $scriptVersion = is_file($scriptPath) ? filemtime($scriptPath) : time();
         $liveStyleVersion = is_file($liveStylePath) ? filemtime($liveStylePath) : time();
         $liveScriptVersion = is_file($liveScriptPath) ? filemtime($liveScriptPath) : time();
+        $polishStyleVersion = is_file($polishStylePath) ? filemtime($polishStylePath) : time();
+        $polishScriptVersion = is_file($polishScriptPath) ? filemtime($polishScriptPath) : time();
 
         $html = str_replace(
             [
@@ -106,13 +110,15 @@ class AdminThemePreviewController extends Controller
             '</head>',
             '<meta name="csrf-token" content="' . e(csrf_token()) . '">' .
             '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.css') . '?v=' . $styleVersion . '" rel="stylesheet">' .
-            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css') . '?v=' . $liveStyleVersion . '" rel="stylesheet"></head>',
+            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css') . '?v=' . $liveStyleVersion . '" rel="stylesheet">' .
+            '<link href="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css') . '?v=' . $polishStyleVersion . '" rel="stylesheet"></head>',
             $html
         );
         $html = str_replace(
             '</body>',
             '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.js') . '?v=' . $liveScriptVersion . '"></script>' .
-            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.js') . '?v=' . $scriptVersion . '"></script></body>',
+            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed.js') . '?v=' . $scriptVersion . '"></script>' .
+            '<script src="' . asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.js') . '?v=' . $polishScriptVersion . '"></script></body>',
             $html
         );
 
