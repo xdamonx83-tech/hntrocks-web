@@ -32,7 +32,7 @@
     if (document.querySelector('script[data-real-dashboard-agenda-expand]')) return;
 
     const script = document.createElement('script');
-    script.src = `${base}real-dashboard-agenda-expand.js?v=20260711-1`;
+    script.src = `${base}real-dashboard-agenda-expand.js?v=20260711-2`;
     script.dataset.realDashboardAgendaExpand = '1';
     script.defer = true;
     document.body.appendChild(script);
