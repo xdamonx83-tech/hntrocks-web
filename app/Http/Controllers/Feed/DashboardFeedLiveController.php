@@ -105,6 +105,7 @@ class DashboardFeedLiveController extends Controller
         $scripts = [
             'real-feed-live.js',
             'real-feed.js',
+            'real-dashboard-progress-live.js',
             'real-feed-polish.js',
             'real-feed-comments.js',
         ];
@@ -140,7 +141,10 @@ class DashboardFeedLiveController extends Controller
         foreach ($scripts as $script) {
             $path = public_path('assets/themes/hnt_preview/dashboard-feed/'.$script);
             $version = is_file($path) ? filemtime($path) : time();
-            $javascript .= '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/'.$script).'?v='.$version.'"></script>';
+            $progressAttribute = $script === 'real-dashboard-progress-live.js'
+                ? ' data-real-dashboard-progress="1"'
+                : '';
+            $javascript .= '<script'.$progressAttribute.' src="'.asset('assets/themes/hnt_preview/dashboard-feed/'.$script).'?v='.$version.'"></script>';
         }
 
         $heartbeatPath = public_path('assets/socialite/js/hnt-presence-heartbeat.js');
