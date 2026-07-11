@@ -25,15 +25,15 @@
   document.body.appendChild(progress);
 })();
 
-/* Load the first real dashboard-data block without changing the preview controller. */
+/* Load the real dashboard-data blocks without changing the preview controller. */
 (() => {
   const base = '/assets/themes/hnt_preview/dashboard-feed/';
 
-  const loadStreakAndRocks = () => {
+  const loadStreakRocksAndActivity = () => {
     if (document.querySelector('script[data-real-dashboard-streak-rocks]')) return;
 
     const script = document.createElement('script');
-    script.src = `${base}real-dashboard-streak-rocks.js?v=20260711-1`;
+    script.src = `${base}real-dashboard-streak-rocks.js?v=20260711-2`;
     script.dataset.realDashboardStreakRocks = '1';
     script.defer = true;
     document.body.appendChild(script);
@@ -41,7 +41,7 @@
 
   const existing = document.querySelector('script[data-real-dashboard-progress]');
   if (existing) {
-    loadStreakAndRocks();
+    loadStreakRocksAndActivity();
     return;
   }
 
@@ -49,7 +49,7 @@
   script.src = `${base}real-dashboard-progress.js?v=20260711-1`;
   script.dataset.realDashboardProgress = '1';
   script.defer = true;
-  script.onload = loadStreakAndRocks;
-  script.onerror = loadStreakAndRocks;
+  script.onload = loadStreakRocksAndActivity;
+  script.onerror = loadStreakRocksAndActivity;
   document.body.appendChild(script);
 })();
