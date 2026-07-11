@@ -106,9 +106,9 @@ return [
         'fallback_model' => env('HH_AI_CONTENT_DISCLOSURE_FALLBACK_MODEL', 'gpt-4o-mini'),
         'timeout' => (int) env('HH_AI_CONTENT_DISCLOSURE_TIMEOUT', 20),
         'max_files' => (int) env('HH_AI_CONTENT_DISCLOSURE_MAX_FILES', 4),
-        'image_max_side' => (int) env('HH_AI_CONTENT_DISCLOSURE_MAX_SIDE', 768),
-        'image_jpeg_quality' => (int) env('HH_AI_CONTENT_DISCLOSURE_JPEG_QUALITY', 72),
-        'ffmpeg_binary' => env('HH_VIDEO_FFMPEG_BINARY', 'ffmpeg'),
+        'image_max_side' => (int) env('HH_AI_CONTENT_DISCLOSURE_IMAGE_MAX_SIDE', 768),
+        'image_jpeg_quality' => (int) env('HH_AI_CONTENT_DISCLOSURE_IMAGE_JPEG_QUALITY', 72),
+        'ffmpeg_binary' => env('HH_AI_CONTENT_DISCLOSURE_FFMPEG_BINARY', 'ffmpeg'),
         'video_sample_seconds' => (array_values(array_filter(array_map(
             static fn ($value): int => max(0, (int) trim($value)),
             explode(',', (string) env('HH_AI_CONTENT_DISCLOSURE_VIDEO_SAMPLE_SECONDS', '1,4,8'))
