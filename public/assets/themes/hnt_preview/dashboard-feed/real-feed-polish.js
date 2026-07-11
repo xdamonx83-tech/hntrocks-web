@@ -237,3 +237,24 @@
     document.body.appendChild(script);
   }
 })();
+
+/* Load the fullscreen media + comments viewer without touching the base demo. */
+(() => {
+  const base = '/assets/themes/hnt_preview/dashboard-feed/';
+
+  if (!document.querySelector('link[data-real-media-viewer]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `${base}real-feed-media-viewer.css?v=20260711-1`;
+    link.dataset.realMediaViewer = '1';
+    document.head.appendChild(link);
+  }
+
+  if (!document.querySelector('script[data-real-media-viewer]')) {
+    const script = document.createElement('script');
+    script.src = `${base}real-feed-media-viewer.js?v=20260711-1`;
+    script.dataset.realMediaViewer = '1';
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+})();
