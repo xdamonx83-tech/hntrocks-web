@@ -127,3 +127,29 @@
 @endif
 </div>
 </header>
+
+@auth
+@once
+<div class="hnt-chat-tabs-shell" data-hnt-chat-tabs-shell aria-live="polite"></div>
+<script>
+(() => {
+    if (!document.querySelector('link[data-hnt-comms-style]')) {
+        const style = document.createElement('link');
+        style.rel = 'stylesheet';
+        style.href = @json(asset('assets/themes/hnt_preview/comms-dock.css').'?v=1');
+        style.dataset.hntCommsStyle = '1';
+        document.head.appendChild(style);
+    }
+    if (!document.querySelector('link[data-hnt-phosphor-icons]')) {
+        const icons = document.createElement('link');
+        icons.rel = 'stylesheet';
+        icons.href = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css';
+        icons.dataset.hntPhosphorIcons = '1';
+        document.head.appendChild(icons);
+    }
+})();
+</script>
+<script src="{{ asset('assets/themes/hnt_preview/comms-core.js') }}?v=1" defer></script>
+<script src="{{ asset('assets/themes/hnt_preview/comms-dock.js') }}?v=1" defer></script>
+@endonce
+@endauth
