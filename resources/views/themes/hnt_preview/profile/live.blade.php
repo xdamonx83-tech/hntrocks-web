@@ -5,6 +5,7 @@
     $profileHandle = $profileUser->username ? '@'.$profileUser->username : '@hunter';
     $profileAvatarUrl = $profileUser->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
     $profileCoverUrl = $profileUser->coverUrl() ?: asset('assets/vikinger/img/default-cover.svg');
+    $profileCoverDisplayMode = $profile?->coverDisplayMode() ?? \App\Models\UserProfile::COVER_DISPLAY_AUTO;
     $profileBio = trim((string) ($profile?->bio ?: $profile?->headline ?: 'Noch keine Profilbeschreibung vorhanden.'));
     $profilePostsCount = (int) ($profileUser->visible_feed_posts_count ?? ($profilePostsTotal ?? 0));
     $profileFriendsTotal = (int) ($profileFriendsCount ?? 0);
