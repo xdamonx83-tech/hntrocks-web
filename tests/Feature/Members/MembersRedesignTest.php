@@ -10,7 +10,7 @@ class MembersRedesignTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_members_redesign_uses_the_uploaded_table_layout_with_real_data(): void
+    public function test_members_redesign_renders_the_uploaded_static_demo_exactly_before_live_data_is_reconnected(): void
     {
         config()->set('members.redesign_live', true);
 
@@ -19,37 +19,31 @@ class MembersRedesignTest extends TestCase
             'profile_visibility' => 'registered',
         ]);
 
-        $member = User::factory()->create([
-            'name' => 'Bayou Hunter',
-            'username' => 'bayou-hunter',
-        ]);
-        $member->profile()->create([
-            'profile_visibility' => 'registered',
-            'platform' => 'Xbox',
-            'region' => 'EU',
-            'language' => 'Deutsch',
-            'playstyle' => 'Casual',
-            'is_lfg_available' => true,
-        ]);
-
         $this->actingAs($viewer)
             ->get(route('members.index'))
             ->assertOk()
             ->assertSee('data-hnt-shared-header', false)
+            ->assertSee('members-stage', false)
+            ->assertSee('members-scroll', false)
             ->assertSee('members-overview', false)
             ->assertSee('members-progress-row', false)
             ->assertSee('members-directory-card', false)
+            ->assertSee('members-filter-strip', false)
             ->assertSee('members-table-head', false)
             ->assertSee('members-table-row', false)
-            ->assertSee('Bayou Hunter')
-            ->assertSee('bayou-hunter')
-            ->assertSee('Xbox')
+            ->assertSee('Valentina')
+            ->assertSee('Katy Fuller')
+            ->assertSee('Jonathan Kelly')
+            ->assertSee('1.284')
+            ->assertSee('128')
+            ->assertSee('24')
+            ->assertDontSee('members-directory-sticky', false)
             ->assertDontSee('members-live-card', false)
             ->assertSee('dashboard-members/members-live.css', false)
             ->assertSee('dashboard-members/members-live.js', false);
     }
 
-    public function test_members_fragment_uses_the_live_table_row_partial(): void
+    public function test_members_fragment_still_keeps_the_existing_real_data_endpoint_available_for_the_next_stage(): void
     {
         config()->set('members.redesign_live', true);
 
@@ -76,7 +70,7 @@ class MembersRedesignTest extends TestCase
         $this->assertStringContainsString('Fragment Hunter', $response->json('html'));
     }
 
-    public function test_members_csv_export_uses_the_current_real_member_query(): void
+    public function test_members_csv_export_keeps_the_existing_real_member_query_available(): void
     {
         config()->set('members.redesign_live', true);
 
@@ -108,22 +102,20 @@ class MembersRedesignTest extends TestCase
         $this->assertStringContainsString('PC', $csv);
     }
 
-    public function test_members_uses_the_shared_clipped_scroll_shell_without_a_visible_scrollbar(): void
+    public function test_members_uses_the_feed_scroll_shell_without_sticky_layout_hacks(): void
     {
-        $prototypeCss = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-prototype.css'));
         $liveCss = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.css'));
         $javascript = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.js'));
 
-        $this->assertIsString($prototypeCss);
         $this->assertIsString($liveCss);
         $this->assertIsString($javascript);
-        $this->assertStringContainsString('.members-table-body{overflow:visible!important', $prototypeCss);
         $this->assertStringContainsString('grid-template-rows: auto minmax(0, 1fr)', $liveCss);
         $this->assertStringContainsString('.members-stage', $liveCss);
         $this->assertStringContainsString('.members-scroll', $liveCss);
         $this->assertStringContainsString('scrollbar-width: none', $liveCss);
         $this->assertStringContainsString('.members-scroll::-webkit-scrollbar', $liveCss);
-        $this->assertStringContainsString("stage.className = 'members-stage'", $javascript);
-        $this->assertStringContainsString("scroll.className = 'members-scroll'", $javascript);
+        $this->assertStringNotContainsString('.members-directory-sticky', $liveCss);
+        $this->assertStringNotContainsString("stage.className = 'members-stage'", $javascript);
+        $this->assertStringContainsString('applyMembersFilters', $javascript);
     }
 }
