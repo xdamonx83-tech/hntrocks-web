@@ -170,7 +170,32 @@
 <div class="profile-crop-modal" id="profileCropModal" aria-hidden="true" hidden><div class="profile-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="profileCropTitle"><header><div><span>{{ $copy['profile_media'] }}</span><h2 id="profileCropTitle">{{ $copy['crop_title'] }}</h2><p>{{ $copy['crop_help'] }}</p></div><button type="button" data-crop-close aria-label="{{ $copy['cancel'] }}"><svg><use href="#i-x"></use></svg></button></header><div class="profile-crop-body"><div class="profile-crop-stage"><canvas id="profileCropCanvas"></canvas></div><label>{{ $copy['zoom'] }}<input id="profileCropZoom" type="range" min="1" max="3" step="0.01" value="1"></label><p id="profileCropError" class="profile-crop-error" hidden></p></div><footer><button type="button" id="profileCropChoose">{{ $copy['choose_another'] }}</button><button type="button" data-crop-close>{{ $copy['cancel'] }}</button><button type="button" class="primary" id="profileCropSave">{{ $copy['save_image'] }}</button></footer></div></div>
 <div class="toast" id="toast"></div>
 </main>
-<script>window.HNT_PROFILE_EDIT=@json(['updateMediaUrl'=>route('profile.media.update'),'csrf'=>csrf_token(),'copy'=>['clean'=>$copy['clean'],'dirty'=>$copy['dirty'],'saving'=>$copy['saving'],'noHeadline'=>$copy['no_headline'],'noBio'=>$copy['no_bio'],'open'=>$copy['open'],'notSet'=>$copy['not_set'],'public'=>$copy['public'],'registered'=>$copy['registered'],'private'=>$copy['private'],'imageSaved'=>$copy['image_saved'],'imageFailed'=>$copy['image_failed'],'chooseImage'=>$copy['choose_image'],'leaveWarning'=>$copy['leave_warning'],'saveImage'=>$copy['save_image']]]);</script>
+@php
+    $profileEditConfig = [
+        'updateMediaUrl' => route('profile.media.update'),
+        'csrf' => csrf_token(),
+        'copy' => [
+            'clean' => $copy['clean'],
+            'dirty' => $copy['dirty'],
+            'saving' => $copy['saving'],
+            'noHeadline' => $copy['no_headline'],
+            'noBio' => $copy['no_bio'],
+            'open' => $copy['open'],
+            'notSet' => $copy['not_set'],
+            'public' => $copy['public'],
+            'registered' => $copy['registered'],
+            'private' => $copy['private'],
+            'imageSaved' => $copy['image_saved'],
+            'imageFailed' => $copy['image_failed'],
+            'chooseImage' => $copy['choose_image'],
+            'leaveWarning' => $copy['leave_warning'],
+            'saveImage' => $copy['save_image'],
+        ],
+    ];
+@endphp
+<script>
+    window.HNT_PROFILE_EDIT = {{ \Illuminate\Support\Js::from($profileEditConfig) }};
+</script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/app.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.js')) ?: time() }}"></script>
