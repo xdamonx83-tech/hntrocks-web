@@ -19,6 +19,10 @@
       return;
     }
 
+    const isEnglish = document.documentElement.lang === 'en';
+    const labels = isEnglish
+      ? { show: 'Show cover image', hide: 'Hide cover image' }
+      : { show: 'Titelbild anzeigen', hide: 'Titelbild ausblenden' };
     const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)');
     let pinned = false;
     let temporarilyHidden = false;
@@ -40,10 +44,7 @@
 
       toggles.forEach((toggle) => {
         toggle.setAttribute('aria-pressed', visible ? 'true' : 'false');
-        toggle.setAttribute(
-          'aria-label',
-          visible ? 'Titelbild ausblenden' : 'Titelbild anzeigen',
-        );
+        toggle.setAttribute('aria-label', visible ? labels.hide : labels.show);
       });
     };
 
