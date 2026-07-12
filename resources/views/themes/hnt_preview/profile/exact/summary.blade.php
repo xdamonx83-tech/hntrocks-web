@@ -1,4 +1,5 @@
-<section class="profile-summary-card">
+<section class="profile-summary-card" data-profile-cover-peek>
+<div aria-hidden="true" class="profile-cover-peek-layer" style="background-image:linear-gradient(180deg,rgba(251,249,238,.24) 0%,rgba(251,249,238,.38) 34%,rgba(251,249,238,.82) 72%,#fbf9ee 100%),url('{{ $profileCoverUrl }}')"></div>
 <div class="profile-summary-top">
 <div>
 <span class="profile-eyebrow">HNT.ROCKS PROFIL</span>
