@@ -173,17 +173,34 @@
   };
 
   const replaceWithLink = (node, url) => {
-    if (!node || !url || node.tagName === 'A') return node;
-    const link = document.createElement('a');
-    [...node.attributes].forEach((attribute) => {
-      if (!['type', 'data-toast', 'disabled'].includes(attribute.name)) {
-        link.setAttribute(attribute.name, attribute.value);
-      }
-    });
-    link.href = url;
-    link.innerHTML = node.innerHTML;
-    node.replaceWith(link);
-    return link;
+    if (!node || !url) return node;
+
+    if (node.tagName === 'A') {
+      node.href = url;
+      return node;
+    }
+
+    node.removeAttribute('data-toast');
+    node.dataset.navigationUrl = url;
+
+    if (node.dataset.navigationBound !== '1') {
+      node.dataset.navigationBound = '1';
+      node.addEventListener('click', (event) => {
+        if (event.defaultPrevented || node.getAttribute('aria-disabled') === 'true') return;
+
+        const target = node.dataset.navigationUrl;
+        if (!target) return;
+
+        if (event.ctrlKey || event.metaKey) {
+          window.open(target, '_blank', 'noopener');
+          return;
+        }
+
+        window.location.assign(target);
+      });
+    }
+
+    return node;
   };
 
   const wireMenuLinks = (links = {}) => {
