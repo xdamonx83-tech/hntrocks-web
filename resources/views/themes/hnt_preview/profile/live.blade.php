@@ -63,6 +63,14 @@
 
     $profileTwitchParent = request()->getHost();
     $profileHasSocialLinks = (bool) ($profileSteamUrl || $profileTwitchUrl || $profileYoutubeUrl);
+    $profileTwitchLiveStatus = is_array($profileTwitchLiveStatus ?? null) ? $profileTwitchLiveStatus : [];
+    $profileTwitchStatusState = in_array(($profileTwitchLiveStatus['state'] ?? null), ['live', 'offline'], true)
+        ? $profileTwitchLiveStatus['state']
+        : 'loading';
+    $profileTwitchIsLive = $profileTwitchStatusState === 'live';
+    $profileTwitchStatusLabel = $profileTwitchIsLive
+        ? 'LIVE'
+        : ($profileTwitchStatusState === 'offline' ? 'Offline' : 'Wird geprüft');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() === 'en' ? 'en' : 'de' }}">
@@ -85,6 +93,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-media-viewer.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-media-viewer.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-compose.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-compose.css')) ?: time() }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-social-twitch-final.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-social-twitch-final.css')) ?: time() }}" rel="stylesheet"/>
 </head>
 <body data-page="profile">
 @include('themes.hnt_preview.partials.icons')
@@ -98,8 +107,8 @@
 @include('themes.hnt_preview.profile.exact.card-left')
 <div class="profile-page-main">
 @include('themes.hnt_preview.profile.exact.summary')
-<section class="social-feed-card profile-post-feed">
 @include('themes.hnt_preview.profile.exact.feed-head')
+<section class="social-feed-card profile-post-feed">
 @include('themes.hnt_preview.profile.exact.feed-posts')
 @include('themes.hnt_preview.profile.exact.feed-info')
 @include('themes.hnt_preview.profile.exact.feed-friends')
@@ -114,7 +123,11 @@
 @include('themes.hnt_preview.profile.exact.comments')
 <div class="toast" id="toast"></div>
 </main>
-<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = window.location.href; window.HNT_PROFILE_LIVE = true;</script>
+<script>
+window.HNT_DASHBOARD_HEADER_ENDPOINT = window.location.href;
+window.HNT_PROFILE_LIVE = true;
+window.HNT_PROFILE_TWITCH_STATUS = {{ \Illuminate\Support\Js::from($profileTwitchLiveStatus) }};
+</script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/app.js')) ?: time() }}"></script>
 @if(auth()->check())
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js')) ?: time() }}"></script>
@@ -123,6 +136,7 @@
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-cover-peek.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-cover-peek.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-social-twitch.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-social-twitch.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-twitch-bootstrap.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-twitch-bootstrap.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live-compose.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live-compose.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live-actions.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live-actions.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js')) ?: time() }}"></script>
