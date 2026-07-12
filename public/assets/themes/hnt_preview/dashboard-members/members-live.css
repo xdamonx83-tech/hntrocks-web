@@ -101,7 +101,7 @@ body[data-page="members"]::-webkit-scrollbar {
 .members-directory-sticky + .members-table {
     width: calc(100% + 20px);
     margin: 0 -10px;
-    overflow: visible !important;
+    overflow: hidden !important;
     border-radius: 0;
     background: rgba(255, 255, 255, .76);
     box-shadow: none;
