@@ -178,6 +178,7 @@
         </script>
     @endauth
     <script src="{{ asset('assets/themes/hnt_preview/preview-shell.js') }}?v=765" defer></script>
+    <script src="{{ asset('assets/themes/hnt_preview/comms-dock.js') }}?v=1" defer></script>
     @auth
         <script src="{{ asset('assets/socialite/js/hnt-socialite-message-typing.js') }}?v=172ee-typing" defer></script>
         <script src="{{ asset('assets/vikinger/js/hnt-realtime.js') }}?v=172ee-typing" defer></script>
