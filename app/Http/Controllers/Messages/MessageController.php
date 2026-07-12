@@ -73,39 +73,56 @@ class MessageController extends Controller
             return redirect()->route('messages.index')->withErrors(['recipient_id' => __('ui.message_blocked_unavailable')]);
         }
 
-        $conversation = $this->privateConversationFor($sender, $user);
+        $conversation = $this->existingPrivateConversationFor($sender, $user);
 
         if ($request->expectsJson()) {
+            if (! $conversation) {
+                return response()->json([
+                    'message' => __('ui.message_drawer_opened'),
+                    'draft' => true,
+                    'draft_key' => 'draft-user-'.$user->id,
+                    'html' => view(HntTheme::resolve('messages.partials.chat-draft-tab'), [
+                        'viewer' => $sender,
+                        'recipient' => $user,
+                    ])->render(),
+                    'chat_tab_url' => route('messages.with-user', $user),
+                    'show_url' => route('messages.index', ['recipient_id' => $user->id]),
+                ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+            }
+
             $conversation->markReadFor($sender);
-            $conversation->setRelation('users', collect([$sender, $user]));
+            $conversation->load(['users.profile', 'users.privacySettings']);
 
             $messages = $this->visibleMessagesQuery($conversation, $sender)
                 ->with('user.profile')
                 ->latest('created_at')
-                ->limit(30)
+                ->limit(60)
                 ->get()
                 ->reverse()
                 ->values();
 
             return response()->json([
-                'message' => __('ui.message_drawer_opened'),
+                'message' => __('ui.message_chat_tab_opened'),
                 'conversation_id' => $conversation->id,
-                'panel_key' => 'conversation-'.$conversation->id,
-                'panel_html' => view('partials.chat-dock-conversation-panel', [
-                    'hhChatConversation' => $conversation,
-                    'hhChatUser' => $sender,
-                    'hhChatPartner' => $user,
-                    'hhChatMessages' => $messages,
+                'html' => view(HntTheme::resolve('messages.partials.chat-tab'), [
+                    'conversation' => $conversation,
+                    'viewer' => $sender,
+                    'messages' => $messages,
                 ])->render(),
+                'chat_tab_url' => route('messages.chat-tab', $conversation),
                 'show_url' => route('messages.show', $conversation),
-            ]);
+                'unread_messages' => $sender->unreadMessagesCount(),
+            ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
-        $conversation->markReadFor($sender);
+        if ($conversation) {
+            $conversation->markReadFor($sender);
 
-        return redirect()->route('messages.show', $conversation);
+            return redirect()->route('messages.show', $conversation);
+        }
+
+        return redirect()->route('messages.index', ['recipient_id' => $user->id]);
     }
-
 
     public function chatTab(Request $request, Conversation $conversation): JsonResponse
     {
@@ -131,10 +148,11 @@ class MessageController extends Controller
                 'viewer' => $request->user(),
                 'messages' => $messages,
             ])->render(),
+            'chat_tab_url' => route('messages.chat-tab', $conversation),
+            'show_url' => route('messages.show', $conversation),
             'unread_messages' => $request->user()->unreadMessagesCount(),
-        ]);
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
-
 
     public function chatTabMessages(Request $request, Conversation $conversation): JsonResponse
     {
@@ -165,7 +183,7 @@ class MessageController extends Controller
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
-    public function start(Request $request, MessagePushService $messagePush, MessageBroadcastService $messageBroadcast): RedirectResponse
+    public function start(Request $request, MessagePushService $messagePush, MessageBroadcastService $messageBroadcast): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'recipient_id' => ['required', 'integer', 'exists:users,id'],
@@ -176,10 +194,18 @@ class MessageController extends Controller
         $recipient = User::findOrFail($validated['recipient_id']);
 
         if ((int) $recipient->id === (int) $sender->id) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('ui.message_cannot_self')], 422);
+            }
+
             return back()->withErrors(['recipient_id' => __('ui.message_cannot_self')]);
         }
 
         if ($sender->hasBlocked($recipient) || $recipient->hasBlocked($sender)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('ui.message_blocked_unavailable')], 403);
+            }
+
             return back()->withErrors(['recipient_id' => __('ui.message_blocked_unavailable')]);
         }
 
@@ -194,6 +220,33 @@ class MessageController extends Controller
         $conversation->markReadFor($sender);
         $messagePush->sendForMessage($message);
         $messageBroadcast->broadcastCreated($message);
+
+        if ($request->expectsJson()) {
+            $conversation->load(['users.profile', 'users.privacySettings']);
+            $messages = $this->visibleMessagesQuery($conversation, $sender)
+                ->with('user.profile')
+                ->latest('created_at')
+                ->limit(60)
+                ->get()
+                ->reverse()
+                ->values();
+
+            return response()->json([
+                'message' => __('ui.message_sent'),
+                'conversation_id' => $conversation->id,
+                'conversation_type' => $conversation->type,
+                'body' => $message->body,
+                'created_at_label' => $message->created_at?->format('H:i'),
+                'html' => view(HntTheme::resolve('messages.partials.chat-tab'), [
+                    'conversation' => $conversation,
+                    'viewer' => $sender,
+                    'messages' => $messages,
+                ])->render(),
+                'chat_tab_url' => route('messages.chat-tab', $conversation),
+                'show_url' => route('messages.show', $conversation),
+                'unread_messages' => $sender->unreadMessagesCount(),
+            ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
 
         return redirect()->route('messages.show', $conversation)->with('status', __('ui.message_sent'));
     }
@@ -289,6 +342,7 @@ class MessageController extends Controller
         return Conversation::query()
             ->forUser($user)
             ->whereIn('type', $this->conversationTypesFor($messageType))
+            ->whereHas('messages')
             ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
             ->latest('updated_at')
             ->paginate(12)
@@ -304,16 +358,16 @@ class MessageController extends Controller
             ->get(['id', 'name', 'username', 'avatar_path']);
     }
 
+    private function existingPrivateConversationFor(User $first, User $second): ?Conversation
+    {
+        $conversationId = $this->privateConversationIdFor($first, $second, true);
+
+        return $conversationId ? Conversation::find($conversationId) : null;
+    }
+
     private function privateConversationFor(User $first, User $second): Conversation
     {
-        $conversationId = DB::table('conversation_participants as participant_self')
-            ->join('conversation_participants as participant_other', 'participant_self.conversation_id', '=', 'participant_other.conversation_id')
-            ->join('conversations', 'conversations.id', '=', 'participant_self.conversation_id')
-            ->where('conversations.type', 'private')
-            ->where('participant_self.user_id', $first->id)
-            ->where('participant_other.user_id', $second->id)
-            ->orderByDesc('conversations.updated_at')
-            ->value('conversations.id');
+        $conversationId = $this->privateConversationIdFor($first, $second, false);
 
         if ($conversationId) {
             return Conversation::findOrFail($conversationId);
@@ -332,6 +386,30 @@ class MessageController extends Controller
         return $conversation;
     }
 
+    private function privateConversationIdFor(User $first, User $second, bool $requireMessages): ?int
+    {
+        $query = DB::table('conversation_participants as participant_self')
+            ->join('conversation_participants as participant_other', 'participant_self.conversation_id', '=', 'participant_other.conversation_id')
+            ->join('conversations', 'conversations.id', '=', 'participant_self.conversation_id')
+            ->where('conversations.type', 'private')
+            ->where('participant_self.user_id', $first->id)
+            ->where('participant_other.user_id', $second->id);
+
+        if ($requireMessages) {
+            $query->whereExists(function ($messages): void {
+                $messages
+                    ->selectRaw('1')
+                    ->from('messages')
+                    ->whereColumn('messages.conversation_id', 'conversations.id');
+            });
+        }
+
+        $conversationId = $query
+            ->orderByDesc('conversations.updated_at')
+            ->value('conversations.id');
+
+        return $conversationId ? (int) $conversationId : null;
+    }
 
     private function visibleMessagesQuery(Conversation $conversation, User $user)
     {
@@ -379,6 +457,7 @@ class MessageController extends Controller
         return Conversation::query()
             ->forUser($user)
             ->whereIn('type', $types)
+            ->whereHas('messages')
             ->count();
     }
 }
