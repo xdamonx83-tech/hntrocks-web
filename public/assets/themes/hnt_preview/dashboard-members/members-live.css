@@ -64,6 +64,7 @@ body[data-page="members"]::-webkit-scrollbar {
 .members-directory-card {
     overflow: clip !important;
     border-radius: 31px !important;
+    background: transparent !important;
 }
 
 .members-directory-sticky {
@@ -100,6 +101,14 @@ body[data-page="members"]::-webkit-scrollbar {
 .members-directory-sticky + .members-table {
     overflow: visible !important;
     border-radius: 0 0 23px 23px;
+    background: rgba(255, 255, 255, .76);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, .76);
+}
+
+.members-directory-footer {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, .76);
 }
 
 @media (min-width: 1200px) {
