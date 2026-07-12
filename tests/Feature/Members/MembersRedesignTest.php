@@ -23,8 +23,9 @@ class MembersRedesignTest extends TestCase
             ->get(route('members.index'))
             ->assertOk()
             ->assertSee('data-hnt-shared-header', false)
-            ->assertSee('members-stage', false)
-            ->assertSee('members-scroll', false)
+            ->assertSee('app-shell feed-shell members-page-shell', false)
+            ->assertSee('feed-stage members-stage', false)
+            ->assertSee('feed-scroll members-scroll', false)
             ->assertSee('members-overview', false)
             ->assertSee('members-progress-row', false)
             ->assertSee('members-directory-card', false)
@@ -39,6 +40,7 @@ class MembersRedesignTest extends TestCase
             ->assertSee('1.284')
             ->assertSee('128')
             ->assertSee('24')
+            ->assertDontSee('aria-hidden="true" class="feed-shell" hidden', false)
             ->assertDontSee('members-directory-sticky', false)
             ->assertDontSee('members-live-card', false)
             ->assertSee('dashboard-members/members-live.css', false)
@@ -104,19 +106,20 @@ class MembersRedesignTest extends TestCase
         $this->assertStringContainsString('PC', $csv);
     }
 
-    public function test_members_uses_the_feed_scroll_shell_and_demo_footer_without_sticky_layout_hacks(): void
+    public function test_members_uses_the_exact_feed_scroll_shell_and_demo_footer_without_sticky_layout_hacks(): void
     {
         $liveCss = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.css'));
         $javascript = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.js'));
 
         $this->assertIsString($liveCss);
         $this->assertIsString($javascript);
+        $this->assertStringContainsString('.members-page-shell.feed-shell', $liveCss);
         $this->assertStringContainsString('grid-template-rows: 36px minmax(0, 1fr)', $liveCss);
-        $this->assertStringContainsString('.members-stage', $liveCss);
-        $this->assertStringContainsString('.members-scroll', $liveCss);
+        $this->assertStringContainsString('.members-stage.feed-stage', $liveCss);
+        $this->assertStringContainsString('.members-scroll.feed-scroll', $liveCss);
         $this->assertStringContainsString('overflow-y: auto', $liveCss);
         $this->assertStringContainsString('scrollbar-width: none', $liveCss);
-        $this->assertStringContainsString('.members-scroll::-webkit-scrollbar', $liveCss);
+        $this->assertStringContainsString('padding-inline: clamp(16px, 1.65vw, 30px)', $liveCss);
         $this->assertStringContainsString('.members-pagination button', $liveCss);
         $this->assertStringContainsString('.members-empty-state[hidden]', $liveCss);
         $this->assertStringNotContainsString('.members-directory-sticky', $liveCss);
