@@ -102,7 +102,7 @@
 <section aria-labelledby="friendsMenuTrigger" class="header-dropdown requests-dropdown" id="friendsDropdown" role="menu"><header class="header-dropdown-head"><div><span>COMMUNITY</span><strong>Freundschaftsanfragen</strong></div><small data-dropdown-count="friends">0 offen</small></header><div class="header-request-list"><div class="header-live-state"><strong>Freundschaftsanfragen</strong>Echte Daten werden geladen …</div></div><a class="header-dropdown-footer" href="{{ route('profile.friends') }}">Alle Anfragen ansehen <svg><use href="#i-arrow"></use></svg></a></section>
 </div>
 <div class="header-action-menu messages-menu">
-<button aria-controls="messagesDropdown" aria-expanded="false" aria-haspopup="true" aria-label="Nachrichten öffnen" class="header-circle header-dropdown-trigger" id="messagesMenuTrigger"><svg><use href="#i-comment"></use></svg><span class="header-action-badge is-empty" data-header-badge="messages">0</span></button>
+<button aria-controls="messagesDropdown" aria-expanded="false" aria-haspopup="true" aria-label="Nachrichten öffnen" class="header-circle header-dropdown-trigger" data-hnt-messages-open id="messagesMenuTrigger"><svg><use href="#i-comment"></use></svg><span class="header-action-badge is-empty" data-header-badge="messages">0</span></button>
 <section aria-labelledby="messagesMenuTrigger" class="header-dropdown messages-dropdown" id="messagesDropdown" role="menu"><header class="header-dropdown-head"><div><span>INBOX</span><strong>Nachrichten</strong></div><small data-dropdown-count="messages">0 ungelesen</small></header><div class="header-message-list"><div class="header-live-state"><strong>Nachrichten</strong>Echte Daten werden geladen …</div></div><a class="header-dropdown-footer" href="{{ route('messages.index') }}">Alle Nachrichten ansehen <svg><use href="#i-arrow"></use></svg></a></section>
 </div>
 <div class="header-action-menu notifications-menu">
@@ -133,10 +133,36 @@
 <div class="hnt-chat-tabs-shell" data-hnt-chat-tabs-shell aria-live="polite"></div>
 <script>
 (() => {
+    if (!document.querySelector('.feed-shell')) {
+        const compatibilityRoot = document.createElement('div');
+        compatibilityRoot.className = 'feed-shell hnt-header-runtime-root';
+        compatibilityRoot.hidden = true;
+        compatibilityRoot.setAttribute('aria-hidden', 'true');
+        compatibilityRoot.style.display = 'none';
+        document.body.appendChild(compatibilityRoot);
+    }
+
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('.header-message-list a.header-message-item');
+        if (!link || link.hasAttribute('data-hnt-chat-tab-open')) return;
+
+        try {
+            const target = new URL(link.getAttribute('href') || '', window.location.origin);
+            const match = target.pathname.match(/^\/messages\/(\d+)\/?$/);
+            if (!match) return;
+
+            link.setAttribute('data-hnt-chat-tab-open', '');
+            link.setAttribute('data-hnt-chat-conversation-id', match[1]);
+            link.setAttribute('data-hnt-chat-tab-url', target.pathname.replace(/\/$/, '') + '/chat-tab');
+        } catch (_error) {
+            // Keep the normal link as a safe fallback.
+        }
+    }, true);
+
     if (!document.querySelector('link[data-hnt-comms-style]')) {
         const style = document.createElement('link');
         style.rel = 'stylesheet';
-        style.href = @json(asset('assets/themes/hnt_preview/comms-dock.css').'?v=1');
+        style.href = @json(asset('assets/themes/hnt_preview/comms-dock.css').'?v='.(@filemtime(public_path('assets/themes/hnt_preview/comms-dock.css')) ?: time()));
         style.dataset.hntCommsStyle = '1';
         document.head.appendChild(style);
     }
@@ -149,7 +175,7 @@
     }
 })();
 </script>
-<script src="{{ asset('assets/themes/hnt_preview/comms-core.js') }}?v=1" defer></script>
-<script src="{{ asset('assets/themes/hnt_preview/comms-dock.js') }}?v=1" defer></script>
+<script src="{{ asset('assets/themes/hnt_preview/comms-core.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/comms-core.js')) ?: time() }}" defer></script>
+<script src="{{ asset('assets/themes/hnt_preview/comms-dock.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/comms-dock.js')) ?: time() }}" defer></script>
 @endonce
 @endauth
