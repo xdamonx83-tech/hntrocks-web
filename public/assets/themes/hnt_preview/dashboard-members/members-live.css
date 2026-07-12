@@ -9,7 +9,8 @@ body[data-page="members"] {
     overflow: hidden !important;
 }
 
-.members-page-shell {
+/* Exakt dieselbe Shell-Reihenfolge wie im Feed: Header, Stage, Scrollbereich. */
+.members-page-shell.feed-shell {
     display: grid !important;
     grid-template-rows: 36px minmax(0, 1fr) !important;
     width: 100vw !important;
@@ -17,7 +18,8 @@ body[data-page="members"] {
     min-width: 900px !important;
     min-height: 640px !important;
     overflow: hidden !important;
-    padding: 16px !important;
+    padding-block: 16px !important;
+    padding-inline: clamp(16px, 1.65vw, 30px) !important;
 }
 
 .members-page-shell > .site-header {
@@ -30,14 +32,19 @@ body[data-page="members"] {
     -webkit-backdrop-filter: none !important;
 }
 
-.members-stage {
+.members-page-shell .nav-community > .main-nav-trigger {
+    background: var(--dark) !important;
+    color: #fff !important;
+}
+
+.members-stage.feed-stage {
     position: relative;
     min-width: 0;
     min-height: 0;
     overflow: hidden;
 }
 
-.members-scroll {
+.members-scroll.feed-scroll {
     width: 100%;
     height: 100%;
     overflow-y: auto;
@@ -46,10 +53,16 @@ body[data-page="members"] {
     overscroll-behavior: contain;
 }
 
-.members-scroll::-webkit-scrollbar {
+.members-scroll.feed-scroll::-webkit-scrollbar {
     display: none;
     width: 0;
     height: 0;
+}
+
+.members-overview,
+.members-directory-card {
+    width: 100%;
+    min-width: 0;
 }
 
 .members-directory-card,
@@ -158,10 +171,11 @@ body[data-page="members"] {
 }
 
 @media (max-width: 899px) {
-    .members-page-shell {
+    .members-page-shell.feed-shell {
         min-width: 0 !important;
         min-height: 100dvh !important;
         height: 100dvh !important;
+        padding-inline: 12px !important;
     }
 
     .members-directory-footer {
