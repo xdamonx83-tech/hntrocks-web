@@ -1,39 +1,5 @@
 (() => {
-  const shell = document.querySelector('.members-page-shell');
-  const header = shell?.querySelector(':scope > .site-header');
-  const modal = shell?.querySelector(':scope > [data-members-filter-modal]');
-
-  if (shell && header && !shell.querySelector(':scope > .members-stage')) {
-    const stage = document.createElement('div');
-    const scroll = document.createElement('div');
-
-    stage.className = 'members-stage';
-    scroll.className = 'members-scroll';
-    stage.append(scroll);
-    shell.insertBefore(stage, header.nextSibling);
-
-    [...shell.children]
-      .filter((child) => child !== header && child !== stage && child !== modal)
-      .forEach((child) => scroll.append(child));
-  }
-
-  const directoryCard = shell?.querySelector('.members-directory-card');
-  const staleStickyPanel = directoryCard?.querySelector(':scope > .members-sticky-panel');
-
-  if (directoryCard && staleStickyPanel) {
-    [...staleStickyPanel.children].forEach((child) => {
-      directoryCard.insertBefore(child, staleStickyPanel);
-    });
-    staleStickyPanel.remove();
-  }
-
-  const directoryHead = directoryCard?.querySelector(':scope > .members-directory-head');
-  const actionShelf = directoryCard?.querySelector(':scope > .members-action-shelf');
-
-  if (directoryHead && actionShelf && actionShelf.parentElement !== directoryHead) {
-    directoryHead.append(actionShelf);
-  }
-
+  const modal = document.querySelector('[data-members-filter-modal]');
   const openButtons = document.querySelectorAll('[data-members-filter-open]');
   const closeButton = document.querySelector('[data-members-filter-close]');
   const filterStrip = document.querySelector('[data-members-filter-strip]');
