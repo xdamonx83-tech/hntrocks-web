@@ -6,8 +6,15 @@
         const shell = document.querySelector('[data-hnt-chat-tabs-shell]');
         if (!shell) return;
 
+        const locale = String(document.documentElement.lang || 'de').toLowerCase();
+        const isEnglish = locale.startsWith('en');
+        const labels = {
+            openFailed: isEnglish ? 'Chat could not be opened.' : 'Chat konnte nicht geöffnet werden.',
+            sendFailed: isEnglish ? 'Message could not be sent.' : 'Nachricht konnte nicht gesendet werden.',
+        };
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        const storageKey = 'hntPreviewOpenChatTabsV1';
+        const storageKey = 'hntPreviewOpenChatTabsV2';
+        const legacyStorageKey = 'hntPreviewOpenChatTabsV1';
         const pollInterval = 4500;
 
         const cssEscape = (value) => {
@@ -30,9 +37,18 @@
 
         const readStoredTabs = () => {
             try {
-                const stored = JSON.parse(window.sessionStorage.getItem(storageKey) || '[]');
+                const stored = JSON.parse(
+                    window.sessionStorage.getItem(storageKey)
+                    || window.sessionStorage.getItem(legacyStorageKey)
+                    || '[]'
+                );
+
                 return Array.isArray(stored)
-                    ? stored.filter((item) => item && item.id && item.url)
+                    ? stored.filter((item) => item && item.id && item.url).map((item) => ({
+                        id: String(item.id),
+                        url: String(item.url),
+                        minimized: Boolean(item.minimized),
+                    }))
                     : [];
             } catch (_error) {
                 return [];
@@ -43,10 +59,12 @@
             const tabs = Array.from(shell.querySelectorAll('[data-hnt-chat-tab]')).map((tab) => ({
                 id: tab.getAttribute('data-conversation-id') || tab.getAttribute('data-hnt-chat-tab'),
                 url: tab.getAttribute('data-hnt-chat-tab-url') || '',
+                minimized: tab.classList.contains('is-minimized') || tab.classList.contains('hnt-comms-signal'),
             })).filter((item) => item.id && item.url);
 
             try {
                 window.sessionStorage.setItem(storageKey, JSON.stringify(tabs));
+                window.sessionStorage.removeItem(legacyStorageKey);
             } catch (_error) {
                 // Persistence is optional.
             }
@@ -54,7 +72,19 @@
 
         const scrollMessagesToBottom = (tab) => {
             const list = tab?.querySelector('[data-hnt-chat-tab-messages]');
-            if (list) list.scrollTop = list.scrollHeight;
+            if (!list) return;
+
+            const apply = () => {
+                list.scrollTop = list.scrollHeight;
+            };
+
+            apply();
+            window.requestAnimationFrame(() => {
+                apply();
+                window.requestAnimationFrame(apply);
+            });
+            window.setTimeout(apply, 80);
+            window.setTimeout(apply, 180);
         };
 
         const isNearBottom = (list) => !list || (list.scrollHeight - list.scrollTop - list.clientHeight) < 64;
@@ -64,7 +94,7 @@
             const explicit = tab.getAttribute('data-hnt-chat-tab-messages-url');
             if (explicit) return explicit;
             const tabUrl = tab.getAttribute('data-hnt-chat-tab-url') || '';
-            return tabUrl ? tabUrl.replace(/\/?$/, '/messages') : '';
+            return tabUrl.includes('/chat-tab') ? tabUrl.replace(/\/?$/, '/messages') : '';
         };
 
         const renderTab = (html, url) => {
@@ -93,21 +123,27 @@
 
         const activateTab = (tab) => {
             if (!tab) return;
-            tab.classList.remove('is-minimized');
+            tab.classList.remove('is-minimized', 'hnt-comms-signal');
             shell.appendChild(tab);
             scrollMessagesToBottom(tab);
             writeStoredTabs();
+            document.dispatchEvent(new CustomEvent('hnt:comms-tab-activated', { detail: { tab } }));
         };
 
-        const openTab = async (url, trigger = null) => {
-            if (!url) return;
+        const openTab = async (url, trigger = null, options = {}) => {
+            if (!url) return null;
 
-            const existingId = trigger?.getAttribute('data-hnt-chat-conversation-id') || '';
+            const existingId = trigger?.getAttribute('data-hnt-chat-conversation-id') || options.id || '';
             if (existingId) {
                 const existing = shell.querySelector('[data-hnt-chat-tab="' + cssEscape(existingId) + '"]');
                 if (existing) {
-                    activateTab(existing);
-                    return;
+                    if (options.minimized) {
+                        existing.classList.add('is-minimized');
+                        writeStoredTabs();
+                    } else {
+                        activateTab(existing);
+                    }
+                    return existing;
                 }
             }
 
@@ -125,7 +161,7 @@
                 });
 
                 let payload = await response.json();
-                if (!response.ok) throw new Error(payload?.message || 'Chat konnte nicht geöffnet werden.');
+                if (!response.ok) throw new Error(payload?.message || labels.openFailed);
 
                 if (!payload.html && payload.conversation_id) {
                     const showUrl = payload.show_url
@@ -143,19 +179,28 @@
                         },
                     });
                     payload = await response.json();
-                    if (!response.ok) throw new Error(payload?.message || 'Chat konnte nicht geöffnet werden.');
+                    if (!response.ok) throw new Error(payload?.message || labels.openFailed);
                     url = chatTabUrl;
                 }
 
-                const tab = renderTab(payload.html, url);
-                if (tab) {
+                const tab = renderTab(payload.html, payload.chat_tab_url || url);
+                if (!tab) return null;
+
+                if (options.minimized) {
+                    tab.classList.add('is-minimized');
+                    writeStoredTabs();
+                    document.dispatchEvent(new CustomEvent('hnt:comms-tab-restored', { detail: { tab } }));
+                } else {
                     activateTab(tab);
-                    trigger?.classList.remove('unread', 'is-unread');
-                    notifyBadges();
                 }
+
+                trigger?.classList.remove('unread', 'is-unread');
+                notifyBadges();
+                return tab;
             } catch (error) {
                 console.error('HNT Comms:', error);
-                if (trigger?.href) window.location.assign(trigger.href);
+                if (trigger?.href && !options.restoring) window.location.assign(trigger.href);
+                return null;
             } finally {
                 trigger?.removeAttribute('aria-busy');
             }
@@ -163,6 +208,7 @@
 
         const refreshTab = async (tab, force = false) => {
             if (!tab || document.hidden || tab.dataset.hntCommsRefreshing === '1') return;
+            if (tab.hasAttribute('data-hnt-chat-draft')) return;
             if (!force && tab.classList.contains('is-minimized')) return;
 
             const list = tab.querySelector('[data-hnt-chat-tab-messages]');
@@ -261,8 +307,10 @@
             const minimize = event.target.closest('[data-hnt-chat-tab-minimize]');
             if (minimize) {
                 event.preventDefault();
-                minimize.closest('[data-hnt-chat-tab]')?.classList.add('is-minimized');
+                const tab = minimize.closest('[data-hnt-chat-tab]');
+                tab?.classList.add('is-minimized');
                 writeStoredTabs();
+                document.dispatchEvent(new CustomEvent('hnt:comms-tab-minimized', { detail: { tab } }));
                 return;
             }
 
@@ -298,13 +346,24 @@
                     body: new FormData(form),
                 });
                 const payload = await response.json();
-                if (!response.ok) throw new Error(payload?.message || 'Nachricht konnte nicht gesendet werden.');
+                if (!response.ok) throw new Error(payload?.message || labels.sendFailed);
 
-                appendOwnMessage(form, payload);
-                if (input) input.value = '';
-                const tab = form.closest('[data-hnt-chat-tab]');
-                if (tab) window.setTimeout(() => refreshTab(tab, true), 250);
+                const previousTab = form.closest('[data-hnt-chat-tab]');
+                if (typeof payload.html === 'string' && payload.html.trim() !== '') {
+                    const realTab = renderTab(payload.html, payload.chat_tab_url || '');
+                    if (realTab) {
+                        if (previousTab && previousTab !== realTab) previousTab.remove();
+                        activateTab(realTab);
+                    }
+                } else {
+                    appendOwnMessage(form, payload);
+                    if (input) input.value = '';
+                    const tab = form.closest('[data-hnt-chat-tab]');
+                    if (tab) window.setTimeout(() => refreshTab(tab, true), 250);
+                }
+
                 notifyBadges();
+                writeStoredTabs();
             } catch (error) {
                 console.error('HNT Comms send:', error);
             } finally {
@@ -313,7 +372,17 @@
             }
         });
 
-        readStoredTabs().forEach((item) => openTab(item.url));
+        const restoreStoredTabs = async () => {
+            for (const item of readStoredTabs()) {
+                await openTab(item.url, null, {
+                    id: item.id,
+                    minimized: item.minimized,
+                    restoring: true,
+                });
+            }
+        };
+
+        restoreStoredTabs();
 
         window.setInterval(() => {
             shell.querySelectorAll('[data-hnt-chat-tab]').forEach((tab) => refreshTab(tab, false));
@@ -322,5 +391,11 @@
         window.addEventListener('focus', () => {
             shell.querySelectorAll('[data-hnt-chat-tab]').forEach((tab) => refreshTab(tab, true));
         });
+
+        document.addEventListener('hnt:comms-tab-activated', (event) => {
+            scrollMessagesToBottom(event.detail?.tab);
+        });
+
+        window.HNT_COMMS_OPEN = openTab;
     });
 })();
