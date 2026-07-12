@@ -39,6 +39,7 @@ body[data-page="members"] {
     overflow-x: hidden;
     overflow-y: auto;
     padding-top: 12px;
+    padding-bottom: 18px;
     scrollbar-width: none;
     overscroll-behavior: contain;
 }
@@ -47,6 +48,39 @@ body[data-page="members"] {
     display: none;
     width: 0;
     height: 0;
+}
+
+.members-directory-card {
+    overflow: visible !important;
+}
+
+.members-sticky-panel {
+    position: sticky;
+    top: 10px;
+    z-index: 90;
+    overflow: hidden;
+    border-radius: 31px 31px 18px 18px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 10px 26px rgba(67, 61, 42, .08);
+    isolation: isolate;
+}
+
+.members-sticky-panel .members-action-shelf {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.members-sticky-panel .members-directory-head,
+.members-sticky-panel .members-filter-strip,
+.members-sticky-panel .members-table-head {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+}
+
+.members-sticky-panel + .members-table {
+    border-radius: 0 0 23px 23px;
 }
 
 @media (max-width: 899px) {
@@ -58,5 +92,10 @@ body[data-page="members"] {
 
     .members-scroll {
         padding-top: 10px;
+    }
+
+    .members-sticky-panel {
+        top: 8px;
+        border-radius: 24px;
     }
 }
