@@ -31,6 +31,8 @@ class MembersRedesignTest extends TestCase
             ->assertSee('members-filter-strip', false)
             ->assertSee('members-table-head', false)
             ->assertSee('members-table-row', false)
+            ->assertSee('members-directory-footer', false)
+            ->assertSee('members-pagination', false)
             ->assertSee('Valentina')
             ->assertSee('Katy Fuller')
             ->assertSee('Jonathan Kelly')
@@ -102,18 +104,21 @@ class MembersRedesignTest extends TestCase
         $this->assertStringContainsString('PC', $csv);
     }
 
-    public function test_members_uses_the_feed_scroll_shell_without_sticky_layout_hacks(): void
+    public function test_members_uses_the_feed_scroll_shell_and_demo_footer_without_sticky_layout_hacks(): void
     {
         $liveCss = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.css'));
         $javascript = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.js'));
 
         $this->assertIsString($liveCss);
         $this->assertIsString($javascript);
-        $this->assertStringContainsString('grid-template-rows: auto minmax(0, 1fr)', $liveCss);
+        $this->assertStringContainsString('grid-template-rows: 36px minmax(0, 1fr)', $liveCss);
         $this->assertStringContainsString('.members-stage', $liveCss);
         $this->assertStringContainsString('.members-scroll', $liveCss);
+        $this->assertStringContainsString('overflow-y: auto', $liveCss);
         $this->assertStringContainsString('scrollbar-width: none', $liveCss);
         $this->assertStringContainsString('.members-scroll::-webkit-scrollbar', $liveCss);
+        $this->assertStringContainsString('.members-pagination button', $liveCss);
+        $this->assertStringContainsString('.members-empty-state[hidden]', $liveCss);
         $this->assertStringNotContainsString('.members-directory-sticky', $liveCss);
         $this->assertStringNotContainsString("stage.className = 'members-stage'", $javascript);
         $this->assertStringContainsString('applyMembersFilters', $javascript);
