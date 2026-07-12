@@ -18,22 +18,20 @@
   }
 
   const directoryCard = shell?.querySelector('.members-directory-card');
+  const staleStickyPanel = directoryCard?.querySelector(':scope > .members-sticky-panel');
 
-  if (directoryCard && !directoryCard.querySelector(':scope > .members-sticky-panel')) {
-    const actionShelf = directoryCard.querySelector(':scope > .members-action-shelf');
-    const directoryHead = directoryCard.querySelector(':scope > .members-directory-head');
-    const filterStripElement = directoryCard.querySelector(':scope > .members-filter-strip');
-    const table = directoryCard.querySelector(':scope > .members-table');
-    const tableHead = table?.querySelector(':scope > .members-table-head');
-    const stickyPanel = document.createElement('div');
-
-    stickyPanel.className = 'members-sticky-panel';
-
-    [actionShelf, directoryHead, filterStripElement, tableHead].forEach((element) => {
-      if (element) stickyPanel.append(element);
+  if (directoryCard && staleStickyPanel) {
+    [...staleStickyPanel.children].forEach((child) => {
+      directoryCard.insertBefore(child, staleStickyPanel);
     });
+    staleStickyPanel.remove();
+  }
 
-    directoryCard.insertBefore(stickyPanel, table || directoryCard.firstChild);
+  const directoryHead = directoryCard?.querySelector(':scope > .members-directory-head');
+  const actionShelf = directoryCard?.querySelector(':scope > .members-action-shelf');
+
+  if (directoryHead && actionShelf && actionShelf.parentElement !== directoryHead) {
+    directoryHead.append(actionShelf);
   }
 
   const openButtons = document.querySelectorAll('[data-members-filter-open]');
