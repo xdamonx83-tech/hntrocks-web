@@ -8,14 +8,16 @@ use App\Models\Friendship;
 use App\Models\User;
 use App\Support\HntTheme;
 use App\Support\ReworkFeedSidebar;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use ReflectionMethod;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MembersController extends Controller
 {
-    public function index(Request $request): View|JsonResponse
+    public function index(Request $request): View|JsonResponse|StreamedResponse
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:80'],
@@ -25,6 +27,7 @@ class MembersController extends Controller
             'language' => ['nullable', 'string', 'max:40'],
             'lfg' => ['nullable', 'in:1'],
             'relationship' => ['nullable', 'in:all,friends,pending'],
+            'export' => ['nullable', 'in:csv'],
         ]);
 
         $viewer = $request->user();
@@ -44,6 +47,7 @@ class MembersController extends Controller
         $query = User::query()
             ->with([
                 'profile',
+                'privacySettings',
                 'badges' => fn ($badgeQuery) => $badgeQuery->orderBy('badges.sort_order'),
             ])
             ->withCount([
@@ -107,6 +111,10 @@ class MembersController extends Controller
             $query->whereIn('users.id', $relationshipIds->isNotEmpty() ? $relationshipIds->all() : [-1]);
         }
 
+        if (($filters['export'] ?? null) === 'csv') {
+            return $this->exportCsv(clone $query);
+        }
+
         $members = $query
             ->latest('users.created_at')
             ->paginate(12)
@@ -165,6 +173,16 @@ class MembersController extends Controller
             'filtered' => $members->total(),
             'lfg' => (clone $visibleMembers)->whereHas('profile', fn ($profileQuery) => $profileQuery->where('is_lfg_available', true))->count(),
             'friends' => $relationshipCounts['friends'],
+            'pending' => $relationshipCounts['pending'],
+            'new_this_week' => (clone $visibleMembers)->where('users.created_at', '>=', now()->startOfWeek())->count(),
+            'online' => (clone $visibleMembers)
+                ->where('users.last_seen_at', '>=', now()->subSeconds(User::ONLINE_WINDOW_SECONDS))
+                ->where(function ($onlineQuery): void {
+                    $onlineQuery
+                        ->whereDoesntHave('privacySettings')
+                        ->orWhereHas('privacySettings', fn ($privacyQuery) => $privacyQuery->where('show_online_status', true));
+                })
+                ->count(),
         ];
 
         $itemsView = $redesignLive
@@ -207,6 +225,43 @@ class MembersController extends Controller
             'friendCounts' => $friendCounts,
             'relationshipCounts' => $relationshipCounts,
             'membersStats' => $membersStats,
+        ]);
+    }
+
+    private function exportCsv(Builder $query): StreamedResponse
+    {
+        $filename = 'hnt-members-' . now()->format('Y-m-d-His') . '.csv';
+
+        return response()->streamDownload(function () use ($query): void {
+            $output = fopen('php://output', 'wb');
+
+            if ($output === false) {
+                return;
+            }
+
+            fwrite($output, "\xEF\xBB\xBF");
+            fputcsv($output, ['Name', 'Username', 'Plattform', 'Region', 'Spielstil', 'Sprache', 'LFG'], ';');
+
+            $query
+                ->orderBy('users.id')
+                ->chunkById(200, function ($users) use ($output): void {
+                    foreach ($users as $user) {
+                        fputcsv($output, [
+                            $user->name,
+                            $user->username,
+                            $user->profile?->platform,
+                            $user->profile?->region,
+                            $user->profile?->playstyle,
+                            $user->profile?->language,
+                            $user->profile?->is_lfg_available ? 'Ja' : 'Nein',
+                        ], ';');
+                    }
+                }, 'users.id', 'id');
+
+            fclose($output);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'private, no-store',
         ]);
     }
 
