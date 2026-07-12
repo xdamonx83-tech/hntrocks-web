@@ -28,6 +28,7 @@
 </head>
 <body data-page="members">
 @include('themes.hnt_preview.partials.icons')
+<div aria-hidden="true" class="feed-shell" hidden style="display:none!important"></div>
 <main class="app-shell members-page-shell">
 @include('themes.hnt_preview.partials.header')
 
