@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Members;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\PreviewDashboardHeader;
 use App\Models\Friendship;
 use App\Models\User;
 use App\Support\HntTheme;
@@ -10,6 +11,7 @@ use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use ReflectionMethod;
 
 class MembersController extends Controller
 {
@@ -26,6 +28,16 @@ class MembersController extends Controller
         ]);
 
         $viewer = $request->user();
+
+        if ($request->boolean('dashboard_header')) {
+            $method = new ReflectionMethod(PreviewDashboardHeader::class, 'payload');
+            $method->setAccessible(true);
+
+            return response()->json([
+                'header' => $method->invoke(app(PreviewDashboardHeader::class), $viewer),
+            ])->header('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
+        }
+
         $relationshipFilter = $filters['relationship'] ?? 'all';
         $redesignLive = (bool) config('members.redesign_live', false);
 
