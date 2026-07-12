@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Models\Friendship;
 use App\Models\User;
-use App\Http\Middleware\PreviewDashboardHeader;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,10 +15,17 @@ class ActivateProfileEditRedesign
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->isMethod('GET')
+            && $request->routeIs('profile.edit')
+            && $request->boolean('classic_profile_edit')) {
+            $request->query->set('classic_profile', '1');
+
+            return $next($request);
+        }
+
         if (! (bool) config('hunthub.theme.profile_edit_redesign_live', false)
             || ! $request->isMethod('GET')
-            || ! $request->routeIs('profile.edit')
-            || $request->boolean('classic_profile_edit')) {
+            || ! $request->routeIs('profile.edit')) {
             return $next($request);
         }
 
