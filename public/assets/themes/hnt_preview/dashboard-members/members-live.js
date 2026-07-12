@@ -1,5 +1,22 @@
 (() => {
-  const modal = document.querySelector('[data-members-filter-modal]');
+  const shell = document.querySelector('.members-page-shell');
+  const header = shell?.querySelector(':scope > .site-header');
+  const modal = shell?.querySelector(':scope > [data-members-filter-modal]');
+
+  if (shell && header && !shell.querySelector(':scope > .members-stage')) {
+    const stage = document.createElement('div');
+    const scroll = document.createElement('div');
+
+    stage.className = 'members-stage';
+    scroll.className = 'members-scroll';
+    stage.append(scroll);
+    shell.insertBefore(stage, header.nextSibling);
+
+    [...shell.children]
+      .filter((child) => child !== header && child !== stage && child !== modal)
+      .forEach((child) => scroll.append(child));
+  }
+
   const openButtons = document.querySelectorAll('[data-members-filter-open]');
   const closeButton = document.querySelector('[data-members-filter-close]');
   const filterStrip = document.querySelector('[data-members-filter-strip]');
