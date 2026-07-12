@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -38,6 +39,7 @@ class ProfileEditRedesignTest extends TestCase
             'platform' => 'PC',
             'playstyle' => 'Tactical',
             'profile_visibility' => 'public',
+            'cover_display_mode' => UserProfile::COVER_DISPLAY_ALWAYS,
         ]);
 
         $this->actingAs($user)
@@ -46,6 +48,8 @@ class ProfileEditRedesignTest extends TestCase
             ->assertSee('data-profile-edit-live', false)
             ->assertSee('Christian Hunter')
             ->assertSee('Real profile biography.')
+            ->assertSee('name="cover_display_mode"', false)
+            ->assertSee('value="always" checked', false)
             ->assertDontSee('Valentina')
             ->assertDontSee('Katy Fuller');
     }
@@ -102,6 +106,7 @@ class ProfileEditRedesignTest extends TestCase
                 'youtube_url' => 'https://www.youtube.com/@updated-hunter',
                 'is_lfg_available' => '1',
                 'profile_visibility' => 'registered',
+                'cover_display_mode' => UserProfile::COVER_DISPLAY_ALWAYS,
             ])
             ->assertRedirect(route('profile.show'));
 
@@ -122,6 +127,31 @@ class ProfileEditRedesignTest extends TestCase
             'discord_name' => 'updated-hunter',
             'is_lfg_available' => 1,
             'profile_visibility' => 'registered',
+            'cover_display_mode' => UserProfile::COVER_DISPLAY_ALWAYS,
+        ]);
+    }
+
+    public function test_invalid_cover_display_mode_is_rejected_without_overwriting_the_saved_mode(): void
+    {
+        $user = User::factory()->create();
+        $user->profile()->create([
+            'profile_visibility' => 'public',
+            'cover_display_mode' => UserProfile::COVER_DISPLAY_AUTO,
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('profile.edit', ['tab' => 'media']))
+            ->put(route('profile.update'), [
+                'name' => $user->name,
+                'profile_visibility' => 'public',
+                'cover_display_mode' => 'invalid-mode',
+            ])
+            ->assertRedirect(route('profile.edit', ['tab' => 'media']))
+            ->assertSessionHasErrors('cover_display_mode');
+
+        $this->assertDatabaseHas('user_profiles', [
+            'user_id' => $user->id,
+            'cover_display_mode' => UserProfile::COVER_DISPLAY_AUTO,
         ]);
     }
 }
