@@ -108,13 +108,22 @@ class MembersRedesignTest extends TestCase
         $this->assertStringContainsString('PC', $csv);
     }
 
-    public function test_members_css_uses_full_page_scroll_instead_of_inline_table_scroll(): void
+    public function test_members_uses_the_shared_clipped_scroll_shell_without_a_visible_scrollbar(): void
     {
-        $css = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-prototype.css'));
+        $prototypeCss = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-prototype.css'));
+        $liveCss = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.css'));
+        $javascript = file_get_contents(public_path('assets/themes/hnt_preview/dashboard-members/members-live.js'));
 
-        $this->assertIsString($css);
-        $this->assertStringContainsString('body[data-page="members"]', $css);
-        $this->assertStringContainsString('overflow-y:auto!important', $css);
-        $this->assertStringContainsString('.members-table-body{overflow:visible!important', $css);
+        $this->assertIsString($prototypeCss);
+        $this->assertIsString($liveCss);
+        $this->assertIsString($javascript);
+        $this->assertStringContainsString('.members-table-body{overflow:visible!important', $prototypeCss);
+        $this->assertStringContainsString('grid-template-rows: auto minmax(0, 1fr)', $liveCss);
+        $this->assertStringContainsString('.members-stage', $liveCss);
+        $this->assertStringContainsString('.members-scroll', $liveCss);
+        $this->assertStringContainsString('scrollbar-width: none', $liveCss);
+        $this->assertStringContainsString('.members-scroll::-webkit-scrollbar', $liveCss);
+        $this->assertStringContainsString("stage.className = 'members-stage'", $javascript);
+        $this->assertStringContainsString("scroll.className = 'members-scroll'", $javascript);
     }
 }
