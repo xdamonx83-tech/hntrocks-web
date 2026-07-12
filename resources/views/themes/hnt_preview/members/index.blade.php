@@ -43,6 +43,8 @@
 <main class="app-shell members-page-shell">
 @include('themes.hnt_preview.partials.header')
 
+<section class="members-stage">
+<div class="members-scroll">
 <section class="members-overview">
     <div class="members-overview-copy">
         <span>HNT.ROCKS COMMUNITY</span>
@@ -81,45 +83,45 @@
 @endif
 
 <section class="members-directory-card">
-    <div aria-label="{{ $localeIsEnglish ? 'Member actions' : 'Mitgliederaktionen' }}" class="members-action-shelf">
-        @if($inviteUrl)
-        <a aria-label="{{ $localeIsEnglish ? 'Invite member' : 'Mitglied einladen' }}" class="members-shelf-icon" href="{{ $inviteUrl }}"><svg><use href="#i-plus"></use></svg></a>
-        @endif
-        <button aria-label="{{ $localeIsEnglish ? 'Toggle filters' : 'Filter ein- oder ausblenden' }}" class="members-shelf-icon members-shelf-filter" data-members-filter-toggle type="button"><svg><use href="#i-sliders"></use></svg></button>
-        <a class="members-shelf-export" href="{{ $exportUrl }}"><svg><use href="#i-export"></use></svg><span>Export</span></a>
-    </div>
-
-    <header class="members-directory-head">
-        <nav aria-label="{{ __('ui.members') }}" class="members-relationship-tabs">
-            <a class="{{ $relationship === 'all' ? 'active' : '' }}" href="{{ $makeFilterUrl(['relationship' => 'all']) }}">{{ $localeIsEnglish ? 'All members' : 'Alle Mitglieder' }} <span>{{ $totalMembers }}</span></a>
-            <a class="{{ $relationship === 'friends' ? 'active' : '' }}" href="{{ $makeFilterUrl(['relationship' => 'friends']) }}">{{ __('ui.friends') }} <span>{{ (int) ($relationshipCounts['friends'] ?? 0) }}</span></a>
-            <a class="{{ $relationship === 'pending' ? 'active' : '' }}" href="{{ $makeFilterUrl(['relationship' => 'pending']) }}">{{ $localeIsEnglish ? 'Requests' : 'Anfragen' }} <span>{{ (int) ($relationshipCounts['pending'] ?? 0) }}</span></a>
-        </nav>
-        <div class="members-directory-actions">
-            <form class="members-search" method="get" action="{{ route('members.index') }}">
-                <input type="hidden" name="relationship" value="{{ $relationship }}">
-                @foreach(['platform','playstyle','region','language','lfg'] as $key)
-                    @if(filled($filters[$key] ?? null))<input type="hidden" name="{{ $key }}" value="{{ $filters[$key] }}">@endif
-                @endforeach
-                <svg><use href="#i-search"></use></svg>
-                <input autocomplete="off" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ $localeIsEnglish ? 'Search members' : 'Mitglieder suchen' }}" type="search">
-            </form>
-            <button class="members-mobile-filter-trigger" data-members-filter-open type="button"><svg><use href="#i-sliders"></use></svg><span>{{ $localeIsEnglish ? 'Filters' : 'Filter' }}</span></button>
+    <div class="members-directory-sticky">
+        <div aria-label="{{ $localeIsEnglish ? 'Member actions' : 'Mitgliederaktionen' }}" class="members-action-shelf">
+            @if($inviteUrl)
+            <a aria-label="{{ $localeIsEnglish ? 'Invite member' : 'Mitglied einladen' }}" class="members-shelf-icon" href="{{ $inviteUrl }}"><svg><use href="#i-plus"></use></svg></a>
+            @endif
+            <button aria-label="{{ $localeIsEnglish ? 'Toggle filters' : 'Filter ein- oder ausblenden' }}" class="members-shelf-icon members-shelf-filter" data-members-filter-toggle type="button"><svg><use href="#i-sliders"></use></svg></button>
+            <a class="members-shelf-export" href="{{ $exportUrl }}"><svg><use href="#i-export"></use></svg><span>Export</span></a>
         </div>
-    </header>
 
-    <form class="members-filter-strip {{ $activeFilters->isEmpty() ? '' : 'has-active-filters' }}" data-members-filter-strip method="get" action="{{ route('members.index') }}">
-        @if(filled($filters['q'] ?? null))<input type="hidden" name="q" value="{{ $filters['q'] }}">@endif
-        <input type="hidden" name="relationship" value="{{ $relationship }}">
-        <label><span>{{ __('ui.platform') }}</span><select name="platform" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['platforms'] as $option)<option value="{{ $option }}" @selected(($filters['platform'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
-        <label><span>{{ __('ui.playstyle') }}</span><select name="playstyle" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['playstyles'] as $option)<option value="{{ $option }}" @selected(($filters['playstyle'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
-        <label><span>{{ __('ui.region') }}</span><select name="region" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['regions'] as $option)<option value="{{ $option }}" @selected(($filters['region'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
-        <label><span>{{ __('ui.language') }}</span><select name="language" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['languages'] as $option)<option value="{{ $option }}" @selected(($filters['language'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
-        <label class="members-ready-filter {{ ($filters['lfg'] ?? null) === '1' ? 'active' : '' }}"><input type="checkbox" name="lfg" value="1" @checked(($filters['lfg'] ?? null) === '1') onchange="this.form.submit()"><i></i><span>{{ $localeIsEnglish ? 'Ready / LFG only' : 'Nur Ready / LFG' }}</span></label>
-        <a class="members-reset-filter" href="{{ route('members.index', ['relationship' => $relationship]) }}">{{ $localeIsEnglish ? 'Reset filters' : 'Filter zurücksetzen' }}</a>
-    </form>
+        <header class="members-directory-head">
+            <nav aria-label="{{ __('ui.members') }}" class="members-relationship-tabs">
+                <a class="{{ $relationship === 'all' ? 'active' : '' }}" href="{{ $makeFilterUrl(['relationship' => 'all']) }}">{{ $localeIsEnglish ? 'All members' : 'Alle Mitglieder' }} <span>{{ $totalMembers }}</span></a>
+                <a class="{{ $relationship === 'friends' ? 'active' : '' }}" href="{{ $makeFilterUrl(['relationship' => 'friends']) }}">{{ __('ui.friends') }} <span>{{ (int) ($relationshipCounts['friends'] ?? 0) }}</span></a>
+                <a class="{{ $relationship === 'pending' ? 'active' : '' }}" href="{{ $makeFilterUrl(['relationship' => 'pending']) }}">{{ $localeIsEnglish ? 'Requests' : 'Anfragen' }} <span>{{ (int) ($relationshipCounts['pending'] ?? 0) }}</span></a>
+            </nav>
+            <div class="members-directory-actions">
+                <form class="members-search" method="get" action="{{ route('members.index') }}">
+                    <input type="hidden" name="relationship" value="{{ $relationship }}">
+                    @foreach(['platform','playstyle','region','language','lfg'] as $key)
+                        @if(filled($filters[$key] ?? null))<input type="hidden" name="{{ $key }}" value="{{ $filters[$key] }}">@endif
+                    @endforeach
+                    <svg><use href="#i-search"></use></svg>
+                    <input autocomplete="off" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ $localeIsEnglish ? 'Search members' : 'Mitglieder suchen' }}" type="search">
+                </form>
+                <button class="members-mobile-filter-trigger" data-members-filter-open type="button"><svg><use href="#i-sliders"></use></svg><span>{{ $localeIsEnglish ? 'Filters' : 'Filter' }}</span></button>
+            </div>
+        </header>
 
-    <div aria-label="{{ __('ui.members') }}" class="members-table" role="table">
+        <form class="members-filter-strip {{ $activeFilters->isEmpty() ? '' : 'has-active-filters' }}" data-members-filter-strip method="get" action="{{ route('members.index') }}">
+            @if(filled($filters['q'] ?? null))<input type="hidden" name="q" value="{{ $filters['q'] }}">@endif
+            <input type="hidden" name="relationship" value="{{ $relationship }}">
+            <label><span>{{ __('ui.platform') }}</span><select name="platform" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['platforms'] as $option)<option value="{{ $option }}" @selected(($filters['platform'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
+            <label><span>{{ __('ui.playstyle') }}</span><select name="playstyle" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['playstyles'] as $option)<option value="{{ $option }}" @selected(($filters['playstyle'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
+            <label><span>{{ __('ui.region') }}</span><select name="region" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['regions'] as $option)<option value="{{ $option }}" @selected(($filters['region'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
+            <label><span>{{ __('ui.language') }}</span><select name="language" onchange="this.form.submit()"><option value="">{{ $localeIsEnglish ? 'All' : 'Alle' }}</option>@foreach($filterOptions['languages'] as $option)<option value="{{ $option }}" @selected(($filters['language'] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
+            <label class="members-ready-filter {{ ($filters['lfg'] ?? null) === '1' ? 'active' : '' }}"><input type="checkbox" name="lfg" value="1" @checked(($filters['lfg'] ?? null) === '1') onchange="this.form.submit()"><i></i><span>{{ $localeIsEnglish ? 'Ready / LFG only' : 'Nur Ready / LFG' }}</span></label>
+            <a class="members-reset-filter" href="{{ route('members.index', ['relationship' => $relationship]) }}">{{ $localeIsEnglish ? 'Reset filters' : 'Filter zurücksetzen' }}</a>
+        </form>
+
         <div class="members-table-head" role="row">
             <span>{{ $localeIsEnglish ? 'Member' : 'Mitglied' }}</span>
             <span>{{ $localeIsEnglish ? 'Profile' : 'Profil' }}</span>
@@ -132,6 +134,9 @@
             <span>Status</span>
             <span>{{ $localeIsEnglish ? 'Actions' : 'Aktionen' }}</span>
         </div>
+    </div>
+
+    <div aria-label="{{ __('ui.members') }}" class="members-table" role="table">
         <div class="members-table-body" data-members-stream>
             @include('themes.hnt_preview.members.partials.member-items')
         </div>
@@ -149,6 +154,8 @@
         </nav>
         @endif
     </footer>
+</section>
+</div>
 </section>
 
 <div aria-hidden="true" class="members-mobile-filter-backdrop" data-members-filter-modal>
