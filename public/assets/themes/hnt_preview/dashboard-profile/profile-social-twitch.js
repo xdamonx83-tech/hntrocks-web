@@ -16,6 +16,7 @@
 
   const setStatus = (mode) => {
     const labels = {
+      idle: 'Im Tab prüfen',
       loading: 'Wird geprüft',
       live: 'LIVE',
       offline: 'Offline',
@@ -24,7 +25,7 @@
     };
 
     statusNodes.forEach((node) => {
-      node.textContent = labels[mode] || labels.loading;
+      node.textContent = labels[mode] || labels.idle;
       node.classList.toggle('is-live', mode === 'live');
       node.classList.toggle('is-offline', mode === 'offline');
     });
@@ -36,6 +37,7 @@
       if (label) label.textContent = mode === 'live' ? 'LIVE' : (mode === 'offline' ? 'Offline' : 'Stream');
     });
 
+    twitchTab.classList.toggle('is-live', mode === 'live');
     if (liveStrip) liveStrip.hidden = mode !== 'live';
   };
 
@@ -107,5 +109,5 @@
     });
   });
 
-  setStatus('loading');
+  setStatus('idle');
 })();
