@@ -1,93 +1,71 @@
 @forelse($members as $member)
-@php
-    $profile = $member->profile;
-    $friendship = $friendshipMap->get($member->id);
-    $isOwnCard = (int) auth()->id() === (int) $member->id;
-    $memberUrl = $isOwnCard ? route('profile.show') : route('profile.public', $member);
-    $memberFriendCount = (int) ($friendCounts[$member->id] ?? 0);
-    $memberLevel = app(\App\Services\GamificationService::class)->levelForXp((int) ($member->xp_total ?? 0));
-    $memberHeadline = trim((string) ($profile?->headline ?: $profile?->bio ?: __('ui.members_no_headline')));
-    $memberOnline = $member->allowsOnlineStatusVisibility(auth()->user()) && $member->isOnline();
-    $messageUrl = route('messages.with-user', $member);
-@endphp
-<article class="members-live-card" data-member-card>
-    <a class="members-live-cover" href="{{ $memberUrl }}" aria-label="{{ $member->name }}">
-        <img src="{{ $member->coverUrl() }}" alt="">
-        <span class="members-live-level">Level {{ $memberLevel }}</span>
-    </a>
+    @php
+        $profile = $member->profile;
+        $friendship = $friendshipMap->get($member->id);
+        $isOwnCard = (int) auth()->id() === (int) $member->id;
+        $memberUrl = $isOwnCard ? route('profile.show') : route('profile.public', $member);
+        $memberFriendCount = (int) ($friendCounts[$member->id] ?? 0);
+        $memberLevel = app(\App\Services\GamificationService::class)->levelForXp((int) ($member->xp_total ?? 0));
+        $memberHeadline = trim((string) ($profile?->headline ?: $profile?->bio ?: __('ui.members_no_headline')));
+        $memberLanguage = trim((string) ($profile?->language ?: '—'));
+        $memberPlatform = trim((string) ($profile?->platform ?: '—'));
+        $memberRegion = trim((string) ($profile?->region ?: '—'));
+        $memberPlaystyle = trim((string) ($profile?->playstyle ?: '—'));
+        $memberReady = (bool) $profile?->is_lfg_available;
+        $memberOnline = $member->allowsOnlineStatusVisibility(auth()->user()) && $member->isOnline();
+        $memberPending = $friendship?->isPending() ?? false;
+        $statusClass = $memberReady ? 'ready' : ($memberPending ? 'pending' : ($memberOnline ? 'online' : 'offline'));
+        $statusLabel = $memberReady
+            ? 'Ready'
+            : ($memberPending
+                ? (app()->getLocale() === 'en' ? 'Request open' : 'Anfrage offen')
+                : ($memberOnline ? 'Online' : 'Offline'));
+    @endphp
 
-    <div class="members-live-card-body">
-        <div class="members-live-person-row">
-            <a class="members-live-avatar" href="{{ $memberUrl }}">
-                <img src="{{ $member->avatarUrl() }}" alt="{{ $member->name }}">
-                <i class="{{ $memberOnline ? 'is-online' : '' }}"></i>
+    <article class="members-table-row {{ $memberReady ? 'is-highlighted' : '' }}" role="row">
+        <div class="member-identity">
+            <a class="member-avatar" href="{{ $memberUrl }}">
+                <img alt="{{ $member->name }}" src="{{ $member->avatarUrl() }}">
+                <span>{{ $memberLevel }}</span>
             </a>
-            <div class="members-live-identity">
-                <a href="{{ $memberUrl }}">{{ $member->name }}</a>
-                <span>{{ '@'.$member->username }} · {{ $memberOnline ? __('ui.online') : __('ui.offline') }}</span>
+            <div>
+                <strong><a href="{{ $memberUrl }}">{{ $member->name }}</a></strong>
+                <small>{{ '@'.$member->username }}</small>
             </div>
-            @if($profile?->is_lfg_available)
-                <span class="members-live-lfg">LFG</span>
-            @endif
         </div>
-
-        <p class="members-live-headline">{{ $memberHeadline }}</p>
-
-        <div class="members-live-tags">
-            @if($profile?->platform)<span class="yellow">{{ $profile->platform }}</span>@endif
-            @if($profile?->region)<span class="blue">{{ $profile->region }}</span>@endif
-            @if($profile?->language)<span class="purple">{{ $profile->language }}</span>@endif
-            @if($profile?->playstyle)<span class="green">{{ $profile->playstyle }}</span>@endif
+        <div class="member-headline">
+            <strong>{{ $memberHeadline }}</strong>
+            <small>{{ $memberLanguage }}</small>
         </div>
-
-        <div class="members-live-stats">
-            <span><strong>{{ (int) ($member->visible_feed_posts_count ?? 0) }}</strong><small>{{ __('ui.profile_posts_stat') }}</small></span>
-            <span><strong>{{ $memberFriendCount }}</strong><small>{{ __('ui.friends') }}</small></span>
-            <span><strong>{{ (int) ($member->visible_moments_count ?? 0) }}</strong><small>{{ __('ui.moments') }}</small></span>
-            <span><strong>{{ (int) ($member->badges_count ?? 0) }}</strong><small>{{ __('ui.badges') }}</small></span>
-        </div>
-
-        <div class="members-live-actions">
+        <span class="member-chip">{{ $memberPlatform }}</span>
+        <span class="member-cell">{{ $memberRegion }}</span>
+        <span class="member-cell">{{ $memberPlaystyle }}</span>
+        <span class="member-number"><strong>{{ (int) ($member->visible_feed_posts_count ?? 0) }}</strong><small>Posts</small></span>
+        <span class="member-number"><strong>{{ $memberFriendCount }}</strong><small>{{ __('ui.friends') }}</small></span>
+        <span class="member-number"><strong>{{ (int) ($member->visible_moments_count ?? 0) }}</strong><small>Moments</small></span>
+        <span class="member-status {{ $statusClass }}"><i></i>{{ $statusLabel }}</span>
+        <div class="member-row-actions">
             @if($isOwnCard)
-                <a class="members-action-secondary" href="{{ route('profile.edit') }}">{{ __('ui.members_edit') }}</a>
-                <a class="members-action-primary" href="{{ route('profile.show') }}">{{ __('ui.members_my_profile') }}</a>
-            @elseif(! $friendship || $friendship->isDeclined())
-                <form method="post" action="{{ route('friends.store', $member) }}">
-                    @csrf
-                    <button class="members-action-secondary" type="submit">{{ __('ui.profile_add_friend') }}</button>
-                </form>
-                <a class="members-action-primary" href="{{ $messageUrl }}" data-hnt-chat-tab-open data-hnt-chat-tab-url="{{ $messageUrl }}">{{ __('ui.profile_message_singular') }}</a>
+                <a aria-label="{{ app()->getLocale() === 'en' ? 'Edit profile' : 'Profil bearbeiten' }}" href="{{ route('profile.edit') }}" title="{{ app()->getLocale() === 'en' ? 'Edit profile' : 'Profil bearbeiten' }}"><svg><use href="#i-settings"></use></svg></a>
+                <a aria-label="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}" href="{{ $memberUrl }}" title="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}"><svg><use href="#i-arrow"></use></svg></a>
+            @elseif(!$friendship || $friendship->isDeclined())
+                <form method="post" action="{{ route('friends.store', $member) }}">@csrf<button aria-label="{{ __('ui.profile_add_friend') }}" title="{{ __('ui.profile_add_friend') }}" type="submit"><svg><use href="#i-plus"></use></svg></button></form>
+                <a aria-label="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}" href="{{ $memberUrl }}" title="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}"><svg><use href="#i-arrow"></use></svg></a>
             @elseif($friendship->isPending() && $friendship->isRequester(auth()->user()))
-                <form method="post" action="{{ route('friends.destroy', $friendship) }}">
-                    @csrf
-                    @method('DELETE')
-                    <button class="members-action-secondary" type="submit">{{ __('ui.members_friend_request_sent') }}</button>
-                </form>
-                <a class="members-action-primary" href="{{ $messageUrl }}" data-hnt-chat-tab-open data-hnt-chat-tab-url="{{ $messageUrl }}">{{ __('ui.profile_message_singular') }}</a>
+                <form method="post" action="{{ route('friends.destroy', $friendship) }}">@csrf @method('DELETE')<button aria-label="{{ app()->getLocale() === 'en' ? 'Cancel request' : 'Anfrage zurückziehen' }}" title="{{ app()->getLocale() === 'en' ? 'Cancel request' : 'Anfrage zurückziehen' }}" type="submit"><svg><use href="#i-x"></use></svg></button></form>
+                <a aria-label="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}" href="{{ $memberUrl }}" title="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}"><svg><use href="#i-arrow"></use></svg></a>
             @elseif($friendship->isPending() && $friendship->isRecipient(auth()->user()))
-                <form method="post" action="{{ route('friends.decline', $friendship) }}">
-                    @csrf
-                    <button class="members-action-secondary" type="submit">{{ __('ui.profile_decline') }}</button>
-                </form>
-                <form method="post" action="{{ route('friends.accept', $friendship) }}">
-                    @csrf
-                    <button class="members-action-primary" type="submit">{{ __('ui.profile_accept') }}</button>
-                </form>
-            @elseif($friendship->isAccepted())
-                <form method="post" action="{{ route('friends.destroy', $friendship) }}" onsubmit="return confirm('{{ __('ui.profile_friend_remove_confirm') }}');">
-                    @csrf
-                    @method('DELETE')
-                    <button class="members-action-secondary" type="submit">{{ __('ui.members_friends_active') }}</button>
-                </form>
-                <a class="members-action-primary" href="{{ $messageUrl }}" data-hnt-chat-tab-open data-hnt-chat-tab-url="{{ $messageUrl }}">{{ __('ui.profile_message_singular') }}</a>
+                <form method="post" action="{{ route('friends.accept', $friendship) }}">@csrf<button aria-label="{{ __('ui.profile_accept') }}" title="{{ __('ui.profile_accept') }}" type="submit"><svg><use href="#i-check"></use></svg></button></form>
+                <form method="post" action="{{ route('friends.decline', $friendship) }}">@csrf<button aria-label="{{ __('ui.profile_decline') }}" title="{{ __('ui.profile_decline') }}" type="submit"><svg><use href="#i-x"></use></svg></button></form>
+            @else
+                <a aria-label="{{ app()->getLocale() === 'en' ? 'Message '.$member->name : 'Nachricht an '.$member->name }}" data-hnt-chat-tab-open data-hnt-chat-tab-url="{{ route('messages.with-user', $member) }}" href="{{ route('messages.with-user', $member) }}" title="{{ app()->getLocale() === 'en' ? 'Message' : 'Nachricht' }}"><svg><use href="#i-comment"></use></svg></a>
+                <a aria-label="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}" href="{{ $memberUrl }}" title="{{ app()->getLocale() === 'en' ? 'Open profile' : 'Profil öffnen' }}"><svg><use href="#i-arrow"></use></svg></a>
             @endif
         </div>
-    </div>
-</article>
+    </article>
 @empty
-<article class="members-live-empty">
-    <span>HNT.ROCKS</span>
-    <h2>{{ __('ui.members_empty_title') }}</h2>
-    <p>{{ __('ui.members_empty_text') }}</p>
-</article>
+    <div class="members-empty-state">
+        <strong>{{ __('ui.members_empty_title') }}</strong>
+        <span>{{ __('ui.members_empty_text') }}</span>
+    </div>
 @endforelse
