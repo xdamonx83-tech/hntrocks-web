@@ -1,9 +1,12 @@
 <div class="profile-page-left">
-<div class="profile-photo-shell">
+<div class="profile-photo-shell" data-profile-cover-trigger>
 <img alt="{{ $profileDisplayName }}" class="profile-page-photo" src="{{ $profileAvatarUrl }}"/>
 @if($profileIsOnline)
 <span aria-label="Online" class="profile-online-dot"></span>
 @endif
+<button aria-label="Titelbild anzeigen" aria-pressed="false" class="profile-cover-peek-toggle" data-profile-cover-toggle type="button">
+<svg><use href="#i-eye"></use></svg>
+</button>
 @if($isOwnProfile)
 <a aria-label="Profilbild ändern" href="{{ route('profile.edit') }}">
 <svg><use href="#i-image"></use></svg>
