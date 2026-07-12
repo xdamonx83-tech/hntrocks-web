@@ -11,6 +11,15 @@ body[data-page="members"] {
     -ms-overflow-style: none;
 }
 
+body[data-page="members"] {
+    --members-page-background:
+        radial-gradient(circle at 80% 7%, rgba(255, 228, 90, .42), transparent 28%),
+        radial-gradient(circle at 18% 0, rgba(216, 222, 222, .72), transparent 34%),
+        linear-gradient(135deg, #f4f1df 0%, #fff8cf 100%);
+    background: var(--members-page-background) !important;
+    background-attachment: fixed !important;
+}
+
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
 body[data-page="members"]::-webkit-scrollbar {
@@ -75,10 +84,21 @@ body[data-page="members"]::-webkit-scrollbar {
     margin: 0 -10px 0;
     padding: 0 10px;
     overflow: hidden;
+    border-radius: 0;
+    background: var(--members-page-background);
+    background-attachment: fixed;
+    box-shadow: none;
+    isolation: isolate;
+}
+
+.members-directory-sticky::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     border-radius: 31px 31px 0 0;
     background: #fffdf6;
-    box-shadow: 0 10px 24px rgba(66, 61, 43, .07);
-    isolation: isolate;
+    pointer-events: none;
 }
 
 .members-directory-sticky .members-action-shelf {
