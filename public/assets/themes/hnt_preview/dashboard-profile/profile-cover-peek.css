@@ -1,0 +1,117 @@
+/* Profile cover peek: transient cover background without changing the profile layout. */
+.profile-summary-card[data-profile-cover-peek] {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+.profile-summary-card[data-profile-cover-peek] > :not(.profile-cover-peek-layer) {
+  position: relative;
+  z-index: 2;
+}
+
+.profile-cover-peek-layer {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-position: center 38%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: saturate(.72) contrast(.88) brightness(1.08);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.035);
+  transform-origin: center;
+  transition:
+    opacity .32s ease,
+    transform .48s cubic-bezier(.2,.7,.2,1),
+    filter .32s ease;
+}
+
+.profile-summary-card.is-cover-peek .profile-cover-peek-layer {
+  filter: saturate(.82) contrast(.92) brightness(1.05);
+  opacity: .52;
+  transform: scale(1);
+}
+
+.profile-summary-card.is-cover-peek .profile-summary-actions a,
+.profile-summary-card.is-cover-peek .profile-summary-actions button {
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(8px);
+}
+
+.profile-summary-card.is-cover-peek .profile-bio-points span {
+  background: rgba(251,249,238,.72);
+  backdrop-filter: blur(5px);
+}
+
+.profile-cover-peek-toggle {
+  z-index: 4;
+  right: auto !important;
+  left: 11px;
+  background: rgba(255,255,255,.88) !important;
+  color: var(--ink);
+  transition:
+    opacity .18s ease,
+    transform .18s ease,
+    background .18s ease,
+    color .18s ease;
+}
+
+.profile-cover-peek-toggle[aria-pressed="true"] {
+  background: var(--dark) !important;
+  color: #fff;
+}
+
+.profile-cover-peek-toggle svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .profile-cover-peek-toggle {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  .profile-photo-shell:hover .profile-cover-peek-toggle,
+  .profile-photo-shell:focus-within .profile-cover-peek-toggle,
+  .profile-cover-peek-toggle[aria-pressed="true"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .profile-cover-peek-toggle {
+    opacity: 1;
+    transform: none;
+  }
+
+  .profile-summary-card.is-cover-peek .profile-cover-peek-layer {
+    opacity: .48;
+  }
+}
+
+@media (max-width: 620px) {
+  .profile-cover-peek-layer {
+    background-position: center 30%;
+  }
+
+  .profile-summary-card.is-cover-peek .profile-cover-peek-layer {
+    opacity: .44;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-cover-peek-layer,
+  .profile-cover-peek-toggle {
+    transition: none;
+  }
+}
