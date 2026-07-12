@@ -1,5 +1,7 @@
-<section class="profile-summary-card" data-profile-cover-peek>
+<section class="profile-summary-card {{ $profileCoverDisplayMode === \App\Models\UserProfile::COVER_DISPLAY_ALWAYS ? 'is-cover-peek' : '' }}" data-profile-cover-peek data-cover-display-mode="{{ $profileCoverDisplayMode }}">
+@if($profileCoverDisplayMode !== \App\Models\UserProfile::COVER_DISPLAY_HIDDEN)
 <div aria-hidden="true" class="profile-cover-peek-layer" style="background-image:linear-gradient(180deg,rgba(251,249,238,.24) 0%,rgba(251,249,238,.38) 34%,rgba(251,249,238,.82) 72%,#fbf9ee 100%),url('{{ $profileCoverUrl }}')"></div>
+@endif
 <div class="profile-summary-top">
 <div>
 <span class="profile-eyebrow">HNT.ROCKS PROFIL</span>
