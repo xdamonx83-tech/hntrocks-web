@@ -30,6 +30,9 @@ class ProfileSocialTwitchTest extends TestCase
             ->assertSee('https://www.twitch.tv/krispiearmy', false)
             ->assertSee('https://www.youtube.com/@example', false)
             ->assertSee('data-profile-tab="twitch"', false)
+            ->assertSee('data-open-profile-twitch', false)
+            ->assertSee('data-profile-twitch-name', false)
+            ->assertDontSee('data-profile-live-strip', false)
             ->assertSee('data-channel="krispiearmy"', false)
             ->assertSee('profileTwitchPlayer', false);
     }
