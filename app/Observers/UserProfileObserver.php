@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\UserProfile;
-use Illuminate\Validation\ValidationException;
 
 class UserProfileObserver
 {
@@ -17,12 +16,8 @@ class UserProfileObserver
 
         $mode = (string) $request->input('cover_display_mode');
 
-        if (! in_array($mode, UserProfile::COVER_DISPLAY_MODES, true)) {
-            throw ValidationException::withMessages([
-                'cover_display_mode' => __('The selected cover display mode is invalid.'),
-            ]);
+        if (in_array($mode, UserProfile::COVER_DISPLAY_MODES, true)) {
+            $profile->cover_display_mode = $mode;
         }
-
-        $profile->cover_display_mode = $mode;
     }
 }
