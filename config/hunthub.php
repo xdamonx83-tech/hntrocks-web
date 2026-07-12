@@ -35,6 +35,8 @@ return [
         'dashboard_feed_live' => (bool) env('HNT_DASHBOARD_FEED_LIVE', false),
         // Dedicated, reversible switch for the cream dashboard profile only.
         'profile_redesign_live' => (bool) env('HNT_PROFILE_REDESIGN_LIVE', false),
+        // Dedicated, reversible switch for the real profile editor only.
+        'profile_edit_redesign_live' => (bool) env('HNT_PROFILE_EDIT_REDESIGN_LIVE', false),
         // Separate kill switch for replacing real feature pages with theme views.
         // This keeps theme previews safe while the real /feed remains unchanged by default.
         'feed_enabled' => (bool) env('HH_THEME_FEED_ENABLED', false),
@@ -110,7 +112,7 @@ return [
         'max_files' => (int) env('HH_AI_CONTENT_DISCLOSURE_MAX_FILES', 4),
         'image_max_side' => (int) env('HH_AI_CONTENT_DISCLOSURE_IMAGE_MAX_SIDE', 768),
         'image_jpeg_quality' => (int) env('HH_AI_CONTENT_DISCLOSURE_IMAGE_JPEG_QUALITY', 72),
-        'ffmpeg_binary' => env('HH_AI_CONTENT_DISCLOSURE_FFMPEG_BINARY', 'ffmpeg'),
+        'ffmpeg_binary' => env('HH_AI_DISCLOSURE_FFMPEG_BINARY', 'ffmpeg'),
         'video_sample_seconds' => (array_values(array_filter(array_map(
             static fn ($value): int => max(0, (int) trim($value)),
             explode(',', (string) env('HH_AI_CONTENT_DISCLOSURE_VIDEO_SAMPLE_SECONDS', '1,4,8'))
