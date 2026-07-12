@@ -6,25 +6,43 @@
     const trigger = document.querySelector('[data-profile-cover-trigger]');
     const toggles = Array.from(document.querySelectorAll('[data-profile-cover-toggle]'));
 
-    if (!summary || !trigger || toggles.length === 0) {
+    if (!summary || !trigger) {
+      return;
+    }
+
+    const mode = ['auto', 'always', 'hidden'].includes(summary.dataset.coverDisplayMode)
+      ? summary.dataset.coverDisplayMode
+      : 'auto';
+
+    if (mode === 'hidden') {
+      summary.classList.remove('is-cover-peek');
       return;
     }
 
     const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)');
     let pinned = false;
+    let temporarilyHidden = false;
     let hovering = false;
     let focusWithin = false;
     let hideTimer = 0;
 
+    const isVisible = () => {
+      if (mode === 'always') {
+        return !temporarilyHidden;
+      }
+
+      return pinned || hovering || focusWithin;
+    };
+
     const sync = () => {
-      const visible = pinned || hovering || focusWithin;
+      const visible = isVisible();
       summary.classList.toggle('is-cover-peek', visible);
 
       toggles.forEach((toggle) => {
-        toggle.setAttribute('aria-pressed', pinned ? 'true' : 'false');
+        toggle.setAttribute('aria-pressed', visible ? 'true' : 'false');
         toggle.setAttribute(
           'aria-label',
-          pinned ? 'Titelbild ausblenden' : 'Titelbild anzeigen',
+          visible ? 'Titelbild ausblenden' : 'Titelbild anzeigen',
         );
       });
     };
@@ -36,7 +54,7 @@
       }
     };
 
-    if (hoverCapable.matches) {
+    if (mode === 'auto' && hoverCapable.matches) {
       trigger.addEventListener('mouseenter', () => {
         clearHideTimer();
         hovering = true;
@@ -50,39 +68,55 @@
       });
     }
 
-    trigger.addEventListener('focusin', () => {
-      clearHideTimer();
-      focusWithin = true;
-      sync();
-    });
+    if (mode === 'auto') {
+      trigger.addEventListener('focusin', () => {
+        clearHideTimer();
+        focusWithin = true;
+        sync();
+      });
 
-    trigger.addEventListener('focusout', (event) => {
-      if (event.relatedTarget && trigger.contains(event.relatedTarget)) {
-        return;
-      }
+      trigger.addEventListener('focusout', (event) => {
+        if (event.relatedTarget && trigger.contains(event.relatedTarget)) {
+          return;
+        }
 
-      focusWithin = false;
-      clearHideTimer();
-      hideTimer = window.setTimeout(sync, 120);
-    });
+        focusWithin = false;
+        clearHideTimer();
+        hideTimer = window.setTimeout(sync, 120);
+      });
+    }
 
     toggles.forEach((toggle) => {
       toggle.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
         clearHideTimer();
-        pinned = !pinned;
+
+        if (mode === 'always') {
+          temporarilyHidden = !temporarilyHidden;
+        } else {
+          pinned = !pinned;
+        }
+
         sync();
       });
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape' || !pinned) {
+      if (event.key !== 'Escape') {
         return;
       }
 
-      pinned = false;
-      sync();
+      if (mode === 'always' && !temporarilyHidden) {
+        temporarilyHidden = true;
+        sync();
+        return;
+      }
+
+      if (mode === 'auto' && pinned) {
+        pinned = false;
+        sync();
+      }
     });
 
     sync();
