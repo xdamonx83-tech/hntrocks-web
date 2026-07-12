@@ -1,0 +1,159 @@
+/*
+ * Profile cover experiment A
+ * Wide cover banner above the identity block. The image fades into the
+ * existing cream surface so profile copy never depends on image contrast.
+ */
+.profile-summary-card-cover {
+  position: relative;
+  overflow: hidden;
+  padding: 10px 11px 0;
+}
+
+.profile-summary-cover {
+  position: relative;
+  isolation: isolate;
+  height: clamp(118px, 14vh, 158px);
+  overflow: hidden;
+  border-radius: 22px;
+  background-color: #e8e4d8;
+  background-position: center 42%;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.profile-summary-cover::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(28, 27, 24, .10), transparent 32%, transparent 72%, rgba(28, 27, 24, .08));
+  pointer-events: none;
+}
+
+.profile-summary-cover::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(251, 249, 238, 0) 28%,
+    rgba(251, 249, 238, .12) 48%,
+    rgba(251, 249, 238, .62) 72%,
+    rgba(251, 249, 238, .94) 89%,
+    #fbf9ee 100%
+  );
+  pointer-events: none;
+}
+
+.profile-summary-cover-actions {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  right: 10px;
+}
+
+.profile-summary-cover-actions > a,
+.profile-summary-cover-actions > button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .52);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .82);
+  color: var(--ink);
+  text-decoration: none;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.profile-summary-identity {
+  position: relative;
+  z-index: 2;
+  max-width: calc(100% - 150px);
+  margin-top: -43px;
+  padding: 0 11px;
+}
+
+.profile-summary-card-cover .profile-summary-top {
+  min-height: 43px;
+}
+
+.profile-summary-card-cover .profile-tags {
+  margin-top: 9px;
+}
+
+.profile-summary-card-cover .profile-summary-body {
+  position: relative;
+  z-index: 2;
+  margin-top: 9px;
+  padding: 0 10px;
+}
+
+.profile-summary-card-cover .profile-level-ring {
+  margin-bottom: -44px;
+  transform: translateY(-44px) rotate(-44deg);
+}
+
+.profile-summary-card-cover .profile-stat-labels {
+  margin-top: 8px;
+}
+
+@media (min-width: 1200px) {
+  .profile-summary-cover {
+    height: clamp(128px, 15.5vh, 174px);
+  }
+
+  .profile-summary-identity {
+    margin-top: -48px;
+  }
+
+  .profile-summary-card-cover .profile-level-ring {
+    margin-bottom: -50px;
+    transform: translateY(-50px) rotate(-44deg);
+  }
+}
+
+@media (max-width: 899px) {
+  .profile-summary-card-cover {
+    padding: 10px 10px 12px;
+  }
+
+  .profile-summary-cover {
+    height: clamp(170px, 27vw, 230px);
+  }
+
+  .profile-summary-identity {
+    max-width: calc(100% - 126px);
+    margin-top: -42px;
+  }
+
+  .profile-summary-card-cover .profile-level-ring {
+    margin-bottom: -32px;
+    transform: translateY(-32px) rotate(-44deg);
+  }
+}
+
+@media (max-width: 620px) {
+  .profile-summary-cover {
+    height: 190px;
+    border-radius: 19px;
+  }
+
+  .profile-summary-identity {
+    max-width: 100%;
+    margin-top: -38px;
+    padding-inline: 8px;
+  }
+
+  .profile-summary-card-cover .profile-summary-body {
+    padding-inline: 8px;
+  }
+
+  .profile-summary-card-cover .profile-level-ring {
+    margin-top: 8px;
+    margin-bottom: 0;
+    transform: rotate(-44deg);
+  }
+}
