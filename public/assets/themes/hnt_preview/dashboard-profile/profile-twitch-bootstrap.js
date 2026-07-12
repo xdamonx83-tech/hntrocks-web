@@ -22,14 +22,18 @@
   document.querySelectorAll('[data-profile-twitch-link]').forEach((link) => {
     link.classList.toggle('is-live', mode === 'live');
     link.dataset.twitchStatus = mode;
+
     const label = link.querySelector('[data-profile-twitch-label]');
     if (label) label.textContent = labels[mode] || labels.loading;
+
+    const name = link.querySelector('[data-profile-twitch-name]');
+    if (name) {
+      const displayName = (link.dataset.profileDisplayName || 'Twitch').trim();
+      name.textContent = mode === 'live' ? `${displayName} ist live` : 'Twitch';
+    }
   });
 
   document.querySelectorAll('[data-profile-tab="twitch"]').forEach((button) => {
     button.classList.toggle('is-live', mode === 'live');
   });
-
-  const liveStrip = document.querySelector('[data-profile-live-strip]');
-  if (liveStrip) liveStrip.hidden = mode !== 'live';
 })();
