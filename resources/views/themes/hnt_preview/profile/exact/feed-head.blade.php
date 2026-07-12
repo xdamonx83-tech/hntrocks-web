@@ -9,6 +9,9 @@
 <button aria-controls="profileTabFriends" aria-selected="false" data-profile-tab="friends" data-title="Freunde" role="tab" type="button">Freunde</button>
 <button aria-controls="profileTabMoments" aria-selected="false" data-profile-tab="moments" data-title="Moments" role="tab" type="button">Moments</button>
 <button aria-controls="profileTabBadges" aria-selected="false" data-profile-tab="badges" data-title="Badges" role="tab" type="button">Badges</button>
+@if($profileTwitchChannel)
+<button aria-controls="profileTabTwitch" aria-selected="false" class="profile-twitch-tab" data-profile-tab="twitch" data-title="Twitch" role="tab" type="button"><span class="profile-social-live-dot"></span>Twitch</button>
+@endif
 @if($isOwnProfile)
 <button aria-label="Post erstellen" class="compose-button" id="openPostComposer" type="button">
 <svg><use href="#i-plus"></use></svg><span>Post</span>
