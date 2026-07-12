@@ -2,7 +2,6 @@
   const profileTabs = [...document.querySelectorAll('[data-profile-tab]')];
   const profilePanels = [...document.querySelectorAll('[data-profile-panel]')];
   const profileTabTitle = document.getElementById('profileTabTitle');
-  const profileMainScroller = document.querySelector('.profile-page-main');
 
   function activateProfileTab(tabName, shouldFocus = false) {
     profileTabs.forEach((button) => {
@@ -21,11 +20,6 @@
     const activeButton = profileTabs.find((button) => button.dataset.profileTab === tabName);
     if (profileTabTitle && activeButton) {
       profileTabTitle.textContent = activeButton.dataset.title || activeButton.textContent.trim();
-    }
-
-    if (profileMainScroller && window.matchMedia('(min-width: 900px)').matches) {
-      const feedTop = document.querySelector('.profile-post-feed')?.offsetTop || 0;
-      profileMainScroller.scrollTo({ top: Math.max(0, feedTop - 8), behavior: 'smooth' });
     }
   }
 
