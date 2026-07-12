@@ -10,13 +10,12 @@
   const playerTarget = document.getElementById('profileTwitchPlayer');
   const statusNodes = [...document.querySelectorAll('[data-profile-twitch-status]')];
   const socialLinks = [...document.querySelectorAll('[data-profile-twitch-link]')];
-  const liveStrip = document.querySelector('[data-profile-live-strip]');
   let player = null;
   let loadingPromise = null;
 
   const setStatus = (mode) => {
     const labels = {
-      idle: 'Im Tab prüfen',
+      idle: 'Stream',
       loading: 'Wird geprüft',
       live: 'LIVE',
       offline: 'Offline',
@@ -33,12 +32,18 @@
     socialLinks.forEach((link) => {
       link.classList.toggle('is-live', mode === 'live');
       link.dataset.twitchStatus = mode;
+
       const label = link.querySelector('[data-profile-twitch-label]');
-      if (label) label.textContent = mode === 'live' ? 'LIVE' : (mode === 'offline' ? 'Offline' : 'Stream');
+      if (label) label.textContent = labels[mode] || labels.idle;
+
+      const name = link.querySelector('[data-profile-twitch-name]');
+      if (name) {
+        const displayName = (link.dataset.profileDisplayName || 'Twitch').trim();
+        name.textContent = mode === 'live' ? `${displayName} ist live` : 'Twitch';
+      }
     });
 
     twitchTab.classList.toggle('is-live', mode === 'live');
-    if (liveStrip) liveStrip.hidden = mode !== 'live';
   };
 
   const loadTwitchApi = () => {
@@ -89,6 +94,7 @@
 
       player.addEventListener(window.Twitch.Player.READY, () => setStatus('ready'));
       player.addEventListener(window.Twitch.Player.ONLINE, () => setStatus('live'));
+      player.addEventListener(window.Twitch.Player.PLAYING, () => setStatus('live'));
       player.addEventListener(window.Twitch.Player.OFFLINE, () => setStatus('offline'));
       player.addEventListener(window.Twitch.Player.ENDED, () => setStatus('offline'));
       player.addEventListener(window.Twitch.Player.PLAYBACK_BLOCKED, () => setStatus('ready'));
@@ -109,5 +115,6 @@
     });
   });
 
-  setStatus('idle');
+  const initialMode = socialLinks[0]?.dataset.twitchStatus || 'idle';
+  setStatus(initialMode);
 })();
