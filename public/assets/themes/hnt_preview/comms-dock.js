@@ -69,9 +69,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function visibleHeaderMessageTrigger() {
-        return Array.from(document.querySelectorAll('[data-hnt-messages-open]')).find(function (trigger) {
+        const selectors = '[data-hnt-messages-open], #messagesMenuTrigger';
+        return Array.from(document.querySelectorAll(selectors)).find(function (trigger) {
             return trigger.offsetParent !== null;
-        }) || document.querySelector('[data-hnt-messages-open]');
+        }) || document.querySelector(selectors);
     }
 
     function arrangeTabs(preferred) {
@@ -106,13 +107,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (tab === active && !tab.classList.contains('is-minimized')) {
                     tab.classList.add('hnt-comms-active');
                     tab.classList.remove('hnt-comms-signal', 'is-minimized');
-                    panelSlot.appendChild(tab);
+                    if (tab.parentElement !== panelSlot) panelSlot.appendChild(tab);
                     return;
                 }
 
                 tab.classList.remove('hnt-comms-active');
                 tab.classList.add('hnt-comms-signal', 'is-minimized');
-                railList.appendChild(tab);
+                if (tab.parentElement !== railList) railList.appendChild(tab);
             });
 
             const hasActive = Boolean(panelSlot.querySelector('[data-hnt-chat-tab]:not(.is-minimized)'));
@@ -173,6 +174,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.setTimeout(function () {
                     const close = document.querySelector('#hntMessageShell [data-hnt-messages-close]');
                     if (close) close.click();
+                }, 0);
+            }
+
+            if (opener.closest('#messagesDropdown')) {
+                window.setTimeout(function () {
+                    const trigger = document.querySelector('#messagesMenuTrigger');
+                    if (trigger?.getAttribute('aria-expanded') === 'true') trigger.click();
                 }, 0);
             }
             return;
