@@ -50,37 +50,47 @@ body[data-page="members"] {
     height: 0;
 }
 
-.members-directory-card {
+.members-directory-card,
+.members-table {
     overflow: visible !important;
 }
 
-.members-sticky-panel {
-    position: sticky;
-    top: 10px;
-    z-index: 90;
-    overflow: hidden;
-    border-radius: 31px 31px 18px 18px;
-    background: rgba(255, 255, 255, .96);
-    box-shadow: 0 10px 26px rgba(67, 61, 42, .08);
-    isolation: isolate;
+.members-directory-head,
+.members-filter-strip,
+.members-table-head {
+    background: #fffdf5 !important;
 }
 
-.members-sticky-panel .members-action-shelf {
-    position: absolute;
-    top: 0;
-    right: 0;
+.members-directory-head {
+    position: sticky !important;
+    top: 10px !important;
+    z-index: 96 !important;
+    border-radius: 31px 31px 0 0;
 }
 
-.members-sticky-panel .members-directory-head,
-.members-sticky-panel .members-filter-strip,
-.members-sticky-panel .members-table-head {
-    position: relative;
-    z-index: 2;
-    background: transparent;
+.members-directory-head .members-action-shelf {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    z-index: 3 !important;
 }
 
-.members-sticky-panel + .members-table {
-    border-radius: 0 0 23px 23px;
+.members-filter-strip {
+    position: sticky !important;
+    top: 65px !important;
+    z-index: 95 !important;
+}
+
+.members-table-head {
+    position: sticky !important;
+    top: 114px !important;
+    z-index: 94 !important;
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 12px 24px rgba(67, 61, 42, .08);
+}
+
+.members-directory-card:has(.members-filter-strip.is-collapsed) .members-table-head {
+    top: 65px !important;
 }
 
 @media (max-width: 899px) {
@@ -94,8 +104,18 @@ body[data-page="members"] {
         padding-top: 10px;
     }
 
-    .members-sticky-panel {
-        top: 8px;
-        border-radius: 24px;
+    .members-directory-head {
+        top: 8px !important;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .members-filter-strip {
+        top: 71px !important;
+    }
+
+    .members-table-head {
+        position: static !important;
+        top: auto !important;
+        box-shadow: none;
     }
 }
