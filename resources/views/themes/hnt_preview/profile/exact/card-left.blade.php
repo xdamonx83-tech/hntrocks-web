@@ -4,11 +4,13 @@
 @if($profileIsOnline)
 <span aria-label="Online" class="profile-online-dot"></span>
 @endif
-<button aria-label="Titelbild anzeigen" aria-pressed="false" class="profile-cover-peek-toggle" data-profile-cover-toggle type="button">
+@if($profileCoverDisplayMode !== \App\Models\UserProfile::COVER_DISPLAY_HIDDEN)
+<button aria-label="{{ $profileCoverDisplayMode === \App\Models\UserProfile::COVER_DISPLAY_ALWAYS ? 'Titelbild ausblenden' : 'Titelbild anzeigen' }}" aria-pressed="{{ $profileCoverDisplayMode === \App\Models\UserProfile::COVER_DISPLAY_ALWAYS ? 'true' : 'false' }}" class="profile-cover-peek-toggle" data-profile-cover-toggle type="button">
 <svg><use href="#i-eye"></use></svg>
 </button>
+@endif
 @if($isOwnProfile)
-<a aria-label="Profilbild ändern" href="{{ route('profile.edit') }}">
+<a aria-label="Profilbild oder Titelbild ändern" href="{{ route('profile.edit', ['tab' => 'media']) }}">
 <svg><use href="#i-image"></use></svg>
 </a>
 @endif
