@@ -27,11 +27,10 @@ $demoMembers = [
 </head>
 <body data-page="members">
 @include('themes.hnt_preview.partials.icons')
-<div aria-hidden="true" class="feed-shell" hidden style="display:none!important"></div>
-<main class="app-shell members-page-shell">
+<main class="app-shell feed-shell members-page-shell">
 @include('themes.hnt_preview.partials.header')
-<section class="members-stage">
-<div class="members-scroll">
+<section class="feed-stage members-stage">
+<div class="feed-scroll members-scroll" id="membersScroll">
 <section class="members-overview">
     <div class="members-overview-copy">
         <span>HNT.ROCKS COMMUNITY</span>
