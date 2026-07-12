@@ -10,6 +10,8 @@
     $hntOgDescription = trim(strip_tags($__env->yieldContent('og_description', $hntDescription)));
     $hntOgUrl = trim($__env->yieldContent('og_url', $hntCanonical));
     $hntOgImage = trim($__env->yieldContent('og_image', ''));
+    $hntCommsCssVersion = @filemtime(public_path('assets/themes/hnt_preview/comms-dock.css')) ?: time();
+    $hntCommsCoreVersion = @filemtime(public_path('assets/themes/hnt_preview/comms-core.js')) ?: time();
 @endphp
 <meta name="robots" content="@yield('robots', 'noindex,nofollow')">
 <meta name="color-scheme" content="dark">
@@ -35,5 +37,5 @@
 <link rel="stylesheet" href="{{ asset('assets/hnt/crowns/crowns-cosmetics.css') }}?v=637">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
 <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/styles.css') }}?v=779">
-<link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/comms-dock.css') }}?v=1">
-<script src="{{ asset('assets/themes/hnt_preview/comms-core.js') }}?v=2" defer></script>
+<link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/comms-dock.css') }}?v={{ $hntCommsCssVersion }}">
+<script src="{{ asset('assets/themes/hnt_preview/comms-core.js') }}?v={{ $hntCommsCoreVersion }}" defer></script>
