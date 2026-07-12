@@ -1,0 +1,27 @@
+@media (max-width: 899px) {
+  .profile-quest-column {
+    grid-template-rows: auto 42px;
+  }
+
+  .profile-quest-list {
+    display: flex;
+    overflow-x: auto;
+    gap: 9px;
+    padding-bottom: 3px;
+    scrollbar-width: none;
+  }
+
+  .profile-quest-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .profile-quest-card {
+    flex: 0 0 min(280px,82vw);
+    min-height: 185px;
+  }
+
+  .profile-quest-footer {
+    width: min(100%,420px);
+    justify-self: center;
+  }
+}

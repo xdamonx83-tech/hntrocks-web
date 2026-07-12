@@ -1,0 +1,42 @@
+<div class="profile-page-left">
+<div class="profile-photo-shell">
+<img alt="{{ $profileDisplayName }}" class="profile-page-photo" src="{{ $profileAvatarUrl }}"/>
+@if($profileIsOnline)
+<span aria-label="Online" class="profile-online-dot"></span>
+@endif
+@if($isOwnProfile)
+<a aria-label="Profilbild ändern" href="{{ route('profile.edit') }}">
+<svg><use href="#i-image"></use></svg>
+</a>
+@endif
+</div>
+<section class="profile-info-card">
+<div class="profile-info-head">
+<span>PROFILINFO</span>
+@if($isOwnProfile)
+<a aria-label="Profilinformationen bearbeiten" href="{{ route('profile.edit') }}">
+<svg><use href="#i-sliders"></use></svg>
+</a>
+@endif
+</div>
+<dl>
+<div><dt>Plattform</dt><dd>{{ $profile?->platform ?: '—' }}</dd></div>
+<div><dt>Region</dt><dd>{{ $profile?->region ?: '—' }}</dd></div>
+<div><dt>Sprache</dt><dd>{{ $profile?->language ?: '—' }}</dd></div>
+<div><dt>Spielstil</dt><dd>{{ $profile?->playstyle ?: '—' }}</dd></div>
+<div><dt>Mitglied seit</dt><dd>{{ $profileJoinedLabel }}</dd></div>
+</dl>
+</section>
+<section class="profile-level-card">
+<div class="profile-level-top">
+<div><span>LEVEL</span><strong>{{ $profileLevel }}</strong></div>
+<small>{{ $profileLevelProgress }}%</small>
+</div>
+<div class="profile-level-progress"><i style="width:{{ $profileLevelProgress }}%"></i></div>
+<p>Noch {{ $profileFormatCount($profileXpRemaining) }} XP bis Level {{ $profileLevel + 1 }}</p>
+<div class="profile-level-stats">
+<span><strong>{{ $profileFormatCount($profileRocks) }}</strong><small>Rocks</small></span>
+<span><strong>{{ $profileFormatCount($profileBadgesCount) }}</strong><small>Badges</small></span>
+</div>
+</section>
+</div>

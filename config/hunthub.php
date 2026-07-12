@@ -33,6 +33,8 @@ return [
         // Dedicated, reversible switch for the finished dashboard feed only.
         // This does not enable the preview theme for profile, settings, LFG or other pages.
         'dashboard_feed_live' => (bool) env('HNT_DASHBOARD_FEED_LIVE', false),
+        // Dedicated, reversible switch for the cream dashboard profile only.
+        'profile_redesign_live' => (bool) env('HNT_PROFILE_REDESIGN_LIVE', false),
         // Separate kill switch for replacing real feature pages with theme views.
         // This keeps theme previews safe while the real /feed remains unchanged by default.
         'feed_enabled' => (bool) env('HH_THEME_FEED_ENABLED', false),

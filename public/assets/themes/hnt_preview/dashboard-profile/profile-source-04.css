@@ -1,0 +1,390 @@
+@media (max-width: 620px) {
+  .profile-post-feed {
+    padding: 11px 10px 20px;
+    border-radius: 27px;
+  }
+
+  .profile-feed-head {
+    min-height: 72px;
+    margin: -11px -10px 12px;
+    padding: 16px 14px 12px;
+    border-radius: 27px 27px 18px 18px;
+  }
+
+  .profile-post-list .social-post {
+    border-radius: 24px;
+  }
+
+  .profile-post-list .post-head {
+    min-height: 68px;
+    grid-template-columns: 44px minmax(0,1fr) auto 36px;
+    gap: 9px;
+    padding: 12px 12px 9px;
+  }
+
+  .profile-post-list .post-head > img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .profile-post-list .post-author strong {
+    font-size: 13px;
+  }
+
+  .profile-post-list .post-author span {
+    font-size: 9px;
+  }
+
+  .profile-post-list .post-more {
+    width: 36px;
+    height: 36px;
+  }
+
+  .profile-post-list .post-badge {
+    padding: 6px 9px;
+    font-size: 8px;
+  }
+
+  .profile-post-list .post-body {
+    padding: 0 12px 11px;
+  }
+
+  .profile-post-list .post-body > p {
+    margin-bottom: 11px;
+    font-size: 12px;
+  }
+
+  .profile-post-list .moment-preview {
+    min-height: 190px;
+    padding: 18px;
+  }
+
+  .profile-post-list .moment-copy strong {
+    font-size: 20px;
+  }
+
+  .profile-post-list .cup-preview {
+    min-height: 126px;
+    padding: 17px;
+  }
+
+  .profile-post-list .cup-preview strong {
+    font-size: 19px;
+  }
+
+  .profile-post-list .post-actions {
+    min-height: 48px;
+    padding: 8px 10px;
+  }
+
+  .profile-post-list .post-actions button {
+    height: 32px;
+    padding-inline: 9px;
+    font-size: 10px;
+  }
+}
+
+
+/* Profile browser sidebar restored to the original card direction */
+.profile-browser-column {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0,1fr) 38px;
+  gap: 5px;
+}
+
+.profile-browser-list {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: repeat(4,minmax(0,1fr));
+  gap: 6px;
+}
+
+.profile-browser-card {
+  min-height: 0;
+  padding: 13px 15px 10px;
+  border-radius: 27px;
+  background: rgba(255,255,255,.80);
+}
+
+.profile-browser-card.active-profile {
+  box-shadow: inset 0 0 0 1px rgba(222,214,190,.52);
+}
+
+.profile-browser-head {
+  position: relative;
+  min-height: 50px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.profile-browser-head img {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-browser-head > div {
+  min-width: 0;
+  padding: 2px 40px 0 10px;
+}
+
+.profile-browser-head h2 {
+  overflow: hidden;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.profile-browser-head p {
+  overflow: hidden;
+  margin: 3px 0 0;
+  color: #9b9b96;
+  font-size: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.profile-browser-arrow,
+.profile-browser-actions button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.94);
+  cursor: pointer;
+}
+
+.profile-browser-arrow {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.profile-browser-arrow svg,
+.profile-browser-actions svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile-browser-foot {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: end;
+  gap: 9px;
+}
+
+.profile-match span {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 8px;
+}
+
+.profile-match-bar {
+  width: 131px;
+  max-width: 100%;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: repeating-linear-gradient(135deg,#d6d6d2 0 1px,transparent 1px 3px);
+}
+
+.profile-match-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+}
+
+.profile-match-bar.orange i {
+  background: var(--orange);
+}
+
+.profile-browser-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.profile-browser-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-browser-pagination button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.52);
+  color: #b3afa3;
+  cursor: pointer;
+}
+
+.profile-browser-pagination button.active,
+.profile-browser-pagination .page-arrow {
+  background: rgba(255,255,255,.92);
+  color: #454541;
+}
+
+.profile-browser-pagination .page-arrow {
+  font-size: 17px;
+}
+
+/* Avatar, profile information and level remain inside the same shared
+   scroll container as the post feed, but the scrollbar itself is hidden. */
+@media (min-width: 900px) {
+  .profile-page-card {
+    scrollbar-width: none;
+  }
+
+  .profile-page-card::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .profile-page-left {
+    position: static;
+    top: auto;
+    align-self: start;
+    height: max-content;
+  }
+}
+
+@media (max-width: 899px) {
+  .profile-browser-column {
+    display: grid;
+    grid-template-rows: auto 38px;
+    gap: 7px;
+  }
+
+  .profile-browser-list {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .profile-browser-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .profile-browser-card {
+    flex: 0 0 min(270px,78vw);
+    min-height: 155px;
+  }
+
+  .profile-browser-pagination {
+    width: min(100%,360px);
+    justify-self: center;
+  }
+
+  .profile-page-card {
+    scrollbar-width: none;
+  }
+
+  .profile-page-card::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
+/* Profile page v34:
+   Keep avatar, profile information and level fixed in place.
+   Only the complete right profile/content column scrolls on desktop. */
+@media (min-width: 900px) {
+  .profile-page-layout,
+  .profile-page-card {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .profile-page-card {
+    height: 100%;
+    align-items: stretch;
+  }
+
+  .profile-page-left {
+    position: static;
+    align-self: stretch;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .profile-page-main {
+    align-self: stretch;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .profile-page-main::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .profile-page-main > * {
+    min-width: 0;
+  }
+}
+
+/* Mobile remains one continuous natural page. */
+@media (max-width: 899px) {
+  .profile-page-left,
+  .profile-page-main {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+
+/* Functional profile tabs and demo content */
+.profile-tabs {
+  flex-wrap: nowrap;
+}
+
+.profile-tabs > button {
+  flex: 0 0 auto;
+}
+
+.profile-tab-panel {
+  min-height: 0;
+}
+
+.profile-tab-panel[hidden] {
+  display: none !important;
+}
+
+.profile-tab-panel.active {
+  animation: profileTabReveal .2s ease;
+}
+
+@keyframes profileTabReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-info-dashboard {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+}
