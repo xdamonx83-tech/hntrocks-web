@@ -27,6 +27,7 @@ class MembersController extends Controller
 
         $viewer = $request->user();
         $relationshipFilter = $filters['relationship'] ?? 'all';
+        $redesignLive = (bool) config('members.redesign_live', false);
 
         $query = User::query()
             ->with([
@@ -94,11 +95,9 @@ class MembersController extends Controller
             $query->whereIn('users.id', $relationshipIds->isNotEmpty() ? $relationshipIds->all() : [-1]);
         }
 
-        $membersPerPage = 12;
-
         $members = $query
             ->latest('users.created_at')
-            ->paginate($membersPerPage)
+            ->paginate(12)
             ->withQueryString();
 
         $memberIds = $members->getCollection()->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -141,9 +140,28 @@ class MembersController extends Controller
             'pending' => Friendship::query()->forUser($viewer)->where('status', Friendship::STATUS_PENDING)->count(),
         ];
 
+        $visibleMembers = User::query()->whereHas('profile', function ($profileQuery) use ($viewer): void {
+            $profileQuery->where(function ($visibilityQuery) use ($viewer): void {
+                $visibilityQuery
+                    ->whereIn('profile_visibility', ['public', 'registered'])
+                    ->orWhere('user_id', $viewer->id);
+            });
+        });
+
+        $membersStats = [
+            'total' => (clone $visibleMembers)->count(),
+            'filtered' => $members->total(),
+            'lfg' => (clone $visibleMembers)->whereHas('profile', fn ($profileQuery) => $profileQuery->where('is_lfg_available', true))->count(),
+            'friends' => $relationshipCounts['friends'],
+        ];
+
+        $itemsView = $redesignLive
+            ? 'themes.hnt_preview.members.partials.member-items'
+            : HntTheme::resolve('members.partials.member-items');
+
         if ($request->boolean('fragment')) {
             return response()->json([
-                'html' => view(HntTheme::resolve('members.partials.member-items'), [
+                'html' => view($itemsView, [
                     'members' => $members,
                     'filters' => $filters,
                     'filterOptions' => $filterOptions,
@@ -157,8 +175,11 @@ class MembersController extends Controller
         }
 
         $sidebarData = ReworkFeedSidebar::forViewer($viewer);
+        $indexView = $redesignLive
+            ? 'themes.hnt_preview.members.index'
+            : HntTheme::resolve('members.index');
 
-        return view(HntTheme::resolve('members.index'), [
+        return view($indexView, [
             'members' => $members,
             'hasMoreMembers' => $members->hasMorePages(),
             'nextMembersPageUrl' => $members->nextPageUrl(),
@@ -173,6 +194,7 @@ class MembersController extends Controller
             'friendshipMap' => $friendshipMap,
             'friendCounts' => $friendCounts,
             'relationshipCounts' => $relationshipCounts,
+            'membersStats' => $membersStats,
         ]);
     }
 
