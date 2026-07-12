@@ -1,7 +1,6 @@
 /* Real header dropdowns, profile data and navigation for the HNT dashboard preview. */
 (() => {
-  const root = document.querySelector('.feed-shell');
-  if (!root || !window.fetch) return;
+  if (!window.fetch) return;
 
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
   const friendsList = document.querySelector('.header-request-list');
@@ -113,16 +112,27 @@
       return;
     }
 
-    messagesList.innerHTML = items.map((item) => `
-      <a class="header-message-item${Number(item.unread) > 0 ? ' unread' : ''}" href="${escapeHtml(item.url)}" role="menuitem">
-        <img alt="${escapeHtml(item.title)}" src="${escapeHtml(item.avatar)}">
-        <span>
-          <strong>${escapeHtml(item.title)}${Number(item.unread) > 0 ? ` <em>${Number(item.unread)}</em>` : ''}</strong>
-          <small>${escapeHtml(item.preview)}</small>
-        </span>
-        <time>${escapeHtml(item.time)}</time>
-      </a>
-    `).join('');
+    messagesList.innerHTML = items.map((item) => {
+      const conversationId = Math.max(0, Number(item.id) || 0);
+      const showUrl = String(item.url || '');
+      const chatTabUrl = String(item.chat_tab_url || (showUrl ? `${showUrl.replace(/\/$/, '')}/chat-tab` : ''));
+
+      return `
+        <a class="header-message-item${Number(item.unread) > 0 ? ' unread' : ''}"
+           href="${escapeHtml(showUrl)}"
+           role="menuitem"
+           data-hnt-chat-tab-open
+           data-hnt-chat-conversation-id="${conversationId}"
+           data-hnt-chat-tab-url="${escapeHtml(chatTabUrl)}">
+          <img alt="${escapeHtml(item.title)}" src="${escapeHtml(item.avatar)}">
+          <span>
+            <strong>${escapeHtml(item.title)}${Number(item.unread) > 0 ? ` <em>${Number(item.unread)}</em>` : ''}</strong>
+            <small>${escapeHtml(item.preview)}</small>
+          </span>
+          <time>${escapeHtml(item.time)}</time>
+        </a>
+      `;
+    }).join('');
   };
 
   const renderNotifications = (items = []) => {
@@ -286,7 +296,7 @@
     if (!force && lastPayload && Date.now() - lastLoadedAt < 20000) return lastPayload;
 
     loading = (async () => {
-      const url = new URL(window.location.href);
+      const url = new URL(window.HNT_DASHBOARD_HEADER_ENDPOINT || window.location.href, window.location.origin);
       url.search = '';
       url.hash = '';
       url.searchParams.set('dashboard_header', '1');
@@ -300,9 +310,9 @@
       return await loading;
     } catch (error) {
       console.error('HNT dashboard header failed', error);
-      friendsList.innerHTML = '<div class="header-live-state"><strong>Anfragen nicht verfügbar</strong>Bitte die Preview neu laden.</div>';
-      messagesList.innerHTML = '<div class="header-live-state"><strong>Nachrichten nicht verfügbar</strong>Bitte die Preview neu laden.</div>';
-      notificationsList.innerHTML = '<div class="header-live-state"><strong>Benachrichtigungen nicht verfügbar</strong>Bitte die Preview neu laden.</div>';
+      friendsList.innerHTML = '<div class="header-live-state"><strong>Anfragen nicht verfügbar</strong>Bitte die Seite neu laden.</div>';
+      messagesList.innerHTML = '<div class="header-live-state"><strong>Nachrichten nicht verfügbar</strong>Bitte die Seite neu laden.</div>';
+      notificationsList.innerHTML = '<div class="header-live-state"><strong>Benachrichtigungen nicht verfügbar</strong>Bitte die Seite neu laden.</div>';
       return null;
     } finally {
       loading = null;
