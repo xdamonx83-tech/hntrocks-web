@@ -35,3 +35,4 @@
 <link rel="stylesheet" href="{{ asset('assets/hnt/crowns/crowns-cosmetics.css') }}?v=637">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
 <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/styles.css') }}?v=779">
+<link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/comms-dock.css') }}?v=1">
