@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const locale = String(document.documentElement.lang || 'de').toLowerCase();
     const isEnglish = locale.startsWith('en');
+    const storageKey = 'hntPreviewOpenChatTabsV2';
 
     const panelSlot = document.createElement('div');
     panelSlot.className = 'hnt-comms-panel-slot';
@@ -24,10 +25,10 @@ document.addEventListener('DOMContentLoaded', function () {
     launcher.type = 'button';
     launcher.className = 'hnt-comms-launcher';
     launcher.setAttribute('data-hnt-comms-launcher', '');
-    launcher.setAttribute('aria-label', isEnglish ? 'Open communications' : 'Kommunikation öffnen');
+    launcher.setAttribute('aria-label', isEnglish ? 'Open message overview' : 'Nachrichtenübersicht öffnen');
+    launcher.setAttribute('title', isEnglish ? 'Messages' : 'Nachrichten');
     launcher.innerHTML = ''
         + '<i class="ph ph-chats-circle" aria-hidden="true"></i>'
-        + '<span class="hnt-comms-launcher__label">Comms</span>'
         + '<span class="hnt-comms-launcher__count" data-hnt-comms-count hidden>0</span>';
 
     rail.appendChild(railList);
@@ -68,6 +69,24 @@ document.addEventListener('DOMContentLoaded', function () {
         countNode.hidden = count <= 0;
     }
 
+    function persistTabs() {
+        const tabs = allTabs().map(function (tab) {
+            return {
+                id: tab.getAttribute('data-conversation-id') || tab.getAttribute('data-hnt-chat-tab'),
+                url: tab.getAttribute('data-hnt-chat-tab-url') || '',
+                minimized: tab.classList.contains('is-minimized') || tab.classList.contains('hnt-comms-signal'),
+            };
+        }).filter(function (item) {
+            return item.id && item.url;
+        });
+
+        try {
+            window.sessionStorage.setItem(storageKey, JSON.stringify(tabs));
+        } catch (_error) {
+            // Session persistence is optional.
+        }
+    }
+
     function visibleHeaderMessageTrigger() {
         const selectors = '[data-hnt-messages-open], #messagesMenuTrigger';
         return Array.from(document.querySelectorAll(selectors)).find(function (trigger) {
@@ -82,7 +101,9 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const tabs = allTabs();
             const directTabs = Array.from(shell.children).filter(function (child) {
-                return child.matches && child.matches('[data-hnt-chat-tab]');
+                return child.matches
+                    && child.matches('[data-hnt-chat-tab]')
+                    && !child.classList.contains('is-minimized');
             });
 
             let active = null;
@@ -120,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
             shell.classList.toggle('has-active', hasActive);
             shell.classList.toggle('has-signals', Boolean(railList.querySelector('[data-hnt-chat-tab]')));
             updateLauncherCount();
+            persistTabs();
         } finally {
             arranging = false;
         }
@@ -206,7 +228,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const lastSignal = railList.querySelector('[data-hnt-chat-tab]');
+        const signals = Array.from(railList.querySelectorAll('[data-hnt-chat-tab]'));
+        const lastSignal = signals[signals.length - 1];
         if (lastSignal) {
             forceNextOpen = true;
             lastSignal.classList.remove('is-minimized');
@@ -217,6 +240,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const messageTrigger = visibleHeaderMessageTrigger();
         if (messageTrigger) messageTrigger.click();
+    });
+
+    document.addEventListener('hnt:comms-tab-minimized', function (event) {
+        queueArrange(event.detail?.tab || null);
+    });
+
+    document.addEventListener('hnt:comms-tab-restored', function (event) {
+        queueArrange(event.detail?.tab || null);
+    });
+
+    document.addEventListener('hnt:comms-tab-activated', function (event) {
+        forceNextOpen = true;
+        queueArrange(event.detail?.tab || null);
     });
 
     queueArrange();
