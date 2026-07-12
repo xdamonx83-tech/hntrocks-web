@@ -145,6 +145,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-cover-display-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-cover-display-mode.css')) ?: time() }}" rel="stylesheet">
 </head>
 <body data-page="profile-edit">
+<div aria-hidden="true" class="feed-shell" hidden style="display:none!important"></div>
 @include('themes.hnt_preview.partials.icons')
 <main class="app-shell profile-edit-page-shell" data-hnt-dashboard-header data-profile-edit-live>
 @include('themes.hnt_preview.partials.header')
@@ -241,6 +242,7 @@
     window.HNT_PROFILE_EDIT = {{ \Illuminate\Support\Js::from($profileEditConfig) }};
 </script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/app.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-deeplink.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-deeplink.js')) ?: time() }}"></script>
