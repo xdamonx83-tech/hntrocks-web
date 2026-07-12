@@ -30,6 +30,7 @@
 <span><b>Discord</b> {{ $profile?->discord_name ?: '—' }}</span>
 </div>
 @if($profileHasSocialLinks)
+<div class="profile-social-row {{ $profileTwitchIsLive ? 'has-live' : '' }}">
 <nav class="profile-social-bar" aria-label="Social Links">
 @if($profileSteamUrl)
 <a class="profile-social-link steam" href="{{ $profileSteamUrl }}" target="_blank" rel="noopener noreferrer"><span class="profile-social-brand">S</span><span>Steam</span><small>Community</small></a>
@@ -44,6 +45,7 @@
 @if($profileTwitchChannel)
 <div class="profile-live-strip" data-profile-live-strip @unless($profileTwitchIsLive) hidden @endunless><div><i class="profile-social-live-dot"></i><strong>{{ $profileDisplayName }} ist live</strong><span>{{ $profileTwitchChannel }} auf Twitch</span></div><button data-open-profile-twitch type="button">Live ansehen</button></div>
 @endif
+</div>
 @endif
 </div>
 <div class="profile-level-ring" style="--profile-level-progress:{{ $profileLevelProgress }}%">
