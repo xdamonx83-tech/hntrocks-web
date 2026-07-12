@@ -100,14 +100,17 @@ body[data-page="members"]::-webkit-scrollbar {
 
 .members-directory-sticky + .members-table {
     overflow: visible !important;
-    border-radius: 0 0 23px 23px;
+    border-radius: 0;
     background: rgba(255, 255, 255, .76);
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, .76);
+    box-shadow: none;
 }
 
 .members-directory-footer {
     position: relative;
     z-index: 1;
+    margin: 0 -10px -10px;
+    padding: 6px 19px 10px;
+    border-radius: 0 0 31px 31px;
     background: rgba(255, 255, 255, .76);
 }
 
