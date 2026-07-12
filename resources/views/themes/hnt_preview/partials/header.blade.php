@@ -5,8 +5,9 @@
     $headerAvatar = $headerViewer?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
     $headerLevel = max(1, (int) ($headerViewer?->level ?? 1));
     $headerRocks = (int) ($headerViewer?->crownWallet?->balance ?? 0);
+    $headerIsFeed = request()->routeIs('feed.index');
 @endphp
-<header class="site-header">
+<header class="site-header" data-hnt-shared-header>
 <a aria-label="HNT.rocks Feed" class="brand" href="{{ route('feed.index') }}">
 <svg aria-hidden="true" class="brand-mark" viewbox="0 0 44 34">
 <path d="M8.2 5.5c4.4-4.4 10.8-4.2 14.5.1-1 4.7-4.2 8-8.8 9.3-3.9-1.4-6.2-4.7-5.7-9.4Z"></path>
@@ -17,15 +18,15 @@
 <span>HNT.ROCKS</span>
 </a>
 <nav aria-label="HNT.ROCKS Hauptnavigation" class="main-nav hnt-main-nav">
-<a data-page="feed" href="{{ route('feed.index') }}">Feed</a>
+<a class="{{ $headerIsFeed ? 'active' : '' }}" data-page="feed" href="{{ route('feed.index') }}">Feed</a>
 <div class="main-nav-item nav-community">
 <button aria-controls="communityNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger" type="button"><span>Community</span><svg><use href="#i-chevron"></use></svg></button>
 <section class="main-nav-dropdown align-left" id="communityNavDropdown" role="menu">
 <header><span>COMMUNITY</span><strong>Gemeinsam im Bayou</strong></header>
 <div class="main-nav-menu-grid">
-<a href="{{ route('members.index') }}" role="menuitem"><span class="main-nav-menu-icon"><svg><use href="#i-users"></use></svg></span><span><strong>Mitglieder</strong><small>Hunter entdecken und folgen</small></span></a>
-<a href="{{ auth()->check() ? route('profile.friends') : route('login') }}" role="menuitem"><span class="main-nav-menu-icon"><svg><use href="#i-user"></use></svg></span><span><strong>Freunde</strong><small>Freundesliste und Anfragen</small></span></a>
-<a href="{{ route('feed.index') }}#community-hashtags" role="menuitem"><span class="main-nav-menu-icon"><svg><use href="#i-comment"></use></svg></span><span><strong>Hashtags</strong><small>Trends und Community-Themen</small></span></a>
+<button data-navigation-label="Mitglieder" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-users"></use></svg></span><span><strong>Mitglieder</strong><small>Hunter entdecken und folgen</small></span></button>
+<button data-navigation-label="Freunde" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-user"></use></svg></span><span><strong>Freunde</strong><small>Freundesliste und Anfragen</small></span></button>
+<button data-navigation-label="Hashtags" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-comment"></use></svg></span><span><strong>Hashtags</strong><small>Trends und Community-Themen</small></span></button>
 </div>
 </section>
 </div>
@@ -34,9 +35,9 @@
 <section class="main-nav-dropdown" id="lfgNavDropdown" role="menu">
 <header><span>LOOKING FOR GROUP</span><strong>Finde dein Team</strong></header>
 <div class="main-nav-menu-grid">
-<a href="{{ route('lfg.index') }}" role="menuitem"><span class="main-nav-menu-icon"><svg><use href="#i-search"></use></svg></span><span><strong>LFG finden</strong><small>Offene Gruppensuchen durchsuchen</small></span></a>
-<a href="{{ route('lfg.create') }}" role="menuitem"><span class="main-nav-menu-icon yellow"><svg><use href="#i-plus"></use></svg></span><span><strong>LFG erstellen</strong><small>Eigene Suche veröffentlichen</small></span></a>
-<button aria-disabled="true" data-unavailable="1" role="menuitem"><span class="main-nav-menu-icon green"><svg><use href="#i-users"></use></svg></span><span><strong>Ready Lobbys</strong><small>Für die Web-Roadmap geplant</small></span><em>Bald</em></button>
+<button data-navigation-label="LFG finden" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-search"></use></svg></span><span><strong>LFG finden</strong><small>Offene Gruppensuchen durchsuchen</small></span></button>
+<button data-navigation-label="LFG erstellen" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-plus"></use></svg></span><span><strong>LFG erstellen</strong><small>Eigene Suche veröffentlichen</small></span></button>
+<button aria-disabled="true" data-unavailable="1" role="menuitem" type="button"><span class="main-nav-menu-icon green"><svg><use href="#i-users"></use></svg></span><span><strong>Ready Lobbys</strong><small>Sofort spielbereite Hunter finden</small></span><em>Bald</em></button>
 </div>
 </section>
 </div>
@@ -46,9 +47,10 @@
 <section class="main-nav-dropdown" id="cupsNavDropdown" role="menu">
 <header><span>COMMUNITY CUPS</span><strong>Wettbewerbe &amp; Teams</strong></header>
 <div class="main-nav-menu-grid">
-<a href="{{ route('cups.index') }}" role="menuitem"><span class="main-nav-menu-icon yellow"><svg><use href="#i-folder"></use></svg></span><span><strong>Cup-Übersicht</strong><small>Aktive und vergangene Cups</small></span></a>
-<a href="{{ route('hall-of-fame.index') }}" role="menuitem"><span class="main-nav-menu-icon green"><svg><use href="#i-check"></use></svg></span><span><strong>Hall of Fame</strong><small>Sieger und Platzierungen</small></span></a>
-<a href="{{ route('teams.index') }}" role="menuitem"><span class="main-nav-menu-icon"><svg><use href="#i-users"></use></svg></span><span><strong>Teams</strong><small>Community- und Cup-Teams</small></span></a>
+<button data-navigation-label="Aktive Cups" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-folder"></use></svg></span><span><strong>Aktive Cups</strong><small>Laufende und kommende Events</small></span></button>
+<button data-navigation-label="Meine Cup-Teams" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-users"></use></svg></span><span><strong>Meine Cup-Teams</strong><small>Teams, Einladungen und Chat</small></span></button>
+<button data-navigation-label="Einreichungen" role="menuitem" type="button"><span class="main-nav-menu-icon purple"><svg><use href="#i-image"></use></svg></span><span><strong>Einreichungen</strong><small>Screenshots und Prüfstatus</small></span></button>
+<button data-navigation-label="Hall of Fame" role="menuitem" type="button"><span class="main-nav-menu-icon green"><svg><use href="#i-check"></use></svg></span><span><strong>Hall of Fame</strong><small>Sieger und vergangene Cups</small></span></button>
 </div>
 </section>
 </div>
@@ -58,15 +60,32 @@
 <section class="main-nav-dropdown" id="contractsNavDropdown" role="menu">
 <header><span>FORTSCHRITT</span><strong>Aufträge &amp; Belohnungen</strong></header>
 <div class="main-nav-menu-grid">
-<a href="{{ route('gamification.index') }}" role="menuitem"><span class="main-nav-menu-icon green"><svg><use href="#i-sliders"></use></svg></span><span><strong>Gamification</strong><small>Level, XP, Badges und Quests</small></span></a>
-<a href="{{ route('contracts.index') }}" role="menuitem"><span class="main-nav-menu-icon yellow"><svg><use href="#i-check"></use></svg></span><span><strong>Wochenaufträge</strong><small>Fortschritt und Belohnungen</small></span></a>
-<a href="{{ route('crowns.shop') }}" role="menuitem"><span class="main-nav-menu-icon"><svg><use href="#i-folder"></use></svg></span><span><strong>Shop &amp; Inventar</strong><small>Rocks, Rahmen und Items</small></span></a>
+<button data-navigation-label="Wochenaufträge" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-check"></use></svg></span><span><strong>Wochenaufträge</strong><small>Fortschritt und Rocks-Belohnungen</small></span></button>
+<button data-navigation-label="Quests" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-sliders"></use></svg></span><span><strong>Quests</strong><small>Tägliche und dauerhafte Aufgaben</small></span></button>
+<button data-navigation-label="Loadout Challenges" role="menuitem" type="button"><span class="main-nav-menu-icon purple"><svg><use href="#i-briefcase"></use></svg></span><span><strong>Loadout Challenges</strong><small>Builds testen und einreichen</small></span></button>
+<button data-navigation-label="Badges" role="menuitem" type="button"><span class="main-nav-menu-icon green"><svg><use href="#i-bookmark"></use></svg></span><span><strong>Badges</strong><small>Erfolge und Auszeichnungen</small></span></button>
+</div>
+</section>
+</div>
+<div class="main-nav-item nav-more">
+<button aria-controls="moreNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger" type="button"><span>Mehr</span><svg><use href="#i-chevron"></use></svg></button>
+<section class="main-nav-dropdown align-right" id="moreNavDropdown" role="menu">
+<header><span>MEHR ENTDECKEN</span><strong>Weitere HNT.ROCKS-Bereiche</strong></header>
+<div class="main-nav-menu-grid">
+<button data-navigation-label="Shop &amp; Inventar" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-folder"></use></svg></span><span><strong>Shop &amp; Inventar</strong><small>Rocks einlösen und Items verwalten</small></span></button>
+<button aria-disabled="true" data-unavailable="1" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-bookmark"></use></svg></span><span><strong>Guides</strong><small>Community-Wissen und Tipps</small></span></button>
+<button aria-disabled="true" data-unavailable="1" role="menuitem" type="button"><span class="main-nav-menu-icon purple"><svg><use href="#i-comment"></use></svg></span><span><strong>Umfragen</strong><small>Abstimmen und diskutieren</small></span></button>
+<button data-navigation-label="Aktivitätsverlauf" role="menuitem" type="button"><span class="main-nav-menu-icon green"><svg><use href="#i-arrow"></use></svg></span><span><strong>Aktivitätsverlauf</strong><small>XP, Rocks und letzte Aktionen</small></span></button>
 </div>
 </section>
 </div>
 </nav>
 <div class="header-actions">
+@if($headerIsFeed)
+<button aria-label="Stats öffnen" class="mobile-stats-trigger" id="mobileStatsTrigger" type="button"><svg><use href="#i-sliders"></use></svg><span>Stats</span></button>
+@else
 <a aria-label="Feed öffnen" class="mobile-stats-trigger profile-mobile-feed-link" href="{{ route('feed.index') }}"><svg><use href="#i-arrow"></use></svg><span>Feed</span></a>
+@endif
 @if($headerViewer)
 <div class="header-action-menu settings-menu">
 <button aria-controls="settingsDropdown" aria-expanded="false" aria-haspopup="true" aria-label="Einstellungen öffnen" class="settings-button header-dropdown-trigger" id="settingsMenuTrigger"><svg><use href="#i-settings"></use></svg><span>Einstellungen</span></button>
@@ -88,7 +107,7 @@
 </div>
 <div class="header-action-menu notifications-menu">
 <button aria-controls="notificationsDropdown" aria-expanded="false" aria-haspopup="true" aria-label="Benachrichtigungen öffnen" class="header-circle header-dropdown-trigger" id="notificationsMenuTrigger"><svg><use href="#i-bell"></use></svg><span class="header-action-badge is-empty" data-header-badge="notifications">0</span></button>
-<section aria-labelledby="notificationsMenuTrigger" class="header-dropdown notifications-dropdown" id="notificationsDropdown" role="menu"><header class="header-dropdown-head"><div><span>AKTIVITÄT</span><strong>Benachrichtigungen</strong></div><small data-dropdown-count="notifications">0 ungelesen</small></header><div class="header-notification-list"><div class="header-live-state"><strong>Benachrichtigungen</strong>Echte Daten werden geladen …</div></div><a class="header-dropdown-footer" href="{{ route('notifications.index') }}">Alle Benachrichtigungen <svg><use href="#i-arrow"></use></svg></a></section>
+<section aria-labelledby="notificationsMenuTrigger" class="header-dropdown notifications-dropdown" id="notificationsDropdown" role="menu"><header class="header-dropdown-head"><div><span>AKTIVITÄT</span><strong>Benachrichtigungen</strong></div><button class="header-mark-all" type="button">Alle gelesen</button></header><div class="header-notification-list"><div class="header-live-state"><strong>Benachrichtigungen</strong>Echte Daten werden geladen …</div></div><a class="header-dropdown-footer" href="{{ route('notifications.index') }}">Alle Benachrichtigungen <svg><use href="#i-arrow"></use></svg></a></section>
 </div>
 <div class="header-action-menu profile-menu">
 <button aria-controls="profileDropdown" aria-expanded="false" aria-haspopup="true" aria-label="Profil öffnen" class="header-circle header-dropdown-trigger" id="profileMenuTrigger"><svg><use href="#i-user"></use></svg></button>
