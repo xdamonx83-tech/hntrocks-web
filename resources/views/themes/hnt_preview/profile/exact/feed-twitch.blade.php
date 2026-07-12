@@ -4,7 +4,7 @@
 <article class="profile-twitch-player-card">
 <header>
 <div><span>TWITCH LIVE</span><h3>{{ $profileDisplayName }} auf Twitch</h3></div>
-<span class="profile-twitch-status" data-profile-twitch-status>Wird geprüft</span>
+<span class="profile-twitch-status {{ $profileTwitchIsLive ? 'is-live' : ($profileTwitchStatusState === 'offline' ? 'is-offline' : '') }}" data-profile-twitch-status>{{ $profileTwitchStatusLabel }}</span>
 </header>
 <div class="profile-twitch-player-shell">
 <div class="profile-twitch-player" id="profileTwitchPlayer">
