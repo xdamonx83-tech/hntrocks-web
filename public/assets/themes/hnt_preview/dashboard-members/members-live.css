@@ -62,7 +62,8 @@ body[data-page="members"]::-webkit-scrollbar {
 }
 
 .members-directory-card {
-    overflow: visible !important;
+    overflow: clip !important;
+    border-radius: 31px !important;
 }
 
 .members-directory-sticky {
