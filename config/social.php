@@ -52,6 +52,7 @@ return [
             'authorize_url' => 'https://id.twitch.tv/oauth2/authorize',
             'token_url' => 'https://id.twitch.tv/oauth2/token',
             'user_url' => 'https://api.twitch.tv/helix/users',
+            'streams_url' => 'https://api.twitch.tv/helix/streams',
             'scopes' => ['user:read:email'],
         ],
 
