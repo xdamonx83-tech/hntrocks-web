@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\UserProfile;
+use App\Observers\UserProfileObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,6 +15,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Bootstrapping stays intentionally small in the foundation phase.
+        UserProfile::observe(UserProfileObserver::class);
     }
 }
