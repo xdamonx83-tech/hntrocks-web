@@ -9,6 +9,10 @@
     $playstyle = old('playstyle', $profile?->playstyle);
     $language = old('language', $profile?->language);
     $isLfgAvailable = (bool) old('is_lfg_available', $profile?->is_lfg_available);
+    $coverDisplayMode = old('cover_display_mode', $profile?->coverDisplayMode() ?? \App\Models\UserProfile::COVER_DISPLAY_AUTO);
+    $coverDisplayMode = in_array($coverDisplayMode, \App\Models\UserProfile::COVER_DISPLAY_MODES, true)
+        ? $coverDisplayMode
+        : \App\Models\UserProfile::COVER_DISPLAY_AUTO;
     $isEnglish = app()->getLocale() === 'en';
     $handle = $user->username ? '@'.$user->username : '@hunter';
     $onlineLabel = $user->isOnline() ? 'Online' : 'Offline';
@@ -34,6 +38,14 @@
         'cover' => 'COVER IMAGE', 'cover_head' => 'Your public profile header', 'change_cover' => 'Change cover',
         'recommended' => 'Recommended', 'cover_hint' => 'Wide image · JPG, PNG or WebP · server limit applies',
         'avatar' => 'AVATAR', 'avatar_hint' => 'Square images work best.', 'change_avatar' => 'Change avatar',
+        'cover_display' => 'Cover display',
+        'cover_display_text' => 'Choose how your cover appears in the public profile header.',
+        'cover_auto' => 'Automatic',
+        'cover_auto_text' => 'Desktop hover and the cover button reveal it when needed.',
+        'cover_always' => 'Always visible',
+        'cover_always_text' => 'Keep the faded cover permanently visible behind your profile details.',
+        'cover_hidden' => 'Do not show',
+        'cover_hidden_text' => 'Keep the image saved without displaying it on your public profile.',
         'clear' => 'Easy to recognize', 'clear_text' => 'Avoid very dark or blurry images.',
         'crop' => 'Good crop', 'crop_text' => 'Keep important content centered.',
         'community' => 'Community safe', 'community_text' => 'Do not upload abusive or third-party content.',
@@ -81,6 +93,14 @@
         'cover' => 'TITELBILD', 'cover_head' => 'Dein öffentlicher Profilkopf', 'change_cover' => 'Titelbild ändern',
         'recommended' => 'Empfohlen', 'cover_hint' => 'Breites Bild · JPG, PNG oder WebP · Serverlimit beachten',
         'avatar' => 'AVATAR', 'avatar_hint' => 'Quadratische Bilder funktionieren am besten.', 'change_avatar' => 'Avatar ändern',
+        'cover_display' => 'Titelbild-Anzeige',
+        'cover_display_text' => 'Bestimme, wie dein Titelbild im öffentlichen Profilkopf erscheint.',
+        'cover_auto' => 'Automatisch',
+        'cover_auto_text' => 'Desktop-Hover und der Titelbild-Button zeigen es bei Bedarf an.',
+        'cover_always' => 'Immer sichtbar',
+        'cover_always_text' => 'Das ausgeblendete Titelbild bleibt dauerhaft hinter deinen Profildaten sichtbar.',
+        'cover_hidden' => 'Nicht anzeigen',
+        'cover_hidden_text' => 'Das Bild bleibt gespeichert, wird aber im öffentlichen Profil nicht eingeblendet.',
         'clear' => 'Gut erkennbar', 'clear_text' => 'Keine zu dunklen oder unscharfen Bilder.',
         'crop' => 'Passender Ausschnitt', 'crop_text' => 'Wichtige Inhalte mittig platzieren.',
         'community' => 'Community-tauglich', 'community_text' => 'Keine beleidigenden oder fremden Inhalte.',
@@ -122,6 +142,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.css')) ?: time() }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-cover-display-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-cover-display-mode.css')) ?: time() }}" rel="stylesheet">
 </head>
 <body data-page="profile-edit">
 @include('themes.hnt_preview.partials.icons')
@@ -148,7 +169,30 @@
 <label class="profile-edit-field full"><span>{{ $copy['headline'] }}</span><input id="profileHeadline" maxlength="120" name="headline" value="{{ old('headline', $profile?->headline) }}"><small><b id="headlineCount">0</b> / 120 {{ $copy['characters'] }}</small>@error('headline')<em data-field-error>{{ $message }}</em>@enderror</label>
 <label class="profile-edit-field full"><span>{{ $copy['bio'] }}</span><textarea id="profileBio" maxlength="1200" name="bio" rows="7">{{ old('bio', $profile?->bio) }}</textarea><small><b id="bioCount">0</b> / 1200 {{ $copy['characters'] }}</small>@error('bio')<em data-field-error>{{ $message }}</em>@enderror</label>
 </div></section>
-<section class="profile-edit-panel" data-profile-panel="media" hidden><div class="profile-edit-section-intro"><span>{{ $copy['profile_media'] }}</span><h3>{{ $copy['avatar_cover'] }}</h3><p>{{ $copy['media_text'] }}</p></div><div class="profile-media-layout"><article class="profile-cover-editor"><div class="profile-cover-preview" id="profileCoverPreview" style="background-image:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,213,90,.20)),url('{{ $coverUrl }}')"><span>{{ $copy['cover'] }}</span><strong>{{ $copy['cover_head'] }}</strong><button type="button" data-profile-media-trigger="cover"><svg><use href="#i-image"></use></svg> {{ $copy['change_cover'] }}</button></div><div class="profile-media-note"><span>{{ $copy['recommended'] }}</span><p>{{ $copy['cover_hint'] }}</p></div></article><article class="profile-avatar-editor"><div class="profile-avatar-editor-image"><img alt="{{ $user->name }}" id="profileAvatarPreview" src="{{ $avatarUrl }}"><i></i></div><div><span>{{ $copy['avatar'] }}</span><h3 data-preview-name>{{ old('name', $user->name) }}</h3><p>{{ $copy['avatar_hint'] }}</p><button type="button" data-profile-media-trigger="avatar">{{ $copy['change_avatar'] }}</button></div></article></div><div class="profile-media-guidelines"><article><span>01</span><div><strong>{{ $copy['clear'] }}</strong><small>{{ $copy['clear_text'] }}</small></div></article><article><span>02</span><div><strong>{{ $copy['crop'] }}</strong><small>{{ $copy['crop_text'] }}</small></div></article><article><span>03</span><div><strong>{{ $copy['community'] }}</strong><small>{{ $copy['community_text'] }}</small></div></article></div></section>
+<section class="profile-edit-panel" data-profile-panel="media" hidden>
+<div class="profile-edit-section-intro"><span>{{ $copy['profile_media'] }}</span><h3>{{ $copy['avatar_cover'] }}</h3><p>{{ $copy['media_text'] }}</p></div>
+<div class="profile-media-layout"><article class="profile-cover-editor"><div class="profile-cover-preview" id="profileCoverPreview" style="background-image:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,213,90,.20)),url('{{ $coverUrl }}')"><span>{{ $copy['cover'] }}</span><strong>{{ $copy['cover_head'] }}</strong><button type="button" data-profile-media-trigger="cover"><svg><use href="#i-image"></use></svg> {{ $copy['change_cover'] }}</button></div><div class="profile-media-note"><span>{{ $copy['recommended'] }}</span><p>{{ $copy['cover_hint'] }}</p></div></article><article class="profile-avatar-editor"><div class="profile-avatar-editor-image"><img alt="{{ $user->name }}" id="profileAvatarPreview" src="{{ $avatarUrl }}"><i></i></div><div><span>{{ $copy['avatar'] }}</span><h3 data-preview-name>{{ old('name', $user->name) }}</h3><p>{{ $copy['avatar_hint'] }}</p><button type="button" data-profile-media-trigger="avatar">{{ $copy['change_avatar'] }}</button></div></article></div>
+<div class="profile-media-guidelines"><article><span>01</span><div><strong>{{ $copy['clear'] }}</strong><small>{{ $copy['clear_text'] }}</small></div></article><article><span>02</span><div><strong>{{ $copy['crop'] }}</strong><small>{{ $copy['crop_text'] }}</small></div></article><article><span>03</span><div><strong>{{ $copy['community'] }}</strong><small>{{ $copy['community_text'] }}</small></div></article></div>
+<fieldset class="profile-cover-mode-card">
+<legend>{{ $copy['cover_display'] }}</legend>
+<p>{{ $copy['cover_display_text'] }}</p>
+<div class="profile-cover-mode-options">
+@foreach([
+    [\App\Models\UserProfile::COVER_DISPLAY_AUTO, 'i-eye', $copy['cover_auto'], $copy['cover_auto_text']],
+    [\App\Models\UserProfile::COVER_DISPLAY_ALWAYS, 'i-image', $copy['cover_always'], $copy['cover_always_text']],
+    [\App\Models\UserProfile::COVER_DISPLAY_HIDDEN, 'i-x', $copy['cover_hidden'], $copy['cover_hidden_text']],
+] as $option)
+<label>
+<input type="radio" name="cover_display_mode" value="{{ $option[0] }}" @checked($coverDisplayMode === $option[0])>
+<span class="profile-cover-mode-icon"><svg><use href="#{{ $option[1] }}"></use></svg></span>
+<div><strong>{{ $option[2] }}</strong><small>{{ $option[3] }}</small></div>
+<i><svg><use href="#i-check"></use></svg></i>
+</label>
+@endforeach
+</div>
+@error('cover_display_mode')<em class="profile-cover-mode-error" data-field-error>{{ $message }}</em>@enderror
+</fieldset>
+</section>
 <section class="profile-edit-panel" data-profile-panel="hunt" hidden><div class="profile-edit-section-intro"><span>{{ $copy['hunt_profile'] }}</span><h3>{{ $copy['play_availability'] }}</h3><p>{{ $copy['hunt_text'] }}</p></div><div class="profile-edit-field-grid">
 <label class="profile-edit-field"><span>{{ $copy['platform'] }}</span><select id="profilePlatform" name="platform"><option value="">{{ $copy['open'] }}</option>@foreach(['PC','PlayStation','Xbox','Crossplay'] as $option)<option value="{{ $option }}" @selected($platform === $option)>{{ $option }}</option>@endforeach</select>@error('platform')<em data-field-error>{{ $message }}</em>@enderror</label>
 <label class="profile-edit-field"><span>{{ $copy['region'] }}</span><select id="profileRegion" name="region"><option value="">{{ $copy['open'] }}</option>@foreach(['EU','US East','US West','Asia','Oceania'] as $option)<option value="{{ $option }}" @selected($region === $option)>{{ $option }}</option>@endforeach</select>@error('region')<em data-field-error>{{ $message }}</em>@enderror</label>
@@ -199,5 +243,6 @@
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/app.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-live.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-deeplink.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile-edit/profile-edit-deeplink.js')) ?: time() }}"></script>
 </body>
 </html>
