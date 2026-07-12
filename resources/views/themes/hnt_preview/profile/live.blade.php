@@ -4,6 +4,7 @@
     $profileDisplayName = trim((string) ($profileUser->name ?: $profileUser->username ?: 'HNT Hunter'));
     $profileHandle = $profileUser->username ? '@'.$profileUser->username : '@hunter';
     $profileAvatarUrl = $profileUser->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+    $profileCoverUrl = $profileUser->coverUrl() ?: asset('assets/vikinger/img/default-cover.svg');
     $profileBio = trim((string) ($profile?->bio ?: $profile?->headline ?: 'Noch keine Profilbeschreibung vorhanden.'));
     $profilePostsCount = (int) ($profileUser->visible_feed_posts_count ?? ($profilePostsTotal ?? 0));
     $profileFriendsTotal = (int) ($profileFriendsCount ?? 0);
@@ -38,6 +39,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live.css')) ?: time() }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-cover-peek.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-cover-peek.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css')) ?: time() }}" rel="stylesheet"/>
@@ -78,6 +80,7 @@
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time() }}"></script>
 @endif
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-cover-peek.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-cover-peek.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live-compose.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live-compose.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-live-actions.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-live-actions.js')) ?: time() }}"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.js')) ?: time() }}"></script>
