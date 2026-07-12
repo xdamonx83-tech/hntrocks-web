@@ -10,7 +10,7 @@
 </div>
 <div class="profile-summary-actions">
 @if($profileMessageUrl)
-<a aria-label="Nachricht an {{ $profileDisplayName }}" href="{{ $profileMessageUrl }}"><svg><use href="#i-comment"></use></svg></a>
+<a aria-label="Nachricht an {{ $profileDisplayName }}" data-hnt-chat-tab-open data-hnt-chat-tab-url="{{ $profileMessageUrl }}" href="{{ $profileMessageUrl }}"><svg><use href="#i-comment"></use></svg></a>
 @endif
 <button aria-label="Profil teilen" data-profile-share type="button"><svg><use href="#i-share"></use></svg></button>
 </div>
