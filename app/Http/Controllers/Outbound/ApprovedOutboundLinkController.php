@@ -14,7 +14,15 @@ class ApprovedOutboundLinkController extends Controller
     {
         abort_unless($link->is_active, 404);
 
-        return view(HntTheme::resolve('outbound.show'), [
+        // The HNT preview outbound page still depends on the legacy preview shell
+        // and can fail while the new dashboard rollout is only partially complete.
+        // Keep approved /out links usable by rendering the stable Socialite warning
+        // page for preview sessions until this page receives its dedicated redesign.
+        $view = HntTheme::previewActive()
+            ? 'themes.socialite.outbound.show'
+            : HntTheme::resolve('outbound.show');
+
+        return view($view, [
             'link' => $link,
         ]);
     }
