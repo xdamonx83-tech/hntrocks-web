@@ -6,6 +6,7 @@ use App\Http\Controllers\Feed\DashboardFeedLiveController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Middleware\PreviewDashboardHeader;
 use App\Models\User;
+use App\Services\Twitch\TwitchLiveStatusService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -67,9 +68,17 @@ class ActivateProfileRedesign
 
         /** @var View $source */
         $source = app(ProfileController::class)->show($request, $profileUser);
+        $data = $source->getData();
+        $resolvedProfileUser = $data['profileUser'] ?? null;
+        $twitchUrl = $resolvedProfileUser instanceof User
+            ? $resolvedProfileUser->profile?->twitch_url
+            : null;
+
+        $data['profileTwitchLiveStatus'] = app(TwitchLiveStatusService::class)
+            ->statusForUrl($twitchUrl);
 
         return response()
-            ->view('themes.hnt_preview.profile.live', $source->getData())
+            ->view('themes.hnt_preview.profile.live', $data)
             ->header('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache');
     }
