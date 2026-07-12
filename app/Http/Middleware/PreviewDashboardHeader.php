@@ -73,6 +73,7 @@ class PreviewDashboardHeader
             fn () => Conversation::query()
                 ->forUser($user)
                 ->where('type', 'private')
+                ->whereHas('messages')
                 ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
                 ->latest('updated_at')
                 ->limit(6)
@@ -93,6 +94,7 @@ class PreviewDashboardHeader
                         'unread' => (int) $conversation->unreadCountFor($user),
                         'time' => $latestAt?->diffForHumans(null, true, true, 1) ?: '—',
                         'url' => route('messages.show', $conversation),
+                        'chat_tab_url' => route('messages.chat-tab', $conversation),
                     ];
                 })
                 ->values()
