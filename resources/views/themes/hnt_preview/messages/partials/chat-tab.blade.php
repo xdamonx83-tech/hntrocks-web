@@ -4,9 +4,17 @@
     $conversationTitle = $conversation->displayTitleFor($viewer);
     $partnerAvatar = $partner?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
     $partnerHandle = $partner?->username ? '@'.$partner->username : __('ui.private_conversation');
+    $channelLabel = app()->getLocale() === 'en' ? 'PRIVATE CHANNEL' : 'PRIVAT-KANAL';
 @endphp
 
-<section class="hnt-chat-tab" data-hnt-chat-tab="{{ $conversation->id }}" data-conversation-id="{{ $conversation->id }}" data-hnt-chat-tab-messages-url="{{ route('messages.chat-tab.messages', $conversation) }}" aria-label="{{ $conversationTitle }}">
+<section class="hnt-chat-tab"
+         data-hnt-chat-tab="{{ $conversation->id }}"
+         data-conversation-id="{{ $conversation->id }}"
+         data-hnt-chat-tab-messages-url="{{ route('messages.chat-tab.messages', $conversation) }}"
+         data-hnt-comms-name="{{ $conversationTitle }}"
+         data-hnt-comms-avatar="{{ $partnerAvatar }}"
+         data-hnt-comms-channel="private"
+         aria-label="{{ $conversationTitle }}">
     <header class="hnt-chat-tab__header" data-hnt-chat-tab-toggle>
         <div class="hnt-chat-tab__person">
             <span class="hnt-chat-tab__avatar-wrap">
@@ -16,6 +24,7 @@
                 @endif
             </span>
             <div class="hnt-chat-tab__meta">
+                <span class="hnt-chat-tab__channel">{{ $channelLabel }}</span>
                 <strong>{{ $conversationTitle }}</strong>
                 <span>{{ $partnerHandle }}</span>
             </div>
