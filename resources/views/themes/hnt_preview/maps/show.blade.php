@@ -22,7 +22,8 @@
 
     $bodyAssets = '<script src="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-no-popovers.js')).'"></script>'
         .'<script src="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-cash-submit-live.js')).'"></script>'
-        .'<script src="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-fullscreen.js')).'"></script>';
+        .'<script src="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-fullscreen.js')).'"></script>'
+        .'<script src="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-comment-count.js')).'"></script>';
 
     $mapsScriptNeedle = '<script src="'.asset('assets/hnt/maps/maps.js');
     if (strpos($mapDetailHtml, 'data-map-measure-reset') === false && strpos($mapDetailHtml, $mapsScriptNeedle) !== false) {
