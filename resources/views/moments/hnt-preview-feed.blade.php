@@ -12,15 +12,20 @@
     $hntMomentsHtml = view('themes.hnt_preview.moments.demo-feed', $hntMomentsViewData)->render();
 
     $hntThemeColorsVersion = @filemtime(public_path('assets/themes/hnt_preview/theme-colors.css')) ?: time();
+    $hntThemePolishVersion = @filemtime(public_path('assets/themes/hnt_preview/theme-page-polish.css')) ?: time();
     $hntMomentsPolishVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-polish.css')) ?: time();
-    $hntMomentsHeaderVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-header-live.js')) ?: time();
+    $hntHeaderVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js')) ?: time();
+    $hntHeaderLiveVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time();
 
     $hntMomentsHeadAssets =
         '<link data-hnt-theme-colors href="'.asset('assets/themes/hnt_preview/theme-colors.css').'?v='.$hntThemeColorsVersion.'" rel="stylesheet">'.
+        '<link data-hnt-theme-page-polish href="'.asset('assets/themes/hnt_preview/theme-page-polish.css').'?v='.$hntThemePolishVersion.'" rel="stylesheet">'.
         '<link data-hnt-moments-polish href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-polish.css').'?v='.$hntMomentsPolishVersion.'" rel="stylesheet">';
 
     $hntMomentsBodyAssets =
-        '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-header-live.js').'?v='.$hntMomentsHeaderVersion.'" defer></script>';
+        '<script>window.HNT_DASHBOARD_HEADER_ENDPOINT='.\Illuminate\Support\Js::from(route('feed.index')).';</script>'.
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v='.$hntHeaderVersion.'"></script>'.
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v='.$hntHeaderLiveVersion.'"></script>';
 
     $hntMomentsHtml = str_replace('</head>', $hntMomentsHeadAssets.'</head>', $hntMomentsHtml);
     $hntMomentsHtml = str_replace('</body>', $hntMomentsBodyAssets.'</body>', $hntMomentsHtml);
