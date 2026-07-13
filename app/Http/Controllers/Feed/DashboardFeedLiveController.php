@@ -11,6 +11,7 @@ use App\Http\Middleware\PreviewDashboardStreak;
 use App\Models\User;
 use App\Services\Economy\CrownDailyStreakService;
 use App\Support\DashboardProgressPayload;
+use App\Support\DashboardPrototypeLocalizer;
 use App\Support\DashboardPrototypeSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -114,6 +115,7 @@ class DashboardFeedLiveController extends Controller
         $viewerName = $viewer->name ?: ($viewer->username ?: 'HNT Hunter');
         $viewerHandle = $viewer->username ? '@'.$viewer->username : '@hunter';
         $viewerAvatar = $viewer->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+        $greeting = __('hnt_preview.dashboard.hello', ['name' => $viewerName]);
 
         $initialHeader = $this->invokePrivate(
             app(PreviewDashboardHeader::class),
@@ -139,6 +141,7 @@ class DashboardFeedLiveController extends Controller
             'real-feed-polish.js',
             'real-feed-comments.js',
             'real-feed-content-badges.js',
+            'real-feed-i18n.js',
         ];
 
         $html = str_replace(
@@ -150,7 +153,7 @@ class DashboardFeedLiveController extends Controller
                 '<title>HNT.rocks — Feed Preview</title>',
             ],
             [
-                'Hello '.e($viewerName),
+                e($greeting),
                 '>'.e($viewerName).'<',
                 e($viewerHandle),
                 e($viewerAvatar),
@@ -166,9 +169,15 @@ class DashboardFeedLiveController extends Controller
             $initialProgress,
             $initialStreak
         );
+        $html = app(DashboardPrototypeLocalizer::class)->localize($html);
+
+        $dashboardI18n = json_encode(
+            trans('hnt_preview.dashboard'),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+        ) ?: '{}';
 
         $styles = '<meta name="csrf-token" content="'.e(csrf_token()).'">'
-            .'<script>window.HNT_DASHBOARD_FEED_LIVE=true;</script>';
+            .'<script>window.HNT_DASHBOARD_FEED_LIVE=true;window.HNT_DASHBOARD_I18N='.$dashboardI18n.';</script>';
 
         foreach ($assets as $asset) {
             $path = public_path('assets/themes/hnt_preview/dashboard-feed/'.$asset);
