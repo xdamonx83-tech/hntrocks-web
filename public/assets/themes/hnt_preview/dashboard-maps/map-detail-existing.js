@@ -17,6 +17,14 @@
 
   const isEnglish = (document.documentElement.lang || '').toLowerCase().startsWith('en');
 
+  if (!document.querySelector('link[data-hnt-map-cash-modal]')) {
+    const modalStyles = document.createElement('link');
+    modalStyles.rel = 'stylesheet';
+    modalStyles.href = '/assets/themes/hnt_preview/dashboard-maps/map-detail-cash-modal.css?v=1';
+    modalStyles.dataset.hntMapCashModal = '1';
+    document.head.append(modalStyles);
+  }
+
   document.querySelectorAll('[data-existing-map-url]').forEach((button) => {
     button.addEventListener('click', () => {
       const url = button.dataset.existingMapUrl;
@@ -231,7 +239,7 @@
     meta.innerHTML = `
       <article><span>${isEnglish ? 'Area' : 'Bereich'}</span><strong data-cash-detail-area></strong></article>
       <article><span>${isEnglish ? 'Coordinates' : 'Koordinaten'}</span><strong data-cash-detail-coords></strong></article>
-      <article><span>${isEnglish ? 'Status' : 'Status'}</span><strong class="verified">${isEnglish ? 'Approved' : 'Bestätigt'}</strong></article>
+      <article><span>Status</span><strong class="verified">${isEnglish ? 'Approved' : 'Bestätigt'}</strong></article>
     `;
     info.insertBefore(meta, voteSection);
 
