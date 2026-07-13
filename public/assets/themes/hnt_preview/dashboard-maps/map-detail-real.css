@@ -1,0 +1,246 @@
+/* Real Huntmaps bridge for the approved detail-page layout. */
+.map-canvas-surface.map-leaflet-host {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  transform: none !important;
+  transition: none !important;
+  background: var(--hnt-surface-panel);
+  color: var(--hnt-text);
+}
+
+.map-canvas-surface.map-leaflet-host.leaflet-container {
+  font-family: inherit;
+  cursor: grab;
+}
+
+.map-canvas-surface.map-leaflet-host.leaflet-container:active,
+.map-canvas-frame.is-measuring .leaflet-container,
+.map-canvas-frame.is-cash-mode .leaflet-container {
+  cursor: crosshair;
+}
+
+.map-canvas-surface .leaflet-image-layer {
+  image-rendering: auto;
+}
+
+.map-canvas-surface .leaflet-pane,
+.map-canvas-surface .leaflet-top,
+.map-canvas-surface .leaflet-bottom {
+  z-index: 2;
+}
+
+.map-canvas-surface .leaflet-marker-pane,
+.map-canvas-surface .leaflet-tooltip-pane {
+  z-index: 5;
+}
+
+.map-detail-leaflet-icon {
+  border: 0;
+  background: transparent;
+}
+
+.map-detail-leaflet-icon > span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--hnt-surface-card-strong);
+  border-radius: 50%;
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: none;
+  transition: transform .16s ease, background .16s ease;
+}
+
+.map-detail-leaflet-icon.marker-cash > span,
+.map-detail-leaflet-icon.marker-tarot > span,
+.map-detail-leaflet-icon.marker-boss > span {
+  background: var(--hnt-brand-red);
+}
+
+.map-detail-leaflet-icon:hover > span,
+.map-detail-leaflet-icon.selected > span {
+  transform: scale(1.18);
+  background: var(--hnt-brand-red-hover);
+  outline: 4px solid var(--hnt-brand-red-soft-hover);
+}
+
+.map-detail-label-tooltip,
+.map-measure-tooltip {
+  border: .5px solid var(--hnt-border);
+  border-radius: 10px;
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+  font-size: 8px;
+  font-weight: 500;
+  padding: 4px 7px;
+}
+
+.map-detail-label-tooltip::before,
+.map-measure-tooltip::before {
+  display: none;
+}
+
+.map-selected-popover {
+  z-index: 650;
+  border: .5px solid var(--hnt-border);
+  background: var(--hnt-surface-card-strong);
+  box-shadow: none;
+}
+
+.map-selected-popover[hidden],
+.marker-vote-row[hidden],
+#openCommentsFromDetails[hidden],
+#markerCommentState[hidden],
+#markerCommentLogin[hidden],
+#markerCommentForm[hidden] {
+  display: none !important;
+}
+
+.map-selected-popover > span {
+  color: var(--hnt-brand-red);
+}
+
+.map-selected-popover button,
+.marker-comments-card form button,
+.map-cash-modal-panel footer button:last-child {
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+}
+
+.map-toolbar-actions button:disabled,
+.map-canvas-status button:disabled,
+.marker-detail-modal-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.map-toolbar-actions button.active,
+.map-canvas-status button.active {
+  background: var(--hnt-brand-red);
+  color: var(--hnt-text-on-dark);
+}
+
+.map-live-error {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  padding: 24px;
+  text-align: center;
+  color: var(--hnt-text-muted);
+}
+
+.map-live-error strong {
+  color: var(--hnt-text);
+  font-size: 15px;
+}
+
+.marker-comment-body {
+  color: var(--hnt-text-muted);
+  font-size: 6px;
+  line-height: 1.45;
+}
+
+.marker-comment-body p {
+  margin: 0;
+}
+
+#markerCommentState,
+#markerCommentLogin,
+#mapCashStatus,
+#mapMeasureStatus {
+  margin: 8px 0 0;
+  color: var(--hnt-text-muted);
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+#markerCommentLogin a {
+  color: var(--hnt-brand-red);
+  text-decoration: none;
+}
+
+.map-cash-modal-panel form {
+  display: grid;
+}
+
+.map-cash-modal-panel form > label {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px;
+  border: .5px solid var(--hnt-border-soft);
+  border-radius: 18px;
+  background: var(--hnt-surface-card);
+}
+
+.map-cash-modal-panel input[type="text"],
+.map-cash-modal-panel input[type="email"],
+.map-cash-modal-panel input[type="file"] {
+  color: var(--hnt-text);
+}
+
+.map-cash-modal-panel input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+  cursor: pointer;
+}
+
+.map-upload-honeypot {
+  position: fixed !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.map-cash-modal-coords {
+  border: .5px solid var(--hnt-brand-red-soft-hover);
+  background: var(--hnt-brand-red-soft);
+}
+
+.map-cash-modal,
+.map-overlay-modal {
+  background: rgb(48 48 46 / 48%);
+  backdrop-filter: blur(10px);
+}
+
+.map-cash-modal-panel,
+.map-overlay-panel {
+  border: .5px solid var(--hnt-border);
+  background: var(--hnt-surface-card-strong);
+  box-shadow: none;
+}
+
+.marker-comment-list article,
+.marker-comments-card form input,
+.marker-vote-row button {
+  background: var(--hnt-surface-card);
+}
+
+.marker-vote-row button.active {
+  background: var(--hnt-brand-red);
+  color: var(--hnt-text-on-dark);
+}
+
+@media (max-width: 760px) {
+  .map-detail-label-tooltip {
+    display: none;
+  }
+
+  .map-selected-popover {
+    max-width: min(210px, calc(100vw - 36px));
+  }
+}
