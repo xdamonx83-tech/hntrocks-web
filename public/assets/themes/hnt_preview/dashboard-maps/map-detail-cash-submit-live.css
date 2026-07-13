@@ -1,0 +1,32 @@
+/* Functional Cash Spot submission states for the existing live map flow. */
+.map-detail-page-shell [data-map-cash-spot-toggle].is-cash-mode-active,
+.map-detail-page-shell [data-map-cash-spot-toggle][aria-pressed="true"] {
+  background: var(--hnt-brand-red);
+  color: var(--hnt-text-on-dark);
+}
+
+.map-detail-page-shell .hnt-map-canvas.is-cash-spot-submitting {
+  cursor: crosshair;
+}
+
+.map-detail-page-shell [data-map-cash-spot-hint]:not([hidden]) {
+  border-color: var(--hnt-brand-red-soft-hover);
+  background: var(--hnt-brand-red-soft);
+  color: var(--hnt-brand-red);
+}
+
+.map-detail-page-shell [data-map-cash-spot-status][data-state="loading"] {
+  color: var(--hnt-text-muted);
+}
+
+.map-detail-page-shell [data-map-cash-spot-status][data-state="success"] {
+  color: var(--hnt-brand-red);
+}
+
+.map-detail-page-shell [data-map-cash-spot-status][data-state="error"] {
+  color: var(--hnt-danger);
+}
+
+.map-detail-page-shell [data-map-toast].is-visible {
+  display: block;
+}
