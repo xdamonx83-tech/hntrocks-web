@@ -1,0 +1,10 @@
+/* Keep the shared dashboard header and its dropdowns above Leaflet map panes. */
+.map-detail-page-shell > .site-header {
+  position: relative;
+  z-index: 1200;
+}
+
+.map-detail-page-shell .main-nav-dropdown,
+.map-detail-page-shell .header-dropdown {
+  z-index: 1210;
+}
