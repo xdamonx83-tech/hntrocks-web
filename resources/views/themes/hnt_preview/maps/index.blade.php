@@ -1,4 +1,18 @@
-@php($localeIsEnglish = app()->getLocale() === 'en')
+@php
+    $localeIsEnglish = app()->getLocale() === 'en';
+    $mapsBySlug = $maps->keyBy('slug');
+    $mapCards = collect(['stillwater-bayou', 'lawson-delta', 'desalle', 'mammons-gulch'])
+        ->mapWithKeys(function (string $slug) use ($mapsBySlug): array {
+            $map = $mapsBySlug->get($slug);
+
+            return [$slug => [
+                'image' => $map && ($map['image_available'] ?? false)
+                    ? $map['image_url']
+                    : asset('assets/themes/hnt_preview/dashboard-maps/demo/'.$slug.'.svg'),
+                'url' => $map ? route('maps.show', $slug) : '#',
+            ]];
+        });
+@endphp
 <!DOCTYPE html>
 <html lang="{{ $localeIsEnglish ? 'en' : 'de' }}">
 <head>
@@ -36,9 +50,9 @@
 <div class="maps-plan-grid">
 <article class="map-plan-card selected" data-map-card="stillwater-bayou">
 <div class="map-plan-art">
-<img alt="Karten-Vorschau Stillwater Bayou" src="{{ asset('assets/themes/hnt_preview/dashboard-maps/demo/stillwater-bayou.svg') }}"/>
+<img alt="Karten-Vorschau Stillwater Bayou" src="{{ $mapCards['stillwater-bayou']['image'] }}"/>
 <span>Klassiker</span>
-<button aria-label="Stillwater Bayou auswählen" data-detail-href="#" data-map-preview="stillwater-bayou" type="button">
+<button aria-label="Stillwater Bayou auswählen" data-detail-href="{{ $mapCards['stillwater-bayou']['url'] }}" data-map-preview="stillwater-bayou" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
 </div>
@@ -57,14 +71,14 @@
 <li><i><svg><use href="#i-check"></use></svg></i>Cash Spots mit Community-Daten</li>
 <li><i><svg><use href="#i-check"></use></svg></i>Marker filtern und Linien einblenden</li>
 </ul>
-<a class="map-open-button" href="#" data-toast="Demo-Karte wird später mit echten Inhalten verbunden">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
+<a class="map-open-button" href="{{ $mapCards['stillwater-bayou']['url'] }}">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
 </div>
 </article>
 <article class="map-plan-card" data-map-card="lawson-delta">
 <div class="map-plan-art">
-<img alt="Karten-Vorschau Lawson Delta" src="{{ asset('assets/themes/hnt_preview/dashboard-maps/demo/lawson-delta.svg') }}"/>
+<img alt="Karten-Vorschau Lawson Delta" src="{{ $mapCards['lawson-delta']['image'] }}"/>
 <span>Live</span>
-<button aria-label="Lawson Delta auswählen" data-detail-href="#" data-map-preview="lawson-delta" type="button">
+<button aria-label="Lawson Delta auswählen" data-detail-href="{{ $mapCards['lawson-delta']['url'] }}" data-map-preview="lawson-delta" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
 </div>
@@ -83,14 +97,14 @@
 <li><i><svg><use href="#i-check"></use></svg></i>Cash Spots mit Community-Daten</li>
 <li><i><svg><use href="#i-check"></use></svg></i>Marker filtern und Linien einblenden</li>
 </ul>
-<a class="map-open-button" href="#" data-toast="Demo-Karte wird später mit echten Inhalten verbunden">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
+<a class="map-open-button" href="{{ $mapCards['lawson-delta']['url'] }}">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
 </div>
 </article>
 <article class="map-plan-card" data-map-card="desalle">
 <div class="map-plan-art">
-<img alt="Karten-Vorschau DeSalle" src="{{ asset('assets/themes/hnt_preview/dashboard-maps/demo/desalle.svg') }}"/>
+<img alt="Karten-Vorschau DeSalle" src="{{ $mapCards['desalle']['image'] }}"/>
 <span>Live</span>
-<button aria-label="DeSalle auswählen" data-detail-href="#" data-map-preview="desalle" type="button">
+<button aria-label="DeSalle auswählen" data-detail-href="{{ $mapCards['desalle']['url'] }}" data-map-preview="desalle" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
 </div>
@@ -109,14 +123,14 @@
 <li><i><svg><use href="#i-check"></use></svg></i>Cash Spots mit Community-Daten</li>
 <li><i><svg><use href="#i-check"></use></svg></i>Marker filtern und Linien einblenden</li>
 </ul>
-<a class="map-open-button" href="#" data-toast="Demo-Karte wird später mit echten Inhalten verbunden">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
+<a class="map-open-button" href="{{ $mapCards['desalle']['url'] }}">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
 </div>
 </article>
 <article class="map-plan-card" data-map-card="mammons-gulch">
 <div class="map-plan-art">
-<img alt="Karten-Vorschau Mammon's Gulch" src="{{ asset('assets/themes/hnt_preview/dashboard-maps/demo/mammons-gulch.svg') }}"/>
+<img alt="Karten-Vorschau Mammon's Gulch" src="{{ $mapCards['mammons-gulch']['image'] }}"/>
 <span>Live</span>
-<button aria-label="Mammon's Gulch auswählen" data-detail-href="#" data-map-preview="mammons-gulch" type="button">
+<button aria-label="Mammon's Gulch auswählen" data-detail-href="{{ $mapCards['mammons-gulch']['url'] }}" data-map-preview="mammons-gulch" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
 </div>
@@ -135,7 +149,7 @@
 <li><i><svg><use href="#i-check"></use></svg></i>Cash Spots mit Community-Daten</li>
 <li><i><svg><use href="#i-check"></use></svg></i>Marker filtern und Linien einblenden</li>
 </ul>
-<a class="map-open-button" href="#" data-toast="Demo-Karte wird später mit echten Inhalten verbunden">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
+<a class="map-open-button" href="{{ $mapCards['mammons-gulch']['url'] }}">Karte öffnen <svg><use href="#i-arrow"></use></svg></a>
 </div>
 </article>
 </div>
