@@ -3,24 +3,29 @@
 return [
     'meta_title' => 'Huntmaps – interactive Hunt: Showdown maps | HNT.ROCKS',
     'meta_description' => 'Four interactive Hunt maps with real markers, filters, community cash spots and direct map switching.',
+    'and' => 'and',
     'kicker' => 'HNT.ROCKS HUNTMAPS',
     'title' => 'Huntmaps',
     'intro' => 'Four interactive Hunt maps with filters, markers, community cash spots and direct map switching.',
     'stats' => [
         'maps' => 'Maps',
+        'pixel' => 'Pixels',
         'markers' => 'Markers',
         'types' => 'Marker types',
     ],
     'tabs' => [
+        'aria' => 'Maps view',
         'maps' => 'Maps',
         'features' => 'Markers & features',
     ],
     'map' => [
         'kicker' => 'HUNTMAP',
+        'classic' => 'Classic',
         'live' => 'Live',
         'size' => 'Map size',
         'markers' => 'Markers',
         'open' => 'Open map',
+        'open_named' => 'Open :map',
         'select' => 'Select :map',
         'preview_alt' => ':map map preview',
         'image_missing' => 'Map image missing',
@@ -34,7 +39,7 @@ return [
     'features' => [
         'kicker' => 'MARKER LEGEND',
         'title' => 'Everything built into the maps',
-        'intro' => 'All maps use the same ten marker groups. You decide which ones are visible at any time.',
+        'intro' => 'All maps use the same ten marker groups and each one can be filtered individually.',
         'back' => 'Back to maps',
         'cards' => [
             'community' => [
@@ -47,13 +52,13 @@ return [
                 'kicker' => 'INTERACTIVE',
                 'title' => 'Filter instead of clutter',
                 'text' => 'Show only the markers you need. Lines and map details remain independently controllable.',
-                'action' => 'View maps',
+                'action' => 'Choose a map',
             ],
             'feedback' => [
                 'kicker' => 'FEEDBACK',
                 'title' => 'Votes and comments',
                 'text' => 'Community cash spots can be rated and discussed so helpful discoveries remain visible.',
-                'action' => 'Discover locations',
+                'action' => 'Choose a map',
             ],
         ],
     ],
@@ -69,10 +74,14 @@ return [
         'wild' => ['title' => 'Wild', 'text' => 'Wild target locations'],
         'tarot' => ['title' => 'Tarot', 'text' => 'Tarot card locations'],
     ],
+    'available' => [
+        'kicker' => 'CURRENTLY AVAILABLE',
+        'text' => 'All four detail maps are already connected to real map images, marker data, filters and the available community features.',
+    ],
     'workflow' => [
         'kicker' => 'YOUR WAY THROUGH THE BAYOU',
         'title' => 'Plan. Filter. Decide faster in a match.',
-        'intro' => 'Choose your map, reduce the view to the important markers and use community hints for your next route.',
+        'intro' => 'Choose your map, reduce the view to the markers that matter and use community hints for your next route.',
         'action' => 'View markers & features',
         'steps' => [
             ['title' => 'Choose a map', 'text' => 'Switch directly between Stillwater Bayou, Lawson Delta, DeSalle and Mammon’s Gulch.'],
@@ -80,14 +89,20 @@ return [
             ['title' => 'Use community knowledge', 'text' => 'Review, rate and discuss locations or submit new cash spots with an image.'],
         ],
     ],
+    'live_data' => [
+        'aria' => 'Huntmaps live data',
+        'kicker' => 'LIVE MAP DATA',
+        'title' => 'Current data from the Huntmaps',
+        'all' => 'All maps',
+        'real_data' => 'real marker data',
+    ],
     'community' => [
         'kicker' => 'HUNTMAPS STATUS',
-        'title' => 'Real map data instead of demo content',
-        'text' => 'Every map leads directly into the existing interactive view. Markers, votes, comments and cash spot submissions remain fully available.',
+        'title' => 'Everything in one place',
         'maps' => 'active maps',
-        'markers' => 'loaded markers',
+        'markers' => 'Markers',
         'live' => 'Community data',
-        'action' => 'Open first map',
+        'action' => 'Choose a map',
         'chips' => ['Zoom', 'Filters', 'Lines', 'Votes', 'Comments', 'Cash spots'],
     ],
     'faq' => [
@@ -97,7 +112,7 @@ return [
             ['question' => 'Can I view all markers at once?', 'answer' => 'Yes. You can enable all categories or reduce the view to individual marker types.'],
             ['question' => 'Where do cash spots come from?', 'answer' => 'The community can submit locations with images. New entries are reviewed before publication.'],
             ['question' => 'Does the map work on mobile?', 'answer' => 'The map view is prepared for desktop and mobile and remains zoomable and filterable.'],
-            ['question' => 'Can I report incorrect markers?', 'answer' => 'Votes, comments and reporting tools help identify outdated or unclear information.'],
+            ['question' => 'Can I identify incorrect markers?', 'answer' => 'Votes and comments help the community assess outdated or unclear information together.'],
         ],
     ],
 ];
