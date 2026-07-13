@@ -16,7 +16,8 @@
     };
 
     $headAssets = '<link rel="stylesheet" href="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-header-layer.css')).'">'
-        .'<link rel="stylesheet" href="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-cash-submit-live.css')).'">';
+        .'<link rel="stylesheet" href="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-cash-submit-live.css')).'">'
+        .'<link rel="stylesheet" href="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-size.css')).'">';
 
     $bodyAssets = '<script src="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-no-popovers.js')).'"></script>'
         .'<script src="'.e($versionedAsset('assets/themes/hnt_preview/dashboard-maps/map-detail-cash-submit-live.js')).'"></script>';
