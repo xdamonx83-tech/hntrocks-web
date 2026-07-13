@@ -1,0 +1,290 @@
+/* HNT.ROCKS Moments – page-specific polish using the central theme palette only. */
+body[data-page="moments"] {
+  --yellow: var(--hnt-brand-red);
+  --orange: var(--hnt-brand-red);
+  --darkred: var(--hnt-brand-red);
+}
+
+body[data-page="moments"] .moments-stage {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border: .5px solid var(--hnt-border-medium);
+  background: var(--hnt-surface-card);
+}
+
+body[data-page="moments"] .moments-floating-head {
+  position: relative;
+  z-index: 30;
+  top: auto;
+  left: auto;
+  width: min(900px, 100%);
+  min-height: 52px;
+  margin: 0 auto;
+  transform: none;
+  border: .5px solid var(--hnt-border-medium);
+  background: var(--hnt-surface-card-strong);
+  backdrop-filter: none;
+}
+
+body[data-page="moments"] .moments-floating-head nav {
+  background: var(--hnt-surface-input);
+}
+
+body[data-page="moments"] .moments-floating-head nav button {
+  color: var(--hnt-text-muted);
+}
+
+body[data-page="moments"] .moments-floating-head nav button.active {
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+}
+
+body[data-page="moments"] .moments-create-button {
+  background: var(--hnt-brand-red);
+  color: var(--hnt-text-on-dark);
+}
+
+body[data-page="moments"] .moments-create-button:hover,
+body[data-page="moments"] .moments-create-button:focus-visible {
+  background: var(--hnt-brand-red-hover);
+}
+
+body[data-page="moments"] .moments-scroll {
+  min-height: 0;
+  overflow: hidden auto;
+  border: .5px solid var(--hnt-border-soft);
+  border-radius: 22px;
+  background: var(--hnt-surface-card-strong);
+}
+
+body[data-page="moments"] .moment-slide.social-post {
+  background: var(--hnt-surface-card-strong);
+}
+
+body[data-page="moments"] .moment-ambient {
+  opacity: .46;
+}
+
+body[data-page="moments"] .moments-navigation button,
+body[data-page="moments"] .moments-navigation span,
+body[data-page="moments"] .moments-swipe-hint {
+  border-color: var(--hnt-border-medium);
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text-muted);
+}
+
+body[data-page="moments"] .moments-page-dots i {
+  background: var(--hnt-border-medium);
+}
+
+body[data-page="moments"] .moments-page-dots i.active {
+  background: var(--hnt-dark);
+}
+
+/* Shared header: neutral surfaces, red only as the actual brand/action accent. */
+body[data-page="moments"] .main-nav-dropdown,
+body[data-page="moments"] .header-dropdown,
+body[data-page="moments"] .header-dropdown-head,
+body[data-page="moments"] .header-profile-summary,
+body[data-page="moments"] .header-profile-stats {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-card-strong) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+body[data-page="moments"] .main-nav-menu-icon,
+body[data-page="moments"] .main-nav-menu-icon.yellow,
+body[data-page="moments"] .main-nav-menu-icon.green,
+body[data-page="moments"] .main-nav-menu-icon.purple,
+body[data-page="moments"] .header-menu-icon,
+body[data-page="moments"] .header-menu-icon.yellow,
+body[data-page="moments"] .header-menu-icon.green,
+body[data-page="moments"] .header-menu-icon.purple,
+body[data-page="moments"] .header-notification-icon,
+body[data-page="moments"] .header-notification-icon.yellow {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+body[data-page="moments"] .main-nav-dropdown > header span,
+body[data-page="moments"] .header-dropdown-head span,
+body[data-page="moments"] .header-message-item time,
+body[data-page="moments"] .header-notification-item time {
+  color: var(--hnt-brand-red) !important;
+}
+
+body[data-page="moments"] .header-action-badge:not(.is-empty),
+body[data-page="moments"] .header-request-actions .friend-accept,
+body[data-page="moments"] .header-mark-all:not(:disabled) {
+  background: var(--hnt-brand-red) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+body[data-page="moments"] .header-dropdown-footer,
+body[data-page="moments"] .header-profile-logout {
+  background: var(--hnt-dark) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+body[data-page="moments"] .header-dropdown-footer:hover,
+body[data-page="moments"] .header-profile-logout:hover {
+  background: var(--hnt-brand-red) !important;
+}
+
+/* Comments modal: remove the old cream/gold feed styling. */
+body[data-page="moments"] .comments-modal-backdrop {
+  background: color-mix(in srgb, var(--hnt-dark) 56%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+body[data-page="moments"] .comments-modal {
+  border: .5px solid var(--hnt-border-medium);
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+body[data-page="moments"] .comments-modal-head,
+body[data-page="moments"] .comments-modal-content,
+body[data-page="moments"] .comments-composer {
+  border-color: var(--hnt-border-soft);
+  background: var(--hnt-surface-card-strong);
+}
+
+body[data-page="moments"] .comments-modal-head > div > span,
+body[data-page="moments"] .comments-title-row small,
+body[data-page="moments"] .comments-post-copy span,
+body[data-page="moments"] .comments-toolbar button,
+body[data-page="moments"] .comments-list small,
+body[data-page="moments"] .comments-list time,
+body[data-page="moments"] .comments-list .comment-meta {
+  color: var(--hnt-text-muted);
+}
+
+body[data-page="moments"] .comments-close,
+body[data-page="moments"] .comments-toolbar button,
+body[data-page="moments"] .comments-input-shell,
+body[data-page="moments"] .comments-compose-actions button {
+  border-color: var(--hnt-border-soft);
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+}
+
+body[data-page="moments"] .comments-post-context,
+body[data-page="moments"] .comments-list article,
+body[data-page="moments"] .comments-list > div {
+  border: .5px solid var(--hnt-border-soft);
+  background: var(--hnt-surface-card);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+body[data-page="moments"] .comments-post-badge {
+  background: var(--hnt-brand-red-soft);
+  color: var(--hnt-brand-red);
+}
+
+body[data-page="moments"] .comments-composer textarea {
+  color: var(--hnt-text);
+}
+
+body[data-page="moments"] .comments-composer textarea::placeholder {
+  color: var(--hnt-text-muted);
+}
+
+body[data-page="moments"] .comments-send {
+  background: var(--hnt-brand-red) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+body[data-page="moments"] .comments-send:hover,
+body[data-page="moments"] .comments-send:focus-visible {
+  background: var(--hnt-brand-red-hover) !important;
+}
+
+/* Create modal and Comms use the same neutral palette. */
+body[data-page="moments"] .moment-create-backdrop {
+  background: color-mix(in srgb, var(--hnt-dark) 56%, transparent);
+}
+
+body[data-page="moments"] .moment-create-modal,
+body[data-page="moments"] .moment-create-modal > header,
+body[data-page="moments"] .moment-create-modal form,
+body[data-page="moments"] .hnt-comms-overview,
+body[data-page="moments"] .hnt-comms-panel-slot > .hnt-chat-tab {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-card-strong) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+body[data-page="moments"] .moment-upload-zone,
+body[data-page="moments"] .moment-create-modal input,
+body[data-page="moments"] .moment-create-modal select,
+body[data-page="moments"] .moment-create-check i,
+body[data-page="moments"] .hnt-comms-overview__search input,
+body[data-page="moments"] .hnt-chat-tab__form input {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+body[data-page="moments"] .moment-upload-zone > span,
+body[data-page="moments"] .moment-create-submit,
+body[data-page="moments"] .hnt-comms-launcher__count {
+  background: var(--hnt-brand-red) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+body[data-page="moments"] .hnt-comms-overview__footer {
+  background: var(--hnt-dark) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+body[data-page="moments"] .hnt-comms-overview__item.unread {
+  background: var(--hnt-brand-red-soft) !important;
+}
+
+body[data-page="moments"] .hnt-comms-overview__item:hover,
+body[data-page="moments"] .hnt-comms-overview__item:focus-visible {
+  background: var(--hnt-surface-input) !important;
+}
+
+body[data-page="moments"] .hnt-comms-overview__eyebrow,
+body[data-page="moments"] .hnt-comms-overview__item time {
+  color: var(--hnt-brand-red) !important;
+}
+
+@media (min-width: 1200px) {
+  body[data-page="moments"] .moments-stage {
+    gap: 12px;
+    padding: 12px 14px 14px;
+  }
+
+  body[data-page="moments"] .moments-floating-head {
+    top: auto;
+    width: min(960px, 100%);
+  }
+}
+
+@media (max-width: 899px) {
+  body[data-page="moments"] .moments-stage {
+    gap: 7px;
+    padding: 7px;
+  }
+
+  body[data-page="moments"] .moments-floating-head {
+    top: auto;
+    left: auto;
+    width: 100%;
+    margin: 0;
+    transform: none;
+  }
+
+  body[data-page="moments"] .moments-scroll {
+    border-radius: 18px;
+  }
+}
