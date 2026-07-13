@@ -136,11 +136,12 @@
         'translation_loading' => __('ui.translation_loading'),
         'translation_error' => __('ui.translation_error'),
         ];
+        $hntPreviewSharedI18n = trans('hnt_preview');
     @endphp
     <script>
         window.HNT_PREVIEW_LOCALE = @json(str_replace('_', '-', app()->getLocale()));
         window.HNT_PREVIEW_USER_ID = @json(auth()->id());
-        window.HNT_PREVIEW_I18N = @json($hntPreviewI18n);
+        window.HNT_PREVIEW_I18N = Object.assign({}, @json($hntPreviewI18n), @json($hntPreviewSharedI18n));
         window.HNT_PREVIEW_LIVE_BADGES = {
             endpoint: @json(\Illuminate\Support\Facades\Route::has('socialite.header.live-badges') ? route('socialite.header.live-badges') : null),
             notificationsEndpoint: @json(\Illuminate\Support\Facades\Route::has('socialite.header.notifications') ? route('socialite.header.notifications') : null),
@@ -178,7 +179,7 @@
         </script>
     @endauth
     <script src="{{ asset('assets/themes/hnt_preview/preview-shell.js') }}?v=765" defer></script>
-    <script src="{{ asset('assets/themes/hnt_preview/comms-dock.js') }}?v=1" defer></script>
+    <script src="{{ asset('assets/themes/hnt_preview/comms-dock.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/comms-dock.js')) ?: time() }}" defer></script>
     @auth
         <script src="{{ asset('assets/socialite/js/hnt-socialite-message-typing.js') }}?v=172ee-typing" defer></script>
         <script src="{{ asset('assets/vikinger/js/hnt-realtime.js') }}?v=172ee-typing" defer></script>
