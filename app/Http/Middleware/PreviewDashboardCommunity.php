@@ -63,7 +63,7 @@ class PreviewDashboardCommunity
                 ->where('status', 'active')
                 ->where(function ($query) use ($now, $viewer): void {
                     $query->where('last_seen_at', '>=', $now->copy()->subSeconds(User::ONLINE_WINDOW_SECONDS))
-                        ->orWhereKey($viewer->id);
+                        ->orWhere($viewer->getQualifiedKeyName(), $viewer->getKey());
                 })
                 ->count(),
             1
