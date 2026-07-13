@@ -15,6 +15,8 @@
     return;
   }
 
+  const isEnglish = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+
   document.querySelectorAll('[data-existing-map-url]').forEach((button) => {
     button.addEventListener('click', () => {
       const url = button.dataset.existingMapUrl;
@@ -84,7 +86,7 @@
     mapSelect.hidden = true;
   }
 
-  const enhanceCashSpotModal = () => {
+  const enhanceCashSpotSubmissionModal = () => {
     const modal = document.querySelector('[data-map-cash-spot-modal]');
     const panel = modal?.querySelector('.hnt-map-cash-submission-panel');
     const form = panel?.querySelector('[data-map-cash-spot-form]');
@@ -136,7 +138,6 @@
 
       const label = document.createElement('span');
       const value = document.createElement('strong');
-      const isEnglish = (document.documentElement.lang || '').toLowerCase().startsWith('en');
 
       label.textContent = isEnglish ? 'Selected position' : 'Ausgewählte Position';
       value.textContent = 'X 0 · Y 0';
@@ -179,6 +180,164 @@
     syncCoordinates();
   };
 
-  enhanceCashSpotModal();
+  const enhanceCashSpotDetailModal = (modal) => {
+    if (!(modal instanceof HTMLElement) || modal.dataset.hntDemoModal === '1') {
+      return;
+    }
+
+    const panel = modal.querySelector('.hnt-map-cash-detail-panel');
+    const body = panel?.querySelector('.hnt-map-cash-detail-body');
+    const media = body?.querySelector('.hnt-map-cash-detail-media');
+    const info = body?.querySelector('.hnt-map-cash-detail-info');
+    const header = info?.querySelector('.hnt-map-cash-detail-header');
+    const titleBlock = header?.querySelector('.hnt-map-cash-detail-title-block');
+    const genericTitle = titleBlock?.querySelector('h2');
+    const markerTitle = titleBlock?.querySelector('.hnt-map-cash-detail-label');
+    const closeButton = header?.querySelector('.hnt-map-lightbox-close');
+    const voteSection = info?.querySelector('.hnt-map-cash-detail-votes');
+    const comments = info?.querySelector('.hnt-map-cash-detail-comments');
+
+    if (!(panel instanceof HTMLElement) || !(body instanceof HTMLElement) || !(media instanceof HTMLElement) || !(info instanceof HTMLElement) || !(header instanceof HTMLElement) || !(titleBlock instanceof HTMLElement) || !(markerTitle instanceof HTMLElement) || !(closeButton instanceof HTMLButtonElement) || !(voteSection instanceof HTMLElement) || !(comments instanceof HTMLElement)) {
+      return;
+    }
+
+    modal.dataset.hntDemoModal = '1';
+    modal.classList.add('map-cash-detail-demo');
+    panel.classList.add('map-cash-detail-demo-panel');
+    body.classList.add('map-cash-detail-demo-body');
+    media.classList.add('map-cash-detail-demo-media');
+    info.classList.add('map-cash-detail-demo-info');
+    header.classList.add('map-cash-detail-demo-head');
+    titleBlock.classList.add('map-cash-detail-demo-title-block');
+    genericTitle?.classList.add('map-cash-detail-demo-generic-title');
+    markerTitle.classList.add('map-cash-detail-demo-title');
+    closeButton.classList.add('map-cash-detail-demo-close');
+    voteSection.classList.add('map-cash-detail-demo-votes');
+
+    const grip = panel.querySelector('.hnt-map-cash-detail-grip');
+    grip?.remove();
+    panel.insertBefore(header, body);
+
+    let typeBadge = media.querySelector('.map-cash-detail-demo-type');
+    if (!typeBadge) {
+      typeBadge = document.createElement('span');
+      typeBadge.className = 'map-cash-detail-demo-type';
+      typeBadge.textContent = 'Cash Spot';
+      media.append(typeBadge);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'map-cash-detail-demo-meta';
+    meta.innerHTML = `
+      <article><span>${isEnglish ? 'Area' : 'Bereich'}</span><strong data-cash-detail-area></strong></article>
+      <article><span>${isEnglish ? 'Coordinates' : 'Koordinaten'}</span><strong data-cash-detail-coords></strong></article>
+      <article><span>${isEnglish ? 'Status' : 'Status'}</span><strong class="verified">${isEnglish ? 'Approved' : 'Bestätigt'}</strong></article>
+    `;
+    info.insertBefore(meta, voteSection);
+
+    const footer = document.createElement('footer');
+    const commentsButton = document.createElement('button');
+    const footerCloseButton = document.createElement('button');
+
+    footer.className = 'map-cash-detail-demo-actions';
+    commentsButton.type = 'button';
+    commentsButton.textContent = isEnglish ? 'View comments' : 'Kommentare ansehen';
+    footerCloseButton.type = 'button';
+    footerCloseButton.textContent = isEnglish ? 'Close' : 'Schließen';
+    footer.append(commentsButton, footerCloseButton);
+    info.append(footer);
+
+    const commentsModal = document.createElement('div');
+    const commentsPanel = document.createElement('div');
+    const commentsClose = document.createElement('button');
+    const commentsHeader = comments.querySelector(':scope > header');
+
+    commentsModal.className = 'map-overlay-modal map-cash-comments-modal';
+    commentsModal.hidden = true;
+    commentsPanel.className = 'map-overlay-panel map-cash-comments-panel';
+    commentsClose.type = 'button';
+    commentsClose.className = 'map-cash-comments-close';
+    commentsClose.setAttribute('aria-label', isEnglish ? 'Close comments' : 'Kommentare schließen');
+    commentsClose.textContent = '×';
+    commentsHeader?.append(commentsClose);
+    comments.classList.add('map-cash-comments-demo-card');
+    commentsPanel.append(comments);
+    commentsModal.append(commentsPanel);
+    document.body.append(commentsModal);
+
+    const closeComments = () => {
+      commentsModal.hidden = true;
+      document.body.classList.remove('map-overlay-open');
+      commentsButton.focus();
+    };
+
+    commentsButton.addEventListener('click', () => {
+      commentsModal.hidden = false;
+      document.body.classList.add('map-overlay-open');
+      commentsClose.focus();
+    });
+    commentsClose.addEventListener('click', closeComments);
+    commentsModal.addEventListener('click', (event) => {
+      if (event.target === commentsModal) {
+        closeComments();
+      }
+    });
+    footerCloseButton.addEventListener('click', () => closeButton.click());
+
+    const syncDetail = () => {
+      const label = markerTitle.textContent?.trim() || '';
+      const marker = (config.markers || []).find((item) => item.type === 'cash' && String(item.label || '').trim() === label);
+      const area = meta.querySelector('[data-cash-detail-area]');
+      const coords = meta.querySelector('[data-cash-detail-coords]');
+      const mapName = document.querySelector('.map-canvas-toolbar h2')?.textContent?.trim() || document.querySelector('.map-detail-heading h1')?.textContent?.trim() || '';
+
+      if (area instanceof HTMLElement) {
+        area.textContent = mapName;
+      }
+      if (coords instanceof HTMLElement) {
+        coords.textContent = marker
+          ? `X ${Math.round(Number(marker.x) || 0)} · Y ${Math.round(Number(marker.y) || 0)}`
+          : 'X 0 · Y 0';
+      }
+      commentsModal.hidden = true;
+    };
+
+    new MutationObserver(() => {
+      if (!modal.hidden) {
+        syncDetail();
+      } else {
+        commentsModal.hidden = true;
+        document.body.classList.remove('map-overlay-open');
+      }
+    }).observe(modal, { attributes: true, attributeFilter: ['hidden'] });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !commentsModal.hidden) {
+        event.stopImmediatePropagation();
+        closeComments();
+      }
+    }, true);
+
+    syncDetail();
+  };
+
+  const detailModalObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (!(node instanceof Element)) {
+          return;
+        }
+        if (node.matches('.hnt-map-cash-detail')) {
+          enhanceCashSpotDetailModal(node);
+        }
+        node.querySelectorAll?.('.hnt-map-cash-detail').forEach(enhanceCashSpotDetailModal);
+      });
+    });
+  });
+
+  detailModalObserver.observe(document.body, { childList: true, subtree: true });
+  document.querySelectorAll('.hnt-map-cash-detail').forEach(enhanceCashSpotDetailModal);
+
+  enhanceCashSpotSubmissionModal();
   updateFilterState();
 })();
