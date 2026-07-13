@@ -21,6 +21,7 @@ class DashboardPrototypeLocalizer
             '<span>Nachrichten</span>' => '<span>'.$t('messages').'</span>',
             '<span>Inventar</span>' => '<span>'.$t('inventory').'</span>',
             '<span>Wochenauftrag</span>' => '<span>'.$t('weekly_contract').'</span>',
+            '<small>Wochenauftrag</small>' => '<small>'.$t('weekly_contract').'</small>',
             '<span>Login-Serie</span>' => '<span>'.$t('login_streak').'</span>',
             '<span>Level-Fortschritt</span>' => '<span>'.$t('level_progress').'</span>',
             '<span>Hinweise</span>' => '<span>'.$t('notifications').'</span>',
@@ -32,6 +33,11 @@ class DashboardPrototypeLocalizer
             '<button>Verlauf</button>' => '<button>'.$t('history').'</button>',
             '<span>Aktivität</span><span>Fortschritt</span><span>Belohnung</span><span>Status</span>' => '<span>'.$t('activity').'</span><span>'.$t('progress').'</span><span>'.$t('reward').'</span><span>'.$t('status').'</span>',
             '<strong>Wochenaufträge</strong>' => '<strong>'.$t('weekly_contracts').'</strong>',
+            '<strong>Alle Aufträge erledigt</strong>' => '<strong>'.$t('all_contracts_done').'</strong>',
+            '<strong>Keine Wochenaufträge</strong>' => '<strong>'.$t('no_weekly_contracts').'</strong>',
+            '<small>Aktuell keine aktiven Aufträge</small>' => '<small>'.$t('no_active_contracts').'</small>',
+            '<small>Starker Wochenfortschritt</small>' => '<small>'.$t('strong_weekly_progress').'</small>',
+            '<small>Aktuell ist nichts offen</small>' => '<small>'.$t('nothing_open').'</small>',
             '<span>Benötigt deine Aufmerksamkeit</span>' => '<span>'.$t('attention').'</span>',
             '<span class="personal-activity-kicker">LETZTE 30 TAGE</span>' => '<span class="personal-activity-kicker">'.$t('last_30_days').'</span>',
             '<h2>Meine Aktivität</h2>' => '<h2>'.$t('my_activity').'</h2>',
@@ -57,6 +63,12 @@ class DashboardPrototypeLocalizer
         ];
 
         $html = strtr($html, $replacements);
+
+        $html = preg_replace_callback(
+            '~<h1>Hello ([^<]+)</h1>~',
+            static fn (array $match): string => '<h1>'.e(__('hnt_preview.dashboard.hello', ['name' => html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')])).'</h1>',
+            $html
+        ) ?: $html;
 
         $html = preg_replace_callback(
             '~<small>Fortschritt zu Level (\d+)</small>~',
