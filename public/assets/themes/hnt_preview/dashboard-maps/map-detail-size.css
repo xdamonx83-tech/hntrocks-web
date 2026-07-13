@@ -1,0 +1,9 @@
+.map-detail-center .map-canvas-frame.hnt-map-stage {
+  height: 750px;
+}
+
+@media (max-width: 900px) {
+  .map-detail-center .map-canvas-frame.hnt-map-stage {
+    height: 620px;
+  }
+}
