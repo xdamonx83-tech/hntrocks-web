@@ -6,6 +6,7 @@
     $headerLevel = max(1, (int) ($headerViewer?->level ?? 1));
     $headerRocks = (int) ($headerViewer?->crownWallet?->balance ?? 0);
     $headerIsFeed = request()->routeIs('feed.index');
+    $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
 <header class="site-header" data-hnt-shared-header>
 <a aria-label="HNT.rocks {{ __('hnt_preview.header.feed') }}" class="brand" href="{{ route('feed.index') }}">
@@ -73,6 +74,7 @@
 <header><span>{{ __('hnt_preview.header.more_eyebrow') }}</span><strong>{{ __('hnt_preview.header.more_title') }}</strong></header>
 <div class="main-nav-menu-grid">
 <button data-navigation-label="Shop &amp; Inventar" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-folder"></use></svg></span><span><strong>{{ __('hnt_preview.header.shop_inventory') }}</strong><small>{{ __('hnt_preview.header.shop_inventory_text') }}</small></span></button>
+<a data-navigation-label="Maps" href="{{ route('maps.index') }}" role="menuitem"><span class="main-nav-menu-icon"><svg viewBox="0 0 24 24"><path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2z"></path><path d="M8 4v13M16 7v13"></path></svg></span><span><strong>Maps</strong><small>{{ $headerLocaleIsEnglish ? 'Interactive Hunt maps and community spots' : 'Interaktive Hunt-Karten und Community-Spots' }}</small></span></a>
 <button aria-disabled="true" data-unavailable="1" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-bookmark"></use></svg></span><span><strong>{{ __('hnt_preview.header.guides') }}</strong><small>{{ __('hnt_preview.header.guides_text') }}</small></span></button>
 <button aria-disabled="true" data-unavailable="1" role="menuitem" type="button"><span class="main-nav-menu-icon purple"><svg><use href="#i-comment"></use></svg></span><span><strong>{{ __('hnt_preview.header.polls') }}</strong><small>{{ __('hnt_preview.header.polls_text') }}</small></span></button>
 <button data-navigation-label="Aktivitätsverlauf" role="menuitem" type="button"><span class="main-nav-menu-icon green"><svg><use href="#i-arrow"></use></svg></span><span><strong>{{ __('hnt_preview.header.activity_history') }}</strong><small>{{ __('hnt_preview.header.activity_history_text') }}</small></span></button>
