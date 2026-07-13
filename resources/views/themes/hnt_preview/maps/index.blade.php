@@ -4,9 +4,30 @@
     $orderedSlugs = ['stillwater-bayou', 'lawson-delta', 'desalle', 'mammons-gulch'];
     $mapsBySlug = $maps->keyBy('slug');
     $markerTypes = ['compound', 'boss', 'spawn', 'supply', 'extract', 'cash', 'tower', 'bugs', 'wild', 'tarot'];
-    $totalMarkers = (int) $maps->sum('marker_count');
-    $firstMap = $maps->first();
-    $availableMapNames = implode(', ', $maps->pluck('name')->filter()->all());
+
+    $mapCards = collect($orderedSlugs)
+        ->map(function (string $slug) use ($mapsBySlug): ?array {
+            $map = $mapsBySlug->get($slug);
+
+            if (! is_array($map)) {
+                return null;
+            }
+
+            return [
+                ...$map,
+                'slug' => $slug,
+                'url' => route('maps.show', $slug),
+                'display_image' => ($map['image_available'] ?? false)
+                    ? $map['image_url']
+                    : asset('assets/themes/hnt_preview/dashboard-maps/demo/'.$slug.'.svg'),
+            ];
+        })
+        ->filter()
+        ->values();
+
+    $totalMarkers = (int) $mapCards->sum('marker_count');
+    $firstMap = $mapCards->first();
+    $availableMapNames = implode(', ', $mapCards->pluck('name')->filter()->all());
 
     $workflowSteps = trans('maps.workflow.steps');
     $workflowSteps = is_array($workflowSteps) ? $workflowSteps : [];
@@ -59,7 +80,7 @@
 <p>{{ __('maps.intro') }}</p>
 </div>
 <div class="maps-heading-stats">
-<article><strong>{{ $formatNumber($maps->count()) }}</strong><span>{{ __('maps.stats.maps') }}</span></article>
+<article><strong>{{ $formatNumber($mapCards->count()) }}</strong><span>{{ __('maps.stats.maps') }}</span></article>
 <article><strong>2048</strong><span>{{ __('maps.stats.pixel') }}</span></article>
 <article><strong>{{ count($markerTypes) }}</strong><span>{{ __('maps.stats.types') }}</span></article>
 </div>
@@ -70,27 +91,19 @@
 </section>
 <section class="maps-view-panel active" data-maps-panel="maps">
 <div class="maps-plan-grid">
-@foreach($orderedSlugs as $slug)
-    @php($map = $mapsBySlug->get($slug))
-    @if($map)
-        @php
-            $mapUrl = route('maps.show', $slug);
-            $mapImage = ($map['image_available'] ?? false)
-                ? $map['image_url']
-                : asset('assets/themes/hnt_preview/dashboard-maps/demo/'.$slug.'.svg');
-        @endphp
-<article class="map-plan-card {{ $loop->first ? 'selected' : '' }}" data-map-card="{{ $slug }}">
+@foreach($mapCards as $map)
+<article class="map-plan-card {{ $loop->first ? 'selected' : '' }}" data-map-card="{{ $map['slug'] }}">
 <div class="map-plan-art">
-<img alt="{{ __('maps.map.preview_alt', ['map' => $map['name']]) }}" src="{{ $mapImage }}"/>
+<img alt="{{ __('maps.map.preview_alt', ['map' => $map['name']]) }}" src="{{ $map['display_image'] }}"/>
 <span>{{ $loop->first ? __('maps.map.classic') : __('maps.map.live') }}</span>
-<button aria-label="{{ __('maps.map.select', ['map' => $map['name']]) }}" data-detail-href="{{ $mapUrl }}" data-map-preview="{{ $slug }}" type="button">
+<button aria-label="{{ __('maps.map.select', ['map' => $map['name']]) }}" data-detail-href="{{ $map['url'] }}" data-map-preview="{{ $map['slug'] }}" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
 </div>
 <div class="map-plan-content">
 <span class="map-plan-kicker">{{ __('maps.map.kicker') }}</span>
 <h2>{{ $map['name'] }}</h2>
-<p>{{ __('ui.maps_map_summary_'.str_replace('-', '_', $slug)) }}</p>
+<p>{{ __('ui.maps_map_summary_'.str_replace('-', '_', $map['slug'])) }}</p>
 <div class="map-plan-meta">
 <span><strong>{{ $formatNumber($map['width'] ?? 0) }} × {{ $formatNumber($map['height'] ?? 0) }}</strong><small>{{ __('maps.map.size') }}</small></span>
 <span><strong>{{ $formatNumber($map['marker_count'] ?? 0) }}</strong><small>{{ __('maps.map.markers') }}</small></span>
@@ -100,10 +113,9 @@
 <li><i><svg><use href="#i-check"></use></svg></i>{{ __('maps.map.feature_'.$feature) }}</li>
 @endforeach
 </ul>
-<a class="map-open-button" href="{{ $mapUrl }}">{{ __('maps.map.open') }} <svg><use href="#i-arrow"></use></svg></a>
+<a class="map-open-button" href="{{ $map['url'] }}">{{ __('maps.map.open') }} <svg><use href="#i-arrow"></use></svg></a>
 </div>
 </article>
-    @endif
 @endforeach
 </div>
 </section>
@@ -173,19 +185,17 @@
 <button data-maps-view-shortcut="maps" type="button">{{ __('maps.live_data.all') }}</button>
 </header>
 <div class="maps-community-list">
-@foreach($maps as $map)
+@foreach($mapCards as $map)
 <article>
 <div class="maps-community-index">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</div>
 <div>
-<strong>{{ $map['name'] ?? '' }}</strong>
+<strong>{{ $map['name'] }}</strong>
 <p>{{ $formatNumber($map['width'] ?? 0) }} × {{ $formatNumber($map['height'] ?? 0) }} · {{ __('maps.live_data.real_data') }}</p>
 </div>
 <span>{{ $formatNumber($map['marker_count'] ?? 0) }} {{ __('maps.map.markers') }}</span>
-@if(!empty($map['slug']))
-<button aria-label="{{ __('maps.map.open_named', ['map' => $map['name'] ?? '']) }}" data-detail-href="{{ route('maps.show', $map['slug']) }}" data-map-preview="{{ $map['slug'] }}" type="button">
+<button aria-label="{{ __('maps.map.open_named', ['map' => $map['name']]) }}" data-detail-href="{{ $map['url'] }}" data-map-preview="{{ $map['slug'] }}" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
-@endif
 </article>
 @endforeach
 </div>
@@ -194,7 +204,7 @@
 <span>{{ __('maps.community.kicker') }}</span>
 <h2>{{ __('maps.community.title') }}</h2>
 <div class="maps-community-numbers">
-<article><strong>{{ $formatNumber($maps->count()) }}</strong><small>{{ __('maps.community.maps') }}</small></article>
+<article><strong>{{ $formatNumber($mapCards->count()) }}</strong><small>{{ __('maps.community.maps') }}</small></article>
 <article><strong>{{ $formatNumber($totalMarkers) }}</strong><small>{{ __('maps.community.markers') }}</small></article>
 <article><strong>Live</strong><small>{{ __('maps.community.live') }}</small></article>
 </div>
