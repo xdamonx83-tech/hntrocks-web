@@ -1,0 +1,187 @@
+/* Existing HNT map component inside the approved detail-page shell. */
+.map-detail-page-shell {
+  --bg-app: var(--hnt-surface-card-strong);
+  --bg-outer: var(--hnt-page-base);
+  --card-bg: var(--hnt-surface-card);
+  --tag-bg: var(--hnt-surface-input);
+  --text-main: var(--hnt-text);
+  --text-muted: var(--hnt-text-muted);
+  --accent-primary: var(--hnt-brand-red);
+  --border-color: var(--hnt-border);
+}
+
+.map-detail-center .map-canvas-frame.hnt-map-stage {
+  position: relative;
+  width: 100%;
+  height: 544px;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 42px;
+  overflow: hidden;
+  padding: 10px 12px;
+  background: transparent;
+}
+
+.map-detail-center .hnt-map-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--hnt-surface-panel);
+}
+
+.map-detail-center .leaflet-control-zoom {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.map-detail-center .leaflet-container {
+  font-family: inherit;
+}
+
+.map-detail-center .leaflet-popup-content-wrapper,
+.map-detail-center .leaflet-popup-tip {
+  border: .5px solid var(--hnt-border);
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+.map-detail-center .hnt-map-popup-action {
+  border: 0;
+  border-radius: 14px;
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+}
+
+.map-detail-center .hnt-map-compound-label {
+  border: .5px solid var(--hnt-border) !important;
+  background: var(--hnt-surface-card-strong) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+.map-detail-center .leaflet-tooltip-top.hnt-map-compound-label::before {
+  border-top-color: var(--hnt-surface-card-strong) !important;
+}
+
+.map-detail-center .hide-compound-labels .hnt-map-compound-label {
+  display: none !important;
+}
+
+.map-detail-center .hnt-map-measure-hint,
+.map-detail-center .hnt-map-empty-markers,
+.map-detail-center .hnt-map-toast {
+  border: .5px solid var(--hnt-border);
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+.map-detail-center .hnt-map-measure-hint {
+  position: absolute;
+  z-index: 650;
+  top: 82px;
+  left: 28px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-size: 8px;
+}
+
+.map-detail-center .hnt-map-measure-hint[hidden] {
+  display: none;
+}
+
+.map-detail-center .map-canvas-status {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+}
+
+.map-detail-center .map-share-fallback {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-detail-center .map-share-fallback[hidden] {
+  display: none;
+}
+
+.map-detail-center .map-share-fallback input {
+  width: min(280px, 32vw);
+  min-width: 0;
+  height: 28px;
+  border: .5px solid var(--hnt-border);
+  border-radius: 14px;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+  font: inherit;
+  font-size: 7px;
+  padding: 0 9px;
+}
+
+.map-filter-search {
+  position: relative;
+}
+
+.map-filter-search .hnt-map-search-results {
+  position: absolute;
+  z-index: 90;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow: auto;
+  padding: 5px;
+  border: .5px solid var(--hnt-border);
+  border-radius: 14px;
+  background: var(--hnt-surface-card-strong);
+  box-shadow: none;
+}
+
+.map-filter-search .hnt-map-search-result {
+  color: var(--hnt-text);
+}
+
+.map-filter-search .hnt-map-search-result:hover,
+.map-filter-search .hnt-map-search-result:focus-visible {
+  background: var(--hnt-brand-red-soft);
+}
+
+.map-filter-search .hnt-map-search-result span {
+  color: var(--hnt-brand-red);
+}
+
+.map-detail-center .hnt-map-lightbox {
+  position: absolute;
+  inset: 0;
+  z-index: 1200;
+}
+
+.map-detail-center .hnt-map-cash-submission-panel,
+.map-detail-center .hnt-map-cash-detail-panel {
+  border: .5px solid var(--hnt-border);
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+.map-detail-center .hnt-map-cash-submission-panel label,
+.map-detail-center .hnt-map-cash-comments-form textarea {
+  color: var(--hnt-text);
+}
+
+.map-detail-center .hnt-map-cash-submission-panel input,
+.map-detail-center .hnt-map-cash-comments-form textarea {
+  border-color: var(--hnt-border);
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+}
+
+@media (max-width: 900px) {
+  .map-detail-center .map-canvas-frame.hnt-map-stage {
+    height: 620px;
+  }
+}
