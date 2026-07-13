@@ -9,14 +9,28 @@
   let queued = false;
   const lastCounts = new Map();
 
-  const loadThemeColors = () => {
-    if (document.querySelector('link[data-hnt-theme-colors]')) return;
+  const loadThemeStyle = (selector, href, datasetKey) => {
+    if (document.querySelector(selector)) return;
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/assets/themes/hnt_preview/theme-colors.css?v=20260713-1';
-    link.dataset.hntThemeColors = '1';
+    link.href = href;
+    link.dataset[datasetKey] = '1';
     document.head.appendChild(link);
+  };
+
+  const loadThemeColors = () => {
+    loadThemeStyle(
+      'link[data-hnt-theme-colors]',
+      '/assets/themes/hnt_preview/theme-colors.css?v=20260713-2',
+      'hntThemeColors',
+    );
+
+    loadThemeStyle(
+      'link[data-hnt-theme-page-polish]',
+      '/assets/themes/hnt_preview/theme-page-polish.css?v=20260713-1',
+      'hntThemePagePolish',
+    );
   };
 
   const addStyle = () => {
