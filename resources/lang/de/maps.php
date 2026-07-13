@@ -3,24 +3,29 @@
 return [
     'meta_title' => 'Huntmaps – interaktive Hunt: Showdown Karten | HNT.ROCKS',
     'meta_description' => 'Vier interaktive Huntmaps mit echten Markern, Filtern, Community Cash Spots und direktem Kartenwechsel.',
+    'and' => 'und',
     'kicker' => 'HNT.ROCKS HUNTMAPS',
     'title' => 'Huntmaps',
     'intro' => 'Vier interaktive Hunt-Karten mit Filtern, Markern, Community Cash Spots und direktem Kartenwechsel.',
     'stats' => [
         'maps' => 'Karten',
+        'pixel' => 'Pixel',
         'markers' => 'Marker',
         'types' => 'Markerarten',
     ],
     'tabs' => [
+        'aria' => 'Maps Ansicht',
         'maps' => 'Karten',
         'features' => 'Marker & Funktionen',
     ],
     'map' => [
         'kicker' => 'HUNTMAP',
+        'classic' => 'Klassiker',
         'live' => 'Live',
         'size' => 'Kartengröße',
         'markers' => 'Marker',
         'open' => 'Karte öffnen',
+        'open_named' => ':map öffnen',
         'select' => ':map auswählen',
         'preview_alt' => 'Karten-Vorschau :map',
         'image_missing' => 'Kartenbild fehlt',
@@ -34,7 +39,7 @@ return [
     'features' => [
         'kicker' => 'MARKER-LEGENDE',
         'title' => 'Alles, was auf den Karten steckt',
-        'intro' => 'Alle Karten verwenden dieselben zehn Markergruppen. Du entscheidest selbst, welche davon gerade sichtbar sind.',
+        'intro' => 'Die Karten verwenden dieselben zehn Markergruppen und lassen sich jederzeit einzeln filtern.',
         'back' => 'Zurück zu den Karten',
         'cards' => [
             'community' => [
@@ -47,13 +52,13 @@ return [
                 'kicker' => 'INTERAKTIV',
                 'title' => 'Filtern statt überladen',
                 'text' => 'Blende nur die Marker ein, die du gerade brauchst. Linien und Kartendetails bleiben getrennt steuerbar.',
-                'action' => 'Karten ansehen',
+                'action' => 'Karte auswählen',
             ],
             'feedback' => [
                 'kicker' => 'FEEDBACK',
                 'title' => 'Votes und Kommentare',
                 'text' => 'Community Cash Spots können bewertet und kommentiert werden, damit hilfreiche Funde sichtbar bleiben.',
-                'action' => 'Fundorte entdecken',
+                'action' => 'Karte auswählen',
             ],
         ],
     ],
@@ -69,10 +74,14 @@ return [
         'wild' => ['title' => 'Wild', 'text' => 'Wilde Zielpunkte'],
         'tarot' => ['title' => 'Tarot', 'text' => 'Tarotkarten-Fundorte'],
     ],
+    'available' => [
+        'kicker' => 'AKTUELL VERFÜGBAR',
+        'text' => 'Alle vier Detailkarten sind bereits mit echten Kartenbildern, Markerdaten, Filtern und den vorhandenen Community-Funktionen verbunden.',
+    ],
     'workflow' => [
         'kicker' => 'DEIN WEG DURCH DEN BAYOU',
         'title' => 'Planen. Filtern. Im Match schneller entscheiden.',
-        'intro' => 'Wähle deine Karte, reduziere die Ansicht auf die wichtigen Marker und nutze Community-Hinweise für deine nächste Route.',
+        'intro' => 'Wähle deine Karte, reduziere die Ansicht auf die wirklich wichtigen Marker und nutze Community-Hinweise für deine nächste Route.',
         'action' => 'Marker & Funktionen ansehen',
         'steps' => [
             ['title' => 'Karte auswählen', 'text' => 'Direkt zwischen Stillwater Bayou, Lawson Delta, DeSalle und Mammon’s Gulch wechseln.'],
@@ -80,14 +89,20 @@ return [
             ['title' => 'Community-Wissen nutzen', 'text' => 'Fundorte prüfen, bewerten, kommentieren und neue Cash Spots mit Bild einreichen.'],
         ],
     ],
+    'live_data' => [
+        'aria' => 'Huntmaps Live-Daten',
+        'kicker' => 'LIVE-KARTENDATEN',
+        'title' => 'Aktuelle Daten aus den Huntmaps',
+        'all' => 'Alle Karten',
+        'real_data' => 'echte Markerdaten',
+    ],
     'community' => [
         'kicker' => 'HUNTMAPS STATUS',
-        'title' => 'Echte Kartendaten statt Demo-Inhalte',
-        'text' => 'Alle Karten führen direkt in die vorhandene interaktive Ansicht. Marker, Votes, Kommentare und Cash-Spot-Einreichungen bleiben vollständig erhalten.',
+        'title' => 'Alles an einem Ort',
         'maps' => 'aktive Karten',
-        'markers' => 'geladene Marker',
+        'markers' => 'Marker',
         'live' => 'Community-Daten',
-        'action' => 'Erste Karte öffnen',
+        'action' => 'Karte auswählen',
         'chips' => ['Zoom', 'Filter', 'Linien', 'Votes', 'Kommentare', 'Cash Spots'],
     ],
     'faq' => [
@@ -97,7 +112,7 @@ return [
             ['question' => 'Kann ich alle Marker gleichzeitig sehen?', 'answer' => 'Ja. Du kannst alle Kategorien einblenden oder die Ansicht auf einzelne Markerarten reduzieren.'],
             ['question' => 'Woher kommen die Cash Spots?', 'answer' => 'Die Community kann Fundorte mit Bildern einreichen. Neue Einträge werden vor der Freischaltung geprüft.'],
             ['question' => 'Funktioniert die Karte auch auf dem Handy?', 'answer' => 'Die Kartenansicht ist für Desktop und Mobile vorbereitet und bleibt zoombar sowie filterbar.'],
-            ['question' => 'Kann ich falsche Marker melden?', 'answer' => 'Votes, Kommentare und Meldefunktionen helfen dabei, veraltete oder unklare Hinweise zu erkennen.'],
+            ['question' => 'Kann ich falsche Marker erkennen?', 'answer' => 'Votes und Kommentare helfen dabei, veraltete oder unklare Hinweise gemeinsam zu bewerten.'],
         ],
     ],
 ];
