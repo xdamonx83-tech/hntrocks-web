@@ -33,6 +33,30 @@
     );
   };
 
+  const installMapsLink = () => {
+    const grid = document.querySelector('#moreNavDropdown .main-nav-menu-grid');
+    if (!(grid instanceof HTMLElement) || grid.querySelector('[data-navigation-label="Maps"]')) return;
+
+    const isEnglish = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+    const i18n = window.HNT_PREVIEW_I18N?.header || {};
+    const button = document.createElement('button');
+    const label = i18n.maps || 'Maps';
+    const description = i18n.maps_text || (isEnglish
+      ? 'Interactive Hunt maps and community spots'
+      : 'Interaktive Hunt-Karten und Community-Spots');
+
+    button.type = 'button';
+    button.setAttribute('role', 'menuitem');
+    button.dataset.navigationLabel = 'Maps';
+    button.innerHTML = `
+      <span class="main-nav-menu-icon"><svg><use href="#i-map"></use></svg></span>
+      <span><strong>${label}</strong><small>${description}</small></span>
+    `;
+    button.addEventListener('click', () => window.location.assign('/maps'));
+
+    grid.insertBefore(button, grid.children[1] || null);
+  };
+
   const addStyle = () => {
     if (document.getElementById('real-dashboard-header-live-style')) return;
 
@@ -154,6 +178,7 @@
   document.addEventListener('hnt:friend-request-created', refresh);
 
   loadThemeColors();
+  installMapsLink();
   addStyle();
   window.setTimeout(refresh, 450);
   schedule(intervalMs);
