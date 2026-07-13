@@ -78,7 +78,7 @@ body[data-page="moments"] .moments-page-dots i.active {
   background: var(--hnt-dark);
 }
 
-/* Moments comments modal */
+/* Moments comments modal – same visual grammar as the real feed modal. */
 body[data-page="moments"] .comments-modal-backdrop {
   background: color-mix(in srgb, var(--hnt-dark) 56%, transparent);
   backdrop-filter: blur(12px);
@@ -98,13 +98,14 @@ body[data-page="moments"] .comments-composer {
   background: var(--hnt-surface-card-strong);
 }
 
-body[data-page="moments"] .comments-modal-head > div > span,
+body[data-page="moments"] .comments-modal-head > div > span {
+  color: var(--hnt-brand-red);
+}
+
 body[data-page="moments"] .comments-title-row small,
 body[data-page="moments"] .comments-post-copy span,
 body[data-page="moments"] .comments-toolbar button,
-body[data-page="moments"] .comments-list small,
-body[data-page="moments"] .comments-list time,
-body[data-page="moments"] .comments-list .comment-meta {
+body[data-page="moments"] .comment-head span {
   color: var(--hnt-text-muted);
 }
 
@@ -117,18 +118,162 @@ body[data-page="moments"] .comments-compose-actions button {
   color: var(--hnt-text);
 }
 
-body[data-page="moments"] .comments-post-context,
-body[data-page="moments"] .comments-list article,
-body[data-page="moments"] .comments-list > div {
+body[data-page="moments"] .comments-close:hover,
+body[data-page="moments"] .comments-close:focus-visible,
+body[data-page="moments"] .comments-toolbar button:hover,
+body[data-page="moments"] .comments-toolbar button:focus-visible,
+body[data-page="moments"] .comments-compose-actions button:hover,
+body[data-page="moments"] .comments-compose-actions button:focus-visible {
+  background: var(--hnt-brand-red-soft);
+  color: var(--hnt-brand-red);
+  outline: none;
+}
+
+body[data-page="moments"] .comments-post-context {
   border: .5px solid var(--hnt-border-soft);
-  background: var(--hnt-surface-card);
+  background: var(--hnt-surface-panel);
   color: var(--hnt-text);
   box-shadow: none;
+}
+
+body[data-page="moments"] .comments-post-context > img,
+body[data-page="moments"] .comments-composer > img {
+  display: block;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  object-fit: cover;
 }
 
 body[data-page="moments"] .comments-post-badge {
   background: var(--hnt-brand-red-soft);
   color: var(--hnt-brand-red);
+}
+
+body[data-page="moments"] .comments-list {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+body[data-page="moments"] .comments-list .comment-item {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body[data-page="moments"] .comments-list .comment-avatar {
+  position: relative;
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  object-fit: cover;
+}
+
+body[data-page="moments"] .comments-list .comment-bubble {
+  min-width: 0;
+  padding: 16px 18px;
+  border: .5px solid var(--hnt-border-soft);
+  border-radius: 22px;
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+body[data-page="moments"] .comments-list .comment-head {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 7px;
+}
+
+body[data-page="moments"] .comments-list .comment-head strong {
+  color: var(--hnt-text);
+  font-weight: 500;
+}
+
+body[data-page="moments"] .comments-list .comment-bubble > p {
+  margin: 9px 0 0;
+  color: var(--hnt-text-subtle);
+  line-height: 1.55;
+}
+
+body[data-page="moments"] .comments-list .comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 11px;
+}
+
+body[data-page="moments"] .comments-list .comment-actions button {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--hnt-text-muted);
+}
+
+body[data-page="moments"] .comments-list .comment-actions button:hover,
+body[data-page="moments"] .comments-list .comment-actions button:focus-visible,
+body[data-page="moments"] .comments-list .comment-like.is-liked {
+  background: var(--hnt-brand-red-soft);
+  color: var(--hnt-brand-red);
+  outline: none;
+}
+
+body[data-page="moments"] .comments-list .comment-item.is-reply {
+  margin-left: 72px;
+  padding-left: 20px;
+  grid-template-columns: 42px minmax(0, 1fr);
+}
+
+body[data-page="moments"] .comments-list .comment-item.is-reply::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  bottom: 18px;
+  left: 0;
+  width: 1px;
+  background: var(--hnt-border-medium);
+}
+
+body[data-page="moments"] .comments-list .comment-item.is-reply::after {
+  content: "";
+  position: absolute;
+  top: 26px;
+  left: 0;
+  width: 15px;
+  height: 1px;
+  background: var(--hnt-border-medium);
+}
+
+body[data-page="moments"] .comments-list .comment-item.is-reply .comment-avatar {
+  width: 42px;
+  height: 42px;
+}
+
+body[data-page="moments"] .comments-list .comment-item.is-reply .comment-bubble {
+  border-radius: 22px;
 }
 
 body[data-page="moments"] .comments-composer textarea {
@@ -206,5 +351,30 @@ body[data-page="moments"] .moment-create-submit {
 
   body[data-page="moments"] .moments-scroll {
     border-radius: 18px;
+  }
+
+  body[data-page="moments"] .comments-list .comment-item {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  body[data-page="moments"] .comments-list .comment-avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  body[data-page="moments"] .comments-list .comment-item.is-reply {
+    margin-left: 30px;
+    padding-left: 14px;
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  body[data-page="moments"] .comments-list .comment-item.is-reply::after {
+    width: 10px;
+  }
+
+  body[data-page="moments"] .comments-list .comment-item.is-reply .comment-avatar {
+    width: 38px;
+    height: 38px;
   }
 }
