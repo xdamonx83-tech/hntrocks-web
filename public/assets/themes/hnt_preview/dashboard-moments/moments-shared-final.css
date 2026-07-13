@@ -1,0 +1,21 @@
+/* Loaded after the legacy Comms CSS so Moments matches the current shared palette. */
+body[data-page="moments"] .hnt-comms-launcher {
+  border: .5px solid var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-card-strong) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+body[data-page="moments"] .hnt-comms-launcher:hover,
+body[data-page="moments"] .hnt-comms-launcher:focus-visible,
+body[data-page="moments"] .hnt-chat-tabs-shell.has-overview .hnt-comms-launcher {
+  background: var(--hnt-brand-red-soft) !important;
+  color: var(--hnt-brand-red) !important;
+  outline: none !important;
+}
+
+body[data-page="moments"] .hnt-comms-launcher__count {
+  border-color: var(--hnt-surface-card-strong) !important;
+  background: var(--hnt-brand-red) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
