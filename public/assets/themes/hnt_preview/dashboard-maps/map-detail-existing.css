@@ -160,7 +160,6 @@
   z-index: 1200;
 }
 
-.map-detail-center .hnt-map-cash-submission-panel,
 .map-detail-center .hnt-map-cash-detail-panel {
   border: .5px solid var(--hnt-border);
   background: var(--hnt-surface-card-strong);
@@ -168,20 +167,252 @@
   box-shadow: none;
 }
 
-.map-detail-center .hnt-map-cash-submission-panel label,
 .map-detail-center .hnt-map-cash-comments-form textarea {
   color: var(--hnt-text);
 }
 
-.map-detail-center .hnt-map-cash-submission-panel input,
 .map-detail-center .hnt-map-cash-comments-form textarea {
   border-color: var(--hnt-border);
   background: var(--hnt-surface-input);
   color: var(--hnt-text);
 }
 
+/* Cash Spot modal: geometry follows the approved map-detail demo. */
+.map-detail-center .hnt-map-lightbox.map-cash-modal {
+  position: fixed;
+  z-index: 2200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: color-mix(in srgb, var(--hnt-dark) 48%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.map-detail-center .hnt-map-lightbox.map-cash-modal[hidden] {
+  display: none;
+}
+
+.map-detail-center .map-cash-modal-panel {
+  width: min(520px, calc(100vw - 36px));
+  max-height: calc(100vh - 44px);
+  display: block;
+  overflow: auto;
+  padding: 20px;
+  border: .5px solid var(--hnt-border);
+  border-radius: 28px;
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+.map-detail-center .map-cash-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+}
+
+.map-detail-center .map-cash-modal-title {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.map-detail-center .map-cash-modal-title > span {
+  color: var(--hnt-brand-red);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.map-detail-center .map-cash-modal-title h2 {
+  margin: 0;
+  color: var(--hnt-text);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+
+.map-detail-center .map-cash-modal-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-dark);
+  font: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.map-detail-center .map-cash-modal-close:hover,
+.map-detail-center .map-cash-modal-close:focus-visible {
+  outline: 0;
+  background: var(--hnt-surface-hover);
+}
+
+.map-detail-center .map-cash-modal-form {
+  display: grid;
+  gap: 11px;
+  margin-top: 14px;
+}
+
+.map-detail-center .map-cash-modal-intro {
+  margin: 0 0 2px;
+  color: var(--hnt-text-muted);
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.map-detail-center .map-cash-modal-field {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 12px;
+  border: .5px solid var(--hnt-border-soft);
+  border-radius: 18px;
+  background: var(--hnt-surface-card);
+  color: var(--hnt-text);
+}
+
+.map-detail-center .map-cash-modal-field > span {
+  color: var(--hnt-text-muted);
+  font-size: 8px;
+}
+
+.map-detail-center .map-cash-modal-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 11px;
+  border: .5px solid var(--hnt-border);
+  border-radius: 14px;
+  outline: 0;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+  font: inherit;
+  font-size: 8px;
+}
+
+.map-detail-center .map-cash-modal-field input:focus {
+  border-color: var(--hnt-brand-red);
+}
+
+.map-detail-center .map-cash-modal-field input[type="file"] {
+  padding: 5px;
+}
+
+.map-detail-center .map-cash-modal-field input[type="file"]::file-selector-button {
+  min-height: 28px;
+  margin-right: 9px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+  font: inherit;
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.map-detail-center .map-cash-modal-coords {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 14px;
+  border: .5px solid var(--hnt-brand-red-soft-hover);
+  border-radius: 18px;
+  background: var(--hnt-brand-red-soft);
+}
+
+.map-detail-center .map-cash-modal-coords span {
+  color: var(--hnt-text-muted);
+  font-size: 8px;
+}
+
+.map-detail-center .map-cash-modal-coords strong {
+  color: var(--hnt-text);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.map-detail-center .map-cash-modal-status {
+  min-height: 0;
+  margin: 0;
+  color: var(--hnt-danger);
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.map-detail-center .map-cash-modal-status:empty {
+  display: none;
+}
+
+.map-detail-center .map-cash-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 3px;
+}
+
+.map-detail-center .map-cash-modal-actions .hnt-map-popup-action {
+  min-width: 104px;
+  height: 40px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.map-detail-center .map-cash-modal-actions .hnt-map-popup-action[type="submit"] {
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+}
+
+.map-detail-center .map-cash-modal-actions .hnt-map-popup-action:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 900px) {
   .map-detail-center .map-canvas-frame.hnt-map-stage {
     height: 620px;
+  }
+}
+
+@media (max-width: 560px) {
+  .map-detail-center .hnt-map-lightbox.map-cash-modal {
+    padding: 12px;
+  }
+
+  .map-detail-center .map-cash-modal-panel {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 17px;
+    border-radius: 24px;
+  }
+
+  .map-detail-center .map-cash-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .map-detail-center .map-cash-modal-actions .hnt-map-popup-action {
+    min-width: 0;
+    width: 100%;
   }
 }
