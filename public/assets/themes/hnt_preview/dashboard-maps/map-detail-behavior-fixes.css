@@ -1,0 +1,51 @@
+/* Focused fixes for the live Huntmaps detail page. */
+.map-detail-leaflet-icon--asset {
+  background: transparent;
+  border: 0;
+}
+
+.map-detail-leaflet-icon--asset > span {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent !important;
+  color: transparent;
+  outline: 0 !important;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.map-detail-leaflet-icon--asset > span img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.map-detail-leaflet-icon--asset.marker-boss > span {
+  width: 32px;
+  height: 32px;
+}
+
+.map-detail-leaflet-icon--asset.marker-spawn > span,
+.map-detail-leaflet-icon--asset.marker-tower > span,
+.map-detail-leaflet-icon--asset.marker-bugs > span,
+.map-detail-leaflet-icon--asset.marker-wild > span {
+  width: 24px;
+  height: 24px;
+}
+
+.map-detail-leaflet-icon--asset.marker-supply > span,
+.map-detail-leaflet-icon--asset.marker-cash > span {
+  width: 22px;
+  height: 22px;
+}
+
+.map-detail-leaflet-icon--asset:hover > span,
+.map-detail-leaflet-icon--asset.selected > span {
+  transform: scale(1.12);
+  background: transparent !important;
+  outline: 0 !important;
+}
