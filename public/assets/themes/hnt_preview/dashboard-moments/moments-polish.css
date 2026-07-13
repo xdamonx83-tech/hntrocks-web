@@ -1,9 +1,4 @@
-/* HNT.ROCKS Moments – page-specific polish using the central theme palette only. */
-body[data-page="moments"] {
-  --yellow: var(--hnt-brand-red);
-  --orange: var(--hnt-brand-red);
-  --darkred: var(--hnt-brand-red);
-}
+/* HNT.ROCKS Moments – only page-specific polish. Shared header and chat stay untouched. */
 
 body[data-page="moments"] .moments-stage {
   display: grid;
@@ -83,58 +78,7 @@ body[data-page="moments"] .moments-page-dots i.active {
   background: var(--hnt-dark);
 }
 
-/* Shared header: neutral surfaces, red only as the actual brand/action accent. */
-body[data-page="moments"] .main-nav-dropdown,
-body[data-page="moments"] .header-dropdown,
-body[data-page="moments"] .header-dropdown-head,
-body[data-page="moments"] .header-profile-summary,
-body[data-page="moments"] .header-profile-stats {
-  border-color: var(--hnt-border-medium) !important;
-  background: var(--hnt-surface-card-strong) !important;
-  color: var(--hnt-text) !important;
-  box-shadow: none !important;
-}
-
-body[data-page="moments"] .main-nav-menu-icon,
-body[data-page="moments"] .main-nav-menu-icon.yellow,
-body[data-page="moments"] .main-nav-menu-icon.green,
-body[data-page="moments"] .main-nav-menu-icon.purple,
-body[data-page="moments"] .header-menu-icon,
-body[data-page="moments"] .header-menu-icon.yellow,
-body[data-page="moments"] .header-menu-icon.green,
-body[data-page="moments"] .header-menu-icon.purple,
-body[data-page="moments"] .header-notification-icon,
-body[data-page="moments"] .header-notification-icon.yellow {
-  background: var(--hnt-surface-input) !important;
-  color: var(--hnt-text) !important;
-}
-
-body[data-page="moments"] .main-nav-dropdown > header span,
-body[data-page="moments"] .header-dropdown-head span,
-body[data-page="moments"] .header-message-item time,
-body[data-page="moments"] .header-notification-item time {
-  color: var(--hnt-brand-red) !important;
-}
-
-body[data-page="moments"] .header-action-badge:not(.is-empty),
-body[data-page="moments"] .header-request-actions .friend-accept,
-body[data-page="moments"] .header-mark-all:not(:disabled) {
-  background: var(--hnt-brand-red) !important;
-  color: var(--hnt-text-on-dark) !important;
-}
-
-body[data-page="moments"] .header-dropdown-footer,
-body[data-page="moments"] .header-profile-logout {
-  background: var(--hnt-dark) !important;
-  color: var(--hnt-text-on-dark) !important;
-}
-
-body[data-page="moments"] .header-dropdown-footer:hover,
-body[data-page="moments"] .header-profile-logout:hover {
-  background: var(--hnt-brand-red) !important;
-}
-
-/* Comments modal: remove the old cream/gold feed styling. */
+/* Moments comments modal */
 body[data-page="moments"] .comments-modal-backdrop {
   background: color-mix(in srgb, var(--hnt-dark) 56%, transparent);
   backdrop-filter: blur(12px);
@@ -205,16 +149,14 @@ body[data-page="moments"] .comments-send:focus-visible {
   background: var(--hnt-brand-red-hover) !important;
 }
 
-/* Create modal and Comms use the same neutral palette. */
+/* Moments create modal */
 body[data-page="moments"] .moment-create-backdrop {
   background: color-mix(in srgb, var(--hnt-dark) 56%, transparent);
 }
 
 body[data-page="moments"] .moment-create-modal,
 body[data-page="moments"] .moment-create-modal > header,
-body[data-page="moments"] .moment-create-modal form,
-body[data-page="moments"] .hnt-comms-overview,
-body[data-page="moments"] .hnt-comms-panel-slot > .hnt-chat-tab {
+body[data-page="moments"] .moment-create-modal form {
   border-color: var(--hnt-border-medium) !important;
   background: var(--hnt-surface-card-strong) !important;
   color: var(--hnt-text) !important;
@@ -224,38 +166,16 @@ body[data-page="moments"] .hnt-comms-panel-slot > .hnt-chat-tab {
 body[data-page="moments"] .moment-upload-zone,
 body[data-page="moments"] .moment-create-modal input,
 body[data-page="moments"] .moment-create-modal select,
-body[data-page="moments"] .moment-create-check i,
-body[data-page="moments"] .hnt-comms-overview__search input,
-body[data-page="moments"] .hnt-chat-tab__form input {
+body[data-page="moments"] .moment-create-check i {
   border-color: var(--hnt-border-soft) !important;
   background: var(--hnt-surface-input) !important;
   color: var(--hnt-text) !important;
 }
 
 body[data-page="moments"] .moment-upload-zone > span,
-body[data-page="moments"] .moment-create-submit,
-body[data-page="moments"] .hnt-comms-launcher__count {
+body[data-page="moments"] .moment-create-submit {
   background: var(--hnt-brand-red) !important;
   color: var(--hnt-text-on-dark) !important;
-}
-
-body[data-page="moments"] .hnt-comms-overview__footer {
-  background: var(--hnt-dark) !important;
-  color: var(--hnt-text-on-dark) !important;
-}
-
-body[data-page="moments"] .hnt-comms-overview__item.unread {
-  background: var(--hnt-brand-red-soft) !important;
-}
-
-body[data-page="moments"] .hnt-comms-overview__item:hover,
-body[data-page="moments"] .hnt-comms-overview__item:focus-visible {
-  background: var(--hnt-surface-input) !important;
-}
-
-body[data-page="moments"] .hnt-comms-overview__eyebrow,
-body[data-page="moments"] .hnt-comms-overview__item time {
-  color: var(--hnt-brand-red) !important;
 }
 
 @media (min-width: 1200px) {
