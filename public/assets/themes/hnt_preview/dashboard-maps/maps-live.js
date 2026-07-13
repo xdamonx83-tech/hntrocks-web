@@ -31,6 +31,11 @@
       root.querySelectorAll('[data-map-card]').forEach((card) => {
         card.classList.toggle('selected', card.dataset.mapCard === slug);
       });
+
+      const detailHref = button.dataset.detailHref;
+      if (detailHref && detailHref !== '#') {
+        window.location.href = detailHref;
+      }
     });
   });
 
