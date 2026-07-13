@@ -163,6 +163,15 @@ svg { display: block; }
   stroke-linejoin: round;
 }
 
+.header-dropdown .header-dropdown-footer,
+.header-dropdown .header-dropdown-footer:visited {
+  color: #fff !important;
+}
+
+.header-dropdown .header-dropdown-footer svg {
+  color: currentColor;
+}
+
 .toast {
   position: fixed;
   right: 18px;
