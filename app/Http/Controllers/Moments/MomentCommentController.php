@@ -7,12 +7,13 @@ use App\Models\Moment;
 use App\Models\MomentComment;
 use App\Services\GamificationService;
 use App\Services\NotificationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class MomentCommentController extends Controller
 {
-    public function store(Request $request, Moment $moment, GamificationService $gamification, NotificationService $notifications): RedirectResponse
+    public function store(Request $request, Moment $moment, GamificationService $gamification, NotificationService $notifications): RedirectResponse|JsonResponse
     {
         abort_unless(($moment->status === 'published' && $moment->visibility !== 'private') || $moment->canBeManagedBy($request->user()), 404);
 
@@ -35,7 +36,8 @@ class MomentCommentController extends Controller
             'body' => $validated['body'],
         ]);
 
-        $moment->increment('comments_count');
+        $count = $moment->comments()->count();
+        $moment->updateQuietly(['comments_count' => $count]);
         if ($parent) {
             $parent->increment('replies_count');
         }
@@ -64,10 +66,20 @@ class MomentCommentController extends Controller
             );
         }
 
+        $comment->load('user.profile');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'count' => $count,
+                'comment' => $this->commentPayload($comment),
+            ], 201);
+        }
+
         return back()->with('status', 'Kommentar wurde gespeichert.');
     }
 
-    public function update(Request $request, MomentComment $comment): RedirectResponse
+    public function update(Request $request, MomentComment $comment): RedirectResponse|JsonResponse
     {
         abort_unless($comment->canBeEditedBy($request->user()), 403);
 
@@ -79,10 +91,14 @@ class MomentCommentController extends Controller
             'body' => $validated['body'],
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'body' => $comment->body]);
+        }
+
         return back()->with('status', 'Kommentar wurde aktualisiert.');
     }
 
-    public function toggleReaction(Request $request, MomentComment $comment): RedirectResponse
+    public function toggleReaction(Request $request, MomentComment $comment): RedirectResponse|JsonResponse
     {
         abort_unless($comment->moment && (($comment->moment->status === 'published' && $comment->moment->visibility !== 'private') || $comment->moment->canBeManagedBy($request->user())), 404);
 
@@ -93,41 +109,84 @@ class MomentCommentController extends Controller
 
         if ($reaction) {
             $reaction->delete();
-            if ((int) $comment->likes_count > 0) {
-                $comment->decrement('likes_count');
-            }
+            $liked = false;
         } else {
             $comment->reactions()->create([
                 'user_id' => $request->user()->id,
                 'type' => 'like',
             ]);
-            $comment->increment('likes_count');
+            $liked = true;
+        }
+
+        $count = $comment->reactions()->where('type', 'like')->count();
+        $comment->updateQuietly(['likes_count' => $count]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'liked' => $liked, 'count' => $count]);
         }
 
         return back();
     }
 
-    public function destroy(Request $request, MomentComment $comment): RedirectResponse
+    public function destroy(Request $request, MomentComment $comment): RedirectResponse|JsonResponse
     {
         $comment->load(['moment', 'replies']);
 
         abort_unless($comment->canBeDeletedBy($request->user()), 403);
 
-        $removedCount = 1 + ($comment->parent_id ? 0 : $comment->replies()->count());
+        $moment = $comment->moment;
+        $commentId = (int) $comment->id;
+        $parentId = $comment->parent_id ? (int) $comment->parent_id : null;
 
         if ($comment->parent_id) {
-            $comment->parent?->decrement('replies_count');
+            if ($comment->parent && (int) $comment->parent->replies_count > 0) {
+                $comment->parent->decrement('replies_count');
+            }
         } else {
             $comment->replies()->delete();
         }
 
-        $moment = $comment->moment;
         $comment->delete();
 
-        if ($moment && (int) $moment->comments_count > 0) {
-            $moment->decrement('comments_count', min($removedCount, (int) $moment->comments_count));
+        $count = $moment ? $moment->comments()->count() : 0;
+        if ($moment) {
+            $moment->updateQuietly(['comments_count' => $count]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'id' => $commentId,
+                'parent_id' => $parentId,
+                'count' => $count,
+            ]);
         }
 
         return back()->with('status', 'Kommentar wurde entfernt.');
+    }
+
+    /** @return array<string, mixed> */
+    private function commentPayload(MomentComment $comment): array
+    {
+        $user = $comment->user;
+
+        return [
+            'id' => (int) $comment->id,
+            'parent_id' => $comment->parent_id ? (int) $comment->parent_id : null,
+            'body' => (string) $comment->body,
+            'likes_count' => (int) $comment->likes_count,
+            'liked' => false,
+            'created_at' => $comment->created_at?->diffForHumans() ?: __('ui.just_now'),
+            'author' => [
+                'name' => $user?->name ?: ($user?->username ?: 'HNT Hunter'),
+                'handle' => $user?->username ? '@'.$user->username : '@hunter',
+                'avatar' => $user?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg'),
+            ],
+            'reaction_url' => route('moments.comments.reactions.toggle', $comment),
+            'update_url' => route('moments.comments.update', $comment),
+            'delete_url' => route('moments.comments.destroy', $comment),
+            'can_edit' => $comment->canBeEditedBy(request()->user()),
+            'can_delete' => $comment->canBeDeletedBy(request()->user()),
+        ];
     }
 }
