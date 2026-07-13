@@ -4,7 +4,6 @@
     $conversationTitle = $conversation->displayTitleFor($viewer);
     $partnerAvatar = $partner?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
     $partnerHandle = $partner?->username ? '@'.$partner->username : __('ui.private_conversation');
-    $channelLabel = app()->getLocale() === 'en' ? 'PRIVATE CHANNEL' : 'PRIVAT-KANAL';
 @endphp
 
 <section class="hnt-chat-tab"
@@ -24,7 +23,7 @@
                 @endif
             </span>
             <div class="hnt-chat-tab__meta">
-                <span class="hnt-chat-tab__channel">{{ $channelLabel }}</span>
+                <span class="hnt-chat-tab__channel">{{ __('hnt_preview.comms.private_channel') }}</span>
                 <strong>{{ $conversationTitle }}</strong>
                 <span>{{ $partnerHandle }}</span>
             </div>
@@ -33,10 +32,10 @@
             <a href="{{ route('messages.show', $conversation) }}" class="hnt-chat-tab__icon" aria-label="{{ __('ui.messages_open_full') }}" data-hnt-chat-tab-full>
                 <i class="ph ph-arrow-square-out" aria-hidden="true"></i>
             </a>
-            <button type="button" class="hnt-chat-tab__icon" aria-label="{{ __('ui.messages_minimize') }}" data-hnt-chat-tab-minimize>
+            <button type="button" class="hnt-chat-tab__icon" aria-label="{{ __('hnt_preview.comms.minimize') }}" data-hnt-chat-tab-minimize>
                 <i class="ph ph-minus" aria-hidden="true"></i>
             </button>
-            <button type="button" class="hnt-chat-tab__icon" aria-label="{{ __('ui.messages_close_tab') }}" data-hnt-chat-tab-close>
+            <button type="button" class="hnt-chat-tab__icon" aria-label="{{ __('hnt_preview.comms.close') }}" data-hnt-chat-tab-close>
                 <i class="ph ph-x" aria-hidden="true"></i>
             </button>
         </div>
@@ -61,7 +60,7 @@
             @endif>
             @csrf
             <input type="text" name="body" maxlength="3000" autocomplete="off" placeholder="{{ __('ui.write_message') }}" required @if ($conversation->type === 'private') data-hh-message-typing-input @endif>
-            <button type="submit" aria-label="{{ __('ui.send') }}">
+            <button type="submit" aria-label="{{ __('hnt_preview.comms.send') }}">
                 <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
             </button>
         </form>
