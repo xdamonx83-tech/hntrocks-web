@@ -1,0 +1,208 @@
+/*
+ * HNT.ROCKS – ZENTRALE FARBWAHRHEIT
+ *
+ * Diese Datei ist ab jetzt die erste Anlaufstelle für Farben im neuen Webdesign.
+ * Zum Umfärben ausschließlich die Werte im ersten :root-Block ändern.
+ *
+ * VERBINDLICHE REGEL FÜR NEUEN CODE:
+ * - Keine neuen festen HEX-/RGB-Farben in Komponenten erfinden.
+ * - Farben immer über eine vorhandene --hnt-*-Variable verwenden.
+ * - Fehlt eine semantische Farbe, wird sie zuerst hier ergänzt.
+ * - Ausnahmen: transparent, currentColor, Bilder und dynamische Prozentwerte.
+ */
+
+:root {
+    /* Seite / atmosphärischer Hintergrund */
+    --hnt-page-base: #e4e7e6;
+    --hnt-page-middle: #e9eae8;
+    --hnt-page-warm: #fff9dc;
+    --hnt-page-members-start: #f4f1df;
+    --hnt-page-members-end: #fff8cf;
+    --hnt-page-glow-top: rgba(255, 245, 178, .97);
+    --hnt-page-glow-top-soft: rgba(255, 245, 178, .58);
+    --hnt-page-glow-bottom: rgba(255, 237, 151, .72);
+    --hnt-page-glow-bottom-soft: rgba(255, 237, 151, .32);
+    --hnt-page-members-glow: rgba(255, 228, 90, .42);
+    --hnt-page-members-cool: rgba(216, 222, 222, .72);
+
+    /* Texte */
+    --hnt-text: #30302e;
+    --hnt-text-strong: #2f2f2c;
+    --hnt-text-muted: #92918a;
+    --hnt-text-soft: #8f8b82;
+    --hnt-text-subtle: #62625d;
+    --hnt-text-accent: #9b761e;
+    --hnt-text-on-dark: #ffffff;
+
+    /* Flächen / Karten / Eingaben */
+    --hnt-surface: rgba(255, 255, 255, .78);
+    --hnt-surface-strong: rgba(255, 255, 255, .91);
+    --hnt-surface-card: #fbf9ee;
+    --hnt-surface-card-strong: #fffdf6;
+    --hnt-surface-control: rgba(255, 255, 255, .72);
+    --hnt-surface-input: #f1eee5;
+    --hnt-surface-hover: #ffe8a0;
+    --hnt-surface-faint: rgba(255, 255, 255, .18);
+    --hnt-surface-table: rgba(255, 255, 255, .76);
+
+    /* Hauptakzente */
+    --hnt-accent: #ffd55a;
+    --hnt-accent-strong: #ffcd4c;
+    --hnt-accent-gold: #d6a84f;
+    --hnt-accent-soft: rgba(255, 232, 160, .48);
+    --hnt-accent-soft-hover: rgba(255, 232, 160, .72);
+    --hnt-success: #78b41d;
+    --hnt-online: #7fb728;
+    --hnt-warning: #ff9d2a;
+    --hnt-danger: #b8463a;
+    --hnt-purple: #8f73c9;
+
+    /* Dunkle Kontraste */
+    --hnt-dark: #30302e;
+    --hnt-dark-soft: rgba(47, 47, 44, .12);
+
+    /* Linien */
+    --hnt-border: #e3dece;
+    --hnt-border-soft: rgba(52, 48, 37, .12);
+    --hnt-border-medium: rgba(52, 48, 37, .22);
+    --hnt-border-strong: #575752;
+
+    /* Fortschrittsbalken */
+    --hnt-progress-fill: rgba(255, 205, 76, .94);
+    --hnt-progress-track: rgba(47, 47, 44, .12);
+
+    /* Bestehende Variablennamen bleiben als Brücke erhalten. */
+    --ink: var(--hnt-text);
+    --muted: var(--hnt-text-muted);
+    --paper: var(--hnt-surface);
+    --paper-strong: var(--hnt-surface-strong);
+    --yellow: var(--hnt-accent);
+    --green: var(--hnt-success);
+    --orange: var(--hnt-warning);
+    --dark: var(--hnt-dark);
+    --line: var(--hnt-border);
+}
+
+/* Grundflächen – gleiche Optik wie bisher, aber zentral steuerbar. */
+body {
+    color: var(--hnt-text);
+    background: var(--hnt-page-base);
+}
+
+.app-shell {
+    background:
+        radial-gradient(circle at 100% 3%, var(--hnt-page-glow-top) 0, var(--hnt-page-glow-top-soft) 23%, transparent 47%),
+        radial-gradient(circle at 0 100%, var(--hnt-page-glow-bottom) 0, var(--hnt-page-glow-bottom-soft) 26%, transparent 51%),
+        linear-gradient(111deg, var(--hnt-page-base) 0%, var(--hnt-page-middle) 55%, var(--hnt-page-warm) 100%);
+}
+
+body[data-page="members"] {
+    --members-page-background:
+        radial-gradient(circle at 80% 7%, var(--hnt-page-members-glow), transparent 28%),
+        radial-gradient(circle at 18% 0, var(--hnt-page-members-cool), transparent 34%),
+        linear-gradient(135deg, var(--hnt-page-members-start) 0%, var(--hnt-page-members-end) 100%);
+}
+
+/* Gemeinsamer Header */
+.main-nav,
+.settings-button,
+.header-circle,
+.circle-button {
+    background: var(--hnt-surface-control);
+}
+
+.main-nav a {
+    color: var(--hnt-text-subtle);
+}
+
+.main-nav a.active,
+.header-dropdown-footer,
+.toast {
+    background: var(--hnt-dark);
+    color: var(--hnt-text-on-dark);
+}
+
+/* Karten und Tabellen */
+.profile-panel,
+.hnt-comms-overview,
+.hnt-comms-panel-slot > .hnt-chat-tab.hnt-comms-active {
+    background: var(--hnt-surface-card);
+    color: var(--hnt-text);
+}
+
+.members-directory-sticky::before,
+.members-directory-sticky .members-table-head {
+    background: var(--hnt-surface-card-strong);
+}
+
+.members-directory-sticky + .members-table,
+.members-directory-footer {
+    background: var(--hnt-surface-table);
+}
+
+/* Der dynamisch per JavaScript gesetzte Fortschrittsbalken wird hier zentral überschrieben. */
+.overview-progress .bar[data-real-progress="1"] {
+    background-image: linear-gradient(
+        90deg,
+        var(--hnt-progress-fill) 0 var(--real-progress),
+        var(--hnt-progress-track) var(--real-progress) 100%
+    ) !important;
+    color: var(--hnt-text-strong) !important;
+}
+
+.overview-metric .outline {
+    border-color: var(--hnt-border-strong);
+    background: var(--hnt-surface-faint);
+}
+
+/* Comms / Inbox */
+.hnt-comms-launcher,
+.hnt-comms-overview {
+    border-color: var(--hnt-border-medium) !important;
+    background: var(--hnt-surface-card) !important;
+    color: var(--hnt-text) !important;
+}
+
+.hnt-comms-launcher:hover,
+.hnt-comms-launcher:focus-visible,
+.hnt-chat-tabs-shell.has-overview .hnt-comms-launcher,
+.hnt-comms-overview__close:hover,
+.hnt-comms-overview__close:focus-visible {
+    background: var(--hnt-surface-hover) !important;
+    color: var(--hnt-text) !important;
+}
+
+.hnt-comms-launcher__count,
+.hnt-comms-overview__item.unread .hnt-comms-overview__avatar::after {
+    background: var(--hnt-accent-gold) !important;
+    color: var(--hnt-text) !important;
+}
+
+.hnt-comms-overview__close,
+.hnt-comms-overview__search input,
+.hnt-comms-overview__item:hover,
+.hnt-comms-overview__item:focus-visible {
+    background: var(--hnt-surface-input) !important;
+    color: var(--hnt-text) !important;
+}
+
+.hnt-comms-overview__item.unread {
+    background: var(--hnt-accent-soft) !important;
+}
+
+.hnt-comms-overview__item.unread:hover,
+.hnt-comms-overview__item.unread:focus-visible {
+    background: var(--hnt-accent-soft-hover) !important;
+}
+
+.hnt-comms-overview__eyebrow,
+.hnt-comms-overview__item time {
+    color: var(--hnt-text-accent) !important;
+}
+
+.hnt-comms-overview__meta,
+.hnt-comms-overview__search i,
+.hnt-comms-overview__copy small,
+.hnt-comms-overview__empty {
+    color: var(--hnt-text-soft) !important;
+}
