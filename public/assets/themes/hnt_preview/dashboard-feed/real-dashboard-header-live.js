@@ -9,6 +9,16 @@
   let queued = false;
   const lastCounts = new Map();
 
+  const loadThemeColors = () => {
+    if (document.querySelector('link[data-hnt-theme-colors]')) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/assets/themes/hnt_preview/theme-colors.css?v=20260713-1';
+    link.dataset.hntThemeColors = '1';
+    document.head.appendChild(link);
+  };
+
   const addStyle = () => {
     if (document.getElementById('real-dashboard-header-live-style')) return;
 
@@ -129,6 +139,7 @@
   document.addEventListener('hnt:message-created', refresh);
   document.addEventListener('hnt:friend-request-created', refresh);
 
+  loadThemeColors();
   addStyle();
   window.setTimeout(refresh, 450);
   schedule(intervalMs);
