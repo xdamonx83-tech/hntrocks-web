@@ -73,7 +73,7 @@
 }
 
 .overview-metric .dark { background: var(--dark); color: white; }
-.overview-metric .yellow { background: var(--yellow); }
+.overview-metric .yellow { background: var(--darkred); }
 .overview-metric .striped {
   background:
     repeating-linear-gradient(135deg,rgba(255,255,255,.86) 0 2px,transparent 2px 7px),
@@ -343,7 +343,7 @@
   width: 72%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg,var(--yellow) 0%,#e1b237 100%);
+  background: linear-gradient(90deg,var(--darkred) 0%,#e1b237 100%);
 }
 
 .profile-level small {
@@ -536,7 +536,7 @@
 }
 
 .time-axis span.dark { border-color: var(--dark); background: var(--dark); color: white; }
-.time-axis span.yellow { border-color: var(--yellow); background: var(--yellow); }
+.time-axis span.yellow { border-color: var(--darkred); background: var(--darkred); }
 
 .time-dot {
   position: relative;
@@ -550,7 +550,7 @@
   font-style: normal;
 }
 
-.time-dot.yellow { background: var(--yellow); }
+.time-dot.yellow { background: var(--darkred); }
 .time-dot.dark { background: var(--dark); color: white; }
 
 .appointments {
@@ -579,7 +579,7 @@
 }
 
 .appointment.dark > i,
-.appointment > i.yellow { background: var(--yellow); }
+.appointment > i.yellow { background: var(--darkred); }
 
 .appointment h3 {
   margin: 0;
@@ -768,7 +768,7 @@
 
 .attendance-values sup {
   margin-left: 4px;
-  color: var(--yellow);
+  color: var(--darkred);
   font-size: 10px;
 }
 
@@ -789,7 +789,7 @@
   background: #565654;
 }
 
-.dot-matrix span.y { background: var(--yellow); }
+.dot-matrix span.y { background: var(--darkred); }
 
 .fixed-composition {
   position: absolute;
@@ -807,7 +807,7 @@
   overflow-y: auto;
   padding: 14px 14px 13px;
   border-radius: 27px;
-  background: rgba(255,251,234,.96);
+  background: rgb(223 223 223 / 96%);
   scrollbar-width: none;
   box-shadow: 0 10px 36px rgba(70,64,42,.04);
 }
@@ -824,7 +824,7 @@
   place-items: center;
   margin: 18px auto 11px;
   border-radius: 50%;
-  background: conic-gradient(var(--yellow) 0 252deg,var(--dark) 252deg 342deg,transparent 342deg 360deg);
+  background: conic-gradient(var(--darkred) 0 252deg,var(--dark) 252deg 342deg,transparent 342deg 360deg);
   transform: rotate(-42deg);
 }
 
@@ -871,7 +871,7 @@
   border-radius: 50%;
 }
 
-.composition-values i.yellow { background:var(--yellow); }
+.composition-values i.yellow { background:var(--darkred); }
 .composition-values i.dark { background:var(--dark); }
 .composition-values strong { font-size:20px; font-weight:300; }
 
@@ -929,7 +929,7 @@
   margin: -15px -16px 10px;
   padding: 13px 16px 10px;
   border-radius: 27px 27px 15px 15px;
-  background: #fbf9ee;
+  background: #efefee;
   box-shadow: 0 8px 22px rgba(65,60,42,.045);
   isolation: isolate;
 }
@@ -991,7 +991,7 @@
   align-items: center;
   gap: 6px;
   margin-left: 5px;
-  background: var(--yellow);
+  background: rgb(226 204 161 / 72%);
   color: var(--dark);
 }
 
@@ -1123,7 +1123,7 @@
   padding: 0 11px;
   border: 0;
   border-radius: 15px;
-  background: var(--yellow);
+  background: var(--darkred);
   cursor: pointer;
 }
 
@@ -1168,7 +1168,7 @@
   padding: 5px 8px;
   border-radius: 10px;
   background: rgba(255,213,90,.16);
-  color: var(--yellow);
+  color: var(--darkred);
   font-size: 7px;
   letter-spacing: .12em;
 }
@@ -1190,7 +1190,7 @@
   height: 42px;
   border: 0;
   border-radius: 50%;
-  background: var(--yellow);
+  background: var(--darkred);
   cursor: pointer;
 }
 
@@ -1203,7 +1203,7 @@
   border-radius: 18px;
   background:
     repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 2px,transparent 2px 8px),
-    var(--yellow);
+    var(--darkred);
 }
 
 .cup-preview > div {
@@ -1271,7 +1271,7 @@
   width: 86%;
   height: 100%;
   border-radius: inherit;
-  background: var(--yellow);
+  background: var(--darkred);
 }
 
 .rocks-progress small {
@@ -1685,7 +1685,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--yellow);
+  background: var(--darkred);
 }
 
 .loadout-grid {
@@ -1712,7 +1712,7 @@
   place-items: center;
   border-radius: 11px;
   background: var(--dark);
-  color: var(--yellow);
+  color: var(--darkred);
   font-size: 12px;
 }
 
@@ -1756,7 +1756,7 @@
   height: 64px;
   display: grid;
   place-items: center;
-  border: 7px solid var(--yellow);
+  border: 7px solid var(--darkred);
   border-radius: 50%;
   background: var(--dark);
   color: white;
@@ -1835,7 +1835,7 @@
 .team-avatars span {
   display: grid;
   place-items: center;
-  background: var(--yellow);
+  background: var(--darkred);
   font-size: 8px;
 }
 
@@ -1876,7 +1876,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--yellow);
+  background: var(--darkred);
   font-size: 8px;
   font-weight: 500;
 }
@@ -2091,7 +2091,7 @@ body.comments-open {
 }
 
 .comments-close:hover {
-  background: var(--yellow);
+  background: var(--darkred);
   transform: rotate(4deg);
 }
 
@@ -2133,7 +2133,7 @@ body.comments-open {
   gap: 10px;
   padding: 12px;
   border-radius: 18px;
-  background: rgba(255,255,255,.72);
+  background: #fbf9ee;
   box-shadow: inset 0 0 0 1px rgba(220,214,194,.42);
 }
 
@@ -2396,7 +2396,7 @@ body.comments-open {
 .comments-compose-actions .comments-send {
   width: 32px;
   height: 32px;
-  background: var(--yellow);
+  background: var(--darkred);
   color: var(--dark);
 }
 
@@ -2561,7 +2561,7 @@ body.composer-open {
 }
 
 .post-composer-close:hover {
-  background: var(--yellow);
+  background: var(--darkred);
   transform: rotate(4deg);
 }
 
@@ -2740,7 +2740,7 @@ body.composer-open {
 }
 
 .composer-attachment-preview span {
-  color: var(--yellow);
+  color: var(--darkred);
   font-size: 7px;
   letter-spacing: .12em;
 }
@@ -2802,7 +2802,7 @@ body.composer-open {
 }
 
 .composer-tools button:hover {
-  background: var(--yellow);
+  background: var(--darkred);
 }
 
 .post-composer-footer {
@@ -2857,7 +2857,7 @@ body.composer-open {
   align-items: center;
   gap: 8px;
   padding: 0 15px;
-  background: var(--yellow);
+  background: var(--darkred);
   color: var(--dark);
   font-size: 9px;
 }
@@ -4310,8 +4310,8 @@ body.composer-open {
 }
 
 .hnt-agenda-axis span.yellow {
-  border-color: var(--yellow);
-  background: var(--yellow);
+  border-color: var(--darkred);
+  background: var(--darkred);
 }
 
 .hnt-agenda-items {
@@ -4377,7 +4377,7 @@ body.composer-open {
 
 .hnt-agenda-card.dark .hnt-agenda-copy > span,
 .hnt-agenda-card.highlight .hnt-agenda-copy > span {
-  color: var(--yellow);
+  color: var(--darkred);
 }
 
 .hnt-agenda-copy h3 {
@@ -4420,7 +4420,7 @@ body.composer-open {
 }
 
 .hnt-agenda-card.dark > button {
-  background: var(--yellow);
+  background: var(--darkred);
   color: var(--dark);
 }
 
@@ -4428,7 +4428,7 @@ body.composer-open {
   width: 28px;
   min-width: 28px;
   padding: 0;
-  background: var(--yellow);
+  background: var(--darkred);
   color: var(--dark);
 }
 
@@ -4470,7 +4470,7 @@ body.composer-open {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--yellow);
+  background: var(--darkred);
 }
 
 .overview-counts article {
@@ -4694,7 +4694,7 @@ body.composer-open {
   place-items: center;
   border-radius: 9px;
   background: var(--dark);
-  color: var(--yellow);
+  color: var(--darkred);
   font-size: 9px;
   font-weight: 500;
 }
@@ -4745,7 +4745,7 @@ body.composer-open {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--yellow);
+  background: var(--darkred);
 }
 
 .personal-progress-value.submitted strong {
@@ -5377,7 +5377,7 @@ body.composer-open {
   padding: 0 4px;
   border: 2px solid rgba(255,253,245,.96);
   border-radius: 999px;
-  background: var(--yellow);
+  background: var(--darkred);
   color: var(--dark);
   font-size: 7px;
   font-weight: 500;
@@ -5637,7 +5637,7 @@ body.composer-open {
 }
 
 .friend-accept {
-  background: var(--yellow);
+  background: var(--darkred);
   color: var(--dark);
 }
 
@@ -5685,7 +5685,7 @@ body.composer-open {
   height: 7px;
   border: 2px solid #fff8dc;
   border-radius: 50%;
-  background: var(--yellow);
+  background: var(--darkred);
   box-shadow: 0 1px 4px rgba(111,84,9,.16);
 }
 

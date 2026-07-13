@@ -11,6 +11,7 @@
   --orange: #ff9d2a;
   --dark: #30302e;
   --line: #e3dece;
+  --darkred: #b64e44;
 }
 
 html, body {
@@ -50,9 +51,7 @@ svg { display: block; }
   overflow: hidden;
   padding: 16px;
   background:
-    radial-gradient(circle at 100% 3%, rgba(255,245,178,.97) 0, rgba(255,245,178,.58) 23%, transparent 47%),
-    radial-gradient(circle at 0 100%, rgba(255,237,151,.72) 0, rgba(255,237,151,.32) 26%, transparent 51%),
-    linear-gradient(111deg, #e4e7e8 0%, #e9eae8 55%, #fff9dc 100%);
+    radial-gradient(circle at 100% 3%, rgb(125 125 124 / 97%) 0, rgb(203 201 190 / 58%) 23%, transparent 47%), radial-gradient(circle at 0 100%, rgb(97 96 95 / 72%) 0, rgb(204 204 204 / 32%) 26%, transparent 51%), linear-gradient(111deg, #e4e7e8 0%, #e9eae8 55%, #6f6e6d 100%);
 }
 
 .site-header {

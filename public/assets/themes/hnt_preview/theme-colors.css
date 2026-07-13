@@ -27,7 +27,7 @@
 
     /* Texte */
     --hnt-text: #30302e;
-    --hnt-text-strong: #2f2f2c;
+    --hnt-text-strong: #e2e2e2 ;
     --hnt-text-muted: #92918a;
     --hnt-text-soft: #8f8b82;
     --hnt-text-subtle: #62625d;
@@ -68,7 +68,7 @@
     --hnt-border-strong: #575752;
 
     /* Fortschrittsbalken */
-    --hnt-progress-fill: rgba(255, 205, 76, .94);
+    --hnt-progress-fill: rgb(182 78 68);
     --hnt-progress-track: rgba(47, 47, 44, .12);
 
     /* Bestehende Variablennamen bleiben als Brücke erhalten. */
@@ -91,9 +91,7 @@ body {
 
 .app-shell {
     background:
-        radial-gradient(circle at 100% 3%, var(--hnt-page-glow-top) 0, var(--hnt-page-glow-top-soft) 23%, transparent 47%),
-        radial-gradient(circle at 0 100%, var(--hnt-page-glow-bottom) 0, var(--hnt-page-glow-bottom-soft) 26%, transparent 51%),
-        linear-gradient(111deg, var(--hnt-page-base) 0%, var(--hnt-page-middle) 55%, var(--hnt-page-warm) 100%);
+  radial-gradient(circle at 100% 3%, rgb(125 125 124 / 97%) 0, rgb(203 201 190 / 58%) 23%, transparent 47%), radial-gradient(circle at 0 100%, rgb(97 96 95 / 72%) 0, rgb(204 204 204 / 32%) 26%, transparent 51%), linear-gradient(111deg, #e4e7e8 0%, #e9eae8 55%, #6f6e6d 100%);
 }
 
 body[data-page="members"] {
