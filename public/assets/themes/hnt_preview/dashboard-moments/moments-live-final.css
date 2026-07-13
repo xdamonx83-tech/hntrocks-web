@@ -1,0 +1,444 @@
+/* Final live Moments corrections. Keep this file after shared page CSS. */
+body[data-page="moments"] .moments-stage {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+}
+
+body[data-page="moments"] .moments-scroll {
+    min-width: 0;
+    min-height: 0;
+}
+
+body[data-page="moments"] .moments-filter-empty[hidden] {
+    display: none !important;
+}
+
+body[data-page="moments"] .moment-play-toggle {
+    width: 64px;
+    height: 64px;
+}
+
+body[data-page="moments"] .moment-play-toggle svg {
+    width: 25px !important;
+    height: 25px !important;
+    display: block;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.8 !important;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+body[data-page="moments"] .moment-caption h2 {
+    max-width: 100%;
+    font-size: clamp(18px, 1.22vw, 22px) !important;
+    line-height: 1.2;
+    letter-spacing: -.025em;
+}
+
+body[data-page="moments"] .moment-caption > p {
+    margin-top: 6px;
+    font-size: 7.5px !important;
+    line-height: 1.48;
+}
+
+body[data-page="moments"] .moment-tags,
+body[data-page="moments"] .moment-sound {
+    font-size: 6.8px;
+}
+
+body[data-page="moments"] .moment-follow-button {
+    right: -2px;
+    bottom: -3px;
+    border-color: var(--hnt-dark, #30302e);
+}
+
+body[data-page="moments"] .moment-follow-button.is-friend,
+body[data-page="moments"] .moment-follow-button.is-requested {
+    background: var(--hnt-surface-card-strong, #fafaf8);
+    color: var(--hnt-dark, #30302e);
+}
+
+body[data-page="moments"] .moment-follow-button svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Lightweight Moment composer. The full Studio remains available as an optional secondary action. */
+.hnt-moment-composer-backdrop {
+    position: fixed;
+    z-index: 360;
+    inset: 0;
+    display: none;
+    place-items: center;
+    padding: 20px;
+    background: rgb(48 48 46 / .54);
+}
+
+.hnt-moment-composer-backdrop.is-open {
+    display: grid;
+}
+
+body.hnt-moment-composer-open {
+    overflow: hidden !important;
+}
+
+.hnt-moment-composer {
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100dvh - 40px);
+    overflow: auto;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 28px;
+    background: var(--hnt-surface-card-strong, #fafaf8);
+    color: var(--hnt-text, #30302e);
+}
+
+.hnt-moment-composer-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 22px 17px;
+    border-bottom: .5px solid var(--hnt-border-soft, #deddd8);
+}
+
+.hnt-moment-composer-kicker {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--hnt-brand-red, rgb(182 78 68));
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.hnt-moment-composer-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -.025em;
+}
+
+.hnt-moment-composer-header p {
+    margin: 5px 0 0;
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 11px;
+}
+
+.hnt-moment-composer-close {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--hnt-surface-input, #ecece8);
+    color: var(--hnt-text, #30302e);
+    font: inherit;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.hnt-moment-composer-form {
+    display: grid;
+    gap: 15px;
+    padding: 20px 22px 22px;
+}
+
+.hnt-moment-upload-zone {
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 8px;
+    overflow: hidden;
+    padding: 18px;
+    border: .5px dashed var(--hnt-border-medium, #d8d7d1);
+    border-radius: 22px;
+    background: var(--hnt-surface-card, #f5f5f2);
+    text-align: center;
+    cursor: pointer;
+}
+
+.hnt-moment-upload-zone.is-dragging {
+    border-color: var(--hnt-brand-red, rgb(182 78 68));
+    background: var(--hnt-brand-red-soft, rgb(182 78 68 / .1));
+}
+
+.hnt-moment-upload-zone > input {
+    display: none;
+}
+
+.hnt-moment-upload-icon {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--hnt-brand-red, rgb(182 78 68));
+    color: #fff;
+    font-size: 22px;
+}
+
+.hnt-moment-upload-zone strong {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.hnt-moment-upload-zone small {
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 10px;
+}
+
+.hnt-moment-upload-preview {
+    width: 100%;
+    max-height: 310px;
+    display: none;
+    border-radius: 17px;
+    background: #171815;
+    object-fit: contain;
+}
+
+.hnt-moment-upload-zone.has-preview {
+    padding: 8px;
+}
+
+.hnt-moment-upload-zone.has-preview .hnt-moment-upload-placeholder {
+    display: none;
+}
+
+.hnt-moment-upload-zone.has-preview .hnt-moment-upload-preview {
+    display: block;
+}
+
+.hnt-moment-composer-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 190px;
+    gap: 12px;
+}
+
+.hnt-moment-composer-field {
+    display: grid;
+    gap: 6px;
+}
+
+.hnt-moment-composer-field.is-wide {
+    grid-column: 1 / -1;
+}
+
+.hnt-moment-composer-field > span {
+    color: var(--hnt-text-soft, #66645f);
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.hnt-moment-composer-field input,
+.hnt-moment-composer-field textarea,
+.hnt-moment-composer-field select {
+    width: 100%;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 15px;
+    background: var(--hnt-surface-input, #ecece8);
+    color: var(--hnt-text, #30302e);
+    font: inherit;
+    font-size: 11px;
+    outline: none;
+}
+
+.hnt-moment-composer-field input,
+.hnt-moment-composer-field select {
+    height: 44px;
+    padding: 0 13px;
+}
+
+.hnt-moment-composer-field textarea {
+    min-height: 86px;
+    resize: vertical;
+    padding: 12px 13px;
+    line-height: 1.5;
+}
+
+.hnt-moment-composer-field input:focus,
+.hnt-moment-composer-field textarea:focus,
+.hnt-moment-composer-field select:focus {
+    border-color: var(--hnt-brand-red, rgb(182 78 68));
+}
+
+.hnt-moment-cover-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 7px 10px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 15px;
+    background: var(--hnt-surface-input, #ecece8);
+}
+
+.hnt-moment-cover-row input {
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.hnt-moment-composer-status {
+    min-height: 18px;
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 10px;
+}
+
+.hnt-moment-composer-status.is-error {
+    color: var(--hnt-brand-red, rgb(182 78 68));
+}
+
+.hnt-moment-upload-progress {
+    height: 5px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--hnt-surface-input, #ecece8);
+}
+
+.hnt-moment-upload-progress > i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--hnt-brand-red, rgb(182 78 68));
+    transition: width .16s ease;
+}
+
+.hnt-moment-composer-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.hnt-moment-composer-footer > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hnt-moment-composer-footer a,
+.hnt-moment-composer-footer button {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 20px;
+    font: inherit;
+    font-size: 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.hnt-moment-composer-studio,
+.hnt-moment-composer-cancel {
+    background: var(--hnt-surface-input, #ecece8);
+    color: var(--hnt-text, #30302e);
+}
+
+.hnt-moment-composer-submit {
+    background: var(--hnt-brand-red, rgb(182 78 68));
+    color: #fff;
+}
+
+.hnt-moment-composer-submit:hover,
+.hnt-moment-composer-submit:focus-visible {
+    background: var(--hnt-brand-red-hover, rgb(163 66 58));
+}
+
+.hnt-moment-composer-submit:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+@media (max-width: 899px) {
+    body[data-page="moments"] .app-shell.moments-shell {
+        padding: 0;
+        gap: 0;
+        grid-template-rows: minmax(0, 1fr);
+    }
+
+    body[data-page="moments"] .moments-stage {
+        height: 100dvh;
+        gap: 8px;
+        padding: 8px;
+        border: 0;
+        border-radius: 0;
+    }
+
+    body[data-page="moments"] .moments-floating-head {
+        min-height: 58px;
+    }
+
+    body[data-page="moments"] .moment-video-card {
+        width: min(100%, 520px);
+        height: 100%;
+        max-height: none;
+    }
+
+    body[data-page="moments"] .moment-caption {
+        right: 76px;
+        bottom: 25px;
+        left: 15px;
+    }
+
+    body[data-page="moments"] .moment-caption h2 {
+        font-size: clamp(17px, 4.7vw, 21px) !important;
+    }
+
+    body[data-page="moments"] .moment-caption > p {
+        font-size: 7px !important;
+    }
+}
+
+@media (max-width: 700px) {
+    .hnt-moment-composer-backdrop {
+        padding: 0;
+    }
+
+    .hnt-moment-composer {
+        width: 100%;
+        height: 100dvh;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .hnt-moment-composer-header,
+    .hnt-moment-composer-form {
+        padding-inline: 16px;
+    }
+
+    .hnt-moment-composer-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .hnt-moment-composer-field.is-wide {
+        grid-column: auto;
+    }
+
+    .hnt-moment-composer-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hnt-moment-composer-footer > div,
+    .hnt-moment-composer-footer a,
+    .hnt-moment-composer-footer button {
+        width: 100%;
+    }
+}
