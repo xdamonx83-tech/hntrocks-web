@@ -13,23 +13,21 @@ document.addEventListener('DOMContentLoaded', function () {
         document.head.appendChild(style);
     }
 
-    const locale = String(document.documentElement.lang || 'de').toLowerCase();
-    const isEnglish = locale.startsWith('en');
     const storageKey = 'hntPreviewOpenChatTabsV2';
+    const i18n = window.HNT_PREVIEW_I18N?.comms || {};
     const labels = {
-        rail: isEnglish ? 'Active conversations' : 'Aktive Gespräche',
-        launcher: isEnglish ? 'Open message overview' : 'Nachrichtenübersicht öffnen',
-        launcherTitle: isEnglish ? 'Messages' : 'Nachrichten',
-        eyebrow: 'INBOX',
-        title: isEnglish ? 'Messages' : 'Nachrichten',
-        search: isEnglish ? 'Search conversations' : 'Gespräche suchen',
-        emptyTitle: isEnglish ? 'No conversations yet' : 'Noch keine Unterhaltungen',
-        emptyBody: isEnglish
-            ? 'Your existing private conversations will appear here.'
-            : 'Deine bestehenden privaten Unterhaltungen erscheinen hier.',
-        allMessages: isEnglish ? 'View all messages' : 'Alle Nachrichten ansehen',
-        conversation: isEnglish ? 'Conversation' : 'Gespräch',
-        close: isEnglish ? 'Close overview' : 'Übersicht schließen',
+        rail: String(i18n.rail || ''),
+        launcher: String(i18n.launcher || ''),
+        launcherTitle: String(i18n.launcher_title || ''),
+        eyebrow: String(i18n.eyebrow || ''),
+        title: String(i18n.title || ''),
+        search: String(i18n.search || ''),
+        emptyTitle: String(i18n.empty_title || ''),
+        emptyBody: String(i18n.empty_body || ''),
+        allMessages: String(i18n.all_messages || ''),
+        conversation: String(i18n.conversation || ''),
+        conversationsCount: String(i18n.conversations_count || ':count'),
+        close: String(i18n.close_overview || ''),
     };
 
     const panelSlot = document.createElement('div');
@@ -184,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         });
 
-        meta.textContent = String(sourceLinks.length) + (isEnglish ? ' conversations' : ' Gespräche');
+        meta.textContent = labels.conversationsCount.replace(':count', String(sourceLinks.length));
 
         if (rows.length === 0) {
             list.innerHTML = ''
