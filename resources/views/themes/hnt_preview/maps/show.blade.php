@@ -1,268 +1,170 @@
-@extends('themes.hnt_preview.maps.layout')
-
-@section('title', __('ui.maps_detail_meta_title', ['map' => $map['name']]))
-@section('robots', 'index,follow')
-@section('meta_description', __('ui.maps_detail_meta_description', ['map' => $map['name']]))
-@section('canonical', route('maps.show', $map['slug']))
-@section('og_title', __('ui.maps_detail_og_title', ['map' => $map['name']]))
-@section('og_description', __('ui.maps_detail_og_description', ['map' => $map['name']]))
-@section('og_url', route('maps.show', $map['slug']))
-@section('og_image', asset($map['image']))
-
-@section('content')
 @php
-    $viewer = auth()->user();
-    $viewerName = $viewer?->name ?: $viewer?->username;
-    $backUrl = $viewer ? route('feed.index') : route('home');
+    $detailLocaleIsEnglish = app()->getLocale() === 'en';
+    $detailSlug = (string) ($map['slug'] ?? 'stillwater-bayou');
+    $detailName = (string) ($map['name'] ?? 'Stillwater Bayou');
 @endphp
-
-<div class="hnt-map-app" data-map-app>
-    <button class="hnt-map-tools-trigger" type="button" data-map-tools-toggle aria-controls="hntMapTools" aria-expanded="false">
-        <i class="ph ph-sliders-horizontal" aria-hidden="true"></i>
-        <span>{{ __('ui.maps_tools_open') }}</span>
-    </button>
-    <button class="hnt-map-tools-backdrop" type="button" data-map-tools-backdrop aria-label="{{ __('ui.maps_tools_close') }}" tabindex="-1"></button>
-
-    <aside class="hnt-map-tools" id="hntMapTools" data-map-tools-panel aria-label="{{ __('ui.maps_tools_aria') }}">
-        <header class="hnt-map-tools-head">
-            <div>
-                <span class="hnt-map-tools-brand">HNT Maps</span>
-                <strong>{{ $map['name'] }}</strong>
-            </div>
-            <button type="button" class="hnt-map-tools-close" data-map-tools-close aria-label="{{ __('ui.maps_tools_close') }}">
-                <i class="ph ph-x" aria-hidden="true"></i>
-            </button>
-        </header>
-
-        <a class="hnt-map-home-link" href="{{ $backUrl }}">
-            <i class="ph ph-arrow-left" aria-hidden="true"></i>
-            {{ $viewer ? __('ui.maps_back_feed') : __('ui.maps_back_home') }}
-        </a>
-
-        <section class="hnt-map-account">
-            @if($viewer)
-                <span class="hnt-map-account-avatar">
-                    @if($viewer->avatarUrl())
-                        <img src="{{ $viewer->avatarUrl() }}" alt="">
-                    @else
-                        <i class="ph ph-user" aria-hidden="true"></i>
-                    @endif
-                </span>
-                <div>
-                    <span>{{ __('ui.maps_signed_in_as') }}</span>
-                    <strong>{{ $viewerName }}</strong>
-                    <a href="{{ route('profile.show') }}">{{ __('ui.preview_nav_profile') }}</a>
-                </div>
-            @else
-                <span class="hnt-map-account-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
-                <div>
-                    <strong>{{ __('ui.maps_guest_title') }}</strong>
-                    <span>{{ __('ui.maps_guest_text') }}</span>
-                    <span class="hnt-map-account-links"><a href="{{ route('login') }}">{{ __('ui.login') }}</a><a href="{{ route('register') }}">{{ __('ui.register') }}</a></span>
-                </div>
-            @endif
-        </section>
-
-        <div class="hnt-map-tools-scroll">
-            <section class="hnt-map-tool-section">
-                <label for="hntMapSelect">{{ __('ui.maps_choose_map') }}</label>
-                <div class="hnt-map-select-wrap">
-                    <i class="ph ph-map-trifold" aria-hidden="true"></i>
-                    <select id="hntMapSelect" data-map-select>
-                        @foreach($availableMaps as $availableMap)
-                            <option value="{{ $availableMap['url'] }}" @selected($availableMap['slug'] === $map['slug'])>{{ $availableMap['name'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <a class="hnt-map-overview-link" href="{{ route('maps.index') }}">{{ __('ui.maps_back') }}</a>
-            </section>
-
-            <section class="hnt-map-tool-section">
-                <label for="hntMapSearch">{{ __('ui.maps_search') }}</label>
-                <div class="hnt-map-search-wrap">
-                    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-                    <input id="hntMapSearch" type="search" placeholder="{{ __('ui.maps_search_placeholder') }}" autocomplete="off" aria-controls="hntMapSearchResults" aria-expanded="false">
-                </div>
-                <div id="hntMapSearchResults" class="hnt-map-search-results" role="listbox" aria-label="{{ __('ui.maps_search_results') }}" hidden></div>
-                <small>{{ __('ui.maps_search_help') }}</small>
-            </section>
-
-            <section class="hnt-map-tool-section" aria-label="{{ __('ui.maps_filters') }}">
-                <div class="hnt-map-tool-title">
-                    <span>{{ __('ui.maps_filters') }}</span>
-                    <small>{{ __('ui.maps_filter_help') }}</small>
-                </div>
-                <div class="hnt-map-filter-options">
-                    @foreach($markerTypes as $type)
-                        <label class="hnt-map-filter-chip hnt-map-filter-chip--{{ $type }}">
-                            <input type="checkbox" value="{{ $type }}" checked data-map-filter>
-                            <span aria-hidden="true"></span>{{ __('ui.maps_type_'.$type) }}
-                        </label>
-                    @endforeach
-                </div>
-            </section>
-
-            @if($map['lines_url'])
-                <section class="hnt-map-tool-section">
-                    <div class="hnt-map-tool-title">
-                        <span>{{ __('ui.maps_layers') }}</span>
-                    </div>
-                    <label class="hnt-map-layer-toggle">
-                        <span><i class="ph ph-path" aria-hidden="true"></i>{{ __('ui.maps_layer_lines') }}</span>
-                        <input type="checkbox" checked data-map-lines-toggle>
-                    </label>
-                </section>
-            @endif
-
-            <section class="hnt-map-tool-section" aria-labelledby="hntMapMeasureTitle">
-                <div class="hnt-map-tool-title">
-                    <span id="hntMapMeasureTitle">{{ __('ui.maps_measure') }}</span>
-                    <small>{{ __('ui.maps_measure_help') }}</small>
-                </div>
-                <div class="hnt-map-tool-actions">
-                    <button type="button" class="hnt-map-tool-button" data-map-measure-toggle aria-pressed="false">
-                        <i class="ph ph-ruler" aria-hidden="true"></i><span>{{ __('ui.maps_measure_start') }}</span>
-                    </button>
-                    <button type="button" class="hnt-map-tool-button hnt-map-tool-button--muted" data-map-measure-reset disabled>
-                        <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>{{ __('ui.maps_measure_reset') }}</span>
-                    </button>
-                </div>
-                <p class="hnt-map-measure-status" data-map-measure-status role="status">{{ __('ui.maps_measure_idle') }}</p>
-            </section>
-
-            <section class="hnt-map-tool-section">
-                <div class="hnt-map-tool-title">
-                    <span>{{ __('ui.maps_share_view') }}</span>
-                    <small>{{ __('ui.maps_share_help') }}</small>
-                </div>
-                <button type="button" class="hnt-map-tool-button" data-map-share>
-                    <i class="ph ph-link" aria-hidden="true"></i><span>{{ __('ui.maps_share_view') }}</span>
-                </button>
-                <label class="hnt-map-share-fallback" data-map-share-fallback hidden>
-                    <span>{{ __('ui.maps_share_fallback') }}</span>
-                    <input type="text" readonly data-map-share-url>
-                </label>
-            </section>
-
-            <section class="hnt-map-tool-section">
-                <div class="hnt-map-tool-title">
-                    <span>{{ __('ui.maps_cash_spot_submit') }}</span>
-                    <small>{{ __('ui.maps_cash_spot_submit_help') }}</small>
-                </div>
-                <button type="button" class="hnt-map-tool-button" data-map-cash-spot-toggle aria-pressed="false">
-                    <i class="ph ph-map-pin-plus" aria-hidden="true"></i><span>{{ __('ui.maps_cash_spot_submit') }}</span>
-                </button>
-            </section>
-        </div>
-
-        <footer class="hnt-map-tools-footer">
-            <button type="button" class="btn-create hnt-map-reset" data-map-reset>
-                <i class="ph ph-arrows-out-cardinal" aria-hidden="true"></i>{{ __('ui.maps_reset_view') }}
-            </button>
-            <span>{{ __('ui.maps_read_only') }}</span>
-        </footer>
-    </aside>
-
-    <main class="hnt-map-stage">
-        @if(! $imageAvailable || $dataError)
-            <section class="hnt-map-error" role="status">
-                <i class="ph ph-map-trifold" aria-hidden="true"></i>
-                <div>
-                    <span>{{ __('ui.maps_unavailable_kicker') }}</span>
-                    <h1>{{ __('ui.maps_unavailable_title') }}</h1>
-                    <p>
-                        @if(! $imageAvailable)
-                            {{ __('ui.maps_image_missing') }}
-                        @else
-                            {{ $dataError === 'missing' ? __('ui.maps_data_missing') : __('ui.maps_data_invalid') }}
-                        @endif
-                    </p>
-                </div>
-            </section>
-        @else
-            <div id="hntMap" class="hnt-map-canvas" aria-label="{{ __('ui.maps_canvas_aria', ['map' => $map['name']]) }}"></div>
-            <p class="hnt-map-measure-hint" data-map-measure-hint hidden>{{ __('ui.maps_measure_point_a') }}</p>
-            <p class="hnt-map-measure-hint" data-map-cash-spot-hint hidden>{{ __('ui.maps_cash_spot_select') }}</p>
-            @if(empty($markers))
-                <p class="hnt-map-empty-markers">{{ __('ui.maps_no_markers') }}</p>
-            @endif
-            <script id="hntMapConfig" type="application/json">{!! json_encode([
-                'imageUrl' => $map['image_url'],
-                'linesUrl' => $map['lines_url'],
-                'width' => $map['width'],
-                'height' => $map['height'],
-                'markers' => $markers,
-                'typeLabels' => collect($markerTypes)
-                    ->mapWithKeys(fn ($type) => [$type => __('ui.maps_type_'.$type)]),
-                'searchEmptyText' => __('ui.maps_search_empty'),
-                'measureStartText' => __('ui.maps_measure_start'),
-                'measureEndText' => __('ui.maps_measure_end'),
-                'measureIdleText' => __('ui.maps_measure_idle'),
-                'measurePointAText' => __('ui.maps_measure_point_a'),
-                'measurePointBText' => __('ui.maps_measure_point_b'),
-                'measureSavedText' => __('ui.maps_measure_saved'),
-                'measureDistanceText' => __('ui.maps_measure_distance'),
-                'measureMarkerAText' => __('ui.maps_measure_marker_a'),
-                'measureMarkerBText' => __('ui.maps_measure_marker_b'),
-                'shareSuccessText' => __('ui.maps_share_success'),
-                'viewerIsAuthenticated' => auth()->check(),
-                'cashSpotSubmissionUrl' => $map['cash_spot_submission_url'],
-                'cashScreenshotText' => __('ui.maps_cash_screenshot'),
-                'cashScreenshotErrorText' => __('ui.maps_cash_screenshot_error'),
-                'cashSpotSelectText' => __('ui.maps_cash_spot_select'),
-                'cashSpotRunningText' => __('ui.maps_cash_spot_running'),
-                'cashSpotPendingText' => __('ui.maps_cash_spot_pending'),
-                'cashSpotErrorText' => __('ui.maps_cash_spot_error'),
-                'cashSpotDetailTitle' => __('ui.maps_cash_spot_detail_title'),
-                'cashSpotEyebrowText' => __('ui.maps_cash_spot_eyebrow'),
-                'cashSpotHelpfulText' => __('ui.maps_cash_spot_helpful'),
-                'cashSpotUpvoteText' => __('ui.maps_cash_spot_upvote'),
-                'cashSpotDownvoteText' => __('ui.maps_cash_spot_downvote'),
-                'cashSpotVoteAnonymousHintText' => __('ui.maps_cash_spot_vote_anonymous_hint'),
-                'cashSpotCommentsTitleText' => __('ui.maps_cash_spot_comments_title'),
-                'cashSpotCommentsLoadingText' => __('ui.maps_cash_spot_comments_loading'),
-                'cashSpotCommentsEmptyText' => __('ui.maps_cash_spot_comments_empty'),
-                'cashSpotCommentPlaceholderText' => __('ui.maps_cash_spot_comment_placeholder'),
-                'cashSpotCommentSendText' => __('ui.maps_cash_spot_comment_send'),
-                'cashSpotCommentLoginText' => __('ui.maps_cash_spot_comment_login'),
-                'cashSpotCommentErrorText' => __('ui.maps_cash_spot_comment_error'),
-                'cashSpotCommentEditText' => __('ui.maps_cash_spot_comment_edit'),
-                'cashSpotCommentDeleteText' => __('ui.maps_cash_spot_comment_delete'),
-                'cashSpotCommentDeleteConfirmText' => __('ui.maps_cash_spot_comment_delete_confirm'),
-                'cashSpotCommentSaveText' => __('ui.maps_cash_spot_comment_save'),
-                'cashSpotCommentCancelText' => __('ui.maps_cash_spot_comment_cancel'),
-                'cashSpotCommentDeletedText' => __('ui.maps_cash_spot_comment_deleted'),
-                'cashSpotCommentUpdatedText' => __('ui.maps_cash_spot_comment_updated'),
-                'cashSpotVoteErrorText' => __('ui.maps_cash_spot_vote_error'),
-                'closeText' => __('ui.maps_close'),
-            ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
-
-            <div class="hnt-map-lightbox hnt-map-cash-submission-modal" data-map-cash-spot-modal hidden>
-                <div class="hnt-map-lightbox-panel hnt-map-cash-submission-panel" role="dialog" aria-modal="true" aria-labelledby="hntCashSpotSubmissionTitle">
-                    <header class="hnt-map-lightbox-header">
-                        <h2 id="hntCashSpotSubmissionTitle">{{ __('ui.maps_cash_spot_form_title') }}</h2>
-                        <button type="button" class="hnt-map-lightbox-close" data-map-cash-spot-cancel aria-label="{{ __('ui.maps_close') }}"><i class="ph ph-x" aria-hidden="true"></i></button>
-                    </header>
-                    <form class="hnt-map-cash-submission-form" data-map-cash-spot-form>
-                        <p>{{ __('ui.maps_cash_spot_form_help') }}</p>
-                        <input type="hidden" name="x">
-                        <input type="hidden" name="y">
-                        <label><span>{{ __('ui.maps_cash_spot_screenshot') }}</span><input type="file" name="image" accept="image/jpeg,image/png,image/webp" required></label>
-                        <label data-map-cash-spot-guest-field @auth hidden @endauth><span>{{ __('ui.maps_cash_spot_name') }}</span><input type="text" name="submitter_name" maxlength="80" @auth disabled @endauth></label>
-                        <label data-map-cash-spot-guest-field @auth hidden @endauth><span>{{ __('ui.maps_cash_spot_email') }}</span><input type="email" name="submitter_email" maxlength="160" @auth disabled @endauth></label>
-                        <input class="hnt-map-upload-honeypot" type="text" name="website" maxlength="120" tabindex="-1" autocomplete="off" aria-hidden="true">
-                        <p class="hnt-map-cash-submission-status" data-map-cash-spot-status role="status"></p>
-                        <div class="hnt-map-cash-submission-actions">
-                            <button type="button" class="hnt-map-popup-action" data-map-cash-spot-cancel>{{ __('ui.maps_cash_spot_cancel') }}</button>
-                            <button type="submit" class="hnt-map-popup-action">{{ __('ui.maps_cash_spot_send') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        @endif
-
-        <p class="hnt-map-toast" data-map-toast role="status" hidden></p>
-        <p class="hnt-map-disclaimer">{{ __('ui.maps_disclaimer') }}</p>
-    </main>
+<!DOCTYPE html>
+<html lang="{{ $detailLocaleIsEnglish ? 'en' : 'de' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="robots" content="index,follow">
+<title>HNT.ROCKS — {{ $detailName }}</title>
+<meta name="description" content="{{ __('ui.maps_detail_meta_description', ['map' => $detailName]) }}">
+<link rel="canonical" href="{{ route('maps.show', $detailSlug) }}">
+<meta property="og:title" content="HNT.ROCKS — {{ $detailName }}">
+<meta property="og:description" content="{{ __('ui.maps_detail_meta_description', ['map' => $detailName]) }}">
+<meta property="og:url" content="{{ route('maps.show', $detailSlug) }}">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link data-hnt-theme-colors href="{{ asset('assets/themes/hnt_preview/theme-colors.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/theme-colors.css')) ?: time() }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-maps/map-detail-live.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-maps/map-detail-live.css')) ?: time() }}" rel="stylesheet">
+</head>
+<body data-page="map-detail" data-map-slug="{{ $detailSlug }}">
+@include('themes.hnt_preview.partials.icons')
+<main class="app-shell map-detail-page-shell">
+@include('themes.hnt_preview.partials.header')
+<section class="map-detail-stage">
+<div class="map-detail-scroll" id="mapDetailScroll">
+<section class="map-detail-heading">
+<div>
+<span>HNT.ROCKS HUNTMAP</span>
+<h1 id="mapDetailTitle">Stillwater Bayou</h1>
+<div class="map-detail-heading-meta">
+<span class="live"><i></i>Live</span>
+<span id="mapDetailSubtitle">Klassischer Bayou · 2048 × 2048</span>
+<span>Interaktive Marker</span>
+<span>Community-Daten</span>
 </div>
-@endsection
+</div>
+<div class="map-detail-heading-stats">
+<article><strong id="mapStatMarkers">128</strong><span>Marker</span></article>
+<article><strong id="mapStatCash">38</strong><span>Cash Spots</span></article>
+<article><strong id="mapStatComments">64</strong><span>Kommentare</span></article>
+</div>
+</section>
+<section class="map-detail-workspace">
+<aside class="map-detail-left">
+<article class="map-switch-card">
+<header>
+<div><span>KARTEN</span><h2>Map wechseln</h2></div>
+<a aria-label="Zur Übersicht" href="{{ route('maps.index') }}"><svg><use href="#i-arrow"></use></svg></a>
+</header>
+<div class="map-switch-list">
+<button class="map-switch-item active" data-map-switch="stillwater-bayou" type="button">
+<img alt="" src="/assets/themes/hnt_preview/dashboard-maps/demo/stillwater-bayou.svg"/>
+<span><strong>Stillwater Bayou</strong><small>Klassischer Bayou · 2048 × 2048</small></span>
+<i><svg><use href="#i-arrow"></use></svg></i>
+</button>
+<button class="map-switch-item" data-map-switch="lawson-delta" type="button">
+<img alt="" src="/assets/themes/hnt_preview/dashboard-maps/demo/lawson-delta.svg"/>
+<span><strong>Lawson Delta</strong><small>Industriegebiet · 2048 × 2048</small></span>
+<i><svg><use href="#i-arrow"></use></svg></i>
+</button>
+<button class="map-switch-item" data-map-switch="desalle" type="button">
+<img alt="" src="/assets/themes/hnt_preview/dashboard-maps/demo/desalle.svg"/>
+<span><strong>DeSalle</strong><small>Höhenunterschiede · 2048 × 2048</small></span>
+<i><svg><use href="#i-arrow"></use></svg></i>
+</button>
+<button class="map-switch-item" data-map-switch="mammons-gulch" type="button">
+<img alt="" src="/assets/themes/hnt_preview/dashboard-maps/demo/mammons-gulch.svg"/>
+<span><strong>Mammon's Gulch</strong><small>Gebirgiges Terrain · 2048 × 2048</small></span>
+<i><svg><use href="#i-arrow"></use></svg></i>
+</button>
+</div>
+</article>
+<article class="map-filter-card">
+<header>
+<div><span>MARKER</span><h2>Filter</h2></div>
+<button id="resetMapFilters" type="button">Alle</button>
+</header>
+<label class="map-filter-search">
+<svg><use href="#i-search"></use></svg>
+<input id="mapMarkerSearch" placeholder="Marker suchen" type="search"/>
+</label>
+<div class="map-filter-list">
+<label class="map-filter-chip active" data-filter-chip="compound"><input checked type="checkbox" value="compound"/><i></i><span>Compounds</span><b>9</b></label>
+<label class="map-filter-chip active" data-filter-chip="boss"><input checked type="checkbox" value="boss"/><i></i><span>Bosse</span><b>1</b></label>
+<label class="map-filter-chip active" data-filter-chip="spawn"><input checked type="checkbox" value="spawn"/><i></i><span>Spawns</span><b>1</b></label>
+<label class="map-filter-chip active" data-filter-chip="supply"><input checked type="checkbox" value="supply"/><i></i><span>Supply</span><b>1</b></label>
+<label class="map-filter-chip active" data-filter-chip="extract"><input checked type="checkbox" value="extract"/><i></i><span>Extracts</span><b>1</b></label>
+<label class="map-filter-chip active" data-filter-chip="cash"><input checked type="checkbox" value="cash"/><i></i><span>Cash Spots</span><b>3</b></label>
+<label class="map-filter-chip active" data-filter-chip="tower"><input checked type="checkbox" value="tower"/><i></i><span>Türme</span><b>1</b></label>
+<label class="map-filter-chip active" data-filter-chip="bugs"><input checked type="checkbox" value="bugs"/><i></i><span>Bugs</span><b>1</b></label>
+<label class="map-filter-chip active" data-filter-chip="wild"><input checked type="checkbox" value="wild"/><i></i><span>Wild</span><b>1</b></label>
+<label class="map-filter-chip active" data-filter-chip="tarot"><input checked type="checkbox" value="tarot"/><i></i><span>Tarot</span><b>1</b></label>
+</div>
+</article>
+<article class="map-layer-card">
+<header><span>EBENEN</span><h2>Darstellung</h2></header>
+<label><span><strong>Verbindungslinien</strong><small>Routen zwischen Compounds</small></span><input checked id="toggleMapLines" type="checkbox"/><i></i></label>
+<label><span><strong>Beschriftungen</strong><small>Namen direkt auf der Karte</small></span><input checked id="toggleMapLabels" type="checkbox"/><i></i></label>
+</article>
+</aside>
+<section class="map-detail-center">
+<header class="map-canvas-toolbar">
+<div><span>INTERAKTIVE KARTE</span><h2 id="mapCanvasTitle">Stillwater Bayou</h2></div>
+<div class="map-toolbar-actions">
+<button aria-label="Herauszoomen" id="mapZoomOut" type="button">−</button>
+<button aria-label="Hineinzoomen" id="mapZoomIn" type="button">+</button>
+<button id="mapResetView" type="button"><svg><use href="#i-sliders"></use></svg> Ansicht</button>
+<button id="mapMeasureToggle" type="button"><svg><use href="#i-arrow"></use></svg> Messen</button>
+<button id="mapShareView" type="button"><svg><use href="#i-share"></use></svg> Teilen</button>
+<button id="mapOpenMarkerDetails" type="button"><svg><use href="#i-eye"></use></svg> Details</button>
+<button id="mapOpenMarkerComments" type="button"><svg><use href="#i-comment"></use></svg> Kommentare</button>
+</div>
+</header>
+<div class="map-canvas-frame" id="mapCanvasFrame">
+<div class="map-canvas-surface" id="mapCanvasSurface">
+<img alt="Stillwater Bayou Karte" id="mapCanvasImage" src="/assets/themes/hnt_preview/dashboard-maps/demo/stillwater-bayou.svg"/>
+<div aria-hidden="true" class="map-line-overlay" id="mapLineOverlay"><svg preserveaspectratio="none" viewbox="0 0 1000 720"><path d="M180 150L390 120L690 150M205 350L470 320L735 350M275 555L560 520L810 555M390 120L470 320L560 520M690 150L735 350L810 555"></path><path class="soft" d="M180 150L205 350L275 555M690 150L470 320L275 555"></path></svg></div>
+<div class="map-label-layer" id="mapLabelLayer">
+<span style="left:12%;top:14%">Healing-Waters Church</span><span style="left:34%;top:10%">Pitching Crematorium</span><span style="left:64%;top:11%">Stillwater Bend</span><span style="left:14%;top:40%">Scupper Lake</span><span style="left:41%;top:36%">Lockbay Docks</span><span style="left:68%;top:37%">Darrow Livestock</span><span style="left:20%;top:69%">Catfish Grove</span><span style="left:51%;top:65%">The Chapel</span><span style="left:75%;top:69%">Blanchett Graves</span>
+</div>
+<div class="map-marker-layer" id="mapMarkerLayer">
+<button aria-label="Healing-Waters Church" class="map-detail-marker marker-compound" data-marker-label="Healing-Waters Church" data-marker-type="compound" style="left:18%;top:21%" type="button"><span>C</span></button>
+<button aria-label="Pitching Crematorium" class="map-detail-marker marker-compound" data-marker-label="Pitching Crematorium" data-marker-type="compound" style="left:38%;top:17%" type="button"><span>C</span></button>
+<button aria-label="Stillwater Bend" class="map-detail-marker marker-compound" data-marker-label="Stillwater Bend" data-marker-type="compound" style="left:68%;top:18%" type="button"><span>C</span></button>
+<button aria-label="Scupper Lake" class="map-detail-marker marker-compound" data-marker-label="Scupper Lake" data-marker-type="compound" style="left:20%;top:47%" type="button"><span>C</span></button>
+<button aria-label="Lockbay Docks" class="map-detail-marker marker-compound" data-marker-label="Lockbay Docks" data-marker-type="compound" style="left:45%;top:43%" type="button"><span>C</span></button>
+<button aria-label="Darrow Livestock" class="map-detail-marker marker-compound" data-marker-label="Darrow Livestock" data-marker-type="compound" style="left:73%;top:44%" type="button"><span>C</span></button>
+<button aria-label="Catfish Grove" class="map-detail-marker marker-compound" data-marker-label="Catfish Grove" data-marker-type="compound" style="left:27%;top:76%" type="button"><span>C</span></button>
+<button aria-label="The Chapel" class="map-detail-marker marker-compound" data-marker-label="The Chapel" data-marker-type="compound" style="left:56%;top:72%" type="button"><span>C</span></button>
+<button aria-label="Blanchett Graves" class="map-detail-marker marker-compound" data-marker-label="Blanchett Graves" data-marker-type="compound" style="left:80%;top:76%" type="button"><span>C</span></button>
+<button aria-label="Oben in der Scheune" class="map-detail-marker marker-cash selected" data-marker-label="Oben in der Scheune" data-marker-type="cash" style="left:47%;top:53%" type="button"><span>C</span></button>
+<button aria-label="Im Lair unter der Treppe" class="map-detail-marker marker-cash" data-marker-label="Im Lair unter der Treppe" data-marker-type="cash" style="left:34%;top:59%" type="button"><span>C</span></button>
+<button aria-label="Kiste hinter der Hütte" class="map-detail-marker marker-cash" data-marker-label="Kiste hinter der Hütte" data-marker-type="cash" style="left:71%;top:62%" type="button"><span>C</span></button>
+<button aria-label="Tarotkarte" class="map-detail-marker marker-tarot" data-marker-label="Tarotkarte" data-marker-type="tarot" style="left:52%;top:31%" type="button"><span>T</span></button>
+<button aria-label="Wild Target" class="map-detail-marker marker-wild" data-marker-label="Wild Target" data-marker-type="wild" style="left:15%;top:67%" type="button"><span>W</span></button>
+<button aria-label="Supply Point" class="map-detail-marker marker-supply" data-marker-label="Supply Point" data-marker-type="supply" style="left:84%;top:31%" type="button"><span>S</span></button>
+<button aria-label="Extraction" class="map-detail-marker marker-extract" data-marker-label="Extraction" data-marker-type="extract" style="left:89%;top:69%" type="button"><span>E</span></button>
+<button aria-label="Spawn" class="map-detail-marker marker-spawn" data-marker-label="Spawn" data-marker-type="spawn" style="left:10%;top:29%" type="button"><span>S</span></button>
+<button aria-label="Wachturm" class="map-detail-marker marker-tower" data-marker-label="Wachturm" data-marker-type="tower" style="left:62%;top:84%" type="button"><span>T</span></button>
+<button aria-label="Boss Lair" class="map-detail-marker marker-boss" data-marker-label="Boss Lair" data-marker-type="boss" style="left:41%;top:33%" type="button"><span>B</span></button>
+<button aria-label="Gemeldeter Kartenfehler" class="map-detail-marker marker-bugs" data-marker-label="Gemeldeter Kartenfehler" data-marker-type="bugs" style="left:77%;top:27%" type="button"><span>B</span></button>
+</div>
+<div class="map-selected-popover" id="mapSelectedPopover" style="left:49%;top:52%"><span>CASH SPOT</span><strong id="mapPopoverTitle">Oben in der Scheune</strong><small id="mapPopoverMeta">Healing-Waters Church · 18 hilfreich</small><button id="openMarkerDetails" type="button">Details</button></div>
+<div class="map-measure-layer" hidden id="mapMeasureLayer"><i class="point-a"></i><i class="point-b"></i><span>184 m</span></div>
+</div>
+<div class="map-canvas-status"><span id="mapZoomText">100%</span><span id="mapVisibleCount">20 Marker sichtbar</span><span id="mapCoordinates">X 942 · Y 1455</span><button id="submitCashSpot" type="button"><svg><use href="#i-image"></use></svg> Cash Spot einreichen</button></div>
+</div>
+</section>
+</section>
+</div>
+</section>
+<div class="map-overlay-modal" hidden id="markerDetailModal"><div aria-labelledby="markerDetailTitle" aria-modal="true" class="map-overlay-panel marker-overlay-panel" role="dialog"><article class="marker-detail-card"><header><div><span>AUSGEWÄHLTER MARKER</span><h2 id="markerDetailTitle">Oben in der Scheune</h2></div><button aria-label="Marker-Details schließen" id="closeMarkerDetails" type="button">×</button></header><div class="marker-detail-preview"><img alt="" id="markerDetailImage" src="/assets/themes/hnt_preview/dashboard-maps/demo/stillwater-bayou.svg"/><span id="markerDetailType">Cash Spot</span></div><div class="marker-detail-meta"><article><span>Bereich</span><strong id="markerDetailArea">Healing-Waters Church</strong></article><article><span>Koordinaten</span><strong id="markerDetailCoords">X 942 · Y 1455</strong></article><article><span>Status</span><strong class="verified">Bestätigt</strong></article></div><div class="marker-vote-row"><div><span>War dieser Fundort hilfreich?</span><small>Auch Gäste können abstimmen.</small></div><button id="markerVoteUp" type="button">↑ <b id="markerVoteCount">18</b></button><button id="markerVoteDown" type="button">↓ 2</button></div><div class="marker-detail-modal-actions"><button id="openCommentsFromDetails" type="button">Kommentare ansehen</button><button id="closeMarkerDetailsFooter" type="button">Schließen</button></div></article></div></div>
+<div class="map-overlay-modal" hidden id="markerCommentsModal"><div aria-labelledby="markerCommentsTitle" aria-modal="true" class="map-overlay-panel comments-overlay-panel" role="dialog"><article class="marker-comments-card"><header><div><span>COMMUNITY</span><h2 id="markerCommentsTitle">Kommentare</h2></div><div class="marker-comments-head-tools"><strong id="markerCommentCount">6</strong><button aria-label="Kommentare schließen" id="closeMarkerComments" type="button">×</button></div></header><div class="marker-comment-list" id="markerCommentList"><article><img alt="" src="/assets/vikinger/img/default-avatar.svg"/><div><strong>Katy Fuller</strong><p>War gestern noch da. Der Spot liegt oben hinter den Kisten.</p><small>vor 12 Min.</small></div></article><article><img alt="" src="/assets/vikinger/img/default-avatar.svg"/><div><strong>Jonathan Kelly</strong><p>Bestätigt. Von der Westseite aus am schnellsten erreichbar.</p><small>vor 34 Min.</small></div></article></div><form id="markerCommentForm"><img alt="" src="/assets/vikinger/img/default-avatar.svg"/><input id="markerCommentInput" maxlength="180" placeholder="Kommentar schreiben …" type="text"/><button type="submit">→</button></form></article></div></div>
+<div class="map-cash-modal" hidden id="mapCashModal"><div aria-labelledby="mapCashModalTitle" aria-modal="true" class="map-cash-modal-panel" role="dialog"><header><div><span>CASH SPOT</span><h2 id="mapCashModalTitle">Neuen Fundort einreichen</h2></div><button id="closeCashModal" type="button">×</button></header><p>Wähle den Punkt auf der Karte und lade einen gut erkennbaren Screenshot hoch. Neue Fundorte werden vor der Freischaltung geprüft.</p><label><span>Screenshot</span><input accept="image/jpeg,image/png,image/webp" type="file"/></label><label><span>Kurze Beschreibung</span><input maxlength="120" type="text" value="Oben in der Scheune hinter den Kisten"/></label><div class="map-cash-modal-coords"><span>Ausgewählte Position</span><strong id="modalCoords">X 942 · Y 1455</strong></div><footer><button id="cancelCashModal" type="button">Abbrechen</button><button id="sendCashModal" type="button">Einreichen</button></footer></div></div>
+<div class="toast" id="toast"></div>
+</main>
+<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = @json(route('feed.index'));</script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/app.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time() }}"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-maps/map-detail-live.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-maps/map-detail-live.js')) ?: time() }}"></script>
+</body>
+</html>
