@@ -4,6 +4,15 @@
   const root = document.querySelector('.feed-shell');
   if (!root || !window.fetch || window.HNT_DASHBOARD_FEED_LIVE !== true) return;
 
+  const i18n = window.HNT_DASHBOARD_I18N || {};
+  const t = (key, fallback = '', replacements = {}) => {
+    let value = String(i18n[key] || fallback);
+    Object.entries(replacements).forEach(([name, replacement]) => {
+      value = value.replace(`:${name}`, String(replacement));
+    });
+    return value;
+  };
+
   const formatNumber = (value) => new Intl.NumberFormat(document.documentElement.lang || 'de')
     .format(Number.parseInt(value, 10) || 0);
 
@@ -54,18 +63,18 @@
     const metrics = document.querySelectorAll('.overview-progress .overview-metric');
     setMetric(
       metrics[0],
-      'Wochenaufträge',
+      t('weekly_contracts', 'Weekly Contracts'),
       `${progress.completed || 0} / ${progress.total || 0}`,
       progress.completion_percent || 0,
     );
-    setMetric(metrics[2], 'Level-Fortschritt', `${progress.level_progress || 0}%`, progress.level_progress || 0);
+    setMetric(metrics[2], t('level_progress', 'Level Progress'), `${progress.level_progress || 0}%`, progress.level_progress || 0);
     setMetric(metrics[3], 'Rocks', formatNumber(profile.rocks || 0));
 
     const counters = document.querySelectorAll('.overview-counts article');
     const values = [
-      [badges.messages || 0, 'Nachrichten'],
-      [badges.notifications || 0, 'Hinweise'],
-      [badges.friends || 0, 'Anfragen'],
+      [badges.messages || 0, t('messages', 'Messages')],
+      [badges.notifications || 0, t('notifications', 'Notifications')],
+      [badges.friends || 0, t('requests', 'Requests')],
     ];
 
     counters.forEach((counter, index) => {
@@ -102,17 +111,19 @@
     const next = progress.next_open || null;
     const level = Math.max(1, Number(profile.level) || 1);
     const aggregateStatus = total === 0
-      ? { label: 'Keine', css: 'review-status' }
+      ? { label: t('none', 'None'), css: 'review-status' }
       : open === 0
-        ? { label: 'Erledigt', css: 'open-status' }
-        : { label: 'Aktiv', css: 'active-status' };
+        ? { label: t('done', 'Done'), css: 'open-status' }
+        : { label: t('active', 'Active'), css: 'active-status' };
 
     const rows = [
       progressRow({
         icon: 'W',
         iconClass: 'contract',
-        title: 'Wochenaufträge',
-        subtitle: total > 0 ? `${open} noch offen` : 'Aktuell keine aktiven Aufträge',
+        title: t('weekly_contracts', 'Weekly Contracts'),
+        subtitle: total > 0
+          ? t('open_remaining', ':count still open', { count: open })
+          : t('no_active_contracts', 'No active contracts right now'),
         value: `${completed} / ${total}`,
         percent: progress.completion_percent || 0,
         reward: `${formatNumber(progress.available_xp || 0)} XP`,
@@ -123,41 +134,45 @@
         ? progressRow({
             icon: 'N',
             iconClass: 'challenge',
-            title: next.name || 'Wochenauftrag',
-            subtitle: next.action || 'Wochenauftrag',
+            title: next.name || t('weekly_contract', 'Weekly Contract'),
+            subtitle: next.action || t('weekly_contract', 'Weekly Contract'),
             value: `${next.current || 0} / ${next.target || 0}`,
             percent: next.percent || 0,
             reward: next.reward || '+0 XP',
-            status: String(next.status || 'Offen').split('·')[0].trim(),
+            status: t('open', 'Open'),
             statusClass: 'open-status',
           })
         : progressRow({
             icon: '✓',
             iconClass: 'challenge',
-            title: total > 0 ? 'Alle Aufträge erledigt' : 'Keine Wochenaufträge',
-            subtitle: total > 0 ? 'Starker Wochenfortschritt' : 'Aktuell ist nichts offen',
+            title: total > 0
+              ? t('all_contracts_done', 'All contracts completed')
+              : t('no_weekly_contracts', 'No weekly contracts'),
+            subtitle: total > 0
+              ? t('strong_weekly_progress', 'Strong weekly progress')
+              : t('nothing_open', 'Nothing is open right now'),
             value: total > 0 ? '100%' : '—',
             percent: total > 0 ? 100 : 0,
             reward: `${formatNumber(progress.claimed_xp || 0)} XP`,
-            status: total > 0 ? 'Fertig' : 'Keine',
+            status: total > 0 ? t('finished', 'Finished') : t('none', 'None'),
             statusClass: total > 0 ? 'open-status' : 'review-status',
           }),
       progressRow({
         icon: 'L',
         iconClass: 'profile',
         title: `Level ${level}`,
-        subtitle: `Fortschritt zu Level ${level + 1}`,
+        subtitle: t('progress_to_level', 'Progress to level :level', { level: level + 1 }),
         value: `${progress.level_progress || 0}%`,
         percent: progress.level_progress || 0,
         reward: `Level ${level + 1}`,
-        status: 'Läuft',
+        status: t('running', 'In progress'),
         statusClass: 'active-status',
       }),
     ].join('');
 
     table.innerHTML = `
       <div class="personal-progress-labels">
-        <span>Aktivität</span><span>Fortschritt</span><span>Belohnung</span><span>Status</span>
+        <span>${escapeHtml(t('activity', 'Activity'))}</span><span>${escapeHtml(t('progress', 'Progress'))}</span><span>${escapeHtml(t('reward', 'Reward'))}</span><span>${escapeHtml(t('status', 'Status'))}</span>
       </div>
       ${rows}
     `;
@@ -168,9 +183,9 @@
     if (!host) return;
 
     host.innerHTML = `
-      <button type="button"><b>${formatNumber(badges.messages || 0)}</b> Nachrichten</button>
-      <button type="button"><b>${formatNumber(badges.notifications || 0)}</b> Hinweise</button>
-      <button type="button"><b>${formatNumber(badges.friends || 0)}</b> Anfragen</button>
+      <button type="button"><b>${formatNumber(badges.messages || 0)}</b> ${escapeHtml(t('messages', 'Messages'))}</button>
+      <button type="button"><b>${formatNumber(badges.notifications || 0)}</b> ${escapeHtml(t('notifications', 'Notifications'))}</button>
+      <button type="button"><b>${formatNumber(badges.friends || 0)}</b> ${escapeHtml(t('requests', 'Requests'))}</button>
     `;
   };
 
@@ -185,7 +200,7 @@
     if (label) label.textContent = `Level ${level}`;
     if (value) value.textContent = `${percent}%`;
     if (bar) bar.style.width = `${percent}%`;
-    if (hint) hint.textContent = `Fortschritt zu Level ${level + 1}`;
+    if (hint) hint.textContent = t('progress_to_level', 'Progress to level :level', { level: level + 1 });
   };
 
   const renderUnavailable = () => {
@@ -195,12 +210,12 @@
       <article class="personal-progress-row" data-real-dashboard-row>
         <span class="personal-progress-icon contract">!</span>
         <div class="personal-progress-copy">
-          <strong>Fortschritt nicht verfügbar</strong>
-          <small>Die echten Werte konnten gerade nicht geladen werden.</small>
+          <strong>${escapeHtml(t('progress_unavailable', 'Progress unavailable'))}</strong>
+          <small>${escapeHtml(t('real_values_unavailable', 'The live values could not be loaded right now.'))}</small>
         </div>
         <div class="personal-progress-value"><strong>—</strong></div>
         <span class="personal-reward">—</span>
-        <span class="status review-status"><i></i>Fehler</span>
+        <span class="status review-status"><i></i>${escapeHtml(t('error', 'Error'))}</span>
       </article>
     `;
   };
