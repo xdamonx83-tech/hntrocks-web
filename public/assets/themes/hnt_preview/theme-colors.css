@@ -27,7 +27,7 @@
 
     /* Texte */
     --hnt-text: #30302e;
-    --hnt-text-strong: #e2e2e2 ;
+    --hnt-text-strong: #e2e2e2;
     --hnt-text-muted: #92918a;
     --hnt-text-soft: #8f8b82;
     --hnt-text-subtle: #62625d;
@@ -37,13 +37,14 @@
     /* Flächen / Karten / Eingaben */
     --hnt-surface: rgba(255, 255, 255, .78);
     --hnt-surface-strong: rgba(255, 255, 255, .91);
-    --hnt-surface-card: #fbf9ee;
-    --hnt-surface-card-strong: #fffdf6;
+    --hnt-surface-card: #f5f5f2;
+    --hnt-surface-card-strong: #fafaf8;
     --hnt-surface-control: rgba(255, 255, 255, .72);
-    --hnt-surface-input: #f1eee5;
-    --hnt-surface-hover: #ffe8a0;
+    --hnt-surface-input: #ecece8;
+    --hnt-surface-hover: #e4e3df;
     --hnt-surface-faint: rgba(255, 255, 255, .18);
     --hnt-surface-table: rgba(255, 255, 255, .76);
+    --hnt-surface-panel: #f0f0ed;
 
     /* Hauptakzente */
     --hnt-accent: #ffd55a;
@@ -56,13 +57,17 @@
     --hnt-warning: #ff9d2a;
     --hnt-danger: #b8463a;
     --hnt-purple: #8f73c9;
+    --hnt-brand-red: rgb(182 78 68);
+    --hnt-brand-red-hover: rgb(163 66 58);
+    --hnt-brand-red-soft: rgba(182, 78, 68, .12);
+    --hnt-brand-red-soft-hover: rgba(182, 78, 68, .20);
 
     /* Dunkle Kontraste */
     --hnt-dark: #30302e;
     --hnt-dark-soft: rgba(47, 47, 44, .12);
 
     /* Linien */
-    --hnt-border: #e3dece;
+    --hnt-border: #d6d5d0;
     --hnt-border-soft: rgba(52, 48, 37, .12);
     --hnt-border-medium: rgba(52, 48, 37, .22);
     --hnt-border-strong: #575752;
@@ -83,7 +88,6 @@
     --line: var(--hnt-border);
 }
 
-/* Grundflächen – gleiche Optik wie bisher, aber zentral steuerbar. */
 body {
     color: var(--hnt-text);
     background: var(--hnt-page-base);
@@ -91,17 +95,18 @@ body {
 
 .app-shell {
     background:
-  radial-gradient(circle at 100% 3%, rgb(125 125 124 / 97%) 0, rgb(203 201 190 / 58%) 23%, transparent 47%), radial-gradient(circle at 0 100%, rgb(97 96 95 / 72%) 0, rgb(204 204 204 / 32%) 26%, transparent 51%), linear-gradient(111deg, #e4e7e8 0%, #e9eae8 55%, #6f6e6d 100%);
+        radial-gradient(circle at 100% 3%, rgb(125 125 124 / 97%) 0, rgb(203 201 190 / 58%) 23%, transparent 47%),
+        radial-gradient(circle at 0 100%, rgb(97 96 95 / 72%) 0, rgb(204 204 204 / 32%) 26%, transparent 51%),
+        linear-gradient(111deg, #e4e7e8 0%, #e9eae8 55%, #6f6e6d 100%);
 }
 
 body[data-page="members"] {
     --members-page-background:
-        radial-gradient(circle at 80% 7%, var(--hnt-page-members-glow), transparent 28%),
-        radial-gradient(circle at 18% 0, var(--hnt-page-members-cool), transparent 34%),
-        linear-gradient(135deg, var(--hnt-page-members-start) 0%, var(--hnt-page-members-end) 100%);
+        radial-gradient(circle at 80% 7%, rgba(142, 141, 138, .46), transparent 31%),
+        radial-gradient(circle at 18% 0, rgba(216, 222, 222, .72), transparent 34%),
+        linear-gradient(135deg, #eceeed 0%, #a3a29f 100%);
 }
 
-/* Gemeinsamer Header */
 .main-nav,
 .settings-button,
 .header-circle,
@@ -120,7 +125,6 @@ body[data-page="members"] {
     color: var(--hnt-text-on-dark);
 }
 
-/* Karten und Tabellen */
 .profile-panel,
 .hnt-comms-overview,
 .hnt-comms-panel-slot > .hnt-chat-tab.hnt-comms-active {
@@ -138,7 +142,6 @@ body[data-page="members"] {
     background: var(--hnt-surface-table);
 }
 
-/* Der dynamisch per JavaScript gesetzte Fortschrittsbalken wird hier zentral überschrieben. */
 .overview-progress .bar[data-real-progress="1"] {
     background-image: linear-gradient(
         90deg,
@@ -153,11 +156,80 @@ body[data-page="members"] {
     background: var(--hnt-surface-faint);
 }
 
+/* Gemeinsame Header-Dropdowns */
+.main-nav-dropdown,
+.header-dropdown {
+    border-color: var(--hnt-border-medium) !important;
+    background: var(--hnt-surface-card-strong) !important;
+    color: var(--hnt-text) !important;
+    box-shadow: 0 18px 48px rgba(36, 36, 34, .12) !important;
+}
+
+.main-nav-dropdown > header,
+.header-dropdown-head,
+.header-profile-summary,
+.header-profile-stats {
+    border-color: var(--hnt-border-soft) !important;
+    background: var(--hnt-surface-panel) !important;
+}
+
+.main-nav-dropdown > header span,
+.header-dropdown-head span,
+.header-message-item time,
+.header-notification-item time {
+    color: var(--hnt-brand-red) !important;
+}
+
+.main-nav-menu-grid > button,
+.header-menu-list > a,
+.header-message-item,
+.header-notification-item,
+.header-request-item {
+    color: var(--hnt-text) !important;
+}
+
+.main-nav-menu-grid > button:hover,
+.main-nav-menu-grid > button:focus-visible,
+.header-menu-list > a:hover,
+.header-menu-list > a:focus-visible,
+.header-message-item:hover,
+.header-message-item:focus-visible,
+.header-notification-item:hover,
+.header-notification-item:focus-visible,
+.header-request-item:hover {
+    background: var(--hnt-brand-red-soft) !important;
+    outline: none !important;
+}
+
+.main-nav-menu-icon,
+.header-menu-icon {
+    background: var(--hnt-surface-input) !important;
+    color: var(--hnt-text) !important;
+}
+
+.main-nav-menu-icon.yellow,
+.header-menu-icon.yellow,
+.header-action-badge:not(.is-empty) {
+    background: var(--hnt-brand-red) !important;
+    color: var(--hnt-text-on-dark) !important;
+}
+
+.header-dropdown-footer,
+.header-profile-logout {
+    background: var(--hnt-dark) !important;
+    color: var(--hnt-text-on-dark) !important;
+}
+
+.header-dropdown-footer:hover,
+.header-profile-logout:hover {
+    background: var(--hnt-brand-red) !important;
+}
+
 /* Comms / Inbox */
 .hnt-comms-launcher,
 .hnt-comms-overview {
     border-color: var(--hnt-border-medium) !important;
-    background: var(--hnt-surface-card) !important;
+    background: var(--hnt-surface-card-strong) !important;
     color: var(--hnt-text) !important;
 }
 
@@ -166,14 +238,14 @@ body[data-page="members"] {
 .hnt-chat-tabs-shell.has-overview .hnt-comms-launcher,
 .hnt-comms-overview__close:hover,
 .hnt-comms-overview__close:focus-visible {
-    background: var(--hnt-surface-hover) !important;
-    color: var(--hnt-text) !important;
+    background: var(--hnt-brand-red-soft) !important;
+    color: var(--hnt-brand-red) !important;
 }
 
 .hnt-comms-launcher__count,
 .hnt-comms-overview__item.unread .hnt-comms-overview__avatar::after {
-    background: var(--hnt-accent-gold) !important;
-    color: var(--hnt-text) !important;
+    background: var(--hnt-brand-red) !important;
+    color: var(--hnt-text-on-dark) !important;
 }
 
 .hnt-comms-overview__close,
@@ -184,18 +256,22 @@ body[data-page="members"] {
     color: var(--hnt-text) !important;
 }
 
+.hnt-comms-overview__search input:focus {
+    border-color: var(--hnt-brand-red) !important;
+}
+
 .hnt-comms-overview__item.unread {
-    background: var(--hnt-accent-soft) !important;
+    background: var(--hnt-brand-red-soft) !important;
 }
 
 .hnt-comms-overview__item.unread:hover,
 .hnt-comms-overview__item.unread:focus-visible {
-    background: var(--hnt-accent-soft-hover) !important;
+    background: var(--hnt-brand-red-soft-hover) !important;
 }
 
 .hnt-comms-overview__eyebrow,
 .hnt-comms-overview__item time {
-    color: var(--hnt-text-accent) !important;
+    color: var(--hnt-brand-red) !important;
 }
 
 .hnt-comms-overview__meta,
@@ -203,4 +279,163 @@ body[data-page="members"] {
 .hnt-comms-overview__copy small,
 .hnt-comms-overview__empty {
     color: var(--hnt-text-soft) !important;
+}
+
+.hnt-comms-panel-slot .hnt-chat-tab__body,
+.hnt-comms-panel-slot .hnt-chat-tab__form {
+    background: var(--hnt-surface-card-strong) !important;
+}
+
+.hnt-comms-panel-slot .hnt-chat-tab__bubble,
+.hnt-comms-panel-slot .hnt-chat-tab__form input {
+    border-color: var(--hnt-border-soft) !important;
+    background: var(--hnt-surface-input) !important;
+    color: var(--hnt-text) !important;
+}
+
+.hnt-comms-panel-slot .hnt-chat-tab__message.is-own .hnt-chat-tab__bubble {
+    border-color: rgba(182, 78, 68, .24) !important;
+    background: var(--hnt-brand-red-soft) !important;
+}
+
+.hnt-comms-panel-slot .hnt-chat-tab__channel,
+.hnt-comms-panel-slot .hnt-chat-tab__empty i {
+    color: var(--hnt-brand-red) !important;
+}
+
+.hnt-comms-panel-slot .hnt-chat-tab__form input:focus {
+    border-color: var(--hnt-brand-red) !important;
+}
+
+.hnt-comms-panel-slot .hnt-chat-tab__form button:hover,
+.hnt-comms-panel-slot .hnt-chat-tab__form button:focus-visible {
+    background: var(--hnt-brand-red) !important;
+    color: var(--hnt-text-on-dark) !important;
+}
+
+/* Post-Composer */
+.post-composer-modal,
+.post-composer-head,
+.post-composer-body,
+.post-composer-footer {
+    border-color: var(--hnt-border-soft) !important;
+    background: var(--hnt-surface-card-strong) !important;
+    color: var(--hnt-text) !important;
+}
+
+.composer-audience,
+.composer-types button,
+.composer-tools,
+.composer-draft,
+.post-composer-close {
+    background: var(--hnt-surface-input) !important;
+    color: var(--hnt-text) !important;
+}
+
+.composer-types button.active {
+    background: var(--hnt-dark) !important;
+    color: var(--hnt-text-on-dark) !important;
+}
+
+.composer-textarea-shell,
+.composer-textarea-shell textarea {
+    border-color: var(--hnt-border) !important;
+    background: #ffffff !important;
+    color: var(--hnt-text) !important;
+}
+
+.composer-type-panel {
+    border-color: rgba(182, 78, 68, .18) !important;
+    background: var(--hnt-brand-red-soft) !important;
+}
+
+.composer-type-panel span,
+.composer-type-copy span {
+    color: var(--hnt-brand-red) !important;
+}
+
+.composer-publish {
+    background: var(--hnt-brand-red) !important;
+    color: var(--hnt-text-on-dark) !important;
+}
+
+.composer-publish:hover:not(:disabled) {
+    background: var(--hnt-brand-red-hover) !important;
+}
+
+.composer-publish:disabled {
+    background: rgba(182, 78, 68, .34) !important;
+    color: rgba(255,255,255,.72) !important;
+}
+
+/* Kommentare und Medienviewer */
+.comments-modal,
+.comments-modal-head,
+.comments-modal-content,
+.comments-composer,
+.real-media-comments-panel,
+.real-media-viewer-comments {
+    border-color: var(--hnt-border-soft) !important;
+    background: var(--hnt-surface-card-strong) !important;
+    color: var(--hnt-text) !important;
+}
+
+.comments-post-context,
+.comments-input-shell,
+.comments-toolbar button {
+    border-color: var(--hnt-border-soft) !important;
+    background: var(--hnt-surface-input) !important;
+    color: var(--hnt-text) !important;
+}
+
+.comments-post-badge {
+    background: var(--hnt-brand-red-soft) !important;
+    color: var(--hnt-brand-red) !important;
+}
+
+.comments-send {
+    background: var(--hnt-brand-red) !important;
+    color: var(--hnt-text-on-dark) !important;
+}
+
+.comments-send:hover,
+.comments-send:focus-visible {
+    background: var(--hnt-brand-red-hover) !important;
+}
+
+/* Profil und Profil bearbeiten: gelbe Restflächen neutralisieren, rote Akzente behalten */
+.profile-level-card,
+.profile-level-panel,
+.profile-edit-section-intro,
+.profile-edit-form-card,
+.profile-edit-nav-card,
+.profile-edit-preview-card,
+.profile-preview-card {
+    border-color: var(--hnt-border-soft) !important;
+    background: var(--hnt-surface-card-strong) !important;
+}
+
+.profile-level-card,
+.profile-level-panel {
+    background: var(--hnt-brand-red-soft) !important;
+}
+
+.profile-level-card .level-bar i,
+.profile-level-panel .level-bar i,
+.profile-edit-nav-progress b,
+.profile-level-ring {
+    --profile-level-accent: var(--hnt-brand-red);
+}
+
+.profile-edit-nav-list button.active,
+.profile-edit-form-head .primary,
+.profile-edit-heading-actions a:last-child {
+    background: var(--hnt-dark) !important;
+    color: var(--hnt-text-on-dark) !important;
+}
+
+.profile-edit-field input:focus,
+.profile-edit-field textarea:focus,
+.profile-edit-field select:focus {
+    border-color: var(--hnt-brand-red) !important;
 }
