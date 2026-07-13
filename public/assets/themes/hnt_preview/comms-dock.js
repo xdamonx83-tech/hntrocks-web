@@ -192,6 +192,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (opener) {
             forceNextOpen = true;
 
+            const openUrl = opener.getAttribute('data-hnt-chat-tab-url') || opener.href || '';
+            if (openUrl && typeof window.HNT_COMMS_OPEN === 'function') {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                window.HNT_COMMS_OPEN(openUrl, opener);
+            }
+
             if (opener.closest('#hntMessageShell')) {
                 window.setTimeout(function () {
                     const close = document.querySelector('#hntMessageShell [data-hnt-messages-close]');
