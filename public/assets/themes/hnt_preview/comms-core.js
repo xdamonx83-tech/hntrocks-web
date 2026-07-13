@@ -6,11 +6,10 @@
         const shell = document.querySelector('[data-hnt-chat-tabs-shell]');
         if (!shell) return;
 
-        const locale = String(document.documentElement.lang || 'de').toLowerCase();
-        const isEnglish = locale.startsWith('en');
+        const i18n = window.HNT_PREVIEW_I18N?.comms || {};
         const labels = {
-            openFailed: isEnglish ? 'Chat could not be opened.' : 'Chat konnte nicht geöffnet werden.',
-            sendFailed: isEnglish ? 'Message could not be sent.' : 'Nachricht konnte nicht gesendet werden.',
+            openFailed: String(i18n.open_failed || ''),
+            sendFailed: String(i18n.send_failed || ''),
         };
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         const storageKey = 'hntPreviewOpenChatTabsV2';
