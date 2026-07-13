@@ -282,3 +282,23 @@ svg { display: block; }
     grid-template-columns: 69px 36px 36px;
   }
 }
+
+/* HNT brand logo: keep the existing header markup, replace its demo mark visually. */
+.brand-mark {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+  background: url("/assets/themes/hnt_preview/images/hnt-brand-logo.svg") center / contain no-repeat;
+  fill: transparent;
+}
+
+.brand-mark > * {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .brand-mark {
+    width: clamp(31px, 2.3vw, 44px);
+    height: clamp(31px, 2.3vw, 44px);
+  }
+}
