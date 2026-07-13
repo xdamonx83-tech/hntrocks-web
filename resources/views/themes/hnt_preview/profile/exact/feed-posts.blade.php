@@ -24,7 +24,11 @@
     $postGif = method_exists($post, 'gifPayload') ? $post->gifPayload() : null;
     $postHasVideo = $postMedia->contains(fn ($media) => $media->isVideo());
     $postHasImage = $postMedia->contains(fn ($media) => $media->isImage()) || $postGif;
-    $postBadge = $postPoll ? 'Umfrage' : ($postHasVideo ? 'Video' : ($postHasImage ? 'Bild' : 'Beitrag'));
+    $postBadge = $postPoll
+        ? __('hnt_preview.profile.poll')
+        : ($postHasVideo
+            ? __('hnt_preview.profile.video')
+            : ($postHasImage ? __('hnt_preview.profile.image') : __('hnt_preview.profile.post')));
     $postBadgeClass = $postPoll ? 'cup' : ($postHasVideo ? 'moment' : ($postHasImage ? '' : 'discussion'));
 @endphp
 <article class="social-post real-feed-post profile-real-post" data-profile-post-id="{{ $post->id }}" data-real-feed-post="{{ $post->id }}" data-real-permalink="{{ $postUrl }}">
@@ -35,7 +39,7 @@
 <span>{{ $postAuthorHandle }} · {{ $post->created_at?->diffForHumans() }}@if($postFeeling) · {{ trim(($postFeeling['emoji'] ?? '').' '.($postFeeling['label'] ?? '')) }}@endif</span>
 </div>
 <span class="post-badge {{ $postBadgeClass }}">{{ $postBadge }}</span>
-<a aria-label="Beitrag öffnen" class="post-more" href="{{ $postUrl }}"><svg><use href="#i-arrow"></use></svg></a>
+<a aria-label="{{ __('hnt_preview.profile.open_post') }}" class="post-more" href="{{ $postUrl }}"><svg><use href="#i-arrow"></use></svg></a>
 </header>
 <div class="post-body">
 @if(trim((string) $post->body) !== '')
@@ -43,9 +47,9 @@
 @endif
 @if($post->isSharedPost() && $post->sharedPost)
 <a class="profile-shared-post" href="{{ $post->sharedPost->permalink() }}">
-<span>GETEILTER BEITRAG</span>
+<span>{{ __('hnt_preview.profile.shared_post') }}</span>
 <strong>{{ $post->sharedPost->user?->name ?: 'HNT Hunter' }}</strong>
-<small>{{ $post->sharedPost->excerpt(180) ?: 'Beitrag öffnen' }}</small>
+<small>{{ $post->sharedPost->excerpt(180) ?: __('hnt_preview.profile.open_post') }}</small>
 </a>
 @endif
 @if($postMedia->isNotEmpty())
@@ -54,11 +58,11 @@
 @php $mediaUrl = $media->url(); @endphp
 <a class="profile-real-media-item real-post-media-item {{ $media->isVideo() ? 'is-video real-post-video-item' : '' }}" href="{{ $postUrl }}">
 @if($media->isImage())
-<img alt="{{ $media->original_name ?: 'Beitragsbild' }}" loading="lazy" src="{{ $mediaUrl }}"/>
+<img alt="{{ $media->original_name ?: __('hnt_preview.profile.post_image') }}" loading="lazy" src="{{ $mediaUrl }}"/>
 @elseif($media->isVideo())
 <video controls playsinline preload="metadata"><source src="{{ $mediaUrl }}" type="{{ $media->mime_type }}"/></video>
 @else
-<span>Datei öffnen</span>
+<span>{{ __('hnt_preview.profile.open_file') }}</span>
 @endif
 @if($loop->last && $postMedia->count() > 4)
 <b class="profile-real-media-more real-post-media-more">+{{ $postMedia->count() - 4 }}</b>
@@ -81,28 +85,28 @@
 @endphp
 <a href="{{ $postUrl }}"><span>{{ $option->body }}</span><b>{{ $optionPercent }}%</b><i style="width:{{ $optionPercent }}%"></i></a>
 @endforeach
-<small>{{ $postPollVoteTotal }} {{ $postPollVoteTotal === 1 ? 'Stimme' : 'Stimmen' }}</small>
+<small>{{ $postPollVoteTotal }} {{ $postPollVoteTotal === 1 ? __('hnt_preview.profile.vote') : __('hnt_preview.profile.votes') }}</small>
 </div>
 @endif
 </div>
 <footer class="post-actions">
 <button class="like-button {{ $postReactionActive ? 'liked is-active' : '' }}" data-profile-like-url="{{ route('feed.reactions.toggle', $post) }}" type="button"><svg><use href="#i-heart"></use></svg><span>{{ $profileFormatCount($postReactionCount) }}</span></button>
-<button aria-label="Kommentare öffnen" class="comment-button" data-real-preview-comments type="button"><svg><use href="#i-comment"></use></svg><span>{{ $profileFormatCount($postCommentCount) }}</span></button>
-<button data-profile-share-url="{{ $postUrl }}" type="button"><svg><use href="#i-share"></use></svg><span>Teilen</span></button>
-<button aria-label="Beitrag {{ $postBookmarkActive ? 'gespeichert' : 'speichern' }}" class="profile-post-save save-button {{ $postBookmarkActive ? 'saved is-active' : '' }}" data-profile-bookmark-url="{{ route('feed.bookmarks.toggle', $post) }}" type="button"><svg><use href="#i-bookmark"></use></svg></button>
+<button aria-label="{{ __('hnt_preview.profile.open_comments') }}" class="comment-button" data-real-preview-comments type="button"><svg><use href="#i-comment"></use></svg><span>{{ $profileFormatCount($postCommentCount) }}</span></button>
+<button data-profile-share-url="{{ $postUrl }}" type="button"><svg><use href="#i-share"></use></svg><span>{{ __('hnt_preview.profile.share') }}</span></button>
+<button aria-label="{{ __('hnt_preview.profile.post') }} {{ $postBookmarkActive ? __('hnt_preview.profile.saved') : __('hnt_preview.profile.save') }}" class="profile-post-save save-button {{ $postBookmarkActive ? 'saved is-active' : '' }}" data-profile-bookmark-url="{{ route('feed.bookmarks.toggle', $post) }}" type="button"><svg><use href="#i-bookmark"></use></svg></button>
 </footer>
 </article>
 @empty
 <div class="profile-empty-state profile-post-empty">
-<strong>Noch keine Beiträge</strong>
-<p>Veröffentlichte Posts erscheinen hier.</p>
+<strong>{{ __('hnt_preview.profile.no_posts') }}</strong>
+<p>{{ __('hnt_preview.profile.published_posts_here') }}</p>
 @if($isOwnProfile)
-<button id="openEmptyPostComposer" type="button"><svg><use href="#i-plus"></use></svg> Ersten Post erstellen</button>
+<button id="openEmptyPostComposer" type="button"><svg><use href="#i-plus"></use></svg> {{ __('hnt_preview.profile.first_post') }}</button>
 @endif
 </div>
 @endforelse
 @if(($profilePostsTotal ?? $profilePostsLive->count()) > $profilePostsLive->count())
-<a class="profile-post-more-link" href="{{ request()->fullUrlWithQuery(['profile_posts_page' => (int) ($profilePostPage ?? 1) + 1]) }}">Weitere Beiträge laden <svg><use href="#i-arrow"></use></svg></a>
+<a class="profile-post-more-link" href="{{ request()->fullUrlWithQuery(['profile_posts_page' => (int) ($profilePostPage ?? 1) + 1]) }}">{{ __('hnt_preview.profile.load_more') }} <svg><use href="#i-arrow"></use></svg></a>
 @endif
 </div>
 </section>
