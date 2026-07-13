@@ -4,9 +4,13 @@
   const isEnglish = (document.documentElement.lang || '').toLowerCase().startsWith('en');
   const buttonLabel = isEnglish ? 'View comments' : 'Kommentare ansehen';
   const numberFormatter = new Intl.NumberFormat(document.documentElement.lang || 'de-DE');
-  const observedCounters = new WeakSet();
+  let bound = false;
 
   const bindCommentCount = () => {
+    if (bound) {
+      return true;
+    }
+
     const detailModal = document.querySelector('.map-cash-detail-demo');
     const commentsButton = detailModal?.querySelector('.map-cash-detail-demo-actions button:first-child');
     const sourceCounter = document.querySelector('.hnt-map-cash-comments-count');
@@ -19,32 +23,46 @@
       const parsed = Number.parseInt(sourceCounter.textContent || '0', 10);
       const count = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
       const formatted = numberFormatter.format(count);
+      const text = `${buttonLabel} (${formatted})`;
 
-      commentsButton.textContent = `${buttonLabel} (${formatted})`;
+      if (commentsButton.textContent !== text) {
+        commentsButton.textContent = text;
+      }
       commentsButton.dataset.commentCount = String(count);
       commentsButton.setAttribute('aria-label', `${buttonLabel}: ${formatted}`);
     };
 
     sync();
+    new MutationObserver(sync).observe(sourceCounter, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
 
-    if (!observedCounters.has(sourceCounter)) {
-      observedCounters.add(sourceCounter);
-      new MutationObserver(sync).observe(sourceCounter, {
-        childList: true,
-        characterData: true,
-        subtree: true,
-      });
-    }
-
+    bound = true;
     return true;
   };
 
+  const bodyObserver = new MutationObserver(() => {
+    if (bindCommentCount()) {
+      bodyObserver.disconnect();
+    }
+  });
+
   const scheduleBind = () => {
-    bindCommentCount();
-    window.requestAnimationFrame(bindCommentCount);
+    if (bindCommentCount()) {
+      bodyObserver.disconnect();
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      if (bindCommentCount()) {
+        bodyObserver.disconnect();
+      }
+    });
   };
 
-  new MutationObserver(scheduleBind).observe(document.body, {
+  bodyObserver.observe(document.body, {
     childList: true,
     subtree: true,
   });
