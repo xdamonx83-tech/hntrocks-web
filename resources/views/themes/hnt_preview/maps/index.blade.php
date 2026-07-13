@@ -1,20 +1,27 @@
 @php
     $localeIsEnglish = app()->getLocale() === 'en';
+    $maps = collect($maps ?? []);
     $orderedSlugs = ['stillwater-bayou', 'lawson-delta', 'desalle', 'mammons-gulch'];
     $mapsBySlug = $maps->keyBy('slug');
     $markerTypes = ['compound', 'boss', 'spawn', 'supply', 'extract', 'cash', 'tower', 'bugs', 'wild', 'tarot'];
-    $totalMarkers = (int) $maps->sum(fn (array $map): int => (int) ($map['marker_count'] ?? 0));
+    $totalMarkers = (int) $maps->sum('marker_count');
     $firstMap = $maps->first();
-    $firstMapUrl = $firstMap ? route('maps.show', $firstMap['slug']) : '#';
-    $formatNumber = static fn (int $value): string => $localeIsEnglish
-        ? number_format($value, 0, '.', ',')
-        : number_format($value, 0, ',', '.');
-    $mapNames = $maps->pluck('name')->values()->all();
-    $lastMapName = array_pop($mapNames);
-    $availableMapNames = implode(', ', $mapNames);
-    if ($lastMapName !== null) {
-        $availableMapNames .= ($availableMapNames !== '' ? ' '.__('maps.and').' ' : '').$lastMapName;
-    }
+    $availableMapNames = implode(', ', $maps->pluck('name')->filter()->all());
+
+    $workflowSteps = trans('maps.workflow.steps');
+    $workflowSteps = is_array($workflowSteps) ? $workflowSteps : [];
+
+    $communityChips = trans('maps.community.chips');
+    $communityChips = is_array($communityChips) ? $communityChips : [];
+
+    $faqItems = trans('maps.faq.items');
+    $faqItems = is_array($faqItems) ? $faqItems : [];
+
+    $formatNumber = static function (mixed $value) use ($localeIsEnglish): string {
+        return $localeIsEnglish
+            ? number_format((int) $value, 0, '.', ',')
+            : number_format((int) $value, 0, ',', '.');
+    };
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $localeIsEnglish ? 'en' : 'de' }}">
@@ -65,13 +72,13 @@
 <div class="maps-plan-grid">
 @foreach($orderedSlugs as $slug)
     @php($map = $mapsBySlug->get($slug))
-    @continue(!$map)
-    @php
-        $mapUrl = route('maps.show', $slug);
-        $mapImage = ($map['image_available'] ?? false)
-            ? $map['image_url']
-            : asset('assets/themes/hnt_preview/dashboard-maps/demo/'.$slug.'.svg');
-    @endphp
+    @if($map)
+        @php
+            $mapUrl = route('maps.show', $slug);
+            $mapImage = ($map['image_available'] ?? false)
+                ? $map['image_url']
+                : asset('assets/themes/hnt_preview/dashboard-maps/demo/'.$slug.'.svg');
+        @endphp
 <article class="map-plan-card {{ $loop->first ? 'selected' : '' }}" data-map-card="{{ $slug }}">
 <div class="map-plan-art">
 <img alt="{{ __('maps.map.preview_alt', ['map' => $map['name']]) }}" src="{{ $mapImage }}"/>
@@ -85,8 +92,8 @@
 <h2>{{ $map['name'] }}</h2>
 <p>{{ __('ui.maps_map_summary_'.str_replace('-', '_', $slug)) }}</p>
 <div class="map-plan-meta">
-<span><strong>{{ $formatNumber((int) $map['width']) }} × {{ $formatNumber((int) $map['height']) }}</strong><small>{{ __('maps.map.size') }}</small></span>
-<span><strong>{{ $formatNumber((int) $map['marker_count']) }}</strong><small>{{ __('maps.map.markers') }}</small></span>
+<span><strong>{{ $formatNumber($map['width'] ?? 0) }} × {{ $formatNumber($map['height'] ?? 0) }}</strong><small>{{ __('maps.map.size') }}</small></span>
+<span><strong>{{ $formatNumber($map['marker_count'] ?? 0) }}</strong><small>{{ __('maps.map.markers') }}</small></span>
 </div>
 <ul>
 @foreach(['zoom', 'core', 'supply', 'cash', 'filters'] as $feature)
@@ -96,6 +103,7 @@
 <a class="map-open-button" href="{{ $mapUrl }}">{{ __('maps.map.open') }} <svg><use href="#i-arrow"></use></svg></a>
 </div>
 </article>
+    @endif
 @endforeach
 </div>
 </section>
@@ -144,12 +152,12 @@
 <button data-maps-view-shortcut="features" type="button">{{ __('maps.workflow.action') }}</button>
 </div>
 <div class="maps-workflow-steps">
-@foreach(__('maps.workflow.steps') as $step)
+@foreach($workflowSteps as $step)
 <article>
 <i>{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</i>
 <div>
-<strong>{{ $step['title'] }}</strong>
-<p>{{ $step['text'] }}</p>
+<strong>{{ $step['title'] ?? '' }}</strong>
+<p>{{ $step['text'] ?? '' }}</p>
 </div>
 </article>
 @endforeach
@@ -169,13 +177,15 @@
 <article>
 <div class="maps-community-index">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</div>
 <div>
-<strong>{{ $map['name'] }}</strong>
-<p>{{ $formatNumber((int) $map['width']) }} × {{ $formatNumber((int) $map['height']) }} · {{ __('maps.live_data.real_data') }}</p>
+<strong>{{ $map['name'] ?? '' }}</strong>
+<p>{{ $formatNumber($map['width'] ?? 0) }} × {{ $formatNumber($map['height'] ?? 0) }} · {{ __('maps.live_data.real_data') }}</p>
 </div>
-<span>{{ $formatNumber((int) $map['marker_count']) }} {{ __('maps.map.markers') }}</span>
-<button aria-label="{{ __('maps.map.open_named', ['map' => $map['name']]) }}" data-detail-href="{{ route('maps.show', $map['slug']) }}" data-map-preview="{{ $map['slug'] }}" type="button">
+<span>{{ $formatNumber($map['marker_count'] ?? 0) }} {{ __('maps.map.markers') }}</span>
+@if(!empty($map['slug']))
+<button aria-label="{{ __('maps.map.open_named', ['map' => $map['name'] ?? '']) }}" data-detail-href="{{ route('maps.show', $map['slug']) }}" data-map-preview="{{ $map['slug'] }}" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
+@endif
 </article>
 @endforeach
 </div>
@@ -189,7 +199,7 @@
 <article><strong>Live</strong><small>{{ __('maps.community.live') }}</small></article>
 </div>
 <div class="maps-community-chips">
-@foreach(__('maps.community.chips') as $chip)
+@foreach($communityChips as $chip)
 <span>{{ $chip }}</span>
 @endforeach
 </div>
@@ -202,10 +212,10 @@
 <h2 id="mapsHelpTitle">{{ __('maps.faq.title') }}</h2>
 </header>
 <div class="maps-help-rows">
-@foreach(__('maps.faq.items') as $item)
+@foreach($faqItems as $item)
 <article>
-<strong>{{ $item['question'] }}</strong>
-<p>{{ $item['answer'] }}</p>
+<strong>{{ $item['question'] ?? '' }}</strong>
+<p>{{ $item['answer'] ?? '' }}</p>
 </article>
 @endforeach
 </div>
