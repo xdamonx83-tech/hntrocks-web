@@ -1,0 +1,480 @@
+/* Cash Spot detail and comments modals based on the approved map-detail demo. */
+.hnt-map-lightbox.map-cash-detail-demo {
+  position: fixed;
+  z-index: 2300;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: color-mix(in srgb, var(--hnt-dark) 48%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.hnt-map-lightbox.map-cash-detail-demo[hidden],
+.map-cash-comments-modal[hidden] {
+  display: none;
+}
+
+.map-cash-detail-demo-panel {
+  width: min(570px, calc(100vw - 36px));
+  max-height: calc(100vh - 44px);
+  display: block;
+  overflow: auto;
+  padding: 20px;
+  border: .5px solid var(--hnt-border);
+  border-radius: 30px;
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+.map-cash-detail-demo-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+}
+
+.map-cash-detail-demo-title-block {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.map-cash-detail-demo-title-block .hnt-map-cash-detail-eyebrow {
+  display: block;
+  margin: 0;
+  color: var(--hnt-brand-red);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.map-cash-detail-demo-title-block .hnt-map-cash-detail-eyebrow > span {
+  display: none;
+}
+
+.map-cash-detail-demo-generic-title {
+  display: none;
+}
+
+.map-cash-detail-demo-title {
+  margin: 0;
+  color: var(--hnt-text);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+
+.map-cash-detail-demo-close,
+.map-cash-comments-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-dark);
+  font: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.map-cash-detail-demo-close:hover,
+.map-cash-detail-demo-close:focus-visible,
+.map-cash-comments-close:hover,
+.map-cash-comments-close:focus-visible {
+  outline: 0;
+  background: var(--hnt-surface-hover);
+}
+
+.map-cash-detail-demo-body {
+  display: block;
+  overflow: visible;
+}
+
+.map-cash-detail-demo-media {
+  position: relative;
+  width: 100%;
+  height: 205px;
+  min-height: 205px;
+  display: block;
+  margin-top: 15px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--hnt-surface-input);
+}
+
+.map-cash-detail-demo-media .hnt-map-cash-detail-image {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  display: block;
+  object-fit: cover;
+}
+
+.map-cash-detail-demo-media .hnt-map-lightbox-error {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 18px;
+  color: var(--hnt-text-muted);
+  text-align: center;
+}
+
+.map-cash-detail-demo-media .hnt-map-lightbox-error[hidden] {
+  display: none;
+}
+
+.map-cash-detail-demo-type {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+  font-size: 8px;
+}
+
+.map-cash-detail-demo-info {
+  min-width: 0;
+  min-height: 0;
+  display: block;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.map-cash-detail-demo-meta {
+  display: grid;
+  margin-top: 13px;
+}
+
+.map-cash-detail-demo-meta article {
+  min-height: 49px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: .5px dashed var(--hnt-border);
+}
+
+.map-cash-detail-demo-meta span {
+  color: var(--hnt-text-muted);
+  font-size: 8px;
+}
+
+.map-cash-detail-demo-meta strong {
+  max-width: 300px;
+  color: var(--hnt-text);
+  font-size: 9px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.map-cash-detail-demo-meta .verified {
+  color: var(--hnt-brand-red);
+}
+
+.map-cash-detail-demo-votes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 15px;
+  padding: 0;
+  border: 0;
+}
+
+.map-cash-detail-demo-votes > h3 {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  color: var(--hnt-text);
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.map-cash-detail-demo-votes .hnt-map-cash-detail-vote-actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  gap: 7px;
+}
+
+.map-cash-detail-demo-votes .hnt-map-cash-detail-vote {
+  width: 56px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 21px;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.map-cash-detail-demo-votes .hnt-map-cash-detail-vote.is-active {
+  background: var(--hnt-brand-red-soft);
+  color: var(--hnt-brand-red);
+}
+
+.map-cash-detail-demo-votes .hnt-map-cash-detail-anonymous-hint,
+.map-cash-detail-demo-votes .hnt-map-cash-detail-vote-error {
+  grid-column: 1;
+  margin: 0;
+  color: var(--hnt-text-muted);
+  font-size: 7px;
+}
+
+.map-cash-detail-demo-votes .hnt-map-cash-detail-vote-error {
+  grid-column: 1 / -1;
+  color: var(--hnt-danger);
+}
+
+.map-cash-detail-demo-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.map-cash-detail-demo-actions button {
+  height: 39px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.map-cash-detail-demo-actions button:first-child {
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+}
+
+.map-cash-comments-modal {
+  position: fixed;
+  z-index: 2400;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: color-mix(in srgb, var(--hnt-dark) 48%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.map-cash-comments-panel {
+  width: min(650px, calc(100vw - 36px));
+  max-height: calc(100vh - 44px);
+  overflow: hidden;
+  border: .5px solid var(--hnt-border);
+  border-radius: 30px;
+  background: var(--hnt-surface-card-strong);
+  color: var(--hnt-text);
+  box-shadow: none;
+}
+
+.map-cash-comments-demo-card {
+  min-height: 440px;
+  max-height: calc(100vh - 44px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  overflow: hidden;
+  padding: 20px;
+  border: 0;
+  background: var(--hnt-surface-card-strong);
+}
+
+.map-cash-comments-demo-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.map-cash-comments-demo-card > header h3 {
+  margin: 0;
+  color: var(--hnt-text);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.map-cash-comments-demo-card > header .hnt-map-cash-comments-count {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--hnt-brand-red-soft);
+  color: var(--hnt-text);
+  font-size: 8px;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comments-list {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  margin-top: 14px;
+  overflow: auto;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comment {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--hnt-surface-card);
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comment-avatar,
+.map-cash-comments-demo-card .hnt-map-cash-comment-avatar img {
+  width: 42px;
+  height: 42px;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comment-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comment-meta a {
+  color: var(--hnt-text);
+  font-size: 9px;
+  text-decoration: none;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comment-meta span,
+.map-cash-comments-demo-card .hnt-map-cash-comments-status,
+.map-cash-comments-demo-card .hnt-map-cash-comments-login {
+  color: var(--hnt-text-muted);
+  font-size: 7px;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comment-body {
+  margin-top: 4px;
+  color: var(--hnt-text);
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comments-form {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comments-form textarea {
+  width: 100%;
+  min-height: 42px;
+  max-height: 110px;
+  resize: vertical;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 21px;
+  outline: 0;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+  font: inherit;
+  font-size: 8px;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comments-form button {
+  min-width: 88px;
+  height: 42px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 21px;
+  background: var(--hnt-dark);
+  color: var(--hnt-text-on-dark);
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.map-cash-comments-demo-card .hnt-map-cash-comment-actions button,
+.map-cash-comments-demo-card .hnt-map-cash-comment-editor-actions button {
+  border: 0;
+  border-radius: 14px;
+  background: var(--hnt-surface-input);
+  color: var(--hnt-text);
+}
+
+body.map-overlay-open {
+  overflow: hidden;
+}
+
+@media (max-width: 680px) {
+  .hnt-map-lightbox.map-cash-detail-demo,
+  .map-cash-comments-modal {
+    padding: 12px;
+  }
+
+  .map-cash-detail-demo-panel,
+  .map-cash-comments-panel {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border-radius: 24px;
+  }
+
+  .map-cash-detail-demo-panel,
+  .map-cash-comments-demo-card {
+    padding: 17px;
+  }
+
+  .map-cash-detail-demo-media {
+    height: 180px;
+    min-height: 180px;
+  }
+
+  .map-cash-detail-demo-votes {
+    grid-template-columns: 1fr;
+  }
+
+  .map-cash-detail-demo-votes .hnt-map-cash-detail-vote-actions {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .map-cash-detail-demo-actions,
+  .map-cash-comments-demo-card .hnt-map-cash-comments-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .map-cash-detail-demo-actions {
+    display: grid;
+  }
+}
