@@ -10,6 +10,15 @@
 
   if (!friendsList || !messagesList || !notificationsList) return;
 
+  const i18n = window.HNT_PREVIEW_I18N?.header || {};
+  const text = (key, replacements = {}) => {
+    let value = String(i18n[key] || '');
+    Object.entries(replacements).forEach(([name, replacement]) => {
+      value = value.replaceAll(`:${name}`, String(replacement));
+    });
+    return value;
+  };
+
   let lastPayload = null;
   let lastLoadedAt = 0;
   let loading = null;
@@ -49,14 +58,14 @@
   const loadingMarkup = (label) => `
     <div class="header-live-state">
       <strong>${escapeHtml(label)}</strong>
-      Echte Daten werden geladen …
+      ${escapeHtml(text('loading_real_data'))}
     </div>
   `;
 
   const setLoading = () => {
-    friendsList.innerHTML = loadingMarkup('Freundschaftsanfragen');
-    messagesList.innerHTML = loadingMarkup('Nachrichten');
-    notificationsList.innerHTML = loadingMarkup('Benachrichtigungen');
+    friendsList.innerHTML = loadingMarkup(text('friend_requests'));
+    messagesList.innerHTML = loadingMarkup(text('messages'));
+    notificationsList.innerHTML = loadingMarkup(text('notifications'));
     document.querySelectorAll('[data-header-badge]').forEach((badge) => {
       badge.textContent = '0';
       badge.classList.add('is-empty');
@@ -74,14 +83,13 @@
     }
 
     if (label) {
-      const suffix = type === 'friends' ? 'offen' : 'ungelesen';
-      label.textContent = `${count} ${suffix}`;
+      label.textContent = text(type === 'friends' ? 'open_count' : 'unread_count', { count });
     }
   };
 
   const renderFriends = (items = []) => {
     if (!Array.isArray(items) || items.length === 0) {
-      friendsList.innerHTML = '<div class="header-live-state"><strong>Keine offenen Anfragen</strong>Neue Anfragen erscheinen automatisch hier.</div>';
+      friendsList.innerHTML = `<div class="header-live-state"><strong>${escapeHtml(text('no_open_requests'))}</strong>${escapeHtml(text('requests_auto'))}</div>`;
       return;
     }
 
@@ -95,10 +103,10 @@
           <small>${escapeHtml(item.handle)} · ${escapeHtml(item.time)}</small>
         </div>
         <div class="header-request-actions">
-          <button aria-label="${escapeHtml(item.name)} annehmen" class="friend-accept" data-friend-action="accept" data-url="${escapeHtml(item.accept_url)}">
+          <button aria-label="${escapeHtml(text('accept_user', { name: item.name }))}" class="friend-accept" data-friend-action="accept" data-url="${escapeHtml(item.accept_url)}">
             <svg><use href="#i-check"></use></svg>
           </button>
-          <button aria-label="${escapeHtml(item.name)} ablehnen" class="friend-decline" data-friend-action="decline" data-url="${escapeHtml(item.decline_url)}">
+          <button aria-label="${escapeHtml(text('decline_user', { name: item.name }))}" class="friend-decline" data-friend-action="decline" data-url="${escapeHtml(item.decline_url)}">
             <svg><use href="#i-x"></use></svg>
           </button>
         </div>
@@ -108,7 +116,7 @@
 
   const renderMessages = (items = []) => {
     if (!Array.isArray(items) || items.length === 0) {
-      messagesList.innerHTML = '<div class="header-live-state"><strong>Noch keine Unterhaltungen</strong>Deine privaten Nachrichten erscheinen hier.</div>';
+      messagesList.innerHTML = `<div class="header-live-state"><strong>${escapeHtml(text('no_conversations'))}</strong>${escapeHtml(text('messages_auto'))}</div>`;
       return;
     }
 
@@ -137,7 +145,7 @@
 
   const renderNotifications = (items = []) => {
     if (!Array.isArray(items) || items.length === 0) {
-      notificationsList.innerHTML = '<div class="header-live-state"><strong>Keine Benachrichtigungen</strong>Neue Hinweise erscheinen automatisch hier.</div>';
+      notificationsList.innerHTML = `<div class="header-live-state"><strong>${escapeHtml(text('no_notifications'))}</strong>${escapeHtml(text('notifications_auto'))}</div>`;
       return;
     }
 
@@ -167,12 +175,12 @@
       avatar.alt = profile.name || 'HNT Hunter';
     }
     if (name) name.textContent = profile.name || 'HNT Hunter';
-    if (meta) meta.textContent = `${profile.handle || '@hunter'} · Level ${Math.max(1, Number(profile.level) || 1)}`;
+    if (meta) meta.textContent = `${profile.handle || '@hunter'} · ${text('level', { level: Math.max(1, Number(profile.level) || 1) })}`;
 
     const values = [
-      [profile.rocks, 'Rocks'],
-      [profile.friends, 'Freunde'],
-      [profile.posts, 'Posts'],
+      [profile.rocks, text('rocks')],
+      [profile.friends, text('friends')],
+      [profile.posts, text('posts')],
     ];
     stats.forEach((stat, index) => {
       const strong = stat.querySelector('strong');
@@ -216,11 +224,10 @@
   const wireMenuLinks = (links = {}) => {
     const navigation = links.navigation || {};
     document.querySelectorAll('.main-nav-menu-grid > button').forEach((button) => {
-      const label = button.querySelector('strong')?.textContent?.trim();
+      const label = button.dataset.navigationLabel || button.querySelector('strong')?.textContent?.trim();
       if (label && navigation[label]) {
         replaceWithLink(button, navigation[label]);
-      } else if (label && ['Ready Lobbys', 'Guides', 'Umfragen'].includes(label)) {
-        button.dataset.unavailable = '1';
+      } else if (button.dataset.unavailable === '1') {
         button.removeAttribute('data-toast');
         button.setAttribute('aria-disabled', 'true');
         button.addEventListener('click', (event) => event.preventDefault());
@@ -234,13 +241,13 @@
 
     const settingsLinks = links.settings_menu || {};
     document.querySelectorAll('#settingsDropdown .header-menu-list > button').forEach((button) => {
-      const label = button.querySelector('strong')?.textContent?.trim();
+      const label = button.dataset.navigationLabel || button.querySelector('strong')?.textContent?.trim();
       if (label && settingsLinks[label]) replaceWithLink(button, settingsLinks[label]);
     });
 
     const profileLinks = links.profile_menu || {};
     document.querySelectorAll('#profileDropdown .profile-menu-list > button').forEach((button) => {
-      const label = button.querySelector('strong')?.textContent?.trim();
+      const label = button.dataset.navigationLabel || button.querySelector('strong')?.textContent?.trim();
       if (label && profileLinks[label]) replaceWithLink(button, profileLinks[label]);
     });
 
@@ -255,7 +262,7 @@
     replaceWithLink(document.querySelector('#notificationsDropdown .header-dropdown-footer'), links.notifications);
 
     const settingsTriggerText = document.querySelector('#settingsMenuTrigger span');
-    if (settingsTriggerText) settingsTriggerText.textContent = 'Einstellungen';
+    if (settingsTriggerText) settingsTriggerText.textContent = text('settings');
   };
 
   const requestJson = async (url, options = {}) => {
@@ -287,7 +294,7 @@
 
     if (markAllButton) {
       markAllButton.disabled = Number(header.counts?.notifications || 0) === 0;
-      markAllButton.textContent = Number(header.counts?.notifications || 0) === 0 ? 'Alles gelesen' : 'Alle gelesen';
+      markAllButton.textContent = Number(header.counts?.notifications || 0) === 0 ? text('all_read') : text('mark_all_read');
     }
   };
 
@@ -310,9 +317,9 @@
       return await loading;
     } catch (error) {
       console.error('HNT dashboard header failed', error);
-      friendsList.innerHTML = '<div class="header-live-state"><strong>Anfragen nicht verfügbar</strong>Bitte die Seite neu laden.</div>';
-      messagesList.innerHTML = '<div class="header-live-state"><strong>Nachrichten nicht verfügbar</strong>Bitte die Seite neu laden.</div>';
-      notificationsList.innerHTML = '<div class="header-live-state"><strong>Benachrichtigungen nicht verfügbar</strong>Bitte die Seite neu laden.</div>';
+      friendsList.innerHTML = `<div class="header-live-state"><strong>${escapeHtml(text('requests_unavailable'))}</strong>${escapeHtml(text('reload_page'))}</div>`;
+      messagesList.innerHTML = `<div class="header-live-state"><strong>${escapeHtml(text('messages_unavailable'))}</strong>${escapeHtml(text('reload_page'))}</div>`;
+      notificationsList.innerHTML = `<div class="header-live-state"><strong>${escapeHtml(text('notifications_unavailable'))}</strong>${escapeHtml(text('reload_page'))}</div>`;
       return null;
     } finally {
       loading = null;
@@ -370,7 +377,7 @@
       await requestJson(lastPayload.links.notifications_read_all, { method: 'POST' });
       notificationsList.querySelectorAll('.unread').forEach((item) => item.classList.remove('unread'));
       setBadge('notifications', 0);
-      markAllButton.textContent = 'Alles gelesen';
+      markAllButton.textContent = text('all_read');
       if (lastPayload?.counts) lastPayload.counts.notifications = 0;
     } catch (error) {
       console.error('Mark all notifications failed', error);
