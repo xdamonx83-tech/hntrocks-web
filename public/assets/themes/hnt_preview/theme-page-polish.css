@@ -1,0 +1,373 @@
+/*
+ * HNT.ROCKS page polish
+ * Component-specific colour mapping for Members, Profile and Profile Edit.
+ * All actual colour values stay in theme-colors.css.
+ */
+
+/* --------------------------------------------------------------------------
+   Members
+   -------------------------------------------------------------------------- */
+body[data-page="members"] .members-overview-copy > span {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="members"] .members-directory-card {
+    border: .5px solid var(--hnt-border-soft);
+    background: var(--hnt-surface-table);
+}
+
+body[data-page="members"] .members-progress.yellow {
+    border: .5px solid var(--hnt-brand-red-soft-hover);
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="members"] .members-progress.yellow i {
+    background: var(--hnt-brand-red);
+    opacity: .24;
+}
+
+body[data-page="members"] .members-action-shelf {
+    background:
+        radial-gradient(circle at 100% 0, var(--hnt-brand-red-soft-hover), transparent 68%),
+        linear-gradient(120deg, var(--hnt-surface-card-strong), var(--hnt-surface-panel));
+}
+
+body[data-page="members"] .members-shelf-icon {
+    background: var(--hnt-surface-card-strong);
+    color: var(--hnt-text);
+}
+
+body[data-page="members"] .members-shelf-icon:hover,
+body[data-page="members"] .members-shelf-icon:focus-visible {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+    outline: none;
+}
+
+body[data-page="members"] .members-shelf-export {
+    background: var(--hnt-dark);
+    color: var(--hnt-text-on-dark);
+}
+
+body[data-page="members"] .members-shelf-export:hover,
+body[data-page="members"] .members-shelf-export:focus-visible {
+    background: var(--hnt-brand-red);
+    outline: none;
+}
+
+body[data-page="members"] .members-relationship-tabs a,
+body[data-page="members"] .members-filter-strip select,
+body[data-page="members"] .members-ready-filter,
+body[data-page="members"] .member-chip,
+body[data-page="members"] .member-row-actions a,
+body[data-page="members"] .member-row-actions button {
+    background: var(--hnt-surface-input);
+}
+
+body[data-page="members"] .members-relationship-tabs a span {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="members"] .members-relationship-tabs a.active span {
+    background: var(--hnt-surface-control);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="members"] .members-ready-filter.active,
+body[data-page="members"] .member-status.ready {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="members"] .members-ready-filter.active i {
+    background: var(--hnt-brand-red);
+}
+
+body[data-page="members"] .members-table-row:hover,
+body[data-page="members"] .members-table-row.is-highlighted {
+    background: var(--hnt-brand-red-soft);
+}
+
+body[data-page="members"] .member-avatar span {
+    color: var(--hnt-text-on-dark);
+}
+
+body[data-page="members"] .members-mobile-filter-modal header span {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="members"] .members-mobile-ready input:checked + i {
+    background: var(--hnt-brand-red);
+}
+
+/* --------------------------------------------------------------------------
+   Public profile
+   -------------------------------------------------------------------------- */
+body[data-page="profile"] .profile-page-heading > div:first-child > span,
+body[data-page="profile"] .profile-eyebrow,
+body[data-page="profile"] .profile-info-head span,
+body[data-page="profile"] .profile-quest-head > div > span {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-page-card,
+body[data-page="profile"] .profile-info-card,
+body[data-page="profile"] .profile-post-feed,
+body[data-page="profile"] .profile-feed-head,
+body[data-page="profile"] .profile-quest-card,
+body[data-page="profile"] .profile-quest-footer button {
+    border-color: var(--hnt-border-soft);
+    background: var(--hnt-surface-card-strong);
+}
+
+body[data-page="profile"] .profile-quest-card {
+    background:
+        radial-gradient(circle at 100% 0, var(--hnt-brand-red-soft), transparent 36%),
+        var(--hnt-surface-card-strong);
+}
+
+body[data-page="profile"] .profile-quest-icon {
+    background: var(--hnt-dark);
+    color: var(--hnt-text-on-dark);
+}
+
+body[data-page="profile"] .quest-daily .profile-quest-icon,
+body[data-page="profile"] .quest-moments .profile-quest-icon,
+body[data-page="profile"] .quest-social .profile-quest-icon {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-quest-progress i,
+body[data-page="profile"] .quest-daily .profile-quest-progress i,
+body[data-page="profile"] .quest-moments .profile-quest-progress i,
+body[data-page="profile"] .quest-social .profile-quest-progress i {
+    background: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-quest-card footer strong {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-quest-footer b {
+    background: var(--hnt-brand-red);
+    color: var(--hnt-text-on-dark);
+}
+
+body[data-page="profile"] .profile-quest-footer button:hover,
+body[data-page="profile"] .profile-quest-footer button:focus-visible {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+    outline: none;
+}
+
+body[data-page="profile"] .profile-tags span,
+body[data-page="profile"] .profile-tags .blue,
+body[data-page="profile"] .profile-tags .purple,
+body[data-page="profile"] .profile-tags .green {
+    background: var(--hnt-surface-input);
+    color: var(--hnt-text-soft);
+}
+
+body[data-page="profile"] .profile-tags .yellow {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-bio-points span,
+body[data-page="profile"] .profile-level-stats > span,
+body[data-page="profile"] .profile-info-head button {
+    background: var(--hnt-surface-input);
+}
+
+body[data-page="profile"] .profile-level-card {
+    border: .5px solid var(--hnt-brand-red-soft-hover);
+    background:
+        radial-gradient(circle at 100% 0, var(--hnt-brand-red-soft-hover), transparent 46%),
+        var(--hnt-brand-red-soft);
+}
+
+body[data-page="profile"] .profile-level-top span,
+body[data-page="profile"] .profile-level-card > p,
+body[data-page="profile"] .profile-level-stats small {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-level-progress i {
+    background: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-level-ring {
+    background: conic-gradient(
+        var(--hnt-brand-red) 0 259deg,
+        var(--hnt-border) 259deg 360deg
+    );
+}
+
+body[data-page="profile"] .profile-stat-pipeline .yellow {
+    background: var(--hnt-brand-red);
+    color: var(--hnt-text-on-dark);
+}
+
+body[data-page="profile"] .profile-stat-pipeline .hatch {
+    background:
+        repeating-linear-gradient(135deg, transparent 0 4px, var(--hnt-border-medium) 4px 5px),
+        var(--hnt-surface-card-strong);
+}
+
+body[data-page="profile"] .profile-stat-pipeline .grey {
+    background: var(--hnt-surface-hover);
+}
+
+body[data-page="profile"] .feed-tabs .compose-button {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .feed-tabs .compose-button:hover,
+body[data-page="profile"] .feed-tabs .compose-button:focus-visible {
+    background: var(--hnt-brand-red);
+    color: var(--hnt-text-on-dark);
+    outline: none;
+}
+
+body[data-page="profile"] .profile-section-icon.yellow,
+body[data-page="profile"] .profile-section-icon.purple,
+body[data-page="profile"] .profile-section-icon.green {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-section-value,
+body[data-page="profile"] .profile-completion-card {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile"] .profile-completion-bar i {
+    background: var(--hnt-brand-red);
+}
+
+/* --------------------------------------------------------------------------
+   Profile edit
+   -------------------------------------------------------------------------- */
+body[data-page="profile-edit"] .profile-edit-heading > div:first-child > span,
+body[data-page="profile-edit"] .profile-edit-form-head > div > span,
+body[data-page="profile-edit"] .profile-edit-section-intro > span,
+body[data-page="profile-edit"] .profile-live-preview-card > header span,
+body[data-page="profile-edit"] .profile-edit-nav-card > header span,
+body[data-page="profile-edit"] .profile-cover-preview > span,
+body[data-page="profile-edit"] .profile-avatar-editor > div:last-child > span,
+body[data-page="profile-edit"] .profile-social-preview > div:first-child > span {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-edit-nav-card,
+body[data-page="profile-edit"] .profile-edit-form-card,
+body[data-page="profile-edit"] .profile-live-preview-card {
+    border: .5px solid var(--hnt-border-soft);
+    background: var(--hnt-surface-card-strong);
+}
+
+body[data-page="profile-edit"] .profile-edit-form-head,
+body[data-page="profile-edit"] .profile-edit-section-intro,
+body[data-page="profile-edit"] .profile-media-guidelines article,
+body[data-page="profile-edit"] .profile-setting-row,
+body[data-page="profile-edit"] .profile-social-preview,
+body[data-page="profile-edit"] .profile-privacy-note,
+body[data-page="profile-edit"] .profile-edit-save-footer {
+    border-color: var(--hnt-border-soft);
+    background: var(--hnt-surface-panel);
+}
+
+body[data-page="profile-edit"] .profile-edit-nav-list button,
+body[data-page="profile-edit"] .profile-social-list input,
+body[data-page="profile-edit"] .visibility-icon,
+body[data-page="profile-edit"] .profile-live-preview-card > header > a,
+body[data-page="profile-edit"] .profile-edit-form-head button:not(.primary),
+body[data-page="profile-edit"] .profile-edit-save-footer a {
+    background: var(--hnt-surface-input);
+    color: var(--hnt-text);
+}
+
+body[data-page="profile-edit"] .profile-edit-nav-list button.active {
+    background: var(--hnt-dark);
+    color: var(--hnt-text-on-dark);
+}
+
+body[data-page="profile-edit"] .profile-edit-nav-list button.active > i {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-edit-nav-progress > i b,
+body[data-page="profile-edit"] .profile-live-completion > i b {
+    background: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-edit-field,
+body[data-page="profile-edit"] .profile-cover-editor,
+body[data-page="profile-edit"] .profile-avatar-editor,
+body[data-page="profile-edit"] .profile-social-list > label,
+body[data-page="profile-edit"] .profile-visibility-options > label {
+    border-color: var(--hnt-border-soft);
+    background: var(--hnt-surface-card-strong);
+}
+
+body[data-page="profile-edit"] .profile-edit-field:focus-within,
+body[data-page="profile-edit"] .profile-social-list > label:focus-within {
+    border-color: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-media-guidelines article > span {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-media-note span {
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-toggle input:checked + i {
+    background: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-toggle input:checked + i::after {
+    background: var(--hnt-text-on-dark);
+}
+
+body[data-page="profile-edit"] .profile-visibility-options label:has(input:checked) {
+    border-color: var(--hnt-brand-red);
+    background: var(--hnt-brand-red-soft);
+}
+
+body[data-page="profile-edit"] .profile-live-tags span {
+    background: var(--hnt-surface-input);
+    color: var(--hnt-text-soft);
+}
+
+body[data-page="profile-edit"] .profile-live-tags span:first-child {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .save-state.dirty {
+    background: var(--hnt-brand-red-soft);
+    color: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .save-state.dirty i {
+    background: var(--hnt-brand-red);
+}
+
+body[data-page="profile-edit"] .profile-edit-save-footer button,
+body[data-page="profile-edit"] .profile-edit-form-head button.primary {
+    background: var(--hnt-dark);
+    color: var(--hnt-text-on-dark);
+}
+
+body[data-page="profile-edit"] .profile-edit-save-footer button:hover,
+body[data-page="profile-edit"] .profile-edit-form-head button.primary:hover {
+    background: var(--hnt-brand-red);
+}
