@@ -13,6 +13,7 @@
 <symbol id="i-printer" viewbox="0 0 24 24"><path d="M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M7 14h10v7H7z"></path></symbol>
 <symbol id="i-users" viewbox="0 0 24 24"><circle cx="9" cy="8.5" r="3"></circle><circle cx="17" cy="9.5" r="2.3"></circle><path d="M3 19a6 6 0 0 1 12 0M14 18a4.5 4.5 0 0 1 7 0"></path></symbol>
 <symbol id="i-folder" viewbox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"></path><path d="M3 7V5h7l2 2"></path></symbol>
+<symbol id="i-map" viewbox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path><path d="M9 3v15M15 6v15"></path></symbol>
 <symbol id="i-check" viewbox="0 0 24 24"><path d="m6 12 4 4 8-8"></path></symbol>
 <symbol id="i-male" viewbox="0 0 24 24"><circle cx="10" cy="14" r="5"></circle><path d="m14 10 6-6M15 4h5v5"></path></symbol>
 <symbol id="i-female" viewbox="0 0 24 24"><circle cx="12" cy="9" r="5"></circle><path d="M12 14v7M9 18h6"></path></symbol>
