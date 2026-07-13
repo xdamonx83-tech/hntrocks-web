@@ -12,6 +12,7 @@
     $hntOgImage = trim($__env->yieldContent('og_image', ''));
     $hntCommsCssVersion = @filemtime(public_path('assets/themes/hnt_preview/comms-dock.css')) ?: time();
     $hntCommsCoreVersion = @filemtime(public_path('assets/themes/hnt_preview/comms-core.js')) ?: time();
+    $hntThemeColorsVersion = @filemtime(public_path('assets/themes/hnt_preview/theme-colors.css')) ?: time();
 @endphp
 <meta name="robots" content="@yield('robots', 'noindex,nofollow')">
 <meta name="color-scheme" content="dark">
@@ -38,4 +39,5 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
 <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/styles.css') }}?v=779">
 <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/comms-dock.css') }}?v={{ $hntCommsCssVersion }}">
+<link data-hnt-theme-colors rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/theme-colors.css') }}?v={{ $hntThemeColorsVersion }}">
 <script src="{{ asset('assets/themes/hnt_preview/comms-core.js') }}?v={{ $hntCommsCoreVersion }}" defer></script>
