@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title' => 'Zwei-Faktor-Authentifizierung',
+    'title' => 'Anmeldung bestätigen',
+    'intro' => 'Gib den sechsstelligen Sicherheitscode aus deiner Authenticator-App ein.',
+    'security_title' => 'Code aus deiner Authenticator-App',
+    'security_hint' => 'Der Sicherheitscode wird alle 30 Sekunden erneuert.',
+    'code_group' => 'Sechsstelliger Sicherheitscode',
+    'digit_label' => 'Ziffer :number',
+    'code_incomplete' => 'Bitte gib den vollständigen sechsstelligen Code ein.',
+    'verify' => 'Bestätigen',
+    'verifying' => 'Wird geprüft…',
+    'use_recovery' => 'Wiederherstellungscode verwenden',
+    'use_authenticator' => 'Authenticator-Code verwenden',
+    'recovery_label' => 'Wiederherstellungscode',
+    'recovery_placeholder' => 'XXXXX-XXXXX',
+    'recovery_required' => 'Bitte gib einen Wiederherstellungscode ein.',
+    'back_to_login' => 'Zurück zum Login',
+    'privacy' => 'Datenschutz',
+    'imprint' => 'Impressum',
+    'legal_navigation' => 'Rechtliche Hinweise',
+    'language' => 'Sprache wählen',
+    'close' => 'Schließen',
+];
