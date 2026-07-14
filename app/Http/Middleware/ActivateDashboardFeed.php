@@ -27,6 +27,17 @@ class ActivateDashboardFeed
             return app(DashboardCupsLiveController::class)($request);
         }
 
+        if ($request->routeIs('cups.show', 'cups.show.section')) {
+            if (! $request->user()) {
+                return $next($request);
+            }
+
+            $request->attributes->set('hnt_dashboard_feed_live', true);
+            $request->attributes->set('hnt_dashboard_cup_detail_live', true);
+
+            return $next($request);
+        }
+
         if ($request->routeIs('feed.show') && $request->boolean('hnt_preview_comments')) {
             abort_unless($request->user(), 401);
             $request->attributes->set('hnt_dashboard_feed_live', true);
@@ -39,7 +50,6 @@ class ActivateDashboardFeed
         }
 
         abort_unless($request->user(), 401);
-
         $request->attributes->set('hnt_dashboard_feed_live', true);
 
         return app(DashboardFeedLiveController::class)($request);
