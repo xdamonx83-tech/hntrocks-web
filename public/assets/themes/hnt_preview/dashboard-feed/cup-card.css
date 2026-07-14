@@ -114,7 +114,12 @@
   font-size: 13px;
 }
 
-.hnt-preview-feed-post.is-cup-crosspost .post-tags .tag:last-child {
+.hnt-preview-feed-post.is-cup-crosspost .hnt-post-friend-form,
+.hnt-preview-feed-post.is-cup-crosspost .hnt-post-friend-button {
+  display: none !important;
+}
+
+.hnt-preview-feed-post.is-cup-crosspost .post-tags {
   display: none;
 }
 
