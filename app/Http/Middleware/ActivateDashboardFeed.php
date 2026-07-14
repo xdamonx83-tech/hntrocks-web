@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Cups\DashboardCupCreateLiveController;
 use App\Http\Controllers\Cups\DashboardCupDetailLiveController;
 use App\Http\Controllers\Cups\DashboardCupsLiveController;
 use App\Http\Controllers\Feed\DashboardFeedLiveController;
@@ -17,6 +18,13 @@ class ActivateDashboardFeed
     {
         if (! HntTheme::dashboardFeedLive()) {
             return $next($request);
+        }
+
+        if ($request->routeIs('cups.create')) {
+            abort_unless($request->user(), 401);
+            $request->attributes->set('hnt_dashboard_feed_live', true);
+
+            return app(DashboardCupCreateLiveController::class)($request);
         }
 
         if ($request->routeIs('cups.index')) {
