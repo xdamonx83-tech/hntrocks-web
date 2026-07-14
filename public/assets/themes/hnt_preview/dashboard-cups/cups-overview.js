@@ -5,7 +5,7 @@
   if (!document.querySelector('link[data-cups-feed-alignment]')) {
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = '/assets/themes/hnt_preview/dashboard-cups/cups-feed-alignment.css?v=20260714-1';
+    style.href = '/assets/themes/hnt_preview/dashboard-cups/cups-feed-alignment.css?v=20260714-2';
     style.dataset.cupsFeedAlignment = '1';
     document.head.appendChild(style);
   }
