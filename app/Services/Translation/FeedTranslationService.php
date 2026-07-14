@@ -9,6 +9,7 @@ use App\Models\FeedPostTranslation;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Throwable;
 
 class FeedTranslationService
 {
@@ -128,13 +129,13 @@ class FeedTranslationService
             throw new RuntimeException('Translation is not needed for this post.');
         }
 
-        $translated = $this->translateText((string) $post->body, $source, $target);
+        $translation = $this->translateTextResult((string) $post->body, $source, $target);
 
         return $post->translations()->create([
             'locale' => $target,
             'source_locale' => $source,
-            'provider' => 'openai',
-            'translated_body' => $translated,
+            'provider' => $translation['provider'],
+            'translated_body' => $translation['text'],
         ]);
     }
 
@@ -159,24 +160,111 @@ class FeedTranslationService
             throw new RuntimeException('Translation is not needed for this comment.');
         }
 
-        $translated = $this->translateText((string) $comment->body, $source, $target);
+        $translation = $this->translateTextResult((string) $comment->body, $source, $target);
 
         return $comment->translations()->create([
             'locale' => $target,
             'source_locale' => $source,
-            'provider' => 'openai',
-            'translated_body' => $translated,
+            'provider' => $translation['provider'],
+            'translated_body' => $translation['text'],
         ]);
     }
 
     public function translateText(string $text, string $sourceLocale, string $targetLocale): string
     {
+        return $this->translateTextResult($text, $sourceLocale, $targetLocale)['text'];
+    }
+
+    /**
+     * @return array{text:string,provider:string}
+     */
+    private function translateTextResult(string $text, string $sourceLocale, string $targetLocale): array
+    {
         $text = trim($text);
+        $source = $this->supportedLocale($sourceLocale);
+        $target = $this->supportedLocale($targetLocale);
 
         if ($text === '') {
             throw new RuntimeException('No text to translate.');
         }
 
+        if (! $source || ! $target || $source === $target) {
+            throw new RuntimeException('Unsupported translation direction.');
+        }
+
+        $provider = strtolower(trim((string) config('translation.provider', 'openai')));
+        if (! in_array($provider, ['openai', 'local', 'local_first'], true)) {
+            $provider = 'openai';
+        }
+
+        if (in_array($provider, ['local', 'local_first'], true)) {
+            try {
+                return $this->translateLocally($text, $source, $target);
+            } catch (Throwable $exception) {
+                Log::warning('Local feed translation failed.', [
+                    'message' => $exception->getMessage(),
+                    'source_locale' => $source,
+                    'target_locale' => $target,
+                ]);
+
+                if (! $this->openAiFallbackEnabled()) {
+                    throw new RuntimeException('Local translation failed.');
+                }
+            }
+        }
+
+        return $this->translateWithOpenAi($text, $source, $target);
+    }
+
+    /**
+     * @return array{text:string,provider:string}
+     */
+    private function translateLocally(string $text, string $sourceLocale, string $targetLocale): array
+    {
+        $url = trim((string) config('translation.local_url', 'http://127.0.0.1:8787/translate'));
+        if ($url === '') {
+            throw new RuntimeException('No local translation URL configured.');
+        }
+
+        [$protectedText, $tokens] = $this->protectTokens($text);
+        $request = Http::acceptJson()->timeout($this->localTimeoutSeconds());
+        $token = trim((string) config('translation.local_token', ''));
+
+        if ($token !== '') {
+            $request = $request->withHeaders(['X-HNT-Translator-Token' => $token]);
+        }
+
+        $response = $request->post($url, [
+            'q' => $protectedText,
+            'source' => $sourceLocale,
+            'target' => $targetLocale,
+        ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('Local translation API error.');
+        }
+
+        $translated = trim((string) ($response->json('translatedText') ?: $response->json('translated_text') ?: ''));
+        if ($translated === '') {
+            throw new RuntimeException('Local translation API returned an empty response.');
+        }
+
+        $translated = $this->restoreTokens($translated, $tokens);
+        if ($translated === '') {
+            throw new RuntimeException('Local translation token restoration failed.');
+        }
+
+        return [
+            'text' => $translated,
+            'provider' => 'local_argos',
+        ];
+    }
+
+    /**
+     * @return array{text:string,provider:string}
+     */
+    private function translateWithOpenAi(string $text, string $sourceLocale, string $targetLocale): array
+    {
         $apiKey = $this->apiKey();
 
         if ($apiKey === '') {
@@ -185,10 +273,10 @@ class FeedTranslationService
 
         try {
             $response = Http::withToken($apiKey)
-                ->timeout($this->timeoutSeconds())
+                ->timeout($this->openAiTimeoutSeconds())
                 ->asJson()
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => $this->model(),
+                    'model' => $this->openAiModel(),
                     'temperature' => 0.1,
                     'messages' => [
                         [
@@ -217,32 +305,83 @@ class FeedTranslationService
                 throw new RuntimeException('Translation API returned an empty response.');
             }
 
-            return $translated;
+            return [
+                'text' => $translated,
+                'provider' => 'openai',
+            ];
         } catch (RuntimeException $exception) {
             throw $exception;
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             report($exception);
             throw new RuntimeException('Translation failed.');
         }
     }
 
+    /**
+     * @return array{0:string,1:array<string,string>}
+     */
+    private function protectTokens(string $text): array
+    {
+        $tokens = [];
+        $pattern = '~https?://[^\s<]+|www\.[^\s<]+|@[\pL\pN_.-]+|#[\pL\pN_]+|HNT\.ROCKS|Hunt:\s*Showdown|PlayStation(?:\s*[45])?|Xbox(?:\s+Series\s+[XS])?|Steam|Bounty Marks?|Bloodline|Hunter|Bounty|Extract|\r\n|\r|\n~iu';
+
+        $protected = preg_replace_callback($pattern, function (array $match) use (&$tokens): string {
+            $placeholder = 'ZQXHNTTOKEN'.str_pad((string) count($tokens), 4, '0', STR_PAD_LEFT).'QXZ';
+            $tokens[$placeholder] = $match[0];
+
+            return $placeholder;
+        }, $text);
+
+        return [is_string($protected) ? $protected : $text, $tokens];
+    }
+
+    /**
+     * @param array<string,string> $tokens
+     */
+    private function restoreTokens(string $text, array $tokens): string
+    {
+        foreach ($tokens as $placeholder => $original) {
+            if (str_contains($text, $placeholder)) {
+                $text = str_replace($placeholder, $original, $text);
+                continue;
+            }
+
+            $characters = preg_split('//u', $placeholder, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $flexible = '/'.implode('\\s*', array_map(static fn (string $character): string => preg_quote($character, '/'), $characters)).'/iu';
+            $replaced = preg_replace_callback($flexible, static fn (): string => $original, $text, 1, $count);
+
+            if (! is_string($replaced) || $count !== 1) {
+                throw new RuntimeException('Protected translation token was changed.');
+            }
+
+            $text = $replaced;
+        }
+
+        return trim($text);
+    }
+
     private function apiKey(): string
     {
-        return trim((string) (env('HH_TRANSLATION_OPENAI_API_KEY')
-            ?: env('HH_OPENAI_API_KEY')
-            ?: env('OPENAI_API_KEY')
-            ?: env('HH_MEDIA_OPENAI_API_KEY')
-            ?: env('HH_CUP_OPENAI_API_KEY')
-            ?: ''));
+        return trim((string) config('translation.openai_api_key', ''));
     }
 
-    private function model(): string
+    private function openAiModel(): string
     {
-        return trim((string) (env('HH_TRANSLATION_OPENAI_MODEL') ?: 'gpt-4o-mini'));
+        return trim((string) config('translation.openai_model', 'gpt-4o-mini'));
     }
 
-    private function timeoutSeconds(): int
+    private function openAiTimeoutSeconds(): int
     {
-        return max(5, min(60, (int) (env('HH_TRANSLATION_OPENAI_TIMEOUT') ?: 20)));
+        return max(5, min(60, (int) config('translation.openai_timeout', 20)));
+    }
+
+    private function localTimeoutSeconds(): int
+    {
+        return max(1, min(30, (int) config('translation.local_timeout', 12)));
+    }
+
+    private function openAiFallbackEnabled(): bool
+    {
+        return (bool) config('translation.openai_fallback', true);
     }
 }
