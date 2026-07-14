@@ -23,7 +23,7 @@ class CupOverviewService
         $upcomingCups = $this->visibleCups($viewer)
             ->withCount(['activeTeams', 'submissions'])
             ->where('status', 'planned')
-            ->when($featuredCup, fn (Builder $query) => $query->whereKeyNot($featuredCup->getKey()))
+            ->when($featuredCup, fn (Builder $query) => $query->where('id', '!=', $featuredCup->getKey()))
             ->orderByRaw('coalesce(starts_at, registration_closes_at, created_at) asc')
             ->limit(2)
             ->get();
@@ -50,7 +50,7 @@ class CupOverviewService
 
         $topTeams = CupTeam::query()
             ->with([
-                'cup:id,title,slug,status,visibility',
+                'cup:id,title,slug,status,visibility,team_size,settings',
                 'owner:id,name,username,avatar_path',
             ])
             ->where('status', 'active')
@@ -72,22 +72,30 @@ class CupOverviewService
                 'finished' => $this->visibleCups($viewer)->where('status', 'finished')->count(),
                 'teams' => CupTeam::query()
                     ->where('status', 'active')
-                    ->whereHas('cup', fn (Builder $query) => $this->constrainVisibility($query, $viewer))
+                    ->whereHas('cup', function (Builder $query) use ($viewer): void {
+                        $this->constrainVisibility($query, $viewer);
+                    })
                     ->count(),
                 'hunters' => CupTeamMember::query()
                     ->where('status', 'active')
                     ->whereHas('cupTeam', function (Builder $query) use ($viewer): void {
                         $query->where('status', 'active')
-                            ->whereHas('cup', fn (Builder $cupQuery) => $this->constrainVisibility($cupQuery, $viewer));
+                            ->whereHas('cup', function (Builder $cupQuery) use ($viewer): void {
+                                $this->constrainVisibility($cupQuery, $viewer);
+                            });
                     })
                     ->count(),
                 'scores' => CupSubmission::query()
                     ->whereIn('status', CupSubmission::scoredStatuses())
-                    ->whereHas('cup', fn (Builder $query) => $this->constrainVisibility($query, $viewer))
+                    ->whereHas('cup', function (Builder $query) use ($viewer): void {
+                        $this->constrainVisibility($query, $viewer);
+                    })
                     ->count(),
                 'pending' => CupSubmission::query()
                     ->whereIn('status', ['pending', 'review_required'])
-                    ->whereHas('cup', fn (Builder $query) => $this->constrainVisibility($query, $viewer))
+                    ->whereHas('cup', function (Builder $query) use ($viewer): void {
+                        $this->constrainVisibility($query, $viewer);
+                    })
                     ->count(),
             ],
             'featuredCup' => $featuredCup,
