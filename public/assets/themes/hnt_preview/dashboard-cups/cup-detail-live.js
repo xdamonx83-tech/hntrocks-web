@@ -21,12 +21,14 @@
     '/assets/themes/hnt_preview/dashboard-cups/cup-detail-feed-alignment.css?v=20260714-1',
     'data-cup-detail-feed-alignment'
   );
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/dashboard-cups/cup-community-access.css?v=20260714-1',
+    'data-cup-community-access'
+  );
 
   const shell = document.querySelector('.cup-detail-page-shell');
   if (!shell) return;
 
-  /* Header data and actions must use the exact same live runtime as Feed and
-   * Profile. The Feed endpoint already supports dashboard_header JSON. */
   window.HNT_DASHBOARD_HEADER_ENDPOINT = '/feed';
 
   const loadScript = (src, marker, onload) => {
@@ -75,6 +77,17 @@
       window.location.assign(target);
     });
   });
+
+  const cupsMenu = cupsNav?.querySelector('.main-nav-menu-grid');
+  if (cupsMenu && !cupsMenu.querySelector('[data-community-cup-create]')) {
+    const createControl = document.createElement('button');
+    const english = document.documentElement.lang.toLowerCase().startsWith('en');
+    createControl.type = 'button';
+    createControl.dataset.communityCupCreate = '1';
+    createControl.innerHTML = `<span class="main-nav-menu-icon"><svg><use href="#i-plus"></use></svg></span><span><strong>${english ? 'Create cup' : 'Cup erstellen'}</strong><small>${english ? 'Host your own community cup' : 'Eigenen Community-Cup veranstalten'}</small></span>`;
+    createControl.addEventListener('click', () => window.location.assign('/cups/create'));
+    cupsMenu.insertBefore(createControl, cupsMenu.children[1] || null);
+  }
 
   const tabs = Array.from(shell.querySelectorAll('[data-cup-tab]'));
   const panels = Array.from(shell.querySelectorAll('[data-cup-panel]'));
@@ -139,6 +152,66 @@
     const titleNode = zone?.querySelector('strong');
     if (file && titleNode) titleNode.textContent = file.name;
   });
+
+  const setupReviewControls = async () => {
+    let capabilities;
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('review_capabilities', '1');
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) return;
+      capabilities = await response.json();
+    } catch (_error) {
+      return;
+    }
+
+    if (!capabilities?.can_manage) return;
+    const labels = capabilities.labels || {};
+
+    shell.querySelectorAll('.cup-submission-actions').forEach((actions) => {
+      const approveForm = Array.from(actions.querySelectorAll('form')).find((form) => /\/approve\/?$/.test(form.action));
+      if (!approveForm) return;
+
+      const csrf = approveForm.querySelector('input[name="_token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+      if (capabilities.verification_mode === 'manual') {
+        const manualAction = approveForm.action.replace(/\/approve\/?$/, '/manual-score');
+        const manualForm = document.createElement('form');
+        manualForm.method = 'post';
+        manualForm.action = manualAction;
+        manualForm.className = 'cup-manual-score-form';
+        manualForm.innerHTML = `
+          <input type="hidden" name="_token" value="${csrf}">
+          <label>${labels.kills || 'Kills'}<input name="kills" type="number" min="0" max="99" value="0" required></label>
+          <label>${labels.bounty || 'Bounty'}<input name="bounty_tokens" type="number" min="0" max="4" value="0" required></label>
+          <label>${labels.points || 'Punkte optional'}<input name="points" type="number" min="0" max="999" placeholder="Auto"></label>
+          <label>${labels.note || 'Prüfnotiz'}<input name="review_note" maxlength="1200"></label>
+          <button type="submit">${labels.manual_score || 'Manuell werten'}</button>
+        `;
+        approveForm.replaceWith(manualForm);
+
+        const rejectButton = actions.querySelector('form[action$="/reject"] button');
+        if (rejectButton) rejectButton.textContent = labels.reject || 'Ablehnen';
+        return;
+      }
+
+      if (capabilities.verification_mode === 'ai' && capabilities.can_ai_review) {
+        const rescoreAction = approveForm.action.replace(/\/approve\/?$/, '/rescore');
+        const rescoreForm = document.createElement('form');
+        rescoreForm.method = 'post';
+        rescoreForm.action = rescoreAction;
+        rescoreForm.className = 'cup-ai-rescore-form';
+        rescoreForm.innerHTML = `<input type="hidden" name="_token" value="${csrf}"><button type="submit">${labels.ai_rescore || 'KI erneut prüfen'}</button>`;
+        actions.appendChild(rescoreForm);
+      }
+    });
+  };
+
+  setupReviewControls();
 
   pageScroll?.addEventListener('scroll', () => {
     shell.classList.toggle('cup-detail-is-scrolled', pageScroll.scrollTop > 10);
