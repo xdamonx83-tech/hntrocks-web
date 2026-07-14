@@ -196,6 +196,31 @@ body[data-page="cups"] .hnt-comms-launcher__count {
   color: #fff !important;
 }
 
+/* Admin-only create action: prevent the inline SVG from stretching the button. */
+.cups-admin-create {
+  width: max-content;
+  max-width: calc(100% - 36px);
+  height: 34px;
+  min-height: 34px;
+  justify-self: start;
+  align-self: start;
+  margin: 0 18px 18px;
+  padding: 0 14px;
+  border-radius: 17px;
+  white-space: nowrap;
+}
+
+.cups-admin-create svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 @media (max-width: 899px) {
   body[data-page="cups"] {
     overflow: auto;
