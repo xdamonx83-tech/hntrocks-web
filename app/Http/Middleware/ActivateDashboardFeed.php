@@ -33,7 +33,10 @@ class ActivateDashboardFeed
         if ($request->routeIs('cups.store')) {
             $request->attributes->set('hnt_dashboard_feed_live', true);
 
-            return app(CommunityCupStoreController::class)($request);
+            return app()->call(
+                [app(CommunityCupStoreController::class), '__invoke'],
+                ['request' => $request]
+            );
         }
 
         if ($request->routeIs(
