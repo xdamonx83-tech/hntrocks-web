@@ -8,7 +8,7 @@
         ['label' => 'Cup-Ideen', 'route' => 'admin.cup-ideas.index', 'active' => 'admin.cup-ideas.*', 'icon' => 'CI'],
         ['label' => 'Moment der Woche', 'route' => 'admin.moment-of-week.index', 'active' => 'admin.moment-of-week.*', 'icon' => 'MW'],
         ['label' => 'Inhalte', 'route' => 'admin.content.index', 'active' => 'admin.content.*', 'icon' => 'IN'],
-        ['label' => 'Hunt-News', 'route' => 'admin.hunt-news.index', 'active' => 'admin.hunt-news.*', 'icon' => 'HN'],
+        ['label' => 'News-Zentrale', 'route' => 'admin.hunt-news.index', 'active' => 'admin.hunt-news.*', 'icon' => 'NZ'],
         ['label' => 'HNT Maps', 'route' => 'admin.maps.index', 'active' => ['admin.maps.index', 'admin.maps.markers*'], 'icon' => 'MP'],
         ['label' => 'Kassenspots', 'route' => 'admin.maps.cash-spots.index', 'active' => 'admin.maps.cash-spots.*', 'icon' => 'KS'],
         ['label' => 'HNT-Aufträge', 'route' => 'admin.contracts.index', 'active' => 'admin.contracts.*', 'icon' => 'AU'],
