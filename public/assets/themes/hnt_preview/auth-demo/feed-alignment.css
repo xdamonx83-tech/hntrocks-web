@@ -1,0 +1,43 @@
+/* Login-only alignment with the currently live HNT feed appearance. */
+body[data-page="auth-login"] .auth-shell {
+  background:
+    radial-gradient(circle at 100% 3%, rgb(125 125 124 / 97%) 0, rgb(203 201 190 / 58%) 23%, transparent 47%),
+    radial-gradient(circle at 0 100%, rgb(97 96 95 / 72%) 0, rgb(204 204 204 / 32%) 26%, transparent 51%),
+    linear-gradient(111deg, #e4e7e8 0%, #e9eae8 55%, #6f6e6d 100%);
+}
+
+body[data-page="auth-login"] .auth-frame {
+  background: transparent;
+}
+
+body[data-page="auth-login"] .auth-left {
+  background: var(--hnt-surface);
+}
+
+body[data-page="auth-login"] .auth-field > div,
+body[data-page="auth-login"] .auth-field > div:focus-within {
+  background: var(--hnt-surface-control);
+}
+
+body[data-page="auth-login"] .auth-field > div:focus-within {
+  border-color: var(--hnt-brand-red);
+  box-shadow: none;
+}
+
+body[data-page="auth-login"] .auth-field input:-webkit-autofill,
+body[data-page="auth-login"] .auth-field input:-webkit-autofill:hover,
+body[data-page="auth-login"] .auth-field input:-webkit-autofill:focus,
+body[data-page="auth-login"] .auth-field input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--hnt-text) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--hnt-surface-control) inset !important;
+  box-shadow: 0 0 0 1000px var(--hnt-surface-control) inset !important;
+  caret-color: var(--hnt-text);
+}
+
+body[data-page="auth-login"] .auth-divider span {
+  background: var(--hnt-surface);
+}
+
+body[data-page="auth-login"] .auth-photo {
+  background: transparent;
+}
