@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Cup;
 use App\Models\UserProfile;
+use App\Observers\CupObserver;
 use App\Observers\UserProfileObserver;
 use App\Services\Cups\CommunityCupSubmissionAnalysisService;
 use App\Services\Cups\CupSubmissionAnalysisService;
@@ -21,5 +23,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         UserProfile::observe(UserProfileObserver::class);
+        Cup::observe(CupObserver::class);
     }
 }
