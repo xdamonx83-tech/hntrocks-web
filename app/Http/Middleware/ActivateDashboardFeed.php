@@ -17,8 +17,9 @@ class ActivateDashboardFeed
         }
 
         if ($request->routeIs('cups.index')) {
-            abort_unless($request->user(), 401);
-            $request->attributes->set('hnt_dashboard_feed_live', true);
+            if ($request->user()) {
+                $request->attributes->set('hnt_dashboard_feed_live', true);
+            }
 
             return $next($request);
         }
