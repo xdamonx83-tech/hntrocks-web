@@ -1,11 +1,24 @@
 @php
     /** @var \App\Models\FeedPost $post */
+    $newsCard = $newsCard ?? \App\Models\FeedNewsCard::query()->where('feed_post_id', $post->id)->first();
     $author = $post->user;
     $authorName = $author?->name ?: ($author?->username ?: __('ui.preview_hnt_hunter'));
     $authorHandle = $author?->username ? '@' . $author->username : '@hntrocks';
     $authorUrl = $author
         ? (((int) $author->id === (int) auth()->id()) ? route('profile.show') : route('profile.public', $author))
         : route('feed.index');
+    $authorAvatarUrl = $author?->avatarUrl();
+
+    if ($newsCard) {
+        $authorName = $newsCard->publisherName();
+        $authorHandle = $newsCard->publisherHandle();
+        $authorUrl = route('feed.index');
+
+        if ($newsCard->publisher === \App\Models\FeedNewsCard::PUBLISHER_HNT_ROCKS) {
+            $authorAvatarUrl = asset('assets/themes/hnt_preview/images/hnt-brand-logo.svg');
+        }
+    }
+
     $postUrl = $post->permalink();
     $commentModalUrl = $postUrl . (str_contains($postUrl, '?') ? '&' : '?') . 'hnt_preview_comments=1';
     $bodyHtml = \App\Support\FeedTextRenderer::render($post->body);
@@ -55,7 +68,7 @@
         __('ui.cup_team_activity_quick_platform'),
     ] : [];
 
-    if ($author && $viewer && ! $isOwnPost) {
+    if (! $newsCard && $author && $viewer && ! $isOwnPost) {
         static $hntPreviewFriendshipCache = [];
         $friendshipCacheKey = (string) $author->id;
 
@@ -73,12 +86,12 @@
     }
 @endphp
 
-<article class="post hnt-preview-feed-post {{ $hasMedia ? 'has-media' : 'is-text-only' }}" id="post-{{ $post->id }}" data-hnt-preview-post data-hnt-lightbox-scope data-post-id="{{ $post->id }}" data-post-update-url="{{ route('feed.update', $post) }}" data-post-delete-url="{{ route('feed.destroy', $post) }}" data-post-visibility="{{ $post->visibility }}">
+<article class="post hnt-preview-feed-post {{ $hasMedia ? 'has-media' : 'is-text-only' }} {{ $newsCard ? 'is-official-news' : '' }}" id="post-{{ $post->id }}" data-hnt-preview-post data-hnt-lightbox-scope data-post-id="{{ $post->id }}" data-post-update-url="{{ route('feed.update', $post) }}" data-post-delete-url="{{ route('feed.destroy', $post) }}" data-post-visibility="{{ $post->visibility }}">
     <div class="post-header">
         <div class="post-author">
             <a class="avatar avatar-sm hnt-avatar-shell" href="{{ $authorUrl }}">
-                @if($author)
-                    <img src="{{ $author->avatarUrl() }}" alt="{{ $authorName }}">
+                @if($authorAvatarUrl)
+                    <img src="{{ $authorAvatarUrl }}" alt="{{ $authorName }}">
                 @endif
             </a>
             <div class="author-info">
@@ -93,6 +106,10 @@
             </div>
         </div>
         <div class="post-header-actions hnt-post-header-actions">
+            @if($newsCard)
+                <span class="hnt-official-news-badge">{{ $newsCard->badge }}</span>
+            @endif
+
             @if($post->is_pinned)
                 <span class="icon-btn-green" title="{{ __('ui.preview_post_pinned') }}"><i class="ph ph-push-pin" aria-hidden="true"></i></span>
             @endif
@@ -102,13 +119,15 @@
                     <i class="ph ph-shield-check" aria-hidden="true"></i>
                 </button>
 
-                @if($friendship?->isAccepted() || $friendship?->isPending())
-                    <span class="btn-following hnt-post-friend-button is-static">{{ $friendButtonLabel }}</span>
-                @else
-                    <form method="post" action="{{ route('friends.store', $author) }}" class="hnt-inline-form hnt-post-friend-form">
-                        @csrf
-                        <button class="btn-following hnt-post-friend-button" type="submit">{{ $friendButtonLabel }}</button>
-                    </form>
+                @if(! $newsCard)
+                    @if($friendship?->isAccepted() || $friendship?->isPending())
+                        <span class="btn-following hnt-post-friend-button is-static">{{ $friendButtonLabel }}</span>
+                    @else
+                        <form method="post" action="{{ route('friends.store', $author) }}" class="hnt-inline-form hnt-post-friend-form">
+                            @csrf
+                            <button class="btn-following hnt-post-friend-button" type="submit">{{ $friendButtonLabel }}</button>
+                        </form>
+                    @endif
                 @endif
             @else
                 <div class="hnt-post-options" data-hnt-post-options>
@@ -235,6 +254,10 @@
             <div class="hnt-post-translation-meta" data-hnt-post-translation-meta>{{ __('ui.translation_loading') }}</div>
             <div class="post-text hnt-post-text hnt-post-translation-body" data-hnt-read-more data-hnt-post-translation-body></div>
         </div>
+    @endif
+
+    @if($newsCard)
+        @include('themes.hnt_preview.feed.partials.news-card', ['newsCard' => $newsCard, 'post' => $post])
     @endif
 
     @if($feelingMeta)
