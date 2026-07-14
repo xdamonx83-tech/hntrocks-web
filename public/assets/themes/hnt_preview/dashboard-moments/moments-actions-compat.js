@@ -14,8 +14,19 @@
     titleField.style.display = 'none';
   }
 
-  composerForm?.addEventListener('wheel', (event) => event.stopPropagation(), { passive: true });
-  composerForm?.addEventListener('touchmove', (event) => event.stopPropagation(), { passive: true });
+  if (composerForm && !composerForm.querySelector('.hnt-moment-composer-scroll')) {
+    const footer = composerForm.querySelector('.hnt-moment-composer-footer');
+    const scrollArea = document.createElement('div');
+    scrollArea.className = 'hnt-moment-composer-scroll';
+
+    [...composerForm.children].forEach((child) => {
+      if (child !== footer) scrollArea.appendChild(child);
+    });
+
+    composerForm.insertBefore(scrollArea, footer || null);
+    scrollArea.addEventListener('wheel', (event) => event.stopPropagation(), { passive: true });
+    scrollArea.addEventListener('touchmove', (event) => event.stopPropagation(), { passive: true });
+  }
 
   document.addEventListener('click', (event) => {
     if (event.target.closest('[data-moment-option="edit"]')) {
@@ -74,8 +85,7 @@
         throw new Error(payload.message || (isEnglish ? 'The moment could not be deleted.' : 'Der Moment konnte nicht gelöscht werden.'));
       }
 
-      deleteSlide.remove();
-      window.location.reload();
+      window.location.assign('/moments');
     } catch (error) {
       if (status) {
         status.classList.add('is-error');
