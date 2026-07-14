@@ -10,11 +10,13 @@
         ->get()
         ->keyBy('feed_post_id');
 
-    $cupCardsByPostId = \App\Models\FeedCupCard::query()
-        ->whereIn('feed_post_id', $feedPostIds)
-        ->with(['cup.owner'])
-        ->get()
-        ->keyBy('feed_post_id');
+    $cupCardsByPostId = \Illuminate\Support\Facades\Schema::hasTable('feed_cup_cards')
+        ? \App\Models\FeedCupCard::query()
+            ->whereIn('feed_post_id', $feedPostIds)
+            ->with(['cup.owner'])
+            ->get()
+            ->keyBy('feed_post_id')
+        : collect();
 @endphp
 
 @forelse($socialitePosts as $post)
