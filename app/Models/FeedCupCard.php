@@ -18,7 +18,7 @@ class FeedCupCard extends Model
 
     public function feedPost(): BelongsTo
     {
-        return $this->belongsTo(FeedPost::class);
+        return $this->belongsTo(FeedPost::class)->withTrashed();
     }
 
     public function cup(): BelongsTo
