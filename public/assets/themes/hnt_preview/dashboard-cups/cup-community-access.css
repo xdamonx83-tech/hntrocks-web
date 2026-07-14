@@ -7,11 +7,65 @@
   grid-column: 1 / -1;
 }
 
+/* Select cards must remain compact even when the neighbouring grid cell is a
+ * tall textarea. The previous stretch behaviour created large empty panels. */
+.cup-create-page-shell .profile-edit-field:has(> select) {
+  min-height: 74px;
+  align-self: start;
+  grid-template-rows: auto 34px auto;
+  gap: 5px;
+  padding: 10px 12px;
+  border-radius: 16px;
+}
+
+/* Author display rules otherwise override the browser's native [hidden]
+ * handling and expose the AI preset during manual review. */
+.cup-create-page-shell .profile-edit-field[hidden],
+.cup-create-page-shell .cup-verification-field[hidden] {
+  display: none !important;
+}
+
+.cup-create-page-shell .profile-edit-field > select,
 .cup-verification-field select {
+  width: 100%;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 32px 0 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2330302e' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 9 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  background-size: 14px 14px;
+  color: #30302e;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 34px;
   cursor: pointer;
 }
 
+.cup-create-page-shell .profile-edit-field > select:focus {
+  outline: 0;
+}
+
+.cup-create-page-shell .profile-edit-field:has(> select):focus-within {
+  border-color: rgba(182, 78, 68, .48);
+  background: rgba(255, 255, 255, .94);
+}
+
+.cup-create-page-shell .profile-edit-field > select option {
+  background: #fff;
+  color: #30302e;
+  font-weight: 400;
+}
+
 .cup-verification-field small {
+  margin-top: 0;
   line-height: 1.45;
 }
 
@@ -104,6 +158,10 @@
 }
 
 @media (max-width: 640px) {
+  .cup-create-page-shell .profile-edit-field:has(> select) {
+    min-height: 70px;
+  }
+
   .cup-manual-score-form {
     grid-template-columns: 1fr 1fr;
   }
