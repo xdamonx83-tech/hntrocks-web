@@ -1,0 +1,760 @@
+/* Live Cup creation page.
+ * The form reuses the accepted profile-edit component language while the
+ * header, dropdowns and comms launcher stay identical to Feed/Profile.
+ */
+
+body[data-page="cup-create"] {
+  overflow: hidden;
+}
+
+.cup-create-page-shell {
+  --cup-create-red: var(--darkred, #b64e44);
+  --cup-create-red-soft: rgba(182, 78, 68, .09);
+  --cup-create-line: rgba(48, 48, 46, .12);
+  --cup-create-surface: rgba(255, 255, 255, .78);
+  width: 100%;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: clamp(12px, 1.45vh, 18px);
+}
+
+.cup-create-page-shell > .site-header {
+  position: relative;
+  top: auto;
+  z-index: 2000;
+}
+
+.cup-create-page-shell .nav-cups > .main-nav-trigger {
+  background: var(--dark);
+  color: #fff;
+}
+
+.cup-create-scroll {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 30px;
+  scrollbar-width: none;
+}
+
+.cup-create-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.cup-create-heading {
+  min-height: 120px;
+  padding-top: 18px;
+}
+
+.cup-create-heading > div:first-child > span,
+.cup-create-form-card .profile-edit-form-head span,
+.cup-create-form-card .profile-edit-section-intro > span,
+.cup-create-preview-card > header span,
+.cup-create-nav-card > header span,
+.cup-create-cover-preview span,
+.cup-create-preview-cover > span,
+.cup-create-preview-rule > span {
+  color: var(--cup-create-red) !important;
+}
+
+.cup-create-heading-actions .save-state {
+  border: .5px solid var(--cup-create-line);
+  background: rgba(255, 255, 255, .74);
+}
+
+.cup-create-heading-actions .save-state i {
+  background: #6f8e48;
+}
+
+.cup-create-heading-actions .save-state.dirty {
+  border-color: rgba(182, 78, 68, .18);
+  background: var(--cup-create-red-soft);
+  color: var(--cup-create-red);
+}
+
+.cup-create-heading-actions .save-state.dirty i {
+  background: var(--cup-create-red);
+}
+
+.cup-create-workspace {
+  grid-template-columns: clamp(245px, 15vw, 290px) minmax(560px, 1fr) clamp(290px, 18vw, 345px);
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.cup-create-nav-card,
+.cup-create-form-card,
+.cup-create-preview-card {
+  border: .5px solid var(--cup-create-line);
+  background: var(--cup-create-surface);
+  box-shadow: none;
+  backdrop-filter: blur(16px);
+}
+
+.cup-create-nav-card,
+.cup-create-preview-card {
+  top: 0;
+}
+
+.cup-create-form-card .profile-edit-form-head {
+  top: 0;
+  border-bottom-color: var(--cup-create-line);
+  background: rgba(250, 250, 248, .97);
+  box-shadow: none;
+}
+
+.cup-create-nav-list button {
+  border: .5px solid transparent;
+  background: rgba(48, 48, 46, .045);
+}
+
+.cup-create-nav-list button:hover {
+  border-color: rgba(48, 48, 46, .10);
+  background: rgba(255, 255, 255, .72);
+}
+
+.cup-create-nav-list button.active {
+  border-color: var(--dark);
+  background: var(--dark);
+  color: #fff;
+}
+
+.cup-create-nav-list button > svg {
+  background: rgba(255, 255, 255, .64);
+}
+
+.cup-create-nav-list button.active > svg {
+  background: rgba(255, 255, 255, .10);
+}
+
+.cup-create-nav-list button.active > i {
+  color: #f2e8d8;
+}
+
+.cup-create-nav-card .profile-edit-nav-progress {
+  border-top-color: rgba(48, 48, 46, .12);
+}
+
+.cup-create-nav-card .profile-edit-nav-progress > i,
+.cup-create-preview-card .profile-live-completion > i {
+  background: rgba(48, 48, 46, .11);
+}
+
+.cup-create-nav-card .profile-edit-nav-progress > i b,
+.cup-create-preview-card .profile-live-completion > i b {
+  background: var(--cup-create-red);
+}
+
+.cup-create-form-card .profile-edit-section-intro,
+.cup-create-form-card .profile-setting-row,
+.cup-create-form-card .profile-edit-save-footer,
+.cup-create-publish-checklist article,
+.cup-create-timeline {
+  background: rgba(48, 48, 46, .045);
+}
+
+.cup-create-form-card .profile-edit-field {
+  border: .5px solid var(--cup-create-line);
+  background: rgba(255, 255, 255, .72);
+}
+
+.cup-create-form-card .profile-edit-field:focus-within {
+  border-color: rgba(182, 78, 68, .42);
+  background: rgba(255, 255, 255, .92);
+}
+
+.cup-create-form-card .profile-edit-field input,
+.cup-create-form-card .profile-edit-field select,
+.cup-create-form-card .profile-edit-field textarea {
+  color: var(--ink);
+  caret-color: var(--cup-create-red);
+}
+
+.cup-create-form-card .profile-edit-field select {
+  cursor: pointer;
+}
+
+.cup-create-form-card .profile-edit-form-head button.primary,
+.cup-create-form-card .profile-edit-save-footer button,
+.cup-create-preview-button,
+.cup-create-cover-preview button {
+  background: var(--dark);
+  color: #fff;
+}
+
+.cup-create-form-card .profile-edit-form-head button.primary:hover,
+.cup-create-form-card .profile-edit-save-footer button:hover,
+.cup-create-preview-button:hover,
+.cup-create-cover-preview button:hover {
+  background: var(--cup-create-red);
+}
+
+.cup-create-cover-editor {
+  margin-top: 12px;
+  padding: 12px;
+  border: .5px solid var(--cup-create-line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .72);
+}
+
+.cup-create-cover-preview {
+  min-height: 300px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px;
+  overflow: hidden;
+  border-radius: 18px;
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+}
+
+.cup-create-cover-preview > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.cup-create-cover-preview strong {
+  overflow-wrap: anywhere;
+  font-size: clamp(23px, 2vw, 34px);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.cup-create-cover-preview small {
+  color: rgba(255, 255, 255, .68);
+  font-size: 10px;
+}
+
+.cup-create-cover-preview button {
+  min-height: 34px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 17px;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.cup-create-cover-preview button svg,
+.cup-create-platforms svg,
+.cup-create-publish-checklist svg,
+.cup-create-preview-button svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cup-create-cover-error {
+  display: block;
+  margin-top: 8px;
+  color: var(--cup-create-red);
+  font-size: 9px;
+  font-style: normal;
+}
+
+.cup-create-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 20px;
+}
+
+.cup-create-timeline article {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.cup-create-timeline i {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--cup-create-red);
+  opacity: .30;
+}
+
+.cup-create-timeline article:first-child i {
+  opacity: 1;
+}
+
+.cup-create-timeline strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cup-create-timeline span {
+  color: #8e8a82;
+  font-size: 8px;
+}
+
+.cup-create-platforms {
+  margin: 12px 0 0;
+  padding: 14px;
+  border: .5px solid var(--cup-create-line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .72);
+}
+
+.cup-create-platforms legend {
+  padding: 0 5px;
+  color: #716d66;
+  font-size: 9px;
+}
+
+.cup-create-platforms > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cup-create-platforms label {
+  position: relative;
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 25px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: .5px solid var(--cup-create-line);
+  border-radius: 17px;
+  background: rgba(48, 48, 46, .035);
+  cursor: pointer;
+}
+
+.cup-create-platforms input {
+  position: absolute;
+  opacity: 0;
+}
+
+.cup-create-platforms label > span {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.cup-create-platforms label > i {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(48, 48, 46, .08);
+  color: transparent;
+}
+
+.cup-create-platforms label:has(input:checked) {
+  border-color: rgba(182, 78, 68, .30);
+  background: var(--cup-create-red-soft);
+}
+
+.cup-create-platforms label:has(input:checked) > i {
+  background: var(--cup-create-red);
+  color: #fff;
+}
+
+.cup-create-form-card .profile-toggle input:checked + i {
+  background: var(--dark);
+}
+
+.cup-create-form-card .profile-toggle input:checked + i::after {
+  background: #f2e8d8;
+}
+
+.cup-create-prize-grid textarea {
+  min-height: 74px;
+}
+
+.cup-create-publish-checklist {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cup-create-publish-checklist article {
+  min-height: 70px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border-radius: 18px;
+}
+
+.cup-create-publish-checklist article > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .78);
+  color: var(--cup-create-red);
+}
+
+.cup-create-publish-checklist article > div {
+  display: grid;
+  gap: 3px;
+}
+
+.cup-create-publish-checklist strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.cup-create-publish-checklist small {
+  color: #969189;
+  font-size: 9px;
+}
+
+.cup-create-preview-card {
+  padding: 14px;
+}
+
+.cup-create-preview-cover {
+  min-height: 220px;
+  display: grid;
+  align-content: end;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 16px;
+  overflow: hidden;
+  border-radius: 18px;
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+}
+
+.cup-create-preview-cover strong {
+  overflow-wrap: anywhere;
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.cup-create-preview-cover small {
+  color: rgba(255, 255, 255, .65);
+  font-size: 8px;
+}
+
+.cup-create-preview-body {
+  display: grid;
+  gap: 10px;
+  padding: 14px 2px 4px;
+}
+
+.cup-create-preview-status {
+  width: max-content;
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--cup-create-red-soft);
+  color: var(--cup-create-red);
+  font-size: 8px;
+}
+
+.cup-create-preview-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cup-create-preview-status b {
+  font-weight: 500;
+}
+
+.cup-create-preview-body h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.cup-create-preview-body > p {
+  min-height: 36px;
+  margin: 0;
+  color: #858078;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.cup-create-preview-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.cup-create-preview-tags span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border: .5px solid var(--cup-create-line);
+  border-radius: 999px;
+  background: rgba(48, 48, 46, .035);
+  color: #77736b;
+  font-size: 7px;
+}
+
+.cup-create-preview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.cup-create-preview-stats article {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(48, 48, 46, .045);
+}
+
+.cup-create-preview-stats strong {
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.cup-create-preview-stats span {
+  color: #918d85;
+  font-size: 7px;
+}
+
+.cup-create-preview-rule {
+  display: grid;
+  gap: 4px;
+  padding: 11px;
+  border-radius: 15px;
+  background: rgba(48, 48, 46, .045);
+}
+
+.cup-create-preview-rule span {
+  font-size: 7px;
+  letter-spacing: .12em;
+}
+
+.cup-create-preview-rule strong {
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.cup-create-preview-card .profile-live-completion {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: .5px solid var(--cup-create-line);
+}
+
+.cup-create-preview-button {
+  width: 100%;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 19px;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.profile-edit-flash.danger {
+  border: .5px solid rgba(182, 78, 68, .22);
+  background: rgba(182, 78, 68, .09);
+  color: #923b33;
+}
+
+.profile-edit-flash.danger ul {
+  margin: 7px 0 0;
+  padding-left: 18px;
+}
+
+/* Header and comms surfaces: exact neutral HNT palette, never Cup-yellow. */
+body[data-page="cup-create"] .main-nav-dropdown,
+body[data-page="cup-create"] .header-dropdown {
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--ink, #30302e) !important;
+}
+
+body[data-page="cup-create"] .main-nav-dropdown::before,
+body[data-page="cup-create"] .main-nav-dropdown::after,
+body[data-page="cup-create"] .header-dropdown::before,
+body[data-page="cup-create"] .header-dropdown::after {
+  background: none !important;
+  background-image: none !important;
+}
+
+body[data-page="cup-create"] .main-nav-dropdown > header,
+body[data-page="cup-create"] .header-dropdown-head {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+body[data-page="cup-create"] .main-nav-menu-icon,
+body[data-page="cup-create"] .main-nav-menu-icon.yellow,
+body[data-page="cup-create"] .main-nav-menu-icon.green,
+body[data-page="cup-create"] .main-nav-menu-icon.purple,
+body[data-page="cup-create"] .header-menu-icon,
+body[data-page="cup-create"] .header-notification-icon,
+body[data-page="cup-create"] .header-notification-icon.yellow,
+body[data-page="cup-create"] .header-notification-icon.green,
+body[data-page="cup-create"] .header-notification-icon.purple,
+body[data-page="cup-create"] .header-mark-all {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
+  color: var(--ink, #30302e) !important;
+}
+
+body[data-page="cup-create"] .main-nav-menu-grid > :is(a, button):hover,
+body[data-page="cup-create"] .header-menu-list > :is(a, button):hover,
+body[data-page="cup-create"] .header-message-item.unread,
+body[data-page="cup-create"] .header-notification-item.unread,
+body[data-page="cup-create"] .header-request-item.unread {
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
+}
+
+body[data-page="cup-create"] .hnt-comms-launcher,
+body[data-page="cup-create"] [data-hnt-comms-launcher] {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-rows: 1fr !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
+  border-radius: 50% !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
+  color: var(--ink, #30302e) !important;
+  box-shadow: none !important;
+}
+
+body[data-page="cup-create"] .hnt-comms-launcher:hover,
+body[data-page="cup-create"] .hnt-comms-launcher:focus-visible,
+body[data-page="cup-create"] [data-hnt-comms-launcher]:hover,
+body[data-page="cup-create"] [data-hnt-comms-launcher]:focus-visible {
+  background: #fff !important;
+  color: var(--cup-create-red) !important;
+  outline: none !important;
+}
+
+body[data-page="cup-create"] .hnt-comms-launcher__count {
+  border-color: #fff !important;
+  background: var(--cup-create-red) !important;
+  color: #fff !important;
+}
+
+@media (max-width: 1320px) {
+  .cup-create-workspace {
+    grid-template-columns: 235px minmax(520px, 1fr) 285px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .cup-create-workspace {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .cup-create-preview-card {
+    display: none;
+  }
+}
+
+@media (max-width: 899px) {
+  body[data-page="cup-create"] {
+    overflow: auto;
+  }
+
+  .cup-create-page-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    display: block;
+  }
+
+  .cup-create-scroll {
+    overflow: visible;
+  }
+
+  .cup-create-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cup-create-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-create-nav-card,
+  .cup-create-form-card .profile-edit-form-head {
+    position: static;
+  }
+
+  .cup-create-nav-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cup-create-platforms > div,
+  .cup-create-timeline {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .cup-create-heading-actions,
+  .cup-create-form-card .profile-edit-form-head,
+  .cup-create-form-card .profile-edit-save-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cup-create-form-card .profile-edit-form-head > div:last-child,
+  .cup-create-form-card .profile-edit-save-footer > div:last-child {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .cup-create-form-card .profile-edit-field-grid,
+  .cup-create-nav-list,
+  .cup-create-platforms > div,
+  .cup-create-timeline {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-create-cover-preview {
+    min-height: 240px;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+}
