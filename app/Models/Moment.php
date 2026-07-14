@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Moment extends Model
 {
@@ -45,6 +46,73 @@ class Moment extends Model
             'comments_count' => 'integer',
             'bookmarks_count' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (Moment $moment): void {
+            if (app()->runningInConsole() || ! app()->bound('request')) {
+                return;
+            }
+
+            $request = request();
+            $aspectRatio = trim((string) $request->input('aspect_ratio', ''));
+            $publishToFeed = $request->boolean('publish_to_feed');
+
+            if (! in_array($aspectRatio, ['9:16', '16:9'], true) && ! $publishToFeed) {
+                return;
+            }
+
+            $moment->loadMissing('media');
+            $asset = $moment->media;
+
+            if (! $asset) {
+                return;
+            }
+
+            if (in_array($aspectRatio, ['9:16', '16:9'], true)) {
+                $metadata = is_array($asset->metadata) ? $asset->metadata : [];
+                $metadata['aspect_ratio'] = $aspectRatio;
+                $asset->forceFill(['metadata' => $metadata])->saveQuietly();
+            }
+
+            if (! $publishToFeed) {
+                return;
+            }
+
+            DB::transaction(function () use ($moment, $asset): void {
+                $bodyParts = array_values(array_filter([
+                    trim((string) $moment->caption),
+                    trim((string) $moment->description),
+                ], static fn (string $value): bool => $value !== ''));
+
+                $body = trim(implode("\n\n", $bodyParts));
+                if ($body === '') {
+                    $body = 'HNT Moment';
+                }
+
+                $body .= "\n\n".url('/moments/r/'.$moment->getKey());
+
+                $post = FeedPost::create([
+                    'user_id' => $moment->user_id,
+                    'body' => $body,
+                    'visibility' => $moment->visibility === 'private' ? 'private' : 'public',
+                    'status' => 'published',
+                ]);
+
+                FeedPostMedia::create([
+                    'feed_post_id' => $post->id,
+                    'user_id' => $moment->user_id,
+                    'media_asset_id' => $asset->id,
+                    'disk' => $asset->disk,
+                    'path' => $asset->path,
+                    'mime_type' => $asset->mime_type,
+                    'original_name' => $asset->original_name,
+                    'size_bytes' => $asset->size_bytes,
+                    'sort_order' => 0,
+                ]);
+            });
+        });
     }
 
     public function user(): BelongsTo
