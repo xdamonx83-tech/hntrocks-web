@@ -1,0 +1,116 @@
+/* Community cup creation and organizer review controls.
+ * Uses the accepted Feed/Profile palette: neutral light surfaces, anthracite
+ * actions and restrained HNT red accents. No yellow prototype surfaces.
+ */
+
+.cup-verification-field {
+  grid-column: 1 / -1;
+}
+
+.cup-verification-field select {
+  cursor: pointer;
+}
+
+.cup-verification-field small {
+  line-height: 1.45;
+}
+
+.cup-submission-actions {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.cup-manual-score-form {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(70px, .55fr)) minmax(150px, 1.3fr) auto;
+  align-items: end;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 9px;
+  border: .5px solid rgba(48, 48, 46, .12);
+  border-radius: 16px;
+  background: rgba(48, 48, 46, .045);
+}
+
+.cup-manual-score-form label {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  color: #827d75;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+
+.cup-manual-score-form input {
+  width: 100%;
+  min-width: 0;
+  height: 31px;
+  padding: 0 9px;
+  border: .5px solid rgba(48, 48, 46, .12);
+  border-radius: 12px;
+  outline: 0;
+  background: rgba(255, 255, 255, .88);
+  color: #30302e;
+  font: inherit;
+  font-size: 10px;
+}
+
+.cup-manual-score-form input:focus {
+  border-color: rgba(182, 78, 68, .55);
+}
+
+.cup-manual-score-form button,
+.cup-ai-rescore-form button {
+  min-height: 31px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 15px;
+  background: #30302e;
+  color: #fff;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.cup-manual-score-form button:hover,
+.cup-ai-rescore-form button:hover {
+  background: #b64e44;
+}
+
+.cup-ai-rescore-form {
+  display: inline-flex;
+}
+
+.cup-ai-rescore-form button {
+  background: rgba(48, 48, 46, .09);
+  color: #30302e;
+}
+
+.cups-admin-create.cups-community-create {
+  display: inline-flex;
+}
+
+@media (max-width: 1100px) {
+  .cup-manual-score-form {
+    grid-template-columns: repeat(3, minmax(70px, 1fr));
+  }
+
+  .cup-manual-score-form label:nth-of-type(4),
+  .cup-manual-score-form button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .cup-manual-score-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cup-manual-score-form label:nth-of-type(3),
+  .cup-manual-score-form label:nth-of-type(4),
+  .cup-manual-score-form button {
+    grid-column: 1 / -1;
+  }
+}
