@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Sign in',
+    'intro' => 'Sign in and return directly to your community.',
+    'identity' => 'Email or username',
+    'identity_placeholder' => 'name@example.com or username',
+    'password' => 'Password',
+    'password_placeholder' => 'Your password',
+    'show_password' => 'Show password',
+    'hide_password' => 'Hide password',
+    'remember' => 'Keep me signed in',
+    'forgot' => 'Forgot password?',
+    'submit' => 'Sign in',
+    'submitting' => 'Signing in …',
+    'continue_with' => 'or continue with',
+    'social_login' => 'Sign in with :provider',
+    'no_account' => 'No account yet?',
+    'register' => 'Create an account',
+    'privacy' => 'Privacy',
+    'imprint' => 'Legal notice',
+    'language' => 'Choose language',
+    'home' => 'Back to homepage',
+    'close' => 'Close',
+    'legal_navigation' => 'Legal links',
+];
