@@ -18,11 +18,12 @@
   }
 
   hiddenCode.name = 'code';
-  let mode = 'authenticator';
+  let mode = form.dataset.initialMode === 'recovery' ? 'recovery' : 'authenticator';
 
   const setError = (message = '') => {
     if (error) error.textContent = message;
     digitGroup.classList.toggle('is-invalid', Boolean(message) && mode === 'authenticator');
+    recoveryField.querySelector('div')?.classList.toggle('is-invalid', Boolean(message) && mode === 'recovery');
   };
 
   const authenticatorCode = () => digits.map((input) => input.value.replace(/\D/g, '')).join('');
@@ -31,6 +32,32 @@
     hiddenCode.value = mode === 'recovery'
       ? recoveryInput.value.trim()
       : authenticatorCode();
+  };
+
+  const applyMode = ({ focus = true, clearError = true } = {}) => {
+    const useRecovery = mode === 'recovery';
+
+    digitGroup.hidden = useRecovery;
+    recoveryField.hidden = !useRecovery;
+    digits.forEach((input) => {
+      input.required = !useRecovery;
+    });
+    recoveryInput.required = useRecovery;
+    hiddenCode.value = '';
+
+    if (clearError) setError();
+
+    if (toggleLabel) {
+      toggleLabel.textContent = useRecovery
+        ? toggle.dataset.authenticatorLabel
+        : toggle.dataset.recoveryLabel;
+    }
+
+    toggle.setAttribute('aria-expanded', String(useRecovery));
+
+    if (focus) {
+      (useRecovery ? recoveryInput : digits[0]).focus();
+    }
   };
 
   const fillDigits = (value, startIndex = 0) => {
@@ -98,25 +125,7 @@
 
   toggle.addEventListener('click', () => {
     mode = mode === 'authenticator' ? 'recovery' : 'authenticator';
-    const useRecovery = mode === 'recovery';
-
-    digitGroup.hidden = useRecovery;
-    recoveryField.hidden = !useRecovery;
-    digits.forEach((input) => {
-      input.required = !useRecovery;
-    });
-    recoveryInput.required = useRecovery;
-    hiddenCode.value = '';
-    setError();
-
-    if (toggleLabel) {
-      toggleLabel.textContent = useRecovery
-        ? toggle.dataset.authenticatorLabel
-        : toggle.dataset.recoveryLabel;
-    }
-
-    toggle.setAttribute('aria-expanded', String(useRecovery));
-    (useRecovery ? recoveryInput : digits[0]).focus();
+    applyMode();
   });
 
   form.addEventListener('submit', (event) => {
@@ -150,4 +159,6 @@
       submitLabel.textContent = form.dataset.loadingLabel;
     }
   });
+
+  applyMode({ focus: false, clearError: false });
 })();
