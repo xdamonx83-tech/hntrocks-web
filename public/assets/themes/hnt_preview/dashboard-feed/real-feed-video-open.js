@@ -12,8 +12,11 @@
     if (!mediaItem || mediaItem.closest('.real-media-viewer')) return;
     if (mediaItem.dataset.hntViewerRedispatch === '1') return;
 
-    /* Keep the compact transport controls usable. Clicking the actual video
-       surface or the large centre button opens the shared media viewer. */
+    /* The existing viewer already handles its large play button. This bridge
+       adds the missing click target on the actual video surface itself. */
+    const clickedVideoSurface = target instanceof HTMLVideoElement
+      || Boolean(target.closest('video'));
+    if (!clickedVideoSurface) return;
     if (target.closest('.hnt-shared-video-controls')) return;
 
     event.preventDefault();
