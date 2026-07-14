@@ -145,14 +145,13 @@ class AdminHuntNewsController extends Controller
 
         $admin = $request->user();
         $publisher = (string) $validated['publisher'];
+        $isPinned = $request->boolean('pin');
         $postOwner = $publisher === FeedNewsCard::PUBLISHER_HUNT_NEWS
             ? User::query()->find((int) config('hunthub.hunt_news.user_id', 1))
             : $admin;
         $postOwner ??= $admin;
 
-        $post = DB::transaction(function () use ($validated, $highlights, $publisher, $postOwner, $admin, $translations): FeedPost {
-            $isPinned = request()->boolean('pin');
-
+        $post = DB::transaction(function () use ($validated, $highlights, $publisher, $postOwner, $admin, $translations, $isPinned): FeedPost {
             $post = FeedPost::create([
                 'user_id' => $postOwner->id,
                 'body' => trim((string) $validated['body']),
