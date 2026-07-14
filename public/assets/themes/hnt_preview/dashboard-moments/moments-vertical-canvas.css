@@ -1,0 +1,53 @@
+/* Moments always keep one consistent 9:16 canvas.
+   A selected 16:9 clip is centered inside that canvas with black letterboxing. */
+body[data-page="moments"] .moment-video-card.is-content-16-9,
+body[data-page="moments"] .moment-video-card.hnt-shared-moment-player.is-content-16-9 {
+    width: auto;
+    height: calc(100% - 24px);
+    max-height: 870px;
+    aspect-ratio: 9 / 16;
+    align-self: center;
+    background: #000;
+}
+
+body[data-page="moments"] .moment-video-card.is-content-16-9 .moment-poster,
+body[data-page="moments"] .moment-video-card.hnt-shared-moment-player.is-content-16-9 .moment-poster {
+    object-fit: contain;
+    object-position: center;
+    background: #000;
+}
+
+body[data-page="moments"] .moment-video-card.is-content-9-16 .moment-poster,
+body[data-page="moments"] .moment-video-card.hnt-shared-moment-player.is-content-9-16 .moment-poster {
+    object-fit: cover;
+    object-position: center;
+}
+
+body[data-page="moments"] .hnt-composer-video-player.is-content-16-9,
+body[data-page="moments"] .hnt-composer-video-player.is-content-9-16 {
+    width: min(300px, 100%);
+    margin-inline: auto;
+    aspect-ratio: 9 / 16;
+    background: #000;
+}
+
+body[data-page="moments"] .hnt-composer-video-player.is-content-16-9 > video {
+    object-fit: contain;
+    object-position: center;
+    background: #000;
+}
+
+body[data-page="moments"] .hnt-composer-video-player.is-content-9-16 > video {
+    object-fit: cover;
+    object-position: center;
+}
+
+@media (max-width: 899px) {
+    body[data-page="moments"] .moment-video-card.is-content-16-9,
+    body[data-page="moments"] .moment-video-card.hnt-shared-moment-player.is-content-16-9 {
+        width: auto;
+        height: calc(100% - 16px);
+        max-height: none;
+        aspect-ratio: 9 / 16;
+    }
+}
