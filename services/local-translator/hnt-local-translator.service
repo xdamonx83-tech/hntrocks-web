@@ -9,6 +9,7 @@ User=hunthub
 Group=hunthub
 WorkingDirectory=/home/users/hunthub/www/hnt.rocks/services/local-translator
 Environment=HOME=/home/users/hunthub
+Environment=XDG_DATA_HOME=/home/users/hunthub/.local/share
 Environment=PYTHONUNBUFFERED=1
 Environment=ARGOS_DEVICE_TYPE=cpu
 Environment=HNT_TRANSLATOR_HOST=127.0.0.1
