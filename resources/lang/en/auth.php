@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'kicker' => 'Welcome back',
+    'login_heading' => 'Sign in',
+    'login_intro' => 'Sign in and return directly to your community.',
+    'identity_label' => 'Email or username',
+    'identity_placeholder' => 'name@example.com or hunter name',
+    'password_label' => 'Password',
+    'password_placeholder' => 'Your password',
+    'show_password' => 'Show password',
+    'hide_password' => 'Hide password',
+    'remember_me' => 'Keep me signed in',
+    'forgot_password' => 'Forgot password?',
+    'login_submit' => 'Sign in',
+    'login_loading' => 'Signing in …',
+    'continue_with' => 'or continue with',
+    'social_login' => 'Sign in with :provider',
+    'no_account' => 'No account yet?',
+    'register_now' => 'Create an account',
+    'privacy' => 'Privacy',
+    'imprint' => 'Legal notice',
+    'legal_navigation' => 'Legal links',
+    'language_label' => 'Choose language',
+    'home_label' => 'Back to homepage',
+];
