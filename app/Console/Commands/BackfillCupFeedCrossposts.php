@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Cup;
+use App\Models\FeedCupCard;
 use App\Services\Cups\CupFeedCrosspostService;
 use Illuminate\Console\Command;
 
@@ -28,7 +29,7 @@ class BackfillCupFeedCrossposts extends Command
 
         $query->chunkById(100, function ($cups) use ($crossposts, &$created, &$skipped): void {
             foreach ($cups as $cup) {
-                $before = $cup->feedCupCard()->exists();
+                $before = FeedCupCard::query()->where('cup_id', $cup->id)->exists();
                 $post = $crossposts->publish($cup);
 
                 if ($post && ! $before) {
