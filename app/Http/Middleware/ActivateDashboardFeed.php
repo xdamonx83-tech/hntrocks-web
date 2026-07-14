@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Cups\DashboardCupsLiveController;
 use App\Http\Controllers\Feed\DashboardFeedLiveController;
 use App\Support\HntTheme;
 use Closure;
@@ -17,11 +18,13 @@ class ActivateDashboardFeed
         }
 
         if ($request->routeIs('cups.index')) {
-            if ($request->user()) {
-                $request->attributes->set('hnt_dashboard_feed_live', true);
+            if (! $request->user()) {
+                return $next($request);
             }
 
-            return $next($request);
+            $request->attributes->set('hnt_dashboard_feed_live', true);
+
+            return app(DashboardCupsLiveController::class)($request);
         }
 
         if ($request->routeIs('feed.show') && $request->boolean('hnt_preview_comments')) {
