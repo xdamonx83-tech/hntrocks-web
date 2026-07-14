@@ -1,0 +1,117 @@
+.hnt-preview-feed-post.is-official-news {
+  border-color: rgba(184, 70, 58, .28);
+}
+
+.hnt-official-news-badge {
+  min-height: 31px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: .5px solid rgba(184, 70, 58, .24);
+  border-radius: 999px;
+  background: rgba(184, 70, 58, .10);
+  color: var(--hnt-brand-red, #b8463a);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hnt-feed-news-card {
+  display: grid;
+  grid-template-columns: minmax(230px, .9fr) minmax(300px, 1.35fr);
+  gap: 0;
+  margin-top: 18px;
+  overflow: hidden;
+  border: .5px solid rgba(52, 48, 37, .16);
+  border-radius: 22px;
+  background: rgba(238, 235, 224, .88);
+  color: #2f302d;
+}
+
+.hnt-feed-news-card-intro {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  padding: 25px 28px;
+}
+
+.hnt-feed-news-card-intro > span {
+  color: #a4771c;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.hnt-feed-news-card-intro h3 {
+  margin: 0;
+  color: #2f302d;
+  font-size: clamp(20px, 2vw, 30px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: 1.08;
+}
+
+.hnt-feed-news-card-intro small {
+  color: #8d887d;
+  font-size: 11px;
+}
+
+.hnt-feed-news-card-highlights {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 15px;
+  margin: 23px 0;
+  padding: 4px 28px 4px 30px;
+  border-left: .5px dashed rgba(164, 119, 28, .36);
+  list-style: none;
+}
+
+.hnt-feed-news-card-highlights li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 13px minmax(0, 1fr);
+  align-items: start;
+  gap: 11px;
+  color: #68665f;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.hnt-feed-news-card-highlights i {
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #d6a84f;
+}
+
+.hnt-feed-news-card--hunt_news .hnt-feed-news-card-intro > span,
+.hnt-feed-news-card--hunt_news .hnt-official-news-badge {
+  color: #b8463a;
+}
+
+.hnt-feed-news-card--hunt_news .hnt-feed-news-card-highlights i {
+  background: #b8463a;
+}
+
+@media (max-width: 760px) {
+  .hnt-feed-news-card {
+    grid-template-columns: 1fr;
+    border-radius: 18px;
+  }
+
+  .hnt-feed-news-card-intro {
+    padding: 20px 20px 14px;
+  }
+
+  .hnt-feed-news-card-highlights {
+    margin: 0 20px 20px;
+    padding: 17px 0 0;
+    border-top: .5px dashed rgba(164, 119, 28, .36);
+    border-left: 0;
+  }
+}
