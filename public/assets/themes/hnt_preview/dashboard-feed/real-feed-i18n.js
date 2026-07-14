@@ -103,3 +103,12 @@
   script.dataset.hntSharedVideoPlayer = '1';
   document.body.appendChild(script);
 })();
+
+/* Moment cross-posts are rendered as linked preview cards, not duplicate videos. */
+(() => {
+  if (document.querySelector('script[data-hnt-feed-moment-preview]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/themes/hnt_preview/dashboard-feed/real-feed-moment-preview.js?v=1';
+  script.dataset.hntFeedMomentPreview = '1';
+  document.body.appendChild(script);
+})();
