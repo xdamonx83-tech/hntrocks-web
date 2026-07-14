@@ -4,6 +4,45 @@
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
   if (!window.fetch) return;
 
+  /* The shared media viewer was originally written for the feed endpoint.
+     Profile posts use the exact same payload, so only rewrite that one narrow
+     data request instead of maintaining a second profile-only viewer. */
+  if (!window.HNT_PROFILE_FEED_FETCH_BRIDGE) {
+    window.HNT_PROFILE_FEED_FETCH_BRIDGE = true;
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      try {
+        const source = input instanceof Request ? input.url : String(input);
+        const url = new URL(source, window.location.href);
+        const isProfileViewerRequest = url.pathname === window.location.pathname
+          && url.searchParams.get('data') === '1'
+          && url.searchParams.has('post_id');
+
+        if (isProfileViewerRequest) {
+          url.pathname = '/feed';
+          input = input instanceof Request
+            ? new Request(url.toString(), input)
+            : url.toString();
+        }
+      } catch (_) {
+        // Leave unrelated requests untouched.
+      }
+      return nativeFetch(input, init);
+    };
+  }
+
+  const loadScript = (src, attribute) => {
+    if (document.querySelector(`script[data-${attribute}]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.setAttribute(`data-${attribute}`, '1');
+    document.body.appendChild(script);
+  };
+
+  loadScript('/assets/themes/hnt_preview/dashboard-feed/shared-video-player.js?v=1', 'hnt-shared-video-player');
+  loadScript('/assets/themes/hnt_preview/dashboard-feed/real-feed-translation.js?v=1', 'hnt-feed-translation');
+  loadScript('/assets/themes/hnt_preview/dashboard-feed/real-feed-video-open.js?v=1', 'hnt-feed-video-open');
+
   const toast = (message) => {
     if (typeof window.showToast === 'function') window.showToast(message);
     else console.info(message);
