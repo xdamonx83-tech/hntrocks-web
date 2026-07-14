@@ -16,6 +16,7 @@
     $hntMomentsLiveFinalVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-live-final.css')) ?: time();
     $hntMomentsLiveFinalJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-live-final.js')) ?: time();
     $hntMomentsActionsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-actions.css')) ?: time();
+    $hntMomentsActionsCompatCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-actions-compat.css')) ?: time();
     $hntMomentsActionsJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-actions.js')) ?: time();
     $hntMomentsActionsCompatJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-actions-compat.js')) ?: time();
     $hntMomentsSharedFinalVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-shared-final.css')) ?: time();
@@ -26,7 +27,8 @@
         '<link data-hnt-theme-colors href="'.asset('assets/themes/hnt_preview/theme-colors.css').'?v='.$hntThemeColorsVersion.'" rel="stylesheet">'.
         '<link data-hnt-theme-page-polish href="'.asset('assets/themes/hnt_preview/theme-page-polish.css').'?v='.$hntThemePolishVersion.'" rel="stylesheet">'.
         '<link data-hnt-moments-live-final href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-live-final.css').'?v='.$hntMomentsLiveFinalVersion.'" rel="stylesheet">'.
-        '<link data-hnt-moments-actions href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions.css').'?v='.$hntMomentsActionsVersion.'" rel="stylesheet">';
+        '<link data-hnt-moments-actions href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions.css').'?v='.$hntMomentsActionsVersion.'" rel="stylesheet">'.
+        '<link data-hnt-moments-actions-compat href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions-compat.css').'?v='.$hntMomentsActionsCompatCssVersion.'" rel="stylesheet">';
 
     $hntMomentsFinalCssUrl = asset('assets/themes/hnt_preview/dashboard-moments/moments-shared-final.css').'?v='.$hntMomentsSharedFinalVersion;
 
