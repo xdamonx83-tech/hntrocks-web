@@ -17,6 +17,7 @@
     $hntMomentsLiveFinalJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-live-final.js')) ?: time();
     $hntMomentsActionsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-actions.css')) ?: time();
     $hntMomentsActionsJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-actions.js')) ?: time();
+    $hntMomentsActionsCompatJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-actions-compat.js')) ?: time();
     $hntMomentsSharedFinalVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-shared-final.css')) ?: time();
     $hntHeaderVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js')) ?: time();
     $hntHeaderLiveVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time();
@@ -35,7 +36,8 @@
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v='.$hntHeaderLiveVersion.'"></script>'.
         '<script>(()=>{const install=()=>{if(document.querySelector(\'link[data-hnt-moments-shared-final]\'))return;const link=document.createElement(\'link\');link.rel=\'stylesheet\';link.href='.\Illuminate\Support\Js::from($hntMomentsFinalCssUrl).';link.dataset.hntMomentsSharedFinal=\'1\';document.head.appendChild(link)};if(document.readyState===\'complete\')install();else window.addEventListener(\'load\',install,{once:true})})();</script>'.
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-live-final.js').'?v='.$hntMomentsLiveFinalJsVersion.'"></script>'.
-        '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions.js').'?v='.$hntMomentsActionsJsVersion.'"></script>';
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions.js').'?v='.$hntMomentsActionsJsVersion.'"></script>'.
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions-compat.js').'?v='.$hntMomentsActionsCompatJsVersion.'"></script>';
 
     $hntMomentsHtml = str_replace('</head>', $hntMomentsHeadAssets.'</head>', $hntMomentsHtml);
     $hntMomentsHtml = str_replace('</body>', $hntMomentsBodyAssets.'</body>', $hntMomentsHtml);
