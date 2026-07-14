@@ -79,25 +79,56 @@ class Moment extends Model
                 return;
             }
 
-            $bodyParts = array_values(array_filter([
-                trim((string) $moment->caption),
-                trim((string) $moment->description),
-            ], static fn (string $value): bool => $value !== ''));
-
-            $body = trim(implode("\n\n", $bodyParts));
-            if ($body === '') {
-                $body = 'HNT Moment';
-            }
-
-            $body .= "\n\n".url('/moments/r/'.$moment->getKey());
-
-            FeedPost::create([
+            $feedPost = FeedPost::create([
                 'user_id' => $moment->user_id,
-                'body' => $body,
+                'body' => self::crosspostBody($moment),
                 'visibility' => $moment->visibility === 'private' ? 'private' : 'public',
                 'status' => 'published',
             ]);
+
+            $metadata = is_array($asset->metadata) ? $asset->metadata : [];
+            $metadata['moment_feed_post_id'] = $feedPost->getKey();
+            $asset->forceFill(['metadata' => $metadata])->saveQuietly();
         });
+
+        static::deleting(function (Moment $moment): void {
+            $moment->loadMissing('media');
+            $asset = $moment->media;
+            $metadata = is_array($asset?->metadata) ? $asset->metadata : [];
+            $feedPostId = (int) ($metadata['moment_feed_post_id'] ?? 0);
+
+            if ($feedPostId > 0) {
+                FeedPost::query()
+                    ->whereKey($feedPostId)
+                    ->where('user_id', $moment->user_id)
+                    ->delete();
+
+                return;
+            }
+
+            // Compatibility for crossposts created before moment_feed_post_id was stored.
+            // The complete generated body must match, so ordinary posts merely mentioning
+            // the same Moment URL are not removed.
+            FeedPost::query()
+                ->where('user_id', $moment->user_id)
+                ->where('body', self::crosspostBody($moment))
+                ->delete();
+        });
+    }
+
+    private static function crosspostBody(Moment $moment): string
+    {
+        $bodyParts = array_values(array_filter([
+            trim((string) $moment->caption),
+            trim((string) $moment->description),
+        ], static fn (string $value): bool => $value !== ''));
+
+        $body = trim(implode("\n\n", $bodyParts));
+        if ($body === '') {
+            $body = 'HNT Moment';
+        }
+
+        return $body."\n\n".url('/moments/r/'.$moment->getKey());
     }
 
     public function user(): BelongsTo
