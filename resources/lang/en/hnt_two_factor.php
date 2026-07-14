@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title' => 'Two-factor authentication',
+    'title' => 'Confirm sign-in',
+    'intro' => 'Enter the six-digit security code from your authenticator app.',
+    'security_title' => 'Code from your authenticator app',
+    'security_hint' => 'The security code refreshes every 30 seconds.',
+    'code_group' => 'Six-digit security code',
+    'digit_label' => 'Digit :number',
+    'code_incomplete' => 'Enter the complete six-digit code.',
+    'verify' => 'Confirm',
+    'verifying' => 'Checking…',
+    'use_recovery' => 'Use a recovery code',
+    'use_authenticator' => 'Use an authenticator code',
+    'recovery_label' => 'Recovery code',
+    'recovery_placeholder' => 'XXXXX-XXXXX',
+    'recovery_required' => 'Enter a recovery code.',
+    'back_to_login' => 'Back to login',
+    'privacy' => 'Privacy',
+    'imprint' => 'Imprint',
+    'legal_navigation' => 'Legal information',
+    'language' => 'Choose language',
+    'close' => 'Close',
+];
