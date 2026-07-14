@@ -45,7 +45,7 @@
       node.setAttribute('aria-label', text('open_post', node.getAttribute('aria-label') || ''));
     });
 
-    const authorMeta = article.querySelector('.post-author > span');
+    const authorMeta = article.querySelector('.post-author > span, .post-author .hnt-post-meta-row > span');
     if (authorMeta) {
       authorMeta.textContent = authorMeta.textContent
         .replace(/ · Öffentlich\s*$/, ` · ${text('public', 'Öffentlich')}`)
@@ -95,20 +95,18 @@
   document.addEventListener('hnt:feed-i18n-refresh', localizeStaticChrome);
 })();
 
-/* The same player is used by feed videos, media viewer videos and Moments. */
+/* Shared live-feed modules. */
 (() => {
-  if (document.querySelector('script[data-hnt-shared-video-player]')) return;
-  const script = document.createElement('script');
-  script.src = '/assets/themes/hnt_preview/dashboard-feed/shared-video-player.js?v=1';
-  script.dataset.hntSharedVideoPlayer = '1';
-  document.body.appendChild(script);
-})();
+  const load = (src, key) => {
+    if (document.querySelector(`script[data-${key}]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.dataset[key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = '1';
+    document.body.appendChild(script);
+  };
 
-/* Moment cross-posts are rendered as linked preview cards, not duplicate videos. */
-(() => {
-  if (document.querySelector('script[data-hnt-feed-moment-preview]')) return;
-  const script = document.createElement('script');
-  script.src = '/assets/themes/hnt_preview/dashboard-feed/real-feed-moment-preview.js?v=1';
-  script.dataset.hntFeedMomentPreview = '1';
-  document.body.appendChild(script);
+  load('/assets/themes/hnt_preview/dashboard-feed/shared-video-player.js?v=1', 'hnt-shared-video-player');
+  load('/assets/themes/hnt_preview/dashboard-feed/real-feed-moment-preview.js?v=1', 'hnt-feed-moment-preview');
+  load('/assets/themes/hnt_preview/dashboard-feed/real-feed-translation.js?v=1', 'hnt-feed-translation');
+  load('/assets/themes/hnt_preview/dashboard-feed/real-feed-video-open.js?v=1', 'hnt-feed-video-open');
 })();
