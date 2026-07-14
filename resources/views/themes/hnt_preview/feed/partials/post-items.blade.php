@@ -1,6 +1,10 @@
 @php
+    $feedPostItems = method_exists($socialitePosts, 'getCollection')
+        ? $socialitePosts->getCollection()
+        : collect($socialitePosts);
+
     $newsCardsByPostId = \App\Models\FeedNewsCard::query()
-        ->whereIn('feed_post_id', collect($socialitePosts)->pluck('id')->filter()->all())
+        ->whereIn('feed_post_id', $feedPostItems->pluck('id')->filter()->all())
         ->get()
         ->keyBy('feed_post_id');
 @endphp
@@ -8,7 +12,7 @@
 @forelse($socialitePosts as $post)
     @include('themes.hnt_preview.feed.partials.post-card', [
         'post' => $post,
-        'newsCard' => $newsCardsByPostId->get($post->id),
+        'newsCard' => $newsCardsByPostId->get($post->id, false),
     ])
 @empty
     <article class="post hnt-preview-empty-card">
