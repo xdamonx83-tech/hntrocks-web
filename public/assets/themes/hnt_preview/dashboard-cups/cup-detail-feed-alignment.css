@@ -1,0 +1,164 @@
+/* Cup detail integration with the accepted Feed/Profile shell.
+ * Only page layout is local. Shared header/dropdown/comms surfaces use the
+ * same neutral variables and runtime as Feed/Profile.
+ */
+
+body[data-page="cup-detail"] {
+  overflow: hidden !important;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell {
+  width: 100%;
+  height: 100vh !important;
+  min-height: 640px;
+  overflow: hidden !important;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: clamp(12px, 1.45vh, 18px);
+  align-content: stretch;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell > .site-header {
+  position: relative !important;
+  top: auto !important;
+  z-index: 2000;
+}
+
+/* One page-content scroller below the fixed header. Cards and columns do not
+ * create additional nested scroll areas. */
+body[data-page="cup-detail"] .cup-detail-stage {
+  height: auto !important;
+  min-height: 0;
+  align-items: start;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  padding-bottom: 18px;
+  scrollbar-width: none;
+}
+
+body[data-page="cup-detail"] .cup-detail-stage::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body[data-page="cup-detail"] .cup-detail-side,
+body[data-page="cup-detail"] .cup-detail-scroll {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0;
+  overflow: visible !important;
+  overscroll-behavior: auto;
+}
+
+/* The section header belongs to the content flow. It must not cover the first
+ * lines of the active panel while scrolling. */
+body[data-page="cup-detail"] .cup-section-head {
+  position: relative !important;
+  top: auto !important;
+}
+
+body[data-page="cup-detail"] .cup-section-panels,
+body[data-page="cup-detail"] .cup-tab-panel,
+body[data-page="cup-detail"] .cup-description-panel {
+  overflow: visible;
+}
+
+body[data-page="cup-detail"] .cup-section-panels {
+  padding-top: 18px;
+}
+
+/* Shared Feed/Profile surfaces. These intentionally override the early Cup
+ * prototype's dark/yellow page-specific header and comms rules. */
+body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown {
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--ink, #30302e) !important;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown::before,
+body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown::after,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown::before,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown::after {
+  background: none !important;
+  background-image: none !important;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown > header,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown-head {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell .header-mark-all,
+body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-menu-icon,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-menu-icon,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-notification-icon {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
+  color: var(--ink, #30302e) !important;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell .header-menu-list > :is(a, button):hover,
+body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-menu-grid > :is(a, button):hover,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-message-item.unread,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-notification-item.unread,
+body[data-page="cup-detail"] .cup-detail-page-shell .header-request-item.unread {
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
+}
+
+body[data-page="cup-detail"] .hnt-comms-launcher,
+body[data-page="cup-detail"] [data-hnt-comms-launcher] {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-rows: 1fr !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
+  border-radius: 50% !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
+  color: var(--ink, #30302e) !important;
+  box-shadow: none !important;
+}
+
+body[data-page="cup-detail"] .hnt-comms-launcher:hover,
+body[data-page="cup-detail"] .hnt-comms-launcher:focus-visible,
+body[data-page="cup-detail"] [data-hnt-comms-launcher]:hover,
+body[data-page="cup-detail"] [data-hnt-comms-launcher]:focus-visible {
+  background: var(--hnt-surface-card-strong, #fff) !important;
+  color: var(--darkred, #b64e44) !important;
+  outline: none !important;
+}
+
+body[data-page="cup-detail"] .hnt-comms-launcher__count {
+  border-color: var(--hnt-surface-card-strong, #fff) !important;
+  background: var(--darkred, #b64e44) !important;
+  color: #fff !important;
+}
+
+@media (max-width: 899px) {
+  body[data-page="cup-detail"] {
+    overflow: auto !important;
+  }
+
+  body[data-page="cup-detail"] .cup-detail-page-shell {
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+    display: block;
+  }
+
+  body[data-page="cup-detail"] .cup-detail-stage {
+    margin-top: 12px;
+    overflow: visible !important;
+    padding-bottom: 12px;
+  }
+}
