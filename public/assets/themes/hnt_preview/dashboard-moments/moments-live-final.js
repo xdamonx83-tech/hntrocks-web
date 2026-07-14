@@ -22,6 +22,10 @@
     registered: 'Members only',
     private: 'Private',
     cover: 'Optional cover',
+    chooseCover: 'Select cover image',
+    coverHelp: 'JPG, PNG or WebP',
+    noCover: 'No image selected',
+    removeCover: 'Remove',
     studio: 'Open Studio',
     cancel: 'Cancel',
     publish: 'Publish moment',
@@ -44,6 +48,10 @@
     registered: 'Nur Mitglieder',
     private: 'Privat',
     cover: 'Optionales Titelbild',
+    chooseCover: 'Titelbild auswählen',
+    coverHelp: 'JPG, PNG oder WebP',
+    noCover: 'Kein Bild ausgewählt',
+    removeCover: 'Entfernen',
     studio: 'Studio öffnen',
     cancel: 'Abbrechen',
     publish: 'Moment veröffentlichen',
@@ -131,10 +139,21 @@
             <span>${text.description}</span>
             <textarea name="description" maxlength="2000" placeholder="${text.descriptionPlaceholder}"></textarea>
           </label>
-          <label class="hnt-moment-composer-field is-wide">
+          <div class="hnt-moment-composer-field is-wide hnt-moment-cover-field">
             <span>${text.cover}</span>
-            <span class="hnt-moment-cover-row"><input name="cover" type="file" accept="image/jpeg,image/png,image/webp"></span>
-          </label>
+            <input id="hntMomentCoverInput" name="cover" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+            <label class="hnt-moment-cover-picker" for="hntMomentCoverInput">
+              <span class="hnt-moment-cover-picker-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 6.5h16v11H4z"></path><path d="m7 15 3.4-3.5 2.5 2.4 1.8-1.8L18 15"></path><circle cx="16.5" cy="9" r="1.4"></circle></svg>
+              </span>
+              <span class="hnt-moment-cover-picker-copy"><strong>${text.chooseCover}</strong><small>${text.coverHelp}</small></span>
+              <span class="hnt-moment-cover-file-name" data-hnt-cover-file-name>${text.noCover}</span>
+            </label>
+            <div class="hnt-moment-cover-preview" data-hnt-cover-preview hidden>
+              <img alt="" data-hnt-cover-preview-image>
+              <button type="button" data-hnt-cover-remove>${text.removeCover}</button>
+            </div>
+          </div>
         </div>
         <div class="hnt-moment-upload-progress" aria-hidden="true"><i></i></div>
         <div class="hnt-moment-composer-status" role="status"></div>
@@ -151,12 +170,18 @@
 
   const form = backdrop.querySelector('form');
   const videoInput = form.querySelector('input[name="video"]');
+  const coverInput = form.querySelector('input[name="cover"]');
+  const coverFileName = form.querySelector('[data-hnt-cover-file-name]');
+  const coverPreview = form.querySelector('[data-hnt-cover-preview]');
+  const coverPreviewImage = form.querySelector('[data-hnt-cover-preview-image]');
+  const coverRemove = form.querySelector('[data-hnt-cover-remove]');
   const uploadZone = backdrop.querySelector('.hnt-moment-upload-zone');
   const preview = backdrop.querySelector('.hnt-moment-upload-preview');
   const status = backdrop.querySelector('.hnt-moment-composer-status');
   const progress = backdrop.querySelector('.hnt-moment-upload-progress > i');
   const submit = backdrop.querySelector('.hnt-moment-composer-submit');
   let previewUrl = '';
+  let coverPreviewUrl = '';
 
   const setStatus = (message = '', isError = false) => {
     status.textContent = message;
@@ -179,6 +204,24 @@
     preview.load();
   };
 
+  const resetCover = ({ clearInput = false } = {}) => {
+    if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl);
+    coverPreviewUrl = '';
+    if (coverPreviewImage) coverPreviewImage.removeAttribute('src');
+    if (coverPreview) coverPreview.hidden = true;
+    if (coverFileName) coverFileName.textContent = text.noCover;
+    if (clearInput && coverInput) coverInput.value = '';
+  };
+
+  const showCover = (file) => {
+    resetCover();
+    if (!file) return;
+    coverPreviewUrl = URL.createObjectURL(file);
+    if (coverPreviewImage) coverPreviewImage.src = coverPreviewUrl;
+    if (coverPreview) coverPreview.hidden = false;
+    if (coverFileName) coverFileName.textContent = file.name;
+  };
+
   const open = () => {
     backdrop.classList.add('is-open');
     backdrop.setAttribute('aria-hidden', 'false');
@@ -194,6 +237,7 @@
     progress.style.width = '0%';
     setStatus('');
     resetPreview();
+    resetCover();
   };
 
   document.addEventListener('click', (event) => {
@@ -213,6 +257,12 @@
   });
 
   videoInput.addEventListener('change', () => showVideo(videoInput.files?.[0]));
+  coverInput?.addEventListener('change', () => showCover(coverInput.files?.[0]));
+  coverRemove?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    resetCover({ clearInput: true });
+  });
 
   ['dragenter', 'dragover'].forEach((name) => uploadZone.addEventListener(name, (event) => {
     event.preventDefault();
