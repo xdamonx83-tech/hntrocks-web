@@ -20,8 +20,8 @@ def installed(source: str, target: str) -> bool:
         return False
 
     try:
-        source_language.get_translation(target_language)
-        return True
+        translator = source_language.get_translation(target_language)
+        return translator is not None
     except Exception:
         return False
 
