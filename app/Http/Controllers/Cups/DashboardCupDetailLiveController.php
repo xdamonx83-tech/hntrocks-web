@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cups;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cup;
+use App\Support\CupOrganizerAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,12 +30,34 @@ class DashboardCupDetailLiveController extends Controller
         ]);
 
         abort_unless(
-            $cup->visibility === 'public' || $cup->isOwner($request->user()) || $cup->canManage($request->user()),
+            $cup->visibility === 'public'
+            || $cup->isOwner($request->user())
+            || CupOrganizerAccess::canManage($cup, $request->user()),
             404
         );
 
+        $canManage = CupOrganizerAccess::canManage($cup, $request->user());
+
+        if ($request->boolean('review_capabilities')) {
+            $isEnglish = app()->getLocale() === 'en';
+
+            return response()->json([
+                'can_manage' => $canManage,
+                'verification_mode' => CupOrganizerAccess::verificationMode($cup),
+                'can_ai_review' => CupOrganizerAccess::canUseAi($request->user()),
+                'labels' => [
+                    'kills' => 'Kills',
+                    'bounty' => 'Bounty',
+                    'points' => $isEnglish ? 'Points optional' : 'Punkte optional',
+                    'note' => $isEnglish ? 'Review note' : 'Prüfnotiz',
+                    'manual_score' => $isEnglish ? 'Score manually' : 'Manuell werten',
+                    'ai_rescore' => $isEnglish ? 'Run AI review again' : 'KI erneut prüfen',
+                    'reject' => $isEnglish ? 'Reject' : 'Ablehnen',
+                ],
+            ]);
+        }
+
         $viewerTeam = $cup->teamFor($request->user());
-        $canManage = $cup->canManage($request->user());
 
         $viewerTeamChatMessagesCount = 0;
         if ($viewerTeam && ! $cup->isSoloLeaderboard() && Schema::hasTable('cup_team_chat_messages')) {
