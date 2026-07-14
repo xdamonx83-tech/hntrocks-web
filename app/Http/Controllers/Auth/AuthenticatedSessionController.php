@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Auth\AuthShowcaseStatsService;
 use App\Services\Auth\TwoFactorService;
 use App\Services\SecurityLogService;
 use Illuminate\Http\RedirectResponse;
@@ -14,9 +15,11 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    public function create(): View
+    public function create(AuthShowcaseStatsService $showcaseStats): View
     {
-        return view('auth.login');
+        return view('auth.login', [
+            'authShowcaseStats' => $showcaseStats->get(),
+        ]);
     }
 
     public function store(Request $request, SecurityLogService $securityLog): RedirectResponse
@@ -169,6 +172,5 @@ class AuthenticatedSessionController extends Controller
         ])->save();
 
         $securityLog->record($user, $event, $request);
-
     }
 }
