@@ -3,8 +3,16 @@
         ? $socialitePosts->getCollection()
         : collect($socialitePosts);
 
+    $feedPostIds = $feedPostItems->pluck('id')->filter()->all();
+
     $newsCardsByPostId = \App\Models\FeedNewsCard::query()
-        ->whereIn('feed_post_id', $feedPostItems->pluck('id')->filter()->all())
+        ->whereIn('feed_post_id', $feedPostIds)
+        ->get()
+        ->keyBy('feed_post_id');
+
+    $cupCardsByPostId = \App\Models\FeedCupCard::query()
+        ->whereIn('feed_post_id', $feedPostIds)
+        ->with(['cup.owner'])
         ->get()
         ->keyBy('feed_post_id');
 @endphp
@@ -13,6 +21,7 @@
     @include('themes.hnt_preview.feed.partials.post-card', [
         'post' => $post,
         'newsCard' => $newsCardsByPostId->get($post->id, false),
+        'cupCard' => $cupCardsByPostId->get($post->id, false),
     ])
 @empty
     <article class="post hnt-preview-empty-card">
