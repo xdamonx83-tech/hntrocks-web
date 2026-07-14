@@ -150,6 +150,10 @@ body[data-page="auth-2fa"] .auth-field > div:focus-within {
   box-shadow: none;
 }
 
+body[data-page="auth-2fa"] .auth-field > div.is-invalid {
+  border-color: var(--hnt-danger);
+}
+
 body[data-page="auth-2fa"] .auth-backup[hidden],
 body[data-page="auth-2fa"] .auth-code[hidden] {
   display: none;
