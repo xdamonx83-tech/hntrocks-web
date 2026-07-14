@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Auth\AuthShowcaseStatsService;
 use App\Services\GamificationService;
 use App\Services\ReferralService;
 use Illuminate\Http\RedirectResponse;
@@ -16,9 +17,11 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    public function create(): View
+    public function create(AuthShowcaseStatsService $showcaseStats): View
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'authShowcaseStats' => $showcaseStats->get(),
+        ]);
     }
 
     public function store(Request $request, GamificationService $gamification, ReferralService $referrals): RedirectResponse
