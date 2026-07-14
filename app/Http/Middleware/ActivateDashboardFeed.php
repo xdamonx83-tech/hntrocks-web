@@ -34,8 +34,12 @@ class ActivateDashboardFeed
                 return $next($request);
             }
 
-            $cup = $request->route('cup');
-            if (! $cup instanceof Cup) {
+            $cupParameter = $request->route('cup');
+            $cup = $cupParameter instanceof Cup
+                ? $cupParameter
+                : Cup::query()->where('slug', (string) $cupParameter)->first();
+
+            if (! $cup) {
                 return $next($request);
             }
 
