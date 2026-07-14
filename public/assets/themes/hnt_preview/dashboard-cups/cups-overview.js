@@ -21,12 +21,14 @@
     '/assets/themes/hnt_preview/dashboard-cups/cups-feed-alignment.css?v=20260714-3',
     'data-cups-feed-alignment'
   );
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/dashboard-cups/cup-community-access.css?v=20260714-1',
+    'data-cup-community-access'
+  );
 
   const shell = document.querySelector('.cups-page-shell');
   if (!shell) return;
 
-  /* Use the exact same live header endpoint and runtime as Feed/Profile and
-   * the Cup detail page. */
   window.HNT_DASHBOARD_HEADER_ENDPOINT = '/feed';
 
   const loadScript = (src, marker, onload) => {
@@ -53,6 +55,7 @@
     )
   );
 
+  const english = document.documentElement.lang.toLowerCase().startsWith('en');
   const cupsNav = shell.querySelector('.nav-cups');
   const cupsTrigger = cupsNav?.querySelector(':scope > .main-nav-trigger');
 
@@ -77,4 +80,25 @@
       window.location.assign(target);
     });
   });
+
+  const cupsMenu = cupsNav?.querySelector('.main-nav-menu-grid');
+  if (cupsMenu && !cupsMenu.querySelector('[data-community-cup-create]')) {
+    const createControl = document.createElement('button');
+    createControl.type = 'button';
+    createControl.dataset.communityCupCreate = '1';
+    createControl.innerHTML = `<span class="main-nav-menu-icon"><svg><use href="#i-plus"></use></svg></span><span><strong>${english ? 'Create cup' : 'Cup erstellen'}</strong><small>${english ? 'Host your own community cup' : 'Eigenen Community-Cup veranstalten'}</small></span>`;
+    createControl.addEventListener('click', () => window.location.assign('/cups/create'));
+    cupsMenu.insertBefore(createControl, cupsMenu.children[1] || null);
+  }
+
+  if (!shell.querySelector('.cups-admin-create')) {
+    const pagination = shell.querySelector('.cups-pagination');
+    const directory = shell.querySelector('.cups-all-section');
+    const createLink = document.createElement('a');
+    createLink.className = 'cups-admin-create cups-community-create';
+    createLink.href = '/cups/create';
+    createLink.innerHTML = `<svg><use href="#i-plus"></use></svg>${english ? 'Create cup' : 'Cup erstellen'}`;
+    if (pagination) pagination.before(createLink);
+    else directory?.after(createLink);
+  }
 })();
