@@ -16,6 +16,13 @@ class ActivateDashboardFeed
             return $next($request);
         }
 
+        if ($request->routeIs('cups.index')) {
+            abort_unless($request->user(), 401);
+            $request->attributes->set('hnt_dashboard_feed_live', true);
+
+            return $next($request);
+        }
+
         if ($request->routeIs('feed.show') && $request->boolean('hnt_preview_comments')) {
             abort_unless($request->user(), 401);
             $request->attributes->set('hnt_dashboard_feed_live', true);
