@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'kicker' => 'Willkommen zurück',
+    'login_heading' => 'Anmelden',
+    'login_intro' => 'Melde dich an und kehre direkt zu deiner Community zurück.',
+    'identity_label' => 'E-Mail oder Benutzername',
+    'identity_placeholder' => 'name@beispiel.de oder Huntername',
+    'password_label' => 'Passwort',
+    'password_placeholder' => 'Dein Passwort',
+    'show_password' => 'Passwort anzeigen',
+    'hide_password' => 'Passwort verbergen',
+    'remember_me' => 'Angemeldet bleiben',
+    'forgot_password' => 'Passwort vergessen?',
+    'login_submit' => 'Anmelden',
+    'login_loading' => 'Anmeldung läuft …',
+    'continue_with' => 'oder weiter mit',
+    'social_login' => 'Mit :provider anmelden',
+    'no_account' => 'Noch kein Konto?',
+    'register_now' => 'Jetzt registrieren',
+    'privacy' => 'Datenschutz',
+    'imprint' => 'Impressum',
+    'legal_navigation' => 'Rechtliche Links',
+    'language_label' => 'Sprache wählen',
+    'home_label' => 'Zur Startseite',
+];
