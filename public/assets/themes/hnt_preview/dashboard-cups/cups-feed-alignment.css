@@ -1,0 +1,224 @@
+/* Cups overview alignment with the accepted HNT feed/profile shell.
+ * This file intentionally contains only cross-page layout and palette fixes.
+ */
+
+body[data-page="cups"] {
+  overflow: hidden;
+}
+
+.cups-page-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: clamp(12px, 1.45vh, 18px);
+}
+
+.cups-page-shell > .site-header {
+  position: relative;
+  z-index: 1200;
+}
+
+.cups-stage {
+  height: auto;
+  min-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.cups-scroll {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0;
+  scrollbar-width: none;
+}
+
+.cups-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.cups-fixed-column {
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+/* Compact filter controls: same proportions as the feed search tools. */
+.cups-filter-row {
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 195px) auto;
+  align-items: center;
+  gap: 8px;
+  padding-block: 11px;
+}
+
+.cups-search,
+.cups-filter-row select,
+.cups-filter-row button,
+.cups-filter-reset {
+  height: 36px;
+  min-height: 36px;
+  border-radius: 18px;
+}
+
+.cups-search {
+  padding-inline: 13px;
+}
+
+.cups-filter-row select {
+  padding: 0 30px 0 12px;
+}
+
+.cups-filter-actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.cups-filter-row button,
+.cups-filter-reset {
+  flex: 0 0 auto;
+  padding-inline: 13px;
+}
+
+.cups-filter-row button {
+  border-color: rgba(48, 48, 46, .24);
+  background: var(--dark);
+  color: #fff;
+}
+
+.cups-filter-row button:hover,
+.cups-filter-row button:focus-visible {
+  border-color: var(--cups-red);
+  background: var(--cups-red);
+  outline: none;
+}
+
+.cups-filter-row button svg,
+.cups-filter-reset svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Remove the old yellow wash from shared dropdowns on the Cups page. */
+.cups-page-shell .main-nav-dropdown,
+.cups-page-shell .header-dropdown {
+  border: .5px solid rgba(48, 48, 46, .15) !important;
+  background: rgba(248, 248, 245, .98) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+}
+
+.cups-page-shell .main-nav-dropdown::before,
+.cups-page-shell .main-nav-dropdown::after,
+.cups-page-shell .header-dropdown::before,
+.cups-page-shell .header-dropdown::after {
+  background: none !important;
+  background-image: none !important;
+}
+
+.cups-page-shell .main-nav-dropdown > header,
+.cups-page-shell .header-dropdown-head {
+  border-color: rgba(48, 48, 46, .11) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.cups-page-shell .main-nav-dropdown > header span,
+.cups-page-shell .header-dropdown-head span,
+.cups-page-shell .hnt-section-kicker {
+  color: var(--cups-red) !important;
+}
+
+.cups-page-shell .main-nav-menu-icon.yellow,
+.cups-page-shell .main-nav-menu-icon.green,
+.cups-page-shell .main-nav-menu-icon.purple,
+.cups-page-shell .header-menu-icon {
+  border-color: rgba(48, 48, 46, .10) !important;
+  background: rgba(48, 48, 46, .065) !important;
+  color: var(--ink) !important;
+}
+
+.cups-page-shell .main-nav-menu-grid > :is(a, button):hover,
+.cups-page-shell .header-menu-list > :is(a, button):hover,
+.cups-page-shell .header-message-item.unread,
+.cups-page-shell .header-notification-item.unread,
+.cups-page-shell .header-request-item.unread {
+  background: rgba(182, 78, 68, .075) !important;
+}
+
+.cups-page-shell .header-action-badge,
+.cups-page-shell .header-action-badge:not(.is-empty) {
+  border-color: rgba(248, 248, 245, .96) !important;
+  background: var(--cups-red) !important;
+  color: #fff !important;
+}
+
+/* The floating chat launcher must use the current anthracite/red palette. */
+body[data-page="cups"] .hnt-comms-launcher,
+body[data-page="cups"] [data-hnt-comms-launcher] {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-rows: 1fr !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: .5px solid rgba(242, 232, 216, .18) !important;
+  border-radius: 50% !important;
+  background: #30302e !important;
+  color: #f2e8d8 !important;
+  box-shadow: none !important;
+}
+
+body[data-page="cups"] .hnt-comms-launcher:hover,
+body[data-page="cups"] .hnt-comms-launcher:focus-visible,
+body[data-page="cups"] [data-hnt-comms-launcher]:hover,
+body[data-page="cups"] [data-hnt-comms-launcher]:focus-visible {
+  background: var(--cups-red) !important;
+  color: #fff !important;
+  outline: none !important;
+}
+
+body[data-page="cups"] .hnt-comms-launcher__count {
+  border-color: rgba(248, 248, 245, .98) !important;
+  background: var(--cups-red) !important;
+  color: #fff !important;
+}
+
+@media (max-width: 899px) {
+  body[data-page="cups"] {
+    overflow: auto;
+  }
+
+  .cups-page-shell {
+    display: block;
+  }
+
+  .cups-stage {
+    margin-top: 12px;
+  }
+
+  .cups-filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .cups-filter-actions {
+    justify-content: stretch;
+  }
+
+  .cups-filter-row button,
+  .cups-filter-reset {
+    flex: 1 1 0;
+  }
+}
