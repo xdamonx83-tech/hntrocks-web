@@ -17,11 +17,12 @@
     });
   });
 
-  const form = document.querySelector('[data-auth-login-form]');
-  const submit = document.querySelector('[data-auth-submit]');
-  const submitLabel = document.querySelector('[data-auth-submit-label]');
+  const form = document.querySelector('[data-auth-form], [data-auth-login-form]');
+  if (!form) return;
 
-  if (!form || !submit) return;
+  const submit = form.querySelector('[data-auth-submit]');
+  const submitLabel = form.querySelector('[data-auth-submit-label]');
+  if (!submit) return;
 
   form.addEventListener('submit', (event) => {
     if (!form.checkValidity()) return;
