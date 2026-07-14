@@ -55,6 +55,10 @@ class CupFeedCrosspostService
                 ->first();
 
             if ($existing?->feedPost) {
+                if ($existing->feedPost->trashed()) {
+                    $existing->feedPost->restore();
+                }
+
                 $existing->feedPost->forceFill([
                     'user_id' => $author->id,
                     'body' => $this->postBody($cup),
