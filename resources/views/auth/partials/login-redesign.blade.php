@@ -1,6 +1,6 @@
 @php
     $hntLoginLogo = asset('assets/themes/hnt_preview/images/hnt-brand-logo.svg');
-    $hntLoginPanelImage = asset('assets/themes/hnt_preview/images/auth-login-panel.svg');
+    $hntLoginPanelImage = asset('assets/socialite/images/post/img-3.jpg');
     $hntSocialService = app(\App\Services\Auth\SocialProviderService::class);
     $hntSocialDefinitions = collect([
         ['key' => 'google', 'label' => 'Google', 'icon' => 'ph-google-logo'],
