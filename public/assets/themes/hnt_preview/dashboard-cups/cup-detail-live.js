@@ -1,4 +1,14 @@
 (() => {
+  const naturalScrollStylesheet = '/assets/themes/hnt_preview/dashboard-cups/cup-detail-natural-scroll.css?v=20260714-1';
+
+  if (!document.querySelector('link[data-cup-detail-natural-scroll]')) {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = naturalScrollStylesheet;
+    style.dataset.cupDetailNaturalScroll = '1';
+    document.head.appendChild(style);
+  }
+
   const shell = document.querySelector('.cup-detail-page-shell');
   if (!shell) return;
 
@@ -89,7 +99,7 @@
     if (file && titleNode) titleNode.textContent = file.name;
   });
 
-  scroll?.addEventListener('scroll', () => {
-    shell.classList.toggle('cup-detail-is-scrolled', scroll.scrollTop > 10);
+  window.addEventListener('scroll', () => {
+    shell.classList.toggle('cup-detail-is-scrolled', window.scrollY > 10);
   }, { passive: true });
 })();
