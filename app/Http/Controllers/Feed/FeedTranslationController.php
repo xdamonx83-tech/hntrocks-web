@@ -36,7 +36,7 @@ class FeedTranslationController extends Controller
             'target_label' => $this->languageLabel($translation->locale),
             'translated_body' => $translation->translated_body,
             'translated_html' => FeedTextRenderer::render($translation->translated_body),
-            'provider_label' => __('ui.translation_provider_ai'),
+            'provider_label' => $this->automaticTranslationLabel(),
             'meta_label' => __('ui.translation_meta', [
                 'language' => $this->languageLabel($translation->source_locale),
             ]),
@@ -69,7 +69,7 @@ class FeedTranslationController extends Controller
             'target_label' => $this->languageLabel($translation->locale),
             'translated_body' => $translation->translated_body,
             'translated_html' => FeedTextRenderer::render($translation->translated_body),
-            'provider_label' => __('ui.translation_provider_ai'),
+            'provider_label' => $this->automaticTranslationLabel(),
             'meta_label' => __('ui.translation_meta', [
                 'language' => $this->languageLabel($translation->source_locale),
             ]),
@@ -83,5 +83,12 @@ class FeedTranslationController extends Controller
             'de' => __('ui.language_german'),
             default => __('ui.translation_language_unknown'),
         };
+    }
+
+    private function automaticTranslationLabel(): string
+    {
+        return app()->getLocale() === 'en'
+            ? 'Automatically translated'
+            : 'Automatisch übersetzt';
     }
 }
