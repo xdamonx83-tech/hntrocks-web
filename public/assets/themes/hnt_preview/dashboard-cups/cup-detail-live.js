@@ -1,16 +1,57 @@
 (() => {
-  const naturalScrollStylesheet = '/assets/themes/hnt_preview/dashboard-cups/cup-detail-natural-scroll.css?v=20260714-1';
+  const ensureStylesheet = (href, marker) => {
+    if (document.querySelector(`link[${marker}]`)) return;
 
-  if (!document.querySelector('link[data-cup-detail-natural-scroll]')) {
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = naturalScrollStylesheet;
-    style.dataset.cupDetailNaturalScroll = '1';
+    style.href = href;
+    style.setAttribute(marker, '1');
     document.head.appendChild(style);
-  }
+  };
+
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/dashboard-feed/real-feed.css?v=20260714-1',
+    'data-cup-detail-real-feed'
+  );
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css?v=20260714-1',
+    'data-cup-detail-real-feed-polish'
+  );
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/dashboard-cups/cup-detail-feed-alignment.css?v=20260714-1',
+    'data-cup-detail-feed-alignment'
+  );
 
   const shell = document.querySelector('.cup-detail-page-shell');
   if (!shell) return;
+
+  /* Header data and actions must use the exact same live runtime as Feed and
+   * Profile. The Feed endpoint already supports dashboard_header JSON. */
+  window.HNT_DASHBOARD_HEADER_ENDPOINT = '/feed';
+
+  const loadScript = (src, marker, onload) => {
+    const existing = document.querySelector(`script[${marker}]`);
+    if (existing) {
+      onload?.();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    script.setAttribute(marker, '1');
+    if (onload) script.addEventListener('load', onload, { once: true });
+    document.body.appendChild(script);
+  };
+
+  loadScript(
+    '/assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js?v=20260714-1',
+    'data-cup-detail-header-runtime',
+    () => loadScript(
+      '/assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js?v=20260714-1',
+      'data-cup-detail-header-live'
+    )
+  );
 
   const cupsNav = shell.querySelector('.nav-cups');
   const cupsTrigger = cupsNav?.querySelector(':scope > .main-nav-trigger');
@@ -38,7 +79,7 @@
   const tabs = Array.from(shell.querySelectorAll('[data-cup-tab]'));
   const panels = Array.from(shell.querySelectorAll('[data-cup-panel]'));
   const title = shell.querySelector('#cupSectionTitle');
-  const scroll = shell.querySelector('#cupDetailScroll');
+  const pageScroll = shell.querySelector('.cup-detail-stage');
 
   function activateTab(name, updateUrl = true) {
     const activeTab = tabs.find((tab) => tab.dataset.cupTab === name) || tabs[0];
@@ -99,7 +140,7 @@
     if (file && titleNode) titleNode.textContent = file.name;
   });
 
-  window.addEventListener('scroll', () => {
-    shell.classList.toggle('cup-detail-is-scrolled', window.scrollY > 10);
+  pageScroll?.addEventListener('scroll', () => {
+    shell.classList.toggle('cup-detail-is-scrolled', pageScroll.scrollTop > 10);
   }, { passive: true });
 })();
