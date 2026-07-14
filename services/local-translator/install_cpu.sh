@@ -52,5 +52,18 @@ cp "$SERVICE_DIR/hnt-local-translator.service" /etc/systemd/system/hnt-local-tra
 systemctl daemon-reload
 systemctl enable --now hnt-local-translator
 
-sleep 5
-curl -fsS http://127.0.0.1:8787/health
+HEALTH_OK=0
+for attempt in $(seq 1 30); do
+  if curl -fsS http://127.0.0.1:8787/health; then
+    echo
+    HEALTH_OK=1
+    break
+  fi
+  sleep 1
+done
+
+if [ "$HEALTH_OK" -ne 1 ]; then
+  echo "Local translator healthcheck failed." >&2
+  systemctl --no-pager --full status hnt-local-translator >&2 || true
+  exit 1
+fi
