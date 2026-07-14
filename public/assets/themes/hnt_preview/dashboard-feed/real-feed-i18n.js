@@ -94,3 +94,12 @@
 
   document.addEventListener('hnt:feed-i18n-refresh', localizeStaticChrome);
 })();
+
+/* The same player is used by feed videos, media viewer videos and Moments. */
+(() => {
+  if (document.querySelector('script[data-hnt-shared-video-player]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/themes/hnt_preview/dashboard-feed/shared-video-player.js?v=1';
+  script.dataset.hntSharedVideoPlayer = '1';
+  document.body.appendChild(script);
+})();
