@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
     @stack('head')
 </head>
-<body class="@yield('body_class', 'hh-auth-socialite-form-page hh-auth-hnt-palette')" data-page="@yield('body_page', 'auth')" data-hnt-theme="locked">
+<body class="hh-auth-socialite-form-page hh-auth-hnt-palette" data-hnt-theme="locked">
     @yield('content')
 
     @include('partials.cookie-consent')
@@ -30,6 +30,5 @@
         localStorage.setItem('theme', 'hnt');
         document.documentElement.dataset.hntTheme = 'locked';
     </script>
-    @stack('scripts')
 </body>
 </html>
