@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/theme-colors.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/common.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/auth.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/feed-alignment.css') }}?v=1">
 </head>
 <body data-page="auth-login">
 <svg aria-hidden="true" class="svg-defs">
