@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 
 class Moment extends Model
 {
@@ -80,38 +79,24 @@ class Moment extends Model
                 return;
             }
 
-            DB::transaction(function () use ($moment, $asset): void {
-                $bodyParts = array_values(array_filter([
-                    trim((string) $moment->caption),
-                    trim((string) $moment->description),
-                ], static fn (string $value): bool => $value !== ''));
+            $bodyParts = array_values(array_filter([
+                trim((string) $moment->caption),
+                trim((string) $moment->description),
+            ], static fn (string $value): bool => $value !== ''));
 
-                $body = trim(implode("\n\n", $bodyParts));
-                if ($body === '') {
-                    $body = 'HNT Moment';
-                }
+            $body = trim(implode("\n\n", $bodyParts));
+            if ($body === '') {
+                $body = 'HNT Moment';
+            }
 
-                $body .= "\n\n".url('/moments/r/'.$moment->getKey());
+            $body .= "\n\n".url('/moments/r/'.$moment->getKey());
 
-                $post = FeedPost::create([
-                    'user_id' => $moment->user_id,
-                    'body' => $body,
-                    'visibility' => $moment->visibility === 'private' ? 'private' : 'public',
-                    'status' => 'published',
-                ]);
-
-                FeedPostMedia::create([
-                    'feed_post_id' => $post->id,
-                    'user_id' => $moment->user_id,
-                    'media_asset_id' => $asset->id,
-                    'disk' => $asset->disk,
-                    'path' => $asset->path,
-                    'mime_type' => $asset->mime_type,
-                    'original_name' => $asset->original_name,
-                    'size_bytes' => $asset->size_bytes,
-                    'sort_order' => 0,
-                ]);
-            });
+            FeedPost::create([
+                'user_id' => $moment->user_id,
+                'body' => $body,
+                'visibility' => $moment->visibility === 'private' ? 'private' : 'public',
+                'status' => 'published',
+            ]);
         });
     }
 
