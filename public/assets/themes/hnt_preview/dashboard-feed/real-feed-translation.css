@@ -1,0 +1,64 @@
+/* Compact translation action shared by the live feed and profile posts. */
+.hnt-post-meta-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hnt-post-meta-row > span:first-child {
+  min-width: 0;
+}
+
+.hnt-post-translate {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--hnt-brand-red, rgb(182 78 68));
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .16s ease, opacity .16s ease;
+}
+
+.hnt-post-translate:hover,
+.hnt-post-translate:focus-visible {
+  color: var(--hnt-brand-red-hover, rgb(163 66 58));
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.hnt-post-translate[aria-busy="true"] {
+  opacity: .58;
+  pointer-events: none;
+}
+
+.hnt-post-translation-note {
+  color: var(--hnt-muted, #92918a);
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .hnt-post-meta-row {
+    gap: 5px 7px;
+  }
+
+  .hnt-post-translate {
+    font-size: 10px;
+  }
+
+  .hnt-post-translation-note {
+    width: 100%;
+  }
+}
