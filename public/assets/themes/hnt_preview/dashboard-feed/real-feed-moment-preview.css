@@ -1,0 +1,156 @@
+/* Clickable Moment preview used by optional Moments cross-posts. */
+.real-feed-post .hnt-feed-moment-preview {
+    position: relative;
+    min-height: 230px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    isolation: isolate;
+    margin-top: 14px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 22px;
+    background: #242521;
+    color: #fff;
+    text-decoration: none;
+}
+
+.real-feed-post .hnt-feed-moment-preview::before {
+    content: "";
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    background-image: var(--hnt-moment-preview-image, linear-gradient(135deg, #30302e, #1a1a18));
+    background-position: center;
+    background-size: cover;
+    transform: scale(1.01);
+    transition: transform .22s ease;
+}
+
+.real-feed-post .hnt-feed-moment-preview::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgb(23 24 21 / .96) 0%, rgb(23 24 21 / .78) 46%, rgb(23 24 21 / .18) 100%),
+        linear-gradient(0deg, rgb(23 24 21 / .56), transparent 65%);
+}
+
+.real-feed-post .hnt-feed-moment-preview:hover::before,
+.real-feed-post .hnt-feed-moment-preview:focus-visible::before {
+    transform: scale(1.045);
+}
+
+.real-feed-post .hnt-feed-moment-preview:focus-visible {
+    outline: 1px solid var(--hnt-brand-red, rgb(182 78 68));
+    outline-offset: 3px;
+}
+
+.real-feed-post .hnt-feed-moment-preview-copy {
+    min-width: 0;
+    max-width: min(620px, 72%);
+    display: grid;
+    gap: 9px;
+    padding: 28px 32px 30px;
+}
+
+.real-feed-post .hnt-feed-moment-preview-kicker {
+    width: max-content;
+    padding: 7px 12px;
+    border: .5px solid rgb(255 255 255 / .12);
+    border-radius: 999px;
+    background: rgb(48 48 46 / .72);
+    color: rgb(255 255 255 / .78);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .12em;
+}
+
+.real-feed-post .hnt-feed-moment-preview-title {
+    overflow: hidden;
+    color: #fff;
+    font-size: clamp(22px, 2vw, 34px);
+    font-weight: 500;
+    line-height: 1.12;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.real-feed-post .hnt-feed-moment-preview-meta {
+    color: rgb(255 255 255 / .66);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.real-feed-post .hnt-feed-moment-preview-play {
+    position: absolute;
+    right: 28px;
+    bottom: 28px;
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    border: .5px solid rgb(255 255 255 / .34);
+    border-radius: 50%;
+    background: var(--hnt-brand-red, rgb(182 78 68));
+    color: #fff;
+    transition: background .16s ease, transform .16s ease;
+}
+
+.real-feed-post .hnt-feed-moment-preview:hover .hnt-feed-moment-preview-play,
+.real-feed-post .hnt-feed-moment-preview:focus-visible .hnt-feed-moment-preview-play {
+    background: var(--hnt-brand-red-hover, rgb(163 66 58));
+    transform: scale(1.04);
+}
+
+.real-feed-post .hnt-feed-moment-preview-play svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    stroke: none;
+    translate: 1px 0;
+}
+
+.real-feed-post .hnt-feed-moment-preview.is-loading {
+    min-height: 190px;
+}
+
+.real-feed-post .hnt-feed-moment-preview.is-loading .hnt-feed-moment-preview-title {
+    width: min(320px, 58vw);
+    height: 22px;
+    border-radius: 8px;
+    background: rgb(255 255 255 / .12);
+    color: transparent;
+}
+
+.real-feed-post .post-badge.hnt-moment-post-badge {
+    background: rgb(182 78 68 / .12);
+    color: var(--hnt-brand-red, rgb(182 78 68));
+}
+
+@media (max-width: 760px) {
+    .real-feed-post .hnt-feed-moment-preview {
+        min-height: 200px;
+        border-radius: 18px;
+    }
+
+    .real-feed-post .hnt-feed-moment-preview-copy {
+        max-width: calc(100% - 76px);
+        padding: 22px 20px 23px;
+    }
+
+    .real-feed-post .hnt-feed-moment-preview-title {
+        font-size: 21px;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .real-feed-post .hnt-feed-moment-preview-play {
+        right: 18px;
+        bottom: 20px;
+        width: 50px;
+        height: 50px;
+    }
+}
