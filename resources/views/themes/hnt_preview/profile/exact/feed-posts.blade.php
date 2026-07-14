@@ -9,6 +9,9 @@
     $postAuthorName = trim((string) ($postAuthor?->name ?: $postAuthor?->username ?: $profileDisplayName));
     $postAuthorHandle = $postAuthor?->username ? '@'.$postAuthor->username : '@hunter';
     $postAuthorAvatar = $postAuthor?->avatarUrl() ?: $profileAvatarUrl;
+    $postAuthorUrl = $postAuthor?->username
+        ? ((int) $postAuthor->id === (int) auth()->id() ? route('profile.show') : route('profile.public', $postAuthor))
+        : '#';
     $postUrl = $post->permalink();
     $postMedia = $post->relationLoaded('media') ? $post->media->values() : collect();
     $postMediaCount = min(4, $postMedia->count());
@@ -31,15 +34,19 @@
             : ($postHasImage ? __('hnt_preview.profile.image') : __('hnt_preview.profile.post')));
     $postBadgeClass = $postPoll ? 'cup' : ($postHasVideo ? 'moment' : ($postHasImage ? '' : 'discussion'));
 @endphp
-<article class="social-post real-feed-post profile-real-post" data-profile-post-id="{{ $post->id }}" data-real-feed-post="{{ $post->id }}" data-real-permalink="{{ $postUrl }}">
+<article class="social-post real-feed-post profile-real-post"
+         data-profile-post-id="{{ $post->id }}"
+         data-real-feed-post="{{ $post->id }}"
+         data-real-permalink="{{ $postUrl }}"
+         data-feed-translation-url="{{ route('feed.translation.post', $post) }}">
 <header class="post-head">
-<img alt="{{ $postAuthorName }}" src="{{ $postAuthorAvatar }}"/>
+<a class="real-feed-author-avatar" href="{{ $postAuthorUrl }}"><img alt="{{ $postAuthorName }}" src="{{ $postAuthorAvatar }}"/></a>
 <div class="post-author">
-<strong>{{ $postAuthorName }}</strong>
-<span>{{ $postAuthorHandle }} · {{ $post->created_at?->diffForHumans() }}@if($postFeeling) · {{ trim(($postFeeling['emoji'] ?? '').' '.($postFeeling['label'] ?? '')) }}@endif</span>
+<a href="{{ $postAuthorUrl }}"><strong>{{ $postAuthorName }}</strong></a>
+<span>{{ $postAuthorHandle }} · {{ $post->created_at?->diffForHumans() }} · {{ $post->visibilityLabel() }}@if($postFeeling) · {{ trim(($postFeeling['emoji'] ?? '').' '.($postFeeling['label'] ?? '')) }}@endif</span>
 </div>
 <span class="post-badge {{ $postBadgeClass }}">{{ $postBadge }}</span>
-<a aria-label="{{ __('hnt_preview.profile.open_post') }}" class="post-more" href="{{ $postUrl }}"><svg><use href="#i-arrow"></use></svg></a>
+<a aria-label="{{ __('hnt_preview.profile.open_post') }}" class="post-more" href="{{ $postUrl }}"><svg><use href="#i-more"></use></svg></a>
 </header>
 <div class="post-body">
 @if(trim((string) $post->body) !== '')
@@ -60,7 +67,7 @@
 @if($media->isImage())
 <img alt="{{ $media->original_name ?: __('hnt_preview.profile.post_image') }}" loading="lazy" src="{{ $mediaUrl }}"/>
 @elseif($media->isVideo())
-<video controls playsinline preload="metadata"><source src="{{ $mediaUrl }}" type="{{ $media->mime_type }}"/></video>
+<video controls muted playsinline preload="metadata"><source src="{{ $mediaUrl }}" type="{{ $media->mime_type }}"/></video>
 @else
 <span>{{ __('hnt_preview.profile.open_file') }}</span>
 @endif
@@ -76,8 +83,8 @@
 </a>
 @endif
 @if($postPoll && $postPollOptions->isNotEmpty())
-<div class="profile-real-poll">
-<strong>{{ $postPoll->question }}</strong>
+<div class="profile-real-poll real-feed-poll">
+<strong class="real-feed-poll-question">{{ $postPoll->question }}</strong>
 @foreach($postPollOptions as $option)
 @php
     $optionVotes = $option->relationLoaded('votes') ? $option->votes->count() : 0;
