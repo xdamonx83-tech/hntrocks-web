@@ -184,6 +184,134 @@ body[data-page="moments"] .hnt-moment-feed-toggle small {
     line-height: 1.4;
 }
 
+body[data-page="moments"] .hnt-moment-cover-field {
+    gap: 7px;
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker {
+    min-height: 66px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 17px;
+    background: var(--hnt-surface-card, #f5f5f2);
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker:hover,
+body[data-page="moments"] .hnt-moment-cover-picker:focus-within {
+    border-color: var(--hnt-brand-red, rgb(182 78 68));
+    background: var(--hnt-surface-card-strong, #fafaf8);
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 13px;
+    background: var(--hnt-surface-input, #ecece8);
+    color: var(--hnt-brand-red, rgb(182 78 68));
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker-copy {
+    min-width: 0;
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker-copy strong,
+body[data-page="moments"] .hnt-moment-cover-picker-copy small {
+    display: block;
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker-copy strong {
+    color: var(--hnt-text, #30302e);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+body[data-page="moments"] .hnt-moment-cover-picker-copy small {
+    margin-top: 3px;
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 9px;
+}
+
+body[data-page="moments"] .hnt-moment-cover-file-name {
+    max-width: 180px;
+    overflow: hidden;
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body[data-page="moments"] .hnt-moment-cover-preview {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 16px;
+    background: var(--hnt-surface-card-strong, #fafaf8);
+}
+
+body[data-page="moments"] .hnt-moment-cover-preview[hidden] {
+    display: none !important;
+}
+
+body[data-page="moments"] .hnt-moment-cover-preview img {
+    width: 64px;
+    height: 46px;
+    display: block;
+    border-radius: 11px;
+    object-fit: cover;
+    background: var(--hnt-surface-input, #ecece8);
+}
+
+body[data-page="moments"] .hnt-moment-cover-preview::after {
+    content: attr(data-file-name);
+    min-width: 0;
+    overflow: hidden;
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body[data-page="moments"] .hnt-moment-cover-preview button {
+    min-height: 34px;
+    padding: 0 12px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 13px;
+    background: var(--hnt-surface-input, #ecece8);
+    color: var(--hnt-text, #30302e);
+    font: inherit;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+body[data-page="moments"] .hnt-moment-cover-preview button:hover,
+body[data-page="moments"] .hnt-moment-cover-preview button:focus-visible {
+    border-color: var(--hnt-brand-red, rgb(182 78 68));
+    color: var(--hnt-brand-red, rgb(182 78 68));
+    outline: none;
+}
+
 @media (max-width: 560px) {
     body[data-page="moments"] .hnt-moment-composer {
         width: calc(100vw - 16px);
@@ -201,5 +329,15 @@ body[data-page="moments"] .hnt-moment-feed-toggle small {
 
     body[data-page="moments"] .hnt-moment-format-choice {
         grid-template-columns: 1fr;
+    }
+
+    body[data-page="moments"] .hnt-moment-cover-picker {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    body[data-page="moments"] .hnt-moment-cover-file-name {
+        grid-column: 1 / -1;
+        max-width: none;
+        padding-left: 52px;
     }
 }
