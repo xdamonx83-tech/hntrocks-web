@@ -85,7 +85,7 @@
     </section>
 
     <aside class="auth-photo" aria-label="Community Vorschau">
-      <img src="{{ asset('assets/themes/hnt_preview/auth-demo/auth-reference-panel.svg') }}" alt="HNT.ROCKS Community Motiv">
+      <img src="{{ asset('assets/themes/hnt_preview/auth-demo/auth-reference-panel.jpg') }}" alt="HNT.ROCKS Community Motiv">
       <a class="auth-photo-close" href="#" data-auth-toast="Schließen wird später angebunden" aria-label="Schließen"></a>
     </aside>
   </section>
