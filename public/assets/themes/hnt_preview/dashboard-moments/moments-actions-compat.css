@@ -53,6 +53,137 @@ body[data-page="moments"] .hnt-moment-composer-footer {
     background: var(--hnt-surface-card-strong, #fafaf8);
 }
 
+body[data-page="moments"] .hnt-moment-publish-options {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 12px;
+}
+
+body[data-page="moments"] .hnt-moment-format-field {
+    display: grid;
+    gap: 7px;
+}
+
+body[data-page="moments"] .hnt-moment-format-field > span {
+    color: var(--hnt-text-soft, #66645f);
+    font-size: 10px;
+    font-weight: 500;
+}
+
+body[data-page="moments"] .hnt-moment-format-choice {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 5px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 17px;
+    background: var(--hnt-surface-input, #ecece8);
+}
+
+body[data-page="moments"] .hnt-moment-format-choice label {
+    position: relative;
+    cursor: pointer;
+}
+
+body[data-page="moments"] .hnt-moment-format-choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+body[data-page="moments"] .hnt-moment-format-choice span {
+    min-height: 38px;
+    display: grid;
+    place-items: center;
+    padding: 0 10px;
+    border-radius: 13px;
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 10px;
+    transition: background .15s ease, color .15s ease;
+}
+
+body[data-page="moments"] .hnt-moment-format-choice input:checked + span {
+    background: var(--hnt-dark, #30302e);
+    color: #fff;
+}
+
+body[data-page="moments"] .hnt-moment-format-choice input:focus-visible + span {
+    outline: 1px solid var(--hnt-brand-red, rgb(182 78 68));
+    outline-offset: 2px;
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 17px;
+    background: var(--hnt-surface-card, #f5f5f2);
+    cursor: pointer;
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle > input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+body[data-page="moments"] .hnt-moment-feed-switch {
+    width: 42px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    border: .5px solid var(--hnt-border-medium, #d8d7d1);
+    border-radius: 14px;
+    background: var(--hnt-surface-input, #ecece8);
+    transition: background .15s ease, border-color .15s ease;
+}
+
+body[data-page="moments"] .hnt-moment-feed-switch i {
+    width: 17px;
+    height: 17px;
+    display: block;
+    border-radius: 50%;
+    background: var(--hnt-text-muted, #92918a);
+    transition: translate .15s ease, background .15s ease;
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle > input:checked + .hnt-moment-feed-switch {
+    border-color: var(--hnt-brand-red, rgb(182 78 68));
+    background: var(--hnt-brand-red-soft, rgb(182 78 68 / .12));
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle > input:checked + .hnt-moment-feed-switch i {
+    translate: 18px 0;
+    background: var(--hnt-brand-red, rgb(182 78 68));
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle > input:focus-visible + .hnt-moment-feed-switch {
+    outline: 1px solid var(--hnt-brand-red, rgb(182 78 68));
+    outline-offset: 2px;
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle strong,
+body[data-page="moments"] .hnt-moment-feed-toggle small {
+    display: block;
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle strong {
+    color: var(--hnt-text, #30302e);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+body[data-page="moments"] .hnt-moment-feed-toggle small {
+    margin-top: 3px;
+    color: var(--hnt-text-muted, #92918a);
+    font-size: 9px;
+    line-height: 1.4;
+}
+
 @media (max-width: 560px) {
     body[data-page="moments"] .hnt-moment-composer {
         width: calc(100vw - 16px);
@@ -66,5 +197,9 @@ body[data-page="moments"] .hnt-moment-composer-footer {
 
     body[data-page="moments"] .hnt-moment-composer-footer {
         padding: 13px 14px 15px;
+    }
+
+    body[data-page="moments"] .hnt-moment-format-choice {
+        grid-template-columns: 1fr;
     }
 }
