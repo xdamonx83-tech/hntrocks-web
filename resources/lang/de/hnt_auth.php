@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Anmelden',
+    'intro' => 'Melde dich an und kehre direkt zu deiner Community zurück.',
+    'identity' => 'E-Mail oder Benutzername',
+    'identity_placeholder' => 'name@beispiel.de oder Benutzername',
+    'password' => 'Passwort',
+    'password_placeholder' => 'Dein Passwort',
+    'show_password' => 'Passwort anzeigen',
+    'hide_password' => 'Passwort verbergen',
+    'remember' => 'Angemeldet bleiben',
+    'forgot' => 'Passwort vergessen?',
+    'submit' => 'Anmelden',
+    'submitting' => 'Anmeldung läuft …',
+    'continue_with' => 'oder weiter mit',
+    'social_login' => 'Mit :provider anmelden',
+    'no_account' => 'Noch kein Konto?',
+    'register' => 'Jetzt registrieren',
+    'privacy' => 'Datenschutz',
+    'imprint' => 'Impressum',
+    'language' => 'Sprache wählen',
+    'home' => 'Zur Startseite',
+    'close' => 'Schließen',
+    'legal_navigation' => 'Rechtliche Links',
+];
