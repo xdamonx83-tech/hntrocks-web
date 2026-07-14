@@ -46,6 +46,8 @@ class CupFeedCrosspostService
         }
 
         return DB::transaction(function () use ($cup, $author): ?FeedPost {
+            $cup->loadMissing('owner');
+
             $existing = FeedCupCard::query()
                 ->where('cup_id', $cup->id)
                 ->with('feedPost')
@@ -53,10 +55,20 @@ class CupFeedCrosspostService
                 ->first();
 
             if ($existing?->feedPost) {
+                $existing->feedPost->forceFill([
+                    'user_id' => $author->id,
+                    'body' => $this->postBody($cup),
+                    'source_language' => 'de',
+                    'visibility' => 'public',
+                    'status' => 'published',
+                ])->save();
+
+                if ((int) $existing->published_by_user_id !== (int) $author->id) {
+                    $existing->forceFill(['published_by_user_id' => $author->id])->save();
+                }
+
                 return $existing->feedPost;
             }
-
-            $cup->loadMissing('owner');
 
             $post = FeedPost::query()->create([
                 'user_id' => $author->id,
@@ -112,9 +124,7 @@ class CupFeedCrosspostService
             default => 'Community Cup',
         };
 
-        $platforms = collect($cup->allowedPlatforms())
-            ->map(fn (string $platform): string => $platform === 'PlayStation' ? 'PlayStation' : $platform)
-            ->implode(' / ');
+        $platforms = collect($cup->allowedPlatforms())->implode(' / ');
         $platforms = $platforms !== '' ? $platforms : 'alle Plattformen';
 
         if ($cup->isRegistrationOpen()) {
