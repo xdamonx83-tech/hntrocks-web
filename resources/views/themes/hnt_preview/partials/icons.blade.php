@@ -27,5 +27,12 @@
 <symbol id="i-send" viewbox="0 0 24 24"><path d="m3 11 18-8-7 18-3-7z"></path><path d="m11 14 4-4"></path></symbol>
 <symbol id="i-smile" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9h.01M15 9h.01"></path></symbol>
 <symbol id="i-reply" viewbox="0 0 24 24"><path d="m9 7-6 5 6 5v-3h4c4 0 6 2 8 5-.5-6-3-9-8-9H9z"></path></symbol>
-<symbol id="i-eye" viewbox="0 0 24 24"><path d="M2.8 12s3.3-6 9.2-6 9.2 6 9.2 6-3.3 6-9.2 6-9.2-6-9.2-6"></path><circle cx="12" cy="12" r="2.6"></circle></symbol>
+<symbol id="i-eye" viewbox="0 0 24 24"><path d="M2.8 12s3.3-6 9.2-6 9.2 6 9.2 6-3.3 6-9.2 6-9.2-6"></path><circle cx="12" cy="12" r="2.6"></circle></symbol>
+<symbol id="i-calendar" viewbox="0 0 24 24"><rect height="16" rx="3" width="18" x="3" y="5"></rect><path d="M8 3v4M16 3v4M3 10h18"></path></symbol>
+<symbol id="i-clock" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></symbol>
+<symbol id="i-trophy" viewbox="0 0 24 24"><path d="M8 4h8v4c0 4-1.7 7-4 7s-4-3-4-7Z"></path><path d="M8 6H4v2c0 3 2 5 5 5M16 6h4v2c0 3-2 5-5 5M12 15v4M8 21h8"></path></symbol>
+<symbol id="i-upload" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4"></path><path d="M4 14v6h16v-6"></path></symbol>
+<symbol id="i-lock" viewbox="0 0 24 24"><rect height="11" rx="3" width="14" x="5" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></symbol>
+<symbol id="i-globe" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></symbol>
+<symbol id="i-coins" viewbox="0 0 24 24"><ellipse cx="9" cy="7" rx="6" ry="3"></ellipse><path d="M3 7v4c0 1.7 2.7 3 6 3s6-1.3 6-3V7M3 11v4c0 1.7 2.7 3 6 3 1.1 0 2.1-.1 3-.4"></path><ellipse cx="16" cy="15" rx="5" ry="2.5"></ellipse><path d="M11 15v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4"></path></symbol>
 </svg>
