@@ -1,5 +1,6 @@
-/* Cups overview alignment with the accepted HNT feed/profile shell.
- * This file intentionally contains only cross-page layout and palette fixes.
+/* Cups overview alignment with the accepted HNT Feed/Profile shell.
+ * Page layout stays local; shared header/dropdown/comms surfaces use the same
+ * central theme variables and runtime as Feed, Profile and Cup detail.
  */
 
 body[data-page="cups"] {
@@ -14,7 +15,7 @@ body[data-page="cups"] {
 
 .cups-page-shell > .site-header {
   position: relative;
-  z-index: 1200;
+  z-index: 2000;
 }
 
 .cups-stage {
@@ -44,7 +45,7 @@ body[data-page="cups"] {
   overscroll-behavior: contain;
 }
 
-/* Compact filter controls: same proportions as the feed search tools. */
+/* Compact filter controls: same proportions as the Feed search tools. */
 .cups-filter-row {
   grid-template-columns: minmax(220px, 1fr) minmax(150px, 195px) auto;
   align-items: center;
@@ -108,62 +109,49 @@ body[data-page="cups"] {
   stroke-linejoin: round;
 }
 
-/* Remove the old yellow wash from shared dropdowns on the Cups page. */
-.cups-page-shell .main-nav-dropdown,
-.cups-page-shell .header-dropdown {
-  border: .5px solid rgba(48, 48, 46, .15) !important;
-  background: rgba(248, 248, 245, .98) !important;
+/* Shared Feed/Profile dropdown surfaces. No Cups-only yellow or dark wash. */
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown,
+body[data-page="cups"] .cups-page-shell .header-dropdown {
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
   background-image: none !important;
   box-shadow: none !important;
-  color: var(--ink) !important;
+  color: var(--ink, #30302e) !important;
 }
 
-.cups-page-shell .main-nav-dropdown::before,
-.cups-page-shell .main-nav-dropdown::after,
-.cups-page-shell .header-dropdown::before,
-.cups-page-shell .header-dropdown::after {
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown::before,
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown::after,
+body[data-page="cups"] .cups-page-shell .header-dropdown::before,
+body[data-page="cups"] .cups-page-shell .header-dropdown::after {
   background: none !important;
   background-image: none !important;
 }
 
-.cups-page-shell .main-nav-dropdown > header,
-.cups-page-shell .header-dropdown-head {
-  border-color: rgba(48, 48, 46, .11) !important;
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown > header,
+body[data-page="cups"] .cups-page-shell .header-dropdown-head {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
   background: transparent !important;
   background-image: none !important;
 }
 
-.cups-page-shell .main-nav-dropdown > header span,
-.cups-page-shell .header-dropdown-head span,
-.cups-page-shell .hnt-section-kicker {
-  color: var(--cups-red) !important;
+body[data-page="cups"] .cups-page-shell .header-mark-all,
+body[data-page="cups"] .cups-page-shell .main-nav-menu-icon,
+body[data-page="cups"] .cups-page-shell .header-menu-icon,
+body[data-page="cups"] .cups-page-shell .header-notification-icon {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
+  color: var(--ink, #30302e) !important;
 }
 
-.cups-page-shell .main-nav-menu-icon.yellow,
-.cups-page-shell .main-nav-menu-icon.green,
-.cups-page-shell .main-nav-menu-icon.purple,
-.cups-page-shell .header-menu-icon {
-  border-color: rgba(48, 48, 46, .10) !important;
-  background: rgba(48, 48, 46, .065) !important;
-  color: var(--ink) !important;
+body[data-page="cups"] .cups-page-shell .main-nav-menu-grid > :is(a, button):hover,
+body[data-page="cups"] .cups-page-shell .header-menu-list > :is(a, button):hover,
+body[data-page="cups"] .cups-page-shell .header-message-item.unread,
+body[data-page="cups"] .cups-page-shell .header-notification-item.unread,
+body[data-page="cups"] .cups-page-shell .header-request-item.unread {
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
 }
 
-.cups-page-shell .main-nav-menu-grid > :is(a, button):hover,
-.cups-page-shell .header-menu-list > :is(a, button):hover,
-.cups-page-shell .header-message-item.unread,
-.cups-page-shell .header-notification-item.unread,
-.cups-page-shell .header-request-item.unread {
-  background: rgba(182, 78, 68, .075) !important;
-}
-
-.cups-page-shell .header-action-badge,
-.cups-page-shell .header-action-badge:not(.is-empty) {
-  border-color: rgba(248, 248, 245, .96) !important;
-  background: var(--cups-red) !important;
-  color: #fff !important;
-}
-
-/* The floating chat launcher must use the current anthracite/red palette. */
+/* Same floating comms launcher as Cup detail / Feed / Profile. */
 body[data-page="cups"] .hnt-comms-launcher,
 body[data-page="cups"] [data-hnt-comms-launcher] {
   width: 50px !important;
@@ -174,10 +162,10 @@ body[data-page="cups"] [data-hnt-comms-launcher] {
   grid-template-rows: 1fr !important;
   place-items: center !important;
   padding: 0 !important;
-  border: .5px solid rgba(242, 232, 216, .18) !important;
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
   border-radius: 50% !important;
-  background: #30302e !important;
-  color: #f2e8d8 !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
+  color: var(--ink, #30302e) !important;
   box-shadow: none !important;
 }
 
@@ -185,14 +173,14 @@ body[data-page="cups"] .hnt-comms-launcher:hover,
 body[data-page="cups"] .hnt-comms-launcher:focus-visible,
 body[data-page="cups"] [data-hnt-comms-launcher]:hover,
 body[data-page="cups"] [data-hnt-comms-launcher]:focus-visible {
-  background: var(--cups-red) !important;
-  color: #fff !important;
+  background: var(--hnt-surface-card-strong, #fff) !important;
+  color: var(--darkred, #b64e44) !important;
   outline: none !important;
 }
 
 body[data-page="cups"] .hnt-comms-launcher__count {
-  border-color: rgba(248, 248, 245, .98) !important;
-  background: var(--cups-red) !important;
+  border-color: var(--hnt-surface-card-strong, #fff) !important;
+  background: var(--darkred, #b64e44) !important;
   color: #fff !important;
 }
 
