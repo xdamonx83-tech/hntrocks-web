@@ -20,38 +20,11 @@
 @endphp
 
 @forelse($socialitePosts as $post)
-    @php
-        $newsCard = $newsCardsByPostId->get($post->id, false);
-        $cupCard = $cupCardsByPostId->get($post->id, false);
-        $postMarkup = view('themes.hnt_preview.feed.partials.post-card', [
-            'post' => $post,
-            'newsCard' => $newsCard,
-        ])->render();
-
-        if ($cupCard && $cupCard->cup) {
-            $cupCardMarkup = view('themes.hnt_preview.feed.partials.cup-card', [
-                'cupCard' => $cupCard,
-                'post' => $post,
-            ])->render();
-
-            $postMarkup = \Illuminate\Support\Str::replaceFirst(
-                'class="post hnt-preview-feed-post',
-                'class="post hnt-preview-feed-post is-cup-crosspost',
-                $postMarkup
-            );
-            $postMarkup = \Illuminate\Support\Str::replaceFirst(
-                '<div class="post-header-actions hnt-post-header-actions">',
-                '<div class="post-header-actions hnt-post-header-actions"><span class="hnt-cup-crosspost-badge">'.e(__('hnt_cup_crosspost.cup')).'</span>',
-                $postMarkup
-            );
-            $postMarkup = \Illuminate\Support\Str::replaceFirst(
-                '<div class="post-tags">',
-                $cupCardMarkup.'<div class="post-tags">',
-                $postMarkup
-            );
-        }
-    @endphp
-    {!! $postMarkup !!}
+    @include('themes.hnt_preview.feed.partials.structured-post-card', [
+        'post' => $post,
+        'newsCard' => $newsCardsByPostId->get($post->id, false),
+        'cupCard' => $cupCardsByPostId->get($post->id, false),
+    ])
 @empty
     <article class="post hnt-preview-empty-card">
         <div class="post-header">
