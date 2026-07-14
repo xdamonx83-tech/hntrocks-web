@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/theme-colors.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/common.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/auth.css') }}">
 </head>
@@ -66,12 +67,7 @@
       <header class="auth-header">
         
 <a class="auth-brand" href="#" data-auth-toast="HNT.ROCKS Startseite wird später angebunden" aria-label="HNT.ROCKS">
-  <svg class="auth-brand-mark" viewBox="0 0 44 34" aria-hidden="true">
-    <path d="M8.2 5.5c4.4-4.4 10.8-4.2 14.5.1-1 4.7-4.2 8-8.8 9.3-3.9-1.4-6.2-4.7-5.7-9.4Z"></path>
-    <path d="M22.1 8.1c5.9-.2 10.2 4 10.4 9.2-3.4 3.2-8 4-12.3 2.1-2-3.8-1.3-8.2 1.9-11.3Z"></path>
-    <path d="M14.3 18.3c3.5-3.5 8.5-3.8 12.2-.9.4 4.7-1.8 8.5-6.1 10.5-4-.7-6.6-4.1-6.1-9.6Z"></path>
-    <circle cx="18.8" cy="15.5" r="3.4"></circle>
-  </svg>
+  <img src="{{ asset('assets/themes/hnt_preview/images/hnt-brand-logo.svg') }}" alt="" aria-hidden="true">
   <span>HNT.ROCKS</span>
 </a>
 
@@ -138,13 +134,13 @@
       <footer class="auth-footer">
         
 <div><span>Noch kein Konto?</span> <a href="#" data-auth-toast="Registrierung wird später angebunden">Jetzt registrieren</a></div>
-<nav><a href="#" data-auth-toast="Datenschutz geöffnet">Datenschutz</a><a href="#" data-auth-toast="Impressum geöffnet">Impressum</a></nav>
+<nav><a href="#" data-auth-toast="Datenschutz wird später angebunden">Datenschutz</a><a href="#" data-auth-toast="Impressum wird später angebunden">Impressum</a></nav>
 
       </footer>
     </section>
 
     <aside class="auth-photo" aria-label="Community Vorschau">
-      <img src="{{ asset('assets/socialite/images/post/img-3.jpg') }}" alt="Community Vorschau">
+      <img src="{{ asset('assets/themes/hnt_preview/auth-demo/auth-reference-panel.jpg') }}" alt="HNT.ROCKS Community Motiv">
       <a class="auth-photo-close" href="#" data-auth-toast="Schließen wird später angebunden" aria-label="Schließen"></a>
     </aside>
   </section>
