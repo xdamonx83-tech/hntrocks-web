@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/common.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/auth.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/feed-alignment.css') }}?v=3">
+  <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/showcase.css') }}?v=1">
 </head>
 <body data-page="auth-register">
 <svg aria-hidden="true" class="svg-defs">
@@ -162,6 +163,7 @@
 
     <aside class="auth-photo" aria-label="HNT.ROCKS">
       <img src="{{ asset('assets/themes/hnt_preview/auth-demo/auth-reference-panel.jpg') }}" alt="HNT.ROCKS Community Motiv">
+      @include('auth.partials.showcase-overlay')
     </aside>
   </section>
 </main>
