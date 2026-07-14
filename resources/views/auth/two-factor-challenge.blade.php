@@ -1,3 +1,9 @@
+@php
+  $twoFactorOldCode = (string) old('code', '');
+  $twoFactorInitialMode = $twoFactorOldCode !== '' && ! preg_match('/^\d{6}$/', $twoFactorOldCode)
+    ? 'recovery'
+    : 'authenticator';
+@endphp
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -13,7 +19,7 @@
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/theme-colors.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/common.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/auth.css') }}">
-  <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/two-factor.css') }}?v=1">
+  <link rel="stylesheet" href="{{ asset('assets/themes/hnt_preview/auth-demo/two-factor.css') }}?v=2">
 </head>
 <body data-page="auth-2fa">
 <svg aria-hidden="true" class="svg-defs">
@@ -55,6 +61,7 @@
             method="POST"
             action="{{ route('login.two-factor.confirm') }}"
             data-two-factor-form
+            data-initial-mode="{{ $twoFactorInitialMode }}"
             data-code-incomplete="{{ __('hnt_two_factor.code_incomplete') }}"
             data-recovery-required="{{ __('hnt_two_factor.recovery_required') }}"
             data-loading-label="{{ __('hnt_two_factor.verifying') }}"
@@ -72,10 +79,11 @@
             </article>
 
             <div
-              @class(['auth-code', 'is-invalid' => $errors->has('code')])
+              @class(['auth-code', 'is-invalid' => $errors->has('code') && $twoFactorInitialMode === 'authenticator'])
               role="group"
               aria-label="{{ __('hnt_two_factor.code_group') }}"
               data-two-factor-digits
+              @if($twoFactorInitialMode === 'recovery') hidden @endif
             >
               @for ($digit = 1; $digit <= 6; $digit++)
                 <input
@@ -83,10 +91,10 @@
                   inputmode="numeric"
                   pattern="[0-9]*"
                   maxlength="1"
-                  @if($digit === 1) autocomplete="one-time-code" autofocus @else autocomplete="off" @endif
+                  @if($digit === 1 && $twoFactorInitialMode === 'authenticator') autocomplete="one-time-code" autofocus @else autocomplete="off" @endif
                   aria-label="{{ __('hnt_two_factor.digit_label', ['number' => $digit]) }}"
                   data-two-factor-digit
-                  required
+                  @if($twoFactorInitialMode === 'authenticator') required @endif
                 >
               @endfor
             </div>
@@ -108,20 +116,20 @@
             <button
               class="auth-recovery-toggle"
               type="button"
-              aria-expanded="false"
+              aria-expanded="{{ $twoFactorInitialMode === 'recovery' ? 'true' : 'false' }}"
               aria-controls="twoFactorRecoveryField"
               data-two-factor-toggle
               data-recovery-label="{{ __('hnt_two_factor.use_recovery') }}"
               data-authenticator-label="{{ __('hnt_two_factor.use_authenticator') }}"
             >
               <svg aria-hidden="true"><use href="#i-key"></use></svg>
-              <span data-two-factor-toggle-label>{{ __('hnt_two_factor.use_recovery') }}</span>
+              <span data-two-factor-toggle-label>{{ $twoFactorInitialMode === 'recovery' ? __('hnt_two_factor.use_authenticator') : __('hnt_two_factor.use_recovery') }}</span>
             </button>
 
-            <label class="auth-field auth-backup" id="twoFactorRecoveryField" data-two-factor-recovery-field hidden>
+            <label class="auth-field auth-backup" id="twoFactorRecoveryField" data-two-factor-recovery-field @if($twoFactorInitialMode !== 'recovery') hidden @endif>
               <span>{{ __('hnt_two_factor.recovery_label') }}</span>
-              <div>
-                <input type="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="{{ __('hnt_two_factor.recovery_placeholder') }}" data-two-factor-recovery>
+              <div @class(['is-invalid' => $errors->has('code') && $twoFactorInitialMode === 'recovery'])>
+                <input type="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="{{ __('hnt_two_factor.recovery_placeholder') }}" data-two-factor-recovery @if($twoFactorInitialMode === 'recovery') required autofocus @endif>
               </div>
             </label>
           </form>
@@ -149,6 +157,6 @@
 </main>
 
 @include('partials.cookie-consent')
-<script src="{{ asset('assets/themes/hnt_preview/auth-demo/two-factor.js') }}?v=1" defer></script>
+<script src="{{ asset('assets/themes/hnt_preview/auth-demo/two-factor.js') }}?v=2" defer></script>
 </body>
 </html>
