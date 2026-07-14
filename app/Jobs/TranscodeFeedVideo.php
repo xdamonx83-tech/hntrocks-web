@@ -110,6 +110,7 @@ class TranscodeFeedVideo implements ShouldQueue
         $thumbnailPath = $this->generateThumbnail($asset, $disk, $outputPath, $outputFullPath);
         $profile = $this->profileFor($asset);
         $probe = $this->probeVideo($outputFullPath, $profile);
+        $momentAspectRatio = $this->momentAspectRatio($asset);
 
         $asset->update([
             'path' => $outputPath,
@@ -135,7 +136,9 @@ class TranscodeFeedVideo implements ShouldQueue
                 'crf' => $profile['crf'],
                 'preset' => $profile['preset'],
                 'fps' => $profile['fps'],
-                'profile' => $asset->context === 'moments' ? 'moment_9_16' : 'feed_max_side',
+                'profile' => $asset->context === 'moments'
+                    ? ($momentAspectRatio === '16:9' ? 'moment_16_9_letterbox' : 'moment_9_16')
+                    : 'feed_max_side',
             ]),
         ]);
 
@@ -202,6 +205,10 @@ class TranscodeFeedVideo implements ShouldQueue
             $width = max(360, (int) $profile['width']);
             $height = max(640, (int) $profile['height']);
 
+            if ($this->momentAspectRatio($asset) === '16:9') {
+                return "scale={$width}:{$height}:force_original_aspect_ratio=decrease,pad={$width}:{$height}:(ow-iw)/2:(oh-ih)/2:black,fps={$fps},format=yuv420p";
+            }
+
             return "scale={$width}:{$height}:force_original_aspect_ratio=increase,crop={$width}:{$height},fps={$fps},format=yuv420p";
         }
 
@@ -209,6 +216,13 @@ class TranscodeFeedVideo implements ShouldQueue
         $maxHeight = max(240, (int) $profile['max_height']);
 
         return "scale=w='min({$maxWidth},iw)':h='min({$maxHeight},ih)':force_original_aspect_ratio=decrease,fps={$fps},format=yuv420p";
+    }
+
+    private function momentAspectRatio(MediaAsset $asset): string
+    {
+        $metadata = is_array($asset->metadata) ? $asset->metadata : [];
+
+        return ($metadata['aspect_ratio'] ?? null) === '16:9' ? '16:9' : '9:16';
     }
 
     private function trimArguments(MediaAsset $asset): array
