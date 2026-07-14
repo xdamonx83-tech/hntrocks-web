@@ -183,7 +183,7 @@ body[data-page="auth-login"] .auth-photo {
 }
 
 body[data-page="auth-login"] .auth-photo > img {
-  object-fit: contain;
+  object-fit: cover;
   object-position: left center;
   background: var(--hnt-dark);
 }
