@@ -46,7 +46,7 @@
 @endif
 
 <div class="feed-content hnt-preview-feed-content hnt-feed-single-content" data-hnt-lightbox-scope>
-    @include('themes.hnt_preview.feed.partials.post-card', [
+    @include('themes.hnt_preview.feed.partials.structured-post-card', [
         'post' => $post,
         'reportedFeedKeys' => $reportedFeedKeys,
     ])
