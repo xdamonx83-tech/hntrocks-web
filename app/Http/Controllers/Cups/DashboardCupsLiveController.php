@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Cups;
 use App\Http\Controllers\Controller;
 use App\Models\Cup;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class DashboardCupsLiveController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request): Response
     {
         $viewer = $request->user();
 
@@ -74,7 +74,7 @@ class DashboardCupsLiveController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('themes.hnt_preview.cups.index', [
+        return response()->view('themes.hnt_preview.cups.index', [
             'cups' => $cups,
             'filters' => $filters,
         ]);
