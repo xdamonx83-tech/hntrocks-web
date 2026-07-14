@@ -1,18 +1,18 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Hunt-News · Admin')
-@section('admin_heading', 'Hunt-News')
+@section('title', 'News-Zentrale · Admin')
+@section('admin_heading', 'News-Zentrale')
 
 @section('content')
     <section class="hh-page-header">
         <div>
-            <p class="hh-kicker">Official News</p>
-            <h1>Offizielle Hunt-News</h1>
-            <p>News von der offiziellen Hunt: Showdown Website erkennen, vergangene Meldungen manuell freigeben und neue Meldungen automatisch als Feed-Post vom HuntNews-Account veröffentlichen.</p>
+            <p class="hh-kicker">HuntNews & HNT.ROCKS</p>
+            <h1>News für den Feed</h1>
+            <p>Veröffentliche eigene Plattform-Updates als HNT.ROCKS News oder offizielle Spielmeldungen als HuntNews. Beide Varianten erscheinen als normaler Feed-Post mit einer festen News-Schablone.</p>
         </div>
         <div class="hh-page-header-meta">
-            <strong>{{ $items->total() }}</strong>
-            <span>News</span>
+            <strong>{{ $stats['manual'] }}</strong>
+            <span>News-Karten</span>
         </div>
     </section>
 
@@ -32,16 +32,110 @@
     @endif
 
     <section class="hh-admin-stat-grid">
+        <article class="hh-card hh-card-compact"><strong>{{ $stats['manual'] }}</strong><span>News-Karten</span></article>
         <article class="hh-card hh-card-compact"><strong>{{ $stats['discovered'] }}</strong><span>Entdeckt</span></article>
-        <article class="hh-card hh-card-compact"><strong>{{ $stats['posted'] }}</strong><span>Gepostet</span></article>
-        <article class="hh-card hh-card-compact"><strong>{{ $stats['auto'] }}</strong><span>Auto-berechtigt</span></article>
+        <article class="hh-card hh-card-compact"><strong>{{ $stats['posted'] }}</strong><span>HuntNews gepostet</span></article>
         <article class="hh-card hh-card-compact"><strong>{{ $stats['errors'] }}</strong><span>Fehler</span></article>
     </section>
+
+    <section class="hh-card">
+        <div class="hh-card-title-row">
+            <div>
+                <p class="hh-kicker">Manuell veröffentlichen</p>
+                <h2>News-Post erstellen</h2>
+                <p class="hh-muted">Der Beitragstext erscheint oberhalb der festen News-Karte. Die Stichpunkte bilden die rechte Seite der Schablone.</p>
+            </div>
+        </div>
+
+        <form method="post" action="{{ route('admin.hunt-news.sync') }}" class="hh-admin-form-wide hh-section-space">
+            @csrf
+            <input type="hidden" name="action" value="manual_publish">
+
+            <div class="hh-admin-grid">
+                <div class="hh-admin-form-wide">
+                    <div>
+                        <label for="publisher">Absender</label>
+                        <select id="publisher" name="publisher" required>
+                            @foreach($publishers as $value => $label)
+                                <option value="{{ $value }}" @selected(old('publisher', 'hnt_rocks') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="badge">Kennzeichnung im Feed</label>
+                        <select id="badge" name="badge" required>
+                            @foreach(['Update', 'News', 'Official', 'Event', 'Patch Notes'] as $badge)
+                                <option value="{{ $badge }}" @selected(old('badge', 'Update') === $badge)>{{ $badge }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="kicker">Kleine Überschrift</label>
+                        <input id="kicker" name="kicker" maxlength="80" value="{{ old('kicker') }}" placeholder="Wird automatisch aus dem Absender gesetzt">
+                    </div>
+
+                    <div>
+                        <label for="headline">Titel der News-Karte</label>
+                        <input id="headline" name="headline" maxlength="190" value="{{ old('headline') }}" placeholder="Community Update 2.4" required>
+                    </div>
+                </div>
+
+                <div class="hh-admin-form-wide">
+                    <div>
+                        <label for="body">Beitragstext oberhalb der Karte</label>
+                        <textarea id="body" name="body" maxlength="5000" placeholder="Das Community-Update ist live. Die wichtigsten Änderungen betreffen ..." required>{{ old('body') }}</textarea>
+                    </div>
+
+                    @for($index = 0; $index < 5; $index++)
+                        <div>
+                            <label for="highlight_{{ $index }}">Stichpunkt {{ $index + 1 }}{{ $index > 2 ? ' · optional' : '' }}</label>
+                            <input id="highlight_{{ $index }}" name="highlights[]" maxlength="180" value="{{ old('highlights.'.$index) }}" placeholder="{{ $index === 0 ? 'Schnellere LFG-Suche' : ($index === 1 ? 'Neue Moment-Reaktionen' : ($index === 2 ? 'Verbesserte Benachrichtigungen' : 'Weiterer Punkt')) }}" {{ $index === 0 ? 'required' : '' }}>
+                        </div>
+                    @endfor
+
+                    <label class="hh-checkline">
+                        <input type="checkbox" name="pin" value="1" @checked(old('pin'))>
+                        <span>Post oben im Feed anpinnen</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="hh-admin-actions hh-admin-form-submit">
+                <button class="hh-primary-button" type="submit">Im Feed veröffentlichen</button>
+            </div>
+        </form>
+    </section>
+
+    @if($recentNewsCards->isNotEmpty())
+        <section class="hh-card hh-section-space">
+            <div class="hh-card-title-row">
+                <div>
+                    <h2>Zuletzt veröffentlichte News</h2>
+                    <p class="hh-muted">Die letzten strukturierten News-Posts aus beiden Absendern.</p>
+                </div>
+            </div>
+
+            <div class="hh-admin-list">
+                @foreach($recentNewsCards as $newsCard)
+                    <div>
+                        <strong>{{ $newsCard->publisherName() }} · {{ $newsCard->headline }}</strong>
+                        <span>{{ $newsCard->badge }} · {{ $newsCard->created_at->diffForHumans() }}</span>
+                        @if($newsCard->feedPost)
+                            <a class="hh-link-button" href="{{ route('feed.show', $newsCard->feedPost) }}" target="_blank" rel="noopener">Feed-Post öffnen</a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
 
     <section class="hh-card hh-section-space">
         <div class="hh-card-title-row">
             <div>
-                <h2>Abgleich</h2>
+                <p class="hh-kicker">Offizielle Hunt-Quelle</p>
+                <h2>Automatischer Abgleich</h2>
                 <p class="hh-muted">Quelle: <strong>{{ $sourceUrl }}</strong> · HuntNews-User-ID: <strong>{{ $huntNewsUserId }}</strong> · Auto-Posting ab: <strong>{{ $autoPublishFrom }}</strong></p>
             </div>
             <form method="post" action="{{ route('admin.hunt-news.sync') }}" class="hh-admin-actions">
@@ -50,7 +144,7 @@
                 <button class="hh-primary-button" type="submit">Jetzt prüfen</button>
             </form>
         </div>
-        <p class="hh-muted">Neue News ab dem Auto-Datum werden beim Abgleich automatisch gepostet. Ältere News werden nur entdeckt und können hier manuell gepostet werden. Im Feed wird nur ein kurzer Auszug mit internem HNT-Link zur offiziellen Quelle veröffentlicht.</p>
+        <p class="hh-muted">Neue offizielle Meldungen werden weiterhin automatisch erkannt. Neu veröffentlichte HuntNews-Posts erhalten ebenfalls die strukturierte News-Schablone.</p>
     </section>
 
     <section class="hh-card hh-card-compact hh-filter-card">
