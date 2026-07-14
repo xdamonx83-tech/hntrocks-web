@@ -28,7 +28,7 @@ body[data-page^="auth-"] {
   overflow: hidden;
   border: .5px solid var(--hnt-border-soft);
   border-radius: 25px;
-  background: var(--hnt-surface-strong);
+
 }
 
 .auth-left {
@@ -37,9 +37,7 @@ body[data-page^="auth-"] {
   display: grid;
   grid-template-rows: 78px minmax(0,1fr) 55px;
   padding: 0 clamp(30px,3.4vw,62px);
-  background:
-    radial-gradient(circle at 0 100%,var(--hnt-brand-red-soft),transparent 42%),
-    linear-gradient(135deg,var(--hnt-page-base),var(--hnt-surface-card-strong));
+
 }
 
 .auth-header {

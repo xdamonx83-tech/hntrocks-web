@@ -6,13 +6,9 @@ body[data-page="auth-login"] .auth-shell {
     linear-gradient(111deg, #e4e7e8 0%, #e9eae8 55%, #6f6e6d 100%);
 }
 
-body[data-page="auth-login"] .auth-frame {
-  background: transparent;
-}
 
-body[data-page="auth-login"] .auth-left {
-  background: var(--hnt-surface);
-}
+
+
 
 body[data-page="auth-login"] .auth-header-actions {
   display: flex;
