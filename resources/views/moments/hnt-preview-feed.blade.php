@@ -44,6 +44,8 @@
     $hntMomentsSharedFinalVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-shared-final.css')) ?: time();
     $hntSharedVideoCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/shared-video-player.css')) ?: time();
     $hntSharedVideoJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/shared-video-player.js')) ?: time();
+    $hntMomentsVerticalCanvasCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-vertical-canvas.css')) ?: time();
+    $hntMomentsVerticalCanvasJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-moments/moments-vertical-canvas.js')) ?: time();
     $hntHeaderVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js')) ?: time();
     $hntHeaderLiveVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js')) ?: time();
 
@@ -53,7 +55,8 @@
         '<link data-hnt-moments-live-final href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-live-final.css').'?v='.$hntMomentsLiveFinalVersion.'" rel="stylesheet">'.
         '<link data-hnt-moments-actions href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions.css').'?v='.$hntMomentsActionsVersion.'" rel="stylesheet">'.
         '<link data-hnt-moments-actions-compat href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions-compat.css').'?v='.$hntMomentsActionsCompatCssVersion.'" rel="stylesheet">'.
-        '<link data-hnt-shared-video-player href="'.asset('assets/themes/hnt_preview/dashboard-feed/shared-video-player.css').'?v='.$hntSharedVideoCssVersion.'" rel="stylesheet">';
+        '<link data-hnt-shared-video-player href="'.asset('assets/themes/hnt_preview/dashboard-feed/shared-video-player.css').'?v='.$hntSharedVideoCssVersion.'" rel="stylesheet">'.
+        '<link data-hnt-moments-vertical-canvas href="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-vertical-canvas.css').'?v='.$hntMomentsVerticalCanvasCssVersion.'" rel="stylesheet">';
 
     $hntMomentsFinalCssUrl = asset('assets/themes/hnt_preview/dashboard-moments/moments-shared-final.css').'?v='.$hntMomentsSharedFinalVersion;
 
@@ -73,7 +76,8 @@
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-live-final.js').'?v='.$hntMomentsLiveFinalJsVersion.'"></script>'.
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions.js').'?v='.$hntMomentsActionsJsVersion.'"></script>'.
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-actions-compat.js').'?v='.$hntMomentsActionsCompatJsVersion.'"></script>'.
-        '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/shared-video-player.js').'?v='.$hntSharedVideoJsVersion.'"></script>';
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/shared-video-player.js').'?v='.$hntSharedVideoJsVersion.'"></script>'.
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-moments/moments-vertical-canvas.js').'?v='.$hntMomentsVerticalCanvasJsVersion.'"></script>';
 
     $hntMomentsHtml = str_replace('</head>', $hntMomentsHeadAssets.'</head>', $hntMomentsHtml);
     $hntMomentsHtml = str_replace('</body>', $hntMomentsBodyAssets.'</body>', $hntMomentsHtml);
