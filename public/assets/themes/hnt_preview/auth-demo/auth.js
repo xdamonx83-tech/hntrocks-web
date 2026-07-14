@@ -1,50 +1,42 @@
 (() => {
-  function notify(message) {
-    if (typeof showToast === "function") {
-      showToast(message);
+  document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = document.getElementById(button.dataset.passwordToggle);
+      const use = button.querySelector('use');
+
+      if (!input) return;
+
+      const willShow = input.type === 'password';
+      input.type = willShow ? 'text' : 'password';
+      button.setAttribute('aria-pressed', String(willShow));
+      button.setAttribute('aria-label', willShow ? button.dataset.hideLabel : button.dataset.showLabel);
+
+      if (use) {
+        use.setAttribute('href', willShow ? '#i-eye-off' : '#i-eye');
+      }
+    });
+  });
+
+  const form = document.querySelector('[data-auth-login-form]');
+  const submit = document.querySelector('[data-auth-submit]');
+  const submitLabel = document.querySelector('[data-auth-submit-label]');
+
+  if (!form || !submit) return;
+
+  form.addEventListener('submit', (event) => {
+    if (!form.checkValidity()) return;
+
+    if (form.dataset.submitting === 'true') {
+      event.preventDefault();
       return;
     }
-    const toast = document.getElementById("toast");
-    if (!toast) return;
-    toast.textContent = message;
-    toast.classList.add("show");
-    clearTimeout(notify.timer);
-    notify.timer = setTimeout(() => toast.classList.remove("show"), 1700);
-  }
 
-  document.querySelectorAll("[data-auth-toast]").forEach((node) => {
-    node.addEventListener("click", (event) => {
-      if (node.getAttribute("href") === "#") event.preventDefault();
-      notify(node.dataset.authToast);
-    });
+    form.dataset.submitting = 'true';
+    submit.disabled = true;
+    submit.classList.add('is-loading');
+
+    if (submitLabel && form.dataset.loadingLabel) {
+      submitLabel.textContent = form.dataset.loadingLabel;
+    }
   });
-
-  document.querySelectorAll("[data-password-toggle]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const input = document.getElementById(button.dataset.passwordToggle);
-      if (!input) return;
-      const visible = input.type === "text";
-      input.type = visible ? "password" : "text";
-      button.innerHTML = `<svg><use href="#${visible ? "i-eye" : "i-eye-off"}"></use></svg>`;
-    });
-  });
-
-  function setError(id, message) {
-    const node = document.querySelector(`[data-error-for="${id}"]`);
-    if (node) node.textContent = message || "";
-  }
-
-  const loginForm = document.getElementById("loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const identity = document.getElementById("loginIdentity").value.trim();
-      const password = document.getElementById("loginPassword").value;
-      setError("loginIdentity", identity ? "" : "Bitte Zugang eingeben.");
-      setError("loginPassword", password ? "" : "Bitte Passwort eingeben.");
-      if (!identity || !password) return;
-      notify("Anmeldung geprüft – 2FA wird geöffnet");
-      setTimeout(() => notify("2FA wird später angebunden"), 550);
-    });
-  }
 })();
