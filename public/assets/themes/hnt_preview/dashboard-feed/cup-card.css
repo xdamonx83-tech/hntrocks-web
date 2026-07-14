@@ -1,0 +1,131 @@
+/* Structured Community Cup crosspost.
+ * Mirrors the accepted feed card proportions while staying in the current
+ * neutral HNT palette: cream surfaces, anthracite actions and restrained red.
+ */
+
+.hnt-cup-crosspost-badge {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px;
+  border: .5px solid rgba(182, 78, 68, .16);
+  border-radius: 999px;
+  background: rgba(182, 78, 68, .09);
+  color: #9f3f37;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.hnt-feed-cup-card {
+  position: relative;
+  min-height: 142px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  margin: 13px 0 2px;
+  padding: 22px 26px;
+  overflow: hidden;
+  border: .5px solid rgba(182, 78, 68, .17);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(182, 78, 68, .10), rgba(255, 255, 255, .52)),
+    repeating-linear-gradient(-45deg, rgba(182, 78, 68, .065) 0 8px, transparent 8px 17px),
+    rgba(245, 242, 233, .96);
+  color: #30302e;
+  box-shadow: none;
+  isolation: isolate;
+}
+
+.hnt-feed-cup-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .62));
+}
+
+.hnt-feed-cup-card-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.hnt-feed-cup-card-copy > span {
+  color: #a7473e;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .14em;
+}
+
+.hnt-feed-cup-card-copy h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #30302e;
+  font-size: clamp(21px, 2vw, 31px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -.03em;
+}
+
+.hnt-feed-cup-card-copy p,
+.hnt-feed-cup-card-copy small {
+  margin: 0;
+  color: #77736b;
+}
+
+.hnt-feed-cup-card-copy p {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.hnt-feed-cup-card-copy small {
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.hnt-feed-cup-card-action {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #30302e;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .16s ease, transform .16s ease;
+}
+
+.hnt-feed-cup-card-action:hover,
+.hnt-feed-cup-card-action:focus-visible {
+  background: #b64e44;
+  color: #fff;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.hnt-feed-cup-card-action i {
+  font-size: 13px;
+}
+
+.hnt-preview-feed-post.is-cup-crosspost .post-tags .tag:last-child {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .hnt-feed-cup-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 19px;
+  }
+
+  .hnt-feed-cup-card-action {
+    width: max-content;
+  }
+}
