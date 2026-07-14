@@ -3,6 +3,20 @@
   const form = document.querySelector('#cupCreateForm');
   if (!shell || !form) return;
 
+  const ensureStylesheet = (href, marker) => {
+    if (document.querySelector(`link[${marker}]`)) return;
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = href;
+    style.setAttribute(marker, '1');
+    document.head.appendChild(style);
+  };
+
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/dashboard-cups/cup-community-access.css?v=20260714-1',
+    'data-cup-community-access'
+  );
+
   const config = window.HNT_CUP_CREATE || {};
   const tabs = Array.from(shell.querySelectorAll('[data-cup-create-tab]'));
   const panels = Array.from(shell.querySelectorAll('[data-cup-create-panel]'));
@@ -25,6 +39,7 @@
     ends: field('#cupEnds'),
     rulesPreset: field('#cupRulesPreset'),
     aiPreset: field('#cupAiPreset'),
+    verificationMode: null,
     rulesDe: field('#cupRulesDe'),
     scoringDe: field('#cupScoringDe'),
     teamSize: field('#cupTeamSize'),
@@ -39,6 +54,9 @@
     visibility: field('#cupVisibility'),
     cover: field('#cupCoverInput'),
   };
+
+  fields.teamSize?.querySelector('option[value="4"]')?.remove();
+  if (fields.teamSize?.value === '4') fields.teamSize.value = '3';
 
   const routeMap = {
     'Aktive Cups': shell.dataset.cupsActiveUrl,
@@ -86,11 +104,17 @@
   const normalize = (value) => String(value ?? '').trim();
   const isFilled = (node) => normalize(node?.value) !== '';
   const selectedPlatforms = () => Array.from(form.querySelectorAll('input[name="allowed_platforms[]"]:checked'));
+  const verificationMode = () => fields.verificationMode?.value || 'manual';
 
   const completionRules = {
     general: [() => isFilled(fields.title), () => isFilled(fields.summaryDe), () => isFilled(fields.descriptionDe)],
     schedule: [() => isFilled(fields.registrationOpens), () => isFilled(fields.registrationCloses), () => isFilled(fields.starts), () => isFilled(fields.ends)],
-    scoring: [() => isFilled(fields.rulesPreset), () => isFilled(fields.aiPreset), () => isFilled(fields.rulesDe), () => isFilled(fields.scoringDe)],
+    scoring: [
+      () => isFilled(fields.rulesPreset),
+      () => verificationMode() === 'manual' || isFilled(fields.aiPreset),
+      () => isFilled(fields.rulesDe),
+      () => isFilled(fields.scoringDe),
+    ],
     participation: [() => isFilled(fields.teamSize), () => isFilled(fields.maxTeams), () => isFilled(fields.region), () => selectedPlatforms().length > 0],
     prizes: [
       () => isFilled(form.elements.prize_first_de),
@@ -125,7 +149,7 @@
     });
   };
 
-  const teamLabels = { 1: 'Solo', 2: 'Duo', 3: 'Trio', 4: 'Quartet' };
+  const teamLabels = { 1: 'Solo', 2: 'Duo', 3: 'Trio' };
   const platformLabels = config.platformLabels || {};
   const statusLabels = config.statusLabels || {};
 
@@ -168,11 +192,13 @@
     });
   };
 
-  const initialSnapshot = new URLSearchParams(new FormData(form)).toString();
+  let initialSnapshot = '';
+  let initialized = false;
   let dirty = false;
   let submitting = false;
 
   const updateDirty = () => {
+    if (!initialized) return;
     const snapshot = new URLSearchParams(new FormData(form)).toString();
     dirty = snapshot !== initialSnapshot || Boolean(fields.cover?.files?.length);
     saveState?.classList.toggle('dirty', dirty);
@@ -221,11 +247,72 @@
     event.returnValue = config.leaveWarning || '';
   });
 
+  const setupVerification = async () => {
+    const aiField = fields.aiPreset?.closest('.profile-edit-field');
+    if (!aiField) return;
+
+    let capabilities = {
+      can_ai_review: false,
+      default_verification_mode: 'manual',
+      labels: {
+        verification_method: 'Prüfmethode',
+        manual: 'Manuelle Prüfung',
+        manual_help: 'Der Cup-Ersteller prüft Screenshots und trägt die Wertung ein.',
+        ai: 'KI-Prüfung',
+        ai_help: 'Nur für den HNT.ROCKS-KI-Manager verfügbar.',
+      },
+    };
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('capabilities', '1');
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      });
+      if (response.ok) capabilities = { ...capabilities, ...(await response.json()) };
+    } catch (_error) {
+      // The server still enforces manual review when capability loading fails.
+    }
+
+    const labels = capabilities.labels || {};
+    const methodField = document.createElement('label');
+    methodField.className = 'profile-edit-field cup-verification-field';
+    methodField.innerHTML = `
+      <span>${labels.verification_method || 'Prüfmethode'}</span>
+      <select id="cupVerificationMode" name="verification_mode">
+        <option value="manual">${labels.manual || 'Manuelle Prüfung'}</option>
+        ${capabilities.can_ai_review ? `<option value="ai">${labels.ai || 'KI-Prüfung'}</option>` : ''}
+      </select>
+      <small data-verification-help></small>
+    `;
+    aiField.before(methodField);
+    fields.verificationMode = methodField.querySelector('select');
+    fields.verificationMode.value = capabilities.default_verification_mode || 'manual';
+
+    const syncVerification = () => {
+      const usesAi = capabilities.can_ai_review && fields.verificationMode?.value === 'ai';
+      aiField.hidden = !usesAi;
+      const help = methodField.querySelector('[data-verification-help]');
+      if (help) help.textContent = usesAi
+        ? (labels.ai_help || '')
+        : (labels.manual_help || '');
+      refresh();
+    };
+
+    fields.verificationMode.addEventListener('change', syncVerification);
+    syncVerification();
+  };
+
   const firstError = shell.querySelector('[data-field-error]');
   if (firstError) {
     const errorPanel = firstError.closest('[data-cup-create-panel]');
     if (errorPanel) activateTab(errorPanel.dataset.cupCreatePanel);
   }
 
-  refresh();
+  setupVerification().finally(() => {
+    initialSnapshot = new URLSearchParams(new FormData(form)).toString();
+    initialized = true;
+    refresh();
+  });
 })();
