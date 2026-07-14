@@ -1,0 +1,70 @@
+/* Cup detail: use one natural document scroll instead of nested column scroll areas. */
+
+html {
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body[data-page="cup-detail"] {
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell {
+  width: 100%;
+  height: auto !important;
+  min-height: 100vh;
+  overflow: visible !important;
+  grid-template-rows: auto auto;
+  align-content: start;
+  padding-bottom: 16px;
+}
+
+body[data-page="cup-detail"] .cup-detail-page-shell > .site-header {
+  position: sticky;
+  top: 16px;
+  z-index: 1200;
+}
+
+body[data-page="cup-detail"] .cup-detail-stage {
+  height: auto !important;
+  min-height: 0;
+  overflow: visible !important;
+  align-items: start;
+}
+
+body[data-page="cup-detail"] .cup-detail-side,
+body[data-page="cup-detail"] .cup-detail-scroll {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0;
+  overflow: visible !important;
+  overscroll-behavior: auto;
+  scrollbar-width: auto;
+}
+
+body[data-page="cup-detail"] .cup-detail-side::-webkit-scrollbar,
+body[data-page="cup-detail"] .cup-detail-scroll::-webkit-scrollbar {
+  display: initial;
+  width: initial;
+  height: initial;
+}
+
+body[data-page="cup-detail"] .cup-section-head {
+  top: 64px;
+}
+
+@media (max-width: 899px) {
+  body[data-page="cup-detail"] .cup-detail-page-shell > .site-header {
+    position: relative;
+    top: auto;
+  }
+
+  body[data-page="cup-detail"] .cup-section-head {
+    position: relative;
+    top: auto;
+  }
+}
