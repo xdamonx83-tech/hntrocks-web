@@ -20,6 +20,11 @@ class CupObserver
         }
     }
 
+    public function restored(Cup $cup): void
+    {
+        $this->sync($cup);
+    }
+
     public function deleted(Cup $cup): void
     {
         try {
