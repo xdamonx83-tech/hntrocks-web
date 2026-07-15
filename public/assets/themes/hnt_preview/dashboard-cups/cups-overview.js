@@ -25,6 +25,10 @@
     '/assets/themes/hnt_preview/dashboard-cups/cup-community-access.css?v=20260714-1',
     'data-cup-community-access'
   );
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/dashboard-cups/cups-header-dropdown-reference.css?v=20260715-1',
+    'data-cups-header-dropdown-reference'
+  );
 
   const shell = document.querySelector('.cups-page-shell');
   if (!shell) return;
