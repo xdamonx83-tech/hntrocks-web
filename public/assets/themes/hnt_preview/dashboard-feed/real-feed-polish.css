@@ -129,6 +129,97 @@ body.real-feed-confirm-open {
   overflow: hidden;
 }
 
+/* Internal HNT.ROCKS link preview. Reuses the central feed markup and only
+   styles the preview-specific classes. */
+[data-hnt-internal-link-previews] {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.hnt-internal-link-preview {
+  width: 100%;
+  min-width: 0;
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(52, 48, 37, .18);
+  border-radius: 20px;
+  background: rgba(250, 250, 248, .98);
+  color: var(--ink);
+  text-decoration: none !important;
+  box-shadow: 0 10px 30px rgba(36, 36, 34, .055);
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.hnt-internal-link-preview:hover {
+  border-color: rgba(182, 78, 68, .36);
+  box-shadow: 0 14px 34px rgba(36, 36, 34, .09);
+  transform: translateY(-1px);
+}
+
+.hnt-internal-link-icon {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid rgba(52, 48, 37, .12);
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .22) 0 2px, transparent 2px 9px),
+    linear-gradient(145deg, rgba(182, 78, 68, .18), rgba(182, 78, 68, .06));
+  color: var(--darkred);
+  font-size: 28px;
+}
+
+.hnt-internal-link-copy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 15px 18px 16px;
+}
+
+.hnt-internal-link-copy > span {
+  overflow: hidden;
+  color: var(--darkred);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hnt-internal-link-copy > strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hnt-internal-link-copy > em {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.hnt-internal-link-copy > small {
+  overflow: hidden;
+  color: rgba(82, 79, 72, .68);
+  font-size: 10px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Compact multi-media presentation. Single media keeps the existing wide
    preview; galleries use controlled rows instead of image intrinsic height. */
 .real-post-media-grid.real-post-media-count-2 {
@@ -191,6 +282,30 @@ body.real-feed-confirm-open {
 
   .real-feed-confirm__delete {
     order: -1;
+  }
+
+  .hnt-internal-link-preview {
+    min-height: 88px;
+    grid-template-columns: 62px minmax(0, 1fr);
+    border-radius: 17px;
+  }
+
+  .hnt-internal-link-icon {
+    font-size: 23px;
+  }
+
+  .hnt-internal-link-copy {
+    gap: 3px;
+    padding: 12px 13px;
+  }
+
+  .hnt-internal-link-copy > strong {
+    font-size: 15px;
+  }
+
+  .hnt-internal-link-copy > em {
+    font-size: 11px;
+    -webkit-line-clamp: 1;
   }
 
   .real-post-media-grid.real-post-media-count-2 {
