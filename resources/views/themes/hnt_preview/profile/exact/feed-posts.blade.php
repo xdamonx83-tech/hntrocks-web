@@ -96,7 +96,7 @@
     $postBadge = $profileCupCard
         ? __('hnt_cup_crosspost.cup')
         : ($profileMomentCrosspost
-            ? __('hnt_preview.profile.moment')
+            ? __('hnt_preview.profile.moments')
             : ($postPoll
                 ? __('hnt_preview.profile.poll')
                 : ($postHasVideo
