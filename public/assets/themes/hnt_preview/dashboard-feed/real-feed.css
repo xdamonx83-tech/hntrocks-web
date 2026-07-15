@@ -41,7 +41,10 @@
   object-position: center;
 }
 
-.real-feed-post .post-author a {
+.real-feed-post .post-author > a {
+  width: fit-content;
+  max-width: 100%;
+  justify-self: start;
   color: inherit;
   text-decoration: none;
 }
