@@ -2,6 +2,14 @@
   const shell = document.querySelector('.team-manage-page-shell');
   if (!shell) return;
 
+  const polishHref = '/assets/themes/hnt_preview/dashboard-cups/team-manage-live-polish.css?v=20260715-1';
+  if (!document.querySelector(`link[href^="${polishHref.split('?')[0]}"]`)) {
+    const polishLink = document.createElement('link');
+    polishLink.rel = 'stylesheet';
+    polishLink.href = polishHref;
+    document.head.appendChild(polishLink);
+  }
+
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
   const scroll = document.getElementById('teamManageScroll');
   const cupsNav = shell.querySelector('.nav-cups');
@@ -39,12 +47,15 @@
       const active = tab === activeTab;
       tab.classList.toggle('active', active);
       tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
     });
 
     panels.forEach((panel) => {
       const active = panel.dataset.teamPanel === activeTab.dataset.teamTab;
       panel.classList.toggle('active', active);
       panel.hidden = !active;
+      panel.setAttribute('aria-hidden', String(!active));
+      panel.style.setProperty('display', active ? 'grid' : 'none', 'important');
     });
 
     if (title) title.textContent = activeTab.dataset.title || activeTab.textContent.trim();
