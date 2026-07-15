@@ -173,9 +173,7 @@
   justify-content: space-between;
   padding: 0 12px;
   background:
-    repeating-linear-gradient(135deg,rgba(255,255,255,.18) 0 2px,transparent 2px 9px),
-    radial-gradient(circle at 86% 36%,rgba(255,213,90,.25),transparent 42%),
-    linear-gradient(100deg,rgba(255,253,245,.98),rgba(255,249,224,.96));
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .18) 0 2px, transparent 2px 9px), radial-gradient(circle at 86% 36%, rgb(182 78 68 / 46%), transparent 42%), linear-gradient(100deg, rgb(182 78 68 / 9%), rgb(182 78 68 / 42%));
 }
 
 .profile-cover > span {
@@ -4341,8 +4339,7 @@ body.composer-open {
 
 .hnt-agenda-card.cup {
   background:
-    repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 2px,transparent 2px 8px),
-    rgba(255,213,90,.84);
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .22) 0 2px, transparent 2px 8px), rgb(182 78 68 / 42%);
 }
 
 .hnt-agenda-card.contract {
@@ -4393,7 +4390,7 @@ body.composer-open {
 .hnt-agenda-copy p {
   overflow: hidden;
   margin: 0;
-  color: #99958c;
+  color: #751a11;
   font-size: 7px;
   line-height: 1.25;
   white-space: nowrap;

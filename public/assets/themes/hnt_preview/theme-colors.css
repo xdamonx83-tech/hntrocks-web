@@ -128,7 +128,7 @@ body[data-page="members"] {
 .profile-panel,
 .hnt-comms-overview,
 .hnt-comms-panel-slot > .hnt-chat-tab.hnt-comms-active {
-    background: var(--hnt-surface-card);
+    background: rgba(255,255,255,.79);
     color: var(--hnt-text);
 }
 
@@ -170,7 +170,7 @@ body[data-page="members"] {
 .header-profile-summary,
 .header-profile-stats {
     border-color: var(--hnt-border-soft) !important;
-    background: var(--hnt-surface-panel) !important;
+
 }
 
 .main-nav-dropdown > header span,

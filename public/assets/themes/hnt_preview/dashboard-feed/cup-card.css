@@ -17,23 +17,18 @@
 
 .hnt-feed-cup-card {
   position: relative;
-  min-height: 196px;
+  min-height: 120px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 34px;
   margin: 22px 0 2px;
-  padding: 34px 36px;
+  padding: 20px 30px;
   overflow: hidden;
   border: .5px solid rgba(204, 148, 0, .16);
   border-radius: 30px;
   background:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(255, 255, 255, .34) 0 8px,
-      rgba(255, 255, 255, 0) 8px 17px
-    ),
-    #ffd24f;
+repeating-linear-gradient(-45deg, rgba(255, 255, 255, .34) 0 8px, rgba(255, 255, 255, 0) 8px 17px), rgb(182 78 68 / 48%);
   color: #30302e;
   box-shadow: none;
 }
@@ -55,7 +50,7 @@
   margin: 0;
   overflow-wrap: anywhere;
   color: #30302e;
-  font-size: clamp(28px, 2.25vw, 40px);
+  font-size: 20px;
   font-weight: 500;
   line-height: 1.02;
   letter-spacing: -.035em;
@@ -69,7 +64,7 @@
 }
 
 .hnt-feed-cup-card-action {
-  min-height: 58px;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
