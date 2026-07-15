@@ -1,218 +1,187 @@
-@extends('themes.socialite.layouts.app')
-
-@section('title', __('ui.teams_index_title'))
-@section('meta_description', __('ui.teams_index_banner_text'))
-
 @php
+    $viewer = auth()->user();
+    $stats = app(\App\Services\Teams\TeamOverviewService::class)->forViewer($viewer);
     $filters = $filters ?? [];
-    $activeSort = $filters['sort'] ?? 'newest';
-    $filterUrl = function (array $params = []) {
-        $query = array_merge(request()->except(['page']), $params);
-        foreach ($query as $key => $value) {
-            if ($value === null || $value === '' || $value === false) {
-                unset($query[$key]);
-            }
-        }
-
+    $activeSort = (string) ($filters['sort'] ?? request('sort', 'newest'));
+    $isRecruiting = ! empty($filters['recruiting']) || request()->boolean('recruiting');
+    $activeView = $isRecruiting ? 'recruiting' : ($activeSort === 'members' ? 'popular' : 'discover');
+    $searchValue = (string) ($filters['q'] ?? request('q', ''));
+    $platformValue = (string) ($filters['platform'] ?? request('platform', ''));
+    $playstyleValue = (string) ($filters['playstyle'] ?? request('playstyle', ''));
+    $regionValue = (string) ($filters['region'] ?? request('region', ''));
+    $languageValue = (string) ($filters['language'] ?? request('language', ''));
+    $hasActiveFilters = $searchValue !== '' || $platformValue !== '' || $playstyleValue !== '' || $regionValue !== '' || $languageValue !== '' || $isRecruiting || $activeSort !== 'newest';
+    $formatCount = static fn (int $value): string => number_format($value, 0, ',', '.');
+    $filterUrl = static function (array $changes = []): string {
+        $query = array_merge(request()->except('page'), $changes);
+        $query = array_filter($query, static fn ($value) => $value !== null && $value !== '' && $value !== false);
         return route('teams.index', $query);
     };
+    $teamIds = $teams->getCollection()->pluck('id')->filter()->values();
+    $viewerMemberships = $teamIds->isEmpty()
+        ? collect()
+        : \App\Models\TeamMember::query()
+            ->where('user_id', $viewer->id)
+            ->whereIn('team_id', $teamIds)
+            ->get()
+            ->keyBy('team_id');
+    $featuredCup = ($featuredCups ?? collect())->first();
+    $teamsCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-teams/teams-overview.css')) ?: time();
+    $teamsJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-teams/teams-overview.js')) ?: time();
 @endphp
-
-@section('content')
-<div class="flex max-lg:flex-col 2xl:gap-12 gap-10 2xl:max-w-[1220px] max-w-[1065px] mx-auto w-full" id="js-teams-oversized">
-    <div class="flex-1 min-w-0">
-        <div class="max-w-[680px] w-full mx-auto">
-            <div class="page-heading">
-                <h1 class="page-title">{{ __('ui.teams') }}</h1>
-            </div>
-
-            @if (session('status'))
-                <div class="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">{{ session('status') }}</div>
-            @endif
-
-            @if ($errors->any())
-                <div class="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{{ $errors->first() }}</div>
-            @endif
-
-            <div class="box p-5">
-                <div class="flex items-baseline justify-between text-black dark:text-white">
-                    <h3 class="font-bold text-base">{{ __('ui.teams_manage_slider_title') }}</h3>
-                    <a href="{{ route('teams.create') }}" class="text-sm text-blue-500">{{ __('ui.create_team') }}</a>
-                </div>
-
-                @if (($managedTeams ?? collect())->isNotEmpty())
-                    <div class="relative mt-2" tabindex="-1" uk-slider>
-                        <div class="overflow-hidden uk-slider-container">
-                            <ul class="-ml-2 uk-slider-items w-[calc(100%+0.5rem)] pt-3 text-center" uk-scrollspy="target: > li; cls: uk-animation-scale-up; delay: 20 ;repeat: true">
-                                @foreach ($managedTeams as $team)
-                                    <li class="md:w-[14.28%] w-32 pr-3 pt-3">
-                                        <a href="{{ route('teams.show', $team) }}">
-                                            <div class="relative">
-                                                <div class="card-media md:aspect-[2/1.8] max-lg:h-28 rounded-lg bg-slate-200 dark:bg-dark3">
-                                                    <img src="{{ $team->coverUrl() }}" alt="{{ $team->name }}" class="h-full w-full object-cover">
-                                                    <div class="card-overly"></div>
-                                                </div>
-                                                <h4 class="card-title text-sm pt-2 line-clamp-1">{{ $team->name }}</h4>
-                                                @if ($team->recruitment_status === 'open')
-                                                    <div class="bg-blue-600 rounded-full w-3 h-3 ring-4 ring-white dark:ring-slate-900 absolute top-0 right-0 -m-1 z-[2]"></div>
-                                                @endif
-                                            </div>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <a class="nav-prev !top-12" href="#" uk-slider-item="previous"><ion-icon name="chevron-back" class="text-2xl"></ion-icon></a>
-                        <a class="nav-next !top-12" href="#" uk-slider-item="next"><ion-icon name="chevron-forward" class="text-2xl"></ion-icon></a>
-                    </div>
-                @else
-                    <div class="mt-4 rounded-xl bg-secondery p-4 text-sm text-gray-600 dark:bg-dark3 dark:text-white/70">
-                        {{ __('ui.teams_manage_empty_text') }}
-                    </div>
-                @endif
-            </div>
-
-            <nav class="mt-8 dark:border-slate-700 mb-6">
-                <ul class="flex gap-2 text-xs text-center text-gray-600 capitalize font-semibold dark:text-white/80">
-                    <li>
-                        <a href="{{ $filterUrl(['sort' => 'newest', 'recruiting' => null]) }}" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-full {{ $activeSort === 'newest' && empty($filters['recruiting']) ? 'text-white bg-black dark:bg-white dark:text-black' : 'hover:bg-secondery dark:hover:bg-white/10' }}">
-                            {{ __('ui.teams_tab_suggestions') }}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ $filterUrl(['sort' => 'members', 'recruiting' => null]) }}" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-full {{ $activeSort === 'members' ? 'text-white bg-black dark:bg-white dark:text-black' : 'hover:bg-secondery dark:hover:bg-white/10' }}">
-                            {{ __('ui.teams_tab_popular') }}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ $filterUrl(['recruiting' => empty($filters['recruiting']) ? 1 : null, 'sort' => 'newest']) }}" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-full {{ ! empty($filters['recruiting']) ? 'text-white bg-black dark:bg-white dark:text-black' : 'hover:bg-secondery dark:hover:bg-white/10' }}">
-                            {{ __('ui.teams_tab_recruiting') }}
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-
-            @if ($teams->isEmpty())
-                <div class="bg-white rounded-xl shadow-sm border1 dark:bg-dark2 p-8 text-center">
-                    <div class="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-secondery dark:bg-dark3"><ion-icon name="people-outline" class="text-2xl"></ion-icon></div>
-                    <h3 class="text-lg font-bold text-black dark:text-white">{{ __('ui.teams_no_results_title') }}</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-white/70">{{ __('ui.teams_no_results_text') }}</p>
-                    <a class="button bg-primary text-white mt-4 mx-auto !w-auto inline-flex" href="{{ route('teams.create') }}">{{ __('ui.create_team') }}</a>
-                </div>
-            @else
-                <div class="grid md:grid-cols-3 grid-cols-2 gap-2.5" uk-scrollspy="target: > div; cls: uk-animation-scale-up; delay: 20 ;repeat: true">
-                    @foreach ($teams as $team)
-                        @php
-                            $memberCount = (int) ($team->members_count ?? $team->active_members_count ?? $team->activeMembers->count());
-                        @endphp
-                        <div class="card">
-                            <a href="{{ route('teams.show', $team) }}">
-                                <div class="card-media h-24 bg-slate-200 dark:bg-dark3">
-                                    <img src="{{ $team->coverUrl() }}" alt="{{ $team->name }}" class="h-full w-full object-cover">
-                                    <div class="card-overly"></div>
-                                    @if ($team->recruitment_status === 'open')
-                                        <div class="bg-blue-600 rounded-full w-3 h-3 ring-4 ring-white dark:ring-slate-900 absolute top-2 right-2 z-[2]"></div>
-                                    @endif
-                                </div>
-                            </a>
-                            <div class="card-body relative z-10">
-                                <img src="{{ $team->avatarUrl() }}" alt="{{ $team->name }}" class="w-10 h-10 rounded-full object-cover mb-2 shadow md:-mt-11 -mt-7 relative border-2 border-white dark:border-slate-800 bg-white dark:bg-dark3">
-                                <a href="{{ route('teams.show', $team) }}"><h4 class="card-title line-clamp-1">{{ $team->name }}</h4></a>
-                                <div class="card-text mt-1">
-                                    <div class="flex items-center flex-wrap space-x-1">
-                                        <a href="{{ route('teams.show', $team) }}"><span>{{ trans_choice('ui.teams_members_count', $memberCount, ['count' => $memberCount]) }}</span></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                @if ($teams->hasMorePages())
-                    <div class="flex justify-center my-6">
-                        <a href="{{ $teams->nextPageUrl() }}" class="bg-white py-2 px-5 rounded-full shadow-md font-semibold text-sm dark:bg-dark2">{{ __('ui.load_more') }}</a>
-                    </div>
-                @endif
-            @endif
-        </div>
-    </div>
-
-    <div class="2xl:w-[380px] lg:w-[330px] w-full shrink-0">
-        <div class="lg:space-y-6 space-y-4 lg:pb-8 max-lg:grid sm:grid-cols-2 max-lg:gap-6">
-            <div class="box p-5 px-6">
-                <div class="flex items-baseline justify-between text-black dark:text-white">
-                    <h3 class="font-bold text-base">{{ __('ui.teams_widget_member_suggestions') }}</h3>
-                    <a href="{{ route('members.index') }}" class="text-sm text-blue-500">{{ __('ui.see_all') }}</a>
-                </div>
-
-                <div class="side-list">
-                    @forelse (($memberSuggestions ?? collect()) as $member)
-                        <div class="side-list-item">
-                            <a href="{{ route('profile.public', $member) }}">
-                                <img src="{{ $member->avatarUrl() }}" alt="{{ $member->username }}" class="side-list-image rounded-md object-cover">
-                            </a>
-                            <div class="flex-1 min-w-0">
-                                <a href="{{ route('profile.public', $member) }}"><h4 class="side-list-title truncate">{{ $member->name }}</h4></a>
-                                <div class="side-list-info truncate">{{ '@' . $member->username }}</div>
-                            </div>
-                            <a href="{{ route('profile.public', $member) }}" class="button bg-secondery">{{ __('ui.profile') }}</a>
-                        </div>
-                    @empty
-                        <div class="side-list-info py-3">{{ __('ui.teams_widget_empty') }}</div>
-                    @endforelse
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow p-5 px-6 border1 dark:bg-dark2">
-                <div class="flex items-baseline justify-between text-black dark:text-white">
-                    <h3 class="font-bold text-base">{{ __('ui.teams_widget_open_lfg') }}</h3>
-                    <a href="{{ route('lfg.index') }}" class="text-sm text-blue-500">{{ __('ui.see_all') }}</a>
-                </div>
-
-                <div class="side-list">
-                    @forelse (($openLfgPosts ?? collect()) as $post)
-                        <div class="side-list-item">
-                            <a href="{{ route('lfg.show', $post) }}">
-                                <img src="{{ $post->user->avatarUrl() }}" alt="{{ $post->user->username }}" class="side-list-image rounded-md object-cover">
-                            </a>
-                            <div class="flex-1 min-w-0">
-                                <a href="{{ route('lfg.show', $post) }}"><h4 class="side-list-title truncate">{{ $post->title }}</h4></a>
-                                <div class="side-list-info truncate">{{ $post->slotsOpen() }} {{ __('ui.lfg_stat_free') }} · {{ $post->user->username }}</div>
-                            </div>
-                            <a href="{{ route('lfg.show', $post) }}" class="button bg-primary-soft text-primary dark:text-white">{{ __('ui.lfg') }}</a>
-                        </div>
-                    @empty
-                        <div class="side-list-info py-3">{{ __('ui.teams_widget_empty') }}</div>
-                    @endforelse
-                </div>
-
-                <a href="{{ route('lfg.index') }}" class="bg-secondery w-full text-black py-1.5 font-medium px-3.5 rounded-md text-sm mt-3 dark:text-white text-center block">{{ __('ui.see_all') }}</a>
-            </div>
-
-            <div class="bg-white rounded-xl shadow p-5 px-6 border1 dark:bg-dark2">
-                <div class="flex items-baseline justify-between text-black dark:text-white">
-                    <h3 class="font-bold text-base">{{ __('ui.teams_widget_cups') }}</h3>
-                    <a href="{{ route('cups.index') }}" class="text-sm text-blue-500">{{ __('ui.see_all') }}</a>
-                </div>
-
-                <div class="side-list">
-                    @forelse (($featuredCups ?? collect()) as $cup)
-                        <div class="side-list-item">
-                            <a href="{{ route('cups.show', $cup) }}">
-                                <img src="{{ $cup->coverUrl() }}" alt="{{ $cup->title }}" class="side-list-image rounded-md object-cover">
-                            </a>
-                            <div class="flex-1 min-w-0">
-                                <a href="{{ route('cups.show', $cup) }}"><h4 class="side-list-title truncate">{{ $cup->title }}</h4></a>
-                                <div class="side-list-info truncate">{{ $cup->statusLabel() }} · {{ (int) ($cup->participants_count ?? 0) }} {{ __('ui.members') }}</div>
-                            </div>
-                            <a href="{{ route('cups.show', $cup) }}" class="button bg-primary text-white">{{ __('ui.cups') }}</a>
-                        </div>
-                    @empty
-                        <div class="side-list-info py-3">{{ __('ui.teams_widget_empty') }}</div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-    </div>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta name="csrf-token" content="{{ csrf_token() }}"/>
+<meta content="{{ request()->query() ? 'noindex,follow' : 'index,follow' }}" name="robots"/>
+<title>{{ __('hnt_teams.title') }} · HNT.ROCKS</title>
+<meta name="description" content="{{ __('hnt_teams.meta_description') }}"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v=20260710-1" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v=20260710-1" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-teams/teams-overview.css') }}?v={{ $teamsCssVersion }}" rel="stylesheet"/>
+</head>
+<body data-page="teams">
+<svg aria-hidden="true" class="svg-defs">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.8"></circle><path d="m16.2 16.2 4 4"></path></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9M13 4v6M8 14v6"></path></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1"></circle><path d="M19 13.6v-3.2l-2-.7-.7-1.7.9-1.9-2.3-2.3-1.9.9-1.7-.7-.7-2H8.4l-.7 2-1.7.7-1.9-.9-2.3 2.3.9 1.9-.7 1.7-2 .7v3.2l2 .7.7 1.7-.9 1.9 2.3 2.3 1.9-.9 1.7.7.7 2h3.2l.7-2 1.7-.7 1.9.9 2.3-2.3-.9-1.9.7-1.7z"></path></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 7 3 6 3 8H3c0-2 3-1 3-8"></path><path d="M9.5 20h5"></path></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"></path></symbol>
+<symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
+<symbol id="i-briefcase" viewBox="0 0 24 24"><rect height="12" rx="3" width="18" x="3" y="7"></rect><path d="M9 7V5h6v2M3 12h18M10 12v2h4v-2"></path></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"></path></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"></circle><circle cx="17" cy="9.5" r="2.3"></circle><path d="M3 19a6 6 0 0 1 12 0M14 18a4.5 4.5 0 0 1 7 0"></path></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"></path><path d="M3 7V5h7l2 2"></path></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m6 12 4 4 8-8"></path></symbol>
+<symbol id="i-comment" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H5l-3 2 1-5a8 8 0 1 1 18-5Z"></path></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"></path></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect height="16" rx="3" width="18" x="3" y="4"></rect><circle cx="9" cy="10" r="2"></circle><path d="m5 18 5-5 3 3 2-2 4 4"></path></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.8 12s3.3-6 9.2-6 9.2 6 9.2 6-3.3 6-9.2 6-9.2-6-9.2-6"></path><circle cx="12" cy="12" r="2.6"></circle></symbol>
+</svg>
+<main class="app-shell teams-page-shell">
+@include('themes.hnt_preview.partials.header')
+<section class="teams-stage">
+<div class="teams-scroll" id="teamsScroll">
+<section class="teams-overview">
+<div class="teams-overview-copy">
+<span>{{ __('hnt_teams.eyebrow') }}</span>
+<h1>{{ __('hnt_teams.title') }}</h1>
+<p>{{ __('hnt_teams.intro') }}</p>
+<div class="teams-progress-row">
+<div class="teams-progress-item wide"><span>{{ __('hnt_teams.all_teams') }}</span><div class="teams-progress dark"><b>{{ $formatCount((int) $stats['all']) }}</b><i style="width:100%"></i></div></div>
+<div class="teams-progress-item"><span>{{ __('hnt_teams.my_teams') }}</span><div class="teams-progress red"><b>{{ $formatCount((int) $stats['mine']) }}</b><i style="width:{{ min(100, max(8, (int) round(((int) $stats['mine'] / max(1, (int) $stats['all'])) * 100))) }}%"></i></div></div>
+<div class="teams-progress-item"><span>{{ __('hnt_teams.recruiting') }}</span><div class="teams-progress striped"><b>{{ $formatCount((int) $stats['recruiting']) }}</b><i style="width:{{ min(100, (int) round(((int) $stats['recruiting'] / max(1, (int) $stats['all'])) * 100)) }}%"></i></div></div>
+<div class="teams-progress-item compact"><span>{{ __('hnt_teams.new_this_week') }}</span><div class="teams-progress outline"><b>{{ $formatCount((int) $stats['new_this_week']) }}</b></div></div>
 </div>
-@endsection
+</div>
+<div class="teams-overview-counts">
+<article><strong>{{ $formatCount((int) $stats['all']) }}</strong><span>{{ __('hnt_teams.teams') }}</span></article>
+<article><strong>{{ $formatCount((int) $stats['members']) }}</strong><span>{{ __('hnt_teams.members') }}</span></article>
+<article><strong>{{ $formatCount((int) $stats['recruiting']) }}</strong><span>{{ __('hnt_teams.recruiting') }}</span></article>
+</div>
+</section>
+
+@if(session('status'))<div class="teams-flash success">{{ session('status') }}</div>@endif
+@if($errors->any())<div class="teams-flash error">{{ $errors->first() }}</div>@endif
+
+<section class="teams-directory-card {{ $hasActiveFilters ? 'is-filter-open' : '' }}" data-teams-directory>
+<div aria-label="{{ __('hnt_teams.actions') }}" class="teams-action-shelf">
+<a aria-label="{{ __('hnt_teams.create_team') }}" class="teams-shelf-icon create" href="{{ route('teams.create') }}"><svg><use href="#i-plus"></use></svg></a>
+<a aria-label="{{ __('hnt_teams.manage_teams') }}" class="teams-shelf-icon" href="{{ route('teams.manage') }}"><svg><use href="#i-sliders"></use></svg></a>
+<a aria-label="{{ __('hnt_teams.invitations') }}" class="teams-shelf-icon" href="{{ route('teams.invitations') }}"><svg><use href="#i-users"></use></svg></a>
+<button aria-label="{{ __('hnt_teams.show_filters') }}" aria-expanded="{{ $hasActiveFilters ? 'true' : 'false' }}" class="teams-shelf-icon" data-teams-filter-toggle type="button"><svg><use href="#i-settings"></use></svg></button>
+</div>
+<header class="teams-directory-head">
+<nav aria-label="{{ __('hnt_teams.title') }}" class="teams-view-tabs">
+<a class="{{ $activeView === 'discover' ? 'active' : '' }}" href="{{ route('teams.index') }}">{{ __('hnt_teams.discover') }}</a>
+<a class="{{ $activeView === 'popular' ? 'active' : '' }}" href="{{ $filterUrl(['sort' => 'members', 'recruiting' => null]) }}">{{ __('hnt_teams.popular') }}</a>
+<a class="{{ $activeView === 'recruiting' ? 'active' : '' }}" href="{{ $filterUrl(['recruiting' => 1, 'sort' => 'newest']) }}">{{ __('hnt_teams.recruiting') }} <span>{{ $formatCount((int) $stats['recruiting']) }}</span></a>
+<a href="{{ route('teams.manage') }}">{{ __('hnt_teams.my_teams') }} <span>{{ $formatCount((int) $stats['mine']) }}</span></a>
+</nav>
+<form class="teams-search" method="get" action="{{ route('teams.index') }}">
+<svg><use href="#i-search"></use></svg>
+<input autocomplete="off" name="q" value="{{ $searchValue }}" placeholder="{{ __('hnt_teams.search_placeholder') }}" type="search"/>
+@foreach(request()->except(['q', 'page']) as $key => $value)@if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}"/>@endif @endforeach
+</form>
+</header>
+<form class="teams-filter-strip" method="get" action="{{ route('teams.index') }}" data-teams-filter-form>
+<label><span>{{ __('hnt_teams.platform') }}</span><select name="platform"><option value="">{{ __('hnt_teams.all') }}</option>@foreach(['PS5','Xbox','PC','Crossplay'] as $option)<option value="{{ $option }}" @selected($platformValue === $option)>{{ $option }}</option>@endforeach</select></label>
+<label><span>{{ __('hnt_teams.playstyle') }}</span><select name="playstyle"><option value="">{{ __('hnt_teams.all') }}</option>@foreach(['Competitive','Teamplay','Casual','Taktisch'] as $option)<option value="{{ $option }}" @selected($playstyleValue === $option)>{{ $option }}</option>@endforeach</select></label>
+<label><span>{{ __('hnt_teams.region') }}</span><select name="region"><option value="">{{ __('hnt_teams.all') }}</option>@foreach(['EU','NA','Global'] as $option)<option value="{{ $option }}" @selected($regionValue === $option)>{{ $option }}</option>@endforeach</select></label>
+<label><span>{{ __('hnt_teams.language') }}</span><select name="language"><option value="">{{ __('hnt_teams.all') }}</option>@foreach(['DE','EN','DE / EN'] as $option)<option value="{{ $option }}" @selected($languageValue === $option)>{{ $option }}</option>@endforeach</select></label>
+<label><span>{{ __('hnt_teams.sorting') }}</span><select name="sort"><option value="newest" @selected($activeSort === 'newest')>{{ __('hnt_teams.newest') }}</option><option value="members" @selected($activeSort === 'members')>{{ __('hnt_teams.most_members') }}</option><option value="name" @selected($activeSort === 'name')>{{ __('hnt_teams.name_az') }}</option></select></label>
+<label class="teams-recruiting-filter"><input type="checkbox" name="recruiting" value="1" @checked($isRecruiting)/><i></i><span>{{ __('hnt_teams.only_recruiting') }}</span></label>
+<div class="teams-filter-actions"><button type="submit"><svg><use href="#i-search"></use></svg>{{ __('hnt_teams.filter_results') }}</button><a href="{{ route('teams.index') }}"><svg><use href="#i-sliders"></use></svg>{{ __('hnt_teams.reset_filters') }}</a></div>
+</form>
+
+<div class="teams-directory-layout">
+<section aria-label="{{ __('hnt_teams.title') }}" class="teams-table" role="table">
+<div class="teams-table-head" role="row"><span>{{ __('hnt_teams.team') }}</span><span>{{ __('hnt_teams.profile') }}</span><span>{{ __('hnt_teams.platform') }}</span><span>{{ __('hnt_teams.region') }}</span><span>{{ __('hnt_teams.playstyle') }}</span><span>{{ __('hnt_teams.members') }}</span><span>{{ __('hnt_teams.posts') }}</span><span>{{ __('hnt_teams.status') }}</span><span>{{ __('hnt_teams.actions') }}</span></div>
+<div class="teams-table-body">
+@forelse($teams as $team)
+@php
+    $membership = $viewerMemberships->get($team->id);
+    $canManage = $membership && $membership->status === 'active' && in_array($membership->role, ['owner', 'officer'], true);
+    $isPending = $membership && $membership->status === 'pending';
+    $memberCount = (int) ($team->members_count ?? $team->activeMembers->count());
+    $postsCount = (int) ($team->posts_count ?? 0);
+    $ownerLabel = $team->owner?->name ?: $team->owner?->username ?: 'HNT Hunter';
+    $teamSummary = $team->tagline ?: \Illuminate\Support\Str::limit((string) $team->description, 72) ?: __('hnt_teams.unknown');
+    $roleLabel = $membership?->role ? __('hnt_teams.' . $membership->role) : __('hnt_teams.owner');
+@endphp
+<article class="teams-table-row {{ $membership?->status === 'active' ? 'is-member' : '' }}" role="row">
+<div class="team-identity"><a class="team-mark" href="{{ route('teams.show', $team) }}"><img src="{{ $team->avatarUrl() }}" alt="{{ $team->name }}"/></a><div><a href="{{ route('teams.show', $team) }}"><strong>{{ $team->name }}</strong></a><small>{{ '@' . $team->slug }}</small></div></div>
+<div class="team-profile"><strong>{{ $teamSummary }}</strong><small>{{ $ownerLabel }} · {{ $membership?->status === 'active' ? $roleLabel : __('hnt_teams.owner') }} · {{ $team->language ?: __('hnt_teams.unknown') }}</small></div>
+<span class="team-chip">{{ $team->platform ?: __('hnt_teams.unknown') }}</span>
+<span class="team-cell">{{ $team->region ?: __('hnt_teams.unknown') }}</span>
+<span class="team-cell">{{ $team->playstyle ?: __('hnt_teams.unknown') }}</span>
+<div class="team-members-cell"><div class="team-avatar-stack">@foreach($team->activeMembers->take(3) as $member)<img alt="{{ $member->user?->name ?: $member->user?->username ?: 'Hunter' }}" src="{{ $member->user?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>@endforeach</div><strong>{{ $formatCount($memberCount) }}</strong></div>
+<span class="team-number"><strong>{{ $formatCount($postsCount) }}</strong><small>{{ __('hnt_teams.posts') }}</small></span>
+<span class="team-status {{ $team->recruitment_status === 'open' ? 'recruiting' : 'closed' }}"><i></i>{{ $team->recruitment_status === 'open' ? __('hnt_teams.recruiting_open') : __('hnt_teams.closed') }}</span>
+<div class="team-row-actions">
+@if($canManage)<a aria-label="{{ __('hnt_teams.manage_team') }}" href="{{ route('teams.edit', $team) }}"><svg><use href="#i-sliders"></use></svg></a>
+@elseif($isPending)<span class="pending" title="{{ __('hnt_teams.request_pending') }}"><svg><use href="#i-check"></use></svg></span>
+@elseif($team->recruitment_status === 'open')<form method="post" action="{{ route('teams.join', $team) }}">@csrf<button aria-label="{{ __('hnt_teams.request_join') }}" type="submit"><svg><use href="#i-plus"></use></svg></button></form>@endif
+<a aria-label="{{ __('hnt_teams.open_team') }}" href="{{ route('teams.show', $team) }}"><svg><use href="#i-arrow"></use></svg></a>
+</div>
+</article>
+@empty
+<div class="teams-empty-state"><svg><use href="#i-users"></use></svg><strong>{{ __('hnt_teams.no_results_title') }}</strong><span>{{ __('hnt_teams.no_results_text') }}</span><a href="{{ route('teams.index') }}">{{ __('hnt_teams.reset_filters') }}</a></div>
+@endforelse
+</div>
+<footer class="teams-table-footer"><span>{{ __('hnt_teams.shown', ['count' => $teams->count()]) }}</span>@if($teams->hasPages())<nav>@if($teams->previousPageUrl())<a aria-label="{{ __('hnt_teams.previous') }}" href="{{ $teams->previousPageUrl() }}"><svg><use href="#i-arrow-left"></use></svg></a>@endif<span>{{ $teams->currentPage() }} / {{ $teams->lastPage() }}</span>@if($teams->nextPageUrl())<a aria-label="{{ __('hnt_teams.next') }}" href="{{ $teams->nextPageUrl() }}"><svg><use href="#i-arrow-right"></use></svg></a>@endif</nav>@endif</footer>
+</section>
+
+<aside class="teams-side-column">
+<article class="teams-side-card teams-managed-card"><header><div><span>{{ __('hnt_teams.your_area') }}</span><h2>{{ __('hnt_teams.my_teams') }}</h2></div><a href="{{ route('teams.manage') }}">{{ __('hnt_teams.manage') }}</a></header><div class="managed-team-list">@forelse(($managedTeams ?? collect())->take(4) as $team)<a href="{{ route('teams.show', $team) }}"><img src="{{ $team->avatarUrl() }}" alt="{{ $team->name }}"/><div><strong>{{ $team->name }}</strong><small>{{ (int) $team->owner_id === (int) $viewer->id ? __('hnt_teams.owner') : __('hnt_teams.officer') }} · {{ __('hnt_teams.member_count', ['count' => (int) ($team->members_count ?? 0)]) }}</small></div><i>{{ $formatCount((int) ($team->pending_count ?? 0)) }}</i></a>@empty<p>{{ __('hnt_teams.no_teams_yet') }}</p>@endforelse</div><a class="teams-create-button" href="{{ route('teams.create') }}"><svg><use href="#i-plus"></use></svg>{{ __('hnt_teams.create_team') }}</a></article>
+
+<article class="teams-side-card teams-lfg-card"><header><div><span>{{ __('hnt_teams.open_lfgs') }}</span><h2>{{ __('hnt_teams.hunters_wanted') }}</h2></div><a href="{{ route('lfg.index') }}">{{ __('hnt_teams.see_all') }}</a></header><div class="side-lfg-list">@forelse(($openLfgPosts ?? collect())->take(3) as $post)<a href="{{ route('lfg.show', $post) }}"><img alt="{{ $post->user?->name ?: $post->user?->username ?: 'Hunter' }}" src="{{ $post->user?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/><div><strong>{{ $post->title }}</strong><small>{{ $post->region ?: __('hnt_teams.unknown') }} · {{ $post->platform ?: __('hnt_teams.unknown') }} · {{ __('hnt_teams.free_slots', ['count' => $post->slotsOpen()]) }}</small></div><span>→</span></a>@empty<p>{{ __('hnt_teams.no_results_title') }}</p>@endforelse</div></article>
+
+@if($featuredCup)
+@php
+    $cupLimit = $featuredCup->participantLimit();
+    $cupParticipants = (int) ($featuredCup->participants_count ?? 0);
+    $cupRemaining = $cupLimit ? max(0, $cupLimit - $cupParticipants) : null;
+    $cupProgress = $cupLimit ? min(100, (int) round(($cupParticipants / max(1, $cupLimit)) * 100)) : 20;
+@endphp
+<article class="teams-side-card teams-cup-card"><header><div><span>{{ __('hnt_teams.community_cup') }}</span><h2>{{ $featuredCup->title }}</h2></div><a href="{{ route('cups.show', $featuredCup) }}"><svg><use href="#i-arrow"></use></svg></a></header><a class="side-cup-preview" href="{{ route('cups.show', $featuredCup) }}" style="--team-cup-cover:url('{{ $featuredCup->coverUrl() }}')"><div><span>{{ $featuredCup->isRegistrationOpen() ? __('hnt_teams.registration_open') : $featuredCup->statusLabel() }}</span><strong>{{ $formatCount($cupParticipants) }} {{ __('hnt_teams.teams') }}</strong><small>{{ $featuredCup->team_size ? $featuredCup->team_size . '-Team' : 'Solo' }} · {{ implode(' / ', $featuredCup->allowedPlatforms()) ?: ($featuredCup->platform ?: __('hnt_teams.unknown')) }}</small></div><i><b style="width:{{ $cupProgress }}%"></b></i><p>{{ $cupRemaining === null ? __('hnt_teams.unlimited_slots') : __('hnt_teams.team_slots_left', ['count' => $cupRemaining]) }}</p></a></article>
+@endif
+</aside>
+</div>
+</section>
+</div>
+</section>
+<div class="toast" id="toast"></div>
+</main>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v=20260710-1"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-teams/teams-overview.js') }}?v={{ $teamsJsVersion }}"></script>
+</body>
+</html>
