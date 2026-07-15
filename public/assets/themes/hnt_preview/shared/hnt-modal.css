@@ -1,5 +1,6 @@
 /* Shared compact HNT modal.
  * Reusable for Cup teams and future dashboard actions.
+ * Visual truth: the light HNT dashboard composer.
  */
 
 .hnt-modal-backdrop {
@@ -10,7 +11,7 @@
   place-items: center;
   padding: 24px;
   overflow-y: auto;
-  background: rgba(20, 20, 18, .54);
+  background: rgba(48, 48, 46, .34);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   opacity: 0;
@@ -30,11 +31,11 @@
   max-height: min(720px, calc(100vh - 48px));
   display: grid;
   overflow: hidden;
-  border: .5px solid rgba(242, 232, 216, .14);
+  border: .5px solid rgba(227, 222, 206, .95);
   border-radius: 24px;
-  background: #2f302d;
-  color: #f2e8d8;
-  box-shadow: 0 26px 80px rgba(0, 0, 0, .28);
+  background: rgba(255, 255, 255, .97);
+  color: var(--ink, #30302e);
+  box-shadow: 0 24px 70px rgba(48, 48, 46, .14);
   transform: translateY(12px) scale(.985);
   transition: transform .18s ease;
 }
@@ -56,7 +57,7 @@
   gap: 18px;
   align-items: start;
   padding: 24px 24px 20px;
-  border-bottom: .5px solid rgba(242, 232, 216, .10);
+  border-bottom: .5px solid rgba(227, 222, 206, .9);
 }
 
 .hnt-modal__head-copy {
@@ -66,7 +67,7 @@
 }
 
 .hnt-modal__kicker {
-  color: #c96055;
+  color: #9b7c28;
   font-size: 10px;
   font-weight: 500;
   letter-spacing: .13em;
@@ -75,7 +76,7 @@
 
 .hnt-modal__head h2 {
   margin: 0;
-  color: #f2e8d8;
+  color: var(--ink, #30302e);
   font-size: 25px;
   font-weight: 400;
   line-height: 1.08;
@@ -84,7 +85,7 @@
 
 .hnt-modal__head p {
   margin: 3px 0 0;
-  color: #a79c8e;
+  color: var(--muted, #92918a);
   font-size: 12px;
   line-height: 1.55;
 }
@@ -95,18 +96,19 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: .5px solid rgba(242, 232, 216, .12);
+  border: .5px solid rgba(227, 222, 206, .72);
   border-radius: 50%;
-  background: rgba(255, 255, 255, .045);
-  color: #f2e8d8;
+  background: rgba(239, 238, 233, .92);
+  color: var(--ink, #30302e);
   cursor: pointer;
-  transition: background .16s ease, color .16s ease;
+  transition: background .16s ease, color .16s ease, border-color .16s ease;
 }
 
 .hnt-modal__close:hover,
 .hnt-modal__close:focus-visible {
-  background: rgba(182, 70, 58, .18);
-  color: #f08a7f;
+  border-color: rgba(182, 78, 68, .24);
+  background: rgba(182, 78, 68, .10);
+  color: var(--darkred, #b64e44);
   outline: none;
 }
 
@@ -143,13 +145,13 @@
   display: grid;
   gap: 3px;
   padding: 13px 14px;
-  border: .5px solid rgba(242, 232, 216, .10);
+  border: .5px solid rgba(227, 222, 206, .88);
   border-radius: 15px;
-  background: rgba(255, 255, 255, .035);
+  background: rgba(247, 246, 241, .9);
 }
 
 .hnt-modal__fact span {
-  color: #a79c8e;
+  color: var(--muted, #92918a);
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -157,7 +159,7 @@
 
 .hnt-modal__fact strong {
   overflow: hidden;
-  color: #f2e8d8;
+  color: var(--ink, #30302e);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
@@ -177,13 +179,13 @@
 }
 
 .hnt-modal__field-head span {
-  color: #d7cdbf;
+  color: var(--ink, #30302e);
   font-size: 11px;
   font-weight: 500;
 }
 
 .hnt-modal__field-head small {
-  color: #847c72;
+  color: var(--muted, #92918a);
   font-size: 9px;
   font-variant-numeric: tabular-nums;
 }
@@ -192,27 +194,27 @@
   width: 100%;
   height: 48px;
   padding: 0 15px;
-  border: .5px solid rgba(242, 232, 216, .14);
+  border: .5px solid rgba(227, 222, 206, .95);
   border-radius: 15px;
   outline: 0;
-  background: #242522;
-  color: #f2e8d8;
+  background: rgba(255, 255, 255, .98);
+  color: var(--ink, #30302e);
   font: inherit;
   font-size: 13px;
   transition: border-color .16s ease, background .16s ease;
 }
 
 .hnt-modal__input::placeholder {
-  color: #756f67;
+  color: #aaa69d;
 }
 
 .hnt-modal__input:hover {
-  border-color: rgba(242, 232, 216, .22);
+  border-color: rgba(182, 78, 68, .28);
 }
 
 .hnt-modal__input:focus {
-  border-color: rgba(182, 70, 58, .82);
-  background: #272825;
+  border-color: rgba(182, 78, 68, .76);
+  background: #fff;
 }
 
 .hnt-modal__note {
@@ -221,9 +223,9 @@
   gap: 11px;
   align-items: center;
   padding: 13px 14px;
-  border: .5px solid rgba(242, 232, 216, .09);
+  border: .5px solid rgba(182, 78, 68, .10);
   border-radius: 15px;
-  background: rgba(255, 255, 255, .025);
+  background: rgba(182, 78, 68, .10);
 }
 
 .hnt-modal__note-icon {
@@ -232,8 +234,8 @@
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: rgba(182, 70, 58, .14);
-  color: #e47b70;
+  background: rgba(255, 255, 255, .62);
+  color: var(--darkred, #b64e44);
 }
 
 .hnt-modal__note-icon svg {
@@ -251,13 +253,13 @@
 }
 
 .hnt-modal__note strong {
-  color: #e5dbcd;
+  color: var(--ink, #30302e);
   font-size: 11px;
   font-weight: 500;
 }
 
 .hnt-modal__note span {
-  color: #948b80;
+  color: #77746d;
   font-size: 10px;
   line-height: 1.45;
 }
@@ -267,7 +269,7 @@
   justify-content: flex-end;
   gap: 9px;
   padding: 18px 24px 22px;
-  border-top: .5px solid rgba(242, 232, 216, .10);
+  border-top: .5px solid rgba(227, 222, 206, .9);
 }
 
 .hnt-modal__button {
@@ -287,32 +289,35 @@
 }
 
 .hnt-modal__button--secondary {
-  border-color: rgba(242, 232, 216, .12);
-  background: rgba(255, 255, 255, .035);
-  color: #d2c8bb;
+  border-color: rgba(227, 222, 206, .78);
+  background: rgba(239, 238, 233, .92);
+  color: #625f59;
 }
 
 .hnt-modal__button--secondary:hover,
 .hnt-modal__button--secondary:focus-visible {
-  border-color: rgba(242, 232, 216, .20);
-  background: rgba(255, 255, 255, .07);
+  border-color: rgba(182, 78, 68, .18);
+  background: rgba(182, 78, 68, .08);
+  color: var(--darkred, #b64e44);
   outline: none;
 }
 
 .hnt-modal__button--primary {
-  background: #f2e8d8;
-  color: #272825;
+  background: var(--dark, #30302e);
+  color: #fff;
 }
 
 .hnt-modal__button--primary:hover,
 .hnt-modal__button--primary:focus-visible {
-  background: #c95c51;
+  background: var(--darkred, #b64e44);
   color: #fff;
   outline: none;
 }
 
 .hnt-modal__button--primary:disabled {
-  opacity: .58;
+  background: rgba(182, 78, 68, .16);
+  color: rgba(48, 48, 46, .40);
+  opacity: 1;
   cursor: wait;
 }
 
@@ -328,7 +333,7 @@
 
 .hnt-team-create-secondary:hover,
 .hnt-team-create-secondary:focus-visible {
-  color: #b64e44;
+  color: var(--darkred, #b64e44);
   outline: none;
 }
 
