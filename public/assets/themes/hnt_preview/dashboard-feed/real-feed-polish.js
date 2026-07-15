@@ -219,6 +219,119 @@
   });
 })();
 
+/* Internal previews are only for HNT.ROCKS links written in the post text.
+   Media anchors, generated Moment crossposts and structured Cup crossposts
+   already have their own visual representation and must not create a second card. */
+(() => {
+  const postSelector = '[data-real-feed-post], [data-hnt-preview-post], .social-post';
+  const previewSelector = '[data-hnt-internal-link-previews]';
+  const mediaSelector = '.real-post-media-grid, .post-image-placeholder, [data-hnt-media-carousel], [data-hnt-lightbox-trigger], .hnt-video-player, video';
+  const internalTextUrlPattern = /(?:https?:\/\/)?(?:www\.)?hnt\.rocks(?:\/[^\s<>"']*)?/iu;
+
+  const normalizeInternalHref = (candidate) => {
+    let value = String(candidate || '').trim().replace(/[.,!?;:]+$/u, '');
+    if (!value) return null;
+
+    try {
+      if (value.startsWith('/') && !value.startsWith('//')) {
+        const relative = new URL(value, window.location.origin);
+        return `${relative.pathname || '/'}${relative.search}${relative.hash}`;
+      }
+
+      if (value.startsWith('//')) value = `https:${value}`;
+      if (!/^https?:\/\//iu.test(value)) value = `https://${value}`;
+
+      const url = new URL(value, window.location.origin);
+      const allowedHosts = new Set([
+        'hnt.rocks',
+        'www.hnt.rocks',
+        window.location.hostname.toLowerCase(),
+      ]);
+
+      if (!allowedHosts.has(url.hostname.toLowerCase())) return null;
+      return `${url.pathname || '/'}${url.search}${url.hash}`;
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const textContainersFor = (article) => [
+    ...article.querySelectorAll('[data-hnt-post-body], .post-body > p'),
+  ];
+
+  const firstWrittenInternalHref = (article) => {
+    const containers = textContainersFor(article);
+
+    for (const container of containers) {
+      const links = [...container.querySelectorAll('a[href]')];
+      const writtenLink = links.find((link) => {
+        if (link.querySelector('img, picture, video, source')) return false;
+        if (link.closest('.real-post-media-grid, .post-image-placeholder, [data-hnt-media-carousel], [data-hnt-lightbox-trigger], .hnt-video-player')) return false;
+        return Boolean(normalizeInternalHref(link.getAttribute('href') || link.href));
+      });
+
+      if (writtenLink) {
+        return normalizeInternalHref(writtenLink.getAttribute('href') || writtenLink.href);
+      }
+
+      const match = String(container.textContent || '').match(internalTextUrlPattern);
+      const normalized = match ? normalizeInternalHref(match[0]) : null;
+      if (normalized) return normalized;
+    }
+
+    return null;
+  };
+
+  const suppressPreviewFor = (article) => {
+    const writtenHref = firstWrittenInternalHref(article);
+    const hasMedia = article.matches('.has-media') || Boolean(article.querySelector(mediaSelector));
+    const isGeneratedMomentCrosspost = Boolean(writtenHref)
+      && hasMedia
+      && /^\/moments(?:\/|$)/iu.test(writtenHref);
+    const hasOwnStructuredCard = article.classList.contains('is-cup-crosspost');
+
+    return !writtenHref || isGeneratedMomentCrosspost || hasOwnStructuredCard;
+  };
+
+  const processPost = (article) => {
+    if (!(article instanceof Element) || !article.matches(postSelector)) return;
+    if (!suppressPreviewFor(article)) return;
+
+    article.dataset.hntInternalPreviewState = 'suppressed';
+    article.querySelectorAll(previewSelector).forEach((preview) => preview.remove());
+  };
+
+  const processRoot = (root) => {
+    if (!(root instanceof Element)) return;
+
+    if (root.matches(postSelector)) processPost(root);
+    root.querySelectorAll(postSelector).forEach(processPost);
+
+    const parentPost = root.closest(postSelector);
+    if (parentPost) processPost(parentPost);
+  };
+
+  const start = () => {
+    processRoot(document.body);
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof Element) processRoot(node);
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+})();
+
 /* Load the live composer as an isolated optional enhancement. */
 (() => {
   const base = '/assets/themes/hnt_preview/dashboard-feed/';
