@@ -3,16 +3,14 @@
 .hnt-cup-crosspost-badge,
 .real-feed-post.is-cup-crosspost .post-badge.cup,
 .social-post.is-cup-crosspost .post-badge.cup {
-  min-height: 28px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 13px;
-  border: .5px solid rgba(183, 132, 0, .12);
-  border-radius: 999px;
-  background: #ffecaa !important;
-  color: #9c6b00 !important;
-  font-size: 10px;
-  font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+    border: .5px solid rgba(183, 132, 0, .12);
+    border-radius: 12px;
+    background: #ffecaa !important;
+    color: #9c6b00 !important;
+    font-size: 7px;
 }
 
 .hnt-feed-cup-card {
