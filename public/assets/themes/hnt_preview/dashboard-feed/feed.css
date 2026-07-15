@@ -390,8 +390,8 @@
 
   .profile-avatar-wrap,
   .profile-avatar {
-    width: clamp(50px,3.15vw,58px);
-    height: clamp(50px,3.15vw,58px);
+    width: 48px;
+    height: 48px;
   }
 
   .profile-card-head {

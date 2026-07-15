@@ -1,7 +1,7 @@
 /* Clickable Moment preview used by optional Moments cross-posts. */
 .real-feed-post .hnt-feed-moment-preview {
     position: relative;
-    min-height: 230px;
+    min-height: 160px;
     display: flex;
     align-items: flex-end;
     overflow: hidden;
@@ -100,7 +100,7 @@
 .real-feed-post .hnt-feed-moment-preview:hover .hnt-feed-moment-preview-play,
 .real-feed-post .hnt-feed-moment-preview:focus-visible .hnt-feed-moment-preview-play {
     background: var(--hnt-brand-red-hover, rgb(163 66 58));
-    transform: scale(1.04);
+    transform: scale(0.84);
 }
 
 .real-feed-post .hnt-feed-moment-preview-play svg {
