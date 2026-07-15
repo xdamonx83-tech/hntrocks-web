@@ -25,6 +25,10 @@
     '/assets/themes/hnt_preview/dashboard-cups/cup-community-access.css?v=20260714-1',
     'data-cup-community-access'
   );
+  ensureStylesheet(
+    '/assets/themes/hnt_preview/shared/hnt-modal.css?v=20260715-1',
+    'data-hnt-shared-modal'
+  );
 
   const shell = document.querySelector('.cup-detail-page-shell');
   if (!shell) return;
@@ -152,6 +156,212 @@
     const titleNode = zone?.querySelector('strong');
     if (file && titleNode) titleNode.textContent = file.name;
   });
+
+  const setupTeamCreateModal = () => {
+    const participation = shell.querySelector('.cup-my-team');
+    const action = participation?.querySelector(':scope > .cup-team-button');
+    const alreadyHasTeam = Boolean(participation?.querySelector('.cup-team-members'));
+
+    if (!action || alreadyHasTeam) return;
+
+    let teamStoreUrl;
+    try {
+      const candidate = new URL(action.href, window.location.origin);
+      if (!/\/cups\/[^/]+\/teams\/?$/.test(candidate.pathname)) return;
+      teamStoreUrl = candidate.href;
+    } catch (_error) {
+      return;
+    }
+
+    const english = document.documentElement.lang.toLowerCase().startsWith('en');
+    const labels = english
+      ? {
+          create: 'Create team',
+          find: 'Find an existing team',
+          kicker: 'HNT.ROCKS CUP',
+          title: 'Create your team',
+          intro: 'Create a team for this Cup. You become captain and can invite your teammates afterwards.',
+          cup: 'Cup',
+          role: 'Your role',
+          captain: 'Captain',
+          teamSize: 'Team size',
+          members: 'members',
+          field: 'Team name',
+          placeholder: 'e.g. Bayou Hunters',
+          noteTitle: 'You stay in control',
+          note: 'After creating the team, you can manage its name, invitations and members.',
+          cancel: 'Cancel',
+          submitting: 'Creating team…',
+          close: 'Close modal',
+        }
+      : {
+          create: 'Team erstellen',
+          find: 'Bestehendes Team finden',
+          kicker: 'HNT.ROCKS CUP',
+          title: 'Dein Team erstellen',
+          intro: 'Erstelle dein Team für diesen Cup. Du wirst Captain und kannst anschließend deine Mitspieler einladen.',
+          cup: 'Cup',
+          role: 'Deine Rolle',
+          captain: 'Captain',
+          teamSize: 'Teamgröße',
+          members: 'Mitglieder',
+          field: 'Teamname',
+          placeholder: 'z. B. Bayou Hunters',
+          noteTitle: 'Du behältst die Kontrolle',
+          note: 'Nach der Erstellung kannst du Teamname, Einladungen und Mitglieder verwalten.',
+          cancel: 'Abbrechen',
+          submitting: 'Team wird erstellt…',
+          close: 'Modal schließen',
+        };
+
+    const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    })[character]);
+
+    const cupTitle = shell.querySelector('.cup-cover-copy strong')?.textContent.trim()
+      || document.title.split('·')[0].trim()
+      || 'HNT.ROCKS Cup';
+
+    const teamSizeRow = Array.from(shell.querySelectorAll('.cup-data-card dl > div')).find((row) => {
+      const key = row.querySelector('dt')?.textContent.trim().toLowerCase() || '';
+      return key.includes('teamgröße') || key.includes('team size');
+    });
+    const teamSize = teamSizeRow?.querySelector('dd')?.textContent.trim() || '3';
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    action.innerHTML = `${escapeHtml(labels.create)} <svg><use href="#i-plus"></use></svg>`;
+    action.setAttribute('role', 'button');
+    action.setAttribute('aria-haspopup', 'dialog');
+    action.setAttribute('aria-controls', 'hntCupTeamCreateModal');
+
+    const findLink = document.createElement('a');
+    findLink.className = 'hnt-team-create-secondary';
+    findLink.href = teamStoreUrl;
+    findLink.textContent = labels.find;
+    action.insertAdjacentElement('afterend', findLink);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'hnt-modal-backdrop';
+    backdrop.id = 'hntCupTeamCreateModal';
+    backdrop.setAttribute('aria-hidden', 'true');
+    backdrop.innerHTML = `
+      <section class="hnt-modal hnt-team-create-modal" role="dialog" aria-modal="true" aria-labelledby="hntCupTeamCreateTitle">
+        <form action="${escapeHtml(teamStoreUrl)}" method="post" data-hnt-team-create-form>
+          <input type="hidden" name="_token" value="${escapeHtml(csrf)}">
+          <header class="hnt-modal__head">
+            <div class="hnt-modal__head-copy">
+              <span class="hnt-modal__kicker">${escapeHtml(labels.kicker)}</span>
+              <h2 id="hntCupTeamCreateTitle">${escapeHtml(labels.title)}</h2>
+              <p>${escapeHtml(labels.intro)}</p>
+            </div>
+            <button class="hnt-modal__close" type="button" aria-label="${escapeHtml(labels.close)}" data-hnt-team-modal-close>
+              <svg><use href="#i-x"></use></svg>
+            </button>
+          </header>
+          <div class="hnt-modal__body">
+            <div class="hnt-modal__facts">
+              <div class="hnt-modal__fact"><span>${escapeHtml(labels.cup)}</span><strong>${escapeHtml(cupTitle)}</strong></div>
+              <div class="hnt-modal__fact"><span>${escapeHtml(labels.teamSize)}</span><strong>${escapeHtml(teamSize)} ${escapeHtml(labels.members)}</strong></div>
+              <div class="hnt-modal__fact"><span>${escapeHtml(labels.role)}</span><strong>${escapeHtml(labels.captain)}</strong></div>
+            </div>
+            <label class="hnt-modal__field">
+              <span class="hnt-modal__field-head"><span>${escapeHtml(labels.field)}</span><small data-hnt-team-name-count>0 / 100</small></span>
+              <input class="hnt-modal__input" name="name" type="text" maxlength="100" required autocomplete="off" placeholder="${escapeHtml(labels.placeholder)}" data-hnt-team-name-input>
+            </label>
+            <div class="hnt-modal__note">
+              <span class="hnt-modal__note-icon"><svg><use href="#i-users"></use></svg></span>
+              <div><strong>${escapeHtml(labels.noteTitle)}</strong><span>${escapeHtml(labels.note)}</span></div>
+            </div>
+          </div>
+          <footer class="hnt-modal__footer">
+            <button class="hnt-modal__button hnt-modal__button--secondary" type="button" data-hnt-team-modal-close>${escapeHtml(labels.cancel)}</button>
+            <button class="hnt-modal__button hnt-modal__button--primary" type="submit" data-hnt-team-create-submit>${escapeHtml(labels.create)}</button>
+          </footer>
+        </form>
+      </section>
+    `;
+    document.body.appendChild(backdrop);
+
+    const modal = backdrop.querySelector('.hnt-modal');
+    const form = backdrop.querySelector('[data-hnt-team-create-form]');
+    const input = backdrop.querySelector('[data-hnt-team-name-input]');
+    const count = backdrop.querySelector('[data-hnt-team-name-count]');
+    const submit = backdrop.querySelector('[data-hnt-team-create-submit]');
+    const closeButtons = backdrop.querySelectorAll('[data-hnt-team-modal-close]');
+    let previousFocus = null;
+
+    const focusableSelector = 'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const openModal = () => {
+      previousFocus = document.activeElement;
+      backdrop.classList.add('is-open');
+      backdrop.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('hnt-modal-is-open');
+      window.requestAnimationFrame(() => input?.focus());
+    };
+
+    const closeModal = () => {
+      backdrop.classList.remove('is-open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('hnt-modal-is-open');
+      previousFocus?.focus?.();
+    };
+
+    action.addEventListener('click', (event) => {
+      event.preventDefault();
+      openModal();
+    });
+
+    closeButtons.forEach((button) => button.addEventListener('click', closeModal));
+    backdrop.addEventListener('click', (event) => {
+      if (event.target === backdrop) closeModal();
+    });
+
+    input?.addEventListener('input', () => {
+      if (count) count.textContent = `${input.value.length} / 100`;
+    });
+
+    form?.addEventListener('submit', (event) => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        input?.reportValidity();
+        return;
+      }
+
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = labels.submitting;
+      }
+    });
+
+    backdrop.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !modal) return;
+      const focusable = Array.from(modal.querySelectorAll(focusableSelector)).filter((element) => !element.hasAttribute('hidden'));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  };
+
+  setupTeamCreateModal();
 
   const setupReviewControls = async () => {
     let capabilities;
