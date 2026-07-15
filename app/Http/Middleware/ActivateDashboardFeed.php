@@ -6,6 +6,7 @@ use App\Http\Controllers\Cups\CommunityCupReviewController;
 use App\Http\Controllers\Cups\CommunityCupStoreController;
 use App\Http\Controllers\Cups\DashboardCupCreateLiveController;
 use App\Http\Controllers\Cups\DashboardCupDetailLiveController;
+use App\Http\Controllers\Cups\DashboardCupTeamManageLiveController;
 use App\Http\Controllers\Cups\DashboardCupsLiveController;
 use App\Http\Controllers\Feed\DashboardFeedLiveController;
 use App\Models\Cup;
@@ -72,6 +73,16 @@ class ActivateDashboardFeed
                 $request->routeIs('cups.submissions.manual-score') => $controller->manualScore($request, $cup, $submission),
                 default => $next($request),
             };
+        }
+
+        if ($request->routeIs('cups.teams.index') && $request->user()) {
+            $cup = $this->resolveCup($request);
+
+            if ($cup && ! $cup->isSoloLeaderboard() && $cup->teamFor($request->user())) {
+                $request->attributes->set('hnt_dashboard_feed_live', true);
+
+                return app(DashboardCupTeamManageLiveController::class)($request, $cup);
+            }
         }
 
         if ($request->routeIs('cups.index')) {
