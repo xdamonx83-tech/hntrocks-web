@@ -142,6 +142,7 @@ class DashboardFeedLiveController extends Controller
             'real-feed-comments.js',
             'real-feed-content-badges.js',
             'real-feed-i18n.js',
+            'real-feed-functionality.js',
         ];
 
         $html = str_replace(
