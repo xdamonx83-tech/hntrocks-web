@@ -132,6 +132,7 @@ class DashboardFeedLiveController extends Controller
             'real-feed-live.css',
             'real-feed-polish.css',
             'real-feed-comments.css',
+            'real-feed-likes.css',
         ];
 
         $scripts = [
@@ -140,6 +141,7 @@ class DashboardFeedLiveController extends Controller
             'real-dashboard-progress-live.js',
             'real-feed-polish.js',
             'real-feed-comments.js',
+            'real-feed-likes.js',
             'real-feed-content-badges.js',
             'real-feed-i18n.js',
             'real-feed-functionality.js',
