@@ -1,7 +1,25 @@
 (() => {
-  const desiredMode = window.HNT_CUP_CREATE?.verificationMode;
   const form = document.querySelector('#cupCreateForm');
-  if (!form || !desiredMode) return;
+  if (!form) return;
+
+  const enforceUpdateMethod = () => {
+    let methodInput = form.querySelector('input[name="_method"]');
+
+    if (!methodInput) {
+      methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      form.appendChild(methodInput);
+    }
+
+    methodInput.value = 'PUT';
+  };
+
+  enforceUpdateMethod();
+  form.addEventListener('submit', enforceUpdateMethod);
+
+  const desiredMode = window.HNT_CUP_CREATE?.verificationMode;
+  if (!desiredMode) return;
 
   let applied = false;
 
