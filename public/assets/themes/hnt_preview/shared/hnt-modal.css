@@ -39,6 +39,12 @@
   transition: transform .18s ease;
 }
 
+.hnt-modal > form {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
 .hnt-modal-backdrop.is-open .hnt-modal {
   transform: translateY(0) scale(1);
 }
