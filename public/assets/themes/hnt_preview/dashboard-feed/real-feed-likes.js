@@ -1,5 +1,5 @@
 /* Shared compact viewer for post and comment likes in the live feed and profile.
-   The heart keeps toggling the reaction; only the visible number opens the list. */
+   The heart keeps toggling the reaction; clicking the visible count opens the list. */
 (() => {
   if (!window.fetch || document.documentElement.dataset.hntLikeViewersReady === '1') return;
   document.documentElement.dataset.hntLikeViewersReady = '1';
@@ -10,6 +10,7 @@
     '[data-hnt-preview-post] [data-hnt-simple-like-count]',
     '[data-hnt-comment-item] [data-hnt-simple-like-count]',
   ].join(',');
+  const actionSelector = '.like-button, .comment-like, [data-hnt-simple-like-button]';
   const english = (document.documentElement.lang || '').toLowerCase().startsWith('en');
   const numberFormatter = new Intl.NumberFormat(english ? 'en' : 'de');
   let lastTrigger = null;
@@ -56,7 +57,7 @@
   };
 
   const targetFor = (trigger) => {
-    const comment = trigger.closest('[data-comment-id], [data-hnt-comment-item]');
+    const comment = trigger?.closest('[data-comment-id], [data-hnt-comment-item]');
     if (comment) {
       const id = Number.parseInt(comment.dataset.commentId || comment.dataset.hntCommentItem || '0', 10);
       return id > 0 ? {
@@ -66,7 +67,7 @@
       } : null;
     }
 
-    const post = trigger.closest('[data-real-feed-post], [data-hnt-preview-post]');
+    const post = trigger?.closest('[data-real-feed-post], [data-hnt-preview-post]');
     if (post) {
       const id = Number.parseInt(post.dataset.realFeedPost || post.dataset.postId || '0', 10);
       return id > 0 ? {
@@ -226,6 +227,7 @@
       node.setAttribute('aria-disabled', count > 0 ? 'false' : 'true');
       node.setAttribute('aria-label', labels.open);
       node.setAttribute('title', count > 0 ? labels.open : '');
+      node.style.setProperty('pointer-events', 'auto', 'important');
     });
   };
 
@@ -237,26 +239,54 @@
     });
   };
 
-  document.addEventListener('click', (event) => {
-    const target = event.target;
-    if (!(target instanceof Element)) return;
+  const countTriggerForClick = (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return null;
+
+    const direct = target.closest('.hnt-like-count-trigger');
+    if (direct) return direct;
+
+    const action = target.closest(actionSelector);
+    if (!action) return null;
+
+    const count = action.querySelector('.hnt-like-count-trigger, [data-hnt-simple-like-count], :scope > span');
+    if (!count || numericCount(count) <= 0) return null;
+
+    const rect = count.getBoundingClientRect();
+    const tolerance = 7;
+    const inside = event.clientX >= rect.left - tolerance
+      && event.clientX <= rect.right + tolerance
+      && event.clientY >= rect.top - tolerance
+      && event.clientY <= rect.bottom + tolerance;
+
+    return inside ? count : null;
+  };
+
+  /* Window capture deliberately runs before the feed/profile reaction handlers.
+     It prevents a count click from ever reaching the parent like button. */
+  window.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
 
     const close = target.closest('[data-hnt-like-viewers-close]');
     if (close) {
       event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
       closeModal();
       return;
     }
 
-    const trigger = target.closest('.hnt-like-count-trigger');
+    const trigger = countTriggerForClick(event);
     if (!trigger) return;
+
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
     openModal(trigger);
   }, true);
 
-  document.addEventListener('keydown', (event) => {
+  window.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && modal.classList.contains('is-open')) {
       event.preventDefault();
       closeModal();
