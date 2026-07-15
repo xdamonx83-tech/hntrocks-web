@@ -69,24 +69,9 @@ body[data-page="cup-detail"] .cup-section-panels {
   padding-top: 18px;
 }
 
-/* Shared Feed/Profile surfaces. These intentionally override the early Cup
- * prototype's dark/yellow page-specific header and comms rules. */
-body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown,
-body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown {
-  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
-  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  color: var(--ink, #30302e) !important;
-}
 
-body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown::before,
-body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown::after,
-body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown::before,
-body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown::after {
-  background: none !important;
-  background-image: none !important;
-}
+
+
 
 body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-dropdown > header,
 body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown-head {
@@ -96,7 +81,7 @@ body[data-page="cup-detail"] .cup-detail-page-shell .header-dropdown-head {
 }
 
 body[data-page="cup-detail"] .cup-detail-page-shell .header-mark-all,
-body[data-page="cup-detail"] .cup-detail-page-shell .main-nav-menu-icon,
+
 body[data-page="cup-detail"] .cup-detail-page-shell .header-menu-icon,
 body[data-page="cup-detail"] .cup-detail-page-shell .header-notification-icon {
   border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;

@@ -5470,7 +5470,7 @@ body.composer-open {
   padding: 0 9px;
   border: 0;
   border-radius: 14px;
-  background: rgba(246,243,232,.9);
+  background: var(--hnt-surface-input, #ecece8) !important;
   cursor: pointer;
 }
 
@@ -5507,7 +5507,7 @@ body.composer-open {
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: rgba(246,243,232,.9);
+  background: var(--hnt-surface-input, #ecece8);
 }
 
 .header-menu-icon svg,

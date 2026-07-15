@@ -955,14 +955,7 @@ body[data-page="cup-detail"] { overflow: hidden; }
 .cup-participation-copy { margin-top: 12px; }
 
 /* Shared header palette: no yellow wash or colored legacy icon tiles. */
-.cup-detail-page-shell .main-nav-dropdown,
-.cup-detail-page-shell .header-dropdown {
-  border: .5px solid rgba(48,48,46,.15) !important;
-  background: rgba(248,248,245,.98) !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  color: var(--ink) !important;
-}
+
 
 .cup-detail-page-shell .main-nav-dropdown::before,
 .cup-detail-page-shell .main-nav-dropdown::after,
@@ -976,7 +969,7 @@ body[data-page="cup-detail"] { overflow: hidden; }
 .cup-detail-page-shell .header-dropdown-head span,
 .cup-detail-page-shell .hnt-section-kicker { color: var(--cup-red) !important; }
 
-.cup-detail-page-shell .main-nav-menu-icon.yellow,
+
 .cup-detail-page-shell .main-nav-menu-icon.green,
 .cup-detail-page-shell .main-nav-menu-icon.purple,
 .cup-detail-page-shell .header-menu-icon,
