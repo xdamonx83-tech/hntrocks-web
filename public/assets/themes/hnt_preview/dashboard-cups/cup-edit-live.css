@@ -1,0 +1,94 @@
+/* Cup edit only extends the accepted Cup Create component stack. */
+
+body[data-page="cup-edit"] {
+  overflow: hidden;
+}
+
+.cup-edit-page-shell .cup-create-heading > div:first-child > span,
+.cup-edit-page-shell .cup-edit-status-banner strong {
+  color: var(--cup-create-red, #b64e44);
+}
+
+.cup-edit-status-banner {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 14px;
+  border: .5px solid rgba(182, 78, 68, .16);
+  border-radius: 20px;
+  background: rgba(182, 78, 68, .07);
+}
+
+.cup-edit-status-banner > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .72);
+  color: var(--cup-create-red, #b64e44);
+}
+
+.cup-edit-status-banner svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.cup-edit-status-banner div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.cup-edit-status-banner strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cup-edit-status-banner small {
+  overflow: hidden;
+  color: #77736b;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cup-edit-status-banner b {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: #30302e;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .08em;
+}
+
+@media (max-width: 899px) {
+  body[data-page="cup-edit"] {
+    overflow: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .cup-edit-status-banner {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .cup-edit-status-banner > span {
+    width: 34px;
+    height: 34px;
+  }
+
+  .cup-edit-status-banner b {
+    grid-column: 2;
+    width: max-content;
+  }
+}
