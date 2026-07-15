@@ -2,21 +2,34 @@
 (() => {
   const internalUrlPattern = /(?:https?:\/\/)?(?:www\.)?hnt\.rocks(?:\/[^\s<>"']*)?/giu;
   const contentSelector = '.post-body p, [data-comment-text], .comment-bubble p';
+  const postSelector = '[data-real-feed-post], [data-hnt-preview-post], .social-post';
   const previewCache = new Map();
 
   const normalizeInternalHref = (candidate) => {
     let value = String(candidate || '').trim();
     if (!value) return null;
 
-    if (!/^https?:\/\//i.test(value)) {
-      value = `https://${value}`;
+    if (value.startsWith('/') && !value.startsWith('//')) {
+      try {
+        const relative = new URL(value, window.location.origin);
+        return `${relative.pathname || '/'}${relative.search}${relative.hash}`;
+      } catch (_) {
+        return null;
+      }
     }
 
-    try {
-      const url = new URL(value);
-      const allowedHosts = new Set(['hnt.rocks', 'www.hnt.rocks', window.location.hostname.toLowerCase()]);
-      if (!allowedHosts.has(url.hostname.toLowerCase())) return null;
+    if (value.startsWith('//')) value = `https:${value}`;
+    if (!/^https?:\/\//i.test(value)) value = `https://${value}`;
 
+    try {
+      const url = new URL(value, window.location.origin);
+      const allowedHosts = new Set([
+        'hnt.rocks',
+        'www.hnt.rocks',
+        window.location.hostname.toLowerCase(),
+      ]);
+
+      if (!allowedHosts.has(url.hostname.toLowerCase())) return null;
       return `${url.pathname || '/'}${url.search}${url.hash}`;
     } catch (_) {
       return null;
@@ -280,12 +293,18 @@
     || article.querySelector('[data-hnt-post-body-wrap]')?.parentElement
     || null;
 
+  const firstInternalPostLink = (article) => {
+    const links = article.querySelectorAll('.post-body a[href], [data-hnt-post-body] a[href]');
+
+    return [...links].find((link) => normalizeInternalHref(link.getAttribute('href') || link.href));
+  };
+
   const hydratePostPreview = async (article) => {
     if (!(article instanceof Element)) return;
     if (article.querySelector('.hnt-internal-link-preview')) return;
     if (article.dataset.hntInternalPreviewState) return;
 
-    const link = article.querySelector('.post-body a.hnt-internal-link, [data-hnt-post-body] a.hnt-internal-link');
+    const link = firstInternalPostLink(article);
     const host = previewHostFor(article);
     if (!link || !host) return;
 
@@ -304,9 +323,9 @@
   const hydrateInternalPreviews = (element) => {
     if (!(element instanceof Element)) return;
 
-    const posts = element.matches('[data-real-feed-post], [data-hnt-preview-post], .social-post')
+    const posts = element.matches(postSelector)
       ? [element]
-      : [...element.querySelectorAll('[data-real-feed-post], [data-hnt-preview-post], .social-post')];
+      : [...element.querySelectorAll(postSelector)];
 
     posts.forEach((post) => {
       void hydratePostPreview(post);
@@ -354,7 +373,7 @@
             processElement(node);
           } else if (node.nodeType === Node.TEXT_NODE && node.parentElement?.matches(contentSelector)) {
             linkifyTextNode(node);
-            const article = node.parentElement.closest('[data-real-feed-post], [data-hnt-preview-post], .social-post');
+            const article = node.parentElement.closest(postSelector);
             if (article) hydrateInternalPreviews(article);
           }
         });
