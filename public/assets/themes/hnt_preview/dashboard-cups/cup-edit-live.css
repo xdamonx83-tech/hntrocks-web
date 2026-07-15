@@ -71,6 +71,86 @@ body[data-page="cup-edit"] {
   letter-spacing: .08em;
 }
 
+/* Same Feed/Profile header and comms surfaces as Cup Create. */
+body[data-page="cup-edit"] .main-nav-dropdown,
+body[data-page="cup-edit"] .header-dropdown {
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--ink, #30302e) !important;
+}
+
+body[data-page="cup-edit"] .main-nav-dropdown::before,
+body[data-page="cup-edit"] .main-nav-dropdown::after,
+body[data-page="cup-edit"] .header-dropdown::before,
+body[data-page="cup-edit"] .header-dropdown::after {
+  background: none !important;
+  background-image: none !important;
+}
+
+body[data-page="cup-edit"] .main-nav-dropdown > header,
+body[data-page="cup-edit"] .header-dropdown-head {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+body[data-page="cup-edit"] .main-nav-menu-icon,
+body[data-page="cup-edit"] .main-nav-menu-icon.yellow,
+body[data-page="cup-edit"] .main-nav-menu-icon.green,
+body[data-page="cup-edit"] .main-nav-menu-icon.purple,
+body[data-page="cup-edit"] .header-menu-icon,
+body[data-page="cup-edit"] .header-notification-icon,
+body[data-page="cup-edit"] .header-notification-icon.yellow,
+body[data-page="cup-edit"] .header-notification-icon.green,
+body[data-page="cup-edit"] .header-notification-icon.purple,
+body[data-page="cup-edit"] .header-mark-all {
+  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
+  color: var(--ink, #30302e) !important;
+}
+
+body[data-page="cup-edit"] .main-nav-menu-grid > :is(a, button):hover,
+body[data-page="cup-edit"] .header-menu-list > :is(a, button):hover,
+body[data-page="cup-edit"] .header-message-item.unread,
+body[data-page="cup-edit"] .header-notification-item.unread,
+body[data-page="cup-edit"] .header-request-item.unread {
+  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
+}
+
+body[data-page="cup-edit"] .hnt-comms-launcher,
+body[data-page="cup-edit"] [data-hnt-comms-launcher] {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-rows: 1fr !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
+  border-radius: 50% !important;
+  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
+  color: var(--ink, #30302e) !important;
+  box-shadow: none !important;
+}
+
+body[data-page="cup-edit"] .hnt-comms-launcher:hover,
+body[data-page="cup-edit"] .hnt-comms-launcher:focus-visible,
+body[data-page="cup-edit"] [data-hnt-comms-launcher]:hover,
+body[data-page="cup-edit"] [data-hnt-comms-launcher]:focus-visible {
+  background: #fff !important;
+  color: var(--cup-create-red, #b64e44) !important;
+  outline: none !important;
+}
+
+body[data-page="cup-edit"] .hnt-comms-launcher__count {
+  border-color: #fff !important;
+  background: var(--cup-create-red, #b64e44) !important;
+  color: #fff !important;
+}
+
 @media (max-width: 899px) {
   body[data-page="cup-edit"] {
     overflow: auto;
