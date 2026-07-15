@@ -116,3 +116,76 @@
     }
   }, true);
 })();
+
+/* Keep structured crossposts identical to the normal feed: their own visual card
+   replaces the generic internal-link preview. Normal text links keep the preview. */
+(() => {
+  const postSelector = '[data-hnt-preview-post], [data-real-feed-post], .social-post';
+  const previewSelector = '[data-hnt-internal-link-previews]';
+
+  const internalPath = (candidate) => {
+    try {
+      const url = new URL(String(candidate || ''), window.location.origin);
+      const allowedHosts = new Set([
+        'hnt.rocks',
+        'www.hnt.rocks',
+        window.location.hostname.toLowerCase(),
+      ]);
+
+      if (!allowedHosts.has(url.hostname.toLowerCase())) return null;
+      return `${url.pathname || '/'}${url.search}${url.hash}`;
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const writtenInternalPaths = (article) => [...article.querySelectorAll('[data-hnt-post-body] a[href], .post-body > p a[href]')]
+    .filter((link) => !link.querySelector('img, picture, video, source'))
+    .map((link) => internalPath(link.getAttribute('href') || link.href))
+    .filter(Boolean);
+
+  const shouldSuppress = (article) => {
+    if (article.classList.contains('is-cup-crosspost')) return true;
+
+    const hasOwnMedia = article.classList.contains('has-media') || Boolean(article.querySelector(
+      '.post-image-placeholder, .real-post-media-grid, [data-hnt-media-carousel], .hnt-video-player, video',
+    ));
+
+    return hasOwnMedia && writtenInternalPaths(article).some((path) => /^\/moments(?:\/|$)/iu.test(path));
+  };
+
+  const processPost = (article) => {
+    if (!(article instanceof Element) || !article.matches(postSelector) || !shouldSuppress(article)) return;
+
+    article.dataset.hntInternalPreviewState = 'suppressed';
+    article.querySelectorAll(previewSelector).forEach((preview) => preview.remove());
+  };
+
+  const processRoot = (root) => {
+    if (!(root instanceof Element)) return;
+    if (root.matches(postSelector)) processPost(root);
+    root.querySelectorAll(postSelector).forEach(processPost);
+    const parentPost = root.closest(postSelector);
+    if (parentPost) processPost(parentPost);
+  };
+
+  const start = () => {
+    processRoot(document.body);
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof Element) processRoot(node);
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+})();
