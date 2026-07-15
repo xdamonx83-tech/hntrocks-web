@@ -1,5 +1,46 @@
 @php
     $profilePostsLive = collect($profilePosts ?? []);
+    $profileOrganizerCupCards = collect();
+
+    if (\Illuminate\Support\Facades\Schema::hasTable('feed_cup_cards')) {
+        $profileOrganizerCupCards = \App\Models\FeedCupCard::query()
+            ->whereHas('cup', function ($query) use ($profileUser): void {
+                $query->where('owner_id', $profileUser->id)
+                    ->where('visibility', 'public');
+            })
+            ->with([
+                'cup.owner',
+                'feedPost.user.profile',
+                'feedPost.team',
+                'feedPost.media.mediaAsset',
+                'feedPost.comments.user.profile',
+                'feedPost.comments.reactions',
+                'feedPost.comments.viewerReaction',
+                'feedPost.reactions',
+                'feedPost.viewerReaction',
+                'feedPost.viewerBookmark',
+                'feedPost.poll.options.votes',
+                'feedPost.poll.votes',
+                'feedPost.sharedPost.user.profile',
+                'feedPost.sharedPost.team',
+                'feedPost.sharedPost.media.mediaAsset',
+            ])
+            ->get();
+
+        $profileOrganizerCupPosts = $profileOrganizerCupCards
+            ->map(fn ($card) => $card->feedPost)
+            ->filter(fn ($post): bool => $post
+                && ! $post->trashed()
+                && $post->status === 'published'
+                && $post->visibility === 'public');
+
+        $profilePostsLive = $profilePostsLive
+            ->concat($profileOrganizerCupPosts)
+            ->unique(fn ($post) => (int) $post->id)
+            ->sortByDesc(fn ($post) => $post->created_at?->getTimestamp() ?? 0)
+            ->values();
+    }
+
     $profilePostIds = $profilePostsLive->pluck('id')->filter()->all();
 
     $profileNewsCardsByPostId = $profilePostIds === []
@@ -34,7 +75,7 @@
 @endif
 </div>
 @endforelse
-@if(($profilePostsTotal ?? $profilePostsLive->count()) > $profilePostsLive->count())
+@if(($profilePostsTotal ?? $profilePostsLive->count()) > collect($profilePosts ?? [])->count())
 <a class="profile-post-more-link" href="{{ request()->fullUrlWithQuery(['profile_posts_page' => (int) ($profilePostPage ?? 1) + 1]) }}">{{ __('hnt_preview.profile.load_more') }} <svg><use href="#i-arrow"></use></svg></a>
 @endif
 </div>
