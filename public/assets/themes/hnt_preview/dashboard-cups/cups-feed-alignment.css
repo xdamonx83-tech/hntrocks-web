@@ -151,32 +151,8 @@ body[data-page="cups"] .cups-page-shell .header-request-item.unread {
   background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
 }
 
-/* Same floating comms launcher as Cup detail / Feed / Profile. */
-body[data-page="cups"] .hnt-comms-launcher,
-body[data-page="cups"] [data-hnt-comms-launcher] {
-  width: 50px !important;
-  height: 50px !important;
-  min-width: 50px !important;
-  min-height: 50px !important;
-  display: grid !important;
-  grid-template-rows: 1fr !important;
-  place-items: center !important;
-  padding: 0 !important;
-  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
-  border-radius: 50% !important;
-  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
-  color: var(--ink, #30302e) !important;
-  box-shadow: none !important;
-}
 
-body[data-page="cups"] .hnt-comms-launcher:hover,
-body[data-page="cups"] .hnt-comms-launcher:focus-visible,
-body[data-page="cups"] [data-hnt-comms-launcher]:hover,
-body[data-page="cups"] [data-hnt-comms-launcher]:focus-visible {
-  background: var(--hnt-surface-card-strong, #fff) !important;
-  color: var(--darkred, #b64e44) !important;
-  outline: none !important;
-}
+
 
 body[data-page="cups"] .hnt-comms-launcher__count {
   border-color: var(--hnt-surface-card-strong, #fff) !important;

@@ -10,18 +10,12 @@
     padding: 0 !important;
     border: .5px solid rgba(52, 48, 37, .22) !important;
     border-radius: 50% !important;
-    background: #fbf9ee !important;
+
     color: #302f2b !important;
     box-shadow: none !important;
 }
 
-.hnt-comms-launcher:hover,
-.hnt-comms-launcher:focus-visible,
-.hnt-chat-tabs-shell.has-overview .hnt-comms-launcher {
-    background: #ffe8a0 !important;
-    color: #302f2b !important;
-    outline: none !important;
-}
+
 
 .hnt-comms-launcher i {
     font-size: 22px !important;
