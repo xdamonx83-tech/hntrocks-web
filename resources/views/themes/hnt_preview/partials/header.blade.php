@@ -6,6 +6,7 @@
     $headerLevel = max(1, (int) ($headerViewer?->level ?? 1));
     $headerRocks = (int) ($headerViewer?->crownWallet?->balance ?? 0);
     $headerIsFeed = request()->routeIs('feed.index');
+    $headerIsTeams = request()->routeIs('teams.index');
     $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
 <header class="site-header" data-hnt-shared-header>
@@ -56,7 +57,7 @@
 </div>
 </section>
 </div>
-<a class="main-nav-trigger main-nav-direct" href="{{ route('teams.index') }}"><span>{{ __('hnt_preview.header.teams') }}</span></a>
+<a class="main-nav-trigger main-nav-direct {{ $headerIsTeams ? 'active' : '' }}" href="{{ route('teams.index') }}"><span>{{ __('hnt_preview.header.teams') }}</span></a>
 <div class="main-nav-item nav-contracts">
 <button aria-controls="contractsNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger" type="button"><span>{{ __('hnt_preview.header.contracts') }}</span><svg><use href="#i-chevron"></use></svg></button>
 <section class="main-nav-dropdown" id="contractsNavDropdown" role="menu">

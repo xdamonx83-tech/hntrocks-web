@@ -9,7 +9,6 @@ use App\Models\TeamMember;
 use App\Models\Friendship;
 use App\Models\Cup;
 use App\Models\LfgPost;
-use App\Models\User;
 use App\Services\MediaService;
 use App\Services\GamificationService;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +21,54 @@ class TeamController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Team::query()
+        $viewer = $request->user();
+        $viewMode = in_array($request->query('view'), ['discover', 'popular', 'recruiting', 'mine'], true)
+            ? (string) $request->query('view')
+            : 'discover';
+
+        $visibleTeams = Team::query()
+            ->where('status', 'active')
+            ->where(function ($query) use ($viewer): void {
+                $query->where('visibility', 'public')
+                    ->orWhere('owner_id', $viewer->id)
+                    ->orWhereHas('members', function ($memberQuery) use ($viewer): void {
+                        $memberQuery
+                            ->where('user_id', $viewer->id)
+                            ->where('status', 'active');
+                    });
+            });
+
+        $visibleTeamIds = (clone $visibleTeams)->select('teams.id');
+        $overviewStats = [
+            'all' => (clone $visibleTeams)->count(),
+            'mine' => TeamMember::query()
+                ->where('user_id', $viewer->id)
+                ->where('status', 'active')
+                ->whereHas('team', fn ($teamQuery) => $teamQuery->where('status', 'active'))
+                ->count(),
+            'recruiting' => (clone $visibleTeams)
+                ->where('recruitment_status', 'open')
+                ->count(),
+            'new_this_week' => (clone $visibleTeams)
+                ->where('created_at', '>=', now()->startOfWeek())
+                ->count(),
+            'members' => TeamMember::query()
+                ->where('status', 'active')
+                ->whereIn('team_id', $visibleTeamIds)
+                ->count(),
+        ];
+
+        $filterOptions = collect(['platform', 'playstyle', 'region', 'language'])
+            ->mapWithKeys(fn (string $field): array => [
+                $field => (clone $visibleTeams)
+                    ->whereNotNull($field)
+                    ->where($field, '!=', '')
+                    ->distinct()
+                    ->orderBy($field)
+                    ->pluck($field),
+            ]);
+
+        $query = (clone $visibleTeams)
             ->with([
                 'owner.profile',
                 'activeMembers.user.profile',
@@ -33,17 +79,7 @@ class TeamController extends Controller
                 'feedPosts as posts_count' => function ($postQuery): void {
                     $postQuery->where('status', 'published');
                 },
-            ])
-            ->where('status', 'active')
-            ->where(function ($query) use ($request): void {
-                $query->where('visibility', 'public')
-                    ->orWhere('owner_id', $request->user()->id)
-                    ->orWhereHas('members', function ($memberQuery) use ($request): void {
-                        $memberQuery
-                            ->where('user_id', $request->user()->id)
-                            ->where('status', 'active');
-                    });
-            });
+            ]);
 
         if ($search = trim((string) $request->query('q', ''))) {
             $query->where(function ($inner) use ($search): void {
@@ -59,11 +95,19 @@ class TeamController extends Controller
             }
         }
 
-        if ($request->boolean('recruiting')) {
+        if ($request->boolean('recruiting') || $viewMode === 'recruiting') {
             $query->where('recruitment_status', 'open');
         }
 
-        $sort = $request->query('sort', 'newest');
+        if ($viewMode === 'mine') {
+            $query->whereHas('members', function ($memberQuery) use ($viewer): void {
+                $memberQuery
+                    ->where('user_id', $viewer->id)
+                    ->where('status', 'active');
+            });
+        }
+
+        $sort = (string) $request->query('sort', $viewMode === 'popular' ? 'members' : 'newest');
 
         match ($sort) {
             'members' => $query->orderByDesc('members_count')->orderByDesc('created_at'),
@@ -72,6 +116,12 @@ class TeamController extends Controller
         };
 
         $teams = $query->paginate(12)->withQueryString();
+
+        $viewerMemberships = TeamMember::query()
+            ->where('user_id', $viewer->id)
+            ->whereIn('team_id', $teams->getCollection()->pluck('id'))
+            ->get()
+            ->keyBy('team_id');
 
         $managedTeams = Team::query()
             ->with(['owner.profile'])
@@ -90,22 +140,6 @@ class TeamController extends Controller
             ->take(10)
             ->get();
 
-        $memberSuggestions = User::query()
-            ->with(['profile'])
-            ->withCount(['activeTeams'])
-            ->where('users.id', '!=', $request->user()->id)
-            ->where('users.status', 'active')
-            ->whereHas('profile', function ($profileQuery) use ($request): void {
-                $profileQuery->where(function ($visibilityQuery) use ($request): void {
-                    $visibilityQuery
-                        ->whereIn('profile_visibility', ['public', 'registered'])
-                        ->orWhere('user_id', $request->user()->id);
-                });
-            })
-            ->latest('users.created_at')
-            ->take(4)
-            ->get();
-
         $openLfgPosts = LfgPost::query()
             ->with(['user.profile'])
             ->withCount(['pendingApplications as pending_applications_count'])
@@ -120,7 +154,8 @@ class TeamController extends Controller
             ->withCount(['activeTeams as participants_count'])
             ->whereIn('status', ['active', 'planned'])
             ->orderByRaw("CASE status WHEN 'active' THEN 0 WHEN 'planned' THEN 1 ELSE 2 END")
-            ->orderByDesc('starts_at')
+            ->orderByRaw('CASE WHEN starts_at IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('starts_at')
             ->take(4)
             ->get();
 
@@ -130,9 +165,15 @@ class TeamController extends Controller
 
         return view($view, [
             'teams' => $teams,
-            'filters' => $request->only(['q', 'platform', 'playstyle', 'region', 'language', 'recruiting', 'sort']),
+            'filters' => array_merge(
+                $request->only(['q', 'platform', 'playstyle', 'region', 'language', 'recruiting']),
+                ['sort' => $sort, 'view' => $viewMode]
+            ),
+            'viewMode' => $viewMode,
+            'overviewStats' => $overviewStats,
+            'filterOptions' => $filterOptions,
+            'viewerMemberships' => $viewerMemberships,
             'managedTeams' => $managedTeams,
-            'memberSuggestions' => $memberSuggestions,
             'openLfgPosts' => $openLfgPosts,
             'featuredCups' => $featuredCups,
         ]);
