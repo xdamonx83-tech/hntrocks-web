@@ -4,8 +4,10 @@ namespace App\Http\Middleware;
 
 use App\Http\Controllers\Cups\CommunityCupReviewController;
 use App\Http\Controllers\Cups\CommunityCupStoreController;
+use App\Http\Controllers\Cups\CommunityCupUpdateController;
 use App\Http\Controllers\Cups\DashboardCupCreateLiveController;
 use App\Http\Controllers\Cups\DashboardCupDetailLiveController;
+use App\Http\Controllers\Cups\DashboardCupEditLiveController;
 use App\Http\Controllers\Cups\DashboardCupTeamManageLiveController;
 use App\Http\Controllers\Cups\DashboardCupsLiveController;
 use App\Http\Controllers\Feed\DashboardFeedLiveController;
@@ -23,6 +25,31 @@ class ActivateDashboardFeed
     {
         if (! HntTheme::dashboardFeedLive()) {
             return $next($request);
+        }
+
+        if ($request->routeIs('cups.edit')) {
+            $cup = $this->resolveCup($request);
+            if (! $cup) {
+                return $next($request);
+            }
+
+            $request->attributes->set('hnt_dashboard_feed_live', true);
+
+            return app(DashboardCupEditLiveController::class)($request, $cup);
+        }
+
+        if ($request->routeIs('cups.update')) {
+            $cup = $this->resolveCup($request);
+            if (! $cup) {
+                return $next($request);
+            }
+
+            $request->attributes->set('hnt_dashboard_feed_live', true);
+
+            return app()->call(
+                [app(CommunityCupUpdateController::class), '__invoke'],
+                ['request' => $request, 'cup' => $cup]
+            );
         }
 
         if ($request->routeIs('cups.create')) {
