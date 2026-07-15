@@ -2228,7 +2228,7 @@ body.comments-open {
 }
 
 .comment-item.is-reply {
-  margin-left: 46px;
+  margin-left: 0px;
   grid-template-columns: 31px minmax(0,1fr);
 }
 
