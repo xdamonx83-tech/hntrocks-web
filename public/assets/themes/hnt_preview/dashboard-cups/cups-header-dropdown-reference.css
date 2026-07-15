@@ -1,0 +1,87 @@
+/* Cup overview only: exact visual reference from the accepted Feed dropdowns. */
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown,
+body[data-page="cups"] .cups-page-shell .header-dropdown {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: var(--hnt-border-medium, rgba(52, 48, 37, .22)) !important;
+  border-radius: 23px !important;
+  background: var(--hnt-surface-card-strong, #fafaf8) !important;
+  background-image: none !important;
+  color: var(--hnt-text, #30302e) !important;
+  box-shadow: 0 18px 48px rgba(36, 36, 34, .12) !important;
+}
+
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown::before,
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown::after,
+body[data-page="cups"] .cups-page-shell .header-dropdown::before,
+body[data-page="cups"] .cups-page-shell .header-dropdown::after {
+  background: none !important;
+  background-image: none !important;
+}
+
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown > header,
+body[data-page="cups"] .cups-page-shell .header-dropdown-head,
+body[data-page="cups"] .cups-page-shell .header-profile-summary,
+body[data-page="cups"] .cups-page-shell .header-profile-stats {
+  border-color: var(--hnt-border-soft, rgba(52, 48, 37, .12)) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+body[data-page="cups"] .cups-page-shell .main-nav-dropdown > header span,
+body[data-page="cups"] .cups-page-shell .header-dropdown-head span,
+body[data-page="cups"] .cups-page-shell .header-message-item time,
+body[data-page="cups"] .cups-page-shell .header-notification-item time {
+  color: var(--hnt-brand-red, #b64e44) !important;
+}
+
+body[data-page="cups"] .cups-page-shell .main-nav-menu-grid > :is(a, button),
+body[data-page="cups"] .cups-page-shell .header-menu-list > :is(a, button),
+body[data-page="cups"] .cups-page-shell .header-message-item,
+body[data-page="cups"] .cups-page-shell .header-notification-item,
+body[data-page="cups"] .cups-page-shell .header-request-item {
+  color: var(--hnt-text, #30302e) !important;
+}
+
+body[data-page="cups"] .cups-page-shell .header-mark-all,
+body[data-page="cups"] .cups-page-shell .main-nav-menu-icon,
+body[data-page="cups"] .cups-page-shell .header-menu-icon,
+body[data-page="cups"] .cups-page-shell .header-notification-icon {
+  border-color: var(--hnt-border-soft, rgba(52, 48, 37, .12)) !important;
+  background: var(--hnt-surface-input, #ecece8) !important;
+  color: var(--hnt-text, #30302e) !important;
+}
+
+body[data-page="cups"] .cups-page-shell .main-nav-menu-icon.yellow,
+body[data-page="cups"] .cups-page-shell .header-menu-icon.yellow,
+body[data-page="cups"] .cups-page-shell .header-action-badge:not(.is-empty) {
+  background: var(--hnt-brand-red, #b64e44) !important;
+  color: #fff !important;
+}
+
+body[data-page="cups"] .cups-page-shell .main-nav-menu-grid > :is(a, button):hover,
+body[data-page="cups"] .cups-page-shell .main-nav-menu-grid > :is(a, button):focus-visible,
+body[data-page="cups"] .cups-page-shell .header-menu-list > :is(a, button):hover,
+body[data-page="cups"] .cups-page-shell .header-menu-list > :is(a, button):focus-visible,
+body[data-page="cups"] .cups-page-shell .header-message-item:hover,
+body[data-page="cups"] .cups-page-shell .header-message-item:focus-visible,
+body[data-page="cups"] .cups-page-shell .header-notification-item:hover,
+body[data-page="cups"] .cups-page-shell .header-notification-item:focus-visible,
+body[data-page="cups"] .cups-page-shell .header-request-item:hover,
+body[data-page="cups"] .cups-page-shell .header-message-item.unread,
+body[data-page="cups"] .cups-page-shell .header-notification-item.unread,
+body[data-page="cups"] .cups-page-shell .header-request-item.unread {
+  background: var(--hnt-brand-red-soft, rgba(182, 78, 68, .12)) !important;
+  outline: none !important;
+}
+
+body[data-page="cups"] .cups-page-shell .header-dropdown-footer,
+body[data-page="cups"] .cups-page-shell .header-profile-logout {
+  background: var(--hnt-dark, #30302e) !important;
+  color: #fff !important;
+}
+
+body[data-page="cups"] .cups-page-shell .header-dropdown-footer:hover,
+body[data-page="cups"] .cups-page-shell .header-profile-logout:hover {
+  background: var(--hnt-brand-red, #b64e44) !important;
+}
