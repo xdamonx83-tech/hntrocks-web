@@ -6283,7 +6283,7 @@ body.composer-open {
 }
 
 .main-nav-menu-grid > a:hover {
-  background: rgba(246,243,232,.9);
+  background: var(--hnt-brand-red-soft) !important;
 }
 
 .main-nav-menu-grid > a > span:nth-child(2) {

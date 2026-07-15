@@ -595,14 +595,7 @@ body[data-page="cup-create"] {
 }
 
 /* Header and comms surfaces: exact neutral HNT palette, never Cup-yellow. */
-body[data-page="cup-create"] .main-nav-dropdown,
-body[data-page="cup-create"] .header-dropdown {
-  border: .5px solid var(--hnt-border-subtle, rgba(48, 48, 46, .12)) !important;
-  background: var(--hnt-surface-card-strong, rgba(255, 255, 255, .96)) !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  color: var(--ink, #30302e) !important;
-}
+
 
 body[data-page="cup-create"] .main-nav-dropdown::before,
 body[data-page="cup-create"] .main-nav-dropdown::after,
@@ -619,28 +612,9 @@ body[data-page="cup-create"] .header-dropdown-head {
   background-image: none !important;
 }
 
-body[data-page="cup-create"] .main-nav-menu-icon,
-body[data-page="cup-create"] .main-nav-menu-icon.yellow,
-body[data-page="cup-create"] .main-nav-menu-icon.green,
-body[data-page="cup-create"] .main-nav-menu-icon.purple,
-body[data-page="cup-create"] .header-menu-icon,
-body[data-page="cup-create"] .header-notification-icon,
-body[data-page="cup-create"] .header-notification-icon.yellow,
-body[data-page="cup-create"] .header-notification-icon.green,
-body[data-page="cup-create"] .header-notification-icon.purple,
-body[data-page="cup-create"] .header-mark-all {
-  border-color: var(--hnt-border-subtle, rgba(48, 48, 46, .10)) !important;
-  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
-  color: var(--ink, #30302e) !important;
-}
 
-body[data-page="cup-create"] .main-nav-menu-grid > :is(a, button):hover,
-body[data-page="cup-create"] .header-menu-list > :is(a, button):hover,
-body[data-page="cup-create"] .header-message-item.unread,
-body[data-page="cup-create"] .header-notification-item.unread,
-body[data-page="cup-create"] .header-request-item.unread {
-  background: var(--hnt-surface-soft, rgba(48, 48, 46, .055)) !important;
-}
+
+
 
 body[data-page="cup-create"] .hnt-comms-launcher,
 body[data-page="cup-create"] [data-hnt-comms-launcher] {
