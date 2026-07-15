@@ -75,11 +75,26 @@
             ->first();
     }
 
-    $postMedia = $post->relationLoaded('media') ? $post->media->values() : collect();
-    if ($postMedia->isEmpty() && $profileMomentCrosspost?->media) {
-        $postMedia = collect([$profileMomentCrosspost->media]);
+    $profileMomentUrl = $profileMomentCrosspost ? route('moments.show', $profileMomentCrosspost) : null;
+    $profileMomentTitle = trim((string) ($profileMomentCrosspost?->caption ?: 'HNT Moment'));
+    $profileMomentCoverUrl = $profileMomentCrosspost?->coverUrl() ?: '';
+    $profileMomentDurationSeconds = max(0, (int) ($profileMomentCrosspost?->duration_seconds ?? 0));
+    $profileMomentDuration = sprintf(
+        '%d:%02d',
+        intdiv($profileMomentDurationSeconds, 60),
+        $profileMomentDurationSeconds % 60
+    );
+    $profileRenderedBody = (string) $post->body;
+
+    if ($profileMomentCrosspost) {
+        $profileRenderedBody = trim((string) preg_replace(
+            '~(?:https?://(?:www\.)?hnt\.rocks)?/moments/r/\d+(?:\?[^\s<]*)?~i',
+            '',
+            $profileRenderedBody
+        ));
     }
 
+    $postMedia = $post->relationLoaded('media') ? $post->media->values() : collect();
     $postMediaCount = min(4, $postMedia->count());
     $postPoll = $post->relationLoaded('poll') ? $post->poll : null;
     $postPollOptions = $postPoll && $postPoll->relationLoaded('options') ? $postPoll->options : collect();
@@ -122,8 +137,8 @@
 <a aria-label="{{ __('hnt_preview.profile.open_post') }}" class="post-more" href="{{ $postUrl }}"><svg><use href="#i-more"></use></svg></a>
 </header>
 <div class="post-body">
-@if(trim((string) $post->body) !== '')
-<p>{!! \App\Support\FeedTextRenderer::render($post->body) !!}</p>
+@if(trim($profileRenderedBody) !== '')
+<p>{!! \App\Support\FeedTextRenderer::render($profileRenderedBody) !!}</p>
 @endif
 @if($post->isSharedPost() && $post->sharedPost)
 <a class="profile-shared-post" href="{{ $post->sharedPost->permalink() }}">
@@ -135,11 +150,21 @@
 @if($profileCupCard && $profileCupCard->cup)
 @include('themes.hnt_preview.feed.partials.cup-card', ['cupCard' => $profileCupCard, 'post' => $post])
 @endif
-@if($postMedia->isNotEmpty())
+@if($profileMomentCrosspost)
+<form class="moment-preview" action="{{ $profileMomentUrl }}" method="get"
+      style="background-image:linear-gradient(90deg,rgba(20,20,18,.88) 0%,rgba(20,20,18,.62) 52%,rgba(20,20,18,.18) 100%),url('{{ e($profileMomentCoverUrl) }}');background-size:cover;background-position:center;">
+<div class="moment-copy">
+<span class="moment-label">HNT MOMENT</span>
+<strong>{{ $profileMomentTitle }}</strong>
+<small>{{ $profileMomentDuration }} · {{ app()->getLocale() === 'en' ? 'Open in Moments' : 'In Moments öffnen' }}</small>
+</div>
+<button type="submit" aria-label="{{ app()->getLocale() === 'en' ? 'Open Moment' : 'Moment öffnen' }}" style="color:#fff">▶</button>
+</form>
+@elseif($postMedia->isNotEmpty())
 <div class="profile-real-media-grid real-post-media-grid profile-real-media-count-{{ $postMediaCount }} real-post-media-count-{{ $postMediaCount }}">
 @foreach($postMedia->take(4) as $media)
 @php $mediaUrl = $media->url(); @endphp
-<a class="profile-real-media-item real-post-media-item {{ $media->isVideo() ? 'is-video real-post-video-item' : '' }}" href="{{ $profileMomentCrosspost ? route('moments.show', $profileMomentCrosspost) : $postUrl }}">
+<a class="profile-real-media-item real-post-media-item {{ $media->isVideo() ? 'is-video real-post-video-item' : '' }}" href="{{ $postUrl }}">
 @if($media->isImage())
 <img alt="{{ $media->original_name ?: __('hnt_preview.profile.post_image') }}" loading="lazy" src="{{ $mediaUrl }}"/>
 @elseif($media->isVideo())
