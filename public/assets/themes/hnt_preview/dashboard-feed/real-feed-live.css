@@ -97,8 +97,7 @@
 /* The global feed composer creates normal posts and polls only. LFG and Moments
    already have dedicated creation flows and do not belong in this modal. */
 #postComposerModal [data-composer-type="LFG"],
-#postComposerModal [data-composer-type="Moment"],
-#postComposerModal #composerLfgButton {
+#postComposerModal [data-composer-type="Moment"] {
   display: none !important;
 }
 
@@ -128,9 +127,14 @@
 }
 
 /* Feeling picker reused by the global feed composer and profile composer. */
-#composerEmojiButton.is-active {
+#composerLfgButton.is-active {
   background: #2f302d;
   color: #fffdf7;
+}
+
+#composerLfgButton > span {
+  font-size: 18px;
+  line-height: 1;
 }
 
 .composer-feeling-current {
