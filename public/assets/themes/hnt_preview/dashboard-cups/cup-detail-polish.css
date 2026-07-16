@@ -1,4 +1,8 @@
-/* Cup detail visual polish: tabs, upload control and round check states. */
+/* Cup detail visual polish: tabs, upload control, accent color and round states. */
+
+.cup-detail-page-shell {
+  --yellow: #c45147;
+}
 
 .cup-section-head {
   display: flex !important;
@@ -18,10 +22,10 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 3px 4px;
+  padding: 4px;
   scrollbar-width: none;
 }
 
@@ -31,16 +35,25 @@
 
 .cup-section-tabs button {
   min-width: max-content;
-  height: 31px;
+  height: 36px;
   flex: 0 0 auto;
-  padding: 0 12px;
+  padding: 0 15px;
   border-radius: 999px;
+  font-size: 7px;
   white-space: nowrap;
+}
+
+.cup-section-tabs button.active {
+  background: var(--dark);
+  color: #fff;
 }
 
 .cup-upload-zone {
   position: relative;
   overflow: hidden;
+  border: 2px dashed #c45147 !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.9) !important;
 }
 
 .cup-upload-zone input[type="file"] {
@@ -56,6 +69,56 @@
   appearance: none;
 }
 
+.cup-upload-zone > span,
+.cup-submit-copy button {
+  background: #c45147 !important;
+}
+
+.cup-upload-zone > span {
+  color: var(--dark);
+}
+
+.cup-submit-copy > span {
+  color: #c45147 !important;
+}
+
+.cup-progress-legend {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px !important;
+  margin-top: 8px;
+  padding: 0 2px !important;
+}
+
+.cup-progress-legend span {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px !important;
+  color: #8a8884;
+  font-size: 6px;
+  white-space: nowrap;
+}
+
+.cup-progress-legend i {
+  width: 9px !important;
+  height: 9px !important;
+  min-width: 9px;
+  min-height: 9px;
+  flex: 0 0 9px;
+  display: block !important;
+  border-radius: 50% !important;
+  background: #aaa9a7 !important;
+}
+
+.cup-progress-legend i.done {
+  background: var(--dark) !important;
+}
+
+.cup-progress-legend i.current {
+  background: #c45147 !important;
+}
+
 .cup-team-members article > i,
 .cup-team-members article > i.done,
 .cup-scoring-actions button,
@@ -69,6 +132,12 @@
   height: 20px;
   min-width: 20px;
   min-height: 20px;
+  background: #c45147 !important;
+  color: var(--dark) !important;
+}
+
+.cup-team-members article > i.notice {
+  background: #c45147 !important;
 }
 
 .cup-scoring-actions button,
@@ -77,6 +146,10 @@
   height: 29px;
   min-width: 29px;
   min-height: 29px;
+}
+
+.cup-team-button {
+  background: #c45147 !important;
 }
 
 @media (max-width: 899px) {
@@ -92,5 +165,10 @@
   .cup-section-tabs {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .cup-section-tabs button {
+    height: 34px;
+    padding: 0 13px;
   }
 }
