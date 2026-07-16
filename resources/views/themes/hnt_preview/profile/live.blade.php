@@ -94,6 +94,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-comments.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-likes.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-likes.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-media-viewer.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-media-viewer.css')) ?: time() }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-live.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-feed-compose.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-feed-compose.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-social-twitch-final.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-social-twitch-final.css')) ?: time() }}" rel="stylesheet"/>
 </head>
