@@ -1,0 +1,31 @@
+/* HNT.ROCKS live color unification (v91). Layout and scroll rules intentionally untouched. */
+:root {
+  --hnt-accent: #b64e44;
+  --hnt-accent-strong: #9f4038;
+  --hnt-accent-soft: #f2dfdc;
+  --hnt-bg-left: #e2e5e5;
+  --hnt-bg-mid: #e7e9e8;
+  --hnt-bg-right: #858582;
+  --hnt-card: rgba(255,255,255,.86);
+  --hnt-surface: #f0f0ed;
+  --hnt-line: #dcdad5;
+}
+
+/* Keep the live-site background consistent on every desktop page. */
+.app-shell,
+.auth-shell,
+.moments-shell,
+.messages-shell {
+  background:
+    linear-gradient(112deg,
+      var(--hnt-bg-left) 0%,
+      var(--hnt-bg-mid) 46%,
+      #cfcec8 73%,
+      var(--hnt-bg-right) 100%) !important;
+}
+
+/* Main interaction accent. Semantic green status indicators stay green. */
+::selection { background: rgba(182,78,68,.24); }
+input:focus,
+textarea:focus,
+select:focus { border-color: rgba(182,78,68,.55); }
