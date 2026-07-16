@@ -380,6 +380,111 @@
   margin-top: 16px;
 }
 
+.cup-team-flow__submit-summary {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.08);
+}
+
+.cup-team-flow__submit-summary > strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.cup-team-submit-modal__panel {
+  width: min(560px,100%);
+}
+
+.cup-team-modal__form textarea {
+  min-height: 90px;
+  padding: 13px 15px;
+  box-sizing: border-box;
+  border: 1px solid #d8d7d2;
+  border-radius: 15px;
+  background: #fff;
+  color: #2c2d2a;
+  font: inherit;
+  resize: vertical;
+  outline: 0;
+}
+
+.cup-team-modal__form textarea:focus {
+  border-color: #b64e44;
+  box-shadow: 0 0 0 3px rgba(182,78,68,.12);
+}
+
+.cup-team-submit-upload {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  padding: 20px;
+  border: 1px dashed #b64e44;
+  border-radius: 20px;
+  background: rgba(182,78,68,.035);
+  text-align: center;
+  cursor: pointer;
+}
+
+.cup-team-submit-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cup-team-submit-upload__icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #b64e44;
+  color: #fff;
+  font-size: 23px;
+}
+
+.cup-team-submit-upload strong {
+  color: #2c2d2a;
+  font-size: 15px;
+}
+
+.cup-team-submit-upload small {
+  color: #8a8984;
+  font-size: 11px;
+}
+
+.cup-team-submit-modal__status {
+  margin: 2px 0;
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: #ecebe7;
+  color: #555550;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cup-team-submit-modal__status.is-error {
+  background: rgba(182,78,68,.12);
+  color: #8f352e;
+}
+
+.cup-team-submit-modal__status.is-success {
+  background: rgba(91,135,77,.13);
+  color: #41643a;
+}
+
+.cup-team-modal__submit:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
 @media (max-width: 900px) {
   .cup-team-flow { width: min(100% - 24px,760px); margin-top: 12px; }
   .cup-team-flow__grid { grid-template-columns: 1fr; }
