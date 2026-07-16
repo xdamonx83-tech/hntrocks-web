@@ -86,8 +86,50 @@
   color: #a9473e;
 }
 
+/* The global feed composer creates normal posts and polls only. LFG and Moments
+   already have dedicated creation flows and do not belong in this modal. */
+#postComposerModal [data-composer-type="LFG"],
+#postComposerModal [data-composer-type="Moment"],
+#postComposerModal #composerLfgButton {
+  display: none !important;
+}
+
+/* Long post text stays inside its own scroll area while editing. This prevents
+   the modal from growing past the viewport and always allows reaching line 1. */
+.post-composer-modal.is-editing .composer-textarea-shell {
+  min-height: 180px;
+  max-height: min(290px, 32vh);
+  overflow: hidden;
+}
+
+.post-composer-modal.is-editing #postComposerInput {
+  height: min(270px, 30vh) !important;
+  min-height: 180px !important;
+  max-height: min(270px, 30vh) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  resize: none;
+  scrollbar-gutter: stable;
+}
+
+.post-composer-modal.is-editing .post-composer-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 @media (max-width: 899px) {
   .real-feed-menu {
     width: min(200px, calc(100vw - 24px));
+  }
+
+  .post-composer-modal.is-editing .composer-textarea-shell {
+    max-height: 34vh;
+  }
+
+  .post-composer-modal.is-editing #postComposerInput {
+    height: 32vh !important;
+    max-height: 32vh !important;
   }
 }
