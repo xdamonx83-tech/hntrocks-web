@@ -78,9 +78,9 @@
 <div><span>{{ __('hnt_cups_overview.cup_hub') }}</span><h3>{{ __('hnt_cups_overview.direct_access') }}</h3></div>
 </header>
 <div class="cups-hub-mobile-grid">
-<button data-toast="{{ __('hnt_cups_overview.hall_of_fame') }}" type="button">{{ __('hnt_cups_overview.hall_of_fame') }}</button>
-<button data-toast="{{ __('hnt_cups_overview.scoring_fair_play') }}" type="button">{{ __('hnt_cups_overview.scoring_fair_play') }}</button>
-<button data-toast="Cup-Ideen" type="button">Cup-Ideen</button>
+<button data-url="{{ route('hall-of-fame.index') }}" type="button">{{ __('hnt_cups_overview.hall_of_fame') }}</button>
+<button data-url="{{ $featuredCup ? route('cups.show.section', ['cup' => $featuredCup, 'section' => 'rules']) : $allCupsUrl }}" type="button">{{ __('hnt_cups_overview.scoring_fair_play') }}</button>
+<button data-url="{{ route('cup-ideas.index') }}" type="button">{{ __('hnt_cups_overview.cup_ideas') }}</button>
 <button data-url="{{ $mineUrl }}" type="button">{{ __('hnt_cups_overview.my_cups') }}</button>
 </div>
 </section>
