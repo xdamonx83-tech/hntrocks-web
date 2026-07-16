@@ -1,39 +1,36 @@
 <section class="cups-overview">
 <div class="cups-heading">
-<span>HNT.ROCKS COMMUNITY</span>
-<h1>Cups</h1>
+<span>{{ __('hnt_cups_overview.eyebrow') }}</span>
+<h1>{{ __('hnt_cups_overview.title') }}</h1>
 <div class="cups-meta">
-<span class="live"><i></i>3 aktiv</span>
-<span>Solo &amp; Teams</span>
-<span>Faire Wertung</span>
-<span>Manuelle Prüfung</span>
+<span class="live"><i></i>{{ $formatCount((int) $stats['active']) }} {{ __('hnt_cups_overview.active') }}</span>
+<span>{{ __('hnt_cups_overview.solo_and_teams') }}</span>
+<span>{{ __('hnt_cups_overview.fair_scoring') }}</span>
+<span>{{ __('hnt_cups_overview.manual_review') }}</span>
 </div>
-<p>
-            Entdecke laufende und kommende Community Cups, tritt mit deinem Team an,
-            reiche Ergebnisse ein und sichere dir Rocks, Badges und einen Platz in der Hall of Fame.
-          </p>
+<p>{{ __('hnt_cups_overview.intro') }}</p>
 <div class="cups-bars">
 <div class="cups-summary-bar wide">
-<span>Aktive Cups</span>
-<div class="dark"><b>3 / 6</b></div>
+<span>{{ __('hnt_cups_overview.active_cups') }}</span>
+<div class="dark"><b>{{ $formatCount((int) $stats['active']) }} / {{ $formatCount($trackedCupCount) }}</b></div>
 </div>
 <div class="cups-summary-bar">
-<span>Geplant</span>
-<div class="yellow"><b>2</b></div>
+<span>{{ __('hnt_cups_overview.planned') }}</span>
+<div class="yellow"><b>{{ $formatCount((int) $stats['planned']) }}</b></div>
 </div>
 <div class="cups-summary-bar">
-<span>Beendet</span>
-<div class="striped"><b>9</b></div>
+<span>{{ __('hnt_cups_overview.finished') }}</span>
+<div class="striped"><b>{{ $formatCount((int) $stats['finished']) }}</b></div>
 </div>
 <div class="cups-summary-bar compact">
-<span>Offene Prüfungen</span>
-<div class="outline"><b>7</b></div>
+<span>{{ __('hnt_cups_overview.pending_reviews') }}</span>
+<div class="outline"><b>{{ $formatCount((int) $stats['pending']) }}</b></div>
 </div>
 </div>
 </div>
 <div class="cups-overview-stats">
-<article><strong>16</strong><span>Teams</span></article>
-<article><strong>44</strong><span>Hunter</span></article>
-<article><strong>7</strong><span>Scores</span></article>
+<article><strong>{{ $formatCount((int) $stats['teams']) }}</strong><span>{{ __('hnt_cups_overview.teams') }}</span></article>
+<article><strong>{{ $formatCount((int) $stats['hunters']) }}</strong><span>{{ __('hnt_cups_overview.hunters') }}</span></article>
+<article><strong>{{ $formatCount((int) $stats['scores']) }}</strong><span>{{ __('hnt_cups_overview.scores') }}</span></article>
 </div>
 </section>
