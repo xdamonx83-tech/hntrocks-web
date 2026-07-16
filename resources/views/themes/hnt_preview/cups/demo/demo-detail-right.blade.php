@@ -56,7 +56,11 @@
 <i></i>
 </article>
 </div>
-<a aria-label="{{ $isEnglish ? 'Open cup participation' : 'Cup-Teilnahme öffnen' }}" class="cup-team-button" href="{{ route('cups.teams.index', $cup) }}">{{ $soloCup ? ($isEnglish ? 'Join cup' : 'Cup beitreten') : ($isEnglish ? 'Create or find team' : 'Team erstellen oder finden') }} <svg><use href="#i-arrow"></use></svg></a>
+@if($soloCup)
+<a aria-label="{{ $isEnglish ? 'Open cup participation' : 'Cup-Teilnahme öffnen' }}" class="cup-team-button" href="{{ route('cups.teams.index', $cup) }}">{{ $isEnglish ? 'Join cup' : 'Cup beitreten' }} <svg><use href="#i-arrow"></use></svg></a>
+@else
+<button aria-label="{{ $isEnglish ? 'Create or find a team' : 'Team erstellen oder finden' }}" class="cup-team-button" type="button" data-open-cup-team-modal>{{ $isEnglish ? 'Create or find team' : 'Team erstellen oder finden' }} <svg><use href="#i-arrow"></use></svg></button>
+@endif
 @endif
 </section>
 </aside></aside>
