@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Cup;
 use App\Models\CupTeam;
 use App\Models\CupTeamChatMessage;
-use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +13,8 @@ use Illuminate\Support\Facades\Schema;
 
 class CupTeamChatMessageController extends Controller
 {
+    private const HNT_CHAT_MESSAGE_VIEW = 'themes.hnt_preview.cups.partials.chat-message';
+
     public function index(Request $request, Cup $cup, CupTeam $team): JsonResponse
     {
         $this->guardTeamAccess($request, $cup, $team);
@@ -26,12 +27,6 @@ class CupTeamChatMessageController extends Controller
             ], 503);
         }
 
-        $chatMessageView = HntTheme::resolve('cups.partials.chat-message');
-
-        if (! view()->exists($chatMessageView)) {
-            $chatMessageView = 'themes.socialite.cups.partials.chat-message';
-        }
-
         $messages = $team->chatMessages()
             ->with('user:id,name,username,avatar_path,level')
             ->limit(20)
@@ -40,7 +35,7 @@ class CupTeamChatMessageController extends Controller
             ->values();
 
         return response()->json([
-            'html' => $messages->map(fn (CupTeamChatMessage $chatMessage): string => view($chatMessageView, [
+            'html' => $messages->map(fn (CupTeamChatMessage $chatMessage): string => view(self::HNT_CHAT_MESSAGE_VIEW, [
                 'chatMessage' => $chatMessage,
             ])->render())->implode(''),
             'count' => $team->chatMessages()->count(),
@@ -69,14 +64,8 @@ class CupTeamChatMessageController extends Controller
         ])->load('user');
 
         if ($request->expectsJson()) {
-            $chatMessageView = HntTheme::resolve('cups.partials.chat-message');
-
-            if (! view()->exists($chatMessageView)) {
-                $chatMessageView = 'themes.socialite.cups.partials.chat-message';
-            }
-
             return response()->json([
-                'html' => view($chatMessageView, ['chatMessage' => $message])->render(),
+                'html' => view(self::HNT_CHAT_MESSAGE_VIEW, ['chatMessage' => $message])->render(),
                 'count' => $team->chatMessages()->count(),
                 'message' => __('ui.cup_team_chat_message_saved'),
             ]);
