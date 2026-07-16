@@ -119,6 +119,25 @@
   overscroll-behavior: contain;
 }
 
+/* Profile and feed viewers must open images in fit mode. Some profile image
+   rules use forced full-size dimensions, so the viewer has to win explicitly. */
+.real-media-viewer__media > img {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  inline-size: auto !important;
+  block-size: auto !important;
+  max-inline-size: 100% !important;
+  max-block-size: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  align-self: center;
+  justify-self: center;
+}
+
 @media (max-width: 899px) {
   .real-feed-menu {
     width: min(200px, calc(100vw - 24px));
