@@ -94,12 +94,6 @@
 @if($errors->any())<div class="teams-flash error">{{ $errors->first() }}</div>@endif
 
 <section class="teams-directory-card is-filter-open" data-teams-directory>
-<div aria-label="{{ __('hnt_teams.actions') }}" class="teams-action-shelf">
-<a aria-label="{{ __('hnt_teams.create_team') }}" class="teams-shelf-icon create" href="{{ route('teams.create') }}"><svg><use href="#i-plus"></use></svg></a>
-<a aria-label="{{ __('hnt_teams.manage_teams') }}" class="teams-shelf-icon" href="{{ route('teams.manage') }}"><svg><use href="#i-sliders"></use></svg></a>
-<a aria-label="{{ __('hnt_teams.invitations') }}" class="teams-shelf-icon" href="{{ route('teams.invitations') }}"><svg><use href="#i-users"></use></svg></a>
-<button aria-label="{{ __('hnt_teams.show_filters') }}" aria-expanded="true" class="teams-shelf-icon" data-teams-filter-toggle type="button"><svg><use href="#i-settings"></use></svg></button>
-</div>
 <header class="teams-directory-head">
 <nav aria-label="{{ __('hnt_teams.title') }}" class="teams-view-tabs">
 <a class="{{ $activeView === 'discover' ? 'active' : '' }}" href="{{ route('teams.index') }}">{{ __('hnt_teams.discover') }}</a>
