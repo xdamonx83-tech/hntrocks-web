@@ -1,0 +1,358 @@
+
+.cups-page-shell {
+  height: 100vh;
+  min-height: 640px;
+  display: grid;
+  grid-template-rows: 36px minmax(0,1fr);
+  overflow: hidden;
+}
+
+.cups-page-shell .nav-cups > .main-nav-trigger {
+  background: var(--dark);
+  color: white;
+}
+
+.cups-stage {
+  --cups-sticky-gap: 12px;
+  --cups-layout-gap: 12px;
+  --cups-left-width: 252px;
+  --cups-right-width: 278px;
+
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cups-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  transition: clip-path .12s ease;
+}
+
+.cups-scroll::-webkit-scrollbar,
+.cups-tabs::-webkit-scrollbar,
+.cups-hub-card::-webkit-scrollbar {
+  display: none;
+}
+
+.cups-scroll.cups-content-docked {
+  clip-path:
+    inset(
+      var(--cups-sticky-gap)
+      calc(var(--cups-right-width) + var(--cups-layout-gap))
+      0
+      calc(var(--cups-left-width) + var(--cups-layout-gap))
+      round 28px 28px 0 0
+    );
+}
+
+.cups-overview {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 390px;
+  gap: 30px;
+  align-items: end;
+  padding: 24px 0 26px;
+}
+
+.cups-heading > span,
+.cups-center-title > span,
+.cups-section > header span,
+.cups-my-content > span,
+.cups-timeline-card header span,
+.cups-hall-card header span,
+.cups-hub-card header span {
+  color: #b64e44;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.cups-heading h1 {
+  margin: 3px 0 5px;
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: -1.5px;
+}
+
+.cups-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cups-meta span {
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.52);
+  color: #716f6c;
+  font-size: 7px;
+}
+
+.cups-meta .live {
+  background: #e7f4d6;
+  color: #6d9936;
+}
+
+.cups-meta i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cups-heading > p {
+  max-width: 940px;
+  margin: 9px 0 0;
+  color: #74736f;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.cups-bars {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(260px,1.75fr) minmax(130px,.72fr) minmax(145px,.82fr) minmax(130px,.72fr);
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.cups-summary-bar {
+  min-width: 0;
+}
+
+.cups-summary-bar > span {
+  display: block;
+  min-height: 14px;
+  margin: 0 0 6px 4px;
+  color: #5d5c59;
+  font-size: 7px;
+}
+
+.cups-summary-bar > div {
+  width: 100%;
+  height: 33px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border-radius: 17px;
+}
+
+.cups-summary-bar b {
+  font-size: 7px;
+  font-weight: 400;
+}
+
+.cups-summary-bar .dark {
+  background: var(--dark);
+  color: white;
+}
+
+.cups-summary-bar .yellow {
+  background: rgba(182,78,68,.9);
+}
+
+.cups-summary-bar .striped {
+  background: repeating-linear-gradient(135deg,rgba(255,255,255,.9) 0 4px,rgba(222,222,221,.75) 4px 7px);
+}
+
+.cups-summary-bar .outline {
+  justify-content: center;
+  border: 1px solid #666662;
+}
+
+.cups-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+  padding-bottom: 3px;
+}
+
+.cups-overview-stats article {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.cups-overview-stats strong {
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.cups-overview-stats span {
+  font-size: 7px;
+}
+
+.cups-center-flow {
+  min-width: 0;
+  margin: 0 calc(var(--cups-right-width) + var(--cups-layout-gap)) 30px calc(var(--cups-left-width) + var(--cups-layout-gap));
+}
+
+.cups-center-card,
+.cups-my-card,
+.cups-timeline-card,
+.cups-hall-card,
+.cups-hub-card {
+  border-radius: 28px;
+  background: rgba(255,255,255,.78);
+}
+
+.cups-center-card {
+  min-height: 1080px;
+  padding: 0 12px 18px;
+}
+
+.cups-center-head {
+  position: sticky;
+  top: var(--cups-sticky-gap);
+  z-index: 12;
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 -12px 12px;
+  padding: 11px 16px;
+  border-radius: 28px 28px 17px 17px;
+  background: #f3f3f0;
+  box-shadow: 0 8px 24px rgba(112,44,39,.045);
+}
+
+.cups-center-head.is-stuck {
+  border: 1px solid rgba(234,210,206,.45);
+  backdrop-filter: blur(10px);
+}
+
+.cups-center-title h2 {
+  margin: 1px 0 0;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.cups-tabs {
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cups-tabs button {
+  height: 31px;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 16px;
+  background: #eeeeeb;
+  color: #888682;
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.cups-tabs button.active {
+  background: var(--dark);
+  color: white;
+}
+
+.cups-filter-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 185px auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cups-search {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border-radius: 19px;
+  background: rgba(255,255,255,.82);
+}
+
+.cups-search svg,
+.cups-filter-row button svg,
+.cups-featured-actions svg,
+.cup-card-body svg,
+.cups-hall-card svg,
+.cups-hub-card svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cups-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 7px;
+}
+
+.cups-filter-row select,
+.cups-filter-row > button {
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 19px;
+  background: rgba(255,255,255,.82);
+  color: #74736f;
+  font: inherit;
+  font-size: 7px;
+}
+
+.cups-filter-row > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.cups-featured {
+  min-height: 245px;
+  display: grid;
+  grid-template-columns: minmax(260px,.72fr) minmax(0,1.28fr);
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--dark);
+  color: white;
+}
+
+.cups-featured-cover {
+  position: relative;
+  min-height: 245px;
+  overflow: hidden;
+}
+
+.cups-featured-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cups-featured-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,transparent 45%,rgba(47,47,46,.92));
+}
+

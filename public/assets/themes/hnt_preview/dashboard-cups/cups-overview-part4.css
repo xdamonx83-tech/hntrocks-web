@@ -1,0 +1,366 @@
+.cups-hall-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  margin-top: 11px;
+  border-top: 1px dashed rgba(255,255,255,.15);
+}
+
+.cups-hall-stats span {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 10px 3px 2px;
+}
+
+.cups-hall-stats span + span {
+  border-left: 1px solid rgba(255,255,255,.12);
+}
+
+.cups-hall-stats strong {
+  color: var(--yellow);
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.cups-hall-stats small {
+  color: rgba(255,255,255,.43);
+  font-size: 5.5px;
+}
+
+.cups-hub-card button {
+  width: 100%;
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 35px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 4px;
+  border: 0;
+  border-top: 1px dashed #dcdad5;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cups-hub-card button > svg {
+  width: 35px;
+  height: 35px;
+  padding: 10px;
+  border-radius: 50%;
+  background: #ededeb;
+}
+
+.cups-hub-card button > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cups-hub-card button strong {
+  font-size: 7px;
+  font-weight: 500;
+}
+
+.cups-hub-card button small {
+  color: #8d8b87;
+  font-size: 5.5px;
+}
+
+.cups-hub-card button > i {
+  font-size: 12px;
+  font-style: normal;
+}
+
+.cups-columns-docked .cups-fixed-column {
+  filter: drop-shadow(0 10px 26px rgba(112,44,39,.04));
+}
+
+@media (min-width: 1200px) {
+  .cups-page-shell {
+    grid-template-rows: clamp(36px,5.4vh,58px) minmax(0,1fr);
+  }
+
+  .cups-stage {
+    --cups-left-width: clamp(252px,15.2vw,294px);
+    --cups-right-width: clamp(278px,16.5vw,320px);
+    --cups-layout-gap: clamp(10px,.72vw,14px);
+  }
+
+  .cups-heading h1 {
+    font-size: clamp(48px,3.4vw,62px);
+  }
+
+  .cups-overview-stats strong {
+    font-size: clamp(48px,4vw,68px);
+  }
+
+  .cups-fixed-left,
+  .cups-fixed-right {
+    height: min(720px,calc(100% - 24px));
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 900px) {
+  .cups-stage {
+    --cups-left-width: 220px;
+    --cups-right-width: 240px;
+    --cups-layout-gap: 9px;
+  }
+
+  .cups-overview {
+    grid-template-columns: minmax(0,1fr) 320px;
+  }
+
+  .cups-card-grid,
+  .cups-highlight-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 899px) {
+  .cups-page-shell {
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    min-height: 100dvh;
+    display: block;
+    overflow: visible;
+  }
+
+  .cups-stage {
+    display: grid;
+    gap: 10px;
+    overflow: visible;
+  }
+
+  .cups-scroll {
+    display: contents;
+  }
+
+  .cups-scroll.cups-content-docked {
+    clip-path: none;
+  }
+
+  .cups-overview {
+    order: 1;
+    grid-template-columns: 1fr;
+    padding: 28px 0 22px;
+  }
+
+  .cups-fixed-left {
+    order: 2;
+  }
+
+  .cups-center-flow {
+    order: 3;
+  }
+
+  .cups-fixed-right {
+    order: 4;
+  }
+
+  .cups-fixed-column {
+    position: static;
+    width: auto;
+    height: auto;
+    filter: none;
+  }
+
+  .cups-fixed-left,
+  .cups-fixed-right {
+    display: grid;
+    grid-template-rows: auto auto;
+  }
+
+  .cups-center-flow {
+    margin: 0;
+  }
+
+  .cups-center-head {
+    position: static;
+    display: grid;
+  }
+
+  .cups-filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .cups-featured {
+    grid-template-columns: 1fr;
+  }
+
+  .cups-featured-cover {
+    min-height: 230px;
+  }
+
+  .cups-featured-copy {
+    padding: 18px;
+  }
+
+  .cups-highlight-grid,
+  .cups-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cups-hub-mobile {
+    display: block;
+  }
+
+  .cups-hub-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 7px;
+  }
+
+  .cups-hub-mobile-grid button {
+    min-height: 55px;
+    border: 0;
+    border-radius: 16px;
+    background: #ededeb;
+    font-size: 7px;
+  }
+}
+
+@media (max-width: 560px) {
+  .cups-heading h1 {
+    font-size: 38px;
+  }
+
+  .cups-bars {
+    grid-template-columns: 1fr;
+  }
+
+  .cups-overview-stats strong {
+    font-size: 35px;
+  }
+
+  .cup-highlight-card,
+  .cup-card {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-highlight-art,
+  .cup-card-art {
+    min-height: 150px;
+  }
+
+  .cups-featured-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .cups-featured-stats span + span {
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,.12);
+  }
+}
+
+
+/* Cups v56 — style correction
+   Keep the accepted light Crextio/HNT language.
+   Yellow is an accent, dark is reserved for active controls and small focal elements. */
+
+.cups-heading > span,
+.cups-center-title > span,
+.cups-section > header span,
+.cups-my-content > span,
+.cups-timeline-card header span,
+.cups-hall-card header span,
+.cups-hub-card header span {
+  color: #898783;
+}
+
+/* Featured Cup: no oversized dark block. */
+.cups-featured {
+  border: 1px solid rgba(234,210,206,.68);
+  background: rgba(255,255,255,.80);
+  color: var(--ink);
+}
+
+.cups-featured-cover {
+  border-radius: 23px 0 0 23px;
+  background: #ebebea;
+}
+
+.cups-featured-cover::after {
+  background:
+    linear-gradient(90deg, transparent 62%, rgba(243,243,240,.78) 100%),
+    linear-gradient(0deg, rgba(37,37,36,.08), rgba(37,37,36,.08));
+}
+
+.cups-featured-cover > span {
+  background: rgba(255,255,255,.88);
+  color: #70706f;
+  box-shadow: 0 5px 18px rgba(61,61,60,.08);
+}
+
+.cups-featured-copy {
+  padding-left: 20px;
+}
+
+.cups-card-status span {
+  background: #ededeb;
+  color: #797978;
+}
+
+.cups-card-status span.active {
+  background: #e7f4d6;
+  color: #6d9936;
+}
+
+.cups-featured-copy > p {
+  color: #7f7f7e;
+}
+
+.cups-featured-stats {
+  border-color: #ead2ce;
+}
+
+.cups-featured-stats span + span {
+  border-left-color: #dcdad5;
+}
+
+.cups-featured-stats strong {
+  color: var(--ink);
+}
+
+.cups-featured-stats small {
+  color: #8d8b87;
+}
+
+.cups-featured-actions a {
+  background: var(--dark);
+  color: white;
+}
+
+.cups-featured-actions button {
+  background: #ededeb;
+  color: var(--ink);
+}
+
+/* Upcoming highlights: quiet neutral artwork with one small accent. */
+.cup-highlight-art,
+.cup-card-art {
+  color: var(--ink);
+}
+
+.cup-highlight-art::after,
+.cup-card-art::after {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.28) 0 2px, transparent 2px 9px),
+    linear-gradient(0deg, rgba(255,255,255,.12), rgba(255,255,255,.12));
+}
+
+.blood .cup-highlight-art,
+.cup-card.blood .cup-card-art {
+  background:
+    radial-gradient(circle at 76% 22%, rgba(182,78,68,.34), transparent 34%),
+    #e6e6e5;
+}
+
+.frost .cup-highlight-art,
+.cup-card.frost .cup-card-art {
+  background:
+    radial-gradient(circle at 76% 22%, rgba(207,218,219,.75), transparent 36%),
+    #eaeae9;
+}
+

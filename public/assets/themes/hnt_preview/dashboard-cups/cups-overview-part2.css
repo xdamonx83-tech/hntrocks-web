@@ -1,0 +1,357 @@
+.cups-featured-cover > span {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: var(--yellow);
+  color: var(--dark);
+  font-size: 6px;
+  letter-spacing: .1em;
+}
+
+.cups-featured-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: center;
+  padding: 24px 24px 22px 10px;
+}
+
+.cups-card-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.cups-card-status span {
+  min-height: 23px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.09);
+  color: rgba(255,255,255,.7);
+  font-size: 6px;
+}
+
+.cups-card-status span.active {
+  background: rgba(145,185,90,.18);
+  color: #cfe8ad;
+}
+
+.cups-card-status i,
+.cup-card-body > div > span i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cups-featured-copy h3 {
+  margin: 11px 0 0;
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.cups-featured-copy > p {
+  max-width: 620px;
+  margin: 7px 0 0;
+  color: rgba(255,255,255,.62);
+  font-size: 7px;
+  line-height: 1.55;
+}
+
+.cups-featured-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  margin-top: 16px;
+  border-top: 1px dashed rgba(255,255,255,.14);
+  border-bottom: 1px dashed rgba(255,255,255,.14);
+}
+
+.cups-featured-stats span {
+  display: grid;
+  gap: 2px;
+  padding: 10px 4px;
+}
+
+.cups-featured-stats span + span {
+  border-left: 1px solid rgba(255,255,255,.12);
+}
+
+.cups-featured-stats strong {
+  color: var(--yellow);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.cups-featured-stats small {
+  color: rgba(255,255,255,.42);
+  font-size: 5.5px;
+}
+
+.cups-featured-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.cups-featured-actions a {
+  height: 35px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 15px;
+  border-radius: 18px;
+  background: var(--yellow);
+  color: var(--dark);
+  font-size: 7px;
+  text-decoration: none;
+}
+
+.cups-featured-actions button {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.1);
+  color: white;
+}
+
+.cups-section {
+  margin-top: 12px;
+  padding: 15px;
+  border: 1px solid rgba(234,210,206,.58);
+  border-radius: 22px;
+  background: rgba(255,255,255,.72);
+}
+
+.cups-section > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 11px;
+}
+
+.cups-section h3 {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cups-section > header small {
+  color: #8d8b87;
+  font-size: 6px;
+}
+
+.cups-highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+}
+
+.cup-highlight-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 165px minmax(0,1fr);
+  overflow: hidden;
+  border-radius: 19px;
+  background: #f0f0ed;
+}
+
+.cup-highlight-art,
+.cup-card-art {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-content: end;
+  padding: 14px;
+  color: white;
+}
+
+.cup-highlight-art::after,
+.cup-card-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(135deg,rgba(255,255,255,.08) 0 2px,transparent 2px 8px),
+    linear-gradient(transparent,rgba(20,21,19,.6));
+}
+
+.cup-highlight-art > *,
+.cup-card-art > * {
+  position: relative;
+  z-index: 2;
+}
+
+.blood .cup-highlight-art,
+.cup-card.blood .cup-card-art {
+  background: radial-gradient(circle at 72% 26%,#b64e44,transparent 36%),#252524;
+}
+
+.frost .cup-highlight-art,
+.cup-card.frost .cup-card-art {
+  background: radial-gradient(circle at 72% 24%,#b64e44,transparent 34%),#344044;
+}
+
+.cup-highlight-art > span,
+.cup-card-art > span {
+  color: var(--yellow);
+  font-size: 6px;
+  letter-spacing: .12em;
+}
+
+.cup-highlight-art strong,
+.cup-card-art b {
+  margin-top: 3px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.cup-highlight-art small,
+.cup-card-art small {
+  margin-top: 4px;
+  color: rgba(255,255,255,.62);
+  font-size: 6px;
+}
+
+.cup-highlight-content {
+  display: grid;
+  align-content: center;
+  padding: 13px;
+}
+
+.cup-highlight-content > span {
+  justify-self: start;
+  padding: 4px 7px;
+  border-radius: 9px;
+  background: #f2dfdc;
+  color: #9f4038;
+  font-size: 5.5px;
+}
+
+.cup-highlight-content h4,
+.cup-card-body h4 {
+  margin: 7px 0 0;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.cup-highlight-content p,
+.cup-card-body p {
+  margin: 5px 0 0;
+  color: #888682;
+  font-size: 6.5px;
+  line-height: 1.45;
+}
+
+.cup-highlight-content > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 9px;
+}
+
+.cup-highlight-content > div span {
+  padding: 4px 7px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.72);
+  color: #74736f;
+  font-size: 5.5px;
+}
+
+.cup-highlight-content > button {
+  height: 30px;
+  justify-self: start;
+  margin-top: 10px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 15px;
+  background: var(--dark);
+  color: white;
+  font-size: 6px;
+}
+
+.cups-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+}
+
+.cup-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 155px minmax(0,1fr);
+  min-height: 190px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #f0f0ed;
+}
+
+.cup-card[hidden],
+.cup-highlight-card[hidden],
+.cups-featured[hidden] {
+  display: none;
+}
+
+.cup-card.summer .cup-card-art {
+  background: radial-gradient(circle at 72% 26%,#9f4038,transparent 34%),#2d2d2c;
+}
+
+.cup-card.quick .cup-card-art {
+  background: radial-gradient(circle at 72% 26%,#b64e44,transparent 35%),#252524;
+}
+
+.cup-card.extract .cup-card-art {
+  background: radial-gradient(circle at 72% 26%,#9f4038,transparent 35%),#212120;
+}
+
+.cup-card.night .cup-card-art {
+  background: radial-gradient(circle at 72% 26%,#b64e44,transparent 35%),#26252d;
+}
+
+.cup-card-body {
+  display: grid;
+  align-content: center;
+  padding: 13px;
+}
+
+.cup-card-body > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cup-card-body > div > span {
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 11px;
+  font-size: 5.5px;
+}
+
+.cup-card-body > div > span.active {
+  background: #e7f4d6;
+  color: #6d9936;
+}
+
+.cup-card-body > div > span.planned {
+  background: #f2dfdc;
+  color: #9f4038;
+}
+
+.cup-card-body > div > span.finished {
+  background: #e6e6e5;
+  color: #767675;
+}
+

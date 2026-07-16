@@ -1,7 +1,6 @@
 (() => {
   const ensureStylesheet = (href, marker) => {
     if (document.querySelector(`link[${marker}]`)) return;
-
     const style = document.createElement('link');
     style.rel = 'stylesheet';
     style.href = href;
@@ -9,26 +8,10 @@
     document.head.appendChild(style);
   };
 
-  ensureStylesheet(
-    '/assets/themes/hnt_preview/dashboard-feed/real-feed.css?v=20260714-1',
-    'data-cups-real-feed'
-  );
-  ensureStylesheet(
-    '/assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css?v=20260714-1',
-    'data-cups-real-feed-polish'
-  );
-  ensureStylesheet(
-    '/assets/themes/hnt_preview/dashboard-cups/cups-feed-alignment.css?v=20260714-3',
-    'data-cups-feed-alignment'
-  );
-  ensureStylesheet(
-    '/assets/themes/hnt_preview/dashboard-cups/cup-community-access.css?v=20260714-1',
-    'data-cup-community-access'
-  );
-  ensureStylesheet(
-    '/assets/themes/hnt_preview/dashboard-cups/cups-header-dropdown-reference.css?v=20260715-1',
-    'data-cups-header-dropdown-reference'
-  );
+  ensureStylesheet('/assets/themes/hnt_preview/dashboard-feed/real-feed.css?v=20260714-1', 'data-cups-real-feed');
+  ensureStylesheet('/assets/themes/hnt_preview/dashboard-feed/real-feed-polish.css?v=20260714-1', 'data-cups-real-feed-polish');
+  ensureStylesheet('/assets/themes/hnt_preview/dashboard-cups/cup-community-access.css?v=20260714-1', 'data-cup-community-access');
+  ensureStylesheet('/assets/themes/hnt_preview/dashboard-cups/cups-header-dropdown-reference.css?v=20260715-1', 'data-cups-header-dropdown-reference');
 
   const shell = document.querySelector('.cups-page-shell');
   if (!shell) return;
@@ -61,7 +44,6 @@
 
   const cupsNav = shell.querySelector('.nav-cups');
   const cupsTrigger = cupsNav?.querySelector(':scope > .main-nav-trigger');
-
   cupsNav?.classList.add('is-current');
   cupsTrigger?.classList.add('is-current');
 
@@ -75,7 +57,6 @@
   cupsNav?.querySelectorAll('[data-navigation-label]').forEach((control) => {
     const target = routeMap[control.dataset.navigationLabel];
     if (!target) return;
-
     control.removeAttribute('aria-disabled');
     control.removeAttribute('data-unavailable');
     control.addEventListener('click', (event) => {
@@ -83,15 +64,121 @@
       window.location.assign(target);
     });
   });
+})();
 
-  if (!shell.querySelector('.cups-admin-create')) {
-    const pagination = shell.querySelector('.cups-pagination');
-    const directory = shell.querySelector('.cups-all-section');
-    const createLink = document.createElement('a');
-    createLink.className = 'cups-admin-create cups-community-create';
-    createLink.href = '/cups/create';
-    createLink.innerHTML = `<svg><use href="#i-plus"></use></svg>${document.documentElement.lang.toLowerCase().startsWith('en') ? 'Create cup' : 'Cup erstellen'}`;
-    if (pagination) pagination.before(createLink);
-    else directory?.after(createLink);
+(() => {
+  const stage = document.querySelector(".cups-stage");
+  const scroll = document.getElementById("cupsScroll");
+  const center = document.getElementById("cupsCenterFlow");
+  const left = document.getElementById("cupsFixedLeft");
+  const right = document.getElementById("cupsFixedRight");
+  const stickyHead = document.querySelector(".cups-center-head");
+  let frame = 0;
+
+  function updateFixedColumns() {
+    frame = 0;
+    if (!stage || !scroll || !center || !left || !right) return;
+
+    if (window.matchMedia("(max-width: 899px)").matches) {
+      left.style.removeProperty("top");
+      right.style.removeProperty("top");
+      stage.classList.remove("cups-columns-docked");
+      scroll.classList.remove("cups-content-docked");
+      stickyHead?.classList.remove("is-stuck");
+      return;
+    }
+
+    const styles = getComputedStyle(stage);
+    const gap = Number.parseFloat(styles.getPropertyValue("--cups-sticky-gap")) || 12;
+    const stageRect = stage.getBoundingClientRect();
+    const centerRect = center.getBoundingClientRect();
+    const naturalTop = centerRect.top - stageRect.top;
+    const top = Math.max(gap, naturalTop);
+    const docked = naturalTop <= gap + 1;
+
+    left.style.top = `${top}px`;
+    right.style.top = `${top}px`;
+    stage.classList.toggle("cups-columns-docked", docked);
+    scroll.classList.toggle("cups-content-docked", docked);
+
+    if (stickyHead) {
+      const headRect = stickyHead.getBoundingClientRect();
+      const scrollRect = scroll.getBoundingClientRect();
+      stickyHead.classList.toggle("is-stuck", scroll.scrollTop > 0 && headRect.top <= scrollRect.top + gap + 1);
+    }
   }
+
+  function requestUpdate() {
+    if (frame) return;
+    frame = requestAnimationFrame(updateFixedColumns);
+  }
+
+  scroll?.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+  window.addEventListener("load", requestUpdate);
+  requestUpdate();
+
+  const tabs = [...document.querySelectorAll("[data-cups-tab]")];
+  const title = document.getElementById("cupsPanelTitle");
+  const search = document.getElementById("cupSearch");
+  const platform = document.getElementById("cupPlatform");
+  const count = document.getElementById("visibleCupCount");
+  const empty = document.getElementById("cupsEmptyState");
+  let activeFilter = "all";
+
+  function applyFilters() {
+    const query = (search?.value || "").trim().toLowerCase();
+    const platformValue = platform?.value || "all";
+    const items = [...document.querySelectorAll("[data-cup-item]")];
+    let visibleGridCards = 0;
+
+    items.forEach((item) => {
+      const status = item.dataset.status || "";
+      const itemPlatform = item.dataset.platform || "";
+      const mine = item.dataset.mine === "true";
+      const text = item.dataset.search || "";
+
+      const matchesTab =
+        activeFilter === "all" ||
+        activeFilter === status ||
+        (activeFilter === "mine" && mine);
+      const matchesSearch = !query || text.includes(query);
+      const matchesPlatform = platformValue === "all" || itemPlatform === platformValue ||
+        (platformValue === "console" && ["console", "ps5", "xbox"].includes(itemPlatform));
+
+      const visible = matchesTab && matchesSearch && matchesPlatform;
+      item.hidden = !visible;
+
+      if (visible && item.classList.contains("cup-card")) visibleGridCards += 1;
+    });
+
+    if (count) count.textContent = `${visibleGridCards} ${visibleGridCards === 1 ? "Cup" : "Cups"}`;
+    if (empty) empty.hidden = visibleGridCards > 0;
+  }
+
+  function activateTab(name) {
+    activeFilter = name;
+    tabs.forEach((tab) => {
+      const active = tab.dataset.cupsTab === name;
+      tab.classList.toggle("active", active);
+      tab.setAttribute("aria-selected", String(active));
+      if (active && title) title.textContent = tab.dataset.title || tab.textContent.trim();
+    });
+    applyFilters();
+  }
+
+  tabs.forEach((tab) => tab.addEventListener("click", () => activateTab(tab.dataset.cupsTab)));
+  document.querySelectorAll("[data-cups-tab-shortcut]").forEach((button) => {
+    button.addEventListener("click", () => activateTab(button.dataset.cupsTabShortcut));
+  });
+  search?.addEventListener("input", applyFilters);
+  platform?.addEventListener("change", applyFilters);
+
+  document.getElementById("resetCupFilters")?.addEventListener("click", () => {
+    search.value = "";
+    platform.value = "all";
+    activateTab("all");
+  });
+
+  activateTab("all");
 })();

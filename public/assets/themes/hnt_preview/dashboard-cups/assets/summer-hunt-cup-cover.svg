@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1100" viewBox="0 0 900 1100">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171814"/>
+      <stop offset=".58" stop-color="#303027"/>
+      <stop offset="1" stop-color="#151614"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".76" cy=".18" r=".58">
+      <stop offset="0" stop-color="#FFD65C" stop-opacity=".96"/>
+      <stop offset=".45" stop-color="#E4B93F" stop-opacity=".46"/>
+      <stop offset="1" stop-color="#E4B93F" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="stripe" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="6" height="22" fill="#F3F0E7" opacity=".045"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="1100" rx="72" fill="url(#bg)"/>
+  <rect width="900" height="1100" rx="72" fill="url(#sun)"/>
+  <rect width="900" height="1100" rx="72" fill="url(#stripe)"/>
+  <g fill="none" stroke="#F3F0E7" stroke-opacity=".10" stroke-width="3">
+    <path d="M610 80C850 20 960 140 890 300S680 520 780 690 1020 900 810 1030"/>
+    <path d="M650 120C820 80 900 180 850 310S710 500 790 650 930 850 770 1000"/>
+    <path d="M45 700C210 610 360 650 420 770S520 1040 700 1080"/>
+  </g>
+  <g transform="translate(70 76)">
+    <rect width="230" height="52" rx="26" fill="#E4B93F"/>
+    <text x="115" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#292A27" letter-spacing="2">HNT.ROCKS CUP</text>
+  </g>
+  <g transform="translate(70 690)">
+    <text font-family="Arial,sans-serif" fill="#F3F0E7">
+      <tspan x="0" y="0" font-size="92" font-weight="700">SUMMER</tspan>
+      <tspan x="0" y="92" font-size="92" font-weight="700">HUNT</tspan>
+      <tspan x="4" y="158" font-size="25" fill="#D2CEC2" letter-spacing="5">TRIO · CONSOLE · 2026</tspan>
+    </text>
+  </g>
+  <g transform="translate(70 930)">
+    <rect width="760" height="2" fill="#E4B93F" opacity=".7"/>
+    <text x="0" y="54" font-family="Arial,sans-serif" font-size="22" fill="#D2CEC2">FIRST TROPHY EXTRACTION + HUNTER KILLS</text>
+  </g>
+</svg>
