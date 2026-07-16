@@ -1,0 +1,132 @@
+  align-content: center;
+  gap: 7px;
+  border: 1px dashed #b64e44;
+  border-radius: 18px;
+  background: white;
+  cursor: pointer;
+}
+
+.cup-upload-zone input { display: none; }
+.cup-upload-zone > span { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--yellow); }
+.cup-upload-zone > span svg { width: 18px; height: 18px; }
+.cup-upload-zone strong { font-size: 9px; font-weight: 500; }
+.cup-upload-zone small { color: #95938f; font-size: 6px; }
+
+.cup-submit-copy { display: grid; align-content: center; gap: 6px; padding: 14px; border-radius: 18px; background: var(--dark); color: white; }
+.cup-submit-copy > span { color: var(--yellow); }
+.cup-submit-copy h3 { margin: 0; font-size: 14px; font-weight: 400; }
+.cup-submit-copy p { margin: 0; color: rgba(255,255,255,.58); font-size: 7px; line-height: 1.5; }
+.cup-submit-copy > div { display: flex; align-items: end; gap: 7px; margin-top: 6px; }
+.cup-submit-copy > div strong { font-size: 24px; font-weight: 300; }
+.cup-submit-copy > div span { color: rgba(255,255,255,.56); font-size: 6px; }
+.cup-submit-copy button { height: 32px; margin-top: 5px; border: 0; border-radius: 16px; background: var(--yellow); color: var(--dark); font-size: 7px; cursor: pointer; }
+
+.cup-submission-list { display: grid; gap: 6px; padding: 10px; }
+.cup-submission-list article { min-height: 55px; display: grid; grid-template-columns: 34px minmax(0,1fr) 75px 70px; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 16px; background: white; }
+.cup-submission-list article > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; }
+.cup-submission-list .approved { background: #e7f4d6; color: #6c9837; }
+.cup-submission-list .review { background: #f2dfdc; color: #702c27; }
+.cup-submission-list .rejected { background: #f7efed; color: #b64e44; }
+.cup-submission-list article > div { min-width: 0; display: grid; gap: 2px; }
+.cup-submission-list strong,
+.cup-submission-list b { font-size: 8px; font-weight: 500; }
+.cup-submission-list small { overflow: hidden; color: #929291; font-size: 6px; white-space: nowrap; text-overflow: ellipsis; }
+.cup-submission-list em { justify-self: end; padding: 5px 8px; border-radius: 11px; background: #ededeb; color: #74736f; font-size: 6px; font-style: normal; }
+
+@media (min-width: 1200px) {
+  .cup-detail-page-shell { grid-template-rows: clamp(36px,5.4vh,58px) clamp(150px,20vh,205px) minmax(0,1fr); }
+  .cup-detail-heading h1 { font-size: clamp(34px,3.2vw,56px); }
+  .cup-overview-stats strong { font-size: clamp(42px,4vw,68px); }
+  .cup-dashboard-grid { grid-template-columns: clamp(225px,14vw,270px) minmax(360px,1fr) clamp(226px,14vw,270px) clamp(242px,15vw,290px); grid-template-rows: clamp(218px,30vh,315px) minmax(0,1fr); gap: clamp(6px,.62vw,12px); }
+  .cup-progress-card,
+  .cup-scoring-card { padding: clamp(13px,1vw,18px); }
+  .cup-white-card h2,
+  .cup-participation-card h2 { font-size: clamp(13px,.9vw,17px); }
+  .cup-progress-summary strong { font-size: clamp(25px,2vw,36px); }
+  .cup-score-ring { width: clamp(126px,8vw,154px); height: clamp(126px,8vw,154px); }
+  .cup-score-ring::before { width: calc(100% - 24px); height: calc(100% - 24px); }
+}
+
+@media (max-width: 1180px) {
+  .cup-dashboard-grid { grid-template-columns: 215px minmax(300px,1fr) 215px; grid-template-rows: 218px 300px auto; grid-template-areas: "cover progress scoring" "data content content" "side side side"; }
+  .cup-participation-card { grid-template-columns: 260px minmax(0,1fr); grid-template-rows: 1fr; }
+  .cup-my-team { grid-template-columns: auto minmax(0,1fr) 150px; gap: 14px; }
+  .cup-team-members { grid-template-columns: repeat(3,1fr); }
+}
+
+@media (max-width: 899px) {
+  .cup-detail-page-shell { display: block; }
+  .cup-detail-overview { grid-template-columns: 1fr; gap: 18px; padding: 28px 0 20px; }
+  .cup-overview-bars { grid-template-columns: repeat(2,1fr); }
+  .cup-overview-bar.wide { grid-column: 1 / -1; }
+  .cup-detail-overview .cup-overview-stats { padding: 0 8px; }
+  .cup-dashboard-grid { display: grid; grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "cover" "progress" "scoring" "data" "content" "side"; gap: 9px; }
+  .cup-cover-card { min-height: 430px; }
+  .cup-progress-card,
+  .cup-scoring-card,
+  .cup-data-stack,
+  .cup-section-card,
+  .cup-participation-card { min-height: 260px; }
+  .cup-participation-card { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  .cup-my-team { display: grid; grid-template-columns: 1fr; }
+  .cup-section-card { min-height: 620px; }
+  .cup-section-head { display: grid; gap: 8px; }
+  .cup-section-tabs { width: 100%; }
+  .cup-tab-panel { overflow: visible; }
+}
+
+@media (max-width: 560px) {
+  .cup-detail-heading h1 { font-size: 36px; }
+  .cup-overview-bars { grid-template-columns: 1fr; }
+  .cup-overview-bar.wide { grid-column: auto; }
+  .cup-overview-stats strong { font-size: 34px; }
+  .cup-cover-card { min-height: 390px; }
+  .cup-rule-grid,
+  .cup-prize-grid,
+  .cup-submit-layout { grid-template-columns: 1fr; }
+  .cup-leaderboard { overflow-x: auto; }
+  .cup-leaderboard-head,
+  .cup-leaderboard article { min-width: 590px; }
+  .cup-submission-list article { grid-template-columns: 34px minmax(0,1fr); }
+  .cup-submission-list article > b,
+  .cup-submission-list article > em { grid-column: 2; justify-self: start; }
+}
+
+.cup-detail-page-shell { grid-template-rows: 36px auto minmax(0,1fr); }
+.cup-detail-overview { align-items: end; padding-top: 20px; padding-bottom: 20px; }
+.cup-hero-description { max-width: 770px; margin: 9px 0 0; color: #74736f; font-size: 8px; line-height: 1.55; }
+.cup-overview-bars { margin-top: 15px; }
+.cup-dashboard-grid { min-height: 0; grid-template-columns: 235px minmax(360px,1fr) 235px 255px; grid-template-rows: clamp(240px,29vh,286px) minmax(0,1fr); gap: 12px; }
+.cup-white-card,
+.cup-cover-card,
+.cup-participation-card { border-radius: 29px; }
+.cup-cover-card,
+.cup-progress-card,
+.cup-scoring-card,
+.cup-participation-card,
+.cup-data-stack,
+.cup-section-card { min-height: 0; }
+.cup-progress-card,
+.cup-scoring-card { padding: 16px 18px; }
+.cup-progress-summary { margin-top: 11px; }
+.cup-milestone-bars { height: calc(100% - 73px); min-height: 118px; margin-top: 7px; }
+.cup-data-stack { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: 10px 14px 14px; scrollbar-width: thin; scrollbar-color: rgba(159,64,56,.52) transparent; }
+.cup-data-stack::-webkit-scrollbar,
+.cup-tab-panel::-webkit-scrollbar { width: 5px; }
+.cup-data-stack::-webkit-scrollbar-track,
+.cup-tab-panel::-webkit-scrollbar-track { background: transparent; }
+.cup-data-stack::-webkit-scrollbar-thumb,
+.cup-tab-panel::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(159,64,56,.48); }
+.cup-data-stack details { scroll-margin-top: 10px; }
+.cup-section-card { overflow: hidden; padding: 0 12px 12px; }
+.cup-section-head { position: relative; z-index: 4; min-height: 61px; padding: 9px 2px; border-bottom: 1px solid rgba(234,210,206,.55); background: rgba(255,255,255,.72); }
+.cup-section-panels { min-height: 0; overflow: hidden; padding-top: 10px; }
+.cup-tab-panel { height: 100%; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: 0 4px 14px 0; border-radius: 20px; scrollbar-width: thin; scrollbar-color: rgba(159,64,56,.52) transparent; }
+.cup-description-panel { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(300px,.9fr); gap: 15px; margin: 0 0 10px; padding: 16px 17px; border: 1px solid rgba(234,210,206,.62); border-radius: 20px; background: radial-gradient(circle at 100% 0,rgba(182,78,68,.22),transparent 38%), rgba(255,255,255,.78); }
+.cup-description-copy { min-width: 0; display: grid; align-content: center; gap: 4px; }
+.cup-description-copy > span { color: #b64e44; font-size: 7px; font-weight: 500; letter-spacing: .12em; }
+.cup-description-copy h3 { margin: 0; font-size: 13px; font-weight: 500; }
+.cup-description-copy p { max-width: 760px; margin: 2px 0 0; color: #74736f; font-size: 7px; line-height: 1.55; }
+.cup-description-facts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.cup-description-facts > span { min-width: 0; min-height: 48px; display: grid; align-content: center; gap: 3px; padding: 9px 10px; border-radius: 15px; background: rgba(241,241,238,.9); }
+.cup-description-facts small { color: #90908f; font-size: 6px; }

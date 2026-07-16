@@ -1,0 +1,540 @@
+
+.cup-detail-page-shell {
+  display: grid;
+  grid-template-rows: 36px 150px minmax(0,1fr);
+}
+
+.cup-detail-page-shell .nav-cups > .main-nav-trigger {
+  background: var(--dark);
+  color: #fff;
+}
+
+.cup-detail-overview {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 365px;
+  gap: 26px;
+  align-items: end;
+  padding-top: 21px;
+}
+
+.cup-detail-heading > span,
+.cup-white-card header span,
+.cup-cover-copy > div > span,
+.cup-participation-card header span,
+.cup-section-title > span,
+.cup-submit-copy > span {
+  color: #b64e44;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.cup-detail-heading h1 {
+  margin: 3px 0 4px;
+  font-size: 34px;
+  font-weight: 300;
+  letter-spacing: -1px;
+}
+
+.cup-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: #716f6c;
+  font-size: 7px;
+}
+
+.cup-hero-meta > span {
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.48);
+}
+
+.cup-hero-meta .live {
+  background: #e7f4d6;
+  color: #6d9936;
+}
+
+.cup-hero-meta i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cup-overview-bars {
+  display: grid;
+  grid-template-columns: minmax(250px,1.9fr) minmax(120px,.72fr) minmax(145px,.92fr) minmax(105px,.6fr);
+  gap: 7px;
+  max-width: 790px;
+  margin-top: 15px;
+}
+
+.cup-overview-bar > span {
+  display: block;
+  margin: 0 0 6px 5px;
+  color: #5d5c59;
+  font-size: 7px;
+}
+
+.cup-overview-bar > div {
+  position: relative;
+  height: 31px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 0 11px;
+  border-radius: 17px;
+}
+
+.cup-overview-bar b {
+  position: relative;
+  z-index: 2;
+  font-size: 7px;
+  font-weight: 400;
+}
+
+.cup-overview-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+}
+
+.cup-overview-bar .dark {
+  background: var(--dark);
+  color: white;
+}
+
+.cup-overview-bar .yellow {
+  background: rgba(182,78,68,.88);
+}
+
+.cup-overview-bar .striped {
+  background: repeating-linear-gradient(135deg,rgba(255,255,255,.9) 0 4px,rgba(222,222,221,.75) 4px 7px);
+}
+
+.cup-overview-bar .outline {
+  justify-content: center;
+  border: 1px solid #666662;
+  background: transparent;
+}
+
+.cup-detail-overview .cup-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 9px;
+  padding-bottom: 4px;
+}
+
+.cup-overview-stats article {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.cup-overview-stats strong {
+  font-size: 42px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.cup-overview-stats span {
+  font-size: 7px;
+}
+
+.cup-dashboard-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 225px minmax(320px,1fr) 226px 242px;
+  grid-template-rows: 218px minmax(0,1fr);
+  grid-template-areas:
+    "cover progress scoring side"
+    "data content content side";
+  gap: 6px;
+}
+
+.cup-white-card,
+.cup-cover-card,
+.cup-participation-card {
+  min-width: 0;
+  min-height: 0;
+  border-radius: 27px;
+  background: rgba(255,255,255,.76);
+}
+
+.cup-cover-card {
+  grid-area: cover;
+  position: relative;
+  overflow: hidden;
+}
+
+.cup-cover-card > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cup-cover-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 44%;
+  background: linear-gradient(transparent,rgba(21,22,20,.76));
+}
+
+.cup-cover-copy {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 12px;
+  left: 14px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+  color: white;
+}
+
+.cup-cover-copy > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cup-cover-copy > div > span {
+  color: var(--yellow);
+}
+
+.cup-cover-copy strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cup-cover-copy small {
+  color: rgba(255,255,255,.68);
+  font-size: 7px;
+}
+
+.cup-cover-copy button,
+.cup-white-card header button {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.9);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.cup-cover-copy svg,
+.cup-white-card header svg,
+.cup-participation-card svg,
+.cup-data-stack svg,
+.cup-scoring-actions svg,
+.cup-team-button svg,
+.cup-upload-zone svg,
+.cup-submission-list svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cup-progress-card {
+  grid-area: progress;
+  padding: 13px 15px;
+}
+
+.cup-scoring-card {
+  grid-area: scoring;
+  padding: 13px 15px;
+}
+
+.cup-white-card > header,
+.cup-participation-top > header,
+.cup-my-team > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cup-white-card header > div,
+.cup-participation-card header > div {
+  display: grid;
+  gap: 2px;
+}
+
+.cup-white-card h2,
+.cup-participation-card h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.cup-progress-summary {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cup-progress-summary strong {
+  font-size: 25px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.cup-progress-summary span {
+  width: 64px;
+  color: #636362;
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+.cup-progress-summary em {
+  margin-left: auto;
+  padding: 5px 8px;
+  border-radius: 11px;
+  background: #f2dfdc;
+  color: #702c27;
+  font-size: 6px;
+  font-style: normal;
+}
+
+.cup-milestone-bars {
+  height: 118px;
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  align-items: end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.cup-milestone-bars > span {
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0,1fr) 13px 12px;
+  align-items: end;
+  justify-items: center;
+  gap: 3px;
+}
+
+.cup-milestone-bars i {
+  width: 8px;
+  min-height: 17px;
+  border-radius: 7px;
+  background: var(--dark);
+}
+
+.cup-milestone-bars .active i {
+  background: var(--yellow);
+}
+
+.cup-milestone-bars b {
+  font-size: 7px;
+  font-weight: 500;
+}
+
+.cup-milestone-bars small {
+  color: #969695;
+  font-size: 5.5px;
+  text-align: center;
+}
+
+.cup-score-ring {
+  position: relative;
+  width: 126px;
+  height: 126px;
+  display: grid;
+  place-items: center;
+  margin: 8px auto 5px;
+  border-radius: 50%;
+  background: conic-gradient(var(--yellow) 0 260deg,#dbdbda 260deg 360deg);
+  transform: rotate(-45deg);
+}
+
+.cup-score-ring::before {
+  content: "";
+  position: absolute;
+  width: 102px;
+  height: 102px;
+  border-radius: 50%;
+  background: #f8f8f7;
+}
+
+.cup-score-ring > div {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  transform: rotate(45deg);
+}
+
+.cup-score-ring strong {
+  font-size: 27px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.cup-score-ring span {
+  margin-top: 4px;
+  color: #74736f;
+  font-size: 7px;
+}
+
+.cup-scoring-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cup-scoring-actions button {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #ededeb;
+  cursor: pointer;
+}
+
+.cup-scoring-actions button:nth-child(2) {
+  background: var(--dark);
+  color: white;
+}
+
+.cup-scoring-actions span {
+  margin-left: auto;
+  color: #8a8884;
+  font-size: 6px;
+}
+
+.cup-participation-card {
+  grid-area: side;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 138px minmax(0,1fr);
+  padding: 6px;
+}
+
+.cup-participation-top {
+  padding: 10px 10px 7px;
+}
+
+.cup-participation-top header > strong {
+  font-size: 25px;
+  font-weight: 300;
+}
+
+.cup-participation-segments {
+  display: grid;
+  grid-template-columns: 1.2fr .9fr .5fr;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+.cup-participation-segments span {
+  display: grid;
+  grid-template-rows: 13px 31px 12px;
+  gap: 2px;
+}
+
+.cup-participation-segments b,
+.cup-participation-segments small {
+  font-size: 6px;
+  font-weight: 400;
+}
+
+.cup-participation-segments i {
+  display: block;
+  border-radius: 10px;
+}
+
+.cup-participation-segments .yellow { background: var(--yellow); }
+.cup-participation-segments .dark { background: var(--dark); }
+.cup-participation-segments .grey { background: #a8a8a7; }
+
+.cup-my-team {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  padding: 14px;
+  border-radius: 25px;
+  background: var(--dark);
+  color: white;
+}
+
+.cup-my-team header span {
+  color: var(--yellow);
+}
+
+.cup-my-team header > strong {
+  font-size: 24px;
+  font-weight: 300;
+}
+
+.cup-team-members {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.cup-team-members article {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) 24px;
+  align-items: center;
+  gap: 8px;
+}
+
+.cup-team-members img,
+.team-task-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.cup-team-members img {
+  object-fit: cover;
+}
+
+.team-task-icon {
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.08);
+}
+
+.cup-team-members article > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cup-team-members strong {
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cup-team-members span {
+  overflow: hidden;
+  color: rgba(255,255,255,.55);

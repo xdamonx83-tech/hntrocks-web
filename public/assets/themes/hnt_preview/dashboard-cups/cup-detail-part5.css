@@ -1,0 +1,540 @@
+}
+
+
+/* Cup detail v47:
+   fixed-size side cards, center-only scrolling and a clean Feed-like
+   top clipping state once the hero has disappeared. */
+.cup-detail-stage {
+  --cup-sticky-gap: 12px;
+  --cup-layout-gap: 12px;
+  --cup-left-width: 235px;
+  --cup-right-width: 255px;
+  isolation: isolate;
+}
+
+/* Prevent any scrolled center card from shining through behind the menu. */
+.cup-detail-scroll {
+  transition: clip-path .12s ease;
+}
+
+.cup-detail-scroll.cup-content-docked {
+  clip-path:
+    inset(
+      var(--cup-sticky-gap)
+      calc(var(--cup-right-width) + var(--cup-layout-gap))
+      0
+      calc(var(--cup-left-width) + var(--cup-layout-gap))
+      round 28px 28px 0 0
+    );
+}
+
+/* Keep the accepted breathing space below the global header. */
+.cup-detail-overview {
+  padding-top: 26px;
+  padding-bottom: 24px;
+}
+
+/* Side columns no longer stretch to the bottom of the viewport. */
+.cup-fixed-column {
+  bottom: auto;
+  height: min(690px, calc(100% - (var(--cup-sticky-gap) * 2)));
+  max-height: calc(100% - (var(--cup-sticky-gap) * 2));
+}
+
+.cup-fixed-left {
+  grid-template-rows: 260px minmax(0,1fr);
+}
+
+.cup-fixed-right {
+  height: min(690px, calc(100% - (var(--cup-sticky-gap) * 2)));
+}
+
+.cup-fixed-left .cup-cover-card,
+.cup-fixed-left .cup-data-stack,
+.cup-fixed-right .cup-participation-card {
+  height: 100%;
+}
+
+/* Center content keeps its original proportions instead of growing to
+   fill the whole viewport. */
+.cup-center-top-cards {
+  min-height: 244px;
+  grid-template-columns: minmax(0,1fr) 225px;
+}
+
+.cup-center-top-cards .cup-progress-card,
+.cup-center-top-cards .cup-scoring-card {
+  min-height: 244px;
+  height: 244px;
+}
+
+.cup-center-flow .cup-section-card {
+  min-height: 0;
+  height: auto;
+  margin-bottom: 28px;
+}
+
+.cup-center-flow .cup-section-panels,
+.cup-center-flow .cup-tab-panel {
+  min-height: 0;
+  height: auto;
+}
+
+.cup-center-flow .cup-tab-panel {
+  padding-bottom: 16px;
+}
+
+/* Overview remains substantial, but not artificially viewport-high. */
+.cup-center-flow [data-cup-panel="overview"] {
+  min-height: 520px;
+}
+
+.cup-center-flow .cup-description-panel {
+  min-height: 108px;
+}
+
+.cup-center-flow .cup-timeline-events {
+  min-height: 220px;
+}
+
+/* Remove the v46 blanket minimum heights from every non-overview tab. */
+.cup-center-flow .cup-rule-grid,
+.cup-center-flow .cup-prize-grid,
+.cup-center-flow .cup-submit-layout,
+.cup-center-flow .cup-submission-list {
+  min-height: 0;
+}
+
+/* Cleaner sticky header with a real rounded card edge below the menu. */
+.cup-center-flow .cup-section-head {
+  top: var(--cup-sticky-gap);
+  margin-bottom: 12px;
+  border-radius: 27px 27px 17px 17px;
+}
+
+.cup-center-flow .cup-section-head.is-stuck {
+  background: rgba(243,243,240,.98);
+  backdrop-filter: blur(10px);
+}
+
+/* ------------------------------------------------------------------
+   Prize tab redesign
+   ------------------------------------------------------------------ */
+.cup-prizes-layout {
+  display: grid;
+  grid-template-columns: minmax(260px,.9fr) minmax(0,1.45fr);
+  gap: 12px;
+  padding: 12px;
+}
+
+.cup-prize-feature {
+  position: relative;
+  min-height: 300px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 12%,rgba(255,255,255,.36),transparent 28%),
+    repeating-linear-gradient(135deg,rgba(255,255,255,.15) 0 2px,transparent 2px 9px),
+    var(--yellow);
+}
+
+.cup-prize-feature::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -95px;
+  width: 220px;
+  height: 220px;
+  border: 1px solid rgba(41,42,39,.13);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 22px rgba(41,42,39,.035),
+    0 0 0 48px rgba(41,42,39,.02);
+}
+
+.cup-prize-feature-top,
+.cup-prize-feature-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cup-prize-rank {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--dark);
+  color: white;
+  font-size: 10px;
+}
+
+.cup-prize-label,
+.cup-prize-feature-copy > span,
+.cup-prize-secondary span {
+  color: #9f4038;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: .11em;
+}
+
+.cup-prize-feature-copy {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  display: grid;
+  gap: 6px;
+}
+
+.cup-prize-feature-copy strong {
+  color: var(--ink);
+  font-size: 34px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.cup-prize-feature-copy p {
+  max-width: 280px;
+  margin: 0;
+  color: #702c27;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.cup-prize-feature-bottom {
+  align-items: stretch;
+}
+
+.cup-prize-feature-bottom span {
+  flex: 1;
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 7px 9px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.43);
+  color: #702c27;
+  font-size: 7px;
+  text-align: center;
+}
+
+.cup-prize-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 12px;
+}
+
+.cup-prize-secondary {
+  min-width: 0;
+  min-height: 144px;
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr);
+  align-items: center;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid rgba(234,210,206,.58);
+  border-radius: 22px;
+  background: rgba(255,255,255,.82);
+}
+
+.cup-prize-secondary.random {
+  background: var(--dark);
+  color: white;
+}
+
+.cup-prize-secondary.fame {
+  background:
+    radial-gradient(circle at 90% 0,rgba(182,78,68,.24),transparent 40%),
+    rgba(247,247,244,.88);
+}
+
+.cup-prize-medal {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #ededec;
+  color: #702c27;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.cup-prize-secondary.rocks .cup-prize-medal {
+  background: #f2dfdc;
+}
+
+.cup-prize-secondary.badge .cup-prize-medal {
+  background: #f2dfdc;
+  color: #9f4038;
+}
+
+.cup-prize-secondary.random .cup-prize-medal {
+  background: rgba(255,255,255,.1);
+  color: var(--yellow);
+}
+
+.cup-prize-secondary > div:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.cup-prize-secondary strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cup-prize-secondary p {
+  margin: 0;
+  color: #8d8b87;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.cup-prize-secondary.random span {
+  color: var(--yellow);
+}
+
+.cup-prize-secondary.random p {
+  color: rgba(255,255,255,.55);
+}
+
+.cup-prize-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 12px 12px;
+  padding: 11px 13px;
+  border-radius: 16px;
+  background: rgba(241,241,238,.9);
+  color: #888887;
+  font-size: 7px;
+}
+
+@media (min-width: 1200px) {
+  .cup-detail-stage {
+    --cup-left-width: clamp(235px,14.2vw,275px);
+    --cup-right-width: clamp(250px,15vw,292px);
+    --cup-layout-gap: clamp(10px,.68vw,13px);
+  }
+
+  .cup-fixed-column,
+  .cup-fixed-right {
+    height: min(710px, calc(100% - (var(--cup-sticky-gap) * 2)));
+  }
+
+  .cup-fixed-left {
+    grid-template-rows: clamp(260px,27vh,292px) minmax(0,1fr);
+  }
+
+  .cup-center-top-cards {
+    min-height: clamp(244px,26vh,280px);
+    grid-template-columns: minmax(0,1fr) clamp(220px,13.5vw,260px);
+  }
+
+  .cup-center-top-cards .cup-progress-card,
+  .cup-center-top-cards .cup-scoring-card {
+    min-height: clamp(244px,26vh,280px);
+    height: clamp(244px,26vh,280px);
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 900px) {
+  .cup-fixed-column,
+  .cup-fixed-right {
+    height: min(650px, calc(100% - (var(--cup-sticky-gap) * 2)));
+  }
+
+  .cup-fixed-left {
+    grid-template-rows: 240px minmax(0,1fr);
+  }
+
+  .cup-center-top-cards {
+    grid-template-columns: minmax(0,1fr) 205px;
+  }
+}
+
+@media (max-width: 899px) {
+  .cup-detail-scroll.cup-content-docked {
+    clip-path: none;
+  }
+
+  .cup-fixed-column,
+  .cup-fixed-right {
+    height: auto;
+    max-height: none;
+  }
+
+  .cup-center-top-cards .cup-progress-card,
+  .cup-center-top-cards .cup-scoring-card {
+    height: auto;
+  }
+
+  .cup-prizes-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-prize-secondary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-prize-feature {
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 560px) {
+  .cup-prizes-layout {
+    padding: 8px;
+  }
+
+  .cup-prize-feature {
+    min-height: 245px;
+    padding: 17px;
+  }
+
+  .cup-prize-feature-copy strong {
+    font-size: 29px;
+  }
+
+  .cup-prize-secondary {
+    min-height: 128px;
+  }
+
+  .cup-prize-footer {
+    display: grid;
+  }
+}
+
+
+/* Cup detail v48:
+   shorter participation card, scoring controls kept inside their card,
+   and a compact right-aligned top-card group. */
+
+/* Right participation card: content-based height. */
+.cup-fixed-right {
+  height: auto;
+  max-height: none;
+}
+
+.cup-fixed-right .cup-participation-card {
+  height: auto;
+  min-height: 0;
+  max-height: 570px;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: start;
+  overflow: hidden;
+}
+
+.cup-participation-card {
+  grid-template-rows: auto auto;
+}
+
+.cup-participation-top {
+  padding: 13px 14px 10px;
+}
+
+.cup-my-team {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  align-content: start;
+  padding: 16px;
+}
+
+.cup-team-members {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.cup-team-button {
+  margin-top: 17px;
+}
+
+/* Top-center cards: breathing room left, cards grouped right. */
+.cup-center-top-cards {
+  min-height: 252px;
+  display: grid;
+  grid-template-columns:
+    minmax(92px,.28fr)
+    minmax(430px,1.28fr)
+    225px;
+  gap: var(--cup-layout-gap);
+}
+
+.cup-center-top-cards .cup-progress-card {
+  grid-column: 2;
+}
+
+.cup-center-top-cards .cup-scoring-card {
+  grid-column: 3;
+}
+
+.cup-center-top-cards .cup-progress-card,
+.cup-center-top-cards .cup-scoring-card {
+  min-height: 252px;
+  height: 252px;
+}
+
+/* Progress card: denser chart, wider bars and legend. */
+.cup-progress-card {
+  display: grid;
+  grid-template-rows: auto auto minmax(0,1fr) auto;
+  overflow: hidden;
+}
+
+.cup-progress-summary {
+  margin-top: 8px;
+}
+
+.cup-progress-summary strong {
+  font-size: 28px;
+}
+
+.cup-milestone-bars {
+  width: 100%;
+  height: auto;
+  min-height: 112px;
+  grid-template-columns: repeat(5,minmax(58px,1fr));
+  gap: clamp(14px,2.1vw,34px);
+  align-items: end;
+  margin: 7px auto 0;
+  padding: 0 10px;
+}
+
+.cup-milestone-bars > span {
+  grid-template-rows: minmax(0,1fr) 15px 13px;
+}
+
+.cup-milestone-bars i {
+  width: 11px;
+  min-height: 24px;
+}
+
+.cup-milestone-bars b {
+  font-size: 8px;
+}
+
+.cup-milestone-bars small {
+  font-size: 6px;
+}
+
+.cup-progress-legend {

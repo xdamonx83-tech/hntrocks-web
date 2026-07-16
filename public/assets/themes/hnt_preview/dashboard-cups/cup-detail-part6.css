@@ -1,0 +1,540 @@
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 9px 0;
+  color: #8a8884;
+  font-size: 6px;
+}
+
+.cup-progress-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cup-progress-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a8a8a7;
+}
+
+.cup-progress-legend i.done {
+  background: var(--dark);
+}
+
+.cup-progress-legend i.current {
+  background: var(--yellow);
+}
+
+/* Scoring card: controls stay inside. */
+.cup-scoring-card {
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  overflow: hidden;
+}
+
+.cup-scoring-card > header {
+  position: relative;
+  z-index: 2;
+}
+
+.cup-score-ring {
+  width: 116px;
+  height: 116px;
+  align-self: center;
+  margin: 3px auto;
+}
+
+.cup-score-ring::before {
+  width: 94px;
+  height: 94px;
+}
+
+.cup-score-ring strong {
+  font-size: 25px;
+}
+
+.cup-scoring-actions {
+  min-width: 0;
+  min-height: 32px;
+  align-self: end;
+  display: grid;
+  grid-template-columns: 29px 29px minmax(0,1fr);
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+}
+
+.cup-scoring-actions button {
+  width: 29px;
+  height: 29px;
+}
+
+.cup-scoring-actions span {
+  min-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  font-size: 5.5px;
+  white-space: nowrap;
+  text-align: right;
+  text-overflow: ellipsis;
+}
+
+.cup-center-flow .cup-section-card {
+  margin-top: 12px;
+}
+
+@media (min-width: 1200px) {
+  .cup-fixed-right .cup-participation-card {
+    max-height: clamp(535px,59vh,590px);
+  }
+
+  .cup-center-top-cards {
+    min-height: clamp(252px,27vh,282px);
+    grid-template-columns:
+      minmax(100px,.3fr)
+      minmax(440px,1.32fr)
+      clamp(220px,13.2vw,250px);
+  }
+
+  .cup-center-top-cards .cup-progress-card,
+  .cup-center-top-cards .cup-scoring-card {
+    min-height: clamp(252px,27vh,282px);
+    height: clamp(252px,27vh,282px);
+  }
+
+  .cup-score-ring {
+    width: clamp(116px,7.1vw,138px);
+    height: clamp(116px,7.1vw,138px);
+  }
+
+  .cup-score-ring::before {
+    width: calc(100% - 22px);
+    height: calc(100% - 22px);
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 900px) {
+  .cup-center-top-cards {
+    grid-template-columns: minmax(0,1fr) 205px;
+  }
+
+  .cup-center-top-cards .cup-progress-card {
+    grid-column: 1;
+  }
+
+  .cup-center-top-cards .cup-scoring-card {
+    grid-column: 2;
+  }
+
+  .cup-fixed-right .cup-participation-card {
+    max-height: 540px;
+  }
+}
+
+@media (max-width: 899px) {
+  .cup-fixed-right .cup-participation-card {
+    max-height: none;
+  }
+
+  .cup-center-top-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-center-top-cards .cup-progress-card,
+  .cup-center-top-cards .cup-scoring-card {
+    grid-column: 1;
+    height: auto;
+    min-height: 285px;
+  }
+
+  .cup-score-ring {
+    width: 140px;
+    height: 140px;
+  }
+
+  .cup-score-ring::before {
+    width: 114px;
+    height: 114px;
+  }
+
+  .cup-scoring-actions span {
+    font-size: 7px;
+  }
+}
+
+
+/* Cup detail v49: extra demo content for clearly testing the center scroll. */
+.cup-overview-more {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.cup-overview-section-head,
+.cup-overview-feed > header,
+.cup-overview-ranking > header,
+.cup-overview-updates > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cup-overview-section-head > div,
+.cup-overview-feed > header > div,
+.cup-overview-ranking > header > div,
+.cup-overview-updates > header > div {
+  display: grid;
+  gap: 2px;
+}
+
+.cup-overview-section-head span,
+.cup-overview-feed header span,
+.cup-overview-ranking header span,
+.cup-overview-updates header span {
+  color: #b64e44;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: .11em;
+}
+
+.cup-overview-section-head h3,
+.cup-overview-feed h3,
+.cup-overview-ranking h3,
+.cup-overview-updates h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cup-overview-section-head button,
+.cup-overview-ranking header button {
+  height: 30px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 15px;
+  background: #ededeb;
+  color: #636362;
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.cup-live-summary {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 8px;
+}
+
+.cup-live-summary article {
+  min-height: 86px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 13px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.78);
+}
+
+.cup-live-summary article:first-child {
+  background: #f2dfdc;
+}
+
+.cup-live-summary span,
+.cup-live-summary small {
+  color: #8a8a89;
+  font-size: 6px;
+}
+
+.cup-live-summary strong {
+  font-size: 21px;
+  font-weight: 300;
+}
+
+.cup-overview-split {
+  display: grid;
+  grid-template-columns: minmax(0,1.15fr) minmax(300px,.85fr);
+  gap: 12px;
+}
+
+.cup-overview-feed,
+.cup-overview-ranking,
+.cup-overview-updates,
+.cup-overview-faq {
+  padding: 15px;
+  border: 1px solid rgba(234,210,206,.55);
+  border-radius: 21px;
+  background: rgba(255,255,255,.76);
+}
+
+.cup-overview-feed > header,
+.cup-overview-ranking > header {
+  margin-bottom: 8px;
+}
+
+.cup-overview-feed header small {
+  color: #8d8b87;
+  font-size: 6px;
+}
+
+.cup-overview-feed > article {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 35px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 4px;
+  border-top: 1px dashed #dcdad5;
+}
+
+.cup-overview-feed > article img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cup-overview-feed > article > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cup-overview-feed strong,
+.cup-overview-ranking strong {
+  overflow: hidden;
+  font-size: 7px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cup-overview-feed span,
+.cup-overview-ranking small,
+.cup-overview-feed time {
+  color: #8d8b87;
+  font-size: 6px;
+}
+
+.cup-overview-ranking {
+  display: grid;
+  align-content: start;
+}
+
+.cup-overview-ranking > article {
+  min-height: 61px;
+  display: grid;
+  grid-template-columns: 28px minmax(0,1fr) 38px;
+  align-items: center;
+  gap: 9px;
+  border-top: 1px dashed #dcdad5;
+}
+
+.cup-overview-ranking > article > b {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--dark);
+  color: white;
+  font-size: 7px;
+  font-weight: 500;
+}
+
+.cup-overview-ranking > article:first-of-type > b {
+  background: var(--yellow);
+  color: var(--dark);
+}
+
+.cup-overview-team {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cup-overview-team > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cup-overview-ranking > article > strong {
+  justify-self: end;
+  font-size: 12px;
+}
+
+.cup-overview-updates {
+  display: grid;
+  gap: 0;
+}
+
+.cup-overview-updates > header {
+  margin-bottom: 7px;
+}
+
+.cup-overview-updates > article {
+  min-height: 67px;
+  display: grid;
+  grid-template-columns: 95px minmax(0,1fr);
+  gap: 12px;
+  padding: 10px 2px;
+  border-top: 1px dashed #dcdad5;
+}
+
+.cup-overview-updates time {
+  color: #b64e44;
+  font-size: 6px;
+}
+
+.cup-overview-updates article > div {
+  display: grid;
+  gap: 3px;
+}
+
+.cup-overview-updates strong {
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.cup-overview-updates p,
+.cup-overview-faq p {
+  margin: 0;
+  color: #8d8b87;
+  font-size: 6.5px;
+  line-height: 1.5;
+}
+
+.cup-overview-faq .cup-overview-section-head {
+  margin-bottom: 6px;
+}
+
+.cup-overview-faq details {
+  border-top: 1px dashed #dcdad5;
+}
+
+.cup-overview-faq summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.cup-overview-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.cup-overview-faq summary svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+}
+
+.cup-overview-faq details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.cup-overview-faq details p {
+  padding: 0 0 12px;
+}
+
+@media (min-width: 1200px) {
+  .cup-overview-section-head h3,
+  .cup-overview-feed h3,
+  .cup-overview-ranking h3,
+  .cup-overview-updates h3 {
+    font-size: clamp(13px,.85vw,17px);
+  }
+
+  .cup-live-summary strong {
+    font-size: clamp(21px,1.6vw,30px);
+  }
+}
+
+@media (max-width: 899px) {
+  .cup-live-summary {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+
+  .cup-overview-split {
+    grid-template-columns: 1fr;
+  }
+
+  .cup-overview-updates > article {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cup-live-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Cup detail v50:
+   sticky Cup navigation now spans the complete center content card,
+   matching the Community Feed header. */
+.cup-center-flow .cup-section-head {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 0;
+  align-self: stretch;
+
+  /* The parent card has 12px horizontal padding. Negative margins let
+     the sticky header reach the card's full outer width like feed.html. */
+  margin: 0 -12px 12px;
+  padding: 11px 16px 10px;
+
+  border-radius: 27px 27px 16px 16px;
+  background: #f3f3f0;
+  box-shadow: 0 8px 22px rgba(112,44,39,.045);
+  isolation: isolate;
+}
+
+.cup-center-flow .cup-section-head.is-stuck {
+  width: auto;
+  margin-right: -12px;
+  margin-left: -12px;
+  border: 1px solid rgba(234,210,206,.46);
+  border-bottom-color: rgba(234,210,206,.22);
+  background: rgba(243,243,240,.985);
+  box-shadow: 0 10px 26px rgba(112,44,39,.055);
+  backdrop-filter: blur(10px);
+}
+
+.cup-center-flow .cup-section-tabs {
+  min-width: 0;
+  max-width: 72%;
+}
+
+@media (max-width: 1180px) and (min-width: 900px) {
+  .cup-center-flow .cup-section-tabs {
+    max-width: 68%;
+  }
+}
+
+@media (max-width: 899px) {
+  .cup-center-flow .cup-section-head,
+  .cup-center-flow .cup-section-head.is-stuck {
+    width: auto;
+    margin: 0 -12px 12px;
+    padding: 10px 14px;
+  }
+
+  .cup-center-flow .cup-section-tabs {
+    width: 100%;
+    max-width: none;
+  }
+}
