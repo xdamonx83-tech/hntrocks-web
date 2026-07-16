@@ -1,13 +1,45 @@
-<section class="cup-tab-panel" data-cup-panel="teams" hidden="" tabindex="0">
-<div class="cup-leaderboard">
-<div class="cup-leaderboard-head"><span>Rang</span><span>Team</span><span>Kills</span><span>Trophäen</span><span>Punkte</span></div>
-<article><b>1</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/></span><strong>Night Ravens</strong></div><span>18</span><span>3</span><strong>21</strong></article>
-<article><b>2</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/katy.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/sarah.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-1.jpg') }}"/></span><strong>Bayou Wolves</strong></div><span>15</span><span>3</span><strong>18</strong></article>
-<article><b>3</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-1.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-2.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/></span><strong>Last Extract</strong></div><span>14</span><span>2</span><strong>16</strong></article>
-<article><b>4</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/sarah.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/katy.jpg') }}"/></span><strong>Silent Crows</strong></div><span>12</span><span>2</span><strong>14</strong></article>
-<article><b>5</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-2.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/katy.jpg') }}"/></span><strong>Black Water</strong></div><span>11</span><span>2</span><strong>13</strong></article>
-<article><b>6</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/sarah.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-1.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg') }}"/></span><strong>Rotjaw Crew</strong></div><span>10</span><span>2</span><strong>12</strong></article>
-<article><b>7</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-2.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/></span><strong>Delta Hunters</strong></div><span>9</span><span>1</span><strong>10</strong></article>
-<article><b>8</b><div><span class="team-avatars"><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/katy.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-1.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/sarah.jpg') }}"/></span><strong>Last Contract</strong></div><span>7</span><span>2</span><strong>9</strong></article>
-</div>
+@php
+    $isEnglish = app()->getLocale() === 'en';
+    $rankedTeams = collect($leaderboard ?? [])->values();
+@endphp
+
+<section class="cup-tab-panel" data-cup-panel="teams" hidden tabindex="0">
+    <div class="cup-leaderboard">
+        <div class="cup-leaderboard-head">
+            <span>{{ $isEnglish ? 'Rank' : 'Rang' }}</span>
+            <span>Team</span>
+            <span>Kills</span>
+            <span>{{ $isEnglish ? 'Trophies' : 'Trophäen' }}</span>
+            <span>{{ $isEnglish ? 'Points' : 'Punkte' }}</span>
+        </div>
+
+        @forelse($rankedTeams as $rankIndex => $rankedTeam)
+            @php
+                $rankedMembers = $rankedTeam->members->where('status', 'active')->values();
+                $fallbackOwner = $rankedTeam->owner;
+                $isViewerTeam = $viewerTeam && (int) $viewerTeam->id === (int) $rankedTeam->id;
+            @endphp
+            <article @class(['is-viewer-team' => $isViewerTeam])>
+                <b>{{ $rankIndex + 1 }}</b>
+                <div>
+                    <span class="team-avatars">
+                        @forelse($rankedMembers->take(3) as $rankedMember)
+                            @php($rankedUser = $rankedMember->user)
+                            <img alt="{{ $rankedUser?->username ?: $rankedUser?->name ?: 'Hunter' }}" src="{{ $rankedUser?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+                        @empty
+                            <img alt="{{ $fallbackOwner?->username ?: $fallbackOwner?->name ?: 'Hunter' }}" src="{{ $fallbackOwner?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+                        @endforelse
+                    </span>
+                    <strong>{{ $rankedTeam->displayName() }}</strong>
+                </div>
+                <span>{{ (int) $rankedTeam->kills_total }}</span>
+                <span>{{ (int) $rankedTeam->bounty_tokens_total }}</span>
+                <strong>{{ (int) $rankedTeam->points_total }}</strong>
+            </article>
+        @empty
+            <div class="cup-leaderboard-empty">
+                {{ $isEnglish ? 'No confirmed teams are ranked yet.' : 'Noch ist kein bestätigtes Team im Leaderboard.' }}
+            </div>
+        @endforelse
+    </div>
 </section>
