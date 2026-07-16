@@ -86,6 +86,14 @@
   color: #a9473e;
 }
 
+.profile-real-post {
+  position: relative;
+}
+
+.profile-real-post > .real-feed-menu--anchored {
+  position: absolute;
+}
+
 /* The global feed composer creates normal posts and polls only. LFG and Moments
    already have dedicated creation flows and do not belong in this modal. */
 #postComposerModal [data-composer-type="LFG"],
