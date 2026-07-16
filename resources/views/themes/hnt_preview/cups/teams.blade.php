@@ -13,6 +13,7 @@
     $isEnglish = app()->getLocale() === 'en';
     $viewer = auth()->user();
     $registrationOpen = $cup->isRegistrationOpen();
+    $submissionOpen = $cup->isSubmissionOpen();
     $viewerEligibility = $viewer
         ? $cup->participationEligibility($viewer)
         : ['eligible' => false, 'messages' => [$isEnglish ? 'Please sign in first.' : 'Bitte melde dich zuerst an.']];
@@ -22,6 +23,16 @@
     $teamSize = max(1, (int) ($cup->team_size ?: 1));
     $viewerIsCaptain = $viewerTeam ? $viewerTeam->isCaptain($viewer) : false;
     $viewerCanManage = $viewerTeam && ($viewerIsCaptain || $canManage);
+    $viewerTeamComplete = $viewerTeam ? $viewerTeam->isComplete() : false;
+    $viewerUploadLimit = $cup->maxSubmissionsPerParticipant();
+    $viewerUploadCount = $viewerTeam ? $viewerTeam->submissions()->count() : 0;
+    $viewerUploadLimitReached = $viewerUploadLimit !== null && $viewerUploadCount >= $viewerUploadLimit;
+    $viewerCanSubmit = $viewerTeam
+        && $viewerTeam->status === 'active'
+        && $submissionOpen
+        && $viewerIsCaptain
+        && $viewerTeamComplete
+        && ! $viewerUploadLimitReached;
     $inviteUrl = $viewerTeam ? route('cups.teams.join', [$cup, $viewerTeam->join_token]) : null;
     $coverUrl = $cup->coverUrl();
 @endphp
@@ -84,8 +95,30 @@
                     </div>
                 @endif
 
+                <div class="cup-team-flow__submit-summary">
+                    <span class="cup-team-flow__eyebrow">{{ $isEnglish ? 'SUBMISSIONS' : 'EINREICHUNGEN' }}</span>
+                    <strong>{{ $viewerUploadCount }}{{ $viewerUploadLimit !== null ? ' / '.$viewerUploadLimit : '' }}</strong>
+                    <p class="cup-team-flow__muted">
+                        @if($viewerCanSubmit)
+                            {{ $isEnglish ? 'Your team can submit another screenshot.' : 'Dein Team kann einen weiteren Screenshot einreichen.' }}
+                        @elseif(! $submissionOpen)
+                            {{ $cup->submissionClosedReason() }}
+                        @elseif($viewerUploadLimitReached)
+                            {{ $isEnglish ? 'The upload limit has been reached.' : 'Das Upload-Limit wurde erreicht.' }}
+                        @elseif(! $viewerIsCaptain)
+                            {{ $isEnglish ? 'Only the captain can submit screenshots.' : 'Nur der Captain kann Screenshots einreichen.' }}
+                        @elseif(! $viewerTeamComplete)
+                            {{ $isEnglish ? 'Complete the team before submitting.' : 'Vervollständige zuerst das Team.' }}
+                        @endif
+                    </p>
+                </div>
+
                 <div class="cup-team-flow__actions">
-                    <a class="cup-team-flow__primary" href="{{ route('cups.show.section', [$cup, 'submit']) }}">{{ $isEnglish ? 'Open submissions' : 'Einreichungen öffnen' }}</a>
+                    @if($viewerCanSubmit)
+                        <button class="cup-team-flow__primary" type="button" data-open-cup-submission-modal>{{ $isEnglish ? 'Submit screenshot' : 'Screenshot einreichen' }}</button>
+                    @else
+                        <a class="cup-team-flow__primary" href="{{ route('cups.show.section', [$cup, 'submit']) }}">{{ $isEnglish ? 'Open submission status' : 'Einreichungsstatus öffnen' }}</a>
+                    @endif
                     <a class="cup-team-flow__secondary" href="{{ route('cups.show.section', [$cup, 'participants']) }}">Leaderboard</a>
                 </div>
             </article>
@@ -143,7 +176,7 @@
                         <div class="cup-team-flow__card">
                             <div>
                                 <strong>{{ $recruitingTeam->displayName() }}</strong>
-                                <p>{{ $memberCount }}/{{ $recruitingTeam->requiredMembersCount() }} · {{ $isEnglish ? 'Captain' : 'Captain' }}: {{ $owner?->username ?: $owner?->name ?: 'Hunter' }}</p>
+                                <p>{{ $memberCount }}/{{ $recruitingTeam->requiredMembersCount() }} · Captain: {{ $owner?->username ?: $owner?->name ?: 'Hunter' }}</p>
                             </div>
                             @if($viewer && $registrationOpen && ($viewerEligibility['eligible'] ?? false))
                                 <a class="cup-team-flow__primary" href="{{ route('cups.teams.join', [$cup, $recruitingTeam->join_token]) }}">{{ $isEnglish ? 'Join' : 'Beitreten' }}</a>
@@ -211,4 +244,113 @@
         </section>
     @endif
 </div>
+
+@if($viewerCanSubmit)
+<div class="cup-team-modal" id="cupTeamSubmissionModal" hidden>
+    <button class="cup-team-modal__backdrop" type="button" aria-label="{{ $isEnglish ? 'Close modal' : 'Modal schließen' }}" data-close-cup-submission-modal></button>
+    <section class="cup-team-modal__panel cup-team-submit-modal__panel" role="dialog" aria-modal="true" aria-labelledby="cupTeamSubmissionTitle">
+        <header class="cup-team-modal__head">
+            <div>
+                <span class="cup-team-modal__eyebrow">{{ $isEnglish ? 'CUP SUBMISSION' : 'CUP-EINREICHUNG' }}</span>
+                <h2 id="cupTeamSubmissionTitle">{{ $isEnglish ? 'Submit screenshot' : 'Screenshot einreichen' }}</h2>
+            </div>
+            <button class="cup-team-modal__close" type="button" aria-label="{{ $isEnglish ? 'Close' : 'Schließen' }}" data-close-cup-submission-modal>×</button>
+        </header>
+        <p class="cup-team-modal__intro">{{ $isEnglish ? 'Upload the complete, unedited match screenshot. It will be checked immediately.' : 'Lade den vollständigen, unbearbeiteten Match-Screenshot hoch. Er wird direkt geprüft.' }}</p>
+
+        <form class="cup-team-modal__form" id="cupTeamSubmissionForm" method="post" action="{{ route('cups.submissions.store', [$cup, $viewerTeam]) }}" enctype="multipart/form-data">
+            @csrf
+            <label class="cup-team-submit-upload" for="cupTeamSubmissionFile">
+                <input id="cupTeamSubmissionFile" type="file" name="screenshot" accept="image/jpeg,image/png,image/webp" required>
+                <span class="cup-team-submit-upload__icon">▧</span>
+                <strong data-cup-submission-file-label>{{ $isEnglish ? 'Select screenshot' : 'Screenshot auswählen' }}</strong>
+                <small>JPG, PNG, WebP · max. 10 MB</small>
+            </label>
+            <label for="cupTeamSubmissionNote">{{ $isEnglish ? 'Note (optional)' : 'Notiz (optional)' }}</label>
+            <textarea id="cupTeamSubmissionNote" name="note" maxlength="1200" rows="3" placeholder="{{ $isEnglish ? 'Optional note for the review' : 'Optionale Notiz für die Prüfung' }}"></textarea>
+            <p class="cup-team-submit-modal__status" data-cup-submission-status hidden></p>
+            <button class="cup-team-modal__submit" type="submit" data-cup-submission-submit>{{ $isEnglish ? 'Upload and check' : 'Hochladen und prüfen' }}</button>
+        </form>
+    </section>
+</div>
+@endif
 @endsection
+
+@push('scripts')
+@if($viewerCanSubmit)
+<script>
+(() => {
+    const modal = document.getElementById('cupTeamSubmissionModal');
+    const form = document.getElementById('cupTeamSubmissionForm');
+    if (!modal || !form) return;
+
+    const fileInput = form.querySelector('input[name="screenshot"]');
+    const fileLabel = form.querySelector('[data-cup-submission-file-label]');
+    const status = form.querySelector('[data-cup-submission-status]');
+    const submitButton = form.querySelector('[data-cup-submission-submit]');
+    const openButtons = document.querySelectorAll('[data-open-cup-submission-modal]');
+    const closeButtons = modal.querySelectorAll('[data-close-cup-submission-modal]');
+
+    const openModal = () => {
+        modal.hidden = false;
+        document.body.classList.add('cup-team-modal-open');
+        window.setTimeout(() => fileInput?.focus(), 30);
+    };
+
+    const closeModal = () => {
+        if (submitButton?.disabled) return;
+        modal.hidden = true;
+        document.body.classList.remove('cup-team-modal-open');
+    };
+
+    openButtons.forEach((button) => button.addEventListener('click', openModal));
+    closeButtons.forEach((button) => button.addEventListener('click', closeModal));
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.hidden) closeModal();
+    });
+
+    fileInput?.addEventListener('change', () => {
+        const file = fileInput.files?.[0];
+        if (file && fileLabel) fileLabel.textContent = file.name;
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!fileInput?.files?.[0]) return;
+
+        submitButton.disabled = true;
+        submitButton.textContent = @json($isEnglish ? 'Checking screenshot…' : 'Screenshot wird geprüft…');
+        status.hidden = false;
+        status.classList.remove('is-error', 'is-success');
+        status.textContent = @json($isEnglish ? 'Upload and analysis are running. Please keep this window open.' : 'Upload und Prüfung laufen. Bitte dieses Fenster geöffnet lassen.');
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok || payload.ok === false) {
+                throw new Error(payload.message || @json($isEnglish ? 'The submission failed.' : 'Die Einreichung ist fehlgeschlagen.'));
+            }
+
+            status.classList.add('is-success');
+            status.textContent = payload.message || @json($isEnglish ? 'Submission saved.' : 'Einreichung gespeichert.');
+            submitButton.textContent = @json($isEnglish ? 'Done' : 'Fertig');
+            window.setTimeout(() => window.location.reload(), 1100);
+        } catch (error) {
+            status.classList.add('is-error');
+            status.textContent = error.message || @json($isEnglish ? 'The submission failed.' : 'Die Einreichung ist fehlgeschlagen.');
+            submitButton.disabled = false;
+            submitButton.textContent = @json($isEnglish ? 'Upload and check' : 'Hochladen und prüfen');
+        }
+    });
+})();
+</script>
+@endif
+@endpush
