@@ -75,6 +75,8 @@ return [
     'planned_events' => ':count upcoming events',
     'scoring_fair_play' => 'Scoring & fair play',
     'rules_and_scores' => 'Rules and scoring',
+    'cup_ideas' => 'Cup ideas',
+    'cup_ideas_text' => 'Suggest and vote',
     'my_cups' => 'My cups',
     'teams_and_submissions' => 'Teams and submissions',
     'hall_text' => 'Winners and previous cups',

@@ -5,7 +5,9 @@
     $featuredCup = $overview['featuredCup'];
     $upcomingCups = $overview['upcomingCups'];
     $viewerTeam = $overview['viewerTeam'];
+    $viewerCupIds = $overview['viewerCupIds'];
     $topTeams = $overview['topTeams'];
+    $hallStats = $overview['hallStats'];
 
     $statusFilter = (string) ($filters['status'] ?? request('status', ''));
     $platformFilter = (string) ($filters['platform'] ?? request('platform', ''));
@@ -35,6 +37,27 @@
     $formatCount = static fn (int $value): string => number_format($value, 0, '', app()->isLocale('de') ? '.' : ',');
     $trackedCupCount = (int) $stats['active'] + (int) $stats['planned'] + (int) $stats['finished'];
 
+    $cupPlatformLabel = static function (\App\Models\Cup $cup): string {
+        return implode(' / ', $cup->allowedPlatforms()) ?: ($cup->platform ?: __('hnt_cups_overview.all_platforms'));
+    };
+    $cupPlatformKey = static function (\App\Models\Cup $cup): string {
+        $platforms = collect($cup->allowedPlatforms())->map(fn ($platform) => strtolower((string) $platform));
+
+        return $platforms->contains('pc')
+            ? 'pc'
+            : ($platforms->contains('playstation') && $platforms->contains('xbox')
+                ? 'console'
+                : ($platforms->contains('playstation')
+                    ? 'ps5'
+                    : ($platforms->contains('xbox') ? 'xbox' : 'all')));
+    };
+    $cupModeLabel = static fn (\App\Models\Cup $cup): string => $cup->isSoloLeaderboard()
+        ? __('hnt_cups_overview.solo')
+        : __('hnt_cups_overview.team_size', ['counter' => $cup->team_size]);
+    $cupDateLabel = static fn (\App\Models\Cup $cup): string => $cup->starts_at
+        ? $cup->starts_at->translatedFormat('F Y')
+        : 'TBA';
+
     $timelineCup = $viewerTeam?->cup ?: $featuredCup;
     $timelineEvents = collect([
         [
@@ -59,26 +82,15 @@
         ] : null,
     ])->filter()->take(4)->values();
 
-    $featuredPlatforms = $featuredCup
-        ? (implode(' / ', $featuredCup->allowedPlatforms()) ?: ($featuredCup->platform ?: __('hnt_cups_overview.all_platforms')))
-        : '';
-    $featuredPlatformNames = $featuredCup
-        ? collect($featuredCup->allowedPlatforms())->map(fn ($platform) => strtolower((string) $platform))
-        : collect();
-    $featuredPlatformKey = $featuredPlatformNames->contains('pc')
-        ? 'pc'
-        : ($featuredPlatformNames->contains('playstation') && $featuredPlatformNames->contains('xbox')
-            ? 'console'
-            : ($featuredPlatformNames->contains('playstation')
-                ? 'ps5'
-                : ($featuredPlatformNames->contains('xbox') ? 'xbox' : 'all')));
+    $featuredPlatforms = $featuredCup ? $cupPlatformLabel($featuredCup) : '';
+    $featuredPlatformKey = $featuredCup ? $cupPlatformKey($featuredCup) : 'all';
     $featuredLimit = $featuredCup?->participantLimit();
     $featuredStart = $featuredCup?->starts_at
         ? ($featuredCup->starts_at->isFuture()
             ? $featuredCup->starts_at->diffForHumans()
             : $featuredCup->starts_at->translatedFormat('d.m.Y · H:i'))
         : 'TBA';
-    $featuredMine = $featuredCup && $viewerTeam && (int) $viewerTeam->cup_id === (int) $featuredCup->id;
+    $featuredMine = $featuredCup && $viewerCupIds->contains((int) $featuredCup->id);
 
     $viewerCup = $viewerTeam?->cup;
     $viewerMembers = $viewerTeam?->members?->where('status', 'active')->values() ?? collect();
@@ -88,9 +100,7 @@
     $viewerSubmissionProgress = $viewerSubmissionMax > 0
         ? min(100, (int) round(($viewerSubmissionUsed / $viewerSubmissionMax) * 100))
         : 0;
-    $viewerPlatforms = $viewerCup
-        ? (implode(' / ', $viewerCup->allowedPlatforms()) ?: ($viewerCup->platform ?: __('hnt_cups_overview.all_platforms')))
-        : '';
+    $viewerPlatforms = $viewerCup ? $cupPlatformLabel($viewerCup) : '';
 
     $demoCup = $featuredCup;
     $demoViewerTeam = $viewerTeam;

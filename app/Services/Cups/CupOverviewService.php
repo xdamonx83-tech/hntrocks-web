@@ -28,6 +28,21 @@ class CupOverviewService
             ->limit(2)
             ->get();
 
+        $viewerCupIds = $viewer
+            ? CupTeam::query()
+                ->where('status', 'active')
+                ->whereHas('members', fn (Builder $query) => $query
+                    ->where('user_id', $viewer->id)
+                    ->where('status', 'active'))
+                ->whereHas('cup', function (Builder $query) use ($viewer): void {
+                    $this->constrainVisibility($query, $viewer);
+                })
+                ->pluck('cup_id')
+                ->map(static fn ($id): int => (int) $id)
+                ->unique()
+                ->values()
+            : collect();
+
         $viewerTeam = $viewer
             ? CupTeam::query()
                 ->with([
@@ -62,8 +77,27 @@ class CupOverviewService
             ->orderByDesc('bounty_tokens_total')
             ->orderByDesc('kills_total')
             ->orderByDesc('submissions_approved_count')
+            ->orderBy('id')
             ->limit(3)
             ->get();
+
+        $finishedCups = $this->visibleCups($viewer)
+            ->where('status', 'finished')
+            ->with(['teams' => function ($query): void {
+                $query->where('status', 'active')
+                    ->orderByDesc('points_total')
+                    ->orderByDesc('bounty_tokens_total')
+                    ->orderByDesc('kills_total')
+                    ->orderByDesc('submissions_approved_count')
+                    ->orderBy('id');
+            }])
+            ->get(['id']);
+
+        $hallStats = [
+            'cups' => $finishedCups->count(),
+            'finalists' => $finishedCups->sum(fn (Cup $cup): int => $cup->teams->take(5)->count()),
+            'winners' => $finishedCups->sum(fn (Cup $cup): int => $cup->teams->take(3)->count()),
+        ];
 
         return [
             'stats' => [
@@ -101,7 +135,9 @@ class CupOverviewService
             'featuredCup' => $featuredCup,
             'upcomingCups' => $upcomingCups,
             'viewerTeam' => $viewerTeam,
+            'viewerCupIds' => $viewerCupIds,
             'topTeams' => $topTeams,
+            'hallStats' => $hallStats,
         ];
     }
 

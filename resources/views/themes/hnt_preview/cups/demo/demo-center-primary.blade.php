@@ -43,7 +43,7 @@
 <div class="cups-featured-copy">
 <div class="cups-card-status">
 <span class="active"><i></i>{{ $featuredCup->isRegistrationOpen() ? __('hnt_cups_overview.registration_open') : $featuredCup->statusLabel() }}</span>
-<span>{{ $featuredCup->isSoloLeaderboard() ? __('hnt_cups_overview.solo') : __('hnt_cups_overview.team_size', ['counter' => $featuredCup->team_size]) }}</span>
+<span>{{ $cupModeLabel($featuredCup) }}</span>
 <span>{{ $featuredPlatforms }}</span>
 </div>
 <h3>{{ $featuredCup->title }}</h3>
@@ -58,7 +58,7 @@
 </div>
 <div class="cups-featured-actions">
 <a href="{{ route('cups.show', $featuredCup) }}">{{ __('hnt_cups_overview.view_cup') }} <svg><use href="#i-arrow"></use></svg></a>
-<button data-toast="{{ __('hnt_cups_overview.view_cup') }}" type="button" aria-label="{{ __('hnt_cups_overview.view_cup') }}"><svg><use href="#i-bookmark"></use></svg></button>
+<button data-url="{{ route('cups.show', $featuredCup) }}" type="button" aria-label="{{ __('hnt_cups_overview.view_cup') }}"><svg><use href="#i-bookmark"></use></svg></button>
 </div>
 </div>
 </section>
@@ -83,36 +83,42 @@
 <span>{{ __('hnt_cups_overview.next') }}</span>
 <h3>{{ __('hnt_cups_overview.upcoming_highlights') }}</h3>
 </div>
-<small>2 {{ __('hnt_cups_overview.planned') }}</small>
+<small>{{ __('hnt_cups_overview.planned_count', ['count' => $upcomingCups->count()]) }}</small>
 </header>
+@if($upcomingCups->isNotEmpty())
 <div class="cups-highlight-grid">
-<article class="cup-highlight-card blood" data-mine="false" data-platform="console" data-search="bayou blood cup solo console" data-status="planned">
-<div class="cup-highlight-art">
-<span>BAYOU BLOOD</span>
-<strong>SOLO CUP</strong>
-<small>August 2026</small>
+@foreach($upcomingCups as $upcomingCup)
+@php
+    $upcomingPlatforms = $cupPlatformLabel($upcomingCup);
+    $upcomingLimit = $upcomingCup->participantLimit();
+    $upcomingCountLabel = $formatCount((int) $upcomingCup->active_teams_count)
+        .($upcomingLimit ? ' / '.$formatCount($upcomingLimit) : '')
+        .' '.($upcomingCup->isSoloLeaderboard() ? __('hnt_cups_overview.participants') : __('hnt_cups_overview.teams'));
+@endphp
+<article class="cup-highlight-card {{ $loop->first ? 'blood' : 'frost' }}"
+         data-mine="{{ $viewerCupIds->contains((int) $upcomingCup->id) ? 'true' : 'false' }}"
+         data-platform="{{ $cupPlatformKey($upcomingCup) }}"
+         data-search="{{ \Illuminate\Support\Str::lower($upcomingCup->title.' '.$upcomingPlatforms.' '.$upcomingCup->status) }}"
+         data-status="{{ $upcomingCup->status }}">
+<div class="cup-highlight-art" style="background-image:url('{{ $upcomingCup->coverUrl() }}')">
+<span>{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($upcomingCup->title, 22, '')) }}</span>
+<strong>{{ $cupModeLabel($upcomingCup) }}</strong>
+<small>{{ $cupDateLabel($upcomingCup) }}</small>
 </div>
 <div class="cup-highlight-content">
-<span class="planned">{{ __('hnt_cups_overview.planned') }}</span>
-<h4>Bayou Blood Cup</h4>
-<p>Solo-Leaderboard mit festem Loadout und manueller Score-Prüfung.</p>
-<div><span>{{ __('hnt_cups_overview.solo') }}</span><span>Konsole</span><span>64 Plätze</span></div>
-<button data-toast="Benachrichtigung aktiviert" type="button">Erinnern</button>
+<span class="planned">{{ $upcomingCup->statusLabel() }}</span>
+<h4>{{ $upcomingCup->title }}</h4>
+<p>{{ \Illuminate\Support\Str::limit($upcomingCup->displaySummary(), 118) }}</p>
+<div><span>{{ $cupModeLabel($upcomingCup) }}</span><span>{{ $upcomingPlatforms }}</span><span>{{ $upcomingCountLabel }}</span></div>
+<button data-url="{{ route('cups.show', $upcomingCup) }}" type="button">{{ __('hnt_cups_overview.remember') }}</button>
 </div>
 </article>
-<article class="cup-highlight-card frost" data-mine="false" data-platform="pc" data-search="winter bayou trio pc cup" data-status="planned">
-<div class="cup-highlight-art">
-<span>WINTER BAYOU</span>
-<strong>TRIO EVENT</strong>
-<small>Dezember 2026</small>
+@endforeach
 </div>
-<div class="cup-highlight-content">
-<span class="planned">{{ __('hnt_cups_overview.planned') }}</span>
-<h4>Winter Bayou</h4>
-<p>Drei Abende, drei Maps und ein gemeinsames Team-Leaderboard.</p>
-<div><span>Trio</span><span>PC</span><span>20 {{ __('hnt_cups_overview.teams') }}</span></div>
-<button data-toast="Benachrichtigung aktiviert" type="button">Erinnern</button>
+@else
+<div class="cups-empty-state">
+<span>{{ __('hnt_cups_overview.empty_title') }}</span>
+<p>{{ __('hnt_cups_overview.empty_text') }}</p>
 </div>
-</article>
-</div>
+@endif
 </section>
