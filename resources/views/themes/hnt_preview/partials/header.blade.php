@@ -6,7 +6,7 @@
     $headerLevel = max(1, (int) ($headerViewer?->level ?? 1));
     $headerRocks = (int) ($headerViewer?->crownWallet?->balance ?? 0);
     $headerIsFeed = request()->routeIs('feed.index');
-    $headerIsTeams = request()->routeIs('teams.index');
+    $headerIsTeams = request()->routeIs('teams.*');
     $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
 <header class="site-header" data-hnt-shared-header>

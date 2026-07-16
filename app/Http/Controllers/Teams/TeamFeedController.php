@@ -60,7 +60,7 @@ class TeamFeedController extends Controller
             }
 
             return redirect()
-                ->route('teams.show', $team)
+                ->route('teams.info', $team)
                 ->withErrors(['body' => __('ui.feed_body_or_media_required')])
                 ->withInput();
         }
@@ -132,11 +132,11 @@ class TeamFeedController extends Controller
             return response()->json([
                 'ok' => true,
                 'message' => __('ui.team_feed_post_published'),
-                'redirect_url' => route('teams.show', $team),
+                'redirect_url' => route('teams.info', $team),
                 'post_id' => $post->id,
             ]);
         }
 
-        return redirect()->route('teams.show', $team)->with('status', __('ui.team_feed_post_published'));
+        return redirect()->route('teams.info', $team)->with('status', __('ui.team_feed_post_published'));
     }
 }
