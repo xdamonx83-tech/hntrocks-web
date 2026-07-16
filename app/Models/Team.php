@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
@@ -64,6 +65,31 @@ class Team extends Model
     public function feedPosts(): HasMany
     {
         return $this->hasMany(FeedPost::class);
+    }
+
+    public function progression(): HasOne
+    {
+        return $this->hasOne(TeamProgression::class);
+    }
+
+    public function xpEvents(): HasMany
+    {
+        return $this->hasMany(TeamXpEvent::class);
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(TeamContract::class);
+    }
+
+    public function participations(): HasMany
+    {
+        return $this->hasMany(TeamParticipation::class);
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(TeamSession::class);
     }
 
     public function avatarUrl(): string

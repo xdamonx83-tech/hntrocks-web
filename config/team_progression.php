@@ -1,0 +1,103 @@
+<?php
+
+return [
+    'level_curve' => [
+        'base_xp' => 500,
+        'growth_xp' => 250,
+    ],
+
+    'contracts' => [
+        'max_active' => 1,
+        'minimum_qualifying_contribution' => 1,
+        'templates' => [
+            'team_posts' => [
+                'name_key' => 'teams.contracts.team_posts.name',
+                'description_key' => 'teams.contracts.team_posts.description',
+                'category' => 'community',
+                'metric' => 'team_post_created',
+                'target' => 12,
+                'minimum_contributors' => 3,
+                'duration_days' => 7,
+                'repeatable' => true,
+                'cooldown_days' => 7,
+                'team_xp_reward' => 250,
+                'rocks_reward' => 20,
+            ],
+            'team_discussion' => [
+                'name_key' => 'teams.contracts.team_discussion.name',
+                'description_key' => 'teams.contracts.team_discussion.description',
+                'category' => 'community',
+                'metric' => 'team_comment_created',
+                'target' => 30,
+                'minimum_contributors' => 3,
+                'duration_days' => 7,
+                'repeatable' => true,
+                'cooldown_days' => 7,
+                'team_xp_reward' => 300,
+                'rocks_reward' => 25,
+            ],
+            'community_reactions' => [
+                'name_key' => 'teams.contracts.community_reactions.name',
+                'description_key' => 'teams.contracts.community_reactions.description',
+                'category' => 'community',
+                'metric' => 'team_post_reaction_received',
+                'target' => 40,
+                'minimum_contributors' => 3,
+                'duration_days' => 7,
+                'repeatable' => true,
+                'cooldown_days' => 7,
+                'team_xp_reward' => 350,
+                'rocks_reward' => 25,
+            ],
+            'shared_sessions' => [
+                'name_key' => 'teams.contracts.shared_sessions.name',
+                'description_key' => 'teams.contracts.shared_sessions.description',
+                'category' => 'sessions',
+                'metric' => 'team_session_completed',
+                'target' => 3,
+                'minimum_contributors' => 1,
+                'duration_days' => null,
+                'repeatable' => true,
+                'cooldown_days' => 3,
+                'team_xp_reward' => 400,
+                'rocks_reward' => 30,
+            ],
+            'full_roster' => [
+                'name_key' => 'teams.contracts.full_roster.name',
+                'description_key' => 'teams.contracts.full_roster.description',
+                'category' => 'sessions',
+                'metric' => 'team_session_full_roster',
+                'target' => 1,
+                'minimum_contributors' => 1,
+                'duration_days' => null,
+                'repeatable' => true,
+                'cooldown_days' => 7,
+                'team_xp_reward' => 500,
+                'rocks_reward' => 40,
+            ],
+        ],
+    ],
+
+    'participation' => [
+        'badges' => [
+            'member' => 0,
+            'growing_participation' => 700,
+            'top_participation' => 1500,
+            'outstanding_participation' => 5000,
+        ],
+        'activities' => [
+            'team_post_created' => ['points' => 20, 'daily_limit' => 5],
+            'team_comment_created' => ['points' => 8, 'daily_limit' => 15, 'minimum_characters' => 20],
+            'team_post_reaction_received' => ['points' => 3, 'daily_limit' => null],
+            'team_session_attended' => ['points' => 50, 'daily_limit' => null],
+            'team_session_organized' => ['points' => 30, 'daily_limit' => null],
+            'team_contract_contributed' => ['points' => 75, 'daily_limit' => null],
+        ],
+    ],
+
+    'sessions' => [
+        'minimum_confirmed_participants' => 2,
+        'full_roster_percent' => 75,
+        'team_xp_reward' => 100,
+    ],
+];

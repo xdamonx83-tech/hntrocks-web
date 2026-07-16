@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(TeamContractTemplateSeeder::class);
+
         $users = [
             [
                 'email' => 'admin@hunthub.local',
