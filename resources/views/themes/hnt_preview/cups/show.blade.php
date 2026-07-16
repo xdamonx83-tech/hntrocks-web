@@ -172,6 +172,12 @@
         ? $viewerTeamSubmissionCount.' · '.($isEnglish ? 'max. '.$maxUploadsPerParticipant.' per player' : 'max. '.$maxUploadsPerParticipant.' pro Spieler')
         : (string) $viewerTeamSubmissionCount;
     $participationRequirements = $cup->rulesSummary();
+    $defaultTeamName = trim((string) ((auth()->user()?->username ?: auth()->user()?->name)
+        ? (auth()->user()?->username ?: auth()->user()?->name).' Team'
+        : ($isEnglish ? 'My team' : 'Mein Team')));
+    $teamModalShouldOpen = ! $viewerTeam
+        && ! $soloCup
+        && (request()->query('team') === 'create' || old('name') !== null || ($errors->has('name') ?? false) || ($errors->has('team') ?? false));
 
     $cupDetailCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/cup-detail.css')) ?: time();
     $cupDetailThemeVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/cup-detail-theme-live-red.css')) ?: time();
@@ -208,6 +214,45 @@
 </section>
 <div class="toast" id="toast"></div>
 </main>
+
+@if(! $viewerTeam && ! $soloCup && auth()->check())
+<div class="cup-team-modal" id="cupTeamCreateModal" data-auto-open="{{ $teamModalShouldOpen ? '1' : '0' }}" hidden>
+    <button class="cup-team-modal__backdrop" type="button" aria-label="{{ $isEnglish ? 'Close modal' : 'Modal schließen' }}" data-close-cup-team-modal></button>
+    <section class="cup-team-modal__panel" role="dialog" aria-modal="true" aria-labelledby="cupTeamCreateTitle">
+        <header class="cup-team-modal__head">
+            <div>
+                <span class="cup-team-modal__eyebrow">{{ $isEnglish ? 'CUP PARTICIPATION' : 'CUP-TEILNAHME' }}</span>
+                <h2 id="cupTeamCreateTitle">{{ $isEnglish ? 'Create a team' : 'Team erstellen' }}</h2>
+            </div>
+            <button class="cup-team-modal__close" type="button" aria-label="{{ $isEnglish ? 'Close' : 'Schließen' }}" data-close-cup-team-modal>×</button>
+        </header>
+        <p class="cup-team-modal__intro">{{ $isEnglish ? 'Choose a team name. You become captain and can invite the missing players afterwards.' : 'Wähle einen Teamnamen. Du wirst Captain und kannst danach die fehlenden Spieler einladen.' }}</p>
+
+        @if($errors->has('team') || $errors->has('name'))
+            <div class="cup-team-flow__notice is-error">
+                @foreach($errors->get('team') as $message)<div>{{ $message }}</div>@endforeach
+                @foreach($errors->get('name') as $message)<div>{{ $message }}</div>@endforeach
+            </div>
+        @endif
+
+        <form class="cup-team-modal__form" method="post" action="{{ route('cups.teams.store', $cup) }}">
+            @csrf
+            <label for="cupTeamCreateName">{{ $isEnglish ? 'Team name' : 'Teamname' }}</label>
+            <input id="cupTeamCreateName" type="text" name="name" maxlength="100" required value="{{ old('name', $defaultTeamName) }}" autocomplete="off">
+            <button class="cup-team-modal__submit" type="submit">{{ $isEnglish ? 'Create team' : 'Team erstellen' }}</button>
+        </form>
+
+        <div class="cup-team-modal__choice">
+            <div>
+                <strong>{{ $isEnglish ? 'Prefer joining a team?' : 'Lieber einem Team beitreten?' }}</strong>
+                <span>{{ $isEnglish ? 'Browse open teams and player requests.' : 'Sieh dir offene Teams und Spielersuchen an.' }}</span>
+            </div>
+            <a class="cup-team-modal__finder" href="{{ route('cups.teams.index', $cup) }}#cup-team-finder">{{ $isEnglish ? 'Find team' : 'Team finden' }}</a>
+        </div>
+    </section>
+</div>
+@endif
+
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v=20260710-1"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-cups/cup-detail.js') }}?v={{ $cupDetailJsVersion }}"></script>
 </body>
