@@ -127,6 +127,115 @@
   overscroll-behavior: contain;
 }
 
+/* Feeling picker reused by the global feed composer and profile composer. */
+#composerEmojiButton.is-active {
+  background: #2f302d;
+  color: #fffdf7;
+}
+
+.composer-feeling-current {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0 14px 0 16px;
+  border: 1px solid rgba(182,78,68,.18);
+  border-radius: 14px;
+  background: rgba(244,226,221,.7);
+  color: #4f4d47;
+  font-size: 11px;
+}
+
+.composer-feeling-current[hidden] {
+  display: none !important;
+}
+
+.composer-feeling-current button,
+.composer-feeling-picker header button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,253,247,.9);
+  color: #6f6b62;
+  font: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.composer-feeling-picker {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid rgba(214,208,188,.8);
+  border-radius: 18px;
+  background: #fffdf7;
+  box-shadow: 0 18px 48px rgba(45,42,32,.12);
+}
+
+.composer-feeling-picker[hidden] {
+  display: none !important;
+}
+
+.composer-feeling-picker header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #2f302d;
+}
+
+.composer-feeling-picker header strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.composer-feeling-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.composer-feeling-options button {
+  min-width: 0;
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border: 1px solid rgba(214,208,188,.72);
+  border-radius: 13px;
+  background: #f4f1e9;
+  color: #5d5a53;
+  font: inherit;
+  cursor: pointer;
+}
+
+.composer-feeling-options button:hover,
+.composer-feeling-options button.is-active {
+  border-color: rgba(182,78,68,.4);
+  background: #f2e2de;
+  color: #9e4038;
+}
+
+.composer-feeling-options button span {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.composer-feeling-options button b {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 9px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Profile and feed viewers must open images in fit mode. Some profile image
    rules use forced full-size dimensions, so the viewer has to win explicitly. */
 .real-media-viewer__media > img {
@@ -158,5 +267,9 @@
   .post-composer-modal.is-editing #postComposerInput {
     height: 32vh !important;
     max-height: 32vh !important;
+  }
+
+  .composer-feeling-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
