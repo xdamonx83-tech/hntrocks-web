@@ -67,20 +67,20 @@
 })();
 
 (() => {
-  const tabs = [...document.querySelectorAll("[data-cup-tab]")];
-  const panels = [...document.querySelectorAll("[data-cup-panel]")];
-  const title = document.getElementById("cupSectionTitle");
+  const tabs = [...document.querySelectorAll('[data-cup-tab]')];
+  const panels = [...document.querySelectorAll('[data-cup-panel]')];
+  const title = document.getElementById('cupSectionTitle');
 
   function activateCupTab(tabName) {
     tabs.forEach((button) => {
       const active = button.dataset.cupTab === tabName;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-selected", String(active));
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
     });
 
     panels.forEach((panel) => {
       const active = panel.dataset.cupPanel === tabName;
-      panel.classList.toggle("active", active);
+      panel.classList.toggle('active', active);
       panel.hidden = !active;
     });
 
@@ -88,26 +88,26 @@
     if (title && activeTab) title.textContent = activeTab.dataset.title || activeTab.textContent.trim();
   }
 
-  tabs.forEach((button) => button.addEventListener("click", () => activateCupTab(button.dataset.cupTab)));
-  document.querySelectorAll("[data-cup-tab-shortcut]").forEach((button) => {
-    button.addEventListener("click", () => activateCupTab(button.dataset.cupTabShortcut));
+  tabs.forEach((button) => button.addEventListener('click', () => activateCupTab(button.dataset.cupTab)));
+  document.querySelectorAll('[data-cup-tab-shortcut]').forEach((button) => {
+    button.addEventListener('click', () => activateCupTab(button.dataset.cupTabShortcut));
   });
 
-  document.querySelector(".cup-upload-zone input")?.addEventListener("change", (event) => {
+  document.querySelector('.cup-upload-zone input')?.addEventListener('change', (event) => {
     const file = event.target.files?.[0];
-    if (file && typeof showToast === 'function') showToast(file.name + " ausgewählt");
+    if (file && typeof showToast === 'function') showToast(file.name + ' ausgewählt');
   });
 
-  activateCupTab("overview");
+  activateCupTab('overview');
 })();
 
 (() => {
-  const stage = document.querySelector(".cup-detail-stage");
-  const scroll = document.getElementById("cupDetailScroll");
-  const center = document.getElementById("cupCenterFlow");
-  const fixedLeft = document.getElementById("cupFixedLeft");
-  const fixedRight = document.getElementById("cupFixedRight");
-  const sectionHead = document.querySelector(".cup-section-head");
+  const stage = document.querySelector('.cup-detail-stage');
+  const scroll = document.getElementById('cupDetailScroll');
+  const center = document.getElementById('cupCenterFlow');
+  const fixedLeft = document.getElementById('cupFixedLeft');
+  const fixedRight = document.getElementById('cupFixedRight');
+  const sectionHead = document.querySelector('.cup-section-head');
 
   if (!stage || !scroll || !center || !fixedLeft || !fixedRight) return;
 
@@ -116,17 +116,17 @@
   function updateCupLayout() {
     frame = 0;
 
-    if (window.matchMedia("(max-width: 899px)").matches) {
-      fixedLeft.style.removeProperty("top");
-      fixedRight.style.removeProperty("top");
-      stage.classList.remove("cup-columns-docked");
-      scroll.classList.remove("cup-content-docked");
-      sectionHead?.classList.remove("is-stuck");
+    if (window.matchMedia('(max-width: 899px)').matches) {
+      fixedLeft.style.removeProperty('top');
+      fixedRight.style.removeProperty('top');
+      stage.classList.remove('cup-columns-docked');
+      scroll.classList.remove('cup-content-docked');
+      sectionHead?.classList.remove('is-stuck');
       return;
     }
 
     const styles = getComputedStyle(stage);
-    const gap = Number.parseFloat(styles.getPropertyValue("--cup-sticky-gap")) || 12;
+    const gap = Number.parseFloat(styles.getPropertyValue('--cup-sticky-gap')) || 12;
     const stageRect = stage.getBoundingClientRect();
     const centerRect = center.getBoundingClientRect();
     const naturalTop = centerRect.top - stageRect.top;
@@ -136,14 +136,14 @@
     fixedLeft.style.top = `${top}px`;
     fixedRight.style.top = `${top}px`;
 
-    stage.classList.toggle("cup-columns-docked", docked);
-    scroll.classList.toggle("cup-content-docked", docked);
+    stage.classList.toggle('cup-columns-docked', docked);
+    scroll.classList.toggle('cup-content-docked', docked);
 
     if (sectionHead) {
       const headRect = sectionHead.getBoundingClientRect();
       const scrollRect = scroll.getBoundingClientRect();
       sectionHead.classList.toggle(
-        "is-stuck",
+        'is-stuck',
         scroll.scrollTop > 0 && headRect.top <= scrollRect.top + gap + 1
       );
     }
@@ -154,9 +154,38 @@
     frame = window.requestAnimationFrame(updateCupLayout);
   }
 
-  scroll.addEventListener("scroll", requestCupLayoutUpdate, { passive: true });
-  window.addEventListener("resize", requestCupLayoutUpdate);
-  window.addEventListener("load", requestCupLayoutUpdate);
+  scroll.addEventListener('scroll', requestCupLayoutUpdate, { passive: true });
+  window.addEventListener('resize', requestCupLayoutUpdate);
+  window.addEventListener('load', requestCupLayoutUpdate);
 
   requestCupLayoutUpdate();
+})();
+
+(() => {
+  const modal = document.getElementById('cupTeamCreateModal');
+  if (!modal) return;
+
+  const input = modal.querySelector('input[name="name"]');
+  const openButtons = [...document.querySelectorAll('[data-open-cup-team-modal]')];
+  const closeButtons = [...modal.querySelectorAll('[data-close-cup-team-modal]')];
+
+  const openModal = () => {
+    modal.hidden = false;
+    document.body.classList.add('cup-team-modal-open');
+    window.setTimeout(() => input?.focus(), 30);
+  };
+
+  const closeModal = () => {
+    modal.hidden = true;
+    document.body.classList.remove('cup-team-modal-open');
+  };
+
+  openButtons.forEach((button) => button.addEventListener('click', openModal));
+  closeButtons.forEach((button) => button.addEventListener('click', closeModal));
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  if (modal.dataset.autoOpen === '1') openModal();
 })();
