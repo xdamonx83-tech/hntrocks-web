@@ -1,36 +1,37 @@
 <header class="cups-center-head">
 <div class="cups-center-title">
 <span>{{ __('hnt_cups_overview.community_cups') }}</span>
-<h2 id="cupsPanelTitle">{{ __('hnt_cups_overview.all_cups') }}</h2>
+<h2 id="cupsPanelTitle">{{ $panelTitle }}</h2>
 </div>
 <nav aria-label="{{ __('hnt_cups_overview.title') }}" class="cups-tabs" role="tablist">
-<button class="active" data-cups-tab="all" data-title="{{ __('hnt_cups_overview.all_cups') }}" type="button">{{ __('hnt_cups_overview.tab_all') }}</button>
-<button data-cups-tab="active" data-title="{{ __('hnt_cups_overview.active_cups') }}" type="button">{{ __('hnt_cups_overview.tab_active') }}</button>
-<button data-cups-tab="planned" data-title="{{ __('hnt_cups_overview.planned') }}" type="button">{{ __('hnt_cups_overview.tab_planned') }}</button>
-<button data-cups-tab="finished" data-title="{{ __('hnt_cups_overview.finished') }}" type="button">{{ __('hnt_cups_overview.tab_finished') }}</button>
-<button data-cups-tab="mine" data-title="{{ __('hnt_cups_overview.my_cups') }}" type="button">{{ __('hnt_cups_overview.tab_mine') }}</button>
+<button class="{{ ! $mineFilter && $statusFilter === '' ? 'active' : '' }}" data-cups-tab="all" data-url="{{ $allCupsUrl }}" type="button">{{ __('hnt_cups_overview.tab_all') }}</button>
+<button class="{{ ! $mineFilter && $statusFilter === 'active' ? 'active' : '' }}" data-cups-tab="active" data-url="{{ $statusUrl('active') }}" type="button">{{ __('hnt_cups_overview.tab_active') }}</button>
+<button class="{{ ! $mineFilter && $statusFilter === 'planned' ? 'active' : '' }}" data-cups-tab="planned" data-url="{{ $statusUrl('planned') }}" type="button">{{ __('hnt_cups_overview.tab_planned') }}</button>
+<button class="{{ ! $mineFilter && $statusFilter === 'finished' ? 'active' : '' }}" data-cups-tab="finished" data-url="{{ $statusUrl('finished') }}" type="button">{{ __('hnt_cups_overview.tab_finished') }}</button>
+<button class="{{ $mineFilter ? 'active' : '' }}" data-cups-tab="mine" data-url="{{ $mineUrl }}" type="button">{{ __('hnt_cups_overview.tab_mine') }}</button>
 </nav>
 </header>
-<section class="cups-filter-row">
+<form class="cups-filter-row" method="get" action="{{ route('cups.index') }}" data-cups-server-filter>
+@if($statusFilter !== '')<input type="hidden" name="status" value="{{ $statusFilter }}"/>@endif
+@if($mineFilter)<input type="hidden" name="mine" value="1"/>@endif
 <label class="cups-search">
 <svg><use href="#i-search"></use></svg>
-<input id="cupSearch" placeholder="{{ __('hnt_cups_overview.search_placeholder') }}" type="search"/>
+<input id="cupSearch" name="q" value="{{ $searchFilter }}" placeholder="{{ __('hnt_cups_overview.search_placeholder') }}" type="search"/>
 </label>
-<select aria-label="{{ __('hnt_cups_overview.platforms') }}" id="cupPlatform">
-<option value="all">{{ __('hnt_cups_overview.all_platforms') }}</option>
-<option value="console">{{ __('hnt_cups_overview.console') }}</option>
-<option value="ps5">PlayStation 5</option>
-<option value="xbox">Xbox</option>
-<option value="pc">PC</option>
+<select aria-label="{{ __('hnt_cups_overview.platforms') }}" id="cupPlatform" name="platform">
+<option value="">{{ __('hnt_cups_overview.all_platforms') }}</option>
+<option value="console" @selected($platformFilter === 'console')>{{ __('hnt_cups_overview.console') }}</option>
+<option value="ps5" @selected($platformFilter === 'ps5')>PlayStation 5</option>
+<option value="xbox" @selected($platformFilter === 'xbox')>Xbox</option>
+<option value="pc" @selected($platformFilter === 'pc')>PC</option>
 </select>
-<button id="resetCupFilters" type="button">
+<button id="resetCupFilters" data-reset-url="{{ $resetUrl }}" type="button">
 <svg><use href="#i-sliders"></use></svg>
 {{ __('hnt_cups_overview.reset_filters') }}
 </button>
-</section>
+</form>
 @if($featuredCup)
 <section class="cups-featured"
-         data-cup-item=""
          data-mine="{{ $featuredMine ? 'true' : 'false' }}"
          data-platform="{{ $featuredPlatformKey }}"
          data-search="{{ \Illuminate\Support\Str::lower($featuredCup->title.' '.$featuredPlatforms.' '.$featuredCup->status) }}"
@@ -85,7 +86,7 @@
 <small>2 {{ __('hnt_cups_overview.planned') }}</small>
 </header>
 <div class="cups-highlight-grid">
-<article class="cup-highlight-card blood" data-cup-item="" data-mine="false" data-platform="console" data-search="bayou blood cup solo console" data-status="planned">
+<article class="cup-highlight-card blood" data-mine="false" data-platform="console" data-search="bayou blood cup solo console" data-status="planned">
 <div class="cup-highlight-art">
 <span>BAYOU BLOOD</span>
 <strong>SOLO CUP</strong>
@@ -99,7 +100,7 @@
 <button data-toast="Benachrichtigung aktiviert" type="button">Erinnern</button>
 </div>
 </article>
-<article class="cup-highlight-card frost" data-cup-item="" data-mine="false" data-platform="pc" data-search="winter bayou trio pc cup" data-status="planned">
+<article class="cup-highlight-card frost" data-mine="false" data-platform="pc" data-search="winter bayou trio pc cup" data-status="planned">
 <div class="cup-highlight-art">
 <span>WINTER BAYOU</span>
 <strong>TRIO EVENT</strong>

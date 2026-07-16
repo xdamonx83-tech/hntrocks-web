@@ -67,29 +67,29 @@
 })();
 
 (() => {
-  const stage = document.querySelector(".cups-stage");
-  const scroll = document.getElementById("cupsScroll");
-  const center = document.getElementById("cupsCenterFlow");
-  const left = document.getElementById("cupsFixedLeft");
-  const right = document.getElementById("cupsFixedRight");
-  const stickyHead = document.querySelector(".cups-center-head");
+  const stage = document.querySelector('.cups-stage');
+  const scroll = document.getElementById('cupsScroll');
+  const center = document.getElementById('cupsCenterFlow');
+  const left = document.getElementById('cupsFixedLeft');
+  const right = document.getElementById('cupsFixedRight');
+  const stickyHead = document.querySelector('.cups-center-head');
   let frame = 0;
 
   function updateFixedColumns() {
     frame = 0;
     if (!stage || !scroll || !center || !left || !right) return;
 
-    if (window.matchMedia("(max-width: 899px)").matches) {
-      left.style.removeProperty("top");
-      right.style.removeProperty("top");
-      stage.classList.remove("cups-columns-docked");
-      scroll.classList.remove("cups-content-docked");
-      stickyHead?.classList.remove("is-stuck");
+    if (window.matchMedia('(max-width: 899px)').matches) {
+      left.style.removeProperty('top');
+      right.style.removeProperty('top');
+      stage.classList.remove('cups-columns-docked');
+      scroll.classList.remove('cups-content-docked');
+      stickyHead?.classList.remove('is-stuck');
       return;
     }
 
     const styles = getComputedStyle(stage);
-    const gap = Number.parseFloat(styles.getPropertyValue("--cups-sticky-gap")) || 12;
+    const gap = Number.parseFloat(styles.getPropertyValue('--cups-sticky-gap')) || 12;
     const stageRect = stage.getBoundingClientRect();
     const centerRect = center.getBoundingClientRect();
     const naturalTop = centerRect.top - stageRect.top;
@@ -98,13 +98,13 @@
 
     left.style.top = `${top}px`;
     right.style.top = `${top}px`;
-    stage.classList.toggle("cups-columns-docked", docked);
-    scroll.classList.toggle("cups-content-docked", docked);
+    stage.classList.toggle('cups-columns-docked', docked);
+    scroll.classList.toggle('cups-content-docked', docked);
 
     if (stickyHead) {
       const headRect = stickyHead.getBoundingClientRect();
       const scrollRect = scroll.getBoundingClientRect();
-      stickyHead.classList.toggle("is-stuck", scroll.scrollTop > 0 && headRect.top <= scrollRect.top + gap + 1);
+      stickyHead.classList.toggle('is-stuck', scroll.scrollTop > 0 && headRect.top <= scrollRect.top + gap + 1);
     }
   }
 
@@ -113,46 +113,75 @@
     frame = requestAnimationFrame(updateFixedColumns);
   }
 
-  scroll?.addEventListener("scroll", requestUpdate, { passive: true });
-  window.addEventListener("resize", requestUpdate);
-  window.addEventListener("load", requestUpdate);
+  scroll?.addEventListener('scroll', requestUpdate, { passive: true });
+  window.addEventListener('resize', requestUpdate);
+  window.addEventListener('load', requestUpdate);
   requestUpdate();
 
-  const tabs = [...document.querySelectorAll("[data-cups-tab]")];
-  const title = document.getElementById("cupsPanelTitle");
-  const search = document.getElementById("cupSearch");
-  const platform = document.getElementById("cupPlatform");
-  const count = document.getElementById("visibleCupCount");
-  const empty = document.getElementById("cupsEmptyState");
-  let activeFilter = "all";
+  const tabs = [...document.querySelectorAll('[data-cups-tab]')];
+  const shortcuts = [...document.querySelectorAll('[data-cups-tab-shortcut]')];
+  const serverFilterForm = document.querySelector('[data-cups-server-filter]');
+  const platform = document.getElementById('cupPlatform');
+  const reset = document.getElementById('resetCupFilters');
+
+  if (serverFilterForm) {
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        if (tab.dataset.url) window.location.assign(tab.dataset.url);
+      });
+    });
+
+    shortcuts.forEach((button) => {
+      button.addEventListener('click', () => {
+        const targetTab = tabs.find((tab) => tab.dataset.cupsTab === button.dataset.cupsTabShortcut);
+        if (targetTab?.dataset.url) window.location.assign(targetTab.dataset.url);
+      });
+    });
+
+    platform?.addEventListener('change', () => serverFilterForm.requestSubmit());
+    reset?.addEventListener('click', () => {
+      if (reset.dataset.resetUrl) window.location.assign(reset.dataset.resetUrl);
+    });
+
+    document.querySelectorAll('[data-url]').forEach((control) => {
+      if (control.matches('[data-cups-tab]')) return;
+      control.addEventListener('click', () => {
+        if (control.dataset.url) window.location.assign(control.dataset.url);
+      });
+    });
+
+    return;
+  }
+
+  const title = document.getElementById('cupsPanelTitle');
+  const search = document.getElementById('cupSearch');
+  const count = document.getElementById('visibleCupCount');
+  const empty = document.getElementById('cupsEmptyState');
+  let activeFilter = 'all';
 
   function applyFilters() {
-    const query = (search?.value || "").trim().toLowerCase();
-    const platformValue = platform?.value || "all";
-    const items = [...document.querySelectorAll("[data-cup-item]")];
+    const query = (search?.value || '').trim().toLowerCase();
+    const platformValue = platform?.value || 'all';
+    const items = [...document.querySelectorAll('[data-cup-item]')];
     let visibleGridCards = 0;
 
     items.forEach((item) => {
-      const status = item.dataset.status || "";
-      const itemPlatform = item.dataset.platform || "";
-      const mine = item.dataset.mine === "true";
-      const text = item.dataset.search || "";
+      const status = item.dataset.status || '';
+      const itemPlatform = item.dataset.platform || '';
+      const mine = item.dataset.mine === 'true';
+      const text = item.dataset.search || '';
 
-      const matchesTab =
-        activeFilter === "all" ||
-        activeFilter === status ||
-        (activeFilter === "mine" && mine);
+      const matchesTab = activeFilter === 'all' || activeFilter === status || (activeFilter === 'mine' && mine);
       const matchesSearch = !query || text.includes(query);
-      const matchesPlatform = platformValue === "all" || itemPlatform === platformValue ||
-        (platformValue === "console" && ["console", "ps5", "xbox"].includes(itemPlatform));
+      const matchesPlatform = platformValue === 'all' || itemPlatform === platformValue ||
+        (platformValue === 'console' && ['console', 'ps5', 'xbox'].includes(itemPlatform));
 
       const visible = matchesTab && matchesSearch && matchesPlatform;
       item.hidden = !visible;
-
-      if (visible && item.classList.contains("cup-card")) visibleGridCards += 1;
+      if (visible && item.classList.contains('cup-card')) visibleGridCards += 1;
     });
 
-    if (count) count.textContent = `${visibleGridCards} ${visibleGridCards === 1 ? "Cup" : "Cups"}`;
+    if (count) count.textContent = `${visibleGridCards} ${visibleGridCards === 1 ? 'Cup' : 'Cups'}`;
     if (empty) empty.hidden = visibleGridCards > 0;
   }
 
@@ -160,25 +189,22 @@
     activeFilter = name;
     tabs.forEach((tab) => {
       const active = tab.dataset.cupsTab === name;
-      tab.classList.toggle("active", active);
-      tab.setAttribute("aria-selected", String(active));
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', String(active));
       if (active && title) title.textContent = tab.dataset.title || tab.textContent.trim();
     });
     applyFilters();
   }
 
-  tabs.forEach((tab) => tab.addEventListener("click", () => activateTab(tab.dataset.cupsTab)));
-  document.querySelectorAll("[data-cups-tab-shortcut]").forEach((button) => {
-    button.addEventListener("click", () => activateTab(button.dataset.cupsTabShortcut));
-  });
-  search?.addEventListener("input", applyFilters);
-  platform?.addEventListener("change", applyFilters);
-
-  document.getElementById("resetCupFilters")?.addEventListener("click", () => {
-    search.value = "";
-    platform.value = "all";
-    activateTab("all");
+  tabs.forEach((tab) => tab.addEventListener('click', () => activateTab(tab.dataset.cupsTab)));
+  shortcuts.forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.cupsTabShortcut)));
+  search?.addEventListener('input', applyFilters);
+  platform?.addEventListener('change', applyFilters);
+  reset?.addEventListener('click', () => {
+    search.value = '';
+    platform.value = 'all';
+    activateTab('all');
   });
 
-  activateTab("all");
+  activateTab('all');
 })();

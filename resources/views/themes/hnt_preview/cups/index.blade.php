@@ -7,6 +7,31 @@
     $viewerTeam = $overview['viewerTeam'];
     $topTeams = $overview['topTeams'];
 
+    $statusFilter = (string) ($filters['status'] ?? request('status', ''));
+    $platformFilter = (string) ($filters['platform'] ?? request('platform', ''));
+    $mineFilter = (bool) ($filters['mine'] ?? request()->boolean('mine'));
+    $searchFilter = (string) ($filters['q'] ?? request('q', ''));
+    $baseQuery = request()->except(['page', 'status', 'mine']);
+    $cleanQuery = static fn (array $values): array => array_filter(
+        $values,
+        static fn ($value): bool => $value !== '' && $value !== null && $value !== false
+    );
+    $allCupsUrl = route('cups.index', $cleanQuery($baseQuery));
+    $statusUrl = static fn (string $status): string => route(
+        'cups.index',
+        $cleanQuery(array_merge($baseQuery, ['status' => $status]))
+    );
+    $mineUrl = route('cups.index', $cleanQuery(array_merge($baseQuery, ['mine' => 1])));
+    $resetUrl = route('cups.index');
+    $panelTitle = $mineFilter
+        ? __('hnt_cups_overview.my_cups')
+        : match ($statusFilter) {
+            'active' => __('hnt_cups_overview.active_cups'),
+            'planned' => __('hnt_cups_overview.planned'),
+            'finished' => __('hnt_cups_overview.finished'),
+            default => __('hnt_cups_overview.all_cups'),
+        };
+
     $formatCount = static fn (int $value): string => number_format($value, 0, '', app()->isLocale('de') ? '.' : ',');
     $trackedCupCount = (int) $stats['active'] + (int) $stats['planned'] + (int) $stats['finished'];
 
@@ -83,7 +108,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta name="csrf-token" content="{{ csrf_token() }}"/>
-<meta content="index,follow" name="robots"/>
+<meta content="{{ request()->query() ? 'noindex,follow' : 'index,follow' }}" name="robots"/>
 <title>{{ __('hnt_cups_overview.title') }} · HNT.ROCKS</title>
 <meta name="description" content="{{ __('hnt_cups_overview.meta_description') }}"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -96,8 +121,8 @@
 <body data-page="cups">
 @include('themes.hnt_preview.cups.demo.demo-svg')
 <main class="app-shell cups-page-shell"
-      data-cups-active-url="{{ route('cups.index', ['status' => 'active']) }}"
-      data-cups-mine-url="{{ route('cups.index', ['mine' => 1]) }}"
+      data-cups-active-url="{{ $statusUrl('active') }}"
+      data-cups-mine-url="{{ $mineUrl }}"
       data-cups-submissions-url="{{ $featuredCup ? route('cups.show', $featuredCup).'#submissions' : route('cups.index') }}"
       data-cups-hall-url="{{ route('hall-of-fame.index') }}">
 @include('themes.hnt_preview.partials.header')
