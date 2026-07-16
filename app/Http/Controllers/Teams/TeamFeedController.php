@@ -28,6 +28,9 @@ class TeamFeedController extends Controller
             'feeling_key' => ['nullable', 'string', 'in:none,happy,excited,focused,chill,tired,salty'],
             'media' => ['nullable', 'array', 'max:'.config('hunthub.upload_limits.team_feed_media_count', 12)],
             'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif,mp4,webm,mov', 'max:'.config('hunthub.upload_limits.team_feed_media_kb', 51200)],
+            'poll_question' => ['nullable', 'string', 'max:180'],
+            'poll_options' => ['nullable', 'array', 'max:6'],
+            'poll_options.*' => ['nullable', 'string', 'max:180'],
             'ai_generated' => ['nullable', 'boolean'],
         ]);
 
@@ -37,7 +40,16 @@ class TeamFeedController extends Controller
             $mediaService->assertAllowed($file, $request->user(), 'team_feed');
         }
 
-        if (! filled($validated['body'] ?? null) && count($files) === 0) {
+        $pollOptions = collect($validated['poll_options'] ?? [])
+            ->map(fn ($option): string => trim((string) $option))
+            ->filter()
+            ->unique()
+            ->take(6)
+            ->values();
+        $pollQuestion = trim((string) ($validated['poll_question'] ?? ''));
+        $hasPoll = $pollOptions->count() >= 2;
+
+        if (! filled($validated['body'] ?? null) && count($files) === 0 && ! $hasPoll) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => __('ui.feed_body_or_media_required'),
@@ -80,6 +92,20 @@ class TeamFeedController extends Controller
             'visibility' => 'team',
             'status' => 'published',
         ]);
+
+        if ($hasPoll) {
+            $poll = $post->poll()->create([
+                'question' => $pollQuestion !== '' ? $pollQuestion : null,
+                'allows_multiple' => false,
+            ]);
+
+            $pollOptions->each(function (string $optionBody, int $index) use ($poll): void {
+                $poll->options()->create([
+                    'body' => $optionBody,
+                    'sort_order' => $index,
+                ]);
+            });
+        }
 
         foreach ($files as $index => $file) {
             $asset = $mediaService->store($file, $request->user(), 'team_feed', [

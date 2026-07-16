@@ -8,7 +8,10 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\Friendship;
 use App\Models\Cup;
+use App\Models\FeedComment;
+use App\Models\FeedPost;
 use App\Models\LfgPost;
+use App\Models\Report;
 use App\Services\MediaService;
 use App\Services\GamificationService;
 use Illuminate\Http\RedirectResponse;
@@ -288,12 +291,12 @@ class TeamController extends Controller
 
     public function show(Request $request, Team $team): View
     {
-        return $this->renderTeamPage($request, $team, 'timeline');
+        return $this->renderTeamPage($request, $team, 'overview');
     }
 
     public function info(Request $request, Team $team): View
     {
-        return $this->renderTeamPage($request, $team, 'info');
+        return $this->renderTeamPage($request, $team, 'posts');
     }
 
     public function teamLfg(Request $request, Team $team): View
@@ -514,7 +517,7 @@ class TeamController extends Controller
         return redirect()->route('teams.index')->with('status', __('ui.team_archived_status'));
     }
 
-    private function renderTeamPage(Request $request, Team $team, string $activeTeamSection = 'timeline', array $extra = []): View
+    private function renderTeamPage(Request $request, Team $team, string $activeTeamSection = 'overview', array $extra = []): View
     {
         $team->loadMissing([
             'owner.profile',
@@ -523,69 +526,88 @@ class TeamController extends Controller
         $team->loadCount([
             'activeMembers as members_count',
             'pendingMembers as pending_count',
+            'feedPosts as posts_count' => fn ($query) => $query->where('status', 'published'),
         ]);
 
         if ($team->visibility === 'private' && ! $team->isActiveMember($request->user())) {
             abort(404);
         }
 
-        $teamLfgPosts = $team->teamLfgPosts()
-            ->with(['user.profile'])
-            ->withCount(['pendingApplications as pending_applications_count'])
-            ->where('status', 'open')
-            ->latest()
-            ->take(3)
-            ->get();
+        $teamFeedPosts = collect();
+        $reportedFeedKeys = collect();
 
-        $teamLfgOpenCount = $team->teamLfgPosts()
-            ->where('status', 'open')
-            ->count();
+        if ($activeTeamSection === 'posts') {
+            $teamFeedPosts = $team->feedPosts()
+                ->with([
+                    'user.profile',
+                    'team',
+                    'cupTeam.cup',
+                    'sharedPost.user.profile',
+                    'sharedPost.team',
+                    'sharedPost.cupTeam.cup',
+                    'sharedPost.media.mediaAsset',
+                    'media.mediaAsset',
+                    'comments.user.profile',
+                    'comments.media.mediaAsset',
+                    'comments.reactions',
+                    'comments.viewerReaction',
+                    'reactions',
+                    'viewerReaction',
+                    'viewerBookmark',
+                    'poll.options.votes',
+                    'poll.votes',
+                ])
+                ->withCount(['comments', 'reactions', 'bookmarks', 'sharedByPosts as shares_count'])
+                ->where('status', 'published')
+                ->orderByDesc('is_pinned')
+                ->orderByDesc('pinned_at')
+                ->latest()
+                ->paginate(8)
+                ->withQueryString();
 
-        $teamFeedPosts = $team->feedPosts()
-            ->with([
-                'user.profile',
-                'team',
-                'media.mediaAsset',
-                'comments.user.profile',
-                'comments.reactions',
-                'comments.viewerReaction',
-                'reactions',
-                'viewerReaction',
-                'viewerBookmark',
-            ])
-            ->withCount(['comments', 'reactions', 'bookmarks'])
-            ->where('status', 'published')
-            ->latest()
-            ->take(10)
-            ->get();
+            $postIds = $teamFeedPosts->getCollection()->pluck('id')->map(fn ($id) => (int) $id)->filter()->values();
+            $commentIds = $teamFeedPosts->getCollection()
+                ->flatMap(fn (FeedPost $post) => $post->comments->pluck('id'))
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->values();
 
-        $activeMemberUserIds = $team->members
-            ->where('status', 'active')
-            ->pluck('user_id')
-            ->filter(fn ($userId) => (int) $userId !== (int) $request->user()->id)
-            ->values();
+            if ($postIds->isNotEmpty() || $commentIds->isNotEmpty()) {
+                $reportedFeedKeys = Report::query()
+                    ->where('reporter_id', $request->user()->id)
+                    ->whereIn('status', ['open', 'in_review'])
+                    ->where(function ($query) use ($postIds, $commentIds): void {
+                        if ($postIds->isNotEmpty()) {
+                            $query->orWhere(function ($postQuery) use ($postIds): void {
+                                $postQuery->where('reportable_type', FeedPost::class)
+                                    ->whereIn('reportable_id', $postIds->all());
+                            });
+                        }
 
-        $teamFriendshipMap = $activeMemberUserIds->isEmpty()
-            ? collect()
-            : Friendship::query()
-                ->forUser($request->user())
-                ->where(function ($query) use ($activeMemberUserIds): void {
-                    $query
-                        ->whereIn('user_one_id', $activeMemberUserIds)
-                        ->orWhereIn('user_two_id', $activeMemberUserIds);
-                })
-                ->get()
-                ->mapWithKeys(function (Friendship $friendship) use ($request): array {
-                    $otherUserId = (int) $friendship->user_one_id === (int) $request->user()->id
-                        ? (int) $friendship->user_two_id
-                        : (int) $friendship->user_one_id;
+                        if ($commentIds->isNotEmpty()) {
+                            $query->orWhere(function ($commentQuery) use ($commentIds): void {
+                                $commentQuery->where('reportable_type', FeedComment::class)
+                                    ->whereIn('reportable_id', $commentIds->all());
+                            });
+                        }
+                    })
+                    ->get(['reportable_type', 'reportable_id'])
+                    ->mapWithKeys(fn (Report $report): array => [
+                        ($report->reportable_type === FeedComment::class ? 'feed_comment:' : 'feed_post:')
+                            . (int) $report->reportable_id => true,
+                    ]);
+            }
+        }
 
-                    return [$otherUserId => $friendship];
-                });
-
-        $view = HntTheme::teamsEnabled() && ! $request->boolean('classic_teams')
+        $isLegacyTeamLfgPage = $activeTeamSection === 'team-lfg';
+        $view = ! $isLegacyTeamLfgPage && HntTheme::teamsEnabled() && ! $request->boolean('classic_teams')
             ? 'themes.socialite.teams.show'
             : 'teams.show';
+
+        $legacyTeamLfgPaginator = $isLegacyTeamLfgPage ? data_get($extra, 'teamPageLfgPosts') : null;
+        $legacyTeamLfgPosts = $isLegacyTeamLfgPage
+            ? ($legacyTeamLfgPaginator?->getCollection() ?? collect())
+            : collect();
 
         return view($view, array_merge([
             'team' => $team,
@@ -593,10 +615,10 @@ class TeamController extends Controller
             'viewerMembership' => $team->membershipFor($request->user()),
             'canManage' => $team->canManage($request->user()),
             'canPostToTeam' => $team->isActiveMember($request->user()),
-            'teamLfgPosts' => $teamLfgPosts,
-            'teamLfgOpenCount' => $teamLfgOpenCount,
+            'teamLfgPosts' => $legacyTeamLfgPosts,
+            'teamLfgOpenCount' => $isLegacyTeamLfgPage ? (int) ($legacyTeamLfgPaginator?->total() ?? $legacyTeamLfgPosts->count()) : 0,
             'teamFeedPosts' => $teamFeedPosts,
-            'teamFriendshipMap' => $teamFriendshipMap,
+            'reportedFeedKeys' => $reportedFeedKeys,
         ], $extra));
     }
 

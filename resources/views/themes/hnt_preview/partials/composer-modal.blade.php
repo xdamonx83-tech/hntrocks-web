@@ -2,11 +2,14 @@
     $currentUser = auth()->user();
     $displayName = $currentUser?->name ?: ($currentUser?->username ?: 'Admin');
     $avatarUrl = $currentUser?->avatarUrl();
+    $composerAction = $composerAction ?? route('feed.store');
+    $composerContext = $composerContext ?? null;
+    $composerIsTeamContext = $composerContext instanceof \App\Models\Team;
 @endphp
 
 <div class="modal-backdrop" id="composerModal" aria-hidden="true">
     <section class="composer-modal" role="dialog" aria-modal="true" aria-labelledby="composerModalTitle">
-        <form method="post" action="{{ route('feed.store') }}" enctype="multipart/form-data" data-hnt-composer-form>
+        <form method="post" action="{{ $composerAction }}" enctype="multipart/form-data" data-hnt-composer-form>
             @csrf
             <input type="hidden" name="visibility" value="public" data-hnt-composer-visibility-input>
             <input type="hidden" name="background_style" value="none">
@@ -18,9 +21,9 @@
 
             <header class="composer-header">
                 <div>
-                    <span class="composer-kicker">HNT Feed</span>
-                    <h2 id="composerModalTitle">{{ __('ui.preview_composer_title') }}</h2>
-                    <p>{{ __('ui.preview_composer_intro') }}</p>
+                    <span class="composer-kicker">{{ $composerIsTeamContext ? __('hnt_team_detail.composer_kicker') : __('hnt_team_detail.composer_default_kicker') }}</span>
+                    <h2 id="composerModalTitle">{{ $composerIsTeamContext ? __('hnt_team_detail.composer_title', ['team' => $composerContext->name]) : __('ui.preview_composer_title') }}</h2>
+                    <p>{{ $composerIsTeamContext ? __('hnt_team_detail.composer_intro') : __('ui.preview_composer_intro') }}</p>
                 </div>
                 <button class="icon-btn modal-close" type="button" aria-label="{{ __('ui.preview_composer_close_aria') }}">
                     <i class="ph ph-x" aria-hidden="true"></i>
@@ -37,9 +40,10 @@
                         </span>
                         <div class="author-info">
                             <strong>{{ $displayName }}</strong>
-                            <span data-hnt-composer-visibility-copy>{{ __('ui.preview_composer_visibility_copy_public') }}</span>
+                            <span data-hnt-composer-visibility-copy>{{ $composerIsTeamContext ? __('hnt_team_detail.composer_audience', ['team' => $composerContext->name]) : __('ui.preview_composer_visibility_copy_public') }}</span>
                         </div>
                     </div>
+                    @unless($composerIsTeamContext)
                     <div class="composer-privacy-dropdown nav-dropdown" data-hnt-composer-privacy>
                         <button class="composer-audience nav-dropdown-toggle" type="button" aria-expanded="false">
                             <span data-hnt-composer-visibility-label>{{ __('ui.preview_composer_visibility_label_public') }}</span>
@@ -61,10 +65,11 @@
                             </button>
                         </div>
                     </div>
+                    @endunless
                 </div>
 
                 <div class="composer-input-shell" data-hnt-composer-input-shell>
-                    <textarea name="body" placeholder="{{ __('ui.preview_composer_placeholder') }}" data-hnt-hashtag-input data-hnt-composer-textarea>{{ old('body') }}</textarea>
+                    <textarea name="body" placeholder="{{ $composerIsTeamContext ? __('hnt_team_detail.composer_placeholder', ['team' => $composerContext->name]) : __('ui.preview_composer_placeholder') }}" data-hnt-hashtag-input data-hnt-composer-textarea>{{ old('body') }}</textarea>
                     <button class="hnt-emoji-input-button hnt-composer-emoji-button" type="button" data-hnt-emoji-trigger data-hnt-emoji-target="composer" aria-label="{{ __('ui.preview_emoji_button') }}" title="{{ __('ui.preview_emoji_button') }}"><i class="ph ph-smiley" aria-hidden="true"></i></button>
                     <div class="composer-media-preview" data-hnt-composer-media-preview hidden></div>
                     <div class="hnt-hashtag-preview" data-hnt-hashtag-preview hidden></div>
@@ -113,7 +118,7 @@
 
             <footer class="composer-footer">
                 <button class="btn-following modal-close-secondary" type="button">{{ __('ui.preview_lfg_cancel') }}</button>
-                <button class="btn-create composer-submit" type="submit">{{ __('ui.preview_composer_submit') }}</button>
+                <button class="btn-create composer-submit" type="submit">{{ $composerIsTeamContext ? __('hnt_team_detail.composer_submit') : __('ui.preview_composer_submit') }}</button>
             </footer>
         </form>
     </section>
