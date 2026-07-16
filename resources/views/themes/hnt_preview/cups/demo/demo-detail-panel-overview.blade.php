@@ -1,120 +1,157 @@
+@php
+    $scoredSubmissions = $cup->submissions
+        ->whereIn('status', \App\Models\CupSubmission::scoredStatuses())
+        ->values();
+    $totalKills = (int) $scoredSubmissions->sum('kills');
+    $totalBountyTokens = (int) $scoredSubmissions->sum('bounty_tokens');
+    $recentSubmissions = $cup->submissions
+        ->sortByDesc(fn ($submission) => optional($submission->submitted_at ?: $submission->created_at)->timestamp ?? 0)
+        ->take(4)
+        ->values();
+    $topTeams = collect($leaderboard ?? [])->take(3)->values();
+    $overviewTitle = trim((string) $summary) !== '' ? $summary : $cup->title;
+    $overviewCopy = trim((string) $description) !== ''
+        ? $description
+        : trim((string) $cup->displayRules());
+    $overviewCopy = $overviewCopy !== ''
+        ? $overviewCopy
+        : ($isEnglish ? 'All important cup information is collected here.' : 'Hier findest du alle wichtigen Informationen zu diesem Cup.');
+    $scheduleBaseDate = $cup->starts_at ?: $cup->registration_opens_at ?: $cup->created_at;
+    $scheduleDates = collect([
+        $registrationDate,
+        $teamLockDate,
+        $startDate,
+        $midpointDate,
+        $endDate,
+    ]);
+    $activityTeam = $viewerTeam ?: $topTeams->first();
+    $activityMembers = $activityTeam
+        ? $activityTeam->members->where('status', 'active')->take(3)->values()
+        : collect();
+    $cupNotices = collect([
+        [
+            'date' => $cup->registration_closes_at,
+            'title' => $isEnglish ? 'Registration closes' : 'Anmeldung schließt',
+            'text' => $isEnglish ? 'Teams and participants must be complete before this deadline.' : 'Teams und Teilnehmer müssen bis zu diesem Zeitpunkt vollständig sein.',
+        ],
+        [
+            'date' => $cup->starts_at,
+            'title' => $isEnglish ? 'Cup starts' : 'Cup startet',
+            'text' => $submissionOpen
+                ? ($isEnglish ? 'Submissions are currently open.' : 'Einreichungen sind aktuell geöffnet.')
+                : ($isEnglish ? 'Submissions become available when the cup starts.' : 'Einreichungen werden zum Cup-Start freigeschaltet.'),
+        ],
+        [
+            'date' => $cup->ends_at,
+            'title' => $isEnglish ? 'Submission deadline' : 'Einreichungsfrist',
+            'text' => $isEnglish ? 'All valid submissions must be received before the cup ends.' : 'Alle gültigen Einreichungen müssen vor dem Cup-Ende eingegangen sein.',
+        ],
+        [
+            'date' => null,
+            'title' => $isEnglish ? 'Verification' : 'Prüfung',
+            'text' => $verificationMode === \App\Support\CupOrganizerAccess::VERIFICATION_AI
+                ? ($isEnglish ? 'Submissions are checked automatically and can be reviewed manually.' : 'Einreichungen werden automatisch geprüft und können manuell kontrolliert werden.')
+                : ($isEnglish ? 'Submissions are reviewed manually by the cup organizers.' : 'Einreichungen werden manuell durch die Cup-Leitung geprüft.'),
+        ],
+    ])->filter(fn (array $notice) => $notice['date'] !== null || trim((string) $notice['text']) !== '')->values();
+@endphp
 <section class="cup-tab-panel active" data-cup-panel="overview" tabindex="0"><article class="cup-description-panel">
 <div class="cup-description-copy">
-<span>ÜBER DEN CUP</span>
-<h3>Gemeinsam jagen. Sauber einreichen. Fair gewinnen.</h3>
-<p>
-              Beim Summer Hunt treten bis zu 20 Dreierteams gegeneinander an.
-              Eine Runde zählt nur nach erfolgreicher Extraktion. Hunter-Kills
-              bestimmen die Wertung, die erste Trophäen-Extraktion ergänzt das Ergebnis.
-            </p>
+<span>{{ $isEnglish ? 'ABOUT THE CUP' : 'ÜBER DEN CUP' }}</span>
+<h3>{{ \Illuminate\Support\Str::limit($overviewTitle, 110) }}</h3>
+<p>{!! nl2br(e($overviewCopy)) !!}</p>
 </div>
 <div class="cup-description-facts">
-<span><small>Modus</small><strong>Trio-Leaderboard</strong></span>
-<span><small>Wertung</small><strong>Extraktion + Kills</strong></span>
-<span><small>Nachweis</small><strong>Screenshot</strong></span>
-<span><small>Prüfung</small><strong>Manuell</strong></span>
+<span><small>{{ $isEnglish ? 'Mode' : 'Modus' }}</small><strong>{{ $cup->modeLabel() }}</strong></span>
+<span><small>{{ $isEnglish ? 'Scoring' : 'Wertung' }}</small><strong>{{ $requiresExtraction ? ($isEnglish ? 'Extraction' : 'Extraktion') : ($isEnglish ? 'Points' : 'Punkte') }}{{ $pointsPerKill > 0 ? ' + Kills' : '' }}</strong></span>
+<span><small>{{ $isEnglish ? 'Proof' : 'Nachweis' }}</small><strong>Screenshot</strong></span>
+<span><small>{{ $isEnglish ? 'Verification' : 'Prüfung' }}</small><strong>{{ $verificationLabel }}</strong></span>
 </div>
 </article><section class="cup-schedule-block"><div class="cup-calendar-head">
-<button type="button">Juli</button>
-<strong>Summer Hunt 2026</strong>
-<button type="button">Cup-Woche</button>
+<button type="button">{{ $scheduleBaseDate?->translatedFormat('F') ?: ($isEnglish ? 'Schedule' : 'Zeitplan') }}</button>
+<strong>{{ $cup->title }}{{ $scheduleBaseDate ? ' '.$scheduleBaseDate->format('Y') : '' }}</strong>
+<button type="button">{{ $isEnglish ? 'Cup schedule' : 'Cup-Zeitplan' }}</button>
 </div><div class="cup-timeline-grid">
 <div class="cup-timeline-days">
-<span><small>Fr</small><b>10</b></span>
-<span><small>Sa</small><b>11</b></span>
-<span><small>So</small><b>12</b></span>
-<span class="active"><small>Mo</small><b>13</b></span>
-<span><small>Di</small><b>14</b></span>
+@foreach ($scheduleDates as $index => $date)
+<span @class(['active' => $index === $currentMilestoneIndex])><small>{{ $date?->translatedFormat('D') ?: '—' }}</small><b>{{ $date?->format('d') ?: '—' }}</b></span>
+@endforeach
 </div>
 <div class="cup-timeline-hours">
-<span>18:00</span><span>20:00</span><span>22:00</span>
+<span>{{ $teamLockDate?->format('H:i') ?: '—' }}</span><span>{{ $startDate?->format('H:i') ?: '—' }}</span><span>{{ $endDate?->format('H:i') ?: '—' }}</span>
 </div>
 <div class="cup-timeline-events">
 <article class="registration">
-<strong>Anmeldung &amp; Team-Lock</strong>
-<span>Teams bestätigen und Einladungen abschließen</span>
+<strong>{{ $isEnglish ? 'Registration & team lock' : 'Anmeldung & Team-Lock' }}</strong>
+<span>{{ $teamLockDate ? $teamLockDate->translatedFormat('d.m.Y · H:i') : ($isEnglish ? 'No fixed deadline' : 'Keine feste Frist') }}</span>
 </article>
 <article class="start">
-<strong>Cup startet</strong>
-<span>Erste Trophäen-Extraktion zählt</span>
-<div><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/><img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/></div>
+<strong>{{ $isEnglish ? 'Cup starts' : 'Cup startet' }}</strong>
+<span>{{ $startDate ? $startDate->translatedFormat('d.m.Y · H:i') : ($isEnglish ? 'Start not scheduled' : 'Start noch nicht geplant') }}</span>
+@if ($activityMembers->isNotEmpty())
+<div>@foreach ($activityMembers as $member)<img alt="{{ $member->user?->name ?: $member->user?->username ?: 'Hunter' }}" src="{{ $member->user?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>@endforeach</div>
+@endif
 </article>
 <article class="deadline">
-<strong>Zwischenstand</strong>
-<span>14.07. · 22:00 Uhr</span>
+<strong>{{ $isEnglish ? 'Cup ends' : 'Cup endet' }}</strong>
+<span>{{ $endDate ? $endDate->translatedFormat('d.m.Y · H:i') : ($isEnglish ? 'Open end' : 'Offenes Ende') }}</span>
 </article>
 </div>
 </div></section><section class="cup-overview-more">
 <div class="cup-overview-section-head">
 <div>
-<span>LIVE CUP</span>
-<h3>Aktueller Stand</h3>
+<span>{{ $isEnglish ? 'LIVE CUP' : 'LIVE CUP' }}</span>
+<h3>{{ $isEnglish ? 'Current status' : 'Aktueller Stand' }}</h3>
 </div>
-<button data-toast="Live-Stand aktualisiert" type="button">Aktualisieren</button>
+<button type="button" onclick="window.location.reload()">{{ $isEnglish ? 'Refresh' : 'Aktualisieren' }}</button>
 </div>
 <div class="cup-live-summary">
 <article>
-<span>Teams bestätigt</span>
-<strong>16 / 20</strong>
-<small>4 Plätze frei</small>
+<span>{{ $soloCup ? ($isEnglish ? 'Participants' : 'Teilnehmer') : ($isEnglish ? 'Confirmed teams' : 'Teams bestätigt') }}</span>
+<strong>{{ $teamCount }}{{ $teamLimit ? ' / '.$teamLimit : '' }}</strong>
+<small>{{ $teamLimit ? max(0, $teamLimit - $teamCount).' '.($isEnglish ? 'places available' : 'Plätze frei') : ($isEnglish ? 'no fixed limit' : 'kein festes Limit') }}</small>
 </article>
 <article>
-<span>Einreichungen</span>
-<strong>7</strong>
-<small>2 in Prüfung</small>
+<span>{{ $isEnglish ? 'Submissions' : 'Einreichungen' }}</span>
+<strong>{{ $submissionCount }}</strong>
+<small>{{ $pendingSubmissionCount }} {{ $isEnglish ? 'pending review' : 'in Prüfung' }}</small>
 </article>
 <article>
-<span>Hunter-Kills</span>
-<strong>84</strong>
-<small>gesamt gemeldet</small>
+<span>{{ $isEnglish ? 'Hunter kills' : 'Hunter-Kills' }}</span>
+<strong>{{ $totalKills }}</strong>
+<small>{{ $isEnglish ? 'scored in total' : 'gesamt gewertet' }}</small>
 </article>
 <article>
-<span>Trophäen</span>
-<strong>19</strong>
-<small>bestätigt</small>
+<span>{{ $cup->usesSummerFirstTrophyScoring() ? ($isEnglish ? 'Trophies' : 'Trophäen') : 'Bounty' }}</span>
+<strong>{{ $totalBountyTokens }}</strong>
+<small>{{ $isEnglish ? 'confirmed' : 'bestätigt' }}</small>
 </article>
 </div>
 <div class="cup-overview-split">
 <section class="cup-overview-feed">
 <header>
 <div>
-<span>LIVE-AKTIVITÄT</span>
-<h3>Was gerade passiert</h3>
+<span>{{ $isEnglish ? 'LIVE ACTIVITY' : 'LIVE-AKTIVITÄT' }}</span>
+<h3>{{ $isEnglish ? 'Latest submissions' : 'Letzte Einreichungen' }}</h3>
 </div>
-<small>6 neue</small>
+<small>{{ $recentSubmissions->count() }}</small>
 </header>
+@forelse ($recentSubmissions as $submission)
 <article>
-<img alt="Valentina" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg') }}"/>
+<img alt="{{ $submission->submitter?->name ?: $submission->submitter?->username ?: 'Hunter' }}" src="{{ $submission->submitter?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
 <div>
-<strong>Night Ravens haben einen Score eingereicht</strong>
-<span>Stillwater Bayou · 13 Punkte</span>
+<strong>{{ $submission->team?->displayName() ?: ($submission->submitter?->username ?: $submission->submitter?->name ?: ($isEnglish ? 'Submission' : 'Einreichung')) }}</strong>
+<span>{{ $submission->statusLabel() }} · {{ (int) $submission->points }} {{ $isEnglish ? 'points' : 'Punkte' }}</span>
 </div>
-<time>jetzt</time>
+<time>{{ optional($submission->submitted_at ?: $submission->created_at)->diffForHumans() }}</time>
 </article>
+@empty
 <article>
-<img alt="Katy Fuller" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/katy.jpg') }}"/>
-<div>
-<strong>Bayou Wolves sind dem Cup beigetreten</strong>
-<span>Team vollständig · 3/3</span>
-</div>
-<time>4m</time>
+<img alt="HNT.ROCKS" src="{{ asset('assets/vikinger/img/default-avatar.svg') }}"/>
+<div><strong>{{ $isEnglish ? 'No submissions yet' : 'Noch keine Einreichungen' }}</strong><span>{{ $isEnglish ? 'Activity appears here after the first upload.' : 'Nach dem ersten Upload erscheint hier die Aktivität.' }}</span></div>
+<time>—</time>
 </article>
-<article>
-<img alt="Jonathan Kelly" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/>
-<div>
-<strong>Eine Einreichung wurde bestätigt</strong>
-<span>Lawson Delta · 9 Punkte</span>
-</div>
-<time>11m</time>
-</article>
-<article>
-<img alt="Erica Wyatt" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/>
-<div>
-<strong>Zwischenstand aktualisiert</strong>
-<span>Night Ravens führen mit 21 Punkten</span>
-</div>
-<time>18m</time>
-</article>
+@endforelse
 </section>
 <section class="cup-overview-ranking">
 <header>
@@ -122,93 +159,61 @@
 <span>TOP 3</span>
 <h3>Leaderboard</h3>
 </div>
-<button data-cup-tab-shortcut="teams" type="button">Alle Teams</button>
+<button data-cup-tab-shortcut="teams" type="button">{{ $isEnglish ? 'All teams' : 'Alle Teams' }}</button>
 </header>
+@forelse ($topTeams as $index => $team)
 <article>
-<b>1</b>
+<b>{{ $index + 1 }}</b>
 <div class="cup-overview-team">
 <span class="team-avatars">
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg') }}"/>
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/>
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/>
+@php($rankingMembers = $team->members->where('status', 'active')->take(3))
+@if ($rankingMembers->isNotEmpty())
+@foreach ($rankingMembers as $member)<img alt="{{ $member->user?->name ?: $member->user?->username ?: 'Hunter' }}" src="{{ $member->user?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>@endforeach
+@else
+<img alt="{{ $team->owner?->name ?: $team->displayName() }}" src="{{ $team->owner?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+@endif
 </span>
-<div><strong>Night Ravens</strong><small>18 Kills · 3 Trophäen</small></div>
+<div><strong>{{ $team->displayName() }}</strong><small>{{ (int) $team->kills_total }} Kills · {{ (int) $team->bounty_tokens_total }} {{ $isEnglish ? 'Bounty' : 'Trophäen' }}</small></div>
 </div>
-<strong>21</strong>
+<strong>{{ (int) $team->points_total }}</strong>
 </article>
-<article>
-<b>2</b>
-<div class="cup-overview-team">
-<span class="team-avatars">
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/katy.jpg') }}"/>
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/sarah.jpg') }}"/>
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-1.jpg') }}"/>
-</span>
-<div><strong>Bayou Wolves</strong><small>15 Kills · 3 Trophäen</small></div>
-</div>
-<strong>18</strong>
-</article>
-<article>
-<b>3</b>
-<div class="cup-overview-team">
-<span class="team-avatars">
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-1.jpg') }}"/>
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-cups/detail-assets/team-2.jpg') }}"/>
-<img alt="" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/>
-</span>
-<div><strong>Last Extract</strong><small>14 Kills · 2 Trophäen</small></div>
-</div>
-<strong>16</strong>
-</article>
+@empty
+<article><b>—</b><div class="cup-overview-team"><div><strong>{{ $isEnglish ? 'No rankings yet' : 'Noch keine Platzierungen' }}</strong><small>{{ $isEnglish ? 'Approved scores appear here.' : 'Bestätigte Scores erscheinen hier.' }}</small></div></div><strong>0</strong></article>
+@endforelse
 </section>
 </div>
 <section class="cup-overview-updates">
 <header>
 <div>
-<span>CUP-NEWS</span>
-<h3>Updates &amp; Hinweise</h3>
+<span>{{ $isEnglish ? 'CUP INFO' : 'CUP-INFOS' }}</span>
+<h3>{{ $isEnglish ? 'Dates & notes' : 'Termine & Hinweise' }}</h3>
 </div>
 </header>
+@foreach ($cupNotices as $notice)
 <article>
-<time>Heute · 12:30</time>
-<div>
-<strong>Upload-Prüfung läuft wieder normal</strong>
-<p>Die Warteschlange wurde abgearbeitet. Neue Screenshots werden aktuell innerhalb weniger Minuten geprüft.</p>
-</div>
+<time>{{ $notice['date'] ? $notice['date']->translatedFormat('d.m.Y · H:i') : ($isEnglish ? 'Current' : 'Aktuell') }}</time>
+<div><strong>{{ $notice['title'] }}</strong><p>{{ $notice['text'] }}</p></div>
 </article>
-<article>
-<time>Heute · 09:15</time>
-<div>
-<strong>Team-Lock morgen um 20:00 Uhr</strong>
-<p>Danach können keine Spieler mehr ausgetauscht oder neu eingeladen werden.</p>
-</div>
-</article>
-<article>
-<time>Gestern · 18:40</time>
-<div>
-<strong>Scoring-Beispiel ergänzt</strong>
-<p>Im Regelbereich findest du jetzt ein vollständiges Beispiel mit Extraktion, Kills und Gesamtpunkten.</p>
-</div>
-</article>
+@endforeach
 </section>
 <section class="cup-overview-faq">
 <div class="cup-overview-section-head">
 <div>
-<span>HÄUFIGE FRAGEN</span>
-<h3>Vor dem Start</h3>
+<span>{{ $isEnglish ? 'FREQUENT QUESTIONS' : 'HÄUFIGE FRAGEN' }}</span>
+<h3>{{ $isEnglish ? 'Participation & scores' : 'Teilnahme & Scores' }}</h3>
 </div>
 </div>
 <details open="">
-<summary>Wer darf Einreichungen hochladen?<svg><use href="#i-chevron"></use></svg></summary>
-<p>Nur der Captain eines bestätigten Dreierteams kann Screenshots hochladen.</p>
+<summary>{{ $isEnglish ? 'Who can upload submissions?' : 'Wer darf Einreichungen hochladen?' }}<svg><use href="#i-chevron"></use></svg></summary>
+<p>{{ $soloCup ? ($isEnglish ? 'Registered participants can upload their own screenshots.' : 'Angemeldete Teilnehmer können ihre eigenen Screenshots hochladen.') : ($isEnglish ? 'The captain of a complete team can upload screenshots.' : 'Der Captain eines vollständigen Teams kann Screenshots hochladen.') }}</p>
 </details>
 <details>
-<summary>Wie viele Screenshots sind erlaubt?<svg><use href="#i-chevron"></use></svg></summary>
-<p>Pro Team sind maximal drei Einreichungen möglich. Nach jedem Upload gilt ein Cooldown.</p>
+<summary>{{ $isEnglish ? 'How many screenshots are allowed?' : 'Wie viele Screenshots sind erlaubt?' }}<svg><use href="#i-chevron"></use></svg></summary>
+<p>{{ $maxUploadsPerParticipant ? ($isEnglish ? 'Up to '.$maxUploadsPerParticipant.' uploads per participant are allowed.' : 'Pro Teilnehmer sind maximal '.$maxUploadsPerParticipant.' Uploads erlaubt.') : ($isEnglish ? 'No fixed upload limit is configured.' : 'Es ist kein festes Upload-Limit eingestellt.') }} {{ $cooldownMinutes > 0 ? ($isEnglish ? 'The cooldown is '.$cooldownMinutes.' minutes.' : 'Der Cooldown beträgt '.$cooldownMinutes.' Minuten.') : '' }}</p>
 </details>
 <details>
-<summary>Wann erscheint ein Score im Leaderboard?<svg><use href="#i-chevron"></use></svg></summary>
-<p>Erst nach manueller Prüfung und Bestätigung durch das Cup-Team.</p>
+<summary>{{ $isEnglish ? 'When does a score appear on the leaderboard?' : 'Wann erscheint ein Score im Leaderboard?' }}<svg><use href="#i-chevron"></use></svg></summary>
+<p>{{ $verificationMode === \App\Support\CupOrganizerAccess::VERIFICATION_AI ? ($isEnglish ? 'After automatic validation or a manual review.' : 'Nach automatischer Bestätigung oder einer manuellen Prüfung.') : ($isEnglish ? 'After manual review and approval by the cup organizers.' : 'Nach manueller Prüfung und Bestätigung durch die Cup-Leitung.') }}</p>
 </details>
 </section>
 </section></section>
