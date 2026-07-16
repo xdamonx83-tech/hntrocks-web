@@ -210,12 +210,26 @@ class FeedPost extends Model
 
     public function visibilityLabel(): string
     {
-        return match ($this->visibility) {
+        $label = match ($this->visibility) {
             'team' => __('ui.visibility_team'),
             'followers' => __('ui.visibility_followers'),
             'private' => __('ui.visibility_private'),
             default => __('ui.visibility_public'),
         };
+
+        if (! request()->boolean('data')) {
+            return $label;
+        }
+
+        $feeling = $this->feelingMeta();
+
+        if (! $feeling) {
+            return $label;
+        }
+
+        $verb = app()->getLocale() === 'de' ? 'ist' : 'is';
+
+        return trim($label.' · '.$verb.' '.$feeling['label'].' '.$feeling['emoji']);
     }
 
 
