@@ -1,0 +1,96 @@
+/* Cup detail visual polish: tabs, upload control and round check states. */
+
+.cup-section-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.cup-section-title {
+  flex: 0 0 auto;
+  min-width: 130px;
+}
+
+.cup-section-tabs {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 3px 4px;
+  scrollbar-width: none;
+}
+
+.cup-section-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.cup-section-tabs button {
+  min-width: max-content;
+  height: 31px;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cup-upload-zone {
+  position: relative;
+  overflow: hidden;
+}
+
+.cup-upload-zone input[type="file"] {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  cursor: pointer;
+  appearance: none;
+}
+
+.cup-team-members article > i,
+.cup-team-members article > i.done,
+.cup-scoring-actions button,
+.cup-scoring-actions button:nth-child(2) {
+  border-radius: 999px !important;
+  overflow: hidden;
+}
+
+.cup-team-members article > i.done {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.cup-scoring-actions button,
+.cup-scoring-actions button:nth-child(2) {
+  width: 29px;
+  height: 29px;
+  min-width: 29px;
+  min-height: 29px;
+}
+
+@media (max-width: 899px) {
+  .cup-section-head {
+    display: grid !important;
+    gap: 10px;
+  }
+
+  .cup-section-title {
+    min-width: 0;
+  }
+
+  .cup-section-tabs {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
