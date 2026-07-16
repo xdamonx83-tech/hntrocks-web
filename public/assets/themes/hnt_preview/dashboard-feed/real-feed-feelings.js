@@ -4,7 +4,7 @@
   window.HNT_REAL_FEELINGS_READY = true;
 
   const modal = document.getElementById('postComposerModal');
-  const trigger = document.getElementById('composerEmojiButton');
+  const trigger = document.getElementById('composerLfgButton');
   const tools = modal?.querySelector('.composer-tools');
 
   if (!modal || !trigger || !tools || !window.fetch) return;
@@ -25,6 +25,8 @@
         title: 'How are you feeling?',
         none: 'No feeling',
         selected: 'Feeling',
+        remove: 'Remove feeling',
+        close: 'Close',
         verb: 'is',
       }
     : {
@@ -32,6 +34,8 @@
         title: 'Wie fühlst du dich?',
         none: 'Kein Gefühl',
         selected: 'Gefühl',
+        remove: 'Gefühl entfernen',
+        close: 'Schließen',
         verb: 'ist',
       };
 
@@ -97,10 +101,12 @@
     root.querySelectorAll?.('[data-real-feed-post], .profile-real-post').forEach(decorateArticle);
   };
 
+  trigger.innerHTML = '<span aria-hidden="true">☺</span>';
+
   const current = document.createElement('div');
   current.className = 'composer-feeling-current';
   current.hidden = true;
-  current.innerHTML = '<span></span><button type="button" aria-label="Gefühl entfernen">×</button>';
+  current.innerHTML = `<span></span><button type="button" aria-label="${labels.remove}">×</button>`;
   tools.parentNode?.insertBefore(current, tools);
 
   const picker = document.createElement('section');
@@ -108,7 +114,7 @@
   picker.hidden = true;
   picker.setAttribute('aria-label', labels.title);
   picker.innerHTML = `
-    <header><strong>${labels.title}</strong><button type="button" data-feeling-close aria-label="Schließen">×</button></header>
+    <header><strong>${labels.title}</strong><button type="button" data-feeling-close aria-label="${labels.close}">×</button></header>
     <div class="composer-feeling-options">
       <button type="button" data-feeling-value="none"><span>—</span><b>${labels.none}</b></button>
       ${Object.entries(feelings).map(([key, feeling]) => `
@@ -169,7 +175,7 @@
     const target = event.target;
     if (!(target instanceof Element)) return;
 
-    if (target.closest('#composerEmojiButton')) {
+    if (target.closest('#composerLfgButton')) {
       event.preventDefault();
       event.stopImmediatePropagation();
       picker.hidden ? openPicker() : closePicker();
