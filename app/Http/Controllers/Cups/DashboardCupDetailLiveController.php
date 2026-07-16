@@ -75,7 +75,7 @@ class DashboardCupDetailLiveController extends Controller
             ])
             ->values();
 
-        return response()->view('themes.hnt_preview.cups.detail-live', [
+        return response()->view('themes.hnt_preview.cups.show', [
             'cup' => $cup,
             'viewerTeam' => $viewerTeam,
             'canManage' => $canManage,
