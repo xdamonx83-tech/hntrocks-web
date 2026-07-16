@@ -1,43 +1,47 @@
+@php
+    $milestoneLabels = $isEnglish
+        ? ['Registration', 'Team lock', 'Start', 'Midpoint', 'End']
+        : ['Anmeldung', 'Team-Lock', 'Start', 'Zwischenstand', 'Ende'];
+    $milestoneHeights = [38, 58, 86, 66, 46];
+@endphp
 <div class="cup-center-top-cards"><article class="cup-progress-card cup-white-card">
 <header>
-<div><span>ZEITPLAN</span><h2>Cup Fortschritt</h2></div>
-<button aria-label="Zeitplan öffnen" data-toast="Vollständigen Zeitplan geöffnet" type="button">
+<div><span>{{ $isEnglish ? 'SCHEDULE' : 'ZEITPLAN' }}</span><h2>{{ $isEnglish ? 'Cup progress' : 'Cup Fortschritt' }}</h2></div>
+<button aria-label="{{ $isEnglish ? 'Open schedule' : 'Zeitplan öffnen' }}" data-toast="{{ $isEnglish ? 'Full schedule opened' : 'Vollständigen Zeitplan geöffnet' }}" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
 </header>
 <div class="cup-progress-summary">
-<strong>2T 08h</strong>
-<span>bis zum Cup-Start</span>
-<em>16 Teams bestätigt</em>
+<strong>{{ $progressRemaining }}</strong>
+<span>{{ $progressRemainingLabel }}</span>
+<em>{{ $teamCount }} {{ $soloCup ? ($isEnglish ? 'participants confirmed' : 'Teilnehmer bestätigt') : ($isEnglish ? 'teams confirmed' : 'Teams bestätigt') }}</em>
 </div>
-<div aria-label="Cup Meilensteine" class="cup-milestone-bars">
-<span><i style="height:38%"></i><b>10.</b><small>Anmeldung</small></span>
-<span><i style="height:58%"></i><b>12.</b><small>Team-Lock</small></span>
-<span class="active"><i style="height:86%"></i><b>14.</b><small>Start</small></span>
-<span><i style="height:66%"></i><b>15.</b><small>Zwischenstand</small></span>
-<span><i style="height:46%"></i><b>17.</b><small>Ende</small></span>
+<div aria-label="{{ $isEnglish ? 'Cup milestones' : 'Cup Meilensteine' }}" class="cup-milestone-bars">
+@foreach ($milestoneLabels as $index => $milestoneLabel)
+<span @class(['active' => $currentMilestoneIndex === $index])><i style="height:{{ $milestoneHeights[$index] }}%"></i><b>{{ $milestoneDates[$index]?->format('d.') ?: '–' }}</b><small>{{ $milestoneLabel }}</small></span>
+@endforeach
 </div><div class="cup-progress-legend">
-<span><i class="done"></i> abgeschlossen</span>
-<span><i class="current"></i> aktueller Schritt</span>
-<span><i></i> ausstehend</span>
+<span><i class="done"></i> {{ $isEnglish ? 'completed' : 'abgeschlossen' }}</span>
+<span><i class="current"></i> {{ $isEnglish ? 'current step' : 'aktueller Schritt' }}</span>
+<span><i></i> {{ $isEnglish ? 'upcoming' : 'ausstehend' }}</span>
 </div>
 </article><article class="cup-scoring-card cup-white-card">
 <header>
-<div><span>WERTUNG</span><h2>Scoring</h2></div>
-<button aria-label="Regeln öffnen" data-cup-tab-shortcut="rules" type="button">
+<div><span>{{ $isEnglish ? 'SCORING' : 'WERTUNG' }}</span><h2>Scoring</h2></div>
+<button aria-label="{{ $isEnglish ? 'Open rules' : 'Regeln öffnen' }}" data-cup-tab-shortcut="rules" type="button">
 <svg><use href="#i-arrow"></use></svg>
 </button>
 </header>
 <div class="cup-score-ring">
-<div><strong>1+</strong><span>Kill-Punkt</span></div>
+<div><strong>{{ $pointsPerKill > 0 ? $pointsPerKill.'+' : '–' }}</strong><span>{{ $isEnglish ? 'points / kill' : 'Punkte / Kill' }}</span></div>
 </div>
 <div class="cup-scoring-actions">
-<button data-toast="Scoring-Beispiel geöffnet" type="button">
+<button data-toast="{{ e($scoringRules) }}" type="button">
 <svg><use href="#i-eye"></use></svg>
 </button>
 <button data-cup-tab-shortcut="rules" type="button">
 <svg><use href="#i-check"></use></svg>
 </button>
-<span>Extraktion erforderlich</span>
+<span>{{ $requiresExtraction ? ($isEnglish ? 'Extraction required' : 'Extraktion erforderlich') : ($isEnglish ? 'No extraction requirement' : 'Keine Extraktionspflicht') }}{{ $extractBonus > 0 ? ' · +'.$extractBonus.' Bonus' : '' }}</span>
 </div>
 </article></div>
