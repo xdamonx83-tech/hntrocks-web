@@ -179,7 +179,7 @@ body[data-page="profile"] .profile-tags .yellow {
 body[data-page="profile"] .profile-bio-points span,
 body[data-page="profile"] .profile-level-stats > span,
 body[data-page="profile"] .profile-info-head button {
-    background: var(--hnt-surface-input);
+    background: rgb(255 255 255);
 }
 
 body[data-page="profile"] .profile-level-card {

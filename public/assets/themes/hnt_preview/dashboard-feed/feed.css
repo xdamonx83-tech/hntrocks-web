@@ -926,7 +926,7 @@
   min-height: 52px;
   margin: -15px -16px 10px;
   padding: 13px 16px 10px;
-  border-radius: 27px 27px 15px 15px;
+  border-radius: 27px 27px 0px 0px;
   background: #efefee;
   box-shadow: 0 8px 22px rgba(65,60,42,.045);
   isolation: isolate;
@@ -935,7 +935,7 @@
 
 
 .social-feed-head.is-stuck {
-  border: 1px solid rgba(211,205,185,.48);
+  border: 0px solid rgba(211,205,185,.48);
   border-bottom-color: rgba(211,205,185,.22);
   box-shadow: 0 8px 22px rgba(65,60,42,.045);
 }
@@ -1404,9 +1404,7 @@
     font-size: clamp(15px,1.04vw,20px);
   }
 
-  .post-author strong {
-    font-size: clamp(11px,.75vw,14px);
-  }
+
 
   .post-body > p {
     font-size: clamp(10px,.68vw,13px);
