@@ -70,6 +70,7 @@
   const tabs = [...document.querySelectorAll('[data-cup-tab]')];
   const panels = [...document.querySelectorAll('[data-cup-panel]')];
   const title = document.getElementById('cupSectionTitle');
+  const shell = document.querySelector('.cup-detail-page-shell');
 
   function activateCupTab(tabName) {
     tabs.forEach((button) => {
@@ -95,10 +96,28 @@
 
   document.querySelector('.cup-upload-zone input')?.addEventListener('change', (event) => {
     const file = event.target.files?.[0];
-    if (file && typeof showToast === 'function') showToast(file.name + ' ausgewählt');
+    if (!file) return;
+
+    const zone = event.target.closest('.cup-upload-zone');
+    const label = zone?.querySelector('strong');
+    if (label) label.textContent = file.name;
+    if (typeof showToast === 'function') showToast(file.name + ' ausgewählt');
   });
 
-  activateCupTab('overview');
+  const sectionFromPath = {
+    rules: 'rules',
+    prizes: 'prizes',
+    leaderboard: 'teams',
+    participants: 'teams',
+    teams: 'teams',
+    submit: 'submit',
+    submissions: 'submissions',
+  };
+  const routeSection = window.location.pathname.split('/').filter(Boolean).at(-1) || '';
+  const requestedTab = shell?.dataset.cupActiveSection || sectionFromPath[routeSection] || 'overview';
+  const initialTab = tabs.some((button) => button.dataset.cupTab === requestedTab) ? requestedTab : 'overview';
+
+  activateCupTab(initialTab);
 })();
 
 (() => {
