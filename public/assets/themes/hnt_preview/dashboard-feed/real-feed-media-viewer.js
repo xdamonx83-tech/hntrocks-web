@@ -363,3 +363,12 @@
     }
   }, true);
 })();
+
+/* The exact feed and exact profile share the same composer feeling bridge. */
+(() => {
+  if (document.querySelector('script[data-real-feed-feelings]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/themes/hnt_preview/dashboard-feed/real-feed-feelings.js?v=20260716-1';
+  script.dataset.realFeedFeelings = '1';
+  document.body.appendChild(script);
+})();
