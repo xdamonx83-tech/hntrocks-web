@@ -153,7 +153,6 @@
     submissionForm.setAttribute("aria-busy", String(busy));
     submissionButton?.toggleAttribute("disabled", busy);
     submissionCloseButtons.forEach((button) => button.toggleAttribute("disabled", busy));
-    submissionFile?.toggleAttribute("disabled", busy);
   };
 
   const setSubmissionProgress = (percent, text, analyzing = false) => {
@@ -273,6 +272,7 @@
     clearSubmissionError();
     if (!validateSubmissionFile(file)) return;
 
+    const formData = new FormData(submissionForm);
     setSubmissionBusy(true);
     setSubmissionProgress(4, submissionForm.dataset.uploading);
 
@@ -321,7 +321,7 @@
       setSubmissionBusy(false);
     });
 
-    request.send(new FormData(submissionForm));
+    request.send(formData);
   });
 
   document.addEventListener("keydown", (event) => {
