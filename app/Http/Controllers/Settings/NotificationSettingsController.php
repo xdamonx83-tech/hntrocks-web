@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\UserNotificationSetting;
-use App\Support\HntTheme;
 use App\Support\NotificationSettingsGroups;
 use App\Services\SecurityLogService;
 use Illuminate\Http\RedirectResponse;
@@ -17,9 +16,9 @@ class NotificationSettingsController extends Controller
     {
         $settings = $request->user()->notificationSettings()->firstOrCreate([]);
 
-        $view = HntTheme::settingsEnabled() && ! $request->boolean('classic_settings')
-            ? HntTheme::resolve('account.settings')
-            : 'account.settings';
+        $view = $request->boolean('classic_settings')
+            ? 'account.settings'
+            : 'themes.hnt_preview.account.settings';
 
         return view($view, [
             'settings' => $settings,
@@ -50,5 +49,4 @@ class NotificationSettingsController extends Controller
     {
         return array_fill_keys(UserNotificationSetting::FIELDS, ['nullable', 'boolean']);
     }
-
 }
