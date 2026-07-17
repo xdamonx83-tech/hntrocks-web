@@ -174,6 +174,32 @@
         $privacyPanelStart - $notificationsPanelStart
     );
 
+    abort_unless(isset($privacySettings), 500, 'Privacy settings data is missing.');
+
+    $privacyPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="privacy" hidden="">'
+    );
+    abort_unless($privacyPanelStart !== false, 500, 'Privacy settings panel could not be located.');
+
+    $blockedPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="blocked" hidden="">',
+        $privacyPanelStart
+    );
+    abort_unless($blockedPanelStart !== false, 500, 'Blocked users settings panel could not be located.');
+
+    $realPrivacyHtml = view('themes.hnt_preview.account.partials.privacy-settings', [
+        'privacySettings' => $privacySettings,
+    ])->render();
+
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $realPrivacyHtml,
+        $privacyPanelStart,
+        $blockedPanelStart - $privacyPanelStart
+    );
+
     $settingsDemoHtml = str_replace(
         '<button class="active" data-settings-tab="general" data-title="Allgemein" type="button">',
         '<button class="active" data-settings-tab="general" data-title="'.e(__('settings.general_tab')).'" type="button">',
@@ -193,6 +219,16 @@
     $settingsDemoHtml = str_replace(
         '<span><strong>Benachrichtigungen</strong><small>Feed, Freunde, LFG und Cups</small></span><i>9</i>',
         '<span><strong>'.e(__('settings.notifications_tab')).'</strong><small>'.e(__('settings.notifications_nav_description')).'</small></span><i>'.e(__('settings.notifications_badge')).'</i>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<button data-settings-tab="privacy" data-title="Privatsphäre" type="button">',
+        '<button data-settings-tab="privacy" data-title="'.e(__('settings.privacy_tab')).'" type="button">',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<span><strong>Privatsphäre</strong><small>Sichtbarkeit und Kontaktregeln</small></span><i>8</i>',
+        '<span><strong>'.e(__('settings.privacy_tab')).'</strong><small>'.e(__('settings.privacy_nav_description')).'</small></span><i>'.e(__('settings.privacy_badge')).'</i>',
         $settingsDemoHtml
     );
     $settingsDemoHtml = str_replace(
@@ -258,7 +294,7 @@
     if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-4" rel="stylesheet"/>' . "\n" . '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-5" rel="stylesheet"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
@@ -275,7 +311,7 @@
         '<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = '.json_encode(route('feed.index')).';</script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v=20260714-1"></script>',
-        '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-3"></script>',
+        '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-4"></script>',
     ]);
 
     $settingsDemoHtml = str_replace(
