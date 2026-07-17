@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiAccessToken;
 use App\Models\UserNotificationSetting;
-use App\Support\NotificationSettingsGroups;
 use App\Services\SecurityLogService;
+use App\Support\NotificationSettingsGroups;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class NotificationSettingsController extends Controller
@@ -23,6 +25,7 @@ class NotificationSettingsController extends Controller
         return view($view, [
             'settings' => $settings,
             'notificationGroups' => NotificationSettingsGroups::all(),
+            'securityStatus' => $this->securityStatus($request),
         ]);
     }
 
@@ -48,5 +51,154 @@ class NotificationSettingsController extends Controller
     private function rules(): array
     {
         return array_fill_keys(UserNotificationSetting::FIELDS, ['nullable', 'boolean']);
+    }
+
+    private function securityStatus(Request $request): array
+    {
+        $user = $request->user()->loadMissing(['privacySettings', 'profile']);
+        $isEnglish = app()->getLocale() === 'en';
+        $t = static fn (string $de, string $en): string => $isEnglish ? $en : $de;
+
+        $twoFactorEnabled = $user->hasTwoFactorEnabled();
+        $profileVisibility = (string) ($user->privacySettings?->profile_visibility
+            ?? $user->profile?->profile_visibility
+            ?? 'public');
+        $messagesFrom = (string) ($user->privacySettings?->allow_messages_from ?? 'registered');
+
+        $passwordChangedAt = $user->securityEvents()
+            ->where('event', 'password_changed')
+            ->latest()
+            ->first()
+            ?->created_at;
+
+        $passwordActive = filled($user->getAuthPassword());
+        $messagesRestricted = $messagesFrom !== 'everyone';
+        $profileConfigured = in_array($profileVisibility, ['public', 'registered', 'private'], true);
+
+        $score = ($passwordActive ? 54 : 0)
+            + ($profileConfigured ? 18 : 0)
+            + ($messagesRestricted ? 12 : 4)
+            + ($twoFactorEnabled ? 12 : 0);
+        $score = min(96, max(0, $score));
+
+        $scoreLabel = match (true) {
+            $score >= 90 => $t('Sehr gut geschützt', 'Very well protected'),
+            $score >= 75 => $t('Gut geschützt', 'Well protected'),
+            $score >= 55 => $t('Solider Schutz', 'Solid protection'),
+            default => $t('Schutz verbessern', 'Improve protection'),
+        };
+
+        $profileLabel = match ($profileVisibility) {
+            'private' => $t('Privat', 'Private'),
+            'registered' => $t('Nur registrierte Nutzer', 'Registered users only'),
+            default => $t('Öffentlich', 'Public'),
+        };
+
+        $messagesLabel = match ($messagesFrom) {
+            'nobody' => $t('Niemand', 'Nobody'),
+            'everyone' => $t('Alle', 'Everyone'),
+            'following' => $t('Nur von „Folge ich“', 'Following only'),
+            default => $t('Registrierte Nutzer', 'Registered users'),
+        };
+
+        $sessions = [[
+            'type' => 'web',
+            'title' => $this->browserSessionTitle((string) $request->userAgent(), $t),
+            'subtitle' => $t('Diese Sitzung · jetzt aktiv', 'This session · active now'),
+            'current' => true,
+        ]];
+
+        $activeAppSessionCount = 0;
+        if (Schema::hasTable('api_access_tokens')) {
+            $activeTokens = ApiAccessToken::query()
+                ->where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->where(function ($query): void {
+                    $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                });
+
+            $activeAppSessionCount = (clone $activeTokens)->count();
+
+            $tokens = $activeTokens
+                ->orderByRaw('last_used_at is null')
+                ->orderByDesc('last_used_at')
+                ->orderByDesc('created_at')
+                ->limit(3)
+                ->get();
+
+            foreach ($tokens as $token) {
+                $activityAt = $token->last_used_at ?: $token->created_at;
+                $sessions[] = [
+                    'type' => 'app',
+                    'title' => trim((string) $token->name) ?: $t('HNT App', 'HNT App'),
+                    'subtitle' => $activityAt
+                        ? $t('App · ', 'App · ').$activityAt->diffForHumans()
+                        : $t('App-Zugang aktiv', 'App access active'),
+                    'current' => false,
+                ];
+            }
+        }
+
+        return [
+            'score' => $score,
+            'score_label' => $scoreLabel,
+            'password' => [
+                'good' => $passwordActive,
+                'text' => $passwordChangedAt
+                    ? $t('Aktiv · ', 'Active · ').$passwordChangedAt->diffForHumans()
+                    : $t('Aktiv · Änderungsdatum nicht erfasst', 'Active · change date unavailable'),
+                'badge' => $passwordActive ? 'OK' : $t('Offen', 'Open'),
+            ],
+            'two_factor' => [
+                'good' => $twoFactorEnabled,
+                'text' => $twoFactorEnabled ? $t('Aktiviert', 'Enabled') : $t('Noch nicht aktiviert', 'Not enabled yet'),
+                'badge' => $twoFactorEnabled ? $t('Aktiv', 'Active') : $t('Offen', 'Open'),
+            ],
+            'profile' => [
+                'good' => $profileConfigured,
+                'text' => $profileLabel,
+                'badge' => $t('Aktiv', 'Active'),
+            ],
+            'messages' => [
+                'good' => $messagesRestricted,
+                'text' => $messagesLabel,
+                'badge' => $messagesFrom === 'everyone' ? $t('Offen', 'Open') : $t('Begrenzt', 'Limited'),
+            ],
+            'sessions' => $sessions,
+            'session_count' => 1 + $activeAppSessionCount,
+            'labels' => [
+                'eyebrow' => $t('KONTOSTATUS', 'ACCOUNT STATUS'),
+                'title' => $t('Sicherheitsstatus', 'Security status'),
+                'password' => $t('Passwort', 'Password'),
+                'two_factor' => $t('Zwei-Faktor-Schutz', 'Two-factor protection'),
+                'profile' => $t('Profil-Sichtbarkeit', 'Profile visibility'),
+                'messages' => $t('Nachrichten', 'Messages'),
+                'sessions' => $t('AKTIVE SITZUNGEN', 'ACTIVE SESSIONS'),
+                'open_security' => $t('Sicherheit öffnen', 'Open security'),
+                'save' => $t('Änderungen speichern', 'Save changes'),
+            ],
+        ];
+    }
+
+    private function browserSessionTitle(string $userAgent, callable $t): string
+    {
+        $os = match (true) {
+            str_contains($userAgent, 'Windows') => 'Windows',
+            str_contains($userAgent, 'Android') => 'Android',
+            str_contains($userAgent, 'iPhone'), str_contains($userAgent, 'iPad') => 'iOS',
+            str_contains($userAgent, 'Macintosh') => 'macOS',
+            str_contains($userAgent, 'Linux') => 'Linux',
+            default => $t('Gerät', 'Device'),
+        };
+
+        $browser = match (true) {
+            str_contains($userAgent, 'Edg/') => 'Edge',
+            str_contains($userAgent, 'Firefox/') => 'Firefox',
+            str_contains($userAgent, 'Chrome/') => 'Chrome',
+            str_contains($userAgent, 'Safari/') => 'Safari',
+            default => $t('Browser', 'Browser'),
+        };
+
+        return $os.' · '.$browser;
     }
 }
