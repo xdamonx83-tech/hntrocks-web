@@ -1,0 +1,283 @@
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.settings-page-shell {
+  min-height: 100vh;
+  display: block;
+  overflow: visible;
+}
+
+.settings-page-shell > .site-header {
+  position: sticky;
+  z-index: 90;
+  top: 0;
+}
+
+.settings-page-shell .settings-page-active {
+  background: var(--dark);
+  color: white;
+}
+
+.settings-heading {
+  min-height: 138px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 28px 0 22px;
+}
+
+.settings-heading > div:first-child > span,
+.settings-content-head > div > span,
+.settings-section-intro > span,
+.settings-nav-card > header span,
+.settings-status-card > header span,
+.settings-master-row > div > span,
+.settings-choice-card > div:first-child > span,
+.settings-blocked-head span,
+.settings-security-highlight > div:nth-child(2) > span,
+.settings-security-section header span,
+.settings-two-factor-card > div:first-child > span,
+.settings-security-actions-grid article > span,
+.settings-session-card > div > span,
+.settings-delete-panel header span {
+  color: #898783;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.settings-heading h1 {
+  margin: 3px 0 0;
+  font-size: clamp(44px, 3.4vw, 62px);
+  font-weight: 300;
+  letter-spacing: -1.5px;
+}
+
+.settings-heading p {
+  margin: 7px 0 0;
+  color: #797978;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.settings-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 3px;
+}
+
+.settings-save-state {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.7);
+  color: #74736f;
+  font-size: 10px;
+}
+
+.settings-save-state i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #78b41d;
+}
+
+.settings-save-state.dirty {
+  background: #f2dfdc;
+  color: #9f4038;
+}
+
+.settings-save-state.dirty i {
+  background: #9f4038;
+}
+
+.settings-heading-actions > a {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: 20px;
+  background: var(--dark);
+  color: white;
+  font-size: 10px;
+  text-decoration: none;
+}
+
+.settings-heading-actions svg,
+.settings-nav-card svg,
+.settings-content-card svg,
+.settings-status-card svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.settings-workspace {
+  display: grid;
+  grid-template-columns:
+    clamp(250px, 15vw, 300px)
+    minmax(0, 1fr)
+    clamp(300px, 18vw, 350px);
+  align-items: start;
+  gap: 14px;
+  padding-bottom: 42px;
+}
+
+.settings-nav-card,
+.settings-content-card,
+.settings-status-card {
+  min-width: 0;
+  border-radius: 30px;
+  background: rgba(255,255,255,.79);
+}
+
+.settings-nav-card,
+.settings-status-card {
+  position: sticky;
+  top: 78px;
+  align-self: start;
+}
+
+.settings-nav-card {
+  padding: 16px;
+}
+
+.settings-nav-card > header,
+.settings-status-card > header,
+.settings-content-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-nav-card h2,
+.settings-status-card h2 {
+  margin: 3px 0 0;
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.settings-nav-card > header > strong {
+  font-size: 28px;
+  font-weight: 300;
+}
+
+.settings-nav-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.settings-nav-list button {
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: 39px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 19px;
+  background: #eeeeeb;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-nav-list button.active {
+  background: var(--dark);
+  color: white;
+}
+
+.settings-nav-list button > svg {
+  width: 39px;
+  height: 39px;
+  padding: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.67);
+}
+
+.settings-nav-list button.active > svg {
+  background: rgba(255,255,255,.1);
+}
+
+.settings-nav-list button > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.settings-nav-list strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.settings-nav-list small {
+  overflow: hidden;
+  color: #94928e;
+  font-size: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.settings-nav-list button.active small {
+  color: rgba(255,255,255,.5);
+}
+
+.settings-nav-list button > i {
+  color: #878581;
+  font-size: 8px;
+  font-style: normal;
+}
+
+.settings-nav-list button.active > i {
+  color: var(--yellow);
+}
+
+.settings-nav-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #dcdad5;
+}
+
+.settings-nav-footer > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 9px;
+}
+
+.settings-nav-footer > div strong {
+  font-weight: 500;
+}
+
+.settings-nav-footer > i {
+  height: 7px;
+  display: block;
+  overflow: hidden;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: #dcdad6;
+}
+
+.settings-nav-footer > i b {
+  display: block;
+  height: 100%;
