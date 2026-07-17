@@ -1,0 +1,350 @@
+.team-panel-card svg,
+.team-fixed-column svg,
+.team-confirm-dialog svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.team-name-card > p,
+.team-submission-ready > p,
+.team-section-intro p,
+.team-invite-main > p,
+.team-recruiting-toggle p,
+.team-recruiting-info p,
+.team-danger-zone p,
+.team-lock-card p {
+  margin: 8px 0 0;
+  color: #898783;
+  font-size: 7px;
+  line-height: 1.5;
+}
+
+.team-name-form {
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.team-name-form label {
+  color: #878581;
+  font-size: 6px;
+}
+
+.team-name-form > div {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 7px;
+}
+
+.team-name-form input,
+.team-invite-link input,
+.team-chat-compose input {
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #ead2ce;
+  border-radius: 18px;
+  outline: 0;
+  background: #f4f4f1;
+  font: inherit;
+  font-size: 8px;
+}
+
+.team-name-form button,
+.team-invite-link button,
+.team-primary-button {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--yellow);
+  color: var(--dark);
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.team-status-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.team-status-pills span,
+.team-member-details span,
+.team-roster-state {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border-radius: 13px;
+  background: #eeeeeb;
+  color: #7e7c78;
+  font-size: 6px;
+}
+
+.team-status-pills .ready,
+.team-roster-state {
+  background: #e7f4d6;
+  color: #6d9936;
+}
+
+.team-readiness-card header > strong {
+  font-size: 25px;
+  font-weight: 300;
+}
+
+.team-readiness-steps {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.team-readiness-steps span {
+  min-height: 47px;
+  display: grid;
+  grid-template-columns: 32px minmax(0,1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 9px;
+  padding: 7px 9px;
+  border-radius: 15px;
+  background: #f2f2f1;
+}
+
+.team-readiness-steps i {
+  grid-row: 1 / 3;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #d6d6d5;
+  font-size: 8px;
+  font-style: normal;
+}
+
+.team-readiness-steps .done i {
+  background: var(--dark);
+  color: white;
+}
+
+.team-readiness-steps .current i {
+  background: var(--yellow);
+}
+
+.team-readiness-steps b {
+  align-self: end;
+  font-size: 7px;
+  font-weight: 500;
+}
+
+.team-readiness-steps small {
+  align-self: start;
+  color: #939392;
+  font-size: 6px;
+}
+
+.team-members-overview {
+  margin-top: 12px;
+}
+
+.team-members-overview header > button,
+.team-section-intro > button {
+  width: auto;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 15px;
+  color: #74736f;
+  font-size: 7px;
+}
+
+.team-member-table {
+  display: grid;
+  margin-top: 10px;
+}
+
+.team-member-table article {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 38px minmax(160px,1fr) 62px 85px 32px;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px dashed #dcdad5;
+}
+
+.team-member-table img,
+.team-member-card-head img,
+.team-finder-players img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.team-member-table article > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.team-member-table strong,
+.team-finder-players strong {
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.team-member-table article > div span,
+.team-finder-players article > div span {
+  color: #939392;
+  font-size: 6px;
+}
+
+.team-member-table .platform {
+  justify-self: start;
+  padding: 5px 8px;
+  border-radius: 11px;
+  background: #ededeb;
+  color: #74736f;
+  font-size: 6px;
+}
+
+.member-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #74736f;
+  font-size: 6px;
+}
+
+.member-state i,
+.team-roster-state i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.member-state.ready {
+  color: #6d9936;
+}
+
+.team-submission-ready header > strong {
+  font-size: 24px;
+  font-weight: 300;
+}
+
+.team-upload-progress,
+.team-lock-card > div {
+  height: 6px;
+  overflow: hidden;
+  margin-top: 13px;
+  border-radius: 999px;
+  background: #dcdad6;
+}
+
+.team-upload-progress i,
+.team-lock-card > div i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--yellow);
+}
+
+.team-submission-ready > button {
+  width: 100%;
+  height: 35px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--dark);
+  color: white;
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.team-activity-card header small,
+.team-invite-history header small,
+.team-finder-players header small {
+  color: #8d8b87;
+  font-size: 6px;
+}
+
+.team-activity-card ul,
+.team-invite-history ul,
+.team-recruiting-info ul {
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+}
+
+.team-activity-card li {
+  min-height: 39px;
+  display: grid;
+  grid-template-columns: 7px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px dashed #dcdad5;
+  font-size: 6.5px;
+}
+
+.team-activity-card li > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--yellow);
+}
+
+.team-activity-card li strong {
+  font-weight: 500;
+}
+
+.team-activity-card time,
+.team-invite-history time {
+  color: #b64e44;
+  font-size: 6px;
+}
+
+.team-danger-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 12px;
+  background: #f1f1f0;
+  border-color: #f2dfdc;
+}
+
+.team-danger-zone button {
+  height: 35px;
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 18px;
+  background: #b64e44;
+  color: white;
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.team-section-intro {
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 15px;
+  border-radius: 21px;
+  background: rgba(255,255,255,.78);
+}
+
+.team-roster-state.full {
+  background: #f2dfdc;
+  color: #9f4038;
+}
