@@ -1,0 +1,285 @@
+.settings-session-card article small {
+  color: #8d8b87;
+  font-size: 7px;
+}
+
+.settings-session-card article > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #78b41d;
+}
+
+.settings-status-save {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 21px;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.settings-delete-modal[hidden] {
+  display: none;
+}
+
+.settings-delete-modal {
+  position: fixed;
+  z-index: 230;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(31,31,30,.42);
+  backdrop-filter: blur(10px);
+}
+
+.settings-delete-panel {
+  width: min(560px,100%);
+  padding: 20px;
+  border-radius: 30px;
+  background: #f3f3f0;
+  box-shadow: 0 28px 80px rgba(31,31,30,.24);
+}
+
+.settings-delete-panel > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.settings-delete-panel h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.settings-delete-panel header button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #ededeb;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.settings-delete-panel > p {
+  margin: 14px 0 0;
+  color: #7e7c78;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.settings-delete-panel > label {
+  margin-top: 12px;
+  padding: 13px;
+  border-radius: 19px;
+  background: #f0f0ed;
+}
+
+.settings-delete-panel input,
+.settings-delete-panel textarea {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.settings-delete-panel textarea {
+  height: 74px;
+  padding-top: 7px;
+  resize: vertical;
+}
+
+.settings-delete-panel footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.settings-delete-panel footer button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 19px;
+  background: #ededeb;
+  color: #74736f;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.settings-delete-panel footer button:last-child {
+  background: #b64e44;
+  color: white;
+}
+
+.settings-delete-panel footer button:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+body.settings-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 1120px) and (min-width: 761px) {
+  .settings-workspace {
+    grid-template-columns: 235px minmax(0,1fr);
+  }
+
+  .settings-status-card {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .settings-page-shell > .site-header {
+    position: relative;
+  }
+
+  .settings-heading {
+    display: grid;
+    min-height: auto;
+    padding: 24px 0 18px;
+  }
+
+  .settings-heading-actions {
+    flex-wrap: wrap;
+  }
+
+  .settings-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-nav-card,
+  .settings-status-card,
+  .settings-content-head {
+    position: static;
+  }
+
+  .settings-nav-list {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .settings-nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-nav-list button {
+    min-width: 210px;
+  }
+
+  .settings-general-grid,
+  .settings-privacy-selects,
+  .settings-notification-grid,
+  .settings-security-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-choice-card,
+  .settings-master-row,
+  .settings-two-factor-card,
+  .settings-save-footer {
+    display: grid;
+  }
+
+  .settings-choice-options {
+    width: 100%;
+  }
+
+  .settings-choice-options label {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .settings-block-form,
+  .settings-password-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-blocked-list > article {
+    grid-template-columns: 48px minmax(0,1fr);
+  }
+
+  .settings-blocked-list button {
+    grid-column: 1 / -1;
+  }
+
+  .settings-status-card {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-heading h1 {
+    font-size: 38px;
+  }
+
+  .settings-content-head {
+    display: grid;
+  }
+
+  .settings-content-head > div:last-child,
+  .settings-save-footer > div:last-child,
+  .settings-choice-options {
+    display: grid;
+  }
+
+  .settings-content-head button,
+  .settings-save-footer button {
+    width: 100%;
+  }
+
+  .settings-security-log > article {
+    grid-template-columns: 40px minmax(0,1fr);
+  }
+
+  .settings-security-log > article > span:last-child {
+    grid-column: 2;
+  }
+}
+
+
+/* v69: same page architecture as feed.html and crowns.html.
+   The header has no artificial background. It occupies its own fixed grid row.
+   Only the settings content scrolls in the stage below it. */
+
+html,
+body {
+  height: 100%;
+}
+
+body[data-page="settings"] {
+  overflow: hidden;
+  background: #e4e7e6;
+}
+
+.settings-page-shell {
+  --settings-sticky-gap: 12px;
+  width: 100vw;
+  height: 100vh;
+  min-height: 640px;
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+  overflow: hidden;
+}
+
+/* The shared header remains exactly as on Feed/Rocks:
+   no pseudo background, no full-width masking strip, no sticky document header. */
+.settings-page-shell > .site-header {
+  position: relative;
+  z-index: 90;
+  top: auto;
+}
+
+.settings-page-shell > .site-header::before {
+  content: none;
+  display: none;
+}
+
