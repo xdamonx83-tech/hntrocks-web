@@ -1,13 +1,46 @@
 @php
+    $isEnglish = app()->getLocale() === 'en';
+    $t = static fn (string $de, string $en): string => $isEnglish ? $en : $de;
+
+    $teamMembers = $team->members->where('status', 'active')->values();
+    $teamMemberCount = $teamMembers->count();
+    $teamRequiredMembers = max(1, $team->requiredMembersCount());
+    $teamPercent = min(100, (int) round(($teamMemberCount / $teamRequiredMembers) * 100));
+    $teamComplete = $teamMemberCount >= $teamRequiredMembers;
+    $teamConfirmedPercent = $team->status === 'active' ? 100 : 0;
+
+    $teamSubmissions = $team->submissions
+        ->sortByDesc(fn ($submission) => optional($submission->submitted_at ?: $submission->created_at)->timestamp)
+        ->values();
+    $teamSubmissionCount = $teamSubmissions->count();
+    $teamApprovedCount = $teamSubmissions
+        ->whereIn('status', \App\Models\CupSubmission::scoredStatuses())
+        ->count();
+    $teamSubmissionLimit = $cup->maxSubmissionsPerParticipant();
+    $teamSubmissionPercent = $teamSubmissionLimit
+        ? min(100, (int) round(($teamSubmissionCount / max(1, $teamSubmissionLimit)) * 100))
+        : min(100, $teamSubmissionCount * 10);
+
+    $teamPlatformLabel = collect($cup->allowedPlatforms())->implode(' / ')
+        ?: $t('Alle Plattformen', 'All platforms');
+    $teamCoverUrl = $cup->coverUrl();
+    $teamRoleLabel = $isCaptain ? 'Captain' : $t('Mitglied', 'Member');
+    $teamRosterLabel = $team->isRosterLocked()
+        ? $t('Roster gesperrt', 'Roster locked')
+        : $t('Roster offen', 'Roster open');
+    $teamCompletionLabel = $teamComplete
+        ? $t('Team vollständig', 'Team complete')
+        : $t('Noch Plätze frei', 'Open slots remain');
+
     $teamManageJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/team-manage.js')) ?: time();
 @endphp
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta name="robots" content="noindex,nofollow"/>
-<title>HNT.ROCKS — Night Ravens verwalten</title>
+<title>{{ $team->displayName() }} · {{ $t('Team verwalten', 'Manage team') }} · HNT.ROCKS</title>
 <base href="{{ asset('assets/themes/hnt_preview/dashboard-feed/') }}/"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
