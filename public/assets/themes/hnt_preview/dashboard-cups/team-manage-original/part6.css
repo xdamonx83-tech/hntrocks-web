@@ -46,6 +46,20 @@
   background: #f3f3f0;
 }
 
+.team-invite-code.team-invite-code-real {
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 0;
+  overflow: hidden;
+}
+
+.team-invite-code-real canvas,
+.team-invite-code-real img {
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
 @media (max-width: 899px) {
   .team-manage-scroll.team-content-docked {
     clip-path: none;
