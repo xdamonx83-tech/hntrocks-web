@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="Standard Avatar">
-  <rect width="160" height="160" rx="80" fill="#2b2d44"/>
-  <circle cx="80" cy="61" r="30" fill="#23d2e2" opacity="0.9"/>
-  <path d="M32 142c8-31 27-48 48-48s40 17 48 48" fill="#f5f5fb" opacity="0.82"/>
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340">
+<path fill="#DDD" d="m169,.5a169,169 0 1,0 2,0zm0,86a76,76 0 1
+1-2,0zM57,287q27-35 67-35h92q40,0 67,35a164,164 0 0,1-226,0"/>
 </svg>
