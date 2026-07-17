@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'general_tab' => 'General',
+    'general_nav_description' => 'Language and account',
+    'general_badge' => 'Basic',
+    'general_eyebrow' => 'GENERAL',
+    'general_title' => 'Language and account',
+    'general_intro' => 'Choose the interface language and review the most important details of your account.',
+    'language' => 'Language',
+    'language_de' => 'Deutsch',
+    'language_en' => 'English',
+    'language_hint' => 'Applied to the web interface immediately after saving.',
+    'username' => 'Username',
+    'username_hint' => 'This name identifies your account on HNT.rocks.',
+    'email' => 'Email address',
+    'email_hint' => 'This address is currently linked to your account.',
+    'email_status' => 'Email status',
+    'email_verified' => 'Verified',
+    'email_unverified' => 'Not verified yet',
+    'member_since' => 'Member since',
+    'account_data_hint' => 'These details come directly from your HNT.rocks account and are read-only here.',
+    'saved_eyebrow' => 'SAVED',
+    'save_changes' => 'Save changes',
+    'discard' => 'Discard',
+    'no_changes' => 'No pending changes',
+    'unsaved_changes' => 'Unsaved changes',
+];
