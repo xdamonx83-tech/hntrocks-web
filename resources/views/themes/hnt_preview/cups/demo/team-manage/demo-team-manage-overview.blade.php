@@ -18,7 +18,7 @@
 <div class="team-manage-bars">
 <div class="team-manage-bar wide">
 <span>{{ $t('Team vollständig', 'Team complete') }}</span>
-<div class="dark"><b>{{ $teamMemberCount }} / {{ $teamRequiredMembers }}</b><i style="width:{{ $teamPercent }}%"></i></div>
+<div class="dark"><b style="white-space:nowrap">{{ $teamMemberCount }} / {{ $teamRequiredMembers }}</b><i style="width:{{ $teamPercent }}%"></i></div>
 </div>
 <div class="team-manage-bar">
 <span>{{ $t('Bestätigt', 'Confirmed') }}</span>
