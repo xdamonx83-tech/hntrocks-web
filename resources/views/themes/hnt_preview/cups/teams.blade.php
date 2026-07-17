@@ -33,7 +33,10 @@
 @include('themes.hnt_preview.cups.demo.team-manage.demo-team-manage-confirm')
 <div class="toast" id="toast"></div>
 </main>
+<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = '/feed';</script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v=20260710-1"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js') }}?v=20260714-1"></script>
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js') }}?v=20260714-1"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage.js') }}?v={{ $teamManageJsVersion }}"></script>
 </body>
 </html>
