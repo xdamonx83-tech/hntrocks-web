@@ -51,6 +51,15 @@
     );
 
     $settingsDemoHtml = str_replace(
+        [
+            "  document.getElementById(\"settingsSaveTop\").addEventListener(\"click\", saveDemo);\n",
+            "  document.getElementById(\"settingsDiscardTop\").addEventListener(\"click\", discardDemo);\n",
+        ],
+        '',
+        $settingsDemoHtml
+    );
+
+    $settingsDemoHtml = str_replace(
         '/assets/themes/hnt_preview/dashboard-feed/assets/noah.jpg',
         '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
         $settingsDemoHtml
@@ -101,6 +110,75 @@
         $staticHeaderLength
     );
 
+    abort_unless(isset($generalSettings) && is_array($generalSettings), 500, 'General settings data is missing.');
+
+    $generalPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel active" data-settings-panel="general">'
+    );
+    abort_unless($generalPanelStart !== false, 500, 'General settings panel could not be located.');
+
+    $notificationsPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="notifications" hidden="">',
+        $generalPanelStart
+    );
+    abort_unless($notificationsPanelStart !== false, 500, 'Notifications settings panel could not be located.');
+
+    $realGeneralHtml = view('themes.hnt_preview.account.partials.general-settings', [
+        'generalSettings' => $generalSettings,
+    ])->render();
+
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $realGeneralHtml,
+        $generalPanelStart,
+        $notificationsPanelStart - $generalPanelStart
+    );
+
+    $settingsDemoHtml = str_replace(
+        '<button class="active" data-settings-tab="general" data-title="Allgemein" type="button">',
+        '<button class="active" data-settings-tab="general" data-title="'.e(__('settings.general_tab')).'" type="button">',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<span><strong>Allgemein</strong><small>Sprache, Darstellung und Konto</small></span><i>Basis</i>',
+        '<span><strong>'.e(__('settings.general_tab')).'</strong><small>'.e(__('settings.general_nav_description')).'</small></span><i>'.e(__('settings.general_badge')).'</i>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<h2 id="settingsPanelTitle">Allgemein</h2>',
+        '<h2 id="settingsPanelTitle">'.e(__('settings.general_tab')).'</h2>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<button id="settingsDiscardTop" type="button">Verwerfen</button>'."\n".
+        '<button class="primary" id="settingsSaveTop" type="button">Änderungen speichern</button>',
+        '<button id="settingsDiscardTop" type="reset" form="settingsGeneralForm">'.e(__('settings.discard')).'</button>'."\n".
+        '<button class="primary" id="settingsSaveTop" type="submit" form="settingsGeneralForm">'.e(__('settings.save_changes')).'</button>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<footer class="settings-save-footer">',
+        '<footer class="settings-save-footer" data-demo-settings-save-footer>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<span class="settings-save-state" id="settingsSaveState"><i></i>Keine offenen Änderungen</span>',
+        '<span class="settings-save-state" id="settingsSaveState"><i></i>'.e(__('settings.no_changes')).'</span>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        'saveState.innerHTML = "<i></i>Ungespeicherte Änderungen";',
+        'saveState.innerHTML = "<i></i>'.e(__('settings.unsaved_changes')).'";',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        'saveState.innerHTML = "<i></i>Keine offenen Änderungen";',
+        'saveState.innerHTML = "<i></i>'.e(__('settings.no_changes')).'";',
+        $settingsDemoHtml
+    );
+
     /* Replace only the static right-hand security widget with real account data. */
     abort_unless(isset($securityStatus) && is_array($securityStatus), 500, 'Settings security status data is missing.');
     $staticStatusStart = strpos($settingsDemoHtml, '<aside class="settings-status-card">');
@@ -132,6 +210,7 @@
         '<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = '.json_encode(route('feed.index')).';</script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v=20260714-1"></script>',
+        '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-1"></script>',
     ]);
 
     $settingsDemoHtml = str_replace(
