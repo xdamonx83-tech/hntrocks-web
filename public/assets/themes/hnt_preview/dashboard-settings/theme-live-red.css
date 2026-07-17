@@ -29,3 +29,139 @@
 input:focus,
 textarea:focus,
 select:focus { border-color: rgba(182,78,68,.55); }
+
+/* Settings visual polish: keep the sticky center header inside the rounded card. */
+@media (min-width: 900px) {
+  .settings-content-card {
+    border-radius: 30px;
+    overflow: clip;
+  }
+
+  .settings-status-card {
+    max-height: calc(100dvh - 98px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .settings-status-card::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+/*
+ * The static demo contains a nested form in the blocked-users panel.
+ * Browsers discard that inner form tag, so reproduce its intended grid and
+ * field styling on the remaining direct children without changing the design.
+ */
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) auto;
+  gap: 9px;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form))::before {
+  content: "";
+  z-index: 0;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: stretch;
+  border-radius: 22px;
+  background: #f0f0ed;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > .settings-section-intro,
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > .settings-blocked-head,
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > .settings-blocked-list {
+  grid-column: 1 / -1;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > .settings-section-intro {
+  grid-row: 1;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label,
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > button {
+  z-index: 1;
+  grid-row: 2;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label {
+  min-width: 0;
+  display: grid;
+  align-self: center;
+  gap: 6px;
+  margin-block: 14px;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label:first-of-type {
+  margin-left: 14px;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label > span {
+  color: #74736f;
+  font-size: 9px;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label > input {
+  width: 100%;
+  min-width: 0;
+  height: 39px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 19px;
+  outline: 0;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+}
+
+.settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > button {
+  min-height: 37px;
+  align-self: end;
+  margin: 0 14px 14px 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 19px;
+  background: var(--dark);
+  color: #fff;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form))::before,
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label,
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > button {
+    grid-column: 1;
+  }
+
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form))::before {
+    grid-row: 2 / 5;
+  }
+
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label:first-of-type {
+    grid-row: 2;
+    margin: 14px 14px 0;
+  }
+
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > label:nth-of-type(2) {
+    grid-row: 3;
+    margin: 0 14px;
+  }
+
+  .settings-panel[data-settings-panel="blocked"].active:not(:has(> .settings-block-form)) > button {
+    grid-row: 4;
+    margin: 0 14px 14px;
+  }
+}
