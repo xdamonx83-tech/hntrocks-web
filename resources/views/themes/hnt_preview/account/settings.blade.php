@@ -54,6 +54,7 @@
         [
             "  document.getElementById(\"settingsSaveTop\").addEventListener(\"click\", saveDemo);\n",
             "  document.getElementById(\"settingsDiscardTop\").addEventListener(\"click\", discardDemo);\n",
+            "  document.getElementById(\"settingsDiscardBottom\").addEventListener(\"click\", discardDemo);\n",
         ],
         '',
         $settingsDemoHtml
@@ -164,10 +165,18 @@
         '<button class="primary" id="settingsSaveTop" type="submit" form="settingsGeneralForm">'.e(__('settings.save_changes')).'</button>',
         $settingsDemoHtml
     );
-    $settingsDemoHtml = str_replace(
-        '<footer class="settings-save-footer">',
-        '<footer class="settings-save-footer" data-demo-settings-save-footer hidden>',
-        $settingsDemoHtml
+    $saveFooterStart = strpos($settingsDemoHtml, '<footer class="settings-save-footer">');
+    abort_unless($saveFooterStart !== false, 500, 'Settings save footer could not be located.');
+
+    $saveFooterEnd = strpos($settingsDemoHtml, '</footer>', $saveFooterStart);
+    abort_unless($saveFooterEnd !== false, 500, 'Settings save footer is incomplete.');
+
+    $realGeneralSaveFooter = view('themes.hnt_preview.account.partials.general-save-footer')->render();
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $realGeneralSaveFooter,
+        $saveFooterStart,
+        ($saveFooterEnd + strlen('</footer>')) - $saveFooterStart
     );
     $settingsDemoHtml = str_replace(
         '<span class="settings-save-state" id="settingsSaveState"><i></i>Keine offenen Änderungen</span>',
@@ -207,7 +216,7 @@
     if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-2" rel="stylesheet"/>' . "\n" . '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-3" rel="stylesheet"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
@@ -224,7 +233,7 @@
         '<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = '.json_encode(route('feed.index')).';</script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v=20260714-1"></script>',
-        '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-1"></script>',
+        '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-2"></script>',
     ]);
 
     $settingsDemoHtml = str_replace(
