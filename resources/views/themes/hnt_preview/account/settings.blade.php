@@ -60,6 +60,12 @@
     );
 
     $settingsDemoHtml = str_replace(
+        "  document.querySelectorAll(\".settings-choice-options label\").forEach((label) => {\n    label.addEventListener(\"click\", () => {\n      document.querySelectorAll(\".settings-choice-options label\").forEach((item) => item.classList.remove(\"active\"));\n      label.classList.add(\"active\");\n    });\n  });\n",
+        '',
+        $settingsDemoHtml
+    );
+
+    $settingsDemoHtml = str_replace(
         '/assets/themes/hnt_preview/dashboard-feed/assets/noah.jpg',
         '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
         $settingsDemoHtml
@@ -197,6 +203,14 @@
         $staticStatusStart,
         ($staticStatusEnd + strlen('</aside>')) - $staticStatusStart
     );
+
+    if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
+        $settingsDemoHtml = str_replace(
+            '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-1" rel="stylesheet"/>' . "\n" . '</head>',
+            $settingsDemoHtml
+        );
+    }
 
     if (! str_contains($settingsDemoHtml, 'name="csrf-token"')) {
         $settingsDemoHtml = str_replace(
