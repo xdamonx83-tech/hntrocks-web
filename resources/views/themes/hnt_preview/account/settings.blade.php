@@ -22,6 +22,28 @@
         'Settings demo payload could not be decoded.'
     );
 
+    /*
+     * The supplied static demo placed the blocked-user form inside a second,
+     * page-wide form. Nested forms are invalid HTML and browsers discard the
+     * inner form element. Keep the demo controller container, but make it a
+     * neutral div so the real blocked-user form and its original CSS survive.
+     */
+    $settingsDemoHtml = str_replace(
+        '<form id="settingsDemoForm" novalidate="">',
+        '<div id="settingsDemoForm">',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        "</footer>\n</form>\n</section>\n<aside class=\"settings-status-card\">",
+        "</footer>\n</div>\n</section>\n<aside class=\"settings-status-card\">",
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        "  form.addEventListener(\"submit\", (event) => {\n    event.preventDefault();\n    saveDemo();\n  });\n",
+        '',
+        $settingsDemoHtml
+    );
+
     $settingsDemoHtml = str_replace(
         '/assets/themes/hnt_preview/dashboard-feed/assets/noah.jpg',
         '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
