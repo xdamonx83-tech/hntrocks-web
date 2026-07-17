@@ -122,7 +122,7 @@
                                             @csrf
                                             <button type="submit">{{ $isEnglish ? 'Run AI again' : 'KI erneut prüfen' }}</button>
                                         </form>
-                                        <form method="post" action="{{ route('cups.submissions.reject', [$cup, $submission]) }}" data-sync-review-note="{{ $submission->id }}" data-confirm-reject="{{ $isEnglish ? 'Reject this submission?' : 'Diese Einreichung wirklich ablehnen?' }}">
+                                        <form method="post" action="{{ route('cups.submissions.reject', [$cup, $submission]) }}" data-sync-review-note="{{ $submission->id }}">
                                             @csrf
                                             <input type="hidden" name="review_note" value=""/>
                                             <button class="reject" type="submit">{{ $isEnglish ? 'Reject' : 'Ablehnen' }}</button>
@@ -148,3 +148,7 @@
         @endforelse
     </div>
 </section>
+
+@if($canModerateSubmissions && $liveSubmissions->isNotEmpty())
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-cups/cup-submission-moderation.js') }}?v=20260717-1"></script>
+@endif
