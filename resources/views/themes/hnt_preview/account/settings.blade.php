@@ -95,10 +95,29 @@
         $staticHeaderLength
     );
 
+    /* Replace only the static right-hand security widget with real account data. */
+    abort_unless(isset($securityStatus) && is_array($securityStatus), 500, 'Settings security status data is missing.');
+    $staticStatusStart = strpos($settingsDemoHtml, '<aside class="settings-status-card">');
+    abort_unless($staticStatusStart !== false, 500, 'Settings security status widget could not be located.');
+
+    $staticStatusEnd = strpos($settingsDemoHtml, '</aside>', $staticStatusStart);
+    abort_unless($staticStatusEnd !== false, 500, 'Settings security status widget is incomplete.');
+
+    $realStatusHtml = view('themes.hnt_preview.account.partials.security-status', [
+        'securityStatus' => $securityStatus,
+    ])->render();
+
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $realStatusHtml,
+        $staticStatusStart,
+        ($staticStatusEnd + strlen('</aside>')) - $staticStatusStart
+    );
+
     if (! str_contains($settingsDemoHtml, 'name="csrf-token"')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<meta name="csrf-token" content="'.e(csrf_token()).'"/>'."\n".'</head>',
+            '<meta name="csrf-token" content="'.e(csrf_token()).'"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
