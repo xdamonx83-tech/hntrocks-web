@@ -2,7 +2,7 @@
   const form = document.getElementById("settingsGeneralForm");
   const saveButton = document.getElementById("settingsSaveTop");
   const discardButton = document.getElementById("settingsDiscardTop");
-  const demoFooter = document.querySelector("[data-demo-settings-save-footer]");
+  const saveFooter = document.querySelector("[data-settings-save-footer]");
   const saveState = document.getElementById("settingsSaveState");
   const initialSaveState = saveState?.innerHTML || "";
 
@@ -15,7 +15,7 @@
     saveButton.disabled = !generalIsActive;
     discardButton.disabled = !generalIsActive;
 
-    if (demoFooter) demoFooter.hidden = generalIsActive;
+    if (saveFooter) saveFooter.hidden = !generalIsActive;
   };
 
   document.querySelectorAll("[data-settings-tab]").forEach((tab) => {
