@@ -2,7 +2,7 @@
   margin-top: 12px;
 }
 
-[data-demo-settings-save-footer][hidden] {
+[data-settings-save-footer][hidden] {
   display: none !important;
 }
 
