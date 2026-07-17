@@ -34,4 +34,6 @@ return [
     'appearance_dark' => 'Dark',
     'appearance_planned' => 'In preparation',
     'appearance_roadmap' => 'Dark mode will be enabled after all pages have been converted.',
+    'save_footer_title' => 'General settings',
+    'save_footer_hint' => 'The selected language is saved for this browser.',
 ];
