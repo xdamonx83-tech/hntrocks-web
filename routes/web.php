@@ -442,6 +442,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::view('/account', 'account.index')->name('account.index');
     Route::get('/account/settings', [NotificationSettingsController::class, 'edit'])->name('account.settings.edit');
+    Route::put('/account/settings/general', [LocaleController::class, 'update'])->name('account.settings.general.update');
     Route::put('/account/settings', [NotificationSettingsController::class, 'update'])->name('account.settings.update');
     Route::get('/settings/privacy', [PrivacyController::class, 'edit'])->name('settings.privacy.edit');
     Route::put('/settings/privacy', [PrivacyController::class, 'update'])->name('settings.privacy.update');
