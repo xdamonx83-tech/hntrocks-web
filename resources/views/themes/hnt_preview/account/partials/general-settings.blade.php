@@ -21,7 +21,7 @@
 </div>
 </article>
 @endif
-<form id="settingsGeneralForm" method="POST" action="{{ route('account.settings.general.update') }}">
+<form id="settingsGeneralForm" method="POST" action="{{ route('account.settings.general.update') }}" data-save-title="{{ __('settings.save_footer_title') }}" data-save-hint="{{ __('settings.save_footer_hint') }}">
 @csrf
 @method('PUT')
 <div class="settings-general-grid">
