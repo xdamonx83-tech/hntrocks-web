@@ -2,6 +2,7 @@
   const forms = new Map([
     ["general", document.getElementById("settingsGeneralForm")],
     ["notifications", document.getElementById("settingsNotificationsForm")],
+    ["privacy", document.getElementById("settingsPrivacyForm")],
   ].filter((entry) => entry[1]));
   const saveButton = document.getElementById("settingsSaveTop");
   const discardButton = document.getElementById("settingsDiscardTop");
@@ -79,8 +80,15 @@
   forms.forEach((form, panelName) => {
     form.addEventListener("reset", () => {
       requestAnimationFrame(() => {
-        clearDirtyState();
         if (panelName === "notifications") syncNotificationMaster();
+
+        if (panelName === "privacy") {
+          document.getElementById("privacyVisibility")?.dispatchEvent(
+            new Event("change", { bubbles: true })
+          );
+        }
+
+        clearDirtyState();
       });
     });
   });
