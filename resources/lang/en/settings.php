@@ -25,4 +25,13 @@ return [
     'discard' => 'Discard',
     'no_changes' => 'No pending changes',
     'unsaved_changes' => 'Unsaved changes',
+    'appearance_label' => 'Choose appearance',
+    'appearance_eyebrow' => 'APPEARANCE',
+    'appearance_title' => 'Light and dark design',
+    'appearance_intro' => 'The light HNT.rocks style remains active until every page is fully prepared for dark mode.',
+    'appearance_light' => 'Light',
+    'appearance_current' => 'Current style',
+    'appearance_dark' => 'Dark',
+    'appearance_planned' => 'In preparation',
+    'appearance_roadmap' => 'Dark mode will be enabled after all pages have been converted.',
 ];
