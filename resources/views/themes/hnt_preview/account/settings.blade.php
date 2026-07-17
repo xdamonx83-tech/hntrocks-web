@@ -166,7 +166,7 @@
     );
     $settingsDemoHtml = str_replace(
         '<footer class="settings-save-footer">',
-        '<footer class="settings-save-footer" data-demo-settings-save-footer>',
+        '<footer class="settings-save-footer" data-demo-settings-save-footer hidden>',
         $settingsDemoHtml
     );
     $settingsDemoHtml = str_replace(
@@ -207,7 +207,7 @@
     if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-1" rel="stylesheet"/>' . "\n" . '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-2" rel="stylesheet"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
