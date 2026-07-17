@@ -74,6 +74,35 @@
         ->take(3)
         ->values();
 
+    $teamInviteUrl = route('cups.teams.join', [$cup, $team->join_token]);
+    $teamInviteHistory = $teamMembers
+        ->sortByDesc(fn ($member) => optional($member->joined_at ?: $member->created_at)->timestamp)
+        ->values();
+    $teamInviteUsable = $team->status === 'active'
+        && $team->canChangeRoster()
+        && $cup->isRegistrationOpen()
+        && $team->slotsOpen() > 0;
+    $teamLockDate = $team->roster_locked_at ?: $cup->registration_closes_at;
+    $teamLockStart = $cup->registration_opens_at ?: $cup->created_at;
+    $teamLockPercent = 0;
+    if ($teamLockDate) {
+        if ($team->isRosterLocked() || now()->greaterThanOrEqualTo($teamLockDate)) {
+            $teamLockPercent = 100;
+        } elseif ($teamLockStart && $teamLockDate->greaterThan($teamLockStart)) {
+            $teamLockTotalSeconds = max(1, $teamLockDate->timestamp - $teamLockStart->timestamp);
+            $teamLockElapsedSeconds = max(0, now()->timestamp - $teamLockStart->timestamp);
+            $teamLockPercent = min(100, (int) round(($teamLockElapsedSeconds / $teamLockTotalSeconds) * 100));
+        }
+    }
+    $teamLockDateLabel = $teamLockDate
+        ? $teamLockDate->translatedFormat('d. F · H:i').' '.$t('Uhr', '')
+        : $t('Noch nicht festgelegt', 'Not set yet');
+    $teamLockRemainingLabel = match (true) {
+        ! $teamLockDate => $t('Kein Team-Lock festgelegt', 'No team lock scheduled'),
+        $team->isRosterLocked() || now()->greaterThanOrEqualTo($teamLockDate) => $t('Roster ist gesperrt', 'Roster is locked'),
+        default => $teamLockDate->diffForHumans(),
+    };
+
     $teamManageJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/team-manage.js')) ?: time();
 @endphp
 <!DOCTYPE html>
@@ -112,6 +141,7 @@
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v=20260710-1"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js') }}?v=20260714-1"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js') }}?v=20260714-1"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage.js') }}?v={{ $teamManageJsVersion }}"></script>
 </body>
 </html>
