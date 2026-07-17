@@ -13,8 +13,7 @@
 <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-original/common.css') }}" rel="stylesheet"/>
-<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v=20260710-1" rel="stylesheet"/>
-<link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/cup-detail.css') }}?v=20260717-1" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-original/header.css') }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-original/part1.css') }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-original/part2.css') }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-original/part3.css') }}" rel="stylesheet"/>
