@@ -25,9 +25,12 @@ class DashboardCupTeamManageLiveController extends Controller
         $team->load([
             'cup',
             'owner:id,name,username,avatar_path,level,last_seen_at',
-            'members.user:id,name,username,avatar_path,level,last_seen_at',
+            'members.user' => static fn ($query) => $query
+                ->select(['id', 'name', 'username', 'avatar_path', 'level', 'last_seen_at'])
+                ->withCount('feedPosts'),
             'members.user.profile',
             'members.user.crownWallet',
+            'members.user.privacySettings',
             'submissions.submitter:id,name,username,avatar_path',
             'submissions.screenshot',
         ]);
