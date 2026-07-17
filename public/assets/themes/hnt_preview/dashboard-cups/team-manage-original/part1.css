@@ -1,0 +1,330 @@
+.team-manage-page-shell {
+  height: 100vh;
+  min-height: 640px;
+  display: grid;
+  grid-template-rows: 36px minmax(0,1fr);
+  overflow: hidden;
+}
+
+.team-manage-page-shell .nav-cups > .main-nav-trigger {
+  background: var(--dark);
+  color: white;
+}
+
+.team-manage-stage {
+  --team-sticky-gap: 12px;
+  --team-layout-gap: 12px;
+  --team-left-width: 244px;
+  --team-right-width: 276px;
+
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.team-manage-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.team-manage-scroll::-webkit-scrollbar,
+.team-chat-list::-webkit-scrollbar,
+.team-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.team-manage-overview {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 390px;
+  gap: 26px;
+  align-items: end;
+  padding: 24px 0 25px;
+}
+
+.team-manage-heading > span,
+.team-center-title > span,
+.team-panel-card header span,
+.team-section-intro > div > span,
+.team-identity-copy > span,
+.team-quick-card header span,
+.team-chat-card header span,
+.team-invite-main > span,
+.team-recruiting-toggle > div > span,
+.team-recruiting-info > span,
+.team-danger-zone > div > span,
+.team-lock-card > span {
+  color: #b64e44;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.team-manage-heading h1 {
+  margin: 3px 0 5px;
+  font-size: 44px;
+  font-weight: 300;
+  letter-spacing: -1.4px;
+}
+
+.team-manage-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.team-manage-meta span {
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.52);
+  color: #716f6c;
+  font-size: 7px;
+}
+
+.team-manage-meta .live {
+  background: #e7f4d6;
+  color: #6d9936;
+}
+
+.team-manage-meta i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.team-manage-heading > p {
+  max-width: 750px;
+  margin: 9px 0 0;
+  color: #74736f;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.team-manage-bars {
+  display: grid;
+  grid-template-columns: minmax(250px,1.9fr) minmax(120px,.72fr) minmax(145px,.92fr) minmax(105px,.6fr);
+  gap: 7px;
+  max-width: 815px;
+  margin-top: 15px;
+}
+
+.team-manage-bar > span {
+  display: block;
+  margin: 0 0 6px 5px;
+  color: #5d5c59;
+  font-size: 7px;
+}
+
+.team-manage-bar > div {
+  position: relative;
+  height: 31px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 0 11px;
+  border-radius: 17px;
+}
+
+.team-manage-bar b {
+  position: relative;
+  z-index: 2;
+  font-size: 7px;
+  font-weight: 400;
+}
+
+.team-manage-bar .dark {
+  background: var(--dark);
+  color: white;
+}
+
+.team-manage-bar .yellow {
+  background: rgba(182,78,68,.88);
+}
+
+.team-manage-bar .striped {
+  background: repeating-linear-gradient(135deg,rgba(255,255,255,.9) 0 4px,rgba(222,222,221,.75) 4px 7px);
+}
+
+.team-manage-bar .outline {
+  justify-content: center;
+  border: 1px solid #666662;
+  background: transparent;
+}
+
+.team-manage-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+  padding-bottom: 5px;
+}
+
+.team-manage-overview-stats article {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.team-manage-overview-stats strong {
+  font-size: 46px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.team-manage-overview-stats span {
+  font-size: 7px;
+}
+
+.team-manage-center-flow {
+  min-width: 0;
+  margin: 0 calc(var(--team-right-width) + var(--team-layout-gap)) 30px calc(var(--team-left-width) + var(--team-layout-gap));
+}
+
+.team-center-card,
+.team-identity-card,
+.team-quick-card,
+.team-chat-card {
+  border-radius: 28px;
+  background: rgba(255,255,255,.78);
+}
+
+.team-center-card {
+  min-height: 780px;
+  padding: 0 12px 14px;
+}
+
+.team-center-head {
+  position: sticky;
+  top: var(--team-sticky-gap);
+  z-index: 12;
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 -12px 12px;
+  padding: 11px 16px;
+  border-radius: 28px 28px 17px 17px;
+  background: rgba(243,243,240,.985);
+  box-shadow: 0 8px 24px rgba(112,44,39,.045);
+}
+
+.team-center-head.is-stuck {
+  border: 1px solid rgba(234,210,206,.45);
+  backdrop-filter: blur(10px);
+}
+
+.team-center-title {
+  flex: 0 0 auto;
+}
+
+.team-center-title h2 {
+  margin: 1px 0 0;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.team-tabs {
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.team-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.team-tabs button {
+  height: 31px;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 16px;
+  background: #eeeeeb;
+  color: #888682;
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.team-tabs button.active {
+  background: var(--dark);
+  color: white;
+}
+
+.team-panel {
+  min-height: 690px;
+  padding: 0 2px 20px;
+}
+
+.team-panel[hidden] {
+  display: none;
+}
+
+.team-panel.active {
+  animation: teamReveal .18s ease;
+}
+
+@keyframes teamReveal {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.team-overview-grid {
+  display: grid;
+  grid-template-columns: 1.12fr .88fr;
+  gap: 12px;
+}
+
+.team-overview-grid.lower {
+  margin-top: 12px;
+}
+
+.team-panel-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(234,210,206,.58);
+  border-radius: 22px;
+  background: rgba(255,255,255,.82);
+}
+
+.team-panel-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.team-panel-card h3,
+.team-section-intro h3,
+.team-quick-card h3 {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.team-panel-card header button,
+.team-member-table article > button,
+.team-member-card-head > button,
+.team-finder-players article > button {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #eeeeeb;
+  cursor: pointer;
+}
