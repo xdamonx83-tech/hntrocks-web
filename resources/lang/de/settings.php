@@ -34,4 +34,6 @@ return [
     'appearance_dark' => 'Dunkel',
     'appearance_planned' => 'In Vorbereitung',
     'appearance_roadmap' => 'Der dunkle Modus wird nach der Umstellung aller Seiten freigeschaltet.',
+    'save_footer_title' => 'Allgemeine Einstellungen',
+    'save_footer_hint' => 'Die gewählte Sprache wird für diesen Browser gespeichert.',
 ];
