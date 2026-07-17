@@ -8,6 +8,7 @@
         'part5a.txt',
         'part5b.txt',
         'part6.txt',
+        'part7.txt',
     ];
 
     $encodedPayload = '';
@@ -18,7 +19,7 @@
         $encodedPayload .= trim((string) file_get_contents($payloadPath));
     }
 
-    abort_unless(strlen($encodedPayload) === 59048, 500, 'Settings demo payload has an invalid length.');
+    abort_unless(strlen($encodedPayload) === 59092, 500, 'Settings demo payload has an invalid length.');
 
     $compressedPayload = base64_decode($encodedPayload, true);
     abort_unless(is_string($compressedPayload), 500, 'Settings demo payload is not valid base64.');
