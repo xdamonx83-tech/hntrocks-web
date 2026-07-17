@@ -1,3 +1,11 @@
+.settings-appearance-card {
+  margin-top: 12px;
+}
+
+[data-demo-settings-save-footer][hidden] {
+  display: none !important;
+}
+
 .settings-choice-options label.is-disabled {
   cursor: not-allowed;
   opacity: .58;
