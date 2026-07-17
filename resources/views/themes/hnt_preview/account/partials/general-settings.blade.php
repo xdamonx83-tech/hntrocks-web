@@ -50,5 +50,25 @@
 <small>{{ __('settings.member_since') }} {{ $memberSince }} · {{ __('settings.account_data_hint') }}</small>
 </label>
 </div>
+<article class="settings-choice-card full settings-appearance-card">
+<div>
+<span>{{ __('settings.appearance_eyebrow') }}</span>
+<h3>{{ __('settings.appearance_title') }}</h3>
+<p>{{ __('settings.appearance_intro') }}</p>
+</div>
+<div class="settings-choice-options" role="group" aria-label="{{ __('settings.appearance_label') }}">
+<label class="active">
+<input type="radio" value="light" checked disabled>
+<i><svg><use href="#i-check"></use></svg></i>
+<span><strong>{{ __('settings.appearance_light') }}</strong><small>{{ __('settings.appearance_current') }}</small></span>
+</label>
+<label class="is-disabled" aria-disabled="true">
+<input type="radio" value="dark" disabled>
+<i><svg><use href="#i-settings"></use></svg></i>
+<span><strong>{{ __('settings.appearance_dark') }}</strong><small>{{ __('settings.appearance_planned') }}</small></span>
+</label>
+</div>
+</article>
+<small class="settings-appearance-roadmap">{{ __('settings.appearance_roadmap') }}</small>
 </form>
 </section>
