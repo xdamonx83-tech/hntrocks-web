@@ -50,6 +50,12 @@ class NotificationSettingsController extends Controller
 
         $securityLog->record($request->user(), 'notification_settings_updated', $request, $data);
 
+        if ($request->input('settings_section') === 'notifications') {
+            return redirect()
+                ->to(route('account.settings.edit').'#notifications')
+                ->with('status', __('ui.notification_settings_saved'));
+        }
+
         return back()->with('status', __('ui.notification_settings_saved'));
     }
 
