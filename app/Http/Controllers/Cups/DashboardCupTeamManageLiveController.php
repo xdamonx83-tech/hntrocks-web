@@ -60,7 +60,7 @@ class DashboardCupTeamManageLiveController extends Controller
                 ->get();
         }
 
-        return response()->view('themes.hnt_preview.cups.team-manage-live', [
+        return response()->view('themes.hnt_preview.cups.teams', [
             'cup' => $cup,
             'team' => $team,
             'viewer' => $viewer,
