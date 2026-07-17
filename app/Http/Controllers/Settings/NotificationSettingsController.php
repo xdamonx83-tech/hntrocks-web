@@ -16,7 +16,8 @@ class NotificationSettingsController extends Controller
 {
     public function edit(Request $request): View
     {
-        $settings = $request->user()->notificationSettings()->firstOrCreate([]);
+        $user = $request->user();
+        $settings = $user->notificationSettings()->firstOrCreate([]);
 
         $view = $request->boolean('classic_settings')
             ? 'account.settings'
@@ -25,6 +26,10 @@ class NotificationSettingsController extends Controller
         return view($view, [
             'settings' => $settings,
             'notificationGroups' => NotificationSettingsGroups::all(),
+            'generalSettings' => [
+                'locale' => app()->getLocale(),
+                'user' => $user,
+            ],
             'securityStatus' => $this->securityStatus($request),
         ]);
     }
