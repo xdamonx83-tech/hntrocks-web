@@ -31,6 +31,10 @@ class PrivacyController extends Controller
 
     public function update(Request $request, SecurityLogService $securityLog): RedirectResponse
     {
+        if ($request->input('settings_section') === 'privacy') {
+            return $this->updateIntegratedSettingsTab($request, $securityLog);
+        }
+
         $validated = $request->validate([
             'profile_visibility' => ['required', Rule::in(['public', 'registered', 'private'])],
             'allow_messages_from' => ['required', Rule::in(['everyone', 'registered', 'following', 'nobody'])],
@@ -69,6 +73,38 @@ class PrivacyController extends Controller
         ]);
 
         return back()->with('status', __('ui.privacy_settings_saved'));
+    }
+
+    private function updateIntegratedSettingsTab(Request $request, SecurityLogService $securityLog): RedirectResponse
+    {
+        $validated = $request->validate([
+            'profile_visibility' => ['required', Rule::in(['public', 'registered', 'private'])],
+            'show_online_status' => ['nullable', 'boolean'],
+            'show_activity_feed' => ['nullable', 'boolean'],
+        ]);
+
+        $user = $request->user();
+        $data = [
+            'profile_visibility' => $validated['profile_visibility'],
+            'show_online_status' => $request->boolean('show_online_status'),
+            'show_activity_feed' => $request->boolean('show_activity_feed'),
+        ];
+
+        $user->privacySettings()->updateOrCreate(
+            ['user_id' => $user->id],
+            $data
+        );
+
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['profile_visibility' => $validated['profile_visibility']]
+        );
+
+        $securityLog->record($user, 'privacy_settings_updated', $request, $data);
+
+        return redirect()
+            ->to(route('account.settings.edit').'#privacy')
+            ->with('status', __('ui.privacy_settings_saved'));
     }
 
     public function blocks(Request $request): View
