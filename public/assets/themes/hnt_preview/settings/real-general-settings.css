@@ -1,0 +1,33 @@
+.settings-choice-options label.is-disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
+
+.settings-choice-options label.is-disabled:hover {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.settings-appearance-roadmap {
+  display: block;
+  margin: 9px 3px 0;
+  color: #8d8b87;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+  .settings-appearance-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .settings-appearance-card .settings-choice-options {
+    width: 100%;
+  }
+
+  .settings-appearance-card .settings-choice-options label {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+}
