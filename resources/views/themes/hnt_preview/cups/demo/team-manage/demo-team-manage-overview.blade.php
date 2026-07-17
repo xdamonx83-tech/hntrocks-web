@@ -1,40 +1,42 @@
 <section class="team-manage-overview">
 <div class="team-manage-heading">
-<span>SUMMER HUNT · DEIN TEAM</span>
-<h1>Team verwalten</h1>
+<span>{{ $cup->title }} · {{ $t('DEIN TEAM', 'YOUR TEAM') }}</span>
+<h1>{{ $t('Team verwalten', 'Manage team') }}</h1>
 <div class="team-manage-meta">
-<span class="live"><i></i>Team aktiv</span>
-<span>Night Ravens</span>
-<span>Captain</span>
-<span>PS5 / Xbox</span>
-<span>3 / 3 Hunter</span>
+<span class="live"><i></i>{{ $team->statusLabel() }}</span>
+<span>{{ $team->displayName() }}</span>
+<span>{{ $teamRoleLabel }}</span>
+<span>{{ $teamPlatformLabel }}</span>
+<span>{{ $teamMemberCount }} / {{ $teamRequiredMembers }} Hunter</span>
 </div>
 <p>
-            Verwalte Teamname, Mitglieder, Einladungen, Teamchat und Einreichungen
-            für den Summer Hunt Community Cup.
-          </p>
+{{ $t(
+    'Verwalte Teamname, Mitglieder, Einladungen, Teamchat und Einreichungen für den '.$cup->title.' Community Cup.',
+    'Manage the team name, members, invitations, team chat and submissions for the '.$cup->title.' Community Cup.'
+) }}
+</p>
 <div class="team-manage-bars">
 <div class="team-manage-bar wide">
-<span>Team vollständig</span>
-<div class="dark"><b>3 / 3</b><i style="width:100%"></i></div>
+<span>{{ $t('Team vollständig', 'Team complete') }}</span>
+<div class="dark"><b>{{ $teamMemberCount }} / {{ $teamRequiredMembers }}</b><i style="width:{{ $teamPercent }}%"></i></div>
 </div>
 <div class="team-manage-bar">
-<span>Bestätigt</span>
-<div class="yellow"><b>100%</b><i style="width:100%"></i></div>
+<span>{{ $t('Bestätigt', 'Confirmed') }}</span>
+<div class="yellow"><b>{{ $teamConfirmedPercent }}%</b><i style="width:{{ $teamConfirmedPercent }}%"></i></div>
 </div>
 <div class="team-manage-bar">
-<span>Einreichungen</span>
-<div class="striped"><b>2 / 3</b><i style="width:67%"></i></div>
+<span>{{ $t('Einreichungen', 'Submissions') }}</span>
+<div class="striped"><b>{{ $teamSubmissionCount }}{{ $teamSubmissionLimit ? ' / '.$teamSubmissionLimit : '' }}</b><i style="width:{{ $teamSubmissionPercent }}%"></i></div>
 </div>
 <div class="team-manage-bar compact">
-<span>Teamchat</span>
-<div class="outline"><b>4 neu</b></div>
+<span>{{ $t('Teamchat', 'Team chat') }}</span>
+<div class="outline"><b>{{ $chatMessagesCount }}</b></div>
 </div>
 </div>
 </div>
 <div class="team-manage-overview-stats">
-<article><strong>3</strong><span>Mitglieder</span></article>
-<article><strong>2</strong><span>Scores</span></article>
-<article><strong>4</strong><span>Nachrichten</span></article>
+<article><strong>{{ $teamMemberCount }}</strong><span>{{ $t('Mitglieder', 'Members') }}</span></article>
+<article><strong>{{ $teamApprovedCount }}</strong><span>Scores</span></article>
+<article><strong>{{ $chatMessagesCount }}</strong><span>{{ $t('Nachrichten', 'Messages') }}</span></article>
 </div>
 </section>
