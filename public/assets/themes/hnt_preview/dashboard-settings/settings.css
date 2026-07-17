@@ -1,1 +1,6 @@
-* { box-sizing: border-box; }
+@import url("./settings-part1.css");
+@import url("./settings-part2.css");
+@import url("./settings-part3.css");
+@import url("./settings-part4.css");
+@import url("./settings-part5.css");
+@import url("./settings-part6.css");
