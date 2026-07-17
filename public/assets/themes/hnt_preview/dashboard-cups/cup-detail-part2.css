@@ -79,8 +79,8 @@
   gap: 8px;
 }
 
-.cup-data-stack dt { color: #94928e; font-size: 6px; }
-.cup-data-stack dd { margin: 0; font-size: 7px; font-weight: 500; text-align: right; }
+.cup-data-stack dt { color: #94928e; font-size: 8px; }
+.cup-data-stack dd { margin: 0; font-size: 9px; font-weight: 500; text-align: right; }
 
 .cup-organizer {
   display: grid;
@@ -155,14 +155,14 @@
 .cup-rule-grid article { min-height: 68px; display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 9px; padding: 10px; border-radius: 16px; background: white; }
 .cup-rule-grid article > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; background: var(--yellow); font-size: 7px; }
 .cup-rule-grid article > div { min-width: 0; display: grid; align-content: start; gap: 3px; }
-.cup-rule-grid strong { font-size: 8px; font-weight: 500; }
-.cup-rule-grid p { margin: 0; color: #8d8b87; font-size: 6px; line-height: 1.45; }
+.cup-rule-grid strong { font-size: 10px; font-weight: 500; }
+.cup-rule-grid p { margin: 0; color: #8d8b87; font-size: 9px; line-height: 1.45; }
 
 .cup-leaderboard { padding: 8px; }
 .cup-leaderboard-head,
 .cup-leaderboard article { display: grid; grid-template-columns: 44px minmax(180px,1fr) 65px 65px 70px; gap: 8px; align-items: center; }
 .cup-leaderboard-head { min-height: 31px; padding: 0 10px; color: #95938f; font-size: 6px; }
-.cup-leaderboard article { min-height: 43px; margin-top: 3px; padding: 5px 10px; border-radius: 13px; background: white; font-size: 7px; }
+.cup-leaderboard article { min-height: 43px; margin-top: 3px; padding: 5px 10px; border-radius: 13px; background: white; font-size: 10px; }
 .cup-leaderboard article:first-of-type { background: rgba(182,78,68,.72); }
 .cup-leaderboard article > b { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: var(--dark); color: white; font-weight: 500; }
 .cup-leaderboard article > div { min-width: 0; display: flex; align-items: center; gap: 8px; }

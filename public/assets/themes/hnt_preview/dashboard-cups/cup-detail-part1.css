@@ -225,16 +225,19 @@
 
 .cup-cover-copy button,
 .cup-white-card header button {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255,255,255,.9);
-  color: var(--ink);
-  cursor: pointer;
+
+    height: 31px;
+    flex: 0 0 34px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .9);
+    color: var(--ink);
+    cursor: pointer;
+    padding: 0 11px;
+    flex: 0 0 auto;
+    font-size: 7px;
 }
 
 .cup-cover-copy svg,
