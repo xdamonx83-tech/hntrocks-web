@@ -1,0 +1,306 @@
+.team-chat-compose {
+  display: grid;
+  grid-template-columns: 32px minmax(0,1fr) 32px;
+  align-items: center;
+  gap: 7px;
+  padding: 10px;
+  background: rgba(255,255,255,.055);
+}
+
+.team-chat-compose img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.team-chat-compose input {
+  height: 34px;
+  border-color: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.08);
+  color: white;
+}
+
+.team-chat-compose button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--dark);
+  cursor: pointer;
+}
+
+.team-columns-docked .team-fixed-column {
+  filter: drop-shadow(0 10px 26px rgba(112,44,39,.04));
+}
+
+.team-confirm-backdrop {
+  position: fixed;
+  z-index: 999;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(28,28,27,.48);
+  backdrop-filter: blur(8px);
+}
+
+.team-confirm-backdrop[hidden] {
+  display: none;
+}
+
+.team-confirm-dialog {
+  position: relative;
+  width: min(440px,100%);
+  padding: 24px;
+  border-radius: 27px;
+  background: #f3f3f0;
+  box-shadow: 0 30px 80px rgba(25,25,24,.18);
+}
+
+.team-confirm-dialog > button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #ededeb;
+  font-size: 18px;
+}
+
+.team-confirm-dialog > span {
+  color: #b64e44;
+  font-size: 7px;
+  letter-spacing: .12em;
+}
+
+.team-confirm-dialog h2 {
+  margin: 5px 40px 0 0;
+  font-size: 21px;
+  font-weight: 400;
+}
+
+.team-confirm-dialog p {
+  margin: 9px 0 0;
+  color: #74736f;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.team-confirm-dialog > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.team-confirm-dialog > div button {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 18px;
+  background: #ededeb;
+  font-size: 7px;
+}
+
+.team-confirm-dialog > div button:last-child {
+  background: #b64e44;
+  color: white;
+}
+
+@media (min-width: 1200px) {
+  .team-manage-page-shell {
+    grid-template-rows: clamp(36px,5.4vh,58px) minmax(0,1fr);
+  }
+
+  .team-manage-stage {
+    --team-left-width: clamp(244px,14.8vw,288px);
+    --team-right-width: clamp(276px,16.4vw,318px);
+    --team-layout-gap: clamp(10px,.72vw,14px);
+  }
+
+  .team-manage-heading h1 {
+    font-size: clamp(44px,3.2vw,58px);
+  }
+
+  .team-manage-overview-stats strong {
+    font-size: clamp(46px,4vw,68px);
+  }
+
+  .team-fixed-left,
+  .team-fixed-right {
+    height: min(720px,calc(100% - 24px));
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 900px) {
+  .team-manage-stage {
+    --team-left-width: 220px;
+    --team-right-width: 242px;
+    --team-layout-gap: 9px;
+  }
+
+  .team-member-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .team-manage-overview {
+    grid-template-columns: minmax(0,1fr) 320px;
+  }
+}
+
+@media (max-width: 899px) {
+  .team-manage-page-shell {
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    min-height: 100dvh;
+    display: block;
+    overflow: visible;
+  }
+
+  .team-manage-stage {
+    display: grid;
+    gap: 10px;
+    overflow: visible;
+  }
+
+  .team-manage-scroll {
+    display: contents;
+  }
+
+  .team-manage-overview {
+    order: 1;
+    grid-template-columns: 1fr;
+    padding: 28px 0 22px;
+  }
+
+  .team-fixed-left {
+    order: 2;
+  }
+
+  .team-manage-center-flow {
+    order: 3;
+  }
+
+  .team-fixed-right {
+    order: 4;
+  }
+
+  .team-fixed-column {
+    position: static;
+    width: auto;
+    height: auto;
+    filter: none;
+  }
+
+  .team-fixed-left {
+    display: grid;
+    grid-template-rows: auto auto;
+  }
+
+  .team-manage-center-flow {
+    margin: 0;
+  }
+
+  .team-center-head {
+    position: static;
+    display: grid;
+  }
+
+  .team-overview-grid,
+  .team-member-cards,
+  .team-invite-card,
+  .team-overview-split {
+    grid-template-columns: 1fr;
+  }
+
+  .team-panel {
+    min-height: 0;
+  }
+
+  .team-chat-card {
+    min-height: 560px;
+  }
+}
+
+@media (max-width: 560px) {
+  .team-manage-heading h1 {
+    font-size: 36px;
+  }
+
+  .team-manage-bars {
+    grid-template-columns: 1fr;
+  }
+
+  .team-manage-overview-stats strong {
+    font-size: 35px;
+  }
+
+  .team-member-table article {
+    grid-template-columns: 38px minmax(0,1fr) 32px;
+    padding: 8px 0;
+  }
+
+  .team-member-table .platform,
+  .team-member-table .member-state {
+    grid-column: 2;
+  }
+
+  .team-member-table article > button {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+
+  .team-submission-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .team-submission-list article {
+    grid-template-columns: 38px minmax(0,1fr) 32px;
+  }
+
+  .team-submission-list article > b,
+  .team-submission-list article > em {
+    grid-column: 2;
+  }
+
+  .team-submission-list article > button {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+
+  .team-danger-zone {
+    display: grid;
+  }
+
+  .team-invite-code {
+    width: 150px;
+    justify-self: center;
+  }
+}
+
+
+/* Team management v52
+   1. Hide the moving center layer cleanly beneath the global header.
+   2. Constrain every inline SVG used outside .team-panel-card. */
+
+.team-manage-scroll {
+  transition: clip-path .12s ease;
+}
+
+/* The side cards are siblings of the scroll container and remain visible.
+   Only the middle content layer is clipped to its accepted column width. */
+.team-manage-scroll.team-content-docked {
+  clip-path:
+    inset(
+      var(--team-sticky-gap)
+      calc(var(--team-right-width) + var(--team-layout-gap))
+      0
+      calc(var(--team-left-width) + var(--team-layout-gap))
+      round 28px 28px 0 0
+    );
+}
