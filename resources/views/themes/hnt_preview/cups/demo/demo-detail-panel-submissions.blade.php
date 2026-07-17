@@ -65,7 +65,7 @@
                         </header>
 
                         <div class="cup-submission-moderation__layout">
-                            <article class="cup-submission-moderation__media">
+                            <div class="cup-submission-moderation__media">
                                 <div class="cup-submission-moderation__image">
                                     @if($screenshotUrl)
                                         <img src="{{ $screenshotUrl }}" alt="{{ $isEnglish ? 'Submitted screenshot' : 'Eingereichter Screenshot' }}" loading="lazy"/>
@@ -79,9 +79,9 @@
                                     <span><small>{{ $isEnglish ? 'Points' : 'Punkte' }}</small><strong>{{ (int) $submission->points }}</strong></span>
                                     <span><small>{{ $isEnglish ? 'AI confidence' : 'KI-Sicherheit' }}</small><strong>{{ $confidenceLabel }}</strong></span>
                                 </div>
-                            </article>
+                            </div>
 
-                            <article class="cup-submission-moderation__tools">
+                            <div class="cup-submission-moderation__tools">
                                 <header>
                                     <span>{{ $isEnglish ? 'MANUAL SCORE' : 'MANUELLE WERTUNG' }}</span>
                                     <h3>{{ $isEnglish ? 'Correct values and save score' : 'Werte korrigieren und speichern' }}</h3>
@@ -136,7 +136,7 @@
                                         <a href="{{ $screenshotUrl }}" target="_blank" rel="noopener">{{ $isEnglish ? 'Open original' : 'Original öffnen' }}</a>
                                     @endif
                                 </div>
-                            </article>
+                            </div>
                         </div>
                     </section>
                 </div>
