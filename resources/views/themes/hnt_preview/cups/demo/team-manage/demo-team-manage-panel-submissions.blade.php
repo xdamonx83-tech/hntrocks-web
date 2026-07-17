@@ -21,7 +21,7 @@
     : $t('Hier siehst du alle Einreichungen deines Teams. Neue Screenshots kann nur der Captain senden.', 'Here you can see all team submissions. Only the captain can upload new screenshots.') }}</p>
 </div>
 @if($teamCanSubmit)
-<button class="team-primary-button" onclick="window.location.href='{{ route('cups.show.section', [$cup, 'submit']) }}'" type="button">{{ $t('Neue Einreichung', 'New submission') }}</button>
+<button class="team-primary-button" data-open-team-submission-modal type="button">{{ $t('Neue Einreichung', 'New submission') }}</button>
 @endif
 </div>
 <div class="team-submission-summary">
