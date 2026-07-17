@@ -82,15 +82,32 @@
     showToast("Teamname gespeichert");
   });
 
-  document.querySelector("[data-copy-invite]")?.addEventListener("click", async () => {
+  const qrTarget = document.getElementById("teamInviteQr");
+  const qrValue = qrTarget?.dataset.qrValue?.trim();
+  if (qrTarget && qrValue && window.QRCode) {
+    qrTarget.replaceChildren();
+    new QRCode(qrTarget, {
+      text: qrValue,
+      width: 136,
+      height: 136,
+      colorDark: "#2b2c29",
+      colorLight: "#f3f3f0",
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+  }
+
+  document.querySelector("[data-copy-invite]")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget;
     const input = document.getElementById("teamInviteLink");
+    if (!input) return;
+
     try {
       await navigator.clipboard.writeText(input.value);
-      showToast("Einladungslink kopiert");
+      showToast(button.dataset.copySuccess || "Einladungslink kopiert");
     } catch {
       input.select();
       document.execCommand("copy");
-      showToast("Einladungslink kopiert");
+      showToast(button.dataset.copySuccess || "Einladungslink kopiert");
     }
   });
 
