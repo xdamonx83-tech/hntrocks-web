@@ -45,6 +45,12 @@
     );
 
     $settingsDemoHtml = str_replace(
+        "  document.getElementById(\"settingsStatusSave\").addEventListener(\"click\", saveDemo);\n",
+        '',
+        $settingsDemoHtml
+    );
+
+    $settingsDemoHtml = str_replace(
         '/assets/themes/hnt_preview/dashboard-feed/assets/noah.jpg',
         '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
         $settingsDemoHtml
