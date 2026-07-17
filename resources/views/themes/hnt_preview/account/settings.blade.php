@@ -49,5 +49,70 @@
         '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
         $settingsDemoHtml
     );
+
+    /*
+     * Replace only the first complete site-header element. The static header
+     * contains nested <header> elements inside its dropdowns, so a simple
+     * regular expression would stop too early and corrupt the document.
+     */
+    $staticHeaderStart = strpos($settingsDemoHtml, '<header class="site-header">');
+    abort_unless($staticHeaderStart !== false, 500, 'Settings demo header could not be located.');
+
+    $headerFragment = substr($settingsDemoHtml, $staticHeaderStart);
+    preg_match_all('/<\/?header\b[^>]*>/i', $headerFragment, $headerTokens, PREG_OFFSET_CAPTURE);
+
+    $headerDepth = 0;
+    $staticHeaderLength = null;
+
+    foreach ($headerTokens[0] ?? [] as [$headerToken, $headerOffset]) {
+        if (str_starts_with(strtolower($headerToken), '</header')) {
+            $headerDepth--;
+
+            if ($headerDepth === 0) {
+                $staticHeaderLength = $headerOffset + strlen($headerToken);
+                break;
+            }
+
+            continue;
+        }
+
+        $headerDepth++;
+    }
+
+    abort_unless(is_int($staticHeaderLength) && $staticHeaderLength > 0, 500, 'Settings demo header is incomplete.');
+
+    $sharedHeaderHtml = view('themes.hnt_preview.partials.header')->render();
+    $sharedHeaderHtml = str_replace(
+        'class="settings-button header-dropdown-trigger" id="settingsMenuTrigger"',
+        'class="settings-button header-dropdown-trigger settings-page-active" id="settingsMenuTrigger"',
+        $sharedHeaderHtml
+    );
+
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $sharedHeaderHtml,
+        $staticHeaderStart,
+        $staticHeaderLength
+    );
+
+    if (! str_contains($settingsDemoHtml, 'name="csrf-token"')) {
+        $settingsDemoHtml = str_replace(
+            '</head>',
+            '<meta name="csrf-token" content="'.e(csrf_token()).'"/>'."\n".'</head>',
+            $settingsDemoHtml
+        );
+    }
+
+    $sharedHeaderRuntime = implode("\n", [
+        '<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = '.json_encode(route('feed.index')).';</script>',
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v=20260714-1"></script>',
+        '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v=20260714-1"></script>',
+    ]);
+
+    $settingsDemoHtml = str_replace(
+        '</body>',
+        $sharedHeaderRuntime."\n".'</body>',
+        $settingsDemoHtml
+    );
 @endphp
 {!! $settingsDemoHtml !!}
