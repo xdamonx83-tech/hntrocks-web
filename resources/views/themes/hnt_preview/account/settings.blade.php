@@ -1,70 +1,42 @@
-@extends('themes.hnt_preview.layouts.app')
+@php
+    $payloadDirectory = resource_path('views/themes/hnt_preview/account/demo/settings-payload');
+    $payloadFiles = [
+        'part1.txt',
+        'part2.txt',
+        'part3.txt',
+        'part4.txt',
+        'part5a.txt',
+        'part5b.txt',
+        'part6.txt',
+    ];
 
-@section('title', __('ui.account_settings'))
-@section('app_window_class', 'profile-window')
-@section('main_class', 'profile-edit-main')
+    $encodedPayload = '';
 
-@section('content')
-    <section class="edit-profile-shell hnt-settings-shell">
-        @if (session('status'))
-            <div class="profile-edit-status profile-edit-status-success" role="status">
-                {{ session('status') }}
-            </div>
-        @endif
+    foreach ($payloadFiles as $payloadFile) {
+        $payloadPath = $payloadDirectory.DIRECTORY_SEPARATOR.$payloadFile;
+        abort_unless(is_file($payloadPath), 500, 'Settings demo payload is incomplete.');
+        $encodedPayload .= trim((string) file_get_contents($payloadPath));
+    }
 
-        @if ($errors->any())
-            <div class="profile-edit-status profile-edit-status-danger" role="alert">
-                {{ __('ui.profile_validation_error') }}
-            </div>
-        @endif
+    abort_unless(strlen($encodedPayload) === 59048, 500, 'Settings demo payload has an invalid length.');
 
-        @include('themes.hnt_preview.settings.partials.tabs', ['active' => 'notifications'])
+    $compressedPayload = base64_decode($encodedPayload, true);
+    abort_unless(is_string($compressedPayload), 500, 'Settings demo payload is not valid base64.');
 
-        <form id="hnt-preview-account-settings-form" method="POST" action="{{ route('account.settings.update') }}" class="profile-edit-content-panel hnt-settings-form">
-            @csrf
-            @method('PUT')
+    $settingsDemoHtml = gzdecode($compressedPayload);
+    abort_unless(
+        is_string($settingsDemoHtml) && str_contains($settingsDemoHtml, 'class="settings-stage"'),
+        500,
+        'Settings demo payload could not be decoded.'
+    );
 
-            <div class="profile-edit-form">
-                <section class="profile-edit-tab-panel is-active hnt-settings-section">
-                    <div class="profile-edit-section-title">
-                        <span>{{ __('ui.account') }}</span>
-                        <h2>{{ __('ui.notification_settings') }}</h2>
-                        <p>{{ __('ui.notification_settings_intro') }}</p>
-                    </div>
-
-                    <div class="hnt-settings-check-list">
-                        @foreach ($notificationGroups as $field => $meta)
-                            <label class="hnt-lfg-check hnt-settings-check" for="notification-{{ $field }}">
-                                <input
-                                    id="notification-{{ $field }}"
-                                    type="checkbox"
-                                    name="{{ $field }}"
-                                    value="1"
-                                    @checked(old($field, $settings->{$field}))
-                                >
-                                <span class="hnt-settings-check-copy">
-                                    <strong>{{ $meta['title'] }}</strong>
-                                    <small>{{ $meta['text'] }}</small>
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-
-                    <div class="profile-edit-save-card hnt-settings-note">
-                        <strong>{{ __('ui.privacy_settings') }}</strong>
-                        <span>{{ __('ui.account_settings_privacy_intro') }}</span>
-                        <div class="hnt-settings-inline-actions">
-                            <a href="{{ route('settings.privacy.edit') }}" class="btn-create">{{ __('ui.account_privacy_settings') }}</a>
-                            <a href="{{ route('settings.privacy.blocks') }}" class="btn-create">{{ __('ui.manage_blocked_users') }}</a>
-                        </div>
-                    </div>
-
-                    <div class="form-actions profile-edit-actions hnt-settings-actions">
-                        <a href="{{ route('profile.show') }}" class="btn-create">{{ __('ui.discard_all') }}</a>
-                        <button type="submit" class="btn-create">{{ __('ui.save_changes') }}</button>
-                    </div>
-                </section>
-            </div>
-        </form>
-    </section>
-@endsection
+    // The supplied template references one avatar filename that is not part of
+    // the shared dashboard assets. Use the matching existing demo avatar only
+    // for that missing image; the visual structure remains untouched.
+    $settingsDemoHtml = str_replace(
+        '/assets/themes/hnt_preview/dashboard-feed/assets/noah.jpg',
+        '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
+        $settingsDemoHtml
+    );
+@endphp
+{!! $settingsDemoHtml !!}
