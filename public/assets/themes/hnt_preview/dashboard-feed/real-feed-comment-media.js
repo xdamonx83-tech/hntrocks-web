@@ -28,13 +28,36 @@
 (() => {
   const base = '/assets/themes/hnt_preview/dashboard-feed/';
 
+  const loadAgendaBehaviorFix = () => {
+    if (document.querySelector('script[data-real-dashboard-agenda-behavior-fix]')) return;
+
+    const script = document.createElement('script');
+    script.src = `${base}real-dashboard-agenda-behavior-fix.js?v=20260717-1`;
+    script.dataset.realDashboardAgendaBehaviorFix = '1';
+    script.defer = true;
+    document.body.appendChild(script);
+  };
+
   const loadAgendaExpand = () => {
-    if (document.querySelector('script[data-real-dashboard-agenda-expand]')) return;
+    const existing = document.querySelector('script[data-real-dashboard-agenda-expand]');
+    if (existing) {
+      if (existing.dataset.loaded === '1') loadAgendaBehaviorFix();
+      else {
+        existing.addEventListener('load', loadAgendaBehaviorFix, { once: true });
+        existing.addEventListener('error', loadAgendaBehaviorFix, { once: true });
+      }
+      return;
+    }
 
     const script = document.createElement('script');
     script.src = `${base}real-dashboard-agenda-expand.js?v=20260711-2`;
     script.dataset.realDashboardAgendaExpand = '1';
     script.defer = true;
+    script.onload = () => {
+      script.dataset.loaded = '1';
+      loadAgendaBehaviorFix();
+    };
+    script.onerror = loadAgendaBehaviorFix;
     document.body.appendChild(script);
   };
 
