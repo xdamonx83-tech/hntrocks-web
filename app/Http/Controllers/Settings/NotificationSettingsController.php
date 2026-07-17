@@ -18,6 +18,7 @@ class NotificationSettingsController extends Controller
     {
         $user = $request->user();
         $settings = $user->notificationSettings()->firstOrCreate([]);
+        $privacySettings = $user->privacySettings()->firstOrCreate([]);
 
         $view = $request->boolean('classic_settings')
             ? 'account.settings'
@@ -26,6 +27,7 @@ class NotificationSettingsController extends Controller
         return view($view, [
             'settings' => $settings,
             'notificationGroups' => NotificationSettingsGroups::all(),
+            'privacySettings' => $privacySettings,
             'generalSettings' => [
                 'locale' => app()->getLocale(),
                 'user' => $user,
