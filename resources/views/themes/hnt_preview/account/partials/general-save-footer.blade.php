@@ -1,7 +1,7 @@
 <footer class="settings-save-footer" data-settings-save-footer>
 <div>
-<strong>{{ __('settings.save_footer_title') }}</strong>
-<span>{{ __('settings.save_footer_hint') }}</span>
+<strong id="settingsSaveFooterTitle">{{ __('settings.save_footer_title') }}</strong>
+<span id="settingsSaveFooterHint">{{ __('settings.save_footer_hint') }}</span>
 </div>
 <div>
 <button id="settingsDiscardBottom" type="reset" form="settingsGeneralForm">{{ __('settings.discard') }}</button>
