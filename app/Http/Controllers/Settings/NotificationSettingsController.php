@@ -73,13 +73,15 @@ class NotificationSettingsController extends Controller
 
         $passwordActive = filled($user->getAuthPassword());
         $messagesRestricted = $messagesFrom !== 'everyone';
-        $profileConfigured = in_array($profileVisibility, ['public', 'registered', 'private'], true);
+        $profileRestricted = $profileVisibility !== 'public';
 
-        $score = ($passwordActive ? 54 : 0)
-            + ($profileConfigured ? 18 : 0)
-            + ($messagesRestricted ? 12 : 4)
-            + ($twoFactorEnabled ? 12 : 0);
-        $score = min(96, max(0, $score));
+        $protectionChecks = [
+            $passwordActive,
+            $twoFactorEnabled,
+            $profileRestricted,
+            $messagesRestricted,
+        ];
+        $score = count(array_filter($protectionChecks)) * 25;
 
         $scoreLabel = match (true) {
             $score >= 90 => $t('Sehr gut geschützt', 'Very well protected'),
@@ -130,7 +132,7 @@ class NotificationSettingsController extends Controller
                 $activityAt = $token->last_used_at ?: $token->created_at;
                 $sessions[] = [
                     'type' => 'app',
-                    'title' => trim((string) $token->name) ?: $t('HNT App', 'HNT App'),
+                    'title' => 'HNT.rocks App',
                     'subtitle' => $activityAt
                         ? $t('App · ', 'App · ').$activityAt->diffForHumans()
                         : $t('App-Zugang aktiv', 'App access active'),
@@ -144,9 +146,11 @@ class NotificationSettingsController extends Controller
             'score_label' => $scoreLabel,
             'password' => [
                 'good' => $passwordActive,
-                'text' => $passwordChangedAt
-                    ? $t('Aktiv · ', 'Active · ').$passwordChangedAt->diffForHumans()
-                    : $t('Aktiv · Änderungsdatum nicht erfasst', 'Active · change date unavailable'),
+                'text' => ! $passwordActive
+                    ? $t('Kein Passwort eingerichtet', 'No password set')
+                    : ($passwordChangedAt
+                        ? $t('Aktiv · ', 'Active · ').$passwordChangedAt->diffForHumans()
+                        : $t('Aktiv · Änderungsdatum nicht erfasst', 'Active · change date unavailable')),
                 'badge' => $passwordActive ? 'OK' : $t('Offen', 'Open'),
             ],
             'two_factor' => [
@@ -155,9 +159,11 @@ class NotificationSettingsController extends Controller
                 'badge' => $twoFactorEnabled ? $t('Aktiv', 'Active') : $t('Offen', 'Open'),
             ],
             'profile' => [
-                'good' => $profileConfigured,
+                'good' => $profileRestricted,
                 'text' => $profileLabel,
-                'badge' => $t('Aktiv', 'Active'),
+                'badge' => $profileRestricted
+                    ? $t('Begrenzt', 'Limited')
+                    : $t('Offen', 'Open'),
             ],
             'messages' => [
                 'good' => $messagesRestricted,
@@ -173,9 +179,8 @@ class NotificationSettingsController extends Controller
                 'two_factor' => $t('Zwei-Faktor-Schutz', 'Two-factor protection'),
                 'profile' => $t('Profil-Sichtbarkeit', 'Profile visibility'),
                 'messages' => $t('Nachrichten', 'Messages'),
-                'sessions' => $t('AKTIVE SITZUNGEN', 'ACTIVE SESSIONS'),
+                'sessions' => $t('AKTIVE ZUGÄNGE', 'ACTIVE ACCESS'),
                 'open_security' => $t('Sicherheit öffnen', 'Open security'),
-                'save' => $t('Änderungen speichern', 'Save changes'),
             ],
         ];
     }
