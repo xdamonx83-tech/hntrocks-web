@@ -104,6 +104,7 @@
     };
 
     $teamManageJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/team-manage.js')) ?: time();
+    $teamSubmissionModalCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/team-manage-submission-modal.css')) ?: time();
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -125,6 +126,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-original/part5.css') }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-original/part6.css') }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/cup-detail-theme-live-red.css') }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-cups/team-manage-submission-modal.css') }}?v={{ $teamSubmissionModalCssVersion }}" rel="stylesheet"/>
 </head>
 <body data-page="team-manage">
 @include('themes.hnt_preview.cups.demo.demo-svg')
@@ -135,6 +137,7 @@
 @include('themes.hnt_preview.partials.header')
 @include('themes.hnt_preview.cups.demo.team-manage.demo-team-manage-stage')
 @include('themes.hnt_preview.cups.demo.team-manage.demo-team-manage-confirm')
+@include('themes.hnt_preview.cups.demo.team-manage.demo-team-manage-submission-modal')
 <div class="toast" id="toast"></div>
 </main>
 <script>window.HNT_DASHBOARD_HEADER_ENDPOINT = '/feed';</script>
