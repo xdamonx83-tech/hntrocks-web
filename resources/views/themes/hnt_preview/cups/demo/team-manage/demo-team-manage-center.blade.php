@@ -2,14 +2,14 @@
 <article class="team-center-card">
 <header class="team-center-head">
 <div class="team-center-title">
-<span>NIGHT RAVENS</span>
-<h2 id="teamPanelTitle">Übersicht</h2>
+<span>{{ $team->displayName() }}</span>
+<h2 id="teamPanelTitle">{{ $t('Übersicht', 'Overview') }}</h2>
 </div>
-<nav aria-label="Team Bereiche" class="team-tabs" role="tablist">
-<button class="active" data-team-tab="overview" data-title="Übersicht" type="button">Übersicht</button>
-<button data-team-tab="members" data-title="Mitglieder" type="button">Mitglieder</button>
-<button data-team-tab="invites" data-title="Einladungen" type="button">Einladungen</button>
-<button data-team-tab="submissions" data-title="Einreichungen" type="button">Einreichungen</button>
+<nav aria-label="{{ $t('Team Bereiche', 'Team sections') }}" class="team-tabs" role="tablist">
+<button class="active" data-team-tab="overview" data-title="{{ $t('Übersicht', 'Overview') }}" type="button">{{ $t('Übersicht', 'Overview') }}</button>
+<button data-team-tab="members" data-title="{{ $t('Mitglieder', 'Members') }}" type="button">{{ $t('Mitglieder', 'Members') }}</button>
+<button data-team-tab="invites" data-title="{{ $t('Einladungen', 'Invites') }}" type="button">{{ $t('Einladungen', 'Invites') }}</button>
+<button data-team-tab="submissions" data-title="{{ $t('Einreichungen', 'Submissions') }}" type="button">{{ $t('Einreichungen', 'Submissions') }}</button>
 <button data-team-tab="recruiting" data-title="Recruiting" type="button">Recruiting</button>
 </nav>
 </header>
