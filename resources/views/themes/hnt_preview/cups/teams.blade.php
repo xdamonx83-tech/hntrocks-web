@@ -32,6 +32,48 @@
         ? $t('Team vollständig', 'Team complete')
         : $t('Noch Plätze frei', 'Open slots remain');
 
+    $teamCanRename = ($isCaptain || $canManageTeam) && $team->canChangeRoster();
+    $teamCanSubmit = $team->status === 'active'
+        && $cup->isSubmissionOpen()
+        && $team->canSubmitForCup($viewer);
+    $teamCaptainName = $team->owner?->username ?: $team->owner?->name ?: 'Hunter';
+    $teamProfileUrl = static function ($user): string {
+        if (! $user?->username) {
+            return route('members.index');
+        }
+
+        return (int) $user->id === (int) auth()->id()
+            ? route('profile.show')
+            : route('profile.public', $user);
+    };
+
+    $teamActivityItems = collect();
+    foreach ($teamSubmissions as $submission) {
+        $activityAt = $submission->submitted_at ?: $submission->created_at;
+        $submitterName = $submission->submitter?->username ?: $submission->submitter?->name ?: 'Hunter';
+        $teamActivityItems->push([
+            'timestamp' => $activityAt?->timestamp ?? 0,
+            'title' => $submitterName,
+            'text' => $t('hat einen Score eingereicht', 'submitted a score'),
+            'time' => $activityAt?->diffForHumans() ?: '—',
+        ]);
+    }
+    foreach ($chatMessages as $message) {
+        $messageName = (int) $message->user_id === (int) $viewer->id
+            ? $t('Du', 'You')
+            : ($message->user?->username ?: $message->user?->name ?: 'Hunter');
+        $teamActivityItems->push([
+            'timestamp' => $message->created_at?->timestamp ?? 0,
+            'title' => $messageName,
+            'text' => $t('hat im Teamchat geschrieben', 'posted in the team chat'),
+            'time' => $message->created_at?->diffForHumans() ?: '—',
+        ]);
+    }
+    $teamActivityItems = $teamActivityItems
+        ->sortByDesc('timestamp')
+        ->take(3)
+        ->values();
+
     $teamManageJsVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/team-manage.js')) ?: time();
 @endphp
 <!DOCTYPE html>
