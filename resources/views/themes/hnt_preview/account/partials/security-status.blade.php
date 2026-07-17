@@ -41,7 +41,6 @@
 </article>
 @endforeach
 </section>
-<button class="settings-status-save" id="settingsStatusSave" type="button">{{ $status['labels']['save'] }}</button>
 </aside>
 
 {{-- Keep the unfinished demo panels from mutating the visible real widget. --}}
