@@ -1,0 +1,53 @@
+/* Member-card profile arrows and submission icons previously inherited the
+   browser's default SVG size (300 × 150), producing the large black shapes. */
+.team-member-card-head > button svg,
+.team-submission-list article > span svg,
+.team-submission-list article > button svg {
+  display: block;
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  min-height: 13px;
+  max-width: 13px;
+  max-height: 13px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Keep icon containers from stretching in grid/flex layouts. */
+.team-member-card-head > button,
+.team-submission-list article > span,
+.team-submission-list article > button {
+  overflow: hidden;
+  place-self: center;
+}
+
+.team-submission-list article > span {
+  flex: 0 0 38px;
+}
+
+/* Extra containment for all action icons inside the functional tabs. */
+.team-member-cards button svg,
+.team-submission-list svg,
+.team-invite-history svg,
+.team-finder-players button svg,
+.team-roster-note svg {
+  vector-effect: non-scaling-stroke;
+}
+
+/* A clean opaque sticky surface prevents any remaining text or controls
+   from being visible through the tab bar while scrolling. */
+.team-center-head,
+.team-center-head.is-stuck {
+  background: #f3f3f0;
+}
+
+@media (max-width: 899px) {
+  .team-manage-scroll.team-content-docked {
+    clip-path: none;
+  }
+}
