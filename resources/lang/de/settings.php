@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'general_tab' => 'Allgemein',
+    'general_nav_description' => 'Sprache und Konto',
+    'general_badge' => 'Basis',
+    'general_eyebrow' => 'ALLGEMEIN',
+    'general_title' => 'Sprache und Konto',
+    'general_intro' => 'Lege die Sprache der Weboberfläche fest und prüfe die wichtigsten Angaben deines Kontos.',
+    'language' => 'Sprache',
+    'language_de' => 'Deutsch',
+    'language_en' => 'English',
+    'language_hint' => 'Wird nach dem Speichern sofort für die Weboberfläche übernommen.',
+    'username' => 'Benutzername',
+    'username_hint' => 'Dieser Name identifiziert dein Konto auf HNT.rocks.',
+    'email' => 'E-Mail-Adresse',
+    'email_hint' => 'Diese Adresse ist aktuell mit deinem Konto verknüpft.',
+    'email_status' => 'E-Mail-Status',
+    'email_verified' => 'Bestätigt',
+    'email_unverified' => 'Noch nicht bestätigt',
+    'member_since' => 'Mitglied seit',
+    'account_data_hint' => 'Diese Angaben stammen direkt aus deinem HNT.rocks-Konto und sind hier nur lesbar.',
+    'saved_eyebrow' => 'GESPEICHERT',
+    'save_changes' => 'Änderungen speichern',
+    'discard' => 'Verwerfen',
+    'no_changes' => 'Keine offenen Änderungen',
+    'unsaved_changes' => 'Ungespeicherte Änderungen',
+];
