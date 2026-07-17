@@ -31,7 +31,7 @@ class GeneralSettingsTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from(route('account.settings.edit').'#general')
+            ->from(route('account.settings.edit'))
             ->put(route('account.settings.general.update'), [
                 'locale' => 'fr',
             ]);
