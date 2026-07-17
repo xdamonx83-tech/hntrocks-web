@@ -23,7 +23,12 @@
     $compressedPayload = base64_decode($encodedPayload, true);
     abort_unless(is_string($compressedPayload), 500, 'Settings demo payload is not valid base64.');
 
-    $settingsDemoHtml = gzdecode($compressedPayload);
+    $settingsDemoHtml = @gzdecode($compressedPayload);
+
+    if (! is_string($settingsDemoHtml) && strlen($compressedPayload) > 18) {
+        $settingsDemoHtml = @gzinflate(substr($compressedPayload, 10, -8));
+    }
+
     abort_unless(
         is_string($settingsDemoHtml) && str_contains($settingsDemoHtml, 'class="settings-stage"'),
         500,
