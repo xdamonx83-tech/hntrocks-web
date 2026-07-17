@@ -1,30 +1,42 @@
-<aside aria-label="Teamchat" class="team-fixed-column team-fixed-right" id="teamFixedRight">
+<aside aria-label="{{ $t('Teamchat', 'Team chat') }}" class="team-fixed-column team-fixed-right" id="teamFixedRight">
 <article class="team-chat-card">
 <header>
-<div><span>TEAMCHAT</span><h2>Night Ravens</h2></div>
-<strong id="teamChatCount">4</strong>
+<div><span>TEAMCHAT</span><h2>{{ $team->displayName() }}</h2></div>
+<strong id="teamChatCount">{{ $chatMessagesCount }}</strong>
 </header>
 <div class="team-chat-list" id="teamChatList">
+@forelse($chatMessages as $message)
+@php
+    $messageUser = $message->user;
+    $isOwnMessage = (int) $message->user_id === (int) $viewer->id;
+    $messageAuthor = $isOwnMessage
+        ? $t('Du', 'You')
+        : ($messageUser?->username ?: $messageUser?->name ?: 'Hunter');
+    $messageAvatar = $messageUser?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
+@endphp
+<article class="{{ $isOwnMessage ? 'own' : 'other' }}">
+@if(! $isOwnMessage)
+<img alt="{{ $messageAuthor }}" src="{{ $messageAvatar }}"/>
+@endif
+<div>
+<strong>{{ $messageAuthor }}</strong>
+<p>{{ $message->body }}</p>
+<time datetime="{{ $message->created_at?->toIso8601String() }}">{{ $message->created_at?->format('H:i') }}</time>
+</div>
+</article>
+@empty
 <article class="other">
-<img alt="Jonathan" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/>
-<div><strong>Jonathan</strong><p>Bin heute ab 20:30 Uhr bereit.</p><time>19:04</time></div>
+<div>
+<strong>{{ $t('Noch keine Nachrichten', 'No messages yet') }}</strong>
+<p>{{ $t('Schreibt die erste Nachricht in euren Teamchat.', 'Send the first message to your team chat.') }}</p>
+</div>
 </article>
-<article class="own">
-<div><strong>Du</strong><p>Perfekt. Wir testen zuerst Stillwater.</p><time>19:06</time></div>
-</article>
-<article class="other">
-<img alt="Erica" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/erica.jpg') }}"/>
-<div><strong>Erica</strong><p>Ich habe den letzten Score noch einmal geprüft.</p><time>19:11</time></div>
-</article>
-<article class="other">
-<img alt="Jonathan" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/jonathan.jpg') }}"/>
-<div><strong>Jonathan</strong><p>Der Clip ist im Teamchat.</p><time>19:14</time></div>
-</article>
+@endforelse
 </div>
 <form class="team-chat-compose" id="teamChatForm">
-<img alt="Valentina" src="{{ asset('assets/themes/hnt_preview/dashboard-feed/assets/amelie.jpg') }}"/>
-<input autocomplete="off" id="teamChatInput" maxlength="1200" placeholder="Nachricht schreiben …"/>
-<button aria-label="Nachricht senden" type="submit">→</button>
+<img alt="{{ $viewer->username ?: $viewer->name ?: 'Hunter' }}" src="{{ $viewer->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}"/>
+<input autocomplete="off" id="teamChatInput" maxlength="1200" placeholder="{{ $t('Nachricht schreiben …', 'Write a message …') }}"/>
+<button aria-label="{{ $t('Nachricht senden', 'Send message') }}" type="submit">→</button>
 </form>
 </article>
 </aside>
