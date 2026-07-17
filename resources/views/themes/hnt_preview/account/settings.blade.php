@@ -67,6 +67,12 @@
     );
 
     $settingsDemoHtml = str_replace(
+        "  const notificationMaster = document.getElementById(\"notificationMaster\");\n  const notificationToggles = [...document.querySelectorAll(\".notification-toggle\")];\n\n  notificationMaster.addEventListener(\"change\", () => {\n    notificationToggles.forEach((toggle) => toggle.checked = notificationMaster.checked);\n    markDirty();\n  });\n\n  notificationToggles.forEach((toggle) => {\n    toggle.addEventListener(\"change\", () => {\n      notificationMaster.checked = notificationToggles.every((item) => item.checked);\n    });\n  });\n",
+        '',
+        $settingsDemoHtml
+    );
+
+    $settingsDemoHtml = str_replace(
         '/assets/themes/hnt_preview/dashboard-feed/assets/noah.jpg',
         '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
         $settingsDemoHtml
@@ -143,6 +149,31 @@
         $notificationsPanelStart - $generalPanelStart
     );
 
+    $notificationsPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="notifications" hidden="">'
+    );
+    abort_unless($notificationsPanelStart !== false, 500, 'Notifications settings panel could not be located.');
+
+    $privacyPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="privacy" hidden="">',
+        $notificationsPanelStart
+    );
+    abort_unless($privacyPanelStart !== false, 500, 'Privacy settings panel could not be located.');
+
+    $realNotificationsHtml = view('themes.hnt_preview.account.partials.notification-settings', [
+        'settings' => $settings,
+        'notificationGroups' => $notificationGroups,
+    ])->render();
+
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $realNotificationsHtml,
+        $notificationsPanelStart,
+        $privacyPanelStart - $notificationsPanelStart
+    );
+
     $settingsDemoHtml = str_replace(
         '<button class="active" data-settings-tab="general" data-title="Allgemein" type="button">',
         '<button class="active" data-settings-tab="general" data-title="'.e(__('settings.general_tab')).'" type="button">',
@@ -151,6 +182,17 @@
     $settingsDemoHtml = str_replace(
         '<span><strong>Allgemein</strong><small>Sprache, Darstellung und Konto</small></span><i>Basis</i>',
         '<span><strong>'.e(__('settings.general_tab')).'</strong><small>'.e(__('settings.general_nav_description')).'</small></span><i>'.e(__('settings.general_badge')).'</i>',
+        $settingsDemoHtml
+    );
+
+    $settingsDemoHtml = str_replace(
+        '<button data-settings-tab="notifications" data-title="Benachrichtigungen" type="button">',
+        '<button data-settings-tab="notifications" data-title="'.e(__('settings.notifications_tab')).'" type="button">',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<span><strong>Benachrichtigungen</strong><small>Feed, Freunde, LFG und Cups</small></span><i>9</i>',
+        '<span><strong>'.e(__('settings.notifications_tab')).'</strong><small>'.e(__('settings.notifications_nav_description')).'</small></span><i>'.e(__('settings.notifications_badge')).'</i>',
         $settingsDemoHtml
     );
     $settingsDemoHtml = str_replace(
@@ -216,7 +258,7 @@
     if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-3" rel="stylesheet"/>' . "\n" . '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-4" rel="stylesheet"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
@@ -233,7 +275,7 @@
         '<script>window.HNT_DASHBOARD_HEADER_ENDPOINT = '.json_encode(route('feed.index')).';</script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v=20260714-1"></script>',
-        '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-2"></script>',
+        '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-3"></script>',
     ]);
 
     $settingsDemoHtml = str_replace(
