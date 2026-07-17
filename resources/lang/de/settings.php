@@ -25,4 +25,13 @@ return [
     'discard' => 'Verwerfen',
     'no_changes' => 'Keine offenen Änderungen',
     'unsaved_changes' => 'Ungespeicherte Änderungen',
+    'appearance_label' => 'Darstellung wählen',
+    'appearance_eyebrow' => 'DARSTELLUNG',
+    'appearance_title' => 'Helles und dunkles Design',
+    'appearance_intro' => 'Der helle HNT.rocks-Stil bleibt aktiv, bis alle Seiten vollständig für den dunklen Modus vorbereitet sind.',
+    'appearance_light' => 'Hell',
+    'appearance_current' => 'Aktueller Stil',
+    'appearance_dark' => 'Dunkel',
+    'appearance_planned' => 'In Vorbereitung',
+    'appearance_roadmap' => 'Der dunkle Modus wird nach der Umstellung aller Seiten freigeschaltet.',
 ];
