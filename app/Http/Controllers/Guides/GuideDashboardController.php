@@ -8,6 +8,7 @@ use App\Models\Guide;
 use App\Models\GuideCategory;
 use App\Services\Guides\GuideReputationService;
 use App\Services\Guides\GuideWorkflowService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class GuideDashboardController extends Controller
 {
+    use AuthorizesRequests;
+
     public function mine(Request $request, GuideReputationService $reputation): View
     {
         $status = (string) $request->query('status', 'all');
