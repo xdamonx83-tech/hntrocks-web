@@ -80,7 +80,8 @@ class CompleteUserBlockingTest extends TestCase
 
         $this->actingAs($viewer)
             ->get(route('profile.public', $blocked))
-            ->assertNotFound();
+            ->assertNotFound()
+            ->assertSee('data-error-page="404"', false);
 
         $this->actingAs($viewer)
             ->get(route('feed.show', $post))
