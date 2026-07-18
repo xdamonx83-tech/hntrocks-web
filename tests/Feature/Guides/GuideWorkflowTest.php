@@ -168,7 +168,8 @@ class GuideWorkflowTest extends TestCase
         ]);
         $this->get(route('guides.show', $guide))
             ->assertOk()
-            ->assertSee($revision->title);
+            ->assertSee($revision->title)
+            ->assertSee(asset('assets/vikinger/fonts/phosphor/regular/style.css'), false);
     }
 
     public function test_changes_and_rejection_require_a_reason(): void
@@ -302,19 +303,33 @@ class GuideWorkflowTest extends TestCase
             ->assertNotFound();
 
         $guide = $this->publishedGuide($author, $admin);
-        $root = $this->actingAs($commenter)
+        $rootResponse = $this->actingAs($commenter)
             ->postJson(route('guides.comments.store', $guide), ['body' => 'Useful guide'])
             ->assertCreated()
-            ->json('comment.id');
+            ->assertJsonPath('comment.actions.can_reply', true)
+            ->assertJsonPath('comment.actions.can_edit', true)
+            ->assertJsonPath('comment.actions.can_delete', true)
+            ->assertJsonPath('comment.actions.can_report', false);
+        $root = $rootResponse->json('comment.id');
 
-        $reply = $this->actingAs($author)
+        $replyResponse = $this->actingAs($author)
             ->postJson(route('guides.comments.store', $guide), ['body' => 'Thanks', 'parent_id' => $root])
             ->assertCreated()
-            ->json('comment.id');
+            ->assertJsonPath('comment.actions.can_reply', false)
+            ->assertJsonPath('comment.actions.can_edit', true)
+            ->assertJsonPath('comment.actions.can_delete', true)
+            ->assertJsonPath('comment.actions.can_report', false);
+        $reply = $replyResponse->json('comment.id');
 
         $this->actingAs($commenter)
             ->postJson(route('guides.comments.store', $guide), ['body' => 'Too deep', 'parent_id' => $reply])
             ->assertNotFound();
+
+        $rootComment = \App\Models\GuideComment::query()->findOrFail($root);
+        $this->assertTrue($rootComment->canDelete($author));
+        $this->actingAs($author)
+            ->deleteJson(route('guides.comments.destroy', $rootComment))
+            ->assertOk();
     }
 
     public function test_comment_authorization_and_guide_notification_setting_are_respected(): void

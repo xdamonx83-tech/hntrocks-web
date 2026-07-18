@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com" rel="preconnect">
 <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<link href="{{ asset('assets/vikinger/fonts/phosphor/regular/style.css') }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/hnt_preview/guides/guides.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides.css')) ?: time() }}" rel="stylesheet">

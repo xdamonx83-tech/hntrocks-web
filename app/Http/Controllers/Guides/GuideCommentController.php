@@ -115,6 +115,8 @@ class GuideCommentController extends Controller
     /** @return array<string, mixed> */
     private function payload(GuideComment $comment): array
     {
+        $viewer = request()->user();
+
         return [
             'id' => $comment->id,
             'parent_id' => $comment->parent_id,
@@ -126,8 +128,15 @@ class GuideCommentController extends Controller
                 'handle' => $comment->user?->username ? '@'.$comment->user->username : '',
                 'avatar' => $comment->user?->avatarUrl(),
             ],
-            'can_edit' => $comment->canEdit(request()->user()),
-            'can_delete' => $comment->canDelete(request()->user()),
+            'actions' => [
+                'can_reply' => $comment->parent_id === null,
+                'can_edit' => $comment->canEdit($viewer),
+                'can_delete' => $comment->canDelete($viewer),
+                'can_report' => $viewer !== null && (int) $comment->user_id !== (int) $viewer->id,
+                'update_url' => route('guides.comments.update', $comment),
+                'delete_url' => route('guides.comments.destroy', $comment),
+                'report_url' => route('reports.store'),
+            ],
         ];
     }
 }

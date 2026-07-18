@@ -6,6 +6,8 @@ use App\Models\Cup;
 use App\Models\CupSubmission;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
+use App\Models\Guide;
+use App\Models\GuideComment;
 use App\Models\LfgPost;
 use App\Models\MediaAsset;
 use App\Models\Moment;
@@ -22,7 +24,7 @@ use Illuminate\Support\Str;
 
 class UserDataExportService
 {
-    private const EXPORT_VERSION = 2;
+    private const EXPORT_VERSION = 3;
 
     /** @var array<string,array<int,string>> */
     private array $columnCache = [];
@@ -60,6 +62,20 @@ class UserDataExportService
 
         $mediaAssets = $this->rowsWhere('media_assets', 'user_id', $userId);
         $mediaAssetIds = $this->ids($mediaAssets);
+
+        $ownedGuides = $this->rowsWhere('guides', 'author_id', $userId);
+        $ownedGuideIds = $this->ids($ownedGuides);
+        $guideRevisions = $this->guideRelatedRows('guide_revisions', 'author_id', $userId, $ownedGuideIds);
+        $guideMedia = $this->guideRelatedRows('guide_media', 'uploaded_by', $userId, $ownedGuideIds);
+        $guideComments = $this->rowsWhere('guide_comments', 'user_id', $userId);
+        $guideCommentIds = $this->ids($guideComments);
+        $guideHelpfulVotes = $this->rowsWhere('guide_helpful_votes', 'user_id', $userId);
+        $guideHelpfulEventKeys = array_values(array_filter(array_map(
+            static fn (array $vote): ?string => isset($vote['guide_id'])
+                ? 'guide:'.(int) $vote['guide_id'].':helpful:'.$userId
+                : null,
+            $guideHelpfulVotes
+        )));
 
         $moments = $this->rowsWhere('moments', 'user_id', $userId);
         $momentIds = $this->ids($moments);
@@ -119,7 +135,14 @@ class UserDataExportService
             ],
             'profile_and_media' => [
                 'media_assets' => $mediaAssets,
-                'file_references' => $this->fileReferences($account, $ownedTeams, $ownedCups, $mediaAssets, $feedPosts),
+                'file_references' => $this->fileReferences(
+                    $account,
+                    $ownedTeams,
+                    $ownedCups,
+                    $mediaAssets,
+                    $feedPosts,
+                    $guideMedia
+                ),
             ],
             'feed' => [
                 'posts' => $feedPosts,
@@ -173,6 +196,26 @@ class UserDataExportService
                 'reactions_by_user' => $this->rowsWhere('moment_reactions', 'user_id', $userId),
                 'bookmarks' => $this->rowsWhere('moment_bookmarks', 'user_id', $userId),
             ],
+            'guides' => [
+                'owned_guides' => $ownedGuides,
+                'revisions' => $guideRevisions,
+                'media_metadata' => $guideMedia,
+                'comments_written' => $guideComments,
+                'helpful_votes' => $guideHelpfulVotes,
+                'bookmarks' => $this->rowsWhere('guide_bookmarks', 'user_id', $userId),
+                'reputation_earned' => $this->rowsWhere('guide_reputation_entries', 'user_id', $userId),
+                'reputation_triggered_by_helpful_votes' => $this->rowsWhereStringIn(
+                    'guide_reputation_entries',
+                    'event_key',
+                    $guideHelpfulEventKeys
+                ),
+                'moderation_events' => $this->guideRelatedRows(
+                    'guide_moderation_events',
+                    'actor_id',
+                    $userId,
+                    $ownedGuideIds
+                ),
+            ],
             'cups' => [
                 'owned_cups' => $ownedCups,
                 'participated_cups' => $this->rowsWhereIn('cups', 'id', $participatedCupIds),
@@ -198,6 +241,8 @@ class UserDataExportService
                     User::class => [$userId],
                     FeedPost::class => $feedPostIds,
                     FeedComment::class => $feedCommentIds,
+                    Guide::class => $ownedGuideIds,
+                    GuideComment::class => $guideCommentIds,
                     Team::class => $ownedTeamIds,
                     LfgPost::class => $lfgPostIds,
                     TeamLfgPost::class => $teamLfgPostIds,
@@ -259,6 +304,50 @@ class UserDataExportService
 
         return $this->rows($table, function (Builder $query) use ($column, $values): void {
             $query->whereIn($column, $values);
+        });
+    }
+
+    /** @return array<int,array<string,mixed>> */
+    private function rowsWhereStringIn(string $table, string $column, array $values): array
+    {
+        $values = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $value): string => trim((string) $value),
+            $values
+        ))));
+
+        if ($values === [] || ! $this->hasTable($table) || ! $this->hasColumn($table, $column)) {
+            return [];
+        }
+
+        return $this->rows($table, function (Builder $query) use ($column, $values): void {
+            $query->whereIn($column, $values);
+        });
+    }
+
+    /** @return array<int,array<string,mixed>> */
+    private function guideRelatedRows(string $table, string $userColumn, int $userId, array $ownedGuideIds): array
+    {
+        if (! $this->hasTable($table)) {
+            return [];
+        }
+
+        $hasUserColumn = $this->hasColumn($table, $userColumn);
+        $hasGuideColumn = $this->hasColumn($table, 'guide_id');
+
+        if (! $hasUserColumn && (! $hasGuideColumn || $ownedGuideIds === [])) {
+            return [];
+        }
+
+        return $this->rows($table, function (Builder $query) use ($userColumn, $userId, $ownedGuideIds, $hasUserColumn, $hasGuideColumn): void {
+            $query->where(function (Builder $guideRows) use ($userColumn, $userId, $ownedGuideIds, $hasUserColumn, $hasGuideColumn): void {
+                if ($hasUserColumn) {
+                    $guideRows->where($userColumn, $userId);
+                }
+
+                if ($ownedGuideIds !== [] && $hasGuideColumn) {
+                    $guideRows->orWhereIn('guide_id', $ownedGuideIds);
+                }
+            });
         });
     }
 
@@ -421,9 +510,17 @@ class UserDataExportService
      * @param array<int,array<string,mixed>> $ownedCups
      * @param array<int,array<string,mixed>> $mediaAssets
      * @param array<int,array<string,mixed>> $feedPosts
+     * @param array<int,array<string,mixed>> $guideMedia
      * @return array<int,array{source:string,disk:string,path:string|null,thumbnail_path?:string|null,visibility?:string|null,status?:string|null,type?:string|null,mime_type?:string|null,size_bytes?:mixed,original_name?:mixed}>
      */
-    private function fileReferences(?array $account, array $ownedTeams, array $ownedCups, array $mediaAssets, array $feedPosts): array
+    private function fileReferences(
+        ?array $account,
+        array $ownedTeams,
+        array $ownedCups,
+        array $mediaAssets,
+        array $feedPosts,
+        array $guideMedia,
+    ): array
     {
         $files = [];
 
@@ -486,6 +583,19 @@ class UserDataExportService
                     'mime_type' => $post['mime_type'] ?? null,
                     'size_bytes' => $post['size_bytes'] ?? null,
                     'original_name' => $post['original_name'] ?? null,
+                ];
+            }
+        }
+
+        foreach ($guideMedia as $media) {
+            if (! empty($media['path'])) {
+                $files[] = [
+                    'source' => 'guide_media.path',
+                    'disk' => (string) ($media['disk'] ?? 'local') ?: 'local',
+                    'path' => (string) $media['path'],
+                    'mime_type' => $media['mime_type'] ?? null,
+                    'size_bytes' => $media['size_bytes'] ?? null,
+                    'original_name' => $media['original_name'] ?? null,
                 ];
             }
         }

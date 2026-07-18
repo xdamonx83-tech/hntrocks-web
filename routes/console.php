@@ -4,12 +4,21 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 Artisan::command('hunthub:status', function (): void {
     $this->info('hnt.rocks Laravel foundation is ready.');
 })->purpose('Show hnt.rocks foundation status');
+
+Schedule::command(sprintf(
+    'hnt:guides-cleanup-media --hours=%d --limit=%d',
+    (int) config('guides.cleanup.hours', 48),
+    (int) config('guides.cleanup.limit', 100)
+))
+    ->dailyAt('03:35')
+    ->withoutOverlapping(180);
 
 Artisan::command('hunthub:health', function (): int {
     $ok = true;

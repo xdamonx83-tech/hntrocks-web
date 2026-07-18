@@ -81,8 +81,15 @@
     const commentList = document.querySelector('[data-guide-comment-list]');
     const commentsHeadingCount = document.querySelector('#guide-comments h2 b');
     const emptyComments = document.querySelector('[data-guide-comments-empty]');
-    const authorBadgeLabel = document.documentElement.lang.startsWith('de') ? 'Autor' : 'Author';
-    const replyLabel = document.documentElement.lang.startsWith('de') ? 'Antworten' : 'Reply';
+    const commentLabels = {
+      author: commentForm.dataset.labelAuthor || '',
+      reply: commentForm.dataset.labelReply || '',
+      edit: commentForm.dataset.labelEdit || '',
+      delete: commentForm.dataset.labelDelete || '',
+      report: commentForm.dataset.labelReport || '',
+      reportDetails: commentForm.dataset.labelReportDetails || '',
+      reportSend: commentForm.dataset.labelReportSend || '',
+    };
 
     commentList?.addEventListener('click', (event) => {
       const button = event.target.closest('[data-comment-reply]');
@@ -103,6 +110,23 @@
       }
     });
 
+    const hiddenInput = (name, value) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      return input;
+    };
+
+    const actionForm = (url, method) => {
+      const form = document.createElement('form');
+      form.action = url;
+      form.method = 'post';
+      form.append(hiddenInput('_token', csrf));
+      if (method !== 'POST') form.append(hiddenInput('_method', method));
+      return form;
+    };
+
     const commentElement = (comment) => {
       const article = document.createElement('article');
       article.className = `guide-comment${comment.parent_id ? ' reply' : ''}`;
@@ -120,7 +144,7 @@
       header.append(name);
       if (comment.is_guide_author) {
         const badge = document.createElement('em');
-        badge.textContent = authorBadgeLabel;
+        badge.textContent = commentLabels.author;
         header.append(badge);
       }
       const time = document.createElement('span');
@@ -132,14 +156,68 @@
       text.textContent = comment.body;
       body.append(text);
 
-      if (!comment.parent_id) {
+      const actions = comment.actions || {};
+      if (actions.can_reply || actions.can_edit || actions.can_delete || actions.can_report) {
         const footer = document.createElement('footer');
-        const reply = document.createElement('button');
-        reply.type = 'button';
-        reply.dataset.commentReply = String(comment.id);
-        reply.dataset.commentAuthor = (comment.author.handle || '').replace(/^@/, '');
-        reply.textContent = replyLabel;
-        footer.append(reply);
+
+        if (actions.can_reply) {
+          const reply = document.createElement('button');
+          reply.type = 'button';
+          reply.dataset.commentReply = String(comment.id);
+          reply.dataset.commentAuthor = (comment.author.handle || '').replace(/^@/, '');
+          reply.textContent = commentLabels.reply;
+          footer.append(reply);
+        }
+
+        if (actions.can_edit) {
+          const details = document.createElement('details');
+          const summary = document.createElement('summary');
+          summary.textContent = commentLabels.edit;
+          const form = actionForm(actions.update_url, 'PATCH');
+          const textarea = document.createElement('textarea');
+          textarea.name = 'body';
+          textarea.maxLength = 2000;
+          textarea.required = true;
+          textarea.value = comment.body;
+          const submit = document.createElement('button');
+          submit.type = 'submit';
+          submit.textContent = commentLabels.edit;
+          form.append(textarea, submit);
+          details.append(summary, form);
+          footer.append(details);
+        }
+
+        if (actions.can_delete) {
+          const form = actionForm(actions.delete_url, 'DELETE');
+          const submit = document.createElement('button');
+          submit.type = 'submit';
+          submit.textContent = commentLabels.delete;
+          form.append(submit);
+          footer.append(form);
+        }
+
+        if (actions.can_report) {
+          const details = document.createElement('details');
+          const summary = document.createElement('summary');
+          summary.textContent = commentLabels.report;
+          const form = actionForm(actions.report_url, 'POST');
+          form.append(
+            hiddenInput('type', 'guide_comment'),
+            hiddenInput('id', String(comment.id)),
+            hiddenInput('reason', 'other')
+          );
+          const textarea = document.createElement('textarea');
+          textarea.name = 'body';
+          textarea.maxLength = 2000;
+          textarea.placeholder = commentLabels.reportDetails;
+          const submit = document.createElement('button');
+          submit.type = 'submit';
+          submit.textContent = commentLabels.reportSend;
+          form.append(textarea, submit);
+          details.append(summary, form);
+          footer.append(details);
+        }
+
         body.append(footer);
       }
 

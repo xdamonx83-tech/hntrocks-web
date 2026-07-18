@@ -440,7 +440,8 @@ body[data-page="guides"] {
 .guide-comment footer button,
 .guide-comment footer summary { border: 0; background: none; color: #79756e; cursor: pointer; font-size: 7px; list-style: none; }
 .guide-comment footer form { display: flex; gap: 5px; }
-.guide-comment footer details form { display: grid; min-width: 260px; margin-top: 6px; }
+.guide-comment footer details { max-width: 100%; }
+.guide-comment footer details form { width: min(260px, 100%); min-width: 0; display: grid; margin-top: 6px; }
 .guide-comment footer textarea { min-height: 55px; border: 1px solid #ddd; border-radius: 9px; font: inherit; font-size: 8px; }
 .guide-comment.reply { grid-column: 1 / -1; margin: 11px 0 0 22px; padding: 11px; background: #fff; }
 .guide-comments-empty { padding: 25px; border: 1px dashed #d8d4cb; border-radius: 16px; color: #858179; text-align: center; font-size: 9px; }
