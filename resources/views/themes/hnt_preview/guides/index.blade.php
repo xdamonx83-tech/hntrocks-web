@@ -3,6 +3,7 @@
 @section('robots', request()->query() ? 'noindex,follow' : 'index,follow')
 @section('canonical', route('guides.index'))
 @section('body_class', 'guides-demo-index')
+@section('skip_guides_base_styles', '1')
 
 @push('head')
 <link href="{{ asset('assets/themes/hnt_preview/guides/guides-index-demo.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides-index-demo.css')) ?: time() }}" rel="stylesheet">
@@ -81,7 +82,7 @@
         </section>
 
         <section class="guide-featured">
-            <div class="guide-demo-cover"><i class="ph ph-crosshair" aria-hidden="true"></i></div>
+            <div class="guide-demo-featured-blank" aria-hidden="true"></div>
             <div>
                 <span>HERVORGEHOBENER GUIDE</span>
                 <h2>Budget-Loadouts, die wirklich funktionieren</h2>
@@ -101,7 +102,7 @@
 
         <section class="guide-grid" id="guideGrid">
             <article class="guide-card" data-guide-card data-category="maps" data-language="de" data-platform="all" data-difficulty="advanced" data-helpful="512" data-date="5" data-popular="91" data-search="Stillwater Bayou sichere Rotationen für Trios Jonathan Kelly Karten">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-map"><i class="ph ph-map-trifold"></i></div><span>Karten</span></a>
+                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-map" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M92 248h456M145 248v-93h122v93M267 248V92h142v156M409 248v-128h93v128M112 155l94-76 78 54 104-83 128 70"></path></svg></div><span>Karten</span></a>
                 <div class="guide-card-body">
                     <div class="guide-card-author"><div class="guide-demo-avatar">JK</div><div><strong>Jonathan Kelly</strong><small>vor 5 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
                     <a data-demo-guide-link href="#"><h3>Stillwater Bayou: sichere Rotationen für Trios</h3></a>
@@ -112,7 +113,7 @@
             </article>
 
             <article class="guide-card" data-guide-card data-category="traits" data-language="de" data-platform="pc" data-difficulty="expert" data-helpful="438" data-date="10" data-popular="86" data-search="Trait Synergien für aggressive Hunter Sarah Page Hunter Traits">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-traits"><i class="ph ph-person-simple-run"></i></div><span>Hunter &amp; Traits</span></a>
+                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-traits" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M320 40 490 258H150L320 40Zm0 52v98M282 190l28 28 55-61"></path><circle cx="320" cy="190" r="70"></circle></svg></div><span>Hunter &amp; Traits</span></a>
                 <div class="guide-card-body">
                     <div class="guide-card-author"><div class="guide-demo-avatar">SP</div><div><strong>Sarah Page</strong><small>vor 10 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
                     <a data-demo-guide-link href="#"><h3>Trait-Synergien für aggressive Hunter</h3></a>
@@ -123,7 +124,7 @@
             </article>
 
             <article class="guide-card" data-guide-card data-category="bosses" data-language="de" data-platform="all" data-difficulty="advanced" data-helpful="377" data-date="2" data-popular="94" data-search="Boss Lair verteidigen ohne festzusitzen Mara Voss Bosse">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-boss"><i class="ph ph-skull"></i></div><span>Bosse</span></a>
+                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-boss" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M225 78h190l35 72-38 104H228l-38-104 35-72Zm39 82h112M270 132h.01M370 132h.01M285 204l35 20 35-20"></path></svg></div><span>Bosse</span></a>
                 <div class="guide-card-body">
                     <div class="guide-card-author"><div class="guide-demo-avatar">MV</div><div><strong>Mara Voss</strong><small>vor 2 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
                     <a data-demo-guide-link href="#"><h3>Boss-Lair verteidigen, ohne festzusitzen</h3></a>
@@ -134,7 +135,7 @@
             </article>
 
             <article class="guide-card" data-guide-card data-category="pvp" data-language="de" data-platform="console" data-difficulty="beginner" data-helpful="301" data-date="14" data-popular="78" data-search="Aim Grundlagen auf Konsole Katy Fuller PvP">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-console"><i class="ph ph-game-controller"></i></div><span>PvP</span></a>
+                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-console" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M215 112c-48 0-70 100-45 128 18 20 50-25 78-30h144c28 5 60 50 78 30 25-28 3-128-45-128H215Zm48 35v55M235 175h56M383 159h.01M420 190h.01"></path></svg></div><span>PvP</span></a>
                 <div class="guide-card-body">
                     <div class="guide-card-author"><div class="guide-demo-avatar">KF</div><div><strong>Katy Fuller</strong><small>vor 14 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
                     <a data-demo-guide-link href="#"><h3>Aim-Grundlagen auf Konsole</h3></a>
@@ -145,7 +146,7 @@
             </article>
 
             <article class="guide-card" data-guide-card data-category="beginner" data-language="de" data-platform="all" data-difficulty="beginner" data-helpful="692" data-date="1" data-popular="98" data-search="Die ersten 10 Stunden im Bayou Valentina Anfänger">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-beginner"><i class="ph ph-compass"></i></div><span>Anfänger</span></a>
+                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-beginner" aria-hidden="true"><svg viewBox="0 0 640 300"><circle cx="320" cy="150" r="105"></circle><circle cx="320" cy="150" r="18"></circle><path d="m360 92-24 72-56 44 24-72 56-44Z"></path></svg></div><span>Anfänger</span></a>
                 <div class="guide-card-body">
                     <div class="guide-card-author"><div class="guide-demo-avatar">VA</div><div><strong>Valentina</strong><small>vor 1 Tag · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
                     <a data-demo-guide-link href="#"><h3>Die ersten 10 Stunden im Bayou</h3></a>
