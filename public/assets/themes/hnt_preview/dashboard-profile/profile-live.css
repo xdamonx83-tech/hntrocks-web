@@ -87,6 +87,23 @@
 .profile-tab-empty>a svg{width:13px;height:13px;fill:none;stroke:currentColor}
 .profile-filter-empty{grid-column:1/-1;margin-top:9px;padding:18px;border-radius:17px;background:#f7f3e8;color:#8c8880;font-size:9px;text-align:center}
 
+/* Privacy layout: removing gamification also removes the quest column.
+   The profile card must then use the full content width. */
+.profile-page-layout.is-quest-hidden{grid-template-columns:minmax(0,1fr)}
+.profile-summary-card.is-gamification-hidden .profile-summary-body{grid-template-columns:minmax(0,1fr)}
+.profile-stat-pipeline.is-adaptive>div:first-child{margin-left:0;border-radius:18px 0 0 18px}
+.profile-stat-pipeline.is-adaptive>div:last-child{border-radius:0 18px 18px 0}
+.profile-stat-pipeline.is-adaptive>div:only-child{border-radius:18px}
+
+@media(min-width:900px){
+  .profile-page-left.is-gamification-hidden{grid-template-rows:minmax(260px,54%) minmax(250px,1fr)}
+}
+
+@media(min-width:621px) and (max-width:899px){
+  .profile-page-left.is-gamification-hidden{grid-template-rows:auto}
+  .profile-page-left.is-gamification-hidden .profile-photo-shell{grid-row:auto}
+}
+
 @media(min-width:1200px){
   .profile-real-post .post-body>p{font-size:clamp(10px,.68vw,13px)}
 }

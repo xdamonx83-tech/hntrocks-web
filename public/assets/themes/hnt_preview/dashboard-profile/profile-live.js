@@ -139,5 +139,8 @@
     });
   });
 
-  activateProfileTab('posts');
+  const initialProfileTab = profileTabs.find((button) => button.getAttribute('aria-selected') === 'true')
+    ?.dataset.profileTab || profileTabs[0]?.dataset.profileTab;
+
+  if (initialProfileTab) activateProfileTab(initialProfileTab);
 })();

@@ -107,7 +107,7 @@
 <main class="app-shell profile-page-shell">
 @include('themes.hnt_preview.partials.header')
 @include('themes.hnt_preview.profile.exact.heading')
-<section class="profile-page-layout">
+<section class="profile-page-layout {{ $profileGamificationVisible ? '' : 'is-quest-hidden' }}">
 @if($profileGamificationVisible)
 @include('themes.hnt_preview.profile.exact.quests')
 @endif

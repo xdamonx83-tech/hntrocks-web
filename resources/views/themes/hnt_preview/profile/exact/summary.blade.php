@@ -1,11 +1,12 @@
 @php
+    $profileStatColumns = 1 + ($profileActivityVisible ? 2 : 0) + ($profileGamificationVisible ? 1 : 0);
     $profileLanguageLabel = match (mb_strtolower(trim((string) ($profile?->language ?? '')))) {
         'de', 'deutsch', 'german' => __('hnt_preview.profile.language_german'),
         'en', 'english', 'englisch' => __('hnt_preview.profile.language_english'),
         default => $profile?->language,
     };
 @endphp
-<section class="profile-summary-card {{ $profileCoverDisplayMode === \App\Models\UserProfile::COVER_DISPLAY_ALWAYS ? 'is-cover-peek' : '' }}" data-profile-cover-peek data-cover-display-mode="{{ $profileCoverDisplayMode }}">
+<section class="profile-summary-card {{ $profileCoverDisplayMode === \App\Models\UserProfile::COVER_DISPLAY_ALWAYS ? 'is-cover-peek' : '' }} {{ $profileGamificationVisible ? '' : 'is-gamification-hidden' }}" data-profile-cover-peek data-cover-display-mode="{{ $profileCoverDisplayMode }}">
 @if($profileCoverDisplayMode !== \App\Models\UserProfile::COVER_DISPLAY_HIDDEN)
 <div aria-hidden="true" class="profile-cover-peek-layer" style="background-image:linear-gradient(180deg,rgba(251,249,238,.24) 0%,rgba(251,249,238,.38) 34%,rgba(251,249,238,.82) 72%,#fbf9ee 100%),url('{{ $profileCoverUrl }}')"></div>
 @endif
@@ -56,12 +57,12 @@
 </div>
 @endif
 </div>
-<div class="profile-stat-labels">
+<div class="profile-stat-labels is-adaptive" style="grid-template-columns:repeat({{ $profileStatColumns }},minmax(0,1fr))">
 @if($profileActivityVisible)<span>{{ __('hnt_preview.profile.posts') }}</span><span>{{ __('hnt_preview.profile.moments') }}</span>@endif
 <span>{{ __('hnt_preview.profile.friends') }}</span>
 @if($profileGamificationVisible)<span>{{ __('hnt_preview.profile.rocks') }}</span>@endif
 </div>
-<div class="profile-stat-pipeline">
+<div class="profile-stat-pipeline is-adaptive" style="grid-template-columns:repeat({{ $profileStatColumns }},minmax(0,1fr))">
 @if($profileActivityVisible)<div class="yellow">{{ $profileFormatCount($profilePostsCount) }}</div><div class="dark">{{ $profileFormatCount($profileMomentsCount) }}</div>@endif
 <div class="hatch">{{ $profileFormatCount($profileFriendsTotal) }}</div>
 @if($profileGamificationVisible)<div class="grey">{{ $profileFormatCount($profileRocks) }}</div>@endif
