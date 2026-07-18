@@ -8,6 +8,7 @@ use App\Services\Auth\TwoFactorService;
 use App\Services\SecurityLogService;
 use App\Services\UserDataExportService;
 use App\Support\HntTheme;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -36,6 +37,30 @@ class SecurityController extends Controller
             'twoFactorSetupSecret' => $setupSecret,
             'twoFactorSetupUri' => $setupSecret !== '' ? $twoFactor->keyUri($user, $setupSecret) : null,
             'twoFactorRecoveryCodes' => is_array($recoveryCodes) ? $recoveryCodes : [],
+        ]);
+    }
+
+    public function events(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'before' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $query = $request->user()->securityEvents()->latest('id');
+
+        if (! empty($validated['before'])) {
+            $query->where('id', '<', (int) $validated['before']);
+        }
+
+        $events = $query->limit(13)->get();
+        $page = $events->take(12)->values();
+
+        return response()->json([
+            'html' => view('themes.hnt_preview.account.partials.security-events', [
+                'events' => $page,
+            ])->render(),
+            'has_more' => $events->count() > 12,
+            'next_cursor' => $page->last()?->id,
         ]);
     }
 
