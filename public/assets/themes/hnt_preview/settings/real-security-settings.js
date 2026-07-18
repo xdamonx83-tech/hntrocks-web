@@ -46,6 +46,24 @@
     });
   };
 
+  const initOtherSessionsForm = () => {
+    const form = document.querySelector("[data-security-logout-form]");
+    if (!form) return;
+
+    form.addEventListener("submit", (event) => {
+      if (!window.confirm(form.dataset.confirm)) {
+        event.preventDefault();
+        return;
+      }
+
+      const button = form.querySelector("button[type='submit']");
+      if (!button) return;
+
+      button.disabled = true;
+      button.textContent = form.dataset.labelLoading;
+    });
+  };
+
   const initDeletionModal = () => {
     const modal = document.getElementById("settingsDeleteModal");
     const openButton = document.getElementById("openDeleteAccount");
@@ -93,5 +111,6 @@
   };
 
   initSecurityHistory();
+  initOtherSessionsForm();
   initDeletionModal();
 })();
