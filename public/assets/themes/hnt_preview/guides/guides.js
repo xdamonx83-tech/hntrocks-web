@@ -50,18 +50,17 @@
   guideToggleButtons.forEach((button) => {
     button.addEventListener('click', async () => {
       if (button.disabled) return;
-      button.disabled = true;
+      const group = button.dataset.guideToggleGroup;
+      const targets = group
+        ? guideToggleButtons.filter((candidate) => candidate.dataset.guideToggleGroup === group)
+        : [button];
+      targets.forEach((target) => { target.disabled = true; });
       try {
         const payload = await jsonRequest(button.dataset.url, {
           method: 'POST',
           body: JSON.stringify({}),
         });
         const active = payload.helpful ?? payload.saved ?? false;
-        const group = button.dataset.guideToggleGroup;
-        const targets = group
-          ? guideToggleButtons.filter((candidate) => candidate.dataset.guideToggleGroup === group)
-          : [button];
-
         targets.forEach((target) => syncGuideToggle(target, active, payload.count));
 
         if (group === 'helpful' && Number.isFinite(Number(payload.count))) {
@@ -74,7 +73,7 @@
       } catch (error) {
         toast(error.message, true);
       } finally {
-        button.disabled = false;
+        targets.forEach((target) => { target.disabled = false; });
       }
     });
   });
