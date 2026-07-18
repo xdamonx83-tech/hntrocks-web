@@ -3,14 +3,21 @@
 namespace App\Services\Search;
 
 use App\Models\User;
+use App\Services\UserBlockService;
 use Illuminate\Database\Eloquent\Builder;
 
 class PlayerSearchQuery
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function build(User $viewer, string $search = '', string $platform = '', string $playstyle = ''): Builder
     {
-        return User::query()
-            ->with(['profile', 'privacySettings'])
+        return $this->blocks->applyToUserQuery(
+            User::query()->with(['profile', 'privacySettings']),
+            $viewer
+        )
             ->where('status', 'active')
             ->where(function (Builder $query) use ($viewer): void {
                 $query->where('id', $viewer->id)

@@ -14,11 +14,13 @@ use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Services\ReferralService;
+use App\Services\UserBlockService;
 use App\Services\Auth\TwoFactorService;
 use App\Support\CrownCosmetics;
 use App\Support\HntTheme;
 use App\Support\NotificationSettingsGroups;
 use App\Support\ReworkFeedSidebar;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +30,10 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function show(Request $request, ?User $user = null): View
     {
         $profileUser = $user ?? $request->user();
@@ -155,8 +161,8 @@ class ProfileController extends Controller
             ->limit(12)
             ->get();
 
-        $acceptedFriendIdsFor = static function (User $targetUser) {
-            return Friendship::query()
+        $acceptedFriendIdsFor = function (User $targetUser) use ($request) {
+            return $this->visibleFriendships($request->user())
                 ->forUser($targetUser)
                 ->where('status', Friendship::STATUS_ACCEPTED)
                 ->get()
@@ -168,7 +174,7 @@ class ProfileController extends Controller
 
         $viewerFriendIds = $request->user() ? $acceptedFriendIdsFor($request->user()) : collect();
 
-        $profileFriendsPreview = Friendship::query()
+        $profileFriendsPreview = $this->visibleFriendships($request->user())
             ->forUser($profileUser)
             ->where('status', Friendship::STATUS_ACCEPTED)
             ->with(['userOne.profile', 'userTwo.profile'])
@@ -292,7 +298,7 @@ class ProfileController extends Controller
             ->latest()
             ->first();
 
-        $lastFriendship = Friendship::query()
+        $lastFriendship = $this->visibleFriendships($request->user())
             ->forUser($profileUser)
             ->where('status', Friendship::STATUS_ACCEPTED)
             ->latest('accepted_at')
@@ -364,7 +370,7 @@ class ProfileController extends Controller
                 ->first();
         }
 
-        $friendshipsQuery = Friendship::query()
+        $friendshipsQuery = $this->visibleFriendships($request->user())
             ->forUser($profileUser)
             ->where('status', Friendship::STATUS_ACCEPTED)
             ->with(['userOne.profile', 'userTwo.profile'])
@@ -419,8 +425,8 @@ class ProfileController extends Controller
             ]);
         }
 
-        $acceptedFriendIdsFor = static function (User $targetUser) {
-            return Friendship::query()
+        $acceptedFriendIdsFor = function (User $targetUser) use ($request) {
+            return $this->visibleFriendships($request->user())
                 ->forUser($targetUser)
                 ->where('status', Friendship::STATUS_ACCEPTED)
                 ->get(['user_one_id', 'user_two_id'])
@@ -930,6 +936,13 @@ class ProfileController extends Controller
             'nobody' => false,
             default => false,
         };
+    }
+
+    private function visibleFriendships(?User $viewer): Builder
+    {
+        return $viewer
+            ? $this->blocks->applyToFriendshipQuery(Friendship::query(), $viewer)
+            : Friendship::query();
     }
 
     private function reworkSettingsData(?User $viewer): array

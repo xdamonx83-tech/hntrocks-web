@@ -18,11 +18,16 @@ use App\Models\Cup;
 use App\Models\Friendship;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\UserBlockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class HeaderLiveController extends Controller
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function badges(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -40,7 +45,7 @@ class HeaderLiveController extends Controller
             'authenticated' => true,
             'notifications_unread' => $user->notificationItems()->standard()->unread()->count(),
             'messages_unread' => $user->unreadMessagesCount(),
-            'friend_request_count' => Friendship::query()
+            'friend_request_count' => $this->visibleFriendships($user)
                 ->where('recipient_id', $user->id)
                 ->where('status', Friendship::STATUS_PENDING)
                 ->count(),
@@ -115,8 +120,7 @@ class HeaderLiveController extends Controller
         }
 
         if ($request->query('variant') === 'rework') {
-            $conversations = Conversation::query()
-                ->forUser($user)
+            $conversations = $this->visibleConversations($user)
                 ->where('type', 'private')
                 ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
                 ->latest('updated_at')
@@ -131,15 +135,13 @@ class HeaderLiveController extends Controller
                     'defaultAvatar' => asset('assets/vikinger/img/default-avatar.svg'),
                 ])->render(),
                 'unread_count' => method_exists($user, 'unreadMessagesCount') ? $user->unreadMessagesCount() : 0,
-                'total_count' => Conversation::query()
-                    ->forUser($user)
+                'total_count' => $this->visibleConversations($user)
                     ->where('type', 'private')
                     ->count(),
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
-        $conversations = Conversation::query()
-            ->forUser($user)
+        $conversations = $this->visibleConversations($user)
             ->where('type', 'private')
             ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
             ->latest('updated_at')
@@ -153,8 +155,7 @@ class HeaderLiveController extends Controller
                 'previewMessageUser' => $user,
             ])->render(),
             'unread_count' => method_exists($user, 'unreadMessagesCount') ? $user->unreadMessagesCount() : 0,
-            'total_count' => Conversation::query()
-                ->forUser($user)
+            'total_count' => $this->visibleConversations($user)
                 ->where('type', 'private')
                 ->count(),
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
@@ -174,7 +175,7 @@ class HeaderLiveController extends Controller
         }
 
         if ($request->query('variant') === 'rework') {
-            $requests = Friendship::query()
+            $requests = $this->visibleFriendships($user)
                 ->where('recipient_id', $user->id)
                 ->where('status', Friendship::STATUS_PENDING)
                 ->with('requester.profile')
@@ -188,7 +189,7 @@ class HeaderLiveController extends Controller
                     'headerFriendRequests' => $requests,
                     'defaultAvatar' => asset('assets/vikinger/img/default-avatar.svg'),
                 ])->render(),
-                'count' => Friendship::query()
+                'count' => $this->visibleFriendships($user)
                     ->where('recipient_id', $user->id)
                     ->where('status', Friendship::STATUS_PENDING)
                     ->count(),
@@ -196,7 +197,7 @@ class HeaderLiveController extends Controller
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
-        $requests = Friendship::query()
+        $requests = $this->visibleFriendships($user)
             ->where('recipient_id', $user->id)
             ->where('status', Friendship::STATUS_PENDING)
             ->with('requester.profile')
@@ -209,7 +210,7 @@ class HeaderLiveController extends Controller
             'html' => view('themes.hnt_preview.partials.friend-request-shell-items', [
                 'previewFriendRequests' => $requests,
             ])->render(),
-            'count' => Friendship::query()
+            'count' => $this->visibleFriendships($user)
                 ->where('recipient_id', $user->id)
                 ->where('status', Friendship::STATUS_PENDING)
                 ->count(),
@@ -258,8 +259,10 @@ class HeaderLiveController extends Controller
                 });
         };
 
-        $users = User::query()
-            ->with('profile')
+        $users = $this->blocks->applyToUserQuery(
+            User::query()->with('profile'),
+            $viewer
+        )
             ->where('users.status', 'active')
             ->whereNotNull('username')
             ->where('username', '!=', '')
@@ -283,7 +286,7 @@ class HeaderLiveController extends Controller
 
         $friendIds = empty($userIds)
             ? []
-            : Friendship::query()
+            : $this->visibleFriendships($viewer)
                 ->forUser($viewer)
                 ->where('status', Friendship::STATUS_ACCEPTED)
                 ->where(function (Builder $query) use ($userIds): void {
@@ -456,6 +459,19 @@ class HeaderLiveController extends Controller
             'results' => $results->take(10)->values(),
             'all_url' => route('search.index', ['q' => $term, 'type' => 'all']),
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    }
+
+    private function visibleConversations(User $viewer): Builder
+    {
+        return $this->blocks->applyToConversationQuery(
+            Conversation::query()->forUser($viewer),
+            $viewer
+        );
+    }
+
+    private function visibleFriendships(User $viewer): Builder
+    {
+        return $this->blocks->applyToFriendshipQuery(Friendship::query(), $viewer);
     }
 
 }

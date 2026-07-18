@@ -12,6 +12,10 @@ use Throwable;
 
 class NotificationService
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function send(?User $recipient, ?User $actor, string $type, string $title, string $body, ?string $actionUrl = null): ?UserNotification
     {
         if (! $recipient) {
@@ -19,6 +23,10 @@ class NotificationService
         }
 
         if ($actor && (int) $recipient->id === (int) $actor->id) {
+            return null;
+        }
+
+        if ($actor && $this->blocks->areBlocked($recipient, $actor)) {
             return null;
         }
 

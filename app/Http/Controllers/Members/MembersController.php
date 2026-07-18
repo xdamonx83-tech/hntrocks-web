@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\PreviewDashboardHeader;
 use App\Models\Friendship;
 use App\Models\User;
+use App\Services\UserBlockService;
 use App\Support\HntTheme;
 use App\Support\ReworkFeedSidebar;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +18,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MembersController extends Controller
 {
-    public function index(Request $request): View|JsonResponse|StreamedResponse
+    public function index(Request $request, UserBlockService $blocks): View|JsonResponse|StreamedResponse
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:80'],
@@ -67,6 +68,8 @@ class MembersController extends Controller
                         ->orWhere('user_id', $request->user()->id);
                 });
             });
+
+        $blocks->applyToUserQuery($query, $viewer);
 
         if (filled($filters['q'] ?? null)) {
             $term = trim($filters['q']);
@@ -167,6 +170,7 @@ class MembersController extends Controller
                     ->orWhere('user_id', $viewer->id);
             });
         });
+        $blocks->applyToUserQuery($visibleMembers, $viewer);
 
         $membersStats = [
             'total' => (clone $visibleMembers)->count(),

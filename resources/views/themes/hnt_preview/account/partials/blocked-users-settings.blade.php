@@ -56,11 +56,19 @@
 <p class="settings-blocked-empty">{{ __('settings.blocked_empty') }}</p>
 @endforelse
 </div>
-<article class="settings-choice-card full settings-block-coverage-placeholder" aria-disabled="true">
+<article class="settings-choice-card full settings-block-coverage-active">
 <div>
 <span>{{ __('settings.blocked_coverage_eyebrow') }}</span>
 <h3>{{ __('settings.blocked_coverage_title') }}</h3>
 <p>{{ __('settings.blocked_coverage_text') }}</p>
+</div>
+<span class="settings-planned-badge">{{ __('settings.blocked_coverage_badge') }}</span>
+</article>
+<article class="settings-choice-card full settings-block-coverage-placeholder" aria-disabled="true">
+<div>
+<span>{{ __('settings.blocked_future_eyebrow') }}</span>
+<h3>{{ __('settings.blocked_future_title') }}</h3>
+<p>{{ __('settings.blocked_future_text') }}</p>
 </div>
 <span class="settings-planned-badge">{{ __('settings.planned_badge') }}</span>
 </article>

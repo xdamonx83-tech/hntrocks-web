@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HidesBlockedUsers;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Lang;
 class UserNotification extends Model
 {
     use HasFactory;
+    use HidesBlockedUsers;
 
     public const STANDARD_EXCLUDED_TYPES = ['friend_request'];
     public const SYSTEM_AVATAR_PATH = 'assets/hnt/system/system-notification-avatar.webp';
@@ -255,5 +258,10 @@ class UserNotification extends Model
             'team' => $storedBody !== '' ? $storedBody : 'Team',
             'cup' => $storedBody !== '' ? $storedBody : __('ui.cups'),
         ];
+    }
+
+    protected function blockedAuthorColumn(): string
+    {
+        return 'actor_id';
     }
 }

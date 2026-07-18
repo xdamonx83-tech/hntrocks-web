@@ -8,6 +8,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Services\MessageBroadcastService;
 use App\Services\MessagePushService;
+use App\Services\UserBlockService;
 use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,10 @@ use Illuminate\View\View;
 
 class MessageController extends Controller
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function index(Request $request): View
     {
         $activeMessageType = $this->normalizeMessageType($request->query('type'));
@@ -339,10 +344,12 @@ class MessageController extends Controller
 
     private function conversationList(User $user, string $messageType = 'private')
     {
-        return Conversation::query()
+        $query = Conversation::query()
             ->forUser($user)
             ->whereIn('type', $this->conversationTypesFor($messageType))
-            ->whereHas('messages')
+            ->whereHas('messages');
+
+        return $this->blocks->applyToConversationQuery($query, $user)
             ->with(['users.profile', 'users.privacySettings', 'latestMessage.user'])
             ->latest('updated_at')
             ->paginate(12)
@@ -351,7 +358,7 @@ class MessageController extends Controller
 
     private function recipientList(User $user)
     {
-        return User::query()
+        return $this->blocks->applyToUserQuery(User::query(), $user)
             ->where('id', '!=', $user->id)
             ->orderBy('name')
             ->limit(100)
@@ -454,10 +461,11 @@ class MessageController extends Controller
 
     private function conversationTypeCount(User $user, array $types): int
     {
-        return Conversation::query()
+        $query = Conversation::query()
             ->forUser($user)
             ->whereIn('type', $types)
-            ->whereHas('messages')
-            ->count();
+            ->whereHas('messages');
+
+        return $this->blocks->applyToConversationQuery($query, $user)->count();
     }
 }

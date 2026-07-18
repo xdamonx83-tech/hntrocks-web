@@ -18,6 +18,10 @@ use Illuminate\Support\Str;
 
 class MentionService
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function searchableUsers(User $actor, string $query = '', string $context = 'feed', int $limit = 8, ?Team $team = null): Collection
     {
         if ($this->isStrictTeamContext($context)) {
@@ -36,9 +40,10 @@ class MentionService
 
         $query = trim($query);
 
-        return User::query()
-            ->with('profile')
-            ->whereIn('id', $friendIds->all())
+        return $this->blocks->applyToUserQuery(
+            User::query()->with('profile')->whereIn('id', $friendIds->all()),
+            $actor
+        )
             ->when($query !== '', function ($userQuery) use ($query): void {
                 $like = str_replace(['%', '_'], ['\\%', '\\_'], $query).'%';
                 $contains = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $query).'%';
@@ -174,8 +179,10 @@ class MentionService
             return collect();
         }
 
-        return User::query()
-            ->whereIn('id', $friendIds->all())
+        return $this->blocks->applyToUserQuery(
+            User::query()->whereIn('id', $friendIds->all()),
+            $actor
+        )
             ->whereIn(DB::raw('LOWER(username)'), $usernames)
             ->get(['id', 'name', 'username', 'avatar_path', 'level'])
             ->filter(fn (User $user): bool => in_array(Str::lower($user->username), $usernames, true))
@@ -208,9 +215,10 @@ class MentionService
 
         $query = trim($query);
 
-        return User::query()
-            ->with('profile')
-            ->whereIn('id', $memberIds->all())
+        return $this->blocks->applyToUserQuery(
+            User::query()->with('profile')->whereIn('id', $memberIds->all()),
+            $actor
+        )
             ->when($query !== '', function ($userQuery) use ($query): void {
                 $like = str_replace(['%', '_'], ['\\%', '\\_'], $query).'%';
                 $contains = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $query).'%';
@@ -249,8 +257,10 @@ class MentionService
             return collect();
         }
 
-        return User::query()
-            ->whereIn('id', $memberIds->all())
+        return $this->blocks->applyToUserQuery(
+            User::query()->whereIn('id', $memberIds->all()),
+            $actor
+        )
             ->whereIn(DB::raw('LOWER(username)'), $usernames)
             ->get(['id', 'name', 'username', 'avatar_path', 'level'])
             ->filter(fn (User $user): bool => in_array(Str::lower($user->username), $usernames, true))

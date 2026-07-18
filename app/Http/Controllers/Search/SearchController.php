@@ -11,6 +11,7 @@ use App\Models\HntMapMarker;
 use App\Models\LfgPost;
 use App\Models\Moment;
 use App\Models\User;
+use App\Services\UserBlockService;
 use App\Support\ReworkFeedSidebar;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,6 +23,10 @@ use Throwable;
 
 class SearchController extends Controller
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function index(Request $request): View
     {
         $viewer = $request->user();
@@ -51,7 +56,7 @@ class SearchController extends Controller
             $like = $this->like($query);
 
             if ($this->shouldSearch($activeType, 'players')) {
-                $results['players'] = $this->players($like);
+                $results['players'] = $this->players($like, $viewer);
             }
 
             if ($this->shouldSearch($activeType, 'posts')) {
@@ -130,10 +135,12 @@ class SearchController extends Controller
             });
     }
 
-    private function players(string $like): Collection
+    private function players(string $like, User $viewer): Collection
     {
-        return User::query()
-            ->with('profile')
+        return $this->blocks->applyToUserQuery(
+            User::query()->with('profile'),
+            $viewer
+        )
             ->where('status', 'active')
             ->whereNotNull('username')
             ->where('username', '!=', '')

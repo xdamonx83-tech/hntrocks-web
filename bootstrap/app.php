@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\EnforceSecuritySessionVersion::class,
+            \App\Http\Middleware\EnforceUserBlockVisibility::class,
             \App\Http\Middleware\TrackVisitorEvent::class,
             \App\Http\Middleware\AddSecurityHeaders::class,
             \App\Http\Middleware\AppendCupCrosspostsToDashboardFeed::class,
@@ -39,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'api.token' => \App\Http\Middleware\AuthenticateApiToken::class,
+            'block.visibility' => \App\Http\Middleware\EnforceUserBlockVisibility::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

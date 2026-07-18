@@ -16,6 +16,7 @@ use App\Observers\TeamProgressionObserver;
 use App\Observers\UserProfileObserver;
 use App\Policies\TeamPolicy;
 use App\Services\Cups\CommunityCupSubmissionAnalysisService;
+use App\Services\UserBlockService;
 use App\Services\Cups\CupSubmissionAnalysisService;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->scoped(UserBlockService::class);
+
         $this->app->bind(
             CupSubmissionAnalysisService::class,
             CommunityCupSubmissionAnalysisService::class

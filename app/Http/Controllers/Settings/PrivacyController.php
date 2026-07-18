@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Friendship;
 use App\Models\User;
 use App\Models\UserBlock;
 use App\Services\SecurityLogService;
+use App\Services\UserBlockService;
 use App\Support\HntTheme;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -124,7 +126,7 @@ class PrivacyController extends Controller
         ]);
     }
 
-    public function block(Request $request, SecurityLogService $securityLog): RedirectResponse
+    public function block(Request $request, SecurityLogService $securityLog, UserBlockService $blocks): RedirectResponse
     {
         $rules = [
             'username' => ['required', 'string', 'max:32'],
@@ -170,6 +172,9 @@ class PrivacyController extends Controller
             ]
         );
 
+        Friendship::query()->between($request->user(), $target)->delete();
+        $blocks->forget($request->user());
+
         $securityLog->record($request->user(), 'user_blocked', $request, [
             'blocked_user_id' => $target->id,
             'blocked_username' => $target->username,
@@ -179,12 +184,13 @@ class PrivacyController extends Controller
             ->with('status', __('ui.user_blocked_status'));
     }
 
-    public function unblock(Request $request, UserBlock $block, SecurityLogService $securityLog): RedirectResponse
+    public function unblock(Request $request, UserBlock $block, SecurityLogService $securityLog, UserBlockService $blocks): RedirectResponse
     {
         abort_unless((int) $block->user_id === (int) $request->user()->id, 403);
 
         $blockedUsername = $block->blockedUser?->username;
         $block->delete();
+        $blocks->forget($request->user());
 
         $securityLog->record($request->user(), 'user_unblocked', $request, [
             'blocked_username' => $blockedUsername,

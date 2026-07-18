@@ -7,6 +7,7 @@ use App\Http\Resources\Api\UserResource;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\UserBlockService;
 use App\Models\UserBlock;
 use App\Services\MessageBroadcastService;
 use App\Services\MessagePushService;
@@ -18,14 +19,20 @@ use Illuminate\Support\Facades\Validator;
 
 class ApiMessageController extends Controller
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
         $type = $this->normalizeType($request->query('type'));
 
-        $conversations = Conversation::query()
+        $query = Conversation::query()
             ->forUser($user)
-            ->whereIn('type', $this->typesFor($type))
+            ->whereIn('type', $this->typesFor($type));
+
+        $conversations = $this->blocks->applyToConversationQuery($query, $user)
             ->with(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings'])
             ->latest('updated_at')
             ->paginate(30);

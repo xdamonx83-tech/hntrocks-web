@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HidesBlockedUsers;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class TeamLfgPost extends Model
 {
     use HasFactory;
+    use HidesBlockedUsers;
     use SoftDeletes;
 
     protected $fillable = [

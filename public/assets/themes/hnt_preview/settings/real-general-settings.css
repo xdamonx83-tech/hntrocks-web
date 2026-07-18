@@ -197,8 +197,22 @@
   text-align: center;
 }
 
+.settings-block-coverage-active,
 .settings-block-coverage-placeholder {
   margin-top: 13px;
+}
+
+.settings-block-coverage-active {
+  border-color: rgba(76, 139, 96, .28);
+}
+
+.settings-block-coverage-active .settings-planned-badge {
+  flex: 0 0 auto;
+  background: #e2f1e6;
+  color: #357249;
+}
+
+.settings-block-coverage-placeholder {
   opacity: .72;
 }
 
@@ -207,6 +221,7 @@
 }
 
 @media (max-width: 560px) {
+  .settings-block-coverage-active,
   .settings-block-coverage-placeholder {
     align-items: flex-start;
     flex-direction: column;

@@ -15,15 +15,21 @@ use App\Models\LiveLobbyFeedback;
 use App\Models\Quest;
 use App\Models\User;
 use App\Models\UserBlock;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\NotificationService;
 use App\Services\SecurityLogService;
+use App\Services\UserBlockService;
 use App\Services\Search\PlayerSearchQuery;
 use Illuminate\Support\Facades\Storage;
 
 class ApiMembersController extends Controller
 {
+    public function __construct(private readonly UserBlockService $blocks)
+    {
+    }
+
     private const HUNTER_TRUST_TAGS = [
         'reliable' => ['de' => 'Zuverlässig', 'en' => 'Reliable'],
         'chill' => ['de' => 'Chill', 'en' => 'Chill'],
@@ -82,7 +88,7 @@ class ApiMembersController extends Controller
     {
         $viewer = $request->user();
 
-        $accepted = Friendship::query()
+        $accepted = $this->visibleFriendships($viewer)
             ->forUser($viewer)
             ->where('status', Friendship::STATUS_ACCEPTED)
             ->with(['userOne.profile', 'userTwo.profile'])
@@ -92,7 +98,7 @@ class ApiMembersController extends Controller
             ->filter()
             ->values();
 
-        $incoming = Friendship::query()
+        $incoming = $this->visibleFriendships($viewer)
             ->where('recipient_id', $viewer->id)
             ->where('status', Friendship::STATUS_PENDING)
             ->with(['requester.profile', 'recipient.profile'])
@@ -102,7 +108,7 @@ class ApiMembersController extends Controller
             ->filter()
             ->values();
 
-        $outgoing = Friendship::query()
+        $outgoing = $this->visibleFriendships($viewer)
             ->where('requester_id', $viewer->id)
             ->where('status', Friendship::STATUS_PENDING)
             ->with(['requester.profile', 'recipient.profile'])
@@ -296,6 +302,7 @@ class ApiMembersController extends Controller
         );
 
         Friendship::query()->between($viewer, $user)->delete();
+        $this->blocks->forget($viewer);
 
         $securityLog->record($viewer, 'user_blocked_api', $request, [
             'blocked_user_id' => $user->id,
@@ -316,6 +323,7 @@ class ApiMembersController extends Controller
             ->where('user_id', $viewer->id)
             ->where('blocked_user_id', $user->id)
             ->delete();
+        $this->blocks->forget($viewer);
 
         $securityLog->record($viewer, 'user_unblocked_api', $request, [
             'unblocked_user_id' => $user->id,
@@ -476,7 +484,7 @@ class ApiMembersController extends Controller
 
     private function profileFriendsPayload(Request $request, User $user, int $limit): array
     {
-        $query = Friendship::query()
+        $query = $this->visibleFriendships($request->user())
             ->forUser($user)
             ->where('status', Friendship::STATUS_ACCEPTED)
             ->with(['userOne.profile', 'userTwo.profile'])
@@ -822,8 +830,14 @@ class ApiMembersController extends Controller
 
     private function acceptedFriendIdsFor(User $targetUser)
     {
-        return Friendship::query()
-            ->forUser($targetUser)
+        $viewer = request()->user();
+        $query = Friendship::query()->forUser($targetUser);
+
+        if ($viewer instanceof User) {
+            $this->blocks->applyToFriendshipQuery($query, $viewer);
+        }
+
+        return $query
             ->where('status', Friendship::STATUS_ACCEPTED)
             ->get()
             ->map(fn (Friendship $friendship): int => (int) $friendship->user_one_id === (int) $targetUser->id
@@ -859,8 +873,8 @@ class ApiMembersController extends Controller
             ->map(fn (Quest $quest): array => $this->questPayload($quest, $locale))
             ->values();
 
-        $acceptedFriendIdsFor = static function (User $targetUser) {
-            return Friendship::query()
+        $acceptedFriendIdsFor = function (User $targetUser) use ($request) {
+            return $this->visibleFriendships($request->user())
                 ->forUser($targetUser)
                 ->where('status', Friendship::STATUS_ACCEPTED)
                 ->get()
@@ -872,7 +886,7 @@ class ApiMembersController extends Controller
 
         $viewerFriendIds = $request->user() ? $acceptedFriendIdsFor($request->user()) : collect();
 
-        $friendsPreview = Friendship::query()
+        $friendsPreview = $this->visibleFriendships($request->user())
             ->forUser($user)
             ->where('status', Friendship::STATUS_ACCEPTED)
             ->with(['userOne.profile', 'userTwo.profile'])
@@ -1120,5 +1134,10 @@ class ApiMembersController extends Controller
                 && ! $isBlockedBy,
             'can_message' => ! $isOwnProfile && ! $hasBlocked && ! $isBlockedBy,
         ];
+    }
+
+    private function visibleFriendships(User $viewer): Builder
+    {
+        return $this->blocks->applyToFriendshipQuery(Friendship::query(), $viewer);
     }
 }

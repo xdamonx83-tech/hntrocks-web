@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HidesBlockedUsers;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class HntMapMarkerComment extends Model
 {
+    use HidesBlockedUsers;
     use SoftDeletes;
 
     protected $fillable = [
