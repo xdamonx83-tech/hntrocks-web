@@ -1,85 +1,109 @@
 (() => {
-  const root = document.querySelector('.guides-demo-index');
-  if (!root) return;
+    const filterForm = document.querySelector('[data-guide-filter-form]');
 
-  const cards = [...document.querySelectorAll('[data-guide-card]')];
-  const grid = document.getElementById('guideGrid');
-  const empty = document.getElementById('guideEmpty');
-  const count = document.getElementById('guideVisibleCount');
-  const search = document.getElementById('guideSearch');
-  const language = document.getElementById('guideLanguage');
-  const platform = document.getElementById('guidePlatform');
-  const difficulty = document.getElementById('guideDifficulty');
-  const sort = document.getElementById('guideSort');
-  let category = 'all';
+    if (filterForm) {
+        const applyFilters = () => {
+            const params = new URLSearchParams();
 
-  const toast = (message) => {
-    const target = document.querySelector('[data-guide-toast]');
-    if (!target) return;
-    target.textContent = message;
-    target.classList.add('show', 'is-visible');
-    clearTimeout(target.demoTimer);
-    target.demoTimer = setTimeout(() => target.classList.remove('show', 'is-visible'), 2400);
-  };
+            new FormData(filterForm).forEach((value, key) => {
+                const normalized = String(value).trim();
 
-  const applyFilters = () => {
-    const query = (search?.value || '').trim().toLowerCase();
-    const visible = [];
+                if (!normalized || (key === 'sort' && normalized === 'new')) {
+                    return;
+                }
 
-    cards.forEach((card) => {
-      const matches =
-        (category === 'all' || card.dataset.category === category) &&
-        (!query || (card.dataset.search || '').toLowerCase().includes(query)) &&
-        (!language || language.value === 'all' || card.dataset.language === language.value) &&
-        (!platform || platform.value === 'all' || card.dataset.platform === 'all' || card.dataset.platform === platform.value) &&
-        (!difficulty || difficulty.value === 'all' || card.dataset.difficulty === difficulty.value);
+                params.set(key, normalized);
+            });
 
-      card.hidden = !matches;
-      if (matches) visible.push(card);
+            const query = params.toString();
+            window.location.assign(filterForm.action + (query ? `?${query}` : ''));
+        };
+
+        filterForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            applyFilters();
+        });
+
+        filterForm.querySelectorAll('select').forEach((select) => {
+            select.addEventListener('change', applyFilters);
+        });
+    }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    const showToast = (message, isError = false) => {
+        let toast = document.querySelector('.guide-action-toast');
+
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.className = 'guide-action-toast';
+            toast.setAttribute('role', 'status');
+            toast.setAttribute('aria-live', 'polite');
+            document.body.appendChild(toast);
+        }
+
+        toast.textContent = message;
+        toast.classList.toggle('is-error', isError);
+        toast.classList.add('is-visible');
+
+        window.clearTimeout(showToast.timeout);
+        showToast.timeout = window.setTimeout(() => {
+            toast.classList.remove('is-visible');
+        }, 2600);
+    };
+
+    document.addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-guide-card-bookmark]');
+
+        if (!button || button.disabled) {
+            return;
+        }
+
+        const url = button.dataset.url;
+
+        if (!url || !csrfToken) {
+            showToast('Der Guide konnte gerade nicht gespeichert werden.', true);
+            return;
+        }
+
+        button.disabled = true;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                throw new Error('bookmark_failed');
+            }
+
+            const payload = await response.json();
+            const saved = Boolean(payload.saved);
+            const icon = button.querySelector('i');
+
+            button.classList.toggle('saved', saved);
+            button.setAttribute('aria-pressed', saved ? 'true' : 'false');
+            button.setAttribute(
+                'aria-label',
+                saved ? 'Guide aus gespeicherten Guides entfernen' : 'Guide speichern'
+            );
+
+            if (icon) {
+                icon.classList.toggle('ph-bookmark-simple', !saved);
+                icon.classList.toggle('ph-bookmark-simple-fill', saved);
+            }
+
+            showToast(payload.message || (saved ? 'Guide gespeichert.' : 'Guide entfernt.'));
+        } catch (error) {
+            showToast('Der Guide konnte gerade nicht gespeichert werden.', true);
+        } finally {
+            button.disabled = false;
+        }
     });
-
-    const key = sort?.value || 'new';
-    visible.sort((a, b) => key === 'helpful'
-      ? Number(b.dataset.helpful) - Number(a.dataset.helpful)
-      : key === 'popular'
-        ? Number(b.dataset.popular) - Number(a.dataset.popular)
-        : Number(a.dataset.date) - Number(b.dataset.date));
-
-    visible.forEach((card) => grid?.insertBefore(card, empty));
-    if (count) count.textContent = String(visible.length);
-    empty?.classList.toggle('show', visible.length === 0);
-  };
-
-  document.querySelectorAll('[data-guide-category]').forEach((button) => {
-    button.addEventListener('click', () => {
-      document.querySelectorAll('[data-guide-category]').forEach((item) => item.classList.remove('active'));
-      button.classList.add('active');
-      category = button.dataset.guideCategory || 'all';
-      applyFilters();
-    });
-  });
-
-  [search, language, platform, difficulty, sort].forEach((control) => {
-    control?.addEventListener('input', applyFilters);
-    control?.addEventListener('change', applyFilters);
-  });
-
-  document.querySelectorAll('[data-guide-save]').forEach((button) => {
-    button.addEventListener('click', (event) => {
-      event.preventDefault();
-      button.classList.toggle('saved');
-      button.querySelector('i')?.classList.toggle('ph-fill');
-      toast(button.classList.contains('saved') ? 'Guide als Demo gespeichert' : 'Aus Gespeichert entfernt');
-    });
-  });
-
-  document.querySelectorAll('[data-demo-guide-link]').forEach((link) => {
-    link.addEventListener('click', (event) => {
-      if (link.getAttribute('href') !== '#') return;
-      event.preventDefault();
-      toast('Dieser Demo-Guide wird im nächsten Schritt mit echten Inhalten verknüpft.');
-    });
-  });
-
-  applyFilters();
 })();
