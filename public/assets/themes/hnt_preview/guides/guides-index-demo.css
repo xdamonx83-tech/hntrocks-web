@@ -203,3 +203,16 @@ body[data-page="guides"].guides-demo-index {
     overflow: auto;
   }
 }
+
+.guides-demo-index .guide-featured > .guide-demo-cover {
+  display: block;
+  align-content: initial;
+  gap: 0;
+  padding: 0;
+}
+.guides-demo-index .guide-featured footer > a i,
+.guides-demo-index .guide-card footer > a i,
+.guides-demo-index .guide-author-card > a i,
+.guides-demo-index .guide-status-widget > a i {
+  font-size: 14px;
+}
