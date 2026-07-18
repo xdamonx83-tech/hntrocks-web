@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HidesBlockedUsers;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HntMapMarkerVote extends Model
 {
+    use HidesBlockedUsers;
     protected $fillable = [
         'user_id',
         'visitor_hash',

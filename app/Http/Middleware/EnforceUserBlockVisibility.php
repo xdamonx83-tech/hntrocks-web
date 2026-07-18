@@ -9,14 +9,18 @@ use App\Models\CupIdeaVote;
 use App\Models\CupTeamChatMessage;
 use App\Models\FeedComment;
 use App\Models\FeedCommentReaction;
+use App\Models\FeedBookmark;
 use App\Models\FeedPost;
+use App\Models\FeedPostPollVote;
 use App\Models\FeedReaction;
 use App\Models\Friendship;
 use App\Models\HntMapMarkerComment;
+use App\Models\HntMapMarkerVote;
 use App\Models\LfgApplication;
 use App\Models\LfgPost;
 use App\Models\Message;
 use App\Models\Moment;
+use App\Models\MomentBookmark;
 use App\Models\MomentComment;
 use App\Models\MomentReaction;
 use App\Models\TeamLfgApplication;
@@ -84,9 +88,12 @@ class EnforceUserBlockVisibility
             $parameter instanceof FeedComment,
             $parameter instanceof FeedReaction,
             $parameter instanceof FeedCommentReaction,
+            $parameter instanceof FeedBookmark,
+            $parameter instanceof FeedPostPollVote,
             $parameter instanceof Moment,
             $parameter instanceof MomentComment,
             $parameter instanceof MomentReaction,
+            $parameter instanceof MomentBookmark,
             $parameter instanceof LfgPost,
             $parameter instanceof LfgApplication,
             $parameter instanceof TeamLfgPost,
@@ -95,6 +102,7 @@ class EnforceUserBlockVisibility
             $parameter instanceof CupChatMessage,
             $parameter instanceof CupTeamChatMessage,
             $parameter instanceof HntMapMarkerComment,
+            $parameter instanceof HntMapMarkerVote,
             $parameter instanceof CupIdea,
             $parameter instanceof CupIdeaVote => $parameter->user_id,
             default => null,
