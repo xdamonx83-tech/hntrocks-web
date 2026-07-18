@@ -28,9 +28,11 @@ class NotificationSettingsController extends Controller
 
         $twoFactorSetupSecret = (string) $request->session()->get('two_factor_setup_secret', '');
         $twoFactorRecoveryCodes = $request->session()->pull('two_factor_recovery_codes', []);
+        $securityEvents = $user->securityEvents()->latest('id')->limit(13)->get();
         $securitySettings = [
             'user' => $user,
-            'events' => $user->securityEvents()->latest()->limit(12)->get(),
+            'events' => $securityEvents->take(12)->values(),
+            'events_has_more' => $securityEvents->count() > 12,
             'deletion_request' => $user->accountDeletionRequest,
             'two_factor_enabled' => $user->hasTwoFactorEnabled(),
             'two_factor_recovery_count' => $twoFactor->recoveryCodeCount($user),
