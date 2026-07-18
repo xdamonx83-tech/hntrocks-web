@@ -107,9 +107,11 @@
 <main class="app-shell profile-page-shell">
 @include('themes.hnt_preview.partials.header')
 @include('themes.hnt_preview.profile.exact.heading')
-<section class="profile-page-layout {{ $profileGamificationVisible ? '' : 'is-quest-hidden' }}">
+<section class="profile-page-layout">
 @if($profileGamificationVisible)
 @include('themes.hnt_preview.profile.exact.quests')
+@else
+<div aria-hidden="true" class="profile-quest-column-placeholder"></div>
 @endif
 <article class="profile-page-card">
 @include('themes.hnt_preview.profile.exact.card-left')

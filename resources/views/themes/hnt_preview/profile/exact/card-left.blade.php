@@ -1,4 +1,4 @@
-<div class="profile-page-left {{ $profileGamificationVisible ? '' : 'is-gamification-hidden' }}">
+<div class="profile-page-left">
 <div class="profile-photo-shell" data-profile-cover-trigger>
 <img alt="{{ $profileDisplayName }}" class="profile-page-photo" src="{{ $profileAvatarUrl }}"/>
 @if($profileIsOnline)
