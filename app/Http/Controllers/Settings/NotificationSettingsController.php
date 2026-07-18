@@ -19,6 +19,10 @@ class NotificationSettingsController extends Controller
         $user = $request->user();
         $settings = $user->notificationSettings()->firstOrCreate([]);
         $privacySettings = $user->privacySettings()->firstOrCreate([]);
+        $blockedUsers = $user->blockedUsers()
+            ->with('blockedUser')
+            ->latest()
+            ->get();
 
         $view = $request->boolean('classic_settings')
             ? 'account.settings'
@@ -28,6 +32,7 @@ class NotificationSettingsController extends Controller
             'settings' => $settings,
             'notificationGroups' => NotificationSettingsGroups::all(),
             'privacySettings' => $privacySettings,
+            'blockedUsers' => $blockedUsers,
             'generalSettings' => [
                 'locale' => app()->getLocale(),
                 'user' => $user,
