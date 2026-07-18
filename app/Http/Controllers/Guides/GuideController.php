@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Guide;
 use App\Models\GuideCategory;
 use App\Models\GuideComment;
+use App\Models\User;
 use App\Services\Guides\GuideReputationService;
 use App\Services\UserPrivacyService;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,7 +15,7 @@ use Illuminate\View\View;
 
 class GuideController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, GuideReputationService $reputation): View
     {
         $filters = [
             'q' => trim((string) $request->query('q', '')),
@@ -72,14 +73,108 @@ class GuideController extends Controller
         };
 
         $guides = $query->paginate(12)->withQueryString();
-        $categories = GuideCategory::query()->active()->get();
+
+        $publishedCount = Guide::query()->published()->count();
+        $authorCount = Guide::query()->published()->distinct('author_id')->count('author_id');
+        $helpfulCount = (int) Guide::query()->published()->sum('helpful_count');
+
+        $categoryCounts = Guide::query()
+            ->published()
+            ->join('guide_revisions as published_revisions', 'published_revisions.id', '=', 'guides.current_published_revision_id')
+            ->selectRaw('published_revisions.category_id as category_id, count(*) as aggregate')
+            ->groupBy('published_revisions.category_id')
+            ->pluck('aggregate', 'category_id');
+
+        $categories = GuideCategory::query()
+            ->active()
+            ->get()
+            ->each(function (GuideCategory $category) use ($categoryCounts): void {
+                $category->setAttribute(
+                    'published_guides_count',
+                    (int) ($categoryCounts->get($category->id, 0))
+                );
+            });
+
+        $featuredGuide = Guide::query()
+            ->published()
+            ->with([
+                'author.profile',
+                'publishedRevision.category',
+                'publishedRevision.coverMedia',
+            ])
+            ->orderByDesc('is_featured')
+            ->orderByDesc('helpful_count')
+            ->orderByDesc('published_at')
+            ->first();
+
+        $topAuthorStats = Guide::query()
+            ->published()
+            ->selectRaw('guides.author_id, count(*) as published_guides_count, coalesce(sum(guides.helpful_count), 0) as helpful_total')
+            ->groupBy('guides.author_id')
+            ->orderByDesc('helpful_total')
+            ->orderByDesc('published_guides_count')
+            ->limit(3)
+            ->get();
+
+        $topAuthorModels = User::query()
+            ->with('profile')
+            ->whereIn('id', $topAuthorStats->pluck('author_id'))
+            ->get()
+            ->keyBy('id');
+
+        $topAuthors = $topAuthorStats
+            ->map(function (Guide $authorStats) use ($topAuthorModels): ?User {
+                $author = $topAuthorModels->get($authorStats->author_id);
+
+                if (! $author) {
+                    return null;
+                }
+
+                $author->setAttribute('published_guides_count', (int) $authorStats->published_guides_count);
+                $author->setAttribute('guides_helpful_total', (int) $authorStats->helpful_total);
+
+                return $author;
+            })
+            ->filter()
+            ->values();
+
+        $viewer = $request->user();
+        $viewerReputation = $viewer ? $reputation->totalFor($viewer) : null;
+        $viewerGuideStats = null;
+        $bookmarkedGuideIds = [];
+
+        if ($viewer) {
+            $statusCounts = Guide::query()
+                ->forAuthor($viewer)
+                ->selectRaw('status, count(*) as aggregate')
+                ->groupBy('status')
+                ->pluck('aggregate', 'status');
+
+            $viewerGuideStats = [
+                'drafts' => (int) $statusCounts->only(['draft', 'changes_requested', 'rejected'])->sum(),
+                'review' => (int) $statusCounts->get('pending_review', 0),
+                'published' => Guide::query()->forAuthor($viewer)->published()->count(),
+            ];
+
+            $bookmarkedGuideIds = $viewer->guideBookmarks()
+                ->whereIn('guide_id', $guides->getCollection()->modelKeys())
+                ->pluck('guide_id')
+                ->map(fn ($guideId) => (int) $guideId)
+                ->all();
+        }
 
         return view('themes.hnt_preview.guides.index', [
             'guides' => $guides,
             'categories' => $categories,
             'filters' => $filters,
-            'publishedCount' => Guide::query()->published()->count(),
-            'authorCount' => Guide::query()->published()->distinct('author_id')->count('author_id'),
+            'publishedCount' => $publishedCount,
+            'authorCount' => $authorCount,
+            'helpfulCount' => $helpfulCount,
+            'featuredGuide' => $featuredGuide,
+            'topAuthors' => $topAuthors,
+            'viewerReputation' => $viewerReputation,
+            'viewerGuideStats' => $viewerGuideStats,
+            'bookmarkedGuideIds' => $bookmarkedGuideIds,
         ]);
     }
 
