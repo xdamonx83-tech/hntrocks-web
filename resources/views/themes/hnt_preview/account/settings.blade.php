@@ -73,6 +73,17 @@
     );
 
     $settingsDemoHtml = str_replace(
+        "  function updateBlockedCount() {\n    const count = document.querySelectorAll(\"#blockedUsersList > article\").length;\n    document.getElementById(\"blockedCountMain\").textContent = count;\n    document.getElementById(\"blockedCountNav\").textContent = count;\n  }\n\n  function bindUnblockButtons() {\n    document.querySelectorAll(\".unblock-button\").forEach((button) => {\n      button.onclick = () => {\n        button.closest(\"article\").remove();\n        updateBlockedCount();\n        markDirty();\n        showToast(\"Blockierung aufgehoben\");\n      };\n    });\n  }\n\n  document.getElementById(\"blockUserForm\").addEventListener(\"submit\", (event) => {\n    event.preventDefault();\n    const usernameInput = document.getElementById(\"blockUsername\");\n    const reasonInput = document.getElementById(\"blockReason\");\n    const username = usernameInput.value.trim().replace(/^@/, \"\");\n    if (!username) return;\n\n    const row = document.createElement(\"article\");\n    row.innerHTML = `\n      <span class=\"settings-generated-avatar\">\${username.charAt(0).toUpperCase()}</span>\n      <div><strong>\${username}</strong><span>@\${username.toLowerCase()}</span><small></small></div>\n      <button type=\"button\" class=\"unblock-button\">Blockierung aufheben</button>\n    `;\n    row.querySelector(\"small\").textContent = reasonInput.value.trim() || \"Keine Notiz gespeichert\";\n    document.getElementById(\"blockedUsersList\").prepend(row);\n    usernameInput.value = \"\";\n    reasonInput.value = \"\";\n    bindUnblockButtons();\n    updateBlockedCount();\n    markDirty();\n    showToast(\"Nutzer in der Demo blockiert\");\n  });\n\n  bindUnblockButtons();\n",
+        '',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        "  updateBlockedCount();\n",
+        '',
+        $settingsDemoHtml
+    );
+
+    $settingsDemoHtml = str_replace(
         '/assets/themes/hnt_preview/dashboard-feed/assets/noah.jpg',
         '/assets/themes/hnt_preview/dashboard-feed/assets/feed-jonathan.jpg',
         $settingsDemoHtml
@@ -200,6 +211,32 @@
         $blockedPanelStart - $privacyPanelStart
     );
 
+    abort_unless(isset($blockedUsers), 500, 'Blocked users data is missing.');
+
+    $blockedPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="blocked" hidden="">'
+    );
+    abort_unless($blockedPanelStart !== false, 500, 'Blocked users settings panel could not be located.');
+
+    $securityPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="security" hidden="">',
+        $blockedPanelStart
+    );
+    abort_unless($securityPanelStart !== false, 500, 'Security settings panel could not be located.');
+
+    $realBlockedUsersHtml = view('themes.hnt_preview.account.partials.blocked-users-settings', [
+        'blockedUsers' => $blockedUsers,
+    ])->render();
+
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $realBlockedUsersHtml,
+        $blockedPanelStart,
+        $securityPanelStart - $blockedPanelStart
+    );
+
     $settingsDemoHtml = str_replace(
         '<button class="active" data-settings-tab="general" data-title="Allgemein" type="button">',
         '<button class="active" data-settings-tab="general" data-title="'.e(__('settings.general_tab')).'" type="button">',
@@ -229,6 +266,21 @@
     $settingsDemoHtml = str_replace(
         '<span><strong>Privatsphäre</strong><small>Sichtbarkeit und Kontaktregeln</small></span><i>8</i>',
         '<span><strong>'.e(__('settings.privacy_tab')).'</strong><small>'.e(__('settings.privacy_nav_description')).'</small></span><i>'.e(__('settings.privacy_badge')).'</i>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<button data-settings-tab="blocked" data-title="Blockierte Nutzer" type="button">',
+        '<button data-settings-tab="blocked" data-title="'.e(__('settings.blocked_tab')).'" type="button">',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<span><strong>Blockierte Nutzer</strong><small>Blockierungen verwalten</small></span>',
+        '<span><strong>'.e(__('settings.blocked_tab')).'</strong><small>'.e(__('settings.blocked_nav_description')).'</small></span>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<i id="blockedCountNav">2</i>',
+        '<i id="blockedCountNav">'.e((string) $blockedUsers->count()).'</i>',
         $settingsDemoHtml
     );
     $settingsDemoHtml = str_replace(
@@ -294,7 +346,7 @@
     if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260717-5" rel="stylesheet"/>' . "\n" . '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260718-1" rel="stylesheet"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
