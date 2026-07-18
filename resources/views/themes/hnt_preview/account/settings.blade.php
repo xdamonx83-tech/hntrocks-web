@@ -78,6 +78,11 @@
         $settingsDemoHtml
     );
     $settingsDemoHtml = str_replace(
+        'document.getElementById("blockUserForm").addEventListener',
+        'document.getElementById("blockUserForm")?.addEventListener',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
         "  updateBlockedCount();\n",
         '',
         $settingsDemoHtml
