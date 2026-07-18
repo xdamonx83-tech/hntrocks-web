@@ -50,9 +50,6 @@
 <header><span>{{ __('hnt_preview.header.cups_eyebrow') }}</span><strong>{{ __('hnt_preview.header.cups_title') }}</strong></header>
 <div class="main-nav-menu-grid">
 <button data-navigation-label="Aktive Cups" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-folder"></use></svg></span><span><strong>{{ __('hnt_preview.header.active_cups') }}</strong><small>{{ __('hnt_preview.header.active_cups_text') }}</small></span></button>
-<button data-community-cup-create="1" onclick="window.location.assign('{{ route('cups.create') }}')" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-plus"></use></svg></span><span><strong>{{ $headerLocaleIsEnglish ? 'Create cup' : 'Cup erstellen' }}</strong><small>{{ $headerLocaleIsEnglish ? 'Host your own community cup' : 'Eigenen Community-Cup veranstalten' }}</small></span></button>
-<button data-navigation-label="Meine Cup-Teams" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-users"></use></svg></span><span><strong>{{ __('hnt_preview.header.my_cup_teams') }}</strong><small>{{ __('hnt_preview.header.my_cup_teams_text') }}</small></span></button>
-<button data-navigation-label="Einreichungen" role="menuitem" type="button"><span class="main-nav-menu-icon purple"><svg><use href="#i-image"></use></svg></span><span><strong>{{ __('hnt_preview.header.submissions') }}</strong><small>{{ __('hnt_preview.header.submissions_text') }}</small></span></button>
 <button data-navigation-label="Hall of Fame" role="menuitem" type="button"><span class="main-nav-menu-icon green"><svg><use href="#i-check"></use></svg></span><span><strong>{{ __('hnt_preview.header.hall_of_fame') }}</strong><small>{{ __('hnt_preview.header.hall_of_fame_text') }}</small></span></button>
 </div>
 </section>
@@ -97,7 +94,6 @@
 <header class="header-dropdown-head"><div><span>HNT.ROCKS</span><strong>{{ __('hnt_preview.header.settings') }}</strong></div><small>{{ __('hnt_preview.header.personal') }}</small></header>
 <div class="header-menu-list">
 <a href="{{ route('account.settings.edit') }}" role="menuitem"><span class="header-menu-icon"><svg><use href="#i-settings"></use></svg></span><span><strong>{{ __('hnt_preview.header.general') }}</strong><small>{{ __('hnt_preview.header.general_text') }}</small></span><svg class="header-menu-arrow"><use href="#i-arrow"></use></svg></a>
-<a href="{{ route('settings.privacy.edit') }}" role="menuitem"><span class="header-menu-icon"><svg><use href="#i-eye"></use></svg></span><span><strong>{{ __('hnt_preview.header.privacy') }}</strong><small>{{ __('hnt_preview.header.privacy_text') }}</small></span><svg class="header-menu-arrow"><use href="#i-arrow"></use></svg></a>
 </div>
 </section>
 </div>
