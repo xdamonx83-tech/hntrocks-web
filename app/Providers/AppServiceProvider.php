@@ -17,8 +17,10 @@ use App\Observers\UserProfileObserver;
 use App\Policies\TeamPolicy;
 use App\Services\Cups\CommunityCupSubmissionAnalysisService;
 use App\Services\Cups\CupSubmissionAnalysisService;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,15 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Event::listen(Login::class, function (Login $event): void {
+            if (request()->hasSession()) {
+                request()->session()->put(
+                    'security_session_version',
+                    (int) ($event->user->security_session_version ?? 0)
+                );
+            }
+        });
+
         Gate::policy(Team::class, TeamPolicy::class);
         UserProfile::observe(UserProfileObserver::class);
         Cup::observe(CupObserver::class);
