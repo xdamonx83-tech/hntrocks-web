@@ -157,3 +157,177 @@
     flex-direction: column;
   }
 }
+
+
+.settings-security-form-hint {
+  display: block;
+  margin-top: 9px;
+  color: #8d8b87;
+  font-size: 8px;
+}
+
+.settings-security-error {
+  color: #b64e44 !important;
+  font-size: 8px !important;
+}
+
+.settings-two-factor-card.is-expanded {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.settings-two-factor-details {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+}
+
+.settings-two-factor-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.settings-security-inline-form,
+.settings-security-key,
+.settings-recovery-codes {
+  display: grid;
+  gap: 9px;
+  padding: 13px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .7);
+}
+
+.settings-security-inline-form.compact {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.settings-security-inline-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-security-inline-form label > span {
+  color: #74736f;
+  font-size: 8px;
+}
+
+.settings-security-inline-form input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 18px;
+  outline: 0;
+  background: #f0f0ed;
+  color: var(--ink);
+  font: inherit;
+  font-size: 10px;
+}
+
+.settings-security-inline-form button,
+.settings-security-action-button {
+  min-height: 37px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--dark);
+  color: white;
+  font: inherit;
+  font-size: 9px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.settings-security-inline-form.danger button {
+  background: #b64e44;
+}
+
+.settings-security-key code,
+.settings-security-key small {
+  overflow-wrap: anywhere;
+}
+
+.settings-security-key code {
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+
+.settings-security-key small {
+  color: #8d8b87;
+  font-size: 7px;
+}
+
+.settings-recovery-codes > p {
+  margin: 0;
+  color: #7e7c78;
+  font-size: 8px;
+}
+
+.settings-recovery-codes > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.settings-recovery-codes code {
+  padding: 7px 9px;
+  border-radius: 12px;
+  background: #f0f0ed;
+  font-size: 9px;
+}
+
+.settings-security-placeholder-action {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.settings-security-placeholder-action button:disabled,
+.settings-security-actions-grid button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.settings-security-log-empty {
+  margin: 0;
+  padding: 18px 0 4px;
+  color: #8d8b87;
+  font-size: 9px;
+  text-align: center;
+}
+
+.settings-security-actions-grid > article > form {
+  margin-top: 13px;
+}
+
+.settings-security-actions-grid > article > form button {
+  margin-top: 0;
+}
+
+.settings-delete-panel .settings-security-error {
+  display: block;
+  margin-top: 5px;
+}
+
+@media (max-width: 760px) {
+  .settings-two-factor-card.is-expanded,
+  .settings-two-factor-form-grid,
+  .settings-security-inline-form.compact {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-two-factor-state {
+    justify-items: start;
+  }
+
+  .settings-security-placeholder-action {
+    justify-items: start;
+  }
+}
