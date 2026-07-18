@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Models\ApiAccessToken;
 use App\Models\User;
 use App\Models\UserSecurityEvent;
 use App\Services\SecurityLogService;
@@ -121,5 +122,62 @@ class SecuritySettingsTabTest extends TestCase
         $this->assertSame('DE', data_get($event->meta, 'location.country_code'));
         $this->assertSame('Hessen', data_get($event->meta, 'location.region'));
         $this->assertSame('Frankfurt', data_get($event->meta, 'location.city'));
+    }
+
+    public function test_other_sessions_action_keeps_current_web_session_and_revokes_app_tokens(): void
+    {
+        $user = User::factory()->create();
+        $firstToken = ApiAccessToken::createForUser($user, 'First App')['token'];
+        $secondToken = ApiAccessToken::createForUser($user, 'Second App')['token'];
+
+        $response = $this
+            ->actingAs($user)
+            ->withSession(['security_session_version' => 0])
+            ->post(route('settings.security.sessions.logout-others'), [
+                'settings_section' => 'security',
+                'settings_action' => 'security_logout_other_sessions',
+            ]);
+
+        $response->assertRedirect(route('account.settings.edit').'#security');
+        $response->assertSessionHas('security_session_version', 1);
+        $this->assertAuthenticatedAs($user);
+        $this->assertNotNull($firstToken->fresh()->revoked_at);
+        $this->assertNotNull($secondToken->fresh()->revoked_at);
+        $this->assertSame(1, $user->fresh()->security_session_version);
+        $this->assertDatabaseHas('user_security_events', [
+            'user_id' => $user->id,
+            'event' => 'other_sessions_logged_out',
+        ]);
+    }
+
+    public function test_stale_web_session_is_signed_out_after_other_sessions_action(): void
+    {
+        $user = User::factory()->create([
+            'security_session_version' => 2,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->withSession(['security_session_version' => 1])
+            ->get(route('account.settings.edit'));
+
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    public function test_fresh_login_stores_the_current_security_session_version(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('OldPassword123'),
+            'security_session_version' => 3,
+        ]);
+
+        $response = $this->post(route('login.store'), [
+            'login' => $user->email,
+            'password' => 'OldPassword123',
+        ]);
+
+        $response->assertSessionHas('security_session_version', 3);
+        $this->assertAuthenticatedAs($user);
     }
 }
