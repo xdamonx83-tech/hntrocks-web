@@ -457,3 +457,17 @@ body.guide-editor-live .guide-toast.error {
     transition: none;
   }
 }
+
+
+body.guide-editor-live .guide-add-blocks button.planned {
+  opacity: .58;
+}
+
+body.guide-editor-live .guide-add-blocks button.planned em {
+  padding: 3px 5px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 6px;
+  font-style: normal;
+}
