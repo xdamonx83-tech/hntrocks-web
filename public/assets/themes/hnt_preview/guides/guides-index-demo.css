@@ -216,3 +216,68 @@ body[data-page="guides"].guides-demo-index {
 .guides-demo-index .guide-status-widget > a i {
   font-size: 14px;
 }
+
+
+/* Exact overview reset: none of the former production overview geometry may leak in. */
+.guides-demo-index .guides-hero {
+  max-width: none;
+  margin: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.guides-demo-index .guides-hero-stats {
+  min-width: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.guides-demo-index .guides-hero-stats article {
+  min-height: 0;
+  padding: 0;
+}
+.guides-demo-index .guides-overview-layout {
+  max-width: none;
+  margin: 0;
+}
+.guides-demo-index .guide-demo-featured-blank {
+  display: block;
+  min-width: 0;
+  min-height: 290px;
+  padding: 0;
+  border-right: 1px solid rgba(204,202,197,.82);
+  background: #fff;
+}
+.guides-demo-index .guide-demo-cover > svg {
+  position: absolute;
+  inset: 7% 5%;
+  width: 90%;
+  height: 86%;
+  color: rgba(225,225,219,.32);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.guides-demo-index .guide-demo-cover::before,
+.guides-demo-index .guide-demo-cover::after {
+  display: none;
+}
+.guides-demo-index .guide-demo-cover.tone-map {
+  background:
+    radial-gradient(circle at 68% 30%, rgba(195,78,67,.28), transparent 31%),
+    repeating-linear-gradient(135deg, transparent 0 16px, rgba(255,255,255,.075) 16px 18px),
+    linear-gradient(135deg,#343633,#62645e);
+}
+.guides-demo-index .guide-demo-cover.tone-traits {
+  background:
+    radial-gradient(circle at 82% 42%, rgba(195,78,67,.34), transparent 30%),
+    repeating-linear-gradient(135deg, transparent 0 16px, rgba(255,255,255,.075) 16px 18px),
+    linear-gradient(135deg,#343633,#62645e);
+}
+body.guides-demo-index .hnt-chat-tabs-shell {
+  display: none !important;
+}
