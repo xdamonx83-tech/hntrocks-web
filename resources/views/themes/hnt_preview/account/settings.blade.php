@@ -428,7 +428,7 @@
     if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260718-2" rel="stylesheet"/>' . "\n" . '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260718-3" rel="stylesheet"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
@@ -446,7 +446,7 @@
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-4"></script>',
-        '<script src="'.asset('assets/themes/hnt_preview/settings/real-security-settings.js').'?v=20260718-1"></script>',
+        '<script src="'.asset('assets/themes/hnt_preview/settings/real-security-settings.js').'?v=20260718-2"></script>',
     ]);
 
     $settingsDemoHtml = str_replace(
