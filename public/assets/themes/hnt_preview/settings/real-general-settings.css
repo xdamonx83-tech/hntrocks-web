@@ -338,13 +338,37 @@
   font-size: 9px;
 }
 
-.settings-security-placeholder-action {
+.settings-security-session-action {
   display: grid;
   justify-items: end;
   gap: 6px;
+  max-width: 220px;
+  text-align: right;
 }
 
-.settings-security-placeholder-action button:disabled,
+.settings-security-session-action button {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--dark);
+  color: #fff;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.settings-security-session-action button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.settings-security-session-action small {
+  color: #8d8b87;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
 .settings-security-actions-grid button:disabled {
   cursor: not-allowed;
   opacity: .5;
@@ -382,8 +406,9 @@
     justify-items: start;
   }
 
-  .settings-security-placeholder-action {
+  .settings-security-session-action {
     justify-items: start;
+    text-align: left;
   }
 
   .settings-security-log {
