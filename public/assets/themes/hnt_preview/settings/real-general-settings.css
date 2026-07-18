@@ -24,6 +24,61 @@
   line-height: 1.55;
 }
 
+.settings-security-log {
+  max-height: 380px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: 8px;
+}
+
+.settings-security-log:focus-visible {
+  outline: 2px solid rgba(182, 78, 68, .35);
+  outline-offset: 4px;
+}
+
+.settings-security-log article.is-warning .settings-log-icon {
+  background: rgba(182, 78, 68, .14);
+  color: #b64e44;
+}
+
+.settings-security-log article.is-warning .settings-log-icon strong {
+  font-size: 12px;
+}
+
+.settings-security-log-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.settings-security-log-controls button {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--dark);
+  color: #fff;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.settings-security-log-controls button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.settings-security-log-controls button[hidden] {
+  display: none;
+}
+
+.settings-security-log-controls small {
+  color: #b64e44;
+  font-size: 8px;
+}
+
 @media (max-width: 760px) {
   .settings-appearance-card {
     align-items: stretch;
@@ -329,5 +384,9 @@
 
   .settings-security-placeholder-action {
     justify-items: start;
+  }
+
+  .settings-security-log {
+    max-height: 320px;
   }
 }
