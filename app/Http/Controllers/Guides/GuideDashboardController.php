@@ -100,6 +100,21 @@ class GuideDashboardController extends Controller
         $revision = $guide->workingRevision ?: $guide->publishedRevision;
         abort_unless($revision, 404);
 
+        $relatedGuides = Guide::query()
+            ->published()
+            ->where('guides.id', '!=', $guide->id)
+            ->when($revision->category_id, fn ($query) => $query
+                ->whereHas('publishedRevision', fn ($publishedRevision) => $publishedRevision
+                    ->where('category_id', $revision->category_id)))
+            ->with([
+                'publishedRevision.category',
+                'publishedRevision.coverMedia',
+            ])
+            ->orderByDesc('helpful_count')
+            ->orderByDesc('published_at')
+            ->limit(2)
+            ->get();
+
         return view('themes.hnt_preview.guides.show', [
             'guide' => $guide,
             'revision' => $revision,
@@ -108,6 +123,12 @@ class GuideDashboardController extends Controller
             'viewerHelpful' => false,
             'viewerBookmarked' => false,
             'authorReputation' => $reputation->totalFor($guide->author),
+            'authorPublishedGuideCount' => Guide::query()
+                ->published()
+                ->where('author_id', $guide->author_id)
+                ->count(),
+            'authorBadgeCount' => $guide->author?->badges()->count(),
+            'relatedGuides' => $relatedGuides,
         ]);
     }
 
