@@ -336,6 +336,85 @@
     });
   }
 
+  const guideTocLinks = [...document.querySelectorAll('.guide-detail-toc nav a[href^="#"]')];
+  const guideScroll = document.getElementById('guidesScroll');
+
+  if (guideTocLinks.length && guideScroll) {
+    const guideSections = guideTocLinks
+      .map((link) => {
+        const id = decodeURIComponent(link.hash.slice(1));
+        const section = document.getElementById(id);
+        return section ? {link, section} : null;
+      })
+      .filter(Boolean);
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const setActiveGuideSection = (activeSection) => {
+      guideSections.forEach(({link, section}) => {
+        const active = section === activeSection;
+        link.classList.toggle('active', active);
+        if (active) {
+          link.setAttribute('aria-current', 'location');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    guideSections.forEach(({link, section}) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        setActiveGuideSection(section);
+
+        const scrollRect = guideScroll.getBoundingClientRect();
+        const targetTop = section.getBoundingClientRect().top
+          - scrollRect.top
+          + guideScroll.scrollTop
+          - 84;
+
+        guideScroll.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: reducedMotion.matches ? 'auto' : 'smooth',
+        });
+
+        history.replaceState(null, '', `#${encodeURIComponent(section.id)}`);
+      });
+    });
+
+    let tocFrame = 0;
+    const updateActiveGuideSection = () => {
+      tocFrame = 0;
+      if (!guideSections.length) return;
+
+      const rootTop = guideScroll.getBoundingClientRect().top;
+      const activationLine = rootTop + Math.min(150, guideScroll.clientHeight * .2);
+      let activeSection = guideSections[0].section;
+
+      guideSections.forEach(({section}) => {
+        if (section.getBoundingClientRect().top <= activationLine) {
+          activeSection = section;
+        }
+      });
+
+      const reachedBottom = guideScroll.scrollTop + guideScroll.clientHeight
+        >= guideScroll.scrollHeight - 4;
+      if (reachedBottom) {
+        activeSection = guideSections[guideSections.length - 1].section;
+      }
+
+      setActiveGuideSection(activeSection);
+    };
+
+    const requestTocUpdate = () => {
+      if (tocFrame) return;
+      tocFrame = requestAnimationFrame(updateActiveGuideSection);
+    };
+
+    guideScroll.addEventListener('scroll', requestTocUpdate, {passive: true});
+    window.addEventListener('resize', requestTocUpdate);
+    updateActiveGuideSection();
+  }
+
   const editor = document.querySelector('[data-guide-editor]');
   if (!editor) return;
 
