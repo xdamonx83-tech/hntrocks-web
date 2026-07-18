@@ -450,6 +450,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/settings/privacy/blocks', [PrivacyController::class, 'block'])->name('settings.privacy.blocks.store');
     Route::delete('/settings/privacy/blocks/{block}', [PrivacyController::class, 'unblock'])->name('settings.privacy.blocks.destroy');
     Route::get('/settings/security', [SecurityController::class, 'index'])->name('settings.security.index');
+    Route::get('/settings/security/events', [SecurityController::class, 'events'])->name('settings.security.events');
     Route::post('/settings/security/password', [SecurityController::class, 'updatePassword'])->name('settings.security.password');
     Route::post('/settings/security/2fa/setup', [SecurityController::class, 'startTwoFactorSetup'])->name('settings.security.two-factor.setup');
     Route::post('/settings/security/2fa/confirm', [SecurityController::class, 'confirmTwoFactor'])->name('settings.security.two-factor.confirm');
