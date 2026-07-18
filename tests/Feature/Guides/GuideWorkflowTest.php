@@ -509,6 +509,32 @@ class GuideWorkflowTest extends TestCase
             ->assertViewHas('relatedGuides', fn ($guides) => $guides->contains(fn (Guide $item) => $item->is($relatedGuide)));
     }
 
+    public function test_guide_editor_uses_saved_data_and_marks_unavailable_blocks_as_planned(): void
+    {
+        $author = User::factory()->create(['name' => 'Real Editor Author']);
+        $guide = $this->draft($author);
+
+        $this->actingAs($author)
+            ->putJson(route('guides.update', $guide), [
+                'title' => 'Real Saved Editor Guide',
+                'summary' => 'This summary is stored in the working guide revision.',
+                'content_blocks' => [
+                    ['id' => 'intro', 'type' => 'paragraph', 'text' => 'Real saved editor paragraph'],
+                ],
+            ])
+            ->assertOk();
+
+        $this->actingAs($author)
+            ->get(route('guides.edit', $guide))
+            ->assertOk()
+            ->assertSee('Real Saved Editor Guide')
+            ->assertSee('Real Editor Author')
+            ->assertSee('Moment')
+            ->assertSee('Geplant')
+            ->assertDontSee('Budget-Loadouts, die wirklich funktionieren')
+            ->assertDontSee('Erica Wyatt');
+    }
+
     private function draft(User $author): Guide
     {
         return app(GuideWorkflowService::class)->create($author);
