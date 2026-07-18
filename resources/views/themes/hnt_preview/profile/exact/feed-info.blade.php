@@ -17,8 +17,18 @@
     ];
     $profileActivityMaximum = max(1, ...array_column($profileActivityValues, 'value'));
 @endphp
-<section class="profile-tab-panel" data-profile-panel="info" hidden id="profileTabInfo" role="tabpanel">
+<section class="profile-tab-panel {{ $profileDefaultTab === 'info' ? 'active' : '' }}" data-profile-panel="info" @if($profileDefaultTab !== 'info') hidden @endif id="profileTabInfo" role="tabpanel">
 <div class="profile-info-dashboard">
+@if(! $profileActivityVisible)
+<article class="profile-detail-card">
+<header><div><span>{{ __('settings.privacy_eyebrow') }}</span><h3>{{ __('settings.privacy_activity_hidden') }}</h3></div></header>
+</article>
+@endif
+@if(! $profileGamificationVisible)
+<article class="profile-detail-card">
+<header><div><span>{{ __('settings.privacy_eyebrow') }}</span><h3>{{ __('settings.privacy_gamification_hidden') }}</h3></div></header>
+</article>
+@endif
 <article class="profile-detail-card profile-about-card">
 <header>
 <div><span>ÜBER MICH</span><h3>{{ $profileDisplayName }}</h3></div>
@@ -46,6 +56,7 @@
 </dl>
 </article>
 
+@if($profileActivityVisible)
 <article class="profile-detail-card profile-availability-card">
 <header><div><span>AKTIVITÄT</span><h3>Profil in Zahlen</h3></div></header>
 <div class="availability-week profile-activity-bars">
@@ -57,14 +68,17 @@
 @endforeach
 </div>
 </article>
+@endif
 
 <article class="profile-detail-card profile-favorites-card">
 <header><div><span>PROFILSTATUS</span><h3>Community &amp; Fortschritt</h3></div></header>
 <div class="profile-favorite-grid">
 <span><small>LFG-Status</small><strong>{{ $profile?->is_lfg_available ? 'Offen für Gruppen' : 'Geschlossen' }}</strong></span>
 <span><small>Profil-Sichtbarkeit</small><strong>{{ ucfirst((string) ($profile?->profile_visibility ?: 'public')) }}</strong></span>
+@if($profileGamificationVisible)
 <span><small>Abgeschlossene Quests</small><strong>{{ $profileFormatCount($profileCompletedQuestCount ?? 0) }}</strong></span>
 <span><small>Aktueller Fortschritt</small><strong>Level {{ $profileLevel }} · {{ $profileLevelProgress }}%</strong></span>
+@endif
 </div>
 </article>
 </div>

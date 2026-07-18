@@ -23,7 +23,7 @@
     $friendStateLabel = $friendReady ? 'Ready' : ($friendOnline ? 'Online' : 'Offline');
     $friendMeta = collect([$friendProfile?->region, $friendProfile?->platform, $friendProfile?->playstyle])->filter()->join(' · ');
     $friendProfileUrl = $viewer?->is($friend) ? route('profile.show') : route('profile.public', $friend);
-    $friendMessageUrl = $viewer && ! $viewer->is($friend) && \Illuminate\Support\Facades\Route::has('messages.with-user')
+    $friendMessageUrl = $viewer && ! $viewer->is($friend) && $friend->can_message_from_viewer && \Illuminate\Support\Facades\Route::has('messages.with-user')
         ? route('messages.with-user', $friend)
         : null;
 @endphp

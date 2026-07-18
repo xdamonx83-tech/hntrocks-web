@@ -81,15 +81,19 @@ class PrivacyController extends Controller
     {
         $validated = $request->validate([
             'profile_visibility' => ['required', Rule::in(['public', 'registered', 'private'])],
+            'allow_messages_from' => ['required', Rule::in(['everyone', 'registered', 'following', 'nobody'])],
             'show_online_status' => ['nullable', 'boolean'],
             'show_activity_feed' => ['nullable', 'boolean'],
+            'show_gamification' => ['nullable', 'boolean'],
         ]);
 
         $user = $request->user();
         $data = [
             'profile_visibility' => $validated['profile_visibility'],
+            'allow_messages_from' => $validated['allow_messages_from'],
             'show_online_status' => $request->boolean('show_online_status'),
             'show_activity_feed' => $request->boolean('show_activity_feed'),
+            'show_gamification' => $request->boolean('show_gamification'),
         ];
 
         $user->privacySettings()->updateOrCreate(

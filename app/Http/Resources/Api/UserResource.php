@@ -8,12 +8,15 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 use App\Support\CrownCosmetics;
+use App\Services\UserPrivacyService;
 
 class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         $profile = $this->whenLoaded('profile');
+        $gamificationVisible = app(UserPrivacyService::class)
+            ->canViewGamification($request->user(), $this->resource);
 
         return [
             'id' => $this->id,
@@ -23,8 +26,9 @@ class UserResource extends JsonResource
             'avatar_url' => $this->avatar_path ? Storage::disk('public')->url($this->avatar_path) : asset('assets/vikinger/img/default-avatar.svg'),
             'cover_url' => $this->cover_path ? Storage::disk('public')->url($this->cover_path) : asset('assets/vikinger/img/default-cover.svg'),
             'crown_cosmetics' => $this->crownsPayload(),
-            'level' => (int) ($this->level ?? 1),
-            'xp_total' => (int) ($this->xp_total ?? 0),
+            'gamification_visible' => $gamificationVisible,
+            'level' => $this->when($gamificationVisible, (int) ($this->level ?? 1)),
+            'xp_total' => $this->when($gamificationVisible, (int) ($this->xp_total ?? 0)),
             'trust_score' => (int) ($this->trust_score ?? 0),
             'presence' => $this->presencePayload($request),
             'profile' => $this->whenLoaded('profile', fn () => [

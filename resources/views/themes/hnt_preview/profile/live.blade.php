@@ -1,6 +1,9 @@
 @php
     $viewer = auth()->user();
     $profile = $profileUser->profile;
+    $profileActivityVisible = (bool) ($profileActivityVisible ?? true);
+    $profileGamificationVisible = (bool) ($profileGamificationVisible ?? true);
+    $profileDefaultTab = $profileActivityVisible ? 'posts' : 'info';
     $profileDisplayName = trim((string) ($profileUser->name ?: $profileUser->username ?: 'HNT Hunter'));
     $profileHandle = $profileUser->username ? '@'.$profileUser->username : '@hunter';
     $profileAvatarUrl = $profileUser->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
@@ -105,18 +108,26 @@
 @include('themes.hnt_preview.partials.header')
 @include('themes.hnt_preview.profile.exact.heading')
 <section class="profile-page-layout">
+@if($profileGamificationVisible)
 @include('themes.hnt_preview.profile.exact.quests')
+@endif
 <article class="profile-page-card">
 @include('themes.hnt_preview.profile.exact.card-left')
 <div class="profile-page-main">
 @include('themes.hnt_preview.profile.exact.summary')
 @include('themes.hnt_preview.profile.exact.feed-head')
 <section class="social-feed-card profile-post-feed">
+@if($profileActivityVisible)
 @include('themes.hnt_preview.profile.exact.feed-posts')
+@endif
 @include('themes.hnt_preview.profile.exact.feed-info')
 @include('themes.hnt_preview.profile.exact.feed-friends')
+@if($profileActivityVisible)
 @include('themes.hnt_preview.profile.exact.feed-moments')
+@endif
+@if($profileGamificationVisible)
 @include('themes.hnt_preview.profile.exact.feed-badges')
+@endif
 @include('themes.hnt_preview.profile.exact.feed-twitch')
 </section>
 </div>

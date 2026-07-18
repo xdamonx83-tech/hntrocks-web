@@ -15,6 +15,7 @@ use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Services\ReferralService;
 use App\Services\UserBlockService;
+use App\Services\UserPrivacyService;
 use App\Services\Auth\TwoFactorService;
 use App\Support\CrownCosmetics;
 use App\Support\HntTheme;
@@ -30,14 +31,16 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function __construct(private readonly UserBlockService $blocks)
-    {
+    public function __construct(
+        private readonly UserBlockService $blocks,
+        private readonly UserPrivacyService $privacy,
+    ) {
     }
 
     public function show(Request $request, ?User $user = null): View
     {
         $profileUser = $user ?? $request->user();
-        $profileUser->loadMissing(['profile', 'crownWallet']);
+        $profileUser->loadMissing(['profile', 'crownWallet', 'privacySettings']);
 
         if (! $profileUser->profile) {
             $profileUser->profile()->create([
@@ -50,6 +53,9 @@ class ProfileController extends Controller
         $activeSection = $this->profileSectionFromRoute($request);
 
         $this->guardProfileVisibility($request, $profileUser, $isOwnProfile);
+
+        $profileActivityVisible = $this->privacy->canViewActivity($request->user(), $profileUser);
+        $profileGamificationVisible = $this->privacy->canViewGamification($request->user(), $profileUser);
 
         $profileUser->loadCount([
             'badges',
@@ -93,6 +99,7 @@ class ProfileController extends Controller
             ])
             ->withCount(['comments', 'reactions', 'bookmarks', 'sharedByPosts as shares_count'])
             ->where('status', 'published')
+            ->when(! $profileActivityVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->when(! $isOwnProfile, fn ($query) => $request->user() ? $query->where('visibility', '!=', 'private') : $query->where('visibility', 'public'))
             ->latest();
 
@@ -106,6 +113,7 @@ class ProfileController extends Controller
             ->get();
 
         $latestBadges = $profileUser->badges()
+            ->when(! $profileGamificationVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->orderByPivot('awarded_at', 'desc')
             ->orderBy('badges.sort_order')
             ->limit(30)
@@ -113,6 +121,7 @@ class ProfileController extends Controller
 
         $profileMomentsPreview = $profileUser->moments()
             ->published()
+            ->when(! $profileActivityVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->with(['cover', 'media'])
             ->latest('published_at')
             ->latest()
@@ -121,6 +130,7 @@ class ProfileController extends Controller
 
         $profileQuestPreview = Quest::query()
             ->where('is_active', true)
+            ->when(! $profileGamificationVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->with([
                 'progress' => fn ($query) => $query->where('user_id', $profileUser->id),
             ])
@@ -131,12 +141,22 @@ class ProfileController extends Controller
             ->take(5)
             ->values();
 
-        $profileCompletedQuestCount = $profileUser->questProgress()
-            ->whereNotNull('completed_at')
-            ->count();
+        $profileCompletedQuestCount = $profileGamificationVisible
+            ? $profileUser->questProgress()->whereNotNull('completed_at')->count()
+            : 0;
 
-        $trophyCabinet = $this->trophyCabinetFor($profileUser);
-        $hunterCard = $this->hunterCardFor($profileUser, $trophyCabinet);
+        $trophyCabinet = $profileGamificationVisible ? $this->trophyCabinetFor($profileUser) : [];
+        $hunterCard = $profileGamificationVisible ? $this->hunterCardFor($profileUser, $trophyCabinet) : [];
+
+        if (! $profileActivityVisible) {
+            $profileUser->setAttribute('visible_feed_posts_count', 0);
+            $profileUser->setAttribute('moments_count', 0);
+            $profileUser->setAttribute('feed_comments_count', 0);
+        }
+
+        if (! $profileGamificationVisible) {
+            $profileUser->setAttribute('badges_count', 0);
+        }
 
         $profileTeams = $profileUser->activeTeams()
             ->with(['activeMembers.user.profile'])
@@ -177,11 +197,11 @@ class ProfileController extends Controller
         $profileFriendsPreview = $this->visibleFriendships($request->user())
             ->forUser($profileUser)
             ->where('status', Friendship::STATUS_ACCEPTED)
-            ->with(['userOne.profile', 'userTwo.profile'])
+            ->with(['userOne.profile', 'userOne.privacySettings', 'userTwo.profile', 'userTwo.privacySettings'])
             ->latest('accepted_at')
             ->limit(18)
             ->get()
-            ->map(function (Friendship $friendship) use ($profileUser, $viewerFriendIds, $acceptedFriendIdsFor) {
+            ->map(function (Friendship $friendship) use ($request, $profileUser, $viewerFriendIds, $acceptedFriendIdsFor) {
                 $friend = $friendship->otherUser($profileUser);
 
                 if (! $friend) {
@@ -193,6 +213,13 @@ class ProfileController extends Controller
                     : $viewerFriendIds->intersect($acceptedFriendIdsFor($friend))->count();
 
                 $friend->setAttribute('common_friends_count', $commonCount);
+                $friend->setAttribute(
+                    'can_message_from_viewer',
+                    $request->user() && ! $request->user()->is($friend)
+                        ? $this->privacy->canMessage($request->user(), $friend)
+                        : false
+                );
+                $this->redactProfileUserForView($request, $friend);
 
                 return $friend;
             })
@@ -211,6 +238,8 @@ class ProfileController extends Controller
         $profileIsBlocked = $viewer && ! $isOwnProfile
             ? ($viewer->hasBlocked($profileUser) || $profileUser->hasBlocked($viewer))
             : false;
+
+        $this->redactProfileUserForView($request, $profileUser);
 
         return view($profileView, [
             'profileUser' => $profileUser,
@@ -236,6 +265,8 @@ class ProfileController extends Controller
             'profileCanRequestFriend' => $this->canRequestFriend($viewer, $profileUser, $friendship, $isOwnProfile, $profileIsBlocked),
             'profileCanMessage' => $this->canMessageProfile($viewer, $profileUser, $friendship, $isOwnProfile, $profileIsBlocked),
             'profileIsBlocked' => $profileIsBlocked,
+            'profileActivityVisible' => $profileActivityVisible,
+            'profileGamificationVisible' => $profileGamificationVisible,
             'socialiteMembers' => $sidebarData['members'] ?? collect(),
             'socialiteProfileStats' => $sidebarData['profileStats'] ?? [],
             'socialiteCrownsSummary' => $sidebarData['crownsSummary'] ?? ['balance' => 0, 'enabled' => false],
@@ -260,7 +291,7 @@ class ProfileController extends Controller
         }
 
         $profileUser = $user ?? $request->user();
-        $profileUser->loadMissing('profile');
+        $profileUser->loadMissing(['profile', 'privacySettings']);
 
         if (! $profileUser->profile) {
             $profileUser->profile()->create([
@@ -272,6 +303,9 @@ class ProfileController extends Controller
         $isOwnProfile = $request->user()?->is($profileUser) ?? false;
 
         $this->guardProfileVisibility($request, $profileUser, $isOwnProfile);
+
+        $profileActivityVisible = $this->privacy->canViewActivity($request->user(), $profileUser);
+        $profileGamificationVisible = $this->privacy->canViewGamification($request->user(), $profileUser);
 
         $profileUser->loadCount([
             'badges',
@@ -294,6 +328,7 @@ class ProfileController extends Controller
 
         $lastPost = $profileUser->feedPosts()
             ->where('status', 'published')
+            ->when(! $profileActivityVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->when(! $isOwnProfile, fn ($query) => $request->user() ? $query->where('visibility', '!=', 'private') : $query->where('visibility', 'public'))
             ->latest()
             ->first();
@@ -305,17 +340,20 @@ class ProfileController extends Controller
             ->first();
 
         $latestBadge = $profileUser->badges()
+            ->when(! $profileGamificationVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->orderByPivot('awarded_at', 'desc')
             ->orderBy('badges.sort_order')
             ->first();
 
-        $profileCompletedQuestCount = $profileUser->questProgress()
-            ->whereNotNull('completed_at')
-            ->count();
+        $profileCompletedQuestCount = $profileGamificationVisible
+            ? $profileUser->questProgress()->whereNotNull('completed_at')->count()
+            : 0;
 
-        $activeQuestCount = Quest::query()
-            ->where('is_active', true)
-            ->count();
+        $activeQuestCount = $profileGamificationVisible
+            ? Quest::query()->where('is_active', true)->count()
+            : 0;
+
+        $this->redactProfileUserForView($request, $profileUser);
 
         return view('profile.about', [
             'profileUser' => $profileUser,
@@ -328,6 +366,8 @@ class ProfileController extends Controller
             'latestBadge' => $latestBadge,
             'profileCompletedQuestCount' => $profileCompletedQuestCount,
             'activeQuestCount' => $activeQuestCount,
+            'profileActivityVisible' => $profileActivityVisible,
+            'profileGamificationVisible' => $profileGamificationVisible,
         ]);
     }
 
@@ -338,7 +378,7 @@ class ProfileController extends Controller
         }
 
         $profileUser = $user ?? $request->user();
-        $profileUser->loadMissing('profile');
+        $profileUser->loadMissing(['profile', 'privacySettings']);
 
         if (! $profileUser->profile) {
             $profileUser->profile()->create([
@@ -416,7 +456,7 @@ class ProfileController extends Controller
         );
 
         if ($friendModels->isNotEmpty()) {
-            $friendModels->loadMissing('profile');
+            $friendModels->loadMissing(['profile', 'privacySettings']);
             $friendModels->loadCount([
                 'activeTeams',
                 'feedPosts as visible_feed_posts_count' => function ($query): void {
@@ -446,6 +486,16 @@ class ProfileController extends Controller
             $friend->setAttribute('common_friends_count', $commonCount);
         });
 
+        $friendModels->each(function (User $friend) use ($request): void {
+            $friend->setAttribute(
+                'can_message_from_viewer',
+                $request->user() && ! $request->user()->is($friend)
+                    ? $this->privacy->canMessage($request->user(), $friend)
+                    : false
+            );
+            $this->redactProfileUserForView($request, $friend);
+        });
+
         $friendIds = $friendModels->pluck('id')->map(fn ($id): int => (int) $id)->values();
         $viewerFriendships = collect();
 
@@ -469,6 +519,8 @@ class ProfileController extends Controller
 
         $profileFriends->setCollection($friendModels);
 
+        $this->redactProfileUserForView($request, $profileUser);
+
         return view('profile.friends', [
             'profileUser' => $profileUser,
             'isOwnProfile' => $isOwnProfile,
@@ -488,7 +540,7 @@ class ProfileController extends Controller
         }
 
         $profileUser = $user ?? $request->user();
-        $profileUser->loadMissing('profile');
+        $profileUser->loadMissing(['profile', 'privacySettings']);
 
         if (! $profileUser->profile) {
             $profileUser->profile()->create([
@@ -500,6 +552,8 @@ class ProfileController extends Controller
         $isOwnProfile = $request->user()?->is($profileUser) ?? false;
 
         $this->guardProfileVisibility($request, $profileUser, $isOwnProfile);
+
+        abort_unless($this->privacy->canViewGamification($request->user(), $profileUser), 404);
 
         $profileUser->loadCount([
             'badges',
@@ -650,6 +704,8 @@ class ProfileController extends Controller
                 ->keyBy(fn (TeamMember $membership): int => (int) $membership->team_id);
         }
 
+        $this->redactProfileUserForView($request, $profileUser);
+
         return view('profile.teams', [
             'profileUser' => $profileUser,
             'isOwnProfile' => $isOwnProfile,
@@ -688,6 +744,21 @@ class ProfileController extends Controller
 
         if ($visibility === 'registered' && ! $request->user()) {
             abort(404);
+        }
+    }
+
+    private function redactProfileUserForView(Request $request, User $profileUser): void
+    {
+        if (! $this->privacy->canViewActivity($request->user(), $profileUser)) {
+            $profileUser->setAttribute('visible_feed_posts_count', 0);
+            $profileUser->setAttribute('moments_count', 0);
+            $profileUser->setAttribute('feed_comments_count', 0);
+        }
+
+        if (! $this->privacy->canViewGamification($request->user(), $profileUser)) {
+            $profileUser->setAttribute('level', 1);
+            $profileUser->setAttribute('xp_total', 0);
+            $profileUser->setAttribute('badges_count', 0);
         }
     }
 
@@ -927,15 +998,7 @@ class ProfileController extends Controller
             return false;
         }
 
-        $profileUser->loadMissing('privacySettings');
-        $allowMessagesFrom = (string) ($profileUser->privacySettings?->allow_messages_from ?? 'registered');
-
-        return match ($allowMessagesFrom) {
-            'everyone', 'registered' => true,
-            'following' => $friendship?->isAccepted() ?? false,
-            'nobody' => false,
-            default => false,
-        };
+        return $this->privacy->canMessage($viewer, $profileUser);
     }
 
     private function visibleFriendships(?User $viewer): Builder

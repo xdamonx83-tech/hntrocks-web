@@ -50,17 +50,20 @@
 </nav>
 @endif
 </div>
+@if($profileGamificationVisible)
 <div class="profile-level-ring" style="--profile-level-progress:{{ $profileLevelProgress }}%">
 <div><strong>{{ $profileLevel }}</strong><span>{{ __('hnt_preview.profile.level') }}</span></div>
 </div>
+@endif
 </div>
 <div class="profile-stat-labels">
-<span>{{ __('hnt_preview.profile.posts') }}</span><span>{{ __('hnt_preview.profile.moments') }}</span><span>{{ __('hnt_preview.profile.friends') }}</span><span>{{ __('hnt_preview.profile.rocks') }}</span>
+@if($profileActivityVisible)<span>{{ __('hnt_preview.profile.posts') }}</span><span>{{ __('hnt_preview.profile.moments') }}</span>@endif
+<span>{{ __('hnt_preview.profile.friends') }}</span>
+@if($profileGamificationVisible)<span>{{ __('hnt_preview.profile.rocks') }}</span>@endif
 </div>
 <div class="profile-stat-pipeline">
-<div class="yellow">{{ $profileFormatCount($profilePostsCount) }}</div>
-<div class="dark">{{ $profileFormatCount($profileMomentsCount) }}</div>
+@if($profileActivityVisible)<div class="yellow">{{ $profileFormatCount($profilePostsCount) }}</div><div class="dark">{{ $profileFormatCount($profileMomentsCount) }}</div>@endif
 <div class="hatch">{{ $profileFormatCount($profileFriendsTotal) }}</div>
-<div class="grey">{{ $profileFormatCount($profileRocks) }}</div>
+@if($profileGamificationVisible)<div class="grey">{{ $profileFormatCount($profileRocks) }}</div>@endif
 </div>
 </section>

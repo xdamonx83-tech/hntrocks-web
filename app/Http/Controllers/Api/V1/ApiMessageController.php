@@ -8,6 +8,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Services\UserBlockService;
+use App\Services\UserPrivacyService;
 use App\Models\UserBlock;
 use App\Services\MessageBroadcastService;
 use App\Services\MessagePushService;
@@ -19,8 +20,10 @@ use Illuminate\Support\Facades\Validator;
 
 class ApiMessageController extends Controller
 {
-    public function __construct(private readonly UserBlockService $blocks)
-    {
+    public function __construct(
+        private readonly UserBlockService $blocks,
+        private readonly UserPrivacyService $privacy,
+    ) {
     }
 
     public function index(Request $request): JsonResponse
@@ -94,6 +97,10 @@ class ApiMessageController extends Controller
             abort(403, __('ui.message_blocked_unavailable'));
         }
 
+        if (! $this->privacy->canMessage($sender, $user)) {
+            abort(403, __('settings.privacy_messages_denied'));
+        }
+
         $conversation = $this->privateConversationFor($sender, $user);
         $conversation->markReadFor($sender);
         $conversation->loadMissing(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings']);
@@ -123,7 +130,7 @@ class ApiMessageController extends Controller
         abort_unless($conversation->isParticipant($user), 403);
 
         if (! $this->canMessage($conversation, $user)) {
-            abort(403, __('ui.message_blocked_unavailable'));
+            abort(403, $this->messageDeniedText($conversation, $user));
         }
 
         $validator = Validator::make($request->all(), [
@@ -198,7 +205,7 @@ class ApiMessageController extends Controller
         abort_unless($conversation->type === 'private', 403);
 
         if (! $this->canMessage($conversation, $user)) {
-            abort(403, __('ui.message_blocked_unavailable'));
+            abort(403, $this->messageDeniedText($conversation, $user));
         }
 
         $validator = Validator::make($request->all(), [
@@ -274,7 +281,7 @@ class ApiMessageController extends Controller
             'viewer_state' => [
                 'has_blocked' => $hasBlocked,
                 'is_blocked_by' => $isBlockedBy,
-                'can_message' => ! $hasBlocked && ! $isBlockedBy,
+                'can_message' => $this->canMessage($conversation, $user),
             ],
         ];
     }
@@ -395,6 +402,21 @@ class ApiMessageController extends Controller
             return true;
         }
 
-        return ! $viewer->hasBlocked($partner) && ! $partner->hasBlocked($viewer);
+        if ($viewer->hasBlocked($partner) || $partner->hasBlocked($viewer)) {
+            return false;
+        }
+
+        return $conversation->type !== 'private' || $this->privacy->canMessage($viewer, $partner);
+    }
+
+    private function messageDeniedText(Conversation $conversation, User $viewer): string
+    {
+        $partner = $conversation->otherParticipant($viewer);
+
+        if ($partner && ($viewer->hasBlocked($partner) || $partner->hasBlocked($viewer))) {
+            return __('ui.message_blocked_unavailable');
+        }
+
+        return __('settings.privacy_messages_denied');
     }
 }

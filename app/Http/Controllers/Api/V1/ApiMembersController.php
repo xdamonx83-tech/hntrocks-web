@@ -21,13 +21,16 @@ use Illuminate\Http\Request;
 use App\Services\NotificationService;
 use App\Services\SecurityLogService;
 use App\Services\UserBlockService;
+use App\Services\UserPrivacyService;
 use App\Services\Search\PlayerSearchQuery;
 use Illuminate\Support\Facades\Storage;
 
 class ApiMembersController extends Controller
 {
-    public function __construct(private readonly UserBlockService $blocks)
-    {
+    public function __construct(
+        private readonly UserBlockService $blocks,
+        private readonly UserPrivacyService $privacy,
+    ) {
     }
 
     private const HUNTER_TRUST_TAGS = [
@@ -402,7 +405,8 @@ class ApiMembersController extends Controller
             return null;
         }
 
-        $other->loadMissing('profile');
+        $other->loadMissing(['profile', 'privacySettings']);
+        $gamificationVisible = $this->privacy->canViewGamification($viewer, $other);
 
         return [
             'friendship_id' => (int) $friendship->id,
@@ -419,8 +423,9 @@ class ApiMembersController extends Controller
                 'username' => (string) $other->username,
                 'avatar_url' => $other->avatar_path ? Storage::disk('public')->url($other->avatar_path) : asset('assets/vikinger/img/default-avatar.svg'),
                 'cover_url' => $other->cover_path ? Storage::disk('public')->url($other->cover_path) : asset('assets/vikinger/img/default-cover.svg'),
-                'level' => (int) ($other->level ?? 1),
-                'xp_total' => (int) ($other->xp_total ?? 0),
+                'gamification_visible' => $gamificationVisible,
+                'level' => $gamificationVisible ? (int) ($other->level ?? 1) : null,
+                'xp_total' => $gamificationVisible ? (int) ($other->xp_total ?? 0) : null,
                 'trust_score' => (int) ($other->trust_score ?? 0),
                 'profile' => [
                     'headline' => (string) ($other->profile?->headline ?? ''),
@@ -437,6 +442,16 @@ class ApiMembersController extends Controller
     {
         $section = strtolower(str_replace('_', '-', trim($section)));
         $limit = max(1, min(100, (int) $request->integer('limit', 100)));
+        $activityVisible = $this->privacy->canViewActivity($request->user(), $user);
+        $gamificationVisible = $this->privacy->canViewGamification($request->user(), $user);
+
+        if (in_array($section, ['posts', 'moments'], true) && ! $activityVisible) {
+            return $this->hiddenProfileSection($section, 'activity', $limit);
+        }
+
+        if (in_array($section, ['badges', 'quests'], true) && ! $gamificationVisible) {
+            return $this->hiddenProfileSection($section, 'gamification', $limit);
+        }
 
         return match ($section) {
             'badges' => $this->profileBadgesPayload($request, $user, $limit),
@@ -487,7 +502,7 @@ class ApiMembersController extends Controller
         $query = $this->visibleFriendships($request->user())
             ->forUser($user)
             ->where('status', Friendship::STATUS_ACCEPTED)
-            ->with(['userOne.profile', 'userTwo.profile'])
+            ->with(['userOne.profile', 'userOne.privacySettings', 'userTwo.profile', 'userTwo.privacySettings'])
             ->latest('accepted_at');
 
         $total = (clone $query)->count();
@@ -495,7 +510,7 @@ class ApiMembersController extends Controller
         $items = $query
             ->limit($limit)
             ->get()
-            ->map(function (Friendship $friendship) use ($user, $viewerFriendIds): ?array {
+            ->map(function (Friendship $friendship) use ($request, $user, $viewerFriendIds): ?array {
                 $friend = $friendship->otherUser($user);
 
                 if (! $friend || $friend->status !== 'active') {
@@ -512,7 +527,9 @@ class ApiMembersController extends Controller
                     'username' => (string) $friend->username,
                     'avatar_url' => $friend->avatar_path ? Storage::disk('public')->url($friend->avatar_path) : asset('assets/vikinger/img/default-avatar.svg'),
                     'headline' => (string) ($friend->profile?->headline ?? ''),
-                    'level' => (int) ($friend->level ?? 1),
+                    'level' => $this->privacy->canViewGamification($request->user(), $friend)
+                        ? (int) ($friend->level ?? 1)
+                        : null,
                     'common_friends_count' => $commonCount,
                     'accepted_at' => $friendship->accepted_at?->toISOString(),
                 ];
@@ -728,6 +745,30 @@ class ApiMembersController extends Controller
         ];
     }
 
+    private function hiddenProfileSection(string $section, string $privacyScope, int $limit): array
+    {
+        $payload = [
+            'section' => $section,
+            'items' => [],
+            'privacy' => [
+                'hidden' => true,
+                'scope' => $privacyScope,
+            ],
+            'meta' => [
+                'total' => 0,
+                'limit' => $limit,
+                'truncated' => false,
+            ],
+        ];
+
+        if ($section === 'posts') {
+            $payload['comments'] = [];
+            $payload['meta']['comments_total'] = 0;
+        }
+
+        return $payload;
+    }
+
     private function badgePayload($badge, string $locale = 'de'): array
     {
         return [
@@ -850,12 +891,15 @@ class ApiMembersController extends Controller
     private function publicProfileSummary(Request $request, User $user, bool $isOwnProfile): array
     {
         $locale = $this->resolveApiLocale($request);
+        $activityVisible = $this->privacy->canViewActivity($request->user(), $user);
+        $gamificationVisible = $this->privacy->canViewGamification($request->user(), $user);
         $level = max(1, (int) ($user->level ?: 1));
         $xpTotal = max(0, (int) ($user->xp_total ?: 0));
         $nextLevelXp = max(250, $level * 250);
         $progressPercent = $nextLevelXp > 0 ? min(100, (int) floor(($xpTotal / $nextLevelXp) * 100)) : 0;
 
         $latestBadges = $user->badges()
+            ->when(! $gamificationVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->orderByPivot('awarded_at', 'desc')
             ->orderBy('badges.sort_order')
             ->limit(12)
@@ -865,6 +909,7 @@ class ApiMembersController extends Controller
 
         $quests = Quest::query()
             ->where('is_active', true)
+            ->when(! $gamificationVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->with(['progress' => fn ($query) => $query->where('user_id', $user->id)])
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -889,11 +934,11 @@ class ApiMembersController extends Controller
         $friendsPreview = $this->visibleFriendships($request->user())
             ->forUser($user)
             ->where('status', Friendship::STATUS_ACCEPTED)
-            ->with(['userOne.profile', 'userTwo.profile'])
+            ->with(['userOne.profile', 'userOne.privacySettings', 'userTwo.profile', 'userTwo.privacySettings'])
             ->latest('accepted_at')
             ->limit(6)
             ->get()
-            ->map(function (Friendship $friendship) use ($user, $viewerFriendIds, $acceptedFriendIdsFor): ?array {
+            ->map(function (Friendship $friendship) use ($request, $user, $viewerFriendIds, $acceptedFriendIdsFor): ?array {
                 $friend = $friendship->otherUser($user);
 
                 if (! $friend) {
@@ -910,7 +955,9 @@ class ApiMembersController extends Controller
                     'username' => (string) $friend->username,
                     'avatar_url' => $friend->avatar_path ? Storage::disk('public')->url($friend->avatar_path) : asset('assets/vikinger/img/default-avatar.svg'),
                     'headline' => (string) ($friend->profile?->headline ?? ''),
-                    'level' => (int) ($friend->level ?? 1),
+                    'level' => $this->privacy->canViewGamification($request->user(), $friend)
+                        ? (int) ($friend->level ?? 1)
+                        : null,
                     'common_friends_count' => $commonCount,
                     'accepted_at' => $friendship->accepted_at?->toISOString(),
                 ];
@@ -944,6 +991,7 @@ class ApiMembersController extends Controller
         $recentMoments = $user->moments()
             ->with(['user.profile', 'media', 'cover'])
             ->where('status', 'published')
+            ->when(! $activityVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->where(function ($publishedQuery): void {
                 $publishedQuery->whereNull('published_at')->orWhere('published_at', '<=', now());
             })
@@ -980,6 +1028,7 @@ class ApiMembersController extends Controller
             })
             ->withCount(['comments', 'reactions'])
             ->where('status', 'published')
+            ->when(! $activityVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->whereNull('team_id')
             ->when(! $isOwnProfile, fn ($query) => $query->whereIn('visibility', ['public', 'followers']))
             ->latest()
@@ -990,6 +1039,7 @@ class ApiMembersController extends Controller
 
         $recentComments = $user->feedComments()
             ->with(['post.user.profile'])
+            ->when(! $activityVisible, fn ($query) => $query->whereRaw('1 = 0'))
             ->whereHas('post', function ($postQuery) use ($isOwnProfile): void {
                 $postQuery
                     ->where('status', 'published')
@@ -1014,8 +1064,12 @@ class ApiMembersController extends Controller
             ->values();
 
         return [
+            'privacy' => [
+                'activity_visible' => $activityVisible,
+                'gamification_visible' => $gamificationVisible,
+            ],
             'hunter_trust' => $this->hunterTrustSummary($user),
-            'progress' => [
+            'progress' => $gamificationVisible ? [
                 'level' => $level,
                 'xp_total' => $xpTotal,
                 'next_level' => $level + 1,
@@ -1024,19 +1078,19 @@ class ApiMembersController extends Controller
                 'progress_percent' => $progressPercent,
                 'trust_score' => (int) ($user->trust_score ?? 0),
                 'last_xp_at' => $user->last_xp_at?->toISOString(),
-            ],
+            ] : null,
             'counts' => [
-                'badges' => $user->badges()->count(),
-                'active_quests' => Quest::query()->where('is_active', true)->count(),
-                'completed_quests' => $user->questProgress()->whereNotNull('completed_at')->count(),
+                'badges' => $gamificationVisible ? $user->badges()->count() : 0,
+                'active_quests' => $gamificationVisible ? Quest::query()->where('is_active', true)->count() : 0,
+                'completed_quests' => $gamificationVisible ? $user->questProgress()->whereNotNull('completed_at')->count() : 0,
                 'friends' => $user->friendsCount(),
                 'teams' => $user->activeTeams()->count(),
-                'posts' => $user->feedPosts()
+                'posts' => $activityVisible ? $user->feedPosts()
                     ->where('status', 'published')
                     ->when(! $isOwnProfile, fn ($query) => $query->where('visibility', '!=', 'private'))
-                    ->count(),
-                'comments' => $user->feedComments()->count(),
-                'moments' => $user->moments()->count(),
+                    ->count() : 0,
+                'comments' => $activityVisible ? $user->feedComments()->count() : 0,
+                'moments' => $activityVisible ? $user->moments()->count() : 0,
             ],
             'latest_badges' => $latestBadges,
             'quests' => $quests,
@@ -1132,7 +1186,10 @@ class ApiMembersController extends Controller
                 && ! $friendship
                 && ! $hasBlocked
                 && ! $isBlockedBy,
-            'can_message' => ! $isOwnProfile && ! $hasBlocked && ! $isBlockedBy,
+            'can_message' => ! $isOwnProfile
+                && ! $hasBlocked
+                && ! $isBlockedBy
+                && $this->privacy->canMessage($viewer, $profileUser),
         ];
     }
 

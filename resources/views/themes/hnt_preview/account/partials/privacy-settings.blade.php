@@ -27,15 +27,16 @@
 <small>{{ __('settings.privacy_profile_hint') }}</small>
 @error('profile_visibility')<small role="alert">{{ $message }}</small>@enderror
 </label>
-<label class="settings-field-card is-placeholder" aria-disabled="true" for="privacyMessages">
+<label class="settings-field-card" for="privacyMessages">
 <span>{{ __('ui.allow_messages_from') }}</span>
-<select id="privacyMessages" disabled>
-<option value="everyone" @selected($privacySettings->allow_messages_from === 'everyone')>{{ __('ui.allow_messages_everyone') }}</option>
-<option value="registered" @selected($privacySettings->allow_messages_from === 'registered')>{{ __('ui.allow_messages_registered') }}</option>
-<option value="following" @selected($privacySettings->allow_messages_from === 'following')>{{ __('ui.allow_messages_following') }}</option>
-<option value="nobody" @selected($privacySettings->allow_messages_from === 'nobody')>{{ __('ui.allow_messages_nobody') }}</option>
+<select id="privacyMessages" name="allow_messages_from" required>
+<option value="everyone" @selected(old('allow_messages_from', $privacySettings->allow_messages_from) === 'everyone')>{{ __('ui.allow_messages_everyone') }}</option>
+<option value="registered" @selected(old('allow_messages_from', $privacySettings->allow_messages_from) === 'registered')>{{ __('ui.allow_messages_registered') }}</option>
+<option value="following" @selected(old('allow_messages_from', $privacySettings->allow_messages_from) === 'following')>{{ __('ui.allow_messages_following') }}</option>
+<option value="nobody" @selected(old('allow_messages_from', $privacySettings->allow_messages_from) === 'nobody')>{{ __('ui.allow_messages_nobody') }}</option>
 </select>
-<small><b class="settings-inline-planned">{{ __('settings.planned_badge') }}</b>{{ __('settings.privacy_messages_planned_hint') }}</small>
+<small>{{ __('settings.privacy_messages_hint') }}</small>
+@error('allow_messages_from')<small role="alert">{{ $message }}</small>@enderror
 </label>
 </div>
 <div class="settings-row-list privacy">
@@ -61,11 +62,12 @@
 <input id="privacyActivityFeed" name="show_activity_feed" type="checkbox" value="1" @checked(old('show_activity_feed', $privacySettings->show_activity_feed))>
 <i></i>
 </label>
-<article class="settings-switch-row is-placeholder" aria-disabled="true">
+<label class="settings-switch-row" for="privacyGamification">
 <span class="settings-row-icon"><svg><use href="#i-plus"></use></svg></span>
 <span><strong>{{ __('ui.show_gamification') }}</strong><small>{{ __('ui.show_gamification_text') }}</small></span>
-<span class="settings-planned-badge">{{ __('settings.planned_badge') }}</span>
-</article>
+<input id="privacyGamification" name="show_gamification" type="checkbox" value="1" @checked(old('show_gamification', $privacySettings->show_gamification))>
+<i></i>
+</label>
 <article class="settings-switch-row is-placeholder" aria-disabled="true">
 <span class="settings-row-icon"><svg><use href="#i-sliders"></use></svg></span>
 <span><strong>{{ __('ui.data_usage_consent') }}</strong><small>{{ __('ui.data_usage_consent_text') }}</small></span>

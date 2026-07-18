@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\MessageBroadcastService;
 use App\Services\MessagePushService;
 use App\Services\UserBlockService;
+use App\Services\UserPrivacyService;
 use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -19,8 +20,10 @@ use Illuminate\View\View;
 
 class MessageController extends Controller
 {
-    public function __construct(private readonly UserBlockService $blocks)
-    {
+    public function __construct(
+        private readonly UserBlockService $blocks,
+        private readonly UserPrivacyService $privacy,
+    ) {
     }
 
     public function index(Request $request): View
@@ -76,6 +79,14 @@ class MessageController extends Controller
             }
 
             return redirect()->route('messages.index')->withErrors(['recipient_id' => __('ui.message_blocked_unavailable')]);
+        }
+
+        if (! $this->privacy->canMessage($sender, $user)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('settings.privacy_messages_denied')], 403);
+            }
+
+            return redirect()->route('messages.index')->withErrors(['recipient_id' => __('settings.privacy_messages_denied')]);
         }
 
         $conversation = $this->existingPrivateConversationFor($sender, $user);
@@ -214,6 +225,14 @@ class MessageController extends Controller
             return back()->withErrors(['recipient_id' => __('ui.message_blocked_unavailable')]);
         }
 
+        if (! $this->privacy->canMessage($sender, $recipient)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('settings.privacy_messages_denied')], 403);
+            }
+
+            return back()->withErrors(['recipient_id' => __('settings.privacy_messages_denied')]);
+        }
+
         $conversation = $this->privateConversationFor($sender, $recipient);
         $message = $conversation->messages()->create([
             'user_id' => $sender->id,
@@ -262,10 +281,10 @@ class MessageController extends Controller
 
         if (! $this->canMessage($conversation, $request->user())) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => __('ui.message_blocked_unavailable')], 403);
+                return response()->json(['message' => $this->messageDeniedText($conversation, $request->user())], 403);
             }
 
-            return back()->withErrors(['body' => __('ui.message_blocked_unavailable')]);
+            return back()->withErrors(['body' => $this->messageDeniedText($conversation, $request->user())]);
         }
 
         $validated = $request->validate([
@@ -317,7 +336,7 @@ class MessageController extends Controller
         abort_unless($conversation->type === 'private', 403);
 
         if (! $this->canMessage($conversation, $user)) {
-            abort(403, __('ui.message_blocked_unavailable'));
+            abort(403, $this->messageDeniedText($conversation, $user));
         }
 
         $validator = Validator::make($request->all(), [
@@ -358,8 +377,11 @@ class MessageController extends Controller
 
     private function recipientList(User $user)
     {
-        return $this->blocks->applyToUserQuery(User::query(), $user)
+        $query = $this->blocks->applyToUserQuery(User::query(), $user)
             ->where('id', '!=', $user->id)
+            ->where('status', 'active');
+
+        return $this->privacy->applyToMessageRecipientQuery($query, $user)
             ->orderBy('name')
             ->limit(100)
             ->get(['id', 'name', 'username', 'avatar_path']);
@@ -433,7 +455,22 @@ class MessageController extends Controller
             return true;
         }
 
-        return ! $viewer->hasBlocked($partner) && ! $partner->hasBlocked($viewer);
+        if ($viewer->hasBlocked($partner) || $partner->hasBlocked($viewer)) {
+            return false;
+        }
+
+        return $conversation->type !== 'private' || $this->privacy->canMessage($viewer, $partner);
+    }
+
+    private function messageDeniedText(Conversation $conversation, User $viewer): string
+    {
+        $partner = $conversation->otherParticipant($viewer);
+
+        if ($partner && ($viewer->hasBlocked($partner) || $partner->hasBlocked($viewer))) {
+            return __('ui.message_blocked_unavailable');
+        }
+
+        return __('settings.privacy_messages_denied');
     }
 
     private function normalizeMessageType(?string $messageType): string

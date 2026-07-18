@@ -32,6 +32,7 @@
 <div><dt>Mitglied seit</dt><dd>{{ $profileJoinedLabel }}</dd></div>
 </dl>
 </section>
+@if($profileGamificationVisible)
 <section class="profile-level-card">
 <div class="profile-level-top">
 <div><span>LEVEL</span><strong>{{ $profileLevel }}</strong></div>
@@ -44,4 +45,5 @@
 <span><strong>{{ $profileFormatCount($profileBadgesCount) }}</strong><small>Badges</small></span>
 </div>
 </section>
+@endif
 </div>
