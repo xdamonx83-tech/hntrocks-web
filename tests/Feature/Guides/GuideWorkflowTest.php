@@ -444,6 +444,45 @@ class GuideWorkflowTest extends TestCase
             ->assertDontSee('Secret future title');
     }
 
+    public function test_guide_overview_widgets_use_real_published_data(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $firstAuthor = User::factory()->create(['name' => 'Real Guide Author']);
+        $secondAuthor = User::factory()->create(['name' => 'Second Real Author']);
+        $viewer = User::factory()->create();
+
+        $featured = $this->publishedGuide($firstAuthor, $admin);
+        $featured->update([
+            'is_featured' => true,
+            'helpful_count' => 7,
+            'comments_count' => 2,
+        ]);
+
+        $secondGuide = $this->publishedGuide($secondAuthor, $admin);
+        $secondGuide->update(['helpful_count' => 3]);
+
+        $this->actingAs($viewer)
+            ->postJson(route('guides.bookmark.toggle', $featured))
+            ->assertOk()
+            ->assertJsonPath('saved', true);
+
+        $response = $this->actingAs($viewer)->get(route('guides.index'));
+
+        $response
+            ->assertOk()
+            ->assertSee($featured->publishedRevision->title)
+            ->assertSee($secondGuide->publishedRevision->title)
+            ->assertSee('Real Guide Author')
+            ->assertDontSee('Erica Wyatt')
+            ->assertViewHas('publishedCount', 2)
+            ->assertViewHas('authorCount', 2)
+            ->assertViewHas('helpfulCount', 10)
+            ->assertViewHas('featuredGuide', fn (?Guide $guide) => $guide?->is($featured))
+            ->assertViewHas('categories', fn ($categories) => (int) $categories->sum('published_guides_count') === 2)
+            ->assertViewHas('topAuthors', fn ($authors) => $authors->first()?->is($firstAuthor))
+            ->assertViewHas('bookmarkedGuideIds', fn (array $ids) => in_array($featured->id, $ids, true));
+    }
+
     private function draft(User $author): Guide
     {
         return app(GuideWorkflowService::class)->create($author);
