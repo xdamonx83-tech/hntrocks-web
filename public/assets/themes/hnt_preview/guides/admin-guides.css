@@ -1,0 +1,78 @@
+.admin-guides-head { margin-bottom: 18px; }
+.admin-guides-head h1 { margin: 3px 0; font-size: 28px; }
+.admin-guides-head span { color: var(--admin-muted); font-size: 13px; }
+.admin-guides-filters {
+  display: grid;
+  grid-template-columns: minmax(220px,1fr) repeat(3,minmax(130px,180px)) 150px auto;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-panel);
+}
+.admin-guides-filters input,.admin-guides-filters select,.admin-guides-filters button,
+.admin-guide-decision textarea {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-panel-soft);
+}
+.admin-guides-filters button { border: 0; background: var(--admin-sidebar); color: #fff; cursor: pointer; }
+.admin-guides-layout { display: grid; grid-template-columns: 300px minmax(0,1fr) 280px; gap: 16px; align-items: start; }
+.admin-guides-queue,.admin-guide-preview,.admin-guide-decision {
+  overflow: hidden;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius);
+  background: var(--admin-panel);
+  box-shadow: var(--admin-shadow);
+}
+.admin-guides-queue { position: sticky; top: 90px; max-height: calc(100vh - 120px); overflow-y: auto; }
+.admin-guides-queue > header { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--admin-line); }
+.admin-guides-queue > a { display: grid; gap: 5px; padding: 14px 16px; border-bottom: 1px solid var(--admin-line); text-decoration: none; }
+.admin-guides-queue > a.active { background: var(--admin-gold-soft); }
+.admin-guides-queue > a strong { font-size: 13px; }
+.admin-guides-queue > a small,.admin-guides-queue > a em { color: var(--admin-muted); font-size: 11px; font-style: normal; }
+.admin-guides-queue > p { padding: 20px; color: var(--admin-muted); }
+.admin-guides-pagination { padding: 12px; font-size: 11px; }
+.admin-guides-pagination nav > div:first-child { display: none; }
+.admin-guide-preview > header { display: flex; justify-content: space-between; gap: 18px; padding: 22px; }
+.admin-guide-preview > header span { color: var(--admin-muted); font-size: 11px; }
+.admin-guide-preview > header h2 { margin: 5px 0; font-size: 25px; }
+.admin-guide-preview > header p { max-width: 650px; margin: 0; color: var(--admin-muted); }
+.admin-guide-author { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+.admin-guide-author img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.admin-guide-author span { display: grid; }
+.admin-guide-cover { width: calc(100% - 44px); max-height: 420px; display: block; margin: 0 22px; border-radius: 16px; object-fit: cover; }
+.admin-guide-content { padding: 26px; font-size: 15px; }
+.admin-guide-content .guide-content-paragraph { color: #555; font-size: 14px; line-height: 1.7; }
+.admin-guide-content .guide-content-heading h2 { margin: 25px 0 10px; font-size: 23px; }
+.admin-guide-content .guide-content-list,.admin-guide-content .guide-content-callout { padding: 16px; border-radius: 14px; background: var(--admin-panel-soft); }
+.admin-guide-content .guide-content-list li,.admin-guide-content .guide-content-callout p { font-size: 13px; }
+.admin-guide-content .guide-content-image img { width: 100%; max-height: 520px; object-fit: contain; border-radius: 14px; }
+.admin-guide-diff,.admin-guide-history { margin: 0 22px 22px; padding: 18px; border: 1px solid var(--admin-line); border-radius: 16px; }
+.admin-guide-diff h3,.admin-guide-history h3 { margin-top: 0; }
+.admin-guide-diff > div { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.admin-guide-diff article { padding: 14px; border-radius: 12px; background: var(--admin-panel-soft); }
+.admin-guide-diff article span { display: block; margin-bottom: 5px; color: var(--admin-muted); font-size: 11px; }
+.admin-guide-diff article p { color: var(--admin-muted); font-size: 12px; }
+.admin-guide-history article { display: grid; gap: 3px; padding: 10px 0; border-bottom: 1px solid var(--admin-line); }
+.admin-guide-history article span { color: var(--admin-muted); font-size: 11px; }
+.admin-guide-history article p { margin: 4px 0 0; }
+.admin-guide-decision { position: sticky; top: 90px; padding: 18px; }
+.admin-guide-decision section,.admin-guide-decision form { display: grid; gap: 10px; }
+.admin-guide-decision h3 { margin: 0 0 5px; }
+.admin-guide-decision label { display: grid; gap: 6px; color: var(--admin-muted); font-size: 12px; }
+.admin-guide-decision label:has(input[type="checkbox"]) { grid-template-columns: auto 1fr; align-items: center; padding: 9px; border-radius: 10px; background: var(--admin-panel-soft); color: var(--admin-text); }
+.admin-guide-decision textarea { min-height: 120px; padding: 10px; resize: vertical; }
+.admin-guide-decision button { min-height: 42px; border: 0; border-radius: 10px; background: var(--admin-sidebar); color: #fff; cursor: pointer; }
+.admin-guide-decision button.approve { background: var(--admin-green); }
+.admin-guide-decision button.reject { background: var(--admin-red); }
+.guide-status { width: max-content; padding: 4px 8px; border-radius: 999px; background: #eee; font-size: 10px; }
+.guide-status.pending_review { background: var(--admin-gold-soft); color: #755a14; }
+.guide-status.published { background: #def2e8; color: var(--admin-green); }
+.guide-status.rejected,.guide-status.archived,.guide-status.changes_requested { background: #fae3df; color: var(--admin-red); }
+.admin-guide-empty { min-height: 300px; display: grid; place-items: center; color: var(--admin-muted); }
+@media(max-width:1350px){.admin-guides-layout{grid-template-columns:270px minmax(0,1fr)}.admin-guide-decision{grid-column:1/-1;position:static}.admin-guide-decision section{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:950px){.admin-guides-filters{grid-template-columns:1fr 1fr}.admin-guides-layout{grid-template-columns:1fr}.admin-guides-queue{position:static;max-height:450px}.admin-guide-preview>header{flex-direction:column}.admin-guide-diff>div{grid-template-columns:1fr}}

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cup;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
+use App\Models\Guide;
 use App\Models\HntMap;
 use App\Models\HntMapMarker;
 use App\Models\LfgPost;
@@ -42,6 +43,7 @@ class SearchController extends Controller
             'lfg' => ['label' => 'LFG', 'icon' => 'ph-crosshair'],
             'maps' => ['label' => 'Maps', 'icon' => 'ph-map-trifold'],
             'cups' => ['label' => 'Cups', 'icon' => 'ph-trophy'],
+            'guides' => ['label' => __('guides.title'), 'icon' => 'ph-book-open-text'],
         ];
 
         if (! array_key_exists($activeType, $types)) {
@@ -81,6 +83,10 @@ class SearchController extends Controller
 
             if ($this->shouldSearch($activeType, 'cups')) {
                 $results['cups'] = $this->cups($like);
+            }
+
+            if ($this->shouldSearch($activeType, 'guides')) {
+                $results['guides'] = $this->guides($like, $viewer);
             }
         }
 
@@ -336,6 +342,49 @@ class SearchController extends Controller
                 'url' => route('cups.show', $cup),
                 'icon' => 'ph-trophy',
                 'image' => null,
+            ]);
+    }
+
+    private function guides(string $like, ?User $viewer): Collection
+    {
+        $blockedIds = $viewer ? $this->blocks->blockedUserIds($viewer) : [];
+
+        return Guide::query()
+            ->published()
+            ->with(['publishedRevision.category', 'publishedRevision.coverMedia', 'author.profile'])
+            ->when($blockedIds !== [], fn (Builder $query) => $query->whereNotIn('author_id', $blockedIds))
+            ->where(function (Builder $query) use ($like): void {
+                $query->whereHas('publishedRevision', function (Builder $revision) use ($like): void {
+                    $revision
+                        ->where('title', 'like', $like)
+                        ->orWhere('summary', 'like', $like)
+                        ->orWhere('tags', 'like', $like)
+                        ->orWhereHas('category', fn (Builder $category) => $category
+                            ->where('name_de', 'like', $like)
+                            ->orWhere('name_en', 'like', $like));
+                })->orWhereHas('author', fn (Builder $author) => $author
+                    ->where('name', 'like', $like)
+                    ->orWhere('username', 'like', $like));
+            })
+            ->latest('published_at')
+            ->limit(8)
+            ->get()
+            ->map(fn (Guide $guide): array => [
+                'title' => $guide->publishedRevision?->title ?: __('guides.title'),
+                'subtitle' => collect([
+                    $guide->publishedRevision?->category?->label(),
+                    $guide->author?->username ? '@'.$guide->author->username : $guide->author?->name,
+                ])->filter()->implode(' · '),
+                'text' => \Illuminate\Support\Str::limit((string) $guide->publishedRevision?->summary, 170),
+                'url' => route('guides.show', $guide),
+                'icon' => 'ph-book-open-text',
+                'image' => $guide->publishedRevision?->cover_media_id
+                    ? route('guides.media.show', $guide->publishedRevision->cover_media_id)
+                    : null,
+                'meta' => [
+                    ['icon' => 'ph-thumbs-up', 'label' => number_format($guide->helpful_count)],
+                    ['icon' => 'ph-chat-circle', 'label' => number_format($guide->comments_count)],
+                ],
             ]);
     }
 }

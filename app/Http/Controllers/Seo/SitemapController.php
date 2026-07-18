@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cup;
 use App\Models\CupIdea;
 use App\Models\HntMap;
+use App\Models\Guide;
 use App\Models\LoadoutChallenge;
 use App\Models\MomentSpotlight;
 use App\Models\User;
@@ -39,6 +40,7 @@ class SitemapController extends Controller
             $this->url(route('cup-ideas.index'), now(), 'weekly', '0.7'),
             $this->url(route('moment-of-week.index'), now(), 'weekly', '0.7'),
             $this->url(route('maps.index'), $mapsLastModified, 'weekly', '0.9'),
+            $this->url(route('guides.index'), now(), 'daily', '0.8'),
             $this->url(route('legal.impressum'), now(), 'yearly', '0.3'),
             $this->url(route('legal.datenschutz'), now(), 'yearly', '0.3'),
             $this->url(route('legal.nutzungsbedingungen'), now(), 'yearly', '0.3'),
@@ -60,6 +62,17 @@ class SitemapController extends Controller
                 ->get(['id', 'slug', 'updated_at', 'created_at'])
                 ->each(function (Cup $cup) use ($urls): void {
                     $urls->push($this->url(route('cups.show', $cup), $cup->updated_at ?: $cup->created_at, 'weekly', '0.8'));
+                });
+        }
+
+        if (Schema::hasTable('guides')) {
+            Guide::query()
+                ->published()
+                ->orderByDesc('updated_at')
+                ->limit(500)
+                ->get(['id', 'slug', 'updated_at', 'published_at', 'current_published_revision_id', 'archived_at'])
+                ->each(function (Guide $guide) use ($urls): void {
+                    $urls->push($this->url(route('guides.show', $guide), $guide->updated_at ?: $guide->published_at, 'weekly', '0.7'));
                 });
         }
 

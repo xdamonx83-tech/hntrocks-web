@@ -15,6 +15,7 @@ class NotificationSettingsGroups
             'gamification' => ['title' => __('ui.notification_gamification'), 'text' => __('ui.notification_gamification_text')],
             'moments' => ['title' => __('ui.notification_moments'), 'text' => __('ui.notification_moments_text')],
             'cups' => ['title' => __('ui.notification_cups'), 'text' => __('ui.notification_cups_text')],
+            'guides' => ['title' => __('guides.notifications.settings_title'), 'text' => __('guides.notifications.settings_text')],
             'referrals' => ['title' => __('ui.notification_referrals'), 'text' => __('ui.notification_referrals_text')],
         ];
     }

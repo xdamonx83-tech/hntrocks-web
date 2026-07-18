@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\AdminAppRemoteConfigController;
 use App\Http\Controllers\Admin\AdminAppRemoteFeedCardController;
 use App\Http\Controllers\Admin\AdminCampaignLinkController;
 use App\Http\Controllers\Admin\AdminGamificationController;
+use App\Http\Controllers\Admin\AdminGuideController;
 use App\Http\Controllers\Admin\AdminHuntNewsController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminThemePreviewController;
@@ -55,6 +56,12 @@ use App\Http\Controllers\Feed\FeedReactionController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Friends\FriendshipController;
 use App\Http\Controllers\Gamification\GamificationController;
+use App\Http\Controllers\Guides\GuideBookmarkController;
+use App\Http\Controllers\Guides\GuideCommentController;
+use App\Http\Controllers\Guides\GuideController;
+use App\Http\Controllers\Guides\GuideDashboardController;
+use App\Http\Controllers\Guides\GuideHelpfulController;
+use App\Http\Controllers\Guides\GuideMediaController;
 use App\Http\Controllers\Hashtags\HashtagController;
 use App\Http\Controllers\LFG\LfgApplicationController;
 use App\Http\Controllers\LFG\LfgController;
@@ -144,6 +151,8 @@ Route::post('/maps/markers/{marker}/vote', [MapMarkerVoteController::class, 'sto
 Route::get('/maps/markers/{marker}/comments', [MapMarkerCommentController::class, 'index'])
     ->middleware('throttle:60,1')
     ->name('maps.markers.comments.index');
+Route::get('/guides', [GuideController::class, 'index'])->name('guides.index');
+Route::get('/guides/media/{media}', [GuideMediaController::class, 'show'])->name('guides.media.show');
 
 Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
 Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
@@ -586,6 +595,34 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/cups/{cup:slug}/randomizer/draws', [CupRandomizerDrawController::class, 'store'])->name('cups.randomizer.draws.store');
     Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
     Route::get('/gamification', [GamificationController::class, 'index'])->name('gamification.index');
+    Route::get('/guides/mine', [GuideDashboardController::class, 'mine'])->name('guides.mine');
+    Route::post('/guides/create', [GuideDashboardController::class, 'store'])->name('guides.store');
+    Route::get('/guides/{guide:slug}/edit', [GuideDashboardController::class, 'edit'])->name('guides.edit');
+    Route::put('/guides/{guide:slug}', [GuideDashboardController::class, 'update'])->name('guides.update');
+    Route::get('/guides/{guide:slug}/preview', [GuideDashboardController::class, 'preview'])->name('guides.preview');
+    Route::post('/guides/{guide:slug}/submit', [GuideDashboardController::class, 'submit'])
+        ->middleware('throttle:10,1')
+        ->name('guides.submit');
+    Route::post('/guides/{guide:slug}/withdraw', [GuideDashboardController::class, 'withdraw'])
+        ->name('guides.withdraw');
+    Route::post('/guides/{guide:slug}/media', [GuideMediaController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('guides.media.store');
+    Route::post('/guides/{guide:slug}/comments', [GuideCommentController::class, 'store'])
+        ->middleware('throttle:12,1')
+        ->name('guides.comments.store');
+    Route::patch('/guides/comments/{comment}', [GuideCommentController::class, 'update'])
+        ->middleware('throttle:20,1')
+        ->name('guides.comments.update');
+    Route::delete('/guides/comments/{comment}', [GuideCommentController::class, 'destroy'])
+        ->middleware('throttle:20,1')
+        ->name('guides.comments.destroy');
+    Route::post('/guides/{guide:slug}/helpful', [GuideHelpfulController::class, 'toggle'])
+        ->middleware('throttle:30,1')
+        ->name('guides.helpful.toggle');
+    Route::post('/guides/{guide:slug}/bookmark', [GuideBookmarkController::class, 'toggle'])
+        ->middleware('throttle:30,1')
+        ->name('guides.bookmark.toggle');
     Route::get('/gamification/achievements/pending', function () {
         $toasts = session()->pull('hunthub_achievement_toasts', []);
 
@@ -611,6 +648,11 @@ Route::middleware('auth')->group(function (): void {
         Route::put('/moment-of-week/{spotlight}', [AdminMomentOfWeekController::class, 'update'])->name('moment-of-week.update');
         Route::delete('/moment-of-week/{spotlight}', [AdminMomentOfWeekController::class, 'destroy'])->name('moment-of-week.destroy');
         Route::get('/content', [AdminContentController::class, 'index'])->name('content.index');
+        Route::get('/guides', [AdminGuideController::class, 'index'])->name('guides.index');
+        Route::post('/guides/revisions/{revision}/moderate', [AdminGuideController::class, 'moderate'])->name('guides.moderate');
+        Route::post('/guides/{guide:slug}/archive', [AdminGuideController::class, 'archive'])->name('guides.archive');
+        Route::post('/guides/{guide:slug}/restore', [AdminGuideController::class, 'restore'])->name('guides.restore');
+        Route::post('/guides/{guide:slug}/featured', [AdminGuideController::class, 'feature'])->name('guides.feature');
         Route::get('/contracts', [AdminWeeklyContractController::class, 'index'])->name('contracts.index');
         Route::post('/contracts', [AdminWeeklyContractController::class, 'store'])->name('contracts.store');
         Route::put('/contracts/{contract}', [AdminWeeklyContractController::class, 'update'])->name('contracts.update');
@@ -677,6 +719,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/content/{type}/{id}/status', [AdminContentController::class, 'updateStatus'])->name('content.status');
     });
 });
+
+Route::get('/guides/{guide:slug}', [GuideController::class, 'show'])->name('guides.show');
 
 Route::get('/cups/{cup:slug}/{section}', [CupController::class, 'showSection'])
     ->whereIn('section', ['rules', 'prizes', 'leaderboard', 'participants', 'submit', 'submissions'])

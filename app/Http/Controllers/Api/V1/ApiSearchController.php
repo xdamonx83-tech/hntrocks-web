@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Cup;
 use App\Models\FeedPost;
+use App\Models\Guide;
 use App\Models\LfgPost;
 use App\Models\Moment;
 use App\Models\User;
 use App\Services\Search\PlayerSearchQuery;
+use App\Services\UserBlockService;
 use App\Support\Hashtag;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -19,9 +21,9 @@ use Illuminate\Support\Str;
 
 class ApiSearchController extends Controller
 {
-    private const TYPES = ['all', 'players', 'hashtags', 'posts', 'moments', 'lfg', 'cups'];
+    private const TYPES = ['all', 'players', 'hashtags', 'posts', 'moments', 'lfg', 'cups', 'guides'];
 
-    public function __invoke(Request $request, PlayerSearchQuery $playerSearch): JsonResponse
+    public function __invoke(Request $request, PlayerSearchQuery $playerSearch, UserBlockService $blocks): JsonResponse
     {
         $validated = $request->validate([
             'q' => ['nullable', 'string', 'max:120'],
@@ -63,6 +65,9 @@ class ApiSearchController extends Controller
                 : $empty,
             'cups' => $this->wants($type, 'cups')
                 ? $this->cups($query, $platform, $period, $sort)
+                : $empty,
+            'guides' => $this->wants($type, 'guides')
+                ? $this->guides($request, $blocks, $query, $platform, $period, $sort)
                 : $empty,
         ];
 
@@ -236,6 +241,56 @@ class ApiSearchController extends Controller
             route('cups.show', $cup),
             ['name' => 'cup', 'slug' => $cup->slug],
             ['status' => $cup->status, 'badge' => strtoupper($cup->status)]
+        ));
+    }
+
+    private function guides(
+        Request $request,
+        UserBlockService $blocks,
+        string $query,
+        string $platform,
+        string $period,
+        string $sort,
+    ): Collection {
+        $blockedIds = $blocks->blockedUserIds($request->user());
+        $builder = Guide::query()
+            ->published()
+            ->with(['publishedRevision.category', 'publishedRevision.coverMedia', 'author.profile'])
+            ->when($blockedIds !== [], fn (Builder $guideQuery) => $guideQuery->whereNotIn('author_id', $blockedIds))
+            ->where(function (Builder $guideQuery) use ($query): void {
+                $like = '%'.$query.'%';
+                $guideQuery->whereHas('publishedRevision', fn (Builder $revision) => $revision
+                    ->where('title', 'like', $like)
+                    ->orWhere('summary', 'like', $like)
+                    ->orWhere('tags', 'like', $like)
+                    ->orWhereHas('category', fn (Builder $category) => $category
+                        ->where('name_de', 'like', $like)
+                        ->orWhere('name_en', 'like', $like)))
+                    ->orWhereHas('author', fn (Builder $author) => $author
+                        ->where('name', 'like', $like)
+                        ->orWhere('username', 'like', $like));
+            })
+            ->when($platform !== '', fn (Builder $guideQuery) => $guideQuery
+                ->whereHas('publishedRevision', fn (Builder $revision) => $revision
+                    ->whereIn('platform', ['all', strtolower($platform)])));
+
+        $this->applyPeriod($builder, $period, 'published_at');
+        $this->applySort($builder, $sort, 'helpful_count', 'id', 'published_at');
+
+        return $builder->limit(10)->get()->map(fn (Guide $guide): array => $this->item(
+            $guide->id,
+            'guide',
+            (string) $guide->publishedRevision?->title,
+            collect([
+                $guide->publishedRevision?->category?->label(),
+                $guide->author?->username ? '@'.$guide->author->username : $guide->author?->name,
+            ])->filter()->implode(' · '),
+            $guide->publishedRevision?->cover_media_id
+                ? route('guides.media.show', $guide->publishedRevision->cover_media_id)
+                : null,
+            route('guides.show', $guide),
+            ['name' => 'guide', 'slug' => $guide->slug],
+            ['helpful_count' => $guide->helpful_count, 'comments_count' => $guide->comments_count]
         ));
     }
 

@@ -108,6 +108,31 @@ class User extends Authenticatable
         return $this->hasMany(FeedBookmark::class);
     }
 
+    public function guides(): HasMany
+    {
+        return $this->hasMany(Guide::class, 'author_id');
+    }
+
+    public function guideComments(): HasMany
+    {
+        return $this->hasMany(GuideComment::class);
+    }
+
+    public function guideBookmarks(): HasMany
+    {
+        return $this->hasMany(GuideBookmark::class);
+    }
+
+    public function guideHelpfulVotes(): HasMany
+    {
+        return $this->hasMany(GuideHelpfulVote::class);
+    }
+
+    public function guideReputationEntries(): HasMany
+    {
+        return $this->hasMany(GuideReputationEntry::class);
+    }
+
     public function mediaAssets(): HasMany
     {
         return $this->hasMany(MediaAsset::class);

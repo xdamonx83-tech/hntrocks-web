@@ -19,6 +19,7 @@ class UserNotificationSetting extends Model
         'gamification',
         'moments',
         'cups',
+        'guides',
         'referrals',
     ];
 
@@ -32,6 +33,7 @@ class UserNotificationSetting extends Model
         'gamification',
         'moments',
         'cups',
+        'guides',
         'referrals',
     ];
 
@@ -90,6 +92,10 @@ class UserNotificationSetting extends Model
 
         if (str_starts_with($type, 'cup_')) {
             return 'cups';
+        }
+
+        if (str_starts_with($type, 'guide_')) {
+            return 'guides';
         }
 
         if (str_starts_with($type, 'referral_')) {

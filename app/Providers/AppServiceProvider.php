@@ -6,6 +6,7 @@ use App\Models\Cup;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
 use App\Models\FeedReaction;
+use App\Models\Guide;
 use App\Models\Team;
 use App\Models\UserProfile;
 use App\Observers\CupObserver;
@@ -15,6 +16,7 @@ use App\Observers\FeedReactionTeamActivityObserver;
 use App\Observers\TeamProgressionObserver;
 use App\Observers\UserProfileObserver;
 use App\Policies\TeamPolicy;
+use App\Policies\GuidePolicy;
 use App\Services\Cups\CommunityCupSubmissionAnalysisService;
 use App\Services\UserBlockService;
 use App\Services\Cups\CupSubmissionAnalysisService;
@@ -47,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::policy(Team::class, TeamPolicy::class);
+        Gate::policy(Guide::class, GuidePolicy::class);
         UserProfile::observe(UserProfileObserver::class);
         Cup::observe(CupObserver::class);
         FeedPost::observe(FeedPostTeamActivityObserver::class);

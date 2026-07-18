@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CupSubmission;
 use App\Models\CupTeam;
 use App\Models\Friendship;
+use App\Models\Guide;
 use App\Models\LoadoutChallengeSubmission;
 use App\Models\MomentSpotlight;
 use App\Models\Quest;
@@ -126,6 +127,14 @@ class ProfileController extends Controller
             ->latest('published_at')
             ->latest()
             ->limit(12)
+            ->get();
+
+        $profileGuidesPreview = Guide::query()
+            ->published()
+            ->where('author_id', $profileUser->id)
+            ->with(['publishedRevision.category', 'publishedRevision.coverMedia'])
+            ->latest('published_at')
+            ->limit(4)
             ->get();
 
         $profileQuestPreview = Quest::query()
@@ -253,6 +262,7 @@ class ProfileController extends Controller
             'profileNextPostId' => $profileNextPostId,
             'latestBadges' => $latestBadges,
             'profileMomentsPreview' => $profileMomentsPreview,
+            'profileGuidesPreview' => $profileGuidesPreview,
             'profileQuestPreview' => $profileQuestPreview,
             'profileCompletedQuestCount' => $profileCompletedQuestCount,
             'trophyCabinet' => $trophyCabinet,

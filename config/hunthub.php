@@ -19,7 +19,7 @@ return [
     'api_ready' => true,
     'modules' => [
         'feed', 'profiles', 'members', 'teams', 'lfg', 'team_lfg', 'messages', 'notifications',
-        'media', 'moments', 'cups', 'referrals', 'gamification', 'admin', 'moderation',
+        'media', 'moments', 'cups', 'guides', 'referrals', 'gamification', 'admin', 'moderation',
     ],
 
     'theme' => [

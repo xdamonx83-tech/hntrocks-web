@@ -83,6 +83,12 @@
         ? 'index,follow'
         : 'noindex,nofollow')
 
+@if(($profileGuidesPreview ?? collect())->isNotEmpty())
+@push('head')
+<link href="{{ asset('assets/themes/hnt_preview/guides/guides.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides.css')) ?: time() }}" rel="stylesheet">
+@endpush
+@endif
+
 @section('content')
     <section class="profile-hero-card">
         <div class="profile-cover {{ $profileBannerClass }}" data-profile-media-role="cover" style="background-image: linear-gradient(180deg, rgba(26,26,24,.08), rgba(26,26,24,.88)), url('{{ $coverUrl }}'); background-position: center; background-size: cover;">
@@ -171,6 +177,23 @@
                 <div class="progress-pills profile-completion-pills">
                     @foreach($missingCompletion as $key => $done)
                         <span>{{ $completionLabels[$key] ?? ucfirst((string) $key) }}</span>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if(($profileGuidesPreview ?? collect())->isNotEmpty())
+            <section class="profile-post-card profile-guides-panel">
+                <header><div><span>{{ __('guides.kicker') }}</span><h2>{{ __('guides.title') }}</h2></div><a href="{{ route('guides.index', ['q' => $profileUser->username]) }}">{{ __('guides.browse') }}</a></header>
+                <div class="profile-guide-preview-grid">
+                    @foreach($profileGuidesPreview as $profileGuide)
+                        @php($profileGuideRevision = $profileGuide->publishedRevision)
+                        <a href="{{ route('guides.show', $profileGuide) }}">
+                            <span class="profile-guide-preview-cover">
+                                @if($profileGuideRevision?->cover_media_id)<img src="{{ route('guides.media.show', $profileGuideRevision->cover_media_id) }}" alt="">@else<i class="ph ph-book-open-text"></i>@endif
+                            </span>
+                            <span><small>{{ $profileGuideRevision?->category?->label() }}</small><strong>{{ $profileGuideRevision?->title }}</strong><em><i class="ph ph-thumbs-up"></i>{{ $profileGuide->helpful_count }}</em></span>
+                        </a>
                     @endforeach
                 </div>
             </section>
