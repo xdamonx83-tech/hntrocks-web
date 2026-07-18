@@ -126,19 +126,38 @@ class PrivacyController extends Controller
 
     public function block(Request $request, SecurityLogService $securityLog): RedirectResponse
     {
-        $validated = $request->validate([
+        $rules = [
             'username' => ['required', 'string', 'max:32'],
             'reason' => ['nullable', 'string', 'max:120'],
-        ]);
+        ];
 
-        $target = User::where('username', strtolower(trim($validated['username'])))->first();
+        if ($request->input('settings_section') === 'blocked') {
+            $validator = validator($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return $this->blockedUsersRedirect($request)
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $validated = $validator->validated();
+        } else {
+            $validated = $request->validate($rules);
+        }
+
+        $username = ltrim(strtolower(trim($validated['username'])), '@');
+        $target = User::where('username', $username)->first();
 
         if (! $target) {
-            return back()->withErrors(['username' => __('ui.privacy_user_not_found')])->withInput();
+            return $this->blockedUsersRedirect($request)
+                ->withErrors(['username' => __('ui.privacy_user_not_found')])
+                ->withInput();
         }
 
         if ((int) $target->id === (int) $request->user()->id) {
-            return back()->withErrors(['username' => __('ui.privacy_cannot_block_self')])->withInput();
+            return $this->blockedUsersRedirect($request)
+                ->withErrors(['username' => __('ui.privacy_cannot_block_self')])
+                ->withInput();
         }
 
         UserBlock::updateOrCreate(
@@ -156,7 +175,8 @@ class PrivacyController extends Controller
             'blocked_username' => $target->username,
         ]);
 
-        return back()->with('status', __('ui.user_blocked_status'));
+        return $this->blockedUsersRedirect($request)
+            ->with('status', __('ui.user_blocked_status'));
     }
 
     public function unblock(Request $request, UserBlock $block, SecurityLogService $securityLog): RedirectResponse
@@ -170,6 +190,16 @@ class PrivacyController extends Controller
             'blocked_username' => $blockedUsername,
         ]);
 
-        return back()->with('status', __('ui.user_unblocked_status'));
+        return $this->blockedUsersRedirect($request)
+            ->with('status', __('ui.user_unblocked_status'));
+    }
+
+    private function blockedUsersRedirect(Request $request): RedirectResponse
+    {
+        if ($request->input('settings_section') === 'blocked') {
+            return redirect()->to(route('account.settings.edit').'#blocked');
+        }
+
+        return back();
     }
 }
