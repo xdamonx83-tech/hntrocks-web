@@ -35,7 +35,19 @@
     return payload;
   };
 
-  document.querySelectorAll('[data-guide-toggle]').forEach((button) => {
+  const guideToggleButtons = [...document.querySelectorAll('[data-guide-toggle]')];
+
+  const syncGuideToggle = (button, active, count) => {
+    button.classList.toggle('active', active);
+    const label = button.querySelector('span');
+    if (label) label.textContent = active ? button.dataset.activeLabel : button.dataset.inactiveLabel;
+    const countNode = button.querySelector('[data-count]');
+    if (countNode && Number.isFinite(Number(count))) {
+      countNode.textContent = new Intl.NumberFormat(document.documentElement.lang).format(Number(count));
+    }
+  };
+
+  guideToggleButtons.forEach((button) => {
     button.addEventListener('click', async () => {
       if (button.disabled) return;
       button.disabled = true;
@@ -45,11 +57,19 @@
           body: JSON.stringify({}),
         });
         const active = payload.helpful ?? payload.saved ?? false;
-        button.classList.toggle('active', active);
-        const label = button.querySelector('span');
-        if (label) label.textContent = active ? button.dataset.activeLabel : button.dataset.inactiveLabel;
-        const count = button.querySelector('[data-count]');
-        if (count && Number.isFinite(Number(payload.count))) count.textContent = String(payload.count);
+        const group = button.dataset.guideToggleGroup;
+        const targets = group
+          ? guideToggleButtons.filter((candidate) => candidate.dataset.guideToggleGroup === group)
+          : [button];
+
+        targets.forEach((target) => syncGuideToggle(target, active, payload.count));
+
+        if (group === 'helpful' && Number.isFinite(Number(payload.count))) {
+          document.querySelectorAll('[data-guide-helpful-total]').forEach((node) => {
+            node.textContent = new Intl.NumberFormat(document.documentElement.lang).format(Number(payload.count));
+          });
+        }
+
         toast(payload.message);
       } catch (error) {
         toast(error.message, true);
@@ -75,11 +95,42 @@
     });
   });
 
+  const commentsDialog = document.querySelector('[data-guide-comments-dialog]');
+
+  document.querySelectorAll('[data-guide-comments-open]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (commentsDialog?.showModal) {
+        commentsDialog.showModal();
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-guide-comments-close]').forEach((button) => {
+    button.addEventListener('click', () => commentsDialog?.close());
+  });
+
+  commentsDialog?.addEventListener('click', (event) => {
+    if (event.target === commentsDialog) commentsDialog.close();
+  });
+
+  if (commentsDialog && location.hash.startsWith('#comment-')) {
+    commentsDialog.showModal();
+  }
+
   const commentForm = document.querySelector('[data-guide-comment-form]');
   if (commentForm) {
     let replyInput = null;
     const commentList = document.querySelector('[data-guide-comment-list]');
-    const commentsHeadingCount = document.querySelector('#guide-comments h2 b');
+    const commentsHeadingCounts = document.querySelectorAll('[data-guide-comment-count], #guide-comments h2 b');
+    const commentInput = commentForm.querySelector('[data-guide-comment-input]');
+    const commentLength = document.querySelector('[data-guide-comment-length]');
+
+    const updateCommentLength = () => {
+      if (commentLength) commentLength.textContent = String(commentInput?.value.length || 0);
+    };
+
+    commentInput?.addEventListener('input', updateCommentLength);
+    updateCommentLength();
     const emptyComments = document.querySelector('[data-guide-comments-empty]');
     const commentLabels = {
       author: commentForm.dataset.labelAuthor || '',
@@ -242,8 +293,11 @@
           commentList?.append(element);
         }
         emptyComments?.remove();
-        if (commentsHeadingCount) commentsHeadingCount.textContent = String(payload.count);
+        commentsHeadingCounts.forEach((node) => {
+          node.textContent = new Intl.NumberFormat(document.documentElement.lang).format(Number(payload.count));
+        });
         commentForm.reset();
+        updateCommentLength();
         if (replyInput) replyInput.value = '';
         location.hash = `comment-${payload.comment.id}`;
         element.scrollIntoView({behavior: 'smooth', block: 'center'});
