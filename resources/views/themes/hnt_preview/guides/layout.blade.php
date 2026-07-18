@@ -18,7 +18,9 @@
 <link href="{{ asset('assets/vikinger/fonts/phosphor/regular/style.css') }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet">
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet">
+@unless(trim($__env->yieldContent('skip_guides_base_styles')) === '1')
 <link href="{{ asset('assets/themes/hnt_preview/guides/guides.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides.css')) ?: time() }}" rel="stylesheet">
+@endunless
 @stack('head')
 </head>
 <body data-page="guides" class="@yield('body_class')">
