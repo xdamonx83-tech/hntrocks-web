@@ -13,6 +13,38 @@
 <script src="{{ asset('assets/themes/hnt_preview/guides/guides-index-demo.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides-index-demo.js')) ?: time() }}" defer></script>
 @endpush
 
+@php
+    $categoryIcons = [
+        'beginner' => 'ph-star',
+        'loadouts' => 'ph-sliders-horizontal',
+        'weapons-loadouts' => 'ph-sliders-horizontal',
+        'traits' => 'ph-user',
+        'hunter-traits' => 'ph-user',
+        'maps' => 'ph-map-trifold',
+        'bosses' => 'ph-skull',
+        'pvp' => 'ph-crosshair',
+        'teams' => 'ph-users',
+        'events' => 'ph-calendar-dots',
+    ];
+    $difficultyLabels = [
+        'beginner' => 'Anfänger',
+        'advanced' => 'Fortgeschritten',
+        'expert' => 'Experte',
+    ];
+    $platformLabels = [
+        'all' => 'Alle Plattformen',
+        'pc' => 'PC',
+        'playstation' => 'PlayStation',
+        'xbox' => 'Xbox',
+    ];
+    $featuredRevision = $featuredGuide?->publishedRevision;
+    $featuredAuthor = $featuredGuide?->author;
+    $featuredAuthorName = $featuredAuthor?->name ?: ($featuredAuthor?->username ?: 'HNT Hunter');
+    $featuredCoverUrl = $featuredRevision?->cover_media_id
+        ? route('guides.media.show', $featuredRevision->cover_media_id)
+        : null;
+@endphp
+
 @section('content')
 <section class="guides-hero">
     <div>
@@ -32,10 +64,11 @@
             @endauth
         </div>
     </div>
-    <div class="guides-hero-stats" aria-label="Demo-Statistik">
-        <article><strong>184</strong><span>veröffentlichte Guides</span></article>
-        <article><strong>26</strong><span>aktive Autoren</span></article>
-        <article><strong>1.248</strong><span>Hilfreich-Markierungen</span></article>
+
+    <div class="guides-hero-stats" aria-label="Guide-Statistik">
+        <article><strong>{{ number_format($publishedCount, 0, ',', '.') }}</strong><span>veröffentlichte Guides</span></article>
+        <article><strong>{{ number_format($authorCount, 0, ',', '.') }}</strong><span>aktive Autoren</span></article>
+        <article><strong>{{ number_format($helpfulCount, 0, ',', '.') }}</strong><span>Hilfreich-Markierungen</span></article>
     </div>
 </section>
 
@@ -44,120 +77,166 @@
         <section class="guides-side-card">
             <header>
                 <div><span>KATEGORIEN</span><h2>Wissen entdecken</h2></div>
-                <b>8</b>
+                <b>{{ $categories->count() }}</b>
             </header>
+
             <div class="guide-category-list">
-                <button class="active" data-guide-category="all" type="button"><span><i class="ph ph-books"></i></span><strong>Alle Guides</strong><b>184</b></button>
-                <button data-guide-category="beginner" type="button"><span><i class="ph ph-star"></i></span><strong>Anfänger</strong><b>42</b></button>
-                <button data-guide-category="loadouts" type="button"><span><i class="ph ph-sliders-horizontal"></i></span><strong>Waffen &amp; Loadouts</strong><b>31</b></button>
-                <button data-guide-category="traits" type="button"><span><i class="ph ph-user"></i></span><strong>Hunter &amp; Traits</strong><b>25</b></button>
-                <button data-guide-category="maps" type="button"><span><i class="ph ph-map-trifold"></i></span><strong>Karten</strong><b>22</b></button>
-                <button data-guide-category="bosses" type="button"><span><i class="ph ph-skull"></i></span><strong>Bosse</strong><b>18</b></button>
-                <button data-guide-category="pvp" type="button"><span><i class="ph ph-crosshair"></i></span><strong>PvP</strong><b>27</b></button>
-                <button data-guide-category="teams" type="button"><span><i class="ph ph-users"></i></span><strong>Teams</strong><b>14</b></button>
-                <button data-guide-category="events" type="button"><span><i class="ph ph-calendar-dots"></i></span><strong>Events</strong><b>5</b></button>
+                <a class="{{ $filters['category'] === '' ? 'active' : '' }}" href="{{ route('guides.index', request()->except('page', 'category')) }}">
+                    <span><i class="ph ph-books" aria-hidden="true"></i></span>
+                    <strong>Alle Guides</strong>
+                    <b>{{ number_format($publishedCount, 0, ',', '.') }}</b>
+                </a>
+
+                @foreach($categories as $category)
+                    <a class="{{ $filters['category'] === $category->slug ? 'active' : '' }}" href="{{ route('guides.index', array_merge(request()->except('page', 'category'), ['category' => $category->slug])) }}">
+                        <span><i class="ph {{ $categoryIcons[$category->slug] ?? 'ph-book-open-text' }}" aria-hidden="true"></i></span>
+                        <strong>{{ $category->label() }}</strong>
+                        <b>{{ number_format((int) $category->published_guides_count, 0, ',', '.') }}</b>
+                    </a>
+                @endforeach
             </div>
         </section>
 
         <section class="guides-side-card guide-author-card">
             <span>GUIDE-REPUTATION</span>
             <h2>Wissen wird sichtbar</h2>
-            <div class="guide-reputation-ring"><strong>340</strong><span>Reputation</span></div>
+            <div class="guide-reputation-ring">
+                <strong>{{ $viewerReputation === null ? '—' : number_format($viewerReputation, 0, ',', '.') }}</strong>
+                <span>Reputation</span>
+            </div>
             <p>Hilfreiche, freigegebene Guides stärken die Reputation eines Autors.</p>
             @auth
-                <a href="{{ route('guides.mine') }}">Meine Reputation <i class="ph ph-arrow-up-right"></i></a>
+                <a href="{{ route('guides.mine') }}">Meine Reputation <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
             @else
-                <a href="{{ route('login') }}">Anmelden <i class="ph ph-arrow-up-right"></i></a>
+                <a href="{{ route('login') }}">Anmelden <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
             @endauth
         </section>
     </aside>
 
     <main class="guides-main-column">
-        <section class="guides-toolbar" aria-label="Demo-Guidefilter">
-            <label class="guide-search" for="guideSearch"><i class="ph ph-magnifying-glass" aria-hidden="true"></i><input id="guideSearch" type="search" placeholder="Guides, Themen oder Autoren suchen"></label>
-            <select id="guideLanguage" aria-label="Sprache"><option value="all">Alle Sprachen</option><option value="de">Deutsch</option><option value="en">Englisch</option></select>
-            <select id="guidePlatform" aria-label="Plattform"><option value="all">Alle Plattformen</option><option value="pc">PC</option><option value="console">PlayStation / Xbox</option></select>
-            <select id="guideDifficulty" aria-label="Schwierigkeit"><option value="all">Alle Stufen</option><option value="beginner">Anfänger</option><option value="advanced">Fortgeschritten</option><option value="expert">Experte</option></select>
-            <select id="guideSort" aria-label="Sortierung"><option value="new">Neu</option><option value="helpful">Hilfreich</option><option value="popular">Beliebt</option></select>
-        </section>
+        <form class="guides-toolbar" data-guide-filter-form action="{{ route('guides.index') }}" method="get" aria-label="Guidefilter">
+            @if($filters['category'] !== '')
+                <input type="hidden" name="category" value="{{ $filters['category'] }}">
+            @endif
 
-        <section class="guide-featured">
-            <div class="guide-demo-featured-blank" aria-hidden="true"></div>
-            <div>
-                <span>HERVORGEHOBENER GUIDE</span>
-                <h2>Budget-Loadouts, die wirklich funktionieren</h2>
-                <p>Drei günstige Builds für aggressive Runden – inklusive Alternativen für PS5, Xbox und PC.</p>
-                <div><span class="guide-chip accent">Waffen &amp; Loadouts</span><span class="guide-chip">Anfänger</span><span class="guide-chip">Alle Plattformen</span></div>
-                <footer>
-                    <div><div class="guide-demo-avatar" aria-hidden="true">EW</div><span><strong>Erica Wyatt</strong><small>Guide-Autorin · 684 hilfreich</small></span></div>
-                    <a data-demo-guide-link href="#">Guide öffnen <i class="ph ph-arrow-up-right"></i></a>
-                </footer>
-            </div>
-        </section>
+            <label class="guide-search" for="guideSearch">
+                <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                <input id="guideSearch" name="q" value="{{ $filters['q'] }}" type="search" placeholder="Guides, Themen oder Autoren suchen">
+            </label>
+
+            <select id="guideLanguage" name="language" aria-label="Sprache">
+                <option value="">Alle Sprachen</option>
+                <option value="de" @selected($filters['language'] === 'de')>Deutsch</option>
+                <option value="en" @selected($filters['language'] === 'en')>Englisch</option>
+            </select>
+
+            <select id="guidePlatform" name="platform" aria-label="Plattform">
+                <option value="">Alle Plattformen</option>
+                <option value="pc" @selected($filters['platform'] === 'pc')>PC</option>
+                <option value="playstation" @selected($filters['platform'] === 'playstation')>PlayStation</option>
+                <option value="xbox" @selected($filters['platform'] === 'xbox')>Xbox</option>
+            </select>
+
+            <select id="guideDifficulty" name="difficulty" aria-label="Schwierigkeit">
+                <option value="">Alle Stufen</option>
+                <option value="beginner" @selected($filters['difficulty'] === 'beginner')>Anfänger</option>
+                <option value="advanced" @selected($filters['difficulty'] === 'advanced')>Fortgeschritten</option>
+                <option value="expert" @selected($filters['difficulty'] === 'expert')>Experte</option>
+            </select>
+
+            <select id="guideSort" name="sort" aria-label="Sortierung">
+                <option value="new" @selected($filters['sort'] === 'new')>Neu</option>
+                <option value="helpful" @selected($filters['sort'] === 'helpful')>Hilfreich</option>
+                <option value="popular" @selected($filters['sort'] === 'popular')>Beliebt</option>
+            </select>
+        </form>
+
+        @if($featuredGuide && $featuredRevision)
+            <section class="guide-featured">
+                @if($featuredCoverUrl)
+                    <img src="{{ $featuredCoverUrl }}" alt="{{ $featuredRevision->title }}">
+                @else
+                    <div class="guide-real-featured-placeholder" aria-hidden="true">
+                        <i class="ph ph-book-open-text"></i>
+                    </div>
+                @endif
+
+                <div>
+                    <span>{{ $featuredGuide->is_featured ? 'HERVORGEHOBENER GUIDE' : 'BELIEBTER GUIDE' }}</span>
+                    <h2>{{ $featuredRevision->title }}</h2>
+                    <p>{{ $featuredRevision->summary }}</p>
+
+                    <div>
+                        @if($featuredRevision->category)
+                            <span class="guide-chip accent">{{ $featuredRevision->category->label() }}</span>
+                        @endif
+                        <span class="guide-chip">{{ $difficultyLabels[$featuredRevision->difficulty] ?? ucfirst((string) $featuredRevision->difficulty) }}</span>
+                        <span class="guide-chip">{{ $platformLabels[$featuredRevision->platform] ?? ucfirst((string) $featuredRevision->platform) }}</span>
+                    </div>
+
+                    <footer>
+                        <div>
+                            <img src="{{ $featuredAuthor?->avatarUrl() }}" alt="" loading="lazy">
+                            <span>
+                                <strong>{{ $featuredAuthorName }}</strong>
+                                <small>Guide-Autor{{ $featuredAuthor?->profile?->gender === 'female' ? 'in' : '' }} · {{ number_format((int) $featuredGuide->helpful_count, 0, ',', '.') }} hilfreich</small>
+                            </span>
+                        </div>
+                        <a href="{{ route('guides.show', $featuredGuide) }}">Guide öffnen <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
+                    </footer>
+                </div>
+            </section>
+        @else
+            <section class="guide-featured guide-featured-empty">
+                <div class="guide-real-featured-placeholder" aria-hidden="true"><i class="ph ph-book-open-text"></i></div>
+                <div>
+                    <span>COMMUNITY GUIDES</span>
+                    <h2>Noch kein Guide veröffentlicht</h2>
+                    <p>Sobald der erste moderierte Guide veröffentlicht ist, erscheint er hier.</p>
+                </div>
+            </section>
+        @endif
 
         <section class="guides-section-head">
             <div><span>COMMUNITY GUIDES</span><h2>Alle Guides</h2></div>
-            <strong><b id="guideVisibleCount">5</b> sichtbar</strong>
+            <strong><b>{{ number_format($guides->total(), 0, ',', '.') }}</b> sichtbar</strong>
         </section>
 
         <section class="guide-grid" id="guideGrid">
-            <article class="guide-card" data-guide-card data-category="maps" data-language="de" data-platform="all" data-difficulty="advanced" data-helpful="512" data-date="5" data-popular="91" data-search="Stillwater Bayou sichere Rotationen für Trios Jonathan Kelly Karten">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-map" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M92 248h456M145 248v-93h122v93M267 248V92h142v156M409 248v-128h93v128M112 155l94-76 78 54 104-83 128 70"></path></svg></div><span>Karten</span></a>
-                <div class="guide-card-body">
-                    <div class="guide-card-author"><div class="guide-demo-avatar">JK</div><div><strong>Jonathan Kelly</strong><small>vor 5 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
-                    <a data-demo-guide-link href="#"><h3>Stillwater Bayou: sichere Rotationen für Trios</h3></a>
-                    <p>Routen, Rückzugswege und sichere Übergänge für Teams, die nicht in jedem Compound festlaufen wollen.</p>
-                    <div class="guide-card-tags"><span class="guide-chip">Fortgeschritten</span><span class="guide-chip">Alle Plattformen</span><span class="guide-chip">Deutsch</span></div>
-                    <footer><span><i class="ph ph-heart"></i> <b>512</b> hilfreich</span><span><i class="ph ph-eye"></i> 9,8 Tsd.</span><a data-demo-guide-link href="#">Lesen <i class="ph ph-arrow-up-right"></i></a></footer>
+            @forelse($guides as $guide)
+                @include('themes.hnt_preview.guides.partials.overview-card', [
+                    'guide' => $guide,
+                    'bookmarkedGuideIds' => $bookmarkedGuideIds,
+                ])
+            @empty
+                <div class="guide-empty guide-empty-visible">
+                    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                    <h3>Keine passenden Guides</h3>
+                    <p>Ändere Suche oder Filter.</p>
+                    @if(request()->query())
+                        <a href="{{ route('guides.index') }}">Alle Filter zurücksetzen</a>
+                    @endif
                 </div>
-            </article>
-
-            <article class="guide-card" data-guide-card data-category="traits" data-language="de" data-platform="pc" data-difficulty="expert" data-helpful="438" data-date="10" data-popular="86" data-search="Trait Synergien für aggressive Hunter Sarah Page Hunter Traits">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-traits" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M320 40 490 258H150L320 40Zm0 52v98M282 190l28 28 55-61"></path><circle cx="320" cy="190" r="70"></circle></svg></div><span>Hunter &amp; Traits</span></a>
-                <div class="guide-card-body">
-                    <div class="guide-card-author"><div class="guide-demo-avatar">SP</div><div><strong>Sarah Page</strong><small>vor 10 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
-                    <a data-demo-guide-link href="#"><h3>Trait-Synergien für aggressive Hunter</h3></a>
-                    <p>Kombinationen für Pushes, schnelle Revives und kontrollierten Druck im Lair.</p>
-                    <div class="guide-card-tags"><span class="guide-chip">Experte</span><span class="guide-chip">PC</span><span class="guide-chip">Deutsch</span></div>
-                    <footer><span><i class="ph ph-heart"></i> <b>438</b> hilfreich</span><span><i class="ph ph-eye"></i> 7,2 Tsd.</span><a data-demo-guide-link href="#">Lesen <i class="ph ph-arrow-up-right"></i></a></footer>
-                </div>
-            </article>
-
-            <article class="guide-card" data-guide-card data-category="bosses" data-language="de" data-platform="all" data-difficulty="advanced" data-helpful="377" data-date="2" data-popular="94" data-search="Boss Lair verteidigen ohne festzusitzen Mara Voss Bosse">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-boss" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M225 78h190l35 72-38 104H228l-38-104 35-72Zm39 82h112M270 132h.01M370 132h.01M285 204l35 20 35-20"></path></svg></div><span>Bosse</span></a>
-                <div class="guide-card-body">
-                    <div class="guide-card-author"><div class="guide-demo-avatar">MV</div><div><strong>Mara Voss</strong><small>vor 2 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
-                    <a data-demo-guide-link href="#"><h3>Boss-Lair verteidigen, ohne festzusitzen</h3></a>
-                    <p>Positionen, Rotationen und Ausbruchsmöglichkeiten für Teams mit Bounty.</p>
-                    <div class="guide-card-tags"><span class="guide-chip">Fortgeschritten</span><span class="guide-chip">Alle Plattformen</span><span class="guide-chip">Deutsch</span></div>
-                    <footer><span><i class="ph ph-heart"></i> <b>377</b> hilfreich</span><span><i class="ph ph-eye"></i> 6,6 Tsd.</span><a data-demo-guide-link href="#">Lesen <i class="ph ph-arrow-up-right"></i></a></footer>
-                </div>
-            </article>
-
-            <article class="guide-card" data-guide-card data-category="pvp" data-language="de" data-platform="console" data-difficulty="beginner" data-helpful="301" data-date="14" data-popular="78" data-search="Aim Grundlagen auf Konsole Katy Fuller PvP">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-console" aria-hidden="true"><svg viewBox="0 0 640 300"><path d="M215 112c-48 0-70 100-45 128 18 20 50-25 78-30h144c28 5 60 50 78 30 25-28 3-128-45-128H215Zm48 35v55M235 175h56M383 159h.01M420 190h.01"></path></svg></div><span>PvP</span></a>
-                <div class="guide-card-body">
-                    <div class="guide-card-author"><div class="guide-demo-avatar">KF</div><div><strong>Katy Fuller</strong><small>vor 14 Tagen · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
-                    <a data-demo-guide-link href="#"><h3>Aim-Grundlagen auf Konsole</h3></a>
-                    <p>Empfindlichkeit, Aim-Assist, Crosshair Placement und tägliche Übungen für PlayStation und Xbox.</p>
-                    <div class="guide-card-tags"><span class="guide-chip">Anfänger</span><span class="guide-chip">PlayStation / Xbox</span><span class="guide-chip">Deutsch</span></div>
-                    <footer><span><i class="ph ph-heart"></i> <b>301</b> hilfreich</span><span><i class="ph ph-eye"></i> 5,9 Tsd.</span><a data-demo-guide-link href="#">Lesen <i class="ph ph-arrow-up-right"></i></a></footer>
-                </div>
-            </article>
-
-            <article class="guide-card" data-guide-card data-category="beginner" data-language="de" data-platform="all" data-difficulty="beginner" data-helpful="692" data-date="1" data-popular="98" data-search="Die ersten 10 Stunden im Bayou Valentina Anfänger">
-                <a class="guide-card-cover" data-demo-guide-link href="#"><div class="guide-demo-cover tone-beginner" aria-hidden="true"><svg viewBox="0 0 640 300"><circle cx="320" cy="150" r="105"></circle><circle cx="320" cy="150" r="18"></circle><path d="m360 92-24 72-56 44 24-72 56-44Z"></path></svg></div><span>Anfänger</span></a>
-                <div class="guide-card-body">
-                    <div class="guide-card-author"><div class="guide-demo-avatar">VA</div><div><strong>Valentina</strong><small>vor 1 Tag · geprüft</small></div><button data-guide-save aria-label="Guide speichern" type="button"><i class="ph ph-bookmark-simple"></i></button></div>
-                    <a data-demo-guide-link href="#"><h3>Die ersten 10 Stunden im Bayou</h3></a>
-                    <p>Die wichtigsten Systeme verständlich erklärt: Hinweise, Bosse, Extraktion und Economy.</p>
-                    <div class="guide-card-tags"><span class="guide-chip">Anfänger</span><span class="guide-chip">Alle Plattformen</span><span class="guide-chip">Deutsch</span></div>
-                    <footer><span><i class="ph ph-heart"></i> <b>692</b> hilfreich</span><span><i class="ph ph-eye"></i> 14,1 Tsd.</span><a data-demo-guide-link href="#">Lesen <i class="ph ph-arrow-up-right"></i></a></footer>
-                </div>
-            </article>
-
-            <div class="guide-empty" id="guideEmpty"><i class="ph ph-magnifying-glass"></i><h3>Keine passenden Guides</h3><p>Ändere Suche oder Filter.</p></div>
+            @endforelse
         </section>
+
+        @if($guides->hasPages())
+            <nav class="guide-pagination" aria-label="Guide-Seiten">
+                @if($guides->onFirstPage())
+                    <span aria-disabled="true"><i class="ph ph-arrow-left" aria-hidden="true"></i> Zurück</span>
+                @else
+                    <a href="{{ $guides->previousPageUrl() }}" rel="prev"><i class="ph ph-arrow-left" aria-hidden="true"></i> Zurück</a>
+                @endif
+
+                <strong>Seite {{ $guides->currentPage() }} von {{ $guides->lastPage() }}</strong>
+
+                @if($guides->hasMorePages())
+                    <a href="{{ $guides->nextPageUrl() }}" rel="next">Weiter <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
+                @else
+                    <span aria-disabled="true">Weiter <i class="ph ph-arrow-right" aria-hidden="true"></i></span>
+                @endif
+            </nav>
+        @endif
     </main>
 
     <aside class="guides-right-column">
@@ -166,37 +245,50 @@
             <h2>Eigenen Guide erstellen</h2>
             <p>Block-Editor, automatische Entwürfe und Moderation vor der Veröffentlichung.</p>
             <div>
-                <article><i class="ph ph-floppy-disk"></i><span><strong>Automatisch gespeichert</strong><small>Entwurf bleibt erhalten</small></span></article>
-                <article><i class="ph ph-shield-check"></i><span><strong>Moderiert</strong><small>Nichts erscheint ungeprüft</small></span></article>
-                <article><i class="ph ph-arrows-clockwise"></i><span><strong>Versioniert</strong><small>Öffentliche Version bleibt live</small></span></article>
+                <article><i class="ph ph-floppy-disk" aria-hidden="true"></i><span><strong>Automatisch gespeichert</strong><small>Entwurf bleibt erhalten</small></span></article>
+                <article><i class="ph ph-shield-check" aria-hidden="true"></i><span><strong>Moderiert</strong><small>Nichts erscheint ungeprüft</small></span></article>
+                <article><i class="ph ph-arrows-clockwise" aria-hidden="true"></i><span><strong>Versioniert</strong><small>Öffentliche Version bleibt live</small></span></article>
             </div>
             @auth
                 <form class="guide-create-form" action="{{ route('guides.store') }}" method="post">
                     @csrf
-                    <button type="submit">Guide erstellen <i class="ph ph-arrow-up-right"></i></button>
+                    <button type="submit">Guide erstellen <i class="ph ph-arrow-up-right" aria-hidden="true"></i></button>
                 </form>
             @else
-                <a href="{{ route('login') }}">Anmelden <i class="ph ph-arrow-up-right"></i></a>
+                <a href="{{ route('login') }}">Anmelden <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
             @endauth
         </section>
 
         <section class="guides-side-card guide-top-authors">
             <header><div><span>COMMUNITY-EXPERTEN</span><h2>Top Autoren</h2></div><a href="#guideGrid">Alle</a></header>
             <div>
-                <article><b>1</b><div class="guide-demo-avatar">VA</div><span><strong>Valentina</strong><small>8 Guides · 1.406 hilfreich</small></span></article>
-                <article><b>2</b><div class="guide-demo-avatar">EW</div><span><strong>Erica Wyatt</strong><small>6 Guides · 982 hilfreich</small></span></article>
-                <article><b>3</b><div class="guide-demo-avatar">JK</div><span><strong>Jonathan Kelly</strong><small>5 Guides · 714 hilfreich</small></span></article>
+                @forelse($topAuthors as $author)
+                    <article>
+                        <b>{{ $loop->iteration }}</b>
+                        <img src="{{ $author->avatarUrl() }}" alt="" loading="lazy">
+                        <span>
+                            <a href="{{ route('profile.public', $author) }}"><strong>{{ $author->name ?: $author->username }}</strong></a>
+                            <small>{{ number_format((int) $author->published_guides_count, 0, ',', '.') }} Guides · {{ number_format((int) $author->guides_helpful_total, 0, ',', '.') }} hilfreich</small>
+                        </span>
+                    </article>
+                @empty
+                    <p class="guide-widget-empty">Noch keine veröffentlichten Autoren.</p>
+                @endforelse
             </div>
         </section>
 
         <section class="guides-side-card guide-status-widget">
             <span>DEINE GUIDES</span>
             <h2>Aktueller Status</h2>
-            <div><article><strong>2</strong><span>Entwürfe</span></article><article><strong>1</strong><span>Wird geprüft</span></article><article><strong>1</strong><span>Veröffentlicht</span></article></div>
+            <div>
+                <article><strong>{{ $viewerGuideStats === null ? '—' : number_format($viewerGuideStats['drafts'], 0, ',', '.') }}</strong><span>Entwürfe</span></article>
+                <article><strong>{{ $viewerGuideStats === null ? '—' : number_format($viewerGuideStats['review'], 0, ',', '.') }}</strong><span>Wird geprüft</span></article>
+                <article><strong>{{ $viewerGuideStats === null ? '—' : number_format($viewerGuideStats['published'], 0, ',', '.') }}</strong><span>Veröffentlicht</span></article>
+            </div>
             @auth
-                <a href="{{ route('guides.mine') }}">Verwalten <i class="ph ph-arrow-up-right"></i></a>
+                <a href="{{ route('guides.mine') }}">Verwalten <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
             @else
-                <a href="{{ route('login') }}">Anmelden <i class="ph ph-arrow-up-right"></i></a>
+                <a href="{{ route('login') }}">Anmelden <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
             @endauth
         </section>
     </aside>
