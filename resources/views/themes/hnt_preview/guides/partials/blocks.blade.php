@@ -68,7 +68,7 @@
                 <ol class="guide-steps">
                     @foreach((array) ($block['items'] ?? []) as $item)
                         <li>
-                            <b>Schritt {{ $loop->iteration }}</b>
+                            <span class="guide-step-label">Schritt {{ $loop->iteration }}</span>
                             <p>{{ $item }}</p>
                         </li>
                     @endforeach
