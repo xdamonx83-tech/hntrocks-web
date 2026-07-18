@@ -1,6 +1,7 @@
 @php
     $securityUser = $securitySettings['user'];
     $events = $securitySettings['events'];
+    $eventsHasMore = $securitySettings['events_has_more'];
     $deletionRequest = $securitySettings['deletion_request'];
     $twoFactorEnabled = $securitySettings['two_factor_enabled'];
     $twoFactorRecoveryCount = $securitySettings['two_factor_recovery_count'];
@@ -137,23 +138,23 @@
 <button type="button" disabled>{{ __('settings.security_logout_other_sessions') }}</button>
 </div>
 </header>
-<div class="settings-security-log">
-@forelse ($events as $event)
-@php
-    $eventKey = 'settings.security_events.'.$event->event;
-    $eventTranslation = __($eventKey);
-    $eventLabel = $eventTranslation === $eventKey
-        ? \Illuminate\Support\Str::headline($event->event)
-        : $eventTranslation;
-@endphp
-<article>
-<span class="settings-log-icon"><svg><use href="#i-check"></use></svg></span>
-<div><strong>{{ $eventLabel }}</strong><small>IP: {{ $event->ip_address ?: __('ui.unknown') }} · {{ \Illuminate\Support\Str::limit($event->user_agent ?: __('ui.no_user_agent_saved'), 90) }}</small></div>
-<span>{{ $event->created_at->locale(app()->getLocale())->diffForHumans() }}</span>
-</article>
-@empty
+<div class="settings-security-log" id="securityEventsList" tabindex="0" aria-label="{{ __('settings.security_events_scroll_label') }}">
+@include('themes.hnt_preview.account.partials.security-events', ['events' => $events])
+@if ($events->isEmpty())
 <p class="settings-security-log-empty">{{ __('ui.no_security_events') }}</p>
-@endforelse
+@endif
+</div>
+<div class="settings-security-log-controls">
+<button
+id="securityEventsLoadMore"
+type="button"
+data-url="{{ route('settings.security.events') }}"
+data-next-cursor="{{ $events->last()?->id }}"
+data-label-more="{{ __('settings.security_events_more') }}"
+data-label-loading="{{ __('settings.security_events_loading') }}"
+{{ $eventsHasMore ? '' : 'hidden' }}
+>{{ __('settings.security_events_more') }}</button>
+<small id="securityEventsLoadError" role="alert" hidden>{{ __('settings.security_events_load_error') }}</small>
 </div>
 </article>
 <div class="settings-security-actions-grid">
