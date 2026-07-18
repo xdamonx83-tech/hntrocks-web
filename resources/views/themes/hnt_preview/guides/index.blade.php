@@ -179,7 +179,7 @@
                             <img src="{{ $featuredAuthor?->avatarUrl() }}" alt="" loading="lazy">
                             <span>
                                 <strong>{{ $featuredAuthorName }}</strong>
-                                <small>Guide-Autor{{ $featuredAuthor?->profile?->gender === 'female' ? 'in' : '' }} · {{ number_format((int) $featuredGuide->helpful_count, 0, ',', '.') }} hilfreich</small>
+                                <small>Guide-Autor · {{ number_format((int) $featuredGuide->helpful_count, 0, ',', '.') }} hilfreich</small>
                             </span>
                         </div>
                         <a href="{{ route('guides.show', $featuredGuide) }}">Guide öffnen <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
