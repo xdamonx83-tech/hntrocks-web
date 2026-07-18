@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\ApiAccessToken;
 use App\Models\UserNotificationSetting;
+use App\Services\Auth\TwoFactorService;
 use App\Services\SecurityLogService;
 use App\Support\NotificationSettingsGroups;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +15,7 @@ use Illuminate\View\View;
 
 class NotificationSettingsController extends Controller
 {
-    public function edit(Request $request): View
+    public function edit(Request $request, TwoFactorService $twoFactor): View
     {
         $user = $request->user();
         $settings = $user->notificationSettings()->firstOrCreate([]);
@@ -23,6 +24,20 @@ class NotificationSettingsController extends Controller
             ->with('blockedUser')
             ->latest()
             ->get();
+        $user->loadMissing('accountDeletionRequest');
+
+        $twoFactorSetupSecret = (string) $request->session()->get('two_factor_setup_secret', '');
+        $twoFactorRecoveryCodes = $request->session()->pull('two_factor_recovery_codes', []);
+        $securitySettings = [
+            'user' => $user,
+            'events' => $user->securityEvents()->latest()->limit(12)->get(),
+            'deletion_request' => $user->accountDeletionRequest,
+            'two_factor_enabled' => $user->hasTwoFactorEnabled(),
+            'two_factor_recovery_count' => $twoFactor->recoveryCodeCount($user),
+            'two_factor_setup_secret' => $twoFactorSetupSecret,
+            'two_factor_setup_uri' => $twoFactorSetupSecret !== '' ? $twoFactor->keyUri($user, $twoFactorSetupSecret) : null,
+            'two_factor_recovery_codes' => is_array($twoFactorRecoveryCodes) ? $twoFactorRecoveryCodes : [],
+        ];
 
         $view = $request->boolean('classic_settings')
             ? 'account.settings'
@@ -33,6 +48,7 @@ class NotificationSettingsController extends Controller
             'notificationGroups' => NotificationSettingsGroups::all(),
             'privacySettings' => $privacySettings,
             'blockedUsers' => $blockedUsers,
+            'securitySettings' => $securitySettings,
             'generalSettings' => [
                 'locale' => app()->getLocale(),
                 'user' => $user,
