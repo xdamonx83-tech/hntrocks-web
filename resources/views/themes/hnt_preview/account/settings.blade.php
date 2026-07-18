@@ -82,6 +82,26 @@
         'document.getElementById("blockUserForm")?.addEventListener',
         $settingsDemoHtml
     );
+
+    $settingsDemoHtml = str_replace(
+        "  document.getElementById(\"toggleTwoFactor\").addEventListener(\"click\", () => {\n    twoFactorEnabled = !twoFactorEnabled;\n    const button = document.getElementById(\"toggleTwoFactor\");\n    const badge = document.getElementById(\"twoFactorBadge\");\n    const title = document.getElementById(\"twoFactorTitle\");\n    const text = document.getElementById(\"twoFactorText\");\n    const statusDot = document.getElementById(\"twoFactorStatusDot\");\n    const statusText = document.getElementById(\"twoFactorStatusText\");\n    const statusBadge = document.getElementById(\"twoFactorStatusBadge\");\n\n    button.textContent = twoFactorEnabled ? \"2FA deaktivieren\" : \"2FA einrichten\";\n    badge.textContent = twoFactorEnabled ? \"Aktiv\" : \"Nicht aktiv\";\n    badge.classList.toggle(\"active\", twoFactorEnabled);\n    title.textContent = twoFactorEnabled ? \"Zwei-Faktor-Schutz ist aktiv\" : \"Zusätzlichen Schutz aktivieren\";\n    text.textContent = twoFactorEnabled\n      ? \"Bei neuen Anmeldungen wird zusätzlich ein einmaliger Code verlangt.\"\n      : \"Bei jeder neuen Anmeldung wird zusätzlich ein einmaliger Code abgefragt.\";\n    statusDot.classList.toggle(\"good\", twoFactorEnabled);\n    statusText.textContent = twoFactorEnabled ? \"Aktiviert\" : \"Noch nicht aktiviert\";\n    statusBadge.textContent = twoFactorEnabled ? \"Aktiv\" : \"Offen\";\n    document.getElementById(\"securityHighlightTitle\").textContent = twoFactorEnabled\n      ? \"Dein Konto ist sehr gut geschützt\"\n      : \"Dein Konto ist gut geschützt\";\n    document.getElementById(\"securityHighlightText\").textContent = twoFactorEnabled\n      ? \"Passwort aktiv · Zwei-Faktor-Authentifizierung eingerichtet.\"\n      : \"Passwort aktiv · Zwei-Faktor-Authentifizierung noch nicht eingerichtet.\";\n\n    updateSecurityScore(twoFactorEnabled ? 96 : 84);\n    markDirty();\n    showToast(twoFactorEnabled ? \"2FA in der Demo aktiviert\" : \"2FA in der Demo deaktiviert\");\n  });\n",
+        '',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        [
+            "  document.getElementById(\"changePasswordDemo\").addEventListener(\"click\", () => showToast(\"Passwortänderung als Demo bestätigt\"));\n",
+            "  document.getElementById(\"logoutOtherSessions\").addEventListener(\"click\", () => showToast(\"Andere Sitzungen wurden in der Demo abgemeldet\"));\n",
+            "  document.getElementById(\"exportDataDemo\").addEventListener(\"click\", () => showToast(\"Datenexport wird in der Demo vorbereitet\"));\n",
+        ],
+        '',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        "  const deleteModal = document.getElementById(\"settingsDeleteModal\");\n  const confirmation = document.getElementById(\"deleteAccountConfirmation\");\n  const confirmDelete = document.getElementById(\"confirmDeleteAccount\");\n\n  function openDeleteModal() {\n    deleteModal.hidden = false;\n    document.body.classList.add(\"settings-modal-open\");\n    setTimeout(() => confirmation.focus(), 50);\n  }\n\n  function closeDeleteModal() {\n    deleteModal.hidden = true;\n    document.body.classList.remove(\"settings-modal-open\");\n    confirmation.value = \"\";\n    confirmDelete.disabled = true;\n  }\n\n  document.getElementById(\"openDeleteAccount\").addEventListener(\"click\", openDeleteModal);\n  document.getElementById(\"closeDeleteAccount\").addEventListener(\"click\", closeDeleteModal);\n  document.getElementById(\"cancelDeleteAccount\").addEventListener(\"click\", closeDeleteModal);\n  deleteModal.addEventListener(\"click\", (event) => {\n    if (event.target === deleteModal) closeDeleteModal();\n  });\n\n  confirmation.addEventListener(\"input\", () => {\n    confirmDelete.disabled = confirmation.value.trim().toLowerCase() !== \"valentina\";\n  });\n\n  confirmDelete.addEventListener(\"click\", () => {\n    closeDeleteModal();\n    showToast(\"Kontolöschung wurde nur in der Demo vorgemerkt\");\n  });\n\n  document.addEventListener(\"keydown\", (event) => {\n    if (event.key === \"Escape\" && !deleteModal.hidden) closeDeleteModal();\n  });\n",
+        '',
+        $settingsDemoHtml
+    );
     $settingsDemoHtml = str_replace(
         "  updateBlockedCount();\n",
         '',
@@ -242,6 +262,33 @@
         $securityPanelStart - $blockedPanelStart
     );
 
+    abort_unless(isset($securitySettings) && is_array($securitySettings), 500, 'Security settings data is missing.');
+
+    $securityPanelStart = strpos(
+        $settingsDemoHtml,
+        '<section class="settings-panel" data-settings-panel="security" hidden="">'
+    );
+    abort_unless($securityPanelStart !== false, 500, 'Security settings panel could not be located.');
+
+    $saveFooterStart = strpos(
+        $settingsDemoHtml,
+        '<footer class="settings-save-footer">',
+        $securityPanelStart
+    );
+    abort_unless($saveFooterStart !== false, 500, 'Settings save footer could not be located after security panel.');
+
+    $realSecurityHtml = view('themes.hnt_preview.account.partials.security-settings', [
+        'securitySettings' => $securitySettings,
+        'securityStatus' => $securityStatus,
+    ])->render();
+
+    $settingsDemoHtml = substr_replace(
+        $settingsDemoHtml,
+        $realSecurityHtml,
+        $securityPanelStart,
+        $saveFooterStart - $securityPanelStart
+    );
+
     $settingsDemoHtml = str_replace(
         '<button class="active" data-settings-tab="general" data-title="Allgemein" type="button">',
         '<button class="active" data-settings-tab="general" data-title="'.e(__('settings.general_tab')).'" type="button">',
@@ -286,6 +333,21 @@
     $settingsDemoHtml = str_replace(
         '<i id="blockedCountNav">2</i>',
         '<i id="blockedCountNav">'.e((string) $blockedUsers->count()).'</i>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<button data-settings-tab="security" data-title="Sicherheit" type="button">',
+        '<button data-settings-tab="security" data-title="'.e(__('settings.security_tab')).'" type="button">',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<span><strong>Sicherheit</strong><small>Passwort, 2FA und Sitzungen</small></span>',
+        '<span><strong>'.e(__('settings.security_tab')).'</strong><small>'.e(__('settings.security_nav_description')).'</small></span>',
+        $settingsDemoHtml
+    );
+    $settingsDemoHtml = str_replace(
+        '<i id="securityNavState">84%</i>',
+        '<i id="securityNavState">'.e((string) $securityStatus['score']).'%</i>',
         $settingsDemoHtml
     );
     $settingsDemoHtml = str_replace(
@@ -348,10 +410,25 @@
         ($staticStatusEnd + strlen('</aside>')) - $staticStatusStart
     );
 
+    $staticDeleteModalStart = strpos(
+        $settingsDemoHtml,
+        '<div class="settings-delete-modal" hidden="" id="settingsDeleteModal">'
+    );
+    $toastStart = strpos($settingsDemoHtml, '<div class="toast" id="toast"></div>');
+
+    if ($staticDeleteModalStart !== false && $toastStart !== false && $toastStart > $staticDeleteModalStart) {
+        $settingsDemoHtml = substr_replace(
+            $settingsDemoHtml,
+            '',
+            $staticDeleteModalStart,
+            $toastStart - $staticDeleteModalStart
+        );
+    }
+
     if (! str_contains($settingsDemoHtml, 'real-general-settings.css')) {
         $settingsDemoHtml = str_replace(
             '</head>',
-            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260718-1" rel="stylesheet"/>' . "\n" . '</head>',
+            '<link href="'.asset('assets/themes/hnt_preview/settings/real-general-settings.css').'?v=20260718-2" rel="stylesheet"/>' . "\n" . '</head>',
             $settingsDemoHtml
         );
     }
@@ -369,6 +446,7 @@
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header-live.js').'?v=20260714-1"></script>',
         '<script src="'.asset('assets/themes/hnt_preview/settings/real-general-settings.js').'?v=20260717-4"></script>',
+        '<script src="'.asset('assets/themes/hnt_preview/settings/real-security-settings.js').'?v=20260718-1"></script>',
     ]);
 
     $settingsDemoHtml = str_replace(
