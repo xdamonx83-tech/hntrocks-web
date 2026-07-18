@@ -416,284 +416,540 @@
   }
 
   const editor = document.querySelector('[data-guide-editor]');
-  if (!editor) return;
-
-  const dataNode = document.getElementById('guideEditorData');
-  const editorData = JSON.parse(dataNode?.textContent || '{}');
-  const labels = editorData.labels || {};
-  let blocks = Array.isArray(editorData.blocks) ? editorData.blocks : [];
-  const blocksRoot = editor.querySelector('[data-editor-blocks]');
-  const emptyState = editor.querySelector('[data-editor-empty]');
-  const blockCount = editor.querySelector('[data-block-count]');
-  const autosaveState = document.querySelector('[data-autosave-state]');
-  const autosaveTime = document.querySelector('[data-autosave-time]');
-  const coverInput = editor.querySelector('[data-cover-input]');
-  const coverIdInput = editor.querySelector('[name="cover_media_id"]');
-  const coverPreview = editor.querySelector('[data-cover-preview]');
-  const contentInput = editor.querySelector('[data-content-blocks-input]');
-  let dirty = false;
-  let autosaveTimer;
-  let saveChain = Promise.resolve();
-  let pendingSaves = 0;
-
-  const escapeHtml = (value) => String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-
-  const uid = () => `block_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
-
-  const normalizeBlock = (block) => ({
-    id: String(block?.id || uid()),
-    type: String(block?.type || 'paragraph'),
-    ...(block || {}),
-  });
-
-  blocks = blocks.map(normalizeBlock);
-
-  const blockFields = (block) => {
-    const text = escapeHtml(block.text || '');
-    if (block.type === 'heading') {
-      return `<label>${escapeHtml(labels.heading_level)}<select data-field="level"><option value="2"${Number(block.level || 2) === 2 ? ' selected' : ''}>H2</option><option value="3"${Number(block.level) === 3 ? ' selected' : ''}>H3</option><option value="4"${Number(block.level) === 4 ? ' selected' : ''}>H4</option></select></label><label>${escapeHtml(labels.text)}<input data-field="text" maxlength="180" value="${text}"></label>`;
-    }
-    if (block.type === 'paragraph') {
-      return `<label>${escapeHtml(labels.text)}<textarea data-field="text" maxlength="5000">${text}</textarea></label>`;
-    }
-    if (block.type === 'steps' || block.type === 'list') {
-      return `<label>${escapeHtml(labels.items)}<textarea data-field="items" maxlength="12000">${escapeHtml((block.items || []).join('\n'))}</textarea></label>`;
-    }
-    if (block.type === 'image') {
-      const preview = block.media_id
-        ? `<img class="guide-editor-image-preview" src="/guides/media/${Number(block.media_id)}" alt="">`
-        : '';
-      return `${preview}<label>${escapeHtml(labels.image_upload)}<input type="file" accept="image/jpeg,image/png,image/webp" data-image-input></label><label>${escapeHtml(labels.caption)}<input data-field="caption" maxlength="240" value="${escapeHtml(block.caption || '')}"></label>`;
-    }
-    return `<label>${escapeHtml(labels.box_title)}<input data-field="title" maxlength="120" value="${escapeHtml(block.title || '')}"></label><label>${escapeHtml(labels.text)}<textarea data-field="text" maxlength="1500">${text}</textarea></label>`;
-  };
-
-  const renderBlocks = () => {
-    blocksRoot.querySelectorAll('[data-editor-block]').forEach((node) => node.remove());
-    emptyState.hidden = blocks.length > 0;
-    blockCount.textContent = String(blocks.length);
-
-    blocks.forEach((block, index) => {
-      const node = document.createElement('article');
-      node.className = `guide-editor-block type-${block.type}`;
-      node.dataset.editorBlock = block.id;
-      node.innerHTML = `
-        <aside><i class="ph ph-dots-six-vertical" aria-hidden="true"></i><span>${escapeHtml(labels[block.type] || block.type)}</span></aside>
-        <div class="guide-editor-block-fields">${blockFields(block)}</div>
-        <nav class="guide-editor-block-actions">
-          <button type="button" data-move-up title="${escapeHtml(labels.move_up)}" ${index === 0 ? 'disabled' : ''}><i class="ph ph-arrow-up"></i></button>
-          <button type="button" data-move-down title="${escapeHtml(labels.move_down)}" ${index === blocks.length - 1 ? 'disabled' : ''}><i class="ph ph-arrow-down"></i></button>
-          <button type="button" data-remove-block title="${escapeHtml(labels.remove)}"><i class="ph ph-trash"></i></button>
-        </nav>`;
-      blocksRoot.append(node);
-    });
-    contentInput.value = JSON.stringify(blocks);
-  };
-
-  const collectBlock = (node) => {
-    const block = blocks.find((candidate) => candidate.id === node.dataset.editorBlock);
-    if (!block) return;
-    node.querySelectorAll('[data-field]').forEach((input) => {
-      const field = input.dataset.field;
-      block[field] = field === 'level'
-        ? Number(input.value)
-        : field === 'items'
-          ? input.value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean)
-          : input.value;
-    });
-    contentInput.value = JSON.stringify(blocks);
-  };
-
-  const formPayload = () => {
-    blocksRoot.querySelectorAll('[data-editor-block]').forEach(collectBlock);
-    const tags = String(editor.querySelector('[name="tags_text"]')?.value || '')
+    if (!editor) return;
+  
+    const dataNode = document.getElementById('guideEditorData');
+    const editorData = JSON.parse(dataNode?.textContent || '{}');
+    const labels = editorData.labels || {};
+    let blocks = Array.isArray(editorData.blocks) ? editorData.blocks : [];
+    const blocksRoot = editor.querySelector('[data-editor-blocks]');
+    const emptyState = editor.querySelector('[data-editor-empty]');
+    const blockCounts = [...editor.querySelectorAll('[data-block-count]')];
+    const autosaveState = document.querySelector('[data-autosave-state]');
+    const autosaveTime = document.querySelector('[data-autosave-time]');
+    const coverInput = editor.querySelector('[data-cover-input]');
+    const coverIdInput = editor.querySelector('[name="cover_media_id"]');
+    const coverPreview = editor.querySelector('[data-cover-preview]');
+    const coverUploadButton = editor.querySelector('[data-cover-upload]');
+    const contentInput = editor.querySelector('[data-content-blocks-input]');
+    const titleInput = editor.querySelector('[data-editor-title]');
+    const summaryInput = editor.querySelector('[data-editor-summary]');
+    const categoryInput = editor.querySelector('[data-editor-category]');
+    const platformInput = editor.querySelector('[name="platform"]');
+    const titleCount = editor.querySelector('[data-title-count]');
+    const summaryCount = editor.querySelector('[data-summary-count]');
+    const completionNode = editor.querySelector('[data-editor-completion]');
+    const progressNode = editor.querySelector('[data-editor-progress]');
+    const miniCover = editor.querySelector('[data-mini-cover]');
+    const miniCategory = editor.querySelector('[data-mini-category]');
+    const miniTitle = editor.querySelector('[data-mini-title]');
+    const miniSummary = editor.querySelector('[data-mini-summary]');
+    const tagsHidden = editor.querySelector('[name="tags_text"]');
+    const tagList = editor.querySelector('[data-tag-list]');
+    const tagEntry = editor.querySelector('[data-tag-entry]');
+    const undoButton = editor.querySelector('[data-editor-undo]');
+    const redoButton = editor.querySelector('[data-editor-redo]');
+    const submitDialog = document.querySelector('[data-guide-submit-dialog]');
+    const submitButton = editor.querySelector('[data-submit-guide]');
+    const submitConfirm = submitDialog?.querySelector('[data-guide-submit-confirm]');
+    let tags = String(tagsHidden?.value || '')
       .split(',')
       .map((tag) => tag.trim())
       .filter(Boolean)
       .slice(0, 8);
-    return {
-      title: editor.querySelector('[name="title"]')?.value || '',
-      summary: editor.querySelector('[name="summary"]')?.value || '',
-      category_id: editor.querySelector('[name="category_id"]')?.value || null,
-      cover_media_id: coverIdInput.value || null,
-      tags,
-      language: editor.querySelector('[name="language"]')?.value || 'de',
-      difficulty: editor.querySelector('[name="difficulty"]')?.value || 'beginner',
-      platform: editor.querySelector('[name="platform"]')?.value || 'all',
-      content_blocks: blocks,
-    };
-  };
-
-  const setSaveState = (text, error = false) => {
-    autosaveState.textContent = text;
-    autosaveState.style.color = error ? '#ffaaa2' : '';
-  };
-
-  const enqueueSave = (showToast = false) => {
-    clearTimeout(autosaveTimer);
-    const snapshot = formPayload();
-    dirty = false;
-    pendingSaves += 1;
-    setSaveState(labels.saving);
-
-    saveChain = saveChain
-      .catch(() => undefined)
-      .then(() => jsonRequest(editor.action, {
-        method: 'PUT',
-        body: JSON.stringify(snapshot),
-      }))
-      .then((payload) => {
-        pendingSaves -= 1;
-        if (pendingSaves === 0) {
-          setSaveState(labels.saved);
-          if (autosaveTime) autosaveTime.textContent = new Intl.DateTimeFormat(document.documentElement.lang, {hour: '2-digit', minute: '2-digit'}).format(new Date());
-        }
-        if (showToast) toast(payload.message);
-        return payload;
-      })
-      .catch((error) => {
-        pendingSaves = Math.max(0, pendingSaves - 1);
-        dirty = true;
-        setSaveState(labels.save_failed, true);
-        toast(error.message, true);
-        throw error;
-      });
-    return saveChain;
-  };
-
-  const changed = () => {
-    dirty = true;
-    setSaveState(labels.saving);
-    clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(() => enqueueSave(false), 900);
-  };
-
-  editor.addEventListener('input', (event) => {
-    const node = event.target.closest('[data-editor-block]');
-    if (node) collectBlock(node);
-    changed();
-  });
-  editor.addEventListener('change', (event) => {
-    if (event.target.matches('[data-image-input], [data-cover-input]')) return;
-    const node = event.target.closest('[data-editor-block]');
-    if (node) collectBlock(node);
-    changed();
-  });
-
-  editor.querySelectorAll('[data-add-block]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const type = button.dataset.addBlock;
-      blocks.push(normalizeBlock({
-        type,
-        ...(type === 'heading' ? {level: 2, text: ''} : {}),
-        ...(['paragraph'].includes(type) ? {text: ''} : {}),
-        ...(['steps', 'list'].includes(type) ? {items: []} : {}),
-        ...(type === 'image' ? {media_id: 0, caption: ''} : {}),
-        ...(['notice', 'warning'].includes(type) ? {title: '', text: ''} : {}),
-      }));
-      renderBlocks();
-      changed();
-      blocksRoot.lastElementChild?.scrollIntoView({behavior: 'smooth', block: 'center'});
+    let dirty = false;
+    let autosaveTimer;
+    let saveChain = Promise.resolve();
+    let pendingSaves = 0;
+    let undoStack = [];
+    let redoStack = [];
+    let editSnapshot = null;
+  
+    const escapeHtml = (value) => String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  
+    const uid = () => `block_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  
+    const normalizeBlock = (block) => ({
+      id: String(block?.id || uid()),
+      type: String(block?.type || 'paragraph'),
+      ...(block || {}),
     });
-  });
-
-  blocksRoot.addEventListener('click', (event) => {
-    const button = event.target.closest('button');
-    const node = button?.closest('[data-editor-block]');
-    if (!button || !node) return;
-    const index = blocks.findIndex((block) => block.id === node.dataset.editorBlock);
-    if (index < 0) return;
-    collectBlock(node);
-    if (button.hasAttribute('data-remove-block')) blocks.splice(index, 1);
-    if (button.hasAttribute('data-move-up') && index > 0) [blocks[index - 1], blocks[index]] = [blocks[index], blocks[index - 1]];
-    if (button.hasAttribute('data-move-down') && index < blocks.length - 1) [blocks[index + 1], blocks[index]] = [blocks[index], blocks[index + 1]];
-    renderBlocks();
-    changed();
-  });
-
-  const uploadImage = async (file, kind) => {
-    const body = new FormData();
-    body.append('kind', kind);
-    body.append('image', file);
-    return jsonRequest(editor.dataset.mediaUrl, {method: 'POST', body});
-  };
-
-  blocksRoot.addEventListener('change', async (event) => {
-    const input = event.target.closest('[data-image-input]');
-    if (!input?.files?.[0]) return;
-    const node = input.closest('[data-editor-block]');
-    const block = blocks.find((candidate) => candidate.id === node?.dataset.editorBlock);
-    if (!block) return;
-    input.disabled = true;
-    try {
-      const payload = await uploadImage(input.files[0], 'content');
-      block.media_id = payload.media.id;
+  
+    blocks = blocks.map(normalizeBlock);
+  
+    const snapshotBlocks = () => JSON.stringify(blocks);
+  
+    const updateHistoryButtons = () => {
+      if (undoButton) undoButton.disabled = undoStack.length === 0;
+      if (redoButton) redoButton.disabled = redoStack.length === 0;
+    };
+  
+    const rememberBlocks = () => {
+      const snapshot = snapshotBlocks();
+      if (undoStack[undoStack.length - 1] !== snapshot) {
+        undoStack.push(snapshot);
+        if (undoStack.length > 30) undoStack.shift();
+      }
+      redoStack = [];
+      updateHistoryButtons();
+    };
+  
+    const blockFields = (block) => {
+      const text = escapeHtml(block.text || '');
+  
+      if (block.type === 'heading') {
+        return `<label>${escapeHtml(labels.heading_level)}<select data-field="level"><option value="2"${Number(block.level || 2) === 2 ? ' selected' : ''}>H2</option><option value="3"${Number(block.level) === 3 ? ' selected' : ''}>H3</option><option value="4"${Number(block.level) === 4 ? ' selected' : ''}>H4</option></select></label><label>${escapeHtml(labels.text)}<input data-field="text" maxlength="180" value="${text}"></label>`;
+      }
+  
+      if (block.type === 'paragraph') {
+        return `<label>${escapeHtml(labels.text)}<textarea data-field="text" maxlength="5000">${text}</textarea></label>`;
+      }
+  
+      if (block.type === 'steps' || block.type === 'list') {
+        return `<label>${escapeHtml(labels.items)}<small>Ein Eintrag pro Zeile</small><textarea data-field="items" maxlength="12000">${escapeHtml((block.items || []).join('\n'))}</textarea></label>`;
+      }
+  
+      if (block.type === 'image') {
+        const preview = block.media_id
+          ? `<img class="guide-editor-image-preview" src="/guides/media/${Number(block.media_id)}" alt="">`
+          : '';
+        return `${preview}<label>${escapeHtml(labels.image_upload)}<input type="file" accept="image/jpeg,image/png,image/webp" data-image-input></label><label>${escapeHtml(labels.caption)}<input data-field="caption" maxlength="240" value="${escapeHtml(block.caption || '')}"></label>`;
+      }
+  
+      return `<label>${escapeHtml(labels.box_title)}<input data-field="title" maxlength="120" value="${escapeHtml(block.title || '')}"></label><label>${escapeHtml(labels.text)}<textarea data-field="text" maxlength="1500">${text}</textarea></label>`;
+    };
+  
+    const updateEditorState = () => {
+      const title = String(titleInput?.value || '');
+      const summary = String(summaryInput?.value || '');
+      const hasBasics = title.trim() !== '' && summary.trim() !== '';
+      const hasClassification = String(categoryInput?.value || '') !== '' && String(platformInput?.value || '') !== '';
+      const hasCover = Number(coverIdInput?.value || 0) > 0;
+      const hasBlocks = blocks.length >= 3;
+      const completed = [hasBasics, hasClassification, hasCover, hasBlocks].filter(Boolean).length;
+      const completion = Math.round((completed / 4) * 100);
+  
+      if (titleCount) titleCount.textContent = String(title.length);
+      if (summaryCount) summaryCount.textContent = String(summary.length);
+      if (completionNode) completionNode.textContent = `${completion}%`;
+      if (progressNode) progressNode.style.width = `${completion}%`;
+  
+      editor.querySelector('[data-nav-basics]')?.replaceChildren(document.createTextNode(hasBasics ? '✓' : '–'));
+      editor.querySelector('[data-nav-cover]')?.replaceChildren(document.createTextNode(hasCover ? '✓' : '–'));
+      blockCounts.forEach((node) => { node.textContent = String(blocks.length); });
+  
+      const states = [
+        ['[data-check-basics]', hasBasics],
+        ['[data-check-classification]', hasClassification],
+        ['[data-check-cover]', hasCover],
+        ['[data-check-blocks]', hasBlocks],
+      ];
+      states.forEach(([selector, state]) => editor.querySelector(selector)?.classList.toggle('done', state));
+  
+      if (miniTitle) miniTitle.textContent = title.trim() || 'Dein Guide-Titel';
+      if (miniSummary) miniSummary.textContent = summary.trim() || 'Deine Kurzbeschreibung erscheint hier.';
+      if (miniCategory) {
+        miniCategory.textContent = categoryInput?.selectedOptions?.[0]?.textContent?.trim() || 'Keine Kategorie';
+      }
+    };
+  
+    const renderTags = () => {
+      if (!tagList || !tagsHidden) return;
+      tagList.innerHTML = tags.map((tag) => `
+        <span data-tag="${escapeHtml(tag)}">
+          ${escapeHtml(tag)}
+          <button type="button" data-remove-tag aria-label="${escapeHtml(tag)} entfernen">×</button>
+        </span>
+      `).join('');
+      tagsHidden.value = tags.join(', ');
+    };
+  
+    const renderBlocks = () => {
+      blocksRoot.querySelectorAll('[data-editor-block]').forEach((node) => node.remove());
+      emptyState.hidden = blocks.length > 0;
+  
+      blocks.forEach((block, index) => {
+        const node = document.createElement('article');
+        const stateClass = block.type === 'steps'
+          ? 'step'
+          : (block.type === 'notice' || block.type === 'warning' ? block.type : '');
+        node.className = `guide-editor-block ${stateClass} type-${block.type}`.trim();
+        node.dataset.editorBlock = block.id;
+        node.innerHTML = `
+          <aside>
+            <span class="guide-editor-block-grip" aria-hidden="true"><i class="ph ph-dots-six-vertical"></i></span>
+            <span>${escapeHtml(labels[block.type] || block.type)}</span>
+          </aside>
+          <div class="guide-editor-block-fields">${blockFields(block)}</div>
+          <nav class="guide-editor-block-actions">
+            <button type="button" data-move-up title="${escapeHtml(labels.move_up)}" ${index === 0 ? 'disabled' : ''}><i class="ph ph-arrow-up"></i></button>
+            <button type="button" data-move-down title="${escapeHtml(labels.move_down)}" ${index === blocks.length - 1 ? 'disabled' : ''}><i class="ph ph-arrow-down"></i></button>
+            <button type="button" data-remove-block title="${escapeHtml(labels.remove)}"><i class="ph ph-trash"></i></button>
+          </nav>`;
+        blocksRoot.append(node);
+      });
+  
+      contentInput.value = JSON.stringify(blocks);
+      updateEditorState();
+      updateHistoryButtons();
+    };
+  
+    const collectBlock = (node) => {
+      const block = blocks.find((candidate) => candidate.id === node.dataset.editorBlock);
+      if (!block) return;
+  
+      node.querySelectorAll('[data-field]').forEach((input) => {
+        const field = input.dataset.field;
+        block[field] = field === 'level'
+          ? Number(input.value)
+          : field === 'items'
+            ? input.value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean)
+            : input.value;
+      });
+  
+      contentInput.value = JSON.stringify(blocks);
+    };
+  
+    const formPayload = () => {
+      blocksRoot.querySelectorAll('[data-editor-block]').forEach(collectBlock);
+      return {
+        title: titleInput?.value || '',
+        summary: summaryInput?.value || '',
+        category_id: categoryInput?.value || null,
+        cover_media_id: coverIdInput.value || null,
+        tags,
+        language: editor.querySelector('[name="language"]')?.value || 'de',
+        difficulty: editor.querySelector('[name="difficulty"]')?.value || 'beginner',
+        platform: platformInput?.value || 'all',
+        content_blocks: blocks,
+      };
+    };
+  
+    const setSaveState = (text, error = false) => {
+      if (!autosaveState) return;
+      autosaveState.textContent = text;
+      autosaveState.style.color = error ? '#a9453c' : '';
+    };
+  
+    const enqueueSave = (showToast = false) => {
+      clearTimeout(autosaveTimer);
+      const snapshot = formPayload();
+      dirty = false;
+      pendingSaves += 1;
+      setSaveState(labels.saving);
+  
+      saveChain = saveChain
+        .catch(() => undefined)
+        .then(() => jsonRequest(editor.action, {
+          method: 'PUT',
+          body: JSON.stringify(snapshot),
+        }))
+        .then((payload) => {
+          pendingSaves -= 1;
+          if (pendingSaves === 0) {
+            setSaveState(labels.saved);
+            if (autosaveTime) {
+              autosaveTime.textContent = new Intl.DateTimeFormat(
+                document.documentElement.lang,
+                {hour: '2-digit', minute: '2-digit'},
+              ).format(new Date(payload.saved_at || Date.now()));
+            }
+          }
+          if (showToast) toast(payload.message);
+          return payload;
+        })
+        .catch((error) => {
+          pendingSaves = Math.max(0, pendingSaves - 1);
+          dirty = true;
+          setSaveState(labels.save_failed, true);
+          toast(error.message, true);
+          throw error;
+        });
+  
+      return saveChain;
+    };
+  
+    const changed = () => {
+      dirty = true;
+      setSaveState(labels.saving);
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(() => enqueueSave(false), 900);
+      updateEditorState();
+    };
+  
+    const addTag = (value) => {
+      const tag = String(value || '').trim().replace(/^#/, '').slice(0, 30);
+      if (!tag || tags.some((item) => item.toLocaleLowerCase() === tag.toLocaleLowerCase())) return;
+      if (tags.length >= 8) {
+        toast('Maximal 8 Tags sind erlaubt.', true);
+        return;
+      }
+      tags.push(tag);
+      renderTags();
+      if (tagEntry) tagEntry.value = '';
+      changed();
+    };
+  
+    editor.addEventListener('input', (event) => {
+      const node = event.target.closest('[data-editor-block]');
+      if (node) collectBlock(node);
+      changed();
+    });
+  
+    editor.addEventListener('change', (event) => {
+      if (event.target.matches('[data-image-input], [data-cover-input]')) return;
+      const node = event.target.closest('[data-editor-block]');
+      if (node) collectBlock(node);
+      changed();
+    });
+  
+    blocksRoot.addEventListener('focusin', (event) => {
+      if (!event.target.matches('[data-field]') || editSnapshot !== null) return;
+      editSnapshot = snapshotBlocks();
+    });
+  
+    blocksRoot.addEventListener('focusout', (event) => {
+      const node = event.target.closest('[data-editor-block]');
+      if (node) collectBlock(node);
+      if (editSnapshot !== null && editSnapshot !== snapshotBlocks()) {
+        undoStack.push(editSnapshot);
+        if (undoStack.length > 30) undoStack.shift();
+        redoStack = [];
+        updateHistoryButtons();
+      }
+      editSnapshot = null;
+    });
+  
+    editor.querySelectorAll('[data-add-block]').forEach((button) => {
+      button.addEventListener('click', () => {
+        rememberBlocks();
+        const type = button.dataset.addBlock;
+        blocks.push(normalizeBlock({
+          type,
+          ...(type === 'heading' ? {level: 2, text: ''} : {}),
+          ...(type === 'paragraph' ? {text: ''} : {}),
+          ...(['steps', 'list'].includes(type) ? {items: []} : {}),
+          ...(type === 'image' ? {media_id: 0, caption: ''} : {}),
+          ...(['notice', 'warning'].includes(type) ? {title: '', text: ''} : {}),
+        }));
+        renderBlocks();
+        changed();
+        blocksRoot.lastElementChild?.scrollIntoView({
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          block: 'center',
+        });
+      });
+    });
+  
+    blocksRoot.addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      const node = button?.closest('[data-editor-block]');
+      if (!button || !node) return;
+      const index = blocks.findIndex((block) => block.id === node.dataset.editorBlock);
+      if (index < 0) return;
+  
+      collectBlock(node);
+      rememberBlocks();
+  
+      if (button.hasAttribute('data-remove-block')) blocks.splice(index, 1);
+      if (button.hasAttribute('data-move-up') && index > 0) {
+        [blocks[index - 1], blocks[index]] = [blocks[index], blocks[index - 1]];
+      }
+      if (button.hasAttribute('data-move-down') && index < blocks.length - 1) {
+        [blocks[index + 1], blocks[index]] = [blocks[index], blocks[index + 1]];
+      }
+  
       renderBlocks();
       changed();
-    } catch (error) {
-      toast(error.message, true);
-      input.disabled = false;
-    }
-  });
-
-  editor.querySelector('[data-cover-upload]')?.addEventListener('click', () => coverInput?.click());
-  coverInput?.addEventListener('change', async () => {
-    if (!coverInput.files?.[0]) return;
-    const button = editor.querySelector('[data-cover-upload]');
-    button.disabled = true;
-    try {
-      const payload = await uploadImage(coverInput.files[0], 'cover');
-      coverIdInput.value = payload.media.id;
-      coverPreview.innerHTML = `<img src="${escapeHtml(payload.media.url)}" alt="">`;
+    });
+  
+    undoButton?.addEventListener('click', () => {
+      if (!undoStack.length) return;
+      redoStack.push(snapshotBlocks());
+      blocks = JSON.parse(undoStack.pop()).map(normalizeBlock);
+      renderBlocks();
       changed();
-    } catch (error) {
-      toast(error.message, true);
-    } finally {
-      button.disabled = false;
-      coverInput.value = '';
-    }
-  });
-
-  editor.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const button = editor.querySelector('[data-save-guide]');
-    button.disabled = true;
-    try {
-      await enqueueSave(true);
-    } finally {
-      button.disabled = false;
-    }
-  });
-
-  editor.querySelector('[data-submit-guide]')?.addEventListener('click', async (event) => {
-    const button = event.currentTarget;
-    if (!confirm(labels.submit_confirm)) return;
-    button.disabled = true;
-    try {
-      await enqueueSave(false);
-      const payload = await jsonRequest(editor.dataset.submitUrl, {
-        method: 'POST',
-        body: JSON.stringify({}),
+    });
+  
+    redoButton?.addEventListener('click', () => {
+      if (!redoStack.length) return;
+      undoStack.push(snapshotBlocks());
+      blocks = JSON.parse(redoStack.pop()).map(normalizeBlock);
+      renderBlocks();
+      changed();
+    });
+  
+    tagEntry?.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ',') return;
+      event.preventDefault();
+      addTag(tagEntry.value);
+    });
+  
+    tagEntry?.addEventListener('blur', () => addTag(tagEntry.value));
+  
+    tagList?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-remove-tag]');
+      const tagNode = button?.closest('[data-tag]');
+      if (!button || !tagNode) return;
+      tags = tags.filter((tag) => tag !== tagNode.dataset.tag);
+      renderTags();
+      changed();
+    });
+  
+    const uploadImage = async (file, kind) => {
+      const body = new FormData();
+      body.append('kind', kind);
+      body.append('image', file);
+      return jsonRequest(editor.dataset.mediaUrl, {method: 'POST', body});
+    };
+  
+    blocksRoot.addEventListener('change', async (event) => {
+      const input = event.target.closest('[data-image-input]');
+      if (!input?.files?.[0]) return;
+      const node = input.closest('[data-editor-block]');
+      const block = blocks.find((candidate) => candidate.id === node?.dataset.editorBlock);
+      if (!block) return;
+  
+      input.disabled = true;
+      try {
+        const payload = await uploadImage(input.files[0], 'content');
+        rememberBlocks();
+        block.media_id = payload.media.id;
+        renderBlocks();
+        changed();
+      } catch (error) {
+        toast(error.message, true);
+        input.disabled = false;
+      }
+    });
+  
+    coverUploadButton?.addEventListener('click', () => coverInput?.click());
+  
+    coverInput?.addEventListener('change', async () => {
+      if (!coverInput.files?.[0]) return;
+      coverUploadButton.disabled = true;
+  
+      try {
+        const payload = await uploadImage(coverInput.files[0], 'cover');
+        coverIdInput.value = payload.media.id;
+        coverPreview.innerHTML = `<img src="${escapeHtml(payload.media.url)}" alt="">`;
+        if (miniCover) miniCover.innerHTML = `<img src="${escapeHtml(payload.media.url)}" alt="">`;
+        coverUploadButton.lastChild.textContent = ' Bild ersetzen';
+        changed();
+      } catch (error) {
+        toast(error.message, true);
+      } finally {
+        coverUploadButton.disabled = false;
+        coverInput.value = '';
+      }
+    });
+  
+    const editorNavLinks = [...editor.querySelectorAll('[data-editor-nav] a[href^="#"]')];
+    const editorScroll = document.getElementById('guidesScroll');
+  
+    if (editorNavLinks.length && editorScroll) {
+      const sections = editorNavLinks
+        .map((link) => ({link, section: document.getElementById(link.hash.slice(1))}))
+        .filter(({section}) => section);
+  
+      const setActive = (activeSection) => {
+        sections.forEach(({link, section}) => {
+          const active = section === activeSection;
+          link.classList.toggle('active', active);
+          if (active) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      };
+  
+      editorNavLinks.forEach((link) => {
+        link.addEventListener('click', (event) => {
+          const section = document.getElementById(link.hash.slice(1));
+          if (!section) return;
+          event.preventDefault();
+          setActive(section);
+          const rootRect = editorScroll.getBoundingClientRect();
+          const top = section.getBoundingClientRect().top - rootRect.top + editorScroll.scrollTop - 12;
+          editorScroll.scrollTo({
+            top: Math.max(0, top),
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          });
+          history.replaceState(null, '', link.hash);
+        });
       });
-      toast(payload.message);
-      dirty = false;
-      setTimeout(() => { location.href = '/guides/mine'; }, 550);
-    } catch (error) {
-      toast(error.message, true);
-      button.disabled = false;
+  
+      let frame = 0;
+      const updateActive = () => {
+        frame = 0;
+        const line = editorScroll.getBoundingClientRect().top + 110;
+        let activeSection = sections[0].section;
+        sections.forEach(({section}) => {
+          if (section.getBoundingClientRect().top <= line) activeSection = section;
+        });
+        setActive(activeSection);
+      };
+      editorScroll.addEventListener('scroll', () => {
+        if (!frame) frame = requestAnimationFrame(updateActive);
+      }, {passive: true});
+      updateActive();
     }
-  });
-
-  window.addEventListener('beforeunload', (event) => {
-    if (!dirty && pendingSaves === 0) return;
-    event.preventDefault();
-    event.returnValue = labels.unsaved_warning;
-  });
-
-  renderBlocks();
+  
+    editor.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = editor.querySelector('[data-save-guide]');
+      button.disabled = true;
+      try {
+        await enqueueSave(true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  
+    const submitGuide = async () => {
+      if (!submitConfirm) return;
+      submitConfirm.disabled = true;
+  
+      try {
+        await enqueueSave(false);
+        const payload = await jsonRequest(editor.dataset.submitUrl, {
+          method: 'POST',
+          body: JSON.stringify({}),
+        });
+        dirty = false;
+        submitDialog?.close();
+        toast(payload.message);
+        setTimeout(() => { location.href = '/guides/mine'; }, 550);
+      } catch (error) {
+        toast(error.message, true);
+        submitConfirm.disabled = false;
+      }
+    };
+  
+    submitButton?.addEventListener('click', () => {
+      if (submitDialog?.showModal) {
+        submitDialog.showModal();
+        return;
+      }
+      if (confirm(labels.submit_confirm)) submitGuide();
+    });
+  
+    submitConfirm?.addEventListener('click', submitGuide);
+    submitDialog?.querySelector('[data-guide-dialog-close]')?.addEventListener('click', () => submitDialog.close());
+    submitDialog?.addEventListener('click', (event) => {
+      if (event.target === submitDialog) submitDialog.close();
+    });
+  
+    window.addEventListener('beforeunload', (event) => {
+      if (!dirty && pendingSaves === 0) return;
+      event.preventDefault();
+      event.returnValue = labels.unsaved_warning;
+    });
+  
+    renderTags();
+    renderBlocks();
+    updateEditorState();
 })();
