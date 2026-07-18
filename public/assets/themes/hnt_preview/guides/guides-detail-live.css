@@ -284,3 +284,17 @@ body.guides-detail-live .guide-comments-login a {
   font-size: 8px;
   text-decoration: none;
 }
+
+body.guides-detail-live .guide-note > i {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #fff;
+  color: var(--accent);
+  font-size: 20px;
+}
+body.guides-detail-live .guide-comments-shell > header button i,
+body.guides-detail-live .guide-comment-composer button i { font-size: 15px; }
+body.guides-detail-live [data-guide-comment-length] { font-style: normal; }
