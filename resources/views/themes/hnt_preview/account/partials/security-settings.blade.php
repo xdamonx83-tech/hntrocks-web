@@ -133,10 +133,20 @@
 <article class="settings-security-section sessions">
 <header>
 <div><span>{{ __('settings.security_events_eyebrow') }}</span><h3>{{ __('ui.security_log') }}</h3></div>
-<div class="settings-security-placeholder-action">
-<span class="settings-planned-badge">{{ __('settings.planned_badge') }}</span>
-<button type="button" disabled>{{ __('settings.security_logout_other_sessions') }}</button>
-</div>
+<form
+class="settings-security-session-action"
+method="POST"
+action="{{ route('settings.security.sessions.logout-others') }}"
+data-security-logout-form
+data-confirm="{{ __('settings.security_logout_other_sessions_confirm') }}"
+data-label-loading="{{ __('settings.security_logout_other_sessions_loading') }}"
+>
+@csrf
+<input type="hidden" name="settings_section" value="security">
+<input type="hidden" name="settings_action" value="security_logout_other_sessions">
+<button type="submit">{{ __('settings.security_logout_other_sessions') }}</button>
+<small>{{ __('settings.security_logout_other_sessions_hint') }}</small>
+</form>
 </header>
 <div class="settings-security-log" id="securityEventsList" tabindex="0" aria-label="{{ __('settings.security_events_scroll_label') }}">
 @include('themes.hnt_preview.account.partials.security-events', ['events' => $events])
