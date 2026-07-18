@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\AccountDeletionRequest;
+use App\Models\ApiAccessToken;
 use App\Services\Auth\TwoFactorService;
 use App\Services\SecurityLogService;
 use App\Services\UserDataExportService;
@@ -11,7 +12,9 @@ use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -191,6 +194,52 @@ class SecurityController extends Controller
         $securityLog->record($user, 'two_factor_recovery_codes_regenerated', $request);
 
         return $this->securityRedirect($request)->with('status', __('ui.two_factor_recovery_codes_regenerated'));
+    }
+
+    public function logoutOtherSessions(Request $request, SecurityLogService $securityLog): RedirectResponse
+    {
+        $user = $request->user();
+        $nextSessionVersion = 0;
+
+        $revokedAppTokens = DB::transaction(function () use ($user, &$nextSessionVersion): int {
+            $currentSessionVersion = (int) DB::table('users')
+                ->where('id', $user->id)
+                ->lockForUpdate()
+                ->value('security_session_version');
+
+            $nextSessionVersion = $currentSessionVersion + 1;
+
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'security_session_version' => $nextSessionVersion,
+                    'updated_at' => now(),
+                ]);
+
+            if (! Schema::hasTable('api_access_tokens')) {
+                return 0;
+            }
+
+            return ApiAccessToken::query()
+                ->where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->update(['revoked_at' => now()]);
+        });
+
+        $request->session()->put('security_session_version', $nextSessionVersion);
+        $user->forceFill(['security_session_version' => $nextSessionVersion]);
+
+        $securityLog->record($user, 'other_sessions_logged_out', $request, [
+            'revoked_app_tokens' => $revokedAppTokens,
+            'security_session_version' => $nextSessionVersion,
+        ]);
+
+        return $this->securityRedirect($request)->with(
+            'status',
+            trans_choice('settings.security_other_sessions_logged_out', $revokedAppTokens, [
+                'count' => $revokedAppTokens,
+            ])
+        );
     }
 
     public function export(Request $request, SecurityLogService $securityLog, UserDataExportService $exportService)
