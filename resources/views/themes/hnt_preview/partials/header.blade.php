@@ -7,6 +7,7 @@
     $headerRocks = (int) ($headerViewer?->crownWallet?->balance ?? 0);
     $headerIsFeed = request()->routeIs('feed.index');
     $headerIsTeams = request()->routeIs('teams.*');
+    $headerIsGuides = request()->routeIs('guides.*');
     $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
 <header class="site-header" data-hnt-shared-header>
@@ -68,7 +69,7 @@
 </section>
 </div>
 <div class="main-nav-item nav-more">
-<button aria-controls="moreNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger" type="button"><span>{{ __('hnt_preview.header.more') }}</span><svg><use href="#i-chevron"></use></svg></button>
+<button aria-controls="moreNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger {{ $headerIsGuides ? 'is-current' : '' }}" type="button"><span>{{ __('hnt_preview.header.more') }}</span><svg><use href="#i-chevron"></use></svg></button>
 <section class="main-nav-dropdown align-right" id="moreNavDropdown" role="menu">
 <header><span>{{ __('hnt_preview.header.more_eyebrow') }}</span><strong>{{ __('hnt_preview.header.more_title') }}</strong></header>
 <div class="main-nav-menu-grid">
