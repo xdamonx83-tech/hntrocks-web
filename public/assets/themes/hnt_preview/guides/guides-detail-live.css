@@ -298,3 +298,9 @@ body.guides-detail-live .guide-note > i {
 body.guides-detail-live .guide-comments-shell > header button i,
 body.guides-detail-live .guide-comment-composer button i { font-size: 15px; }
 body.guides-detail-live [data-guide-comment-length] { font-style: normal; }
+
+
+body.guides-detail-live .guide-comment footer .guide-comment-placeholder {
+  cursor: not-allowed;
+  opacity: .58;
+}
