@@ -53,6 +53,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'security_session_version' => 'integer',
             'last_xp_at' => 'datetime',
             'last_seen_at' => 'datetime',
             'is_admin' => 'boolean',
