@@ -471,3 +471,71 @@ body.guide-editor-live .guide-add-blocks button.planned em {
   font-size: 6px;
   font-style: normal;
 }
+
+
+/* Live editor: explicit stacked panel headings */
+body.guide-editor-live .guide-editor-panel > header > div:first-child {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  align-content: center;
+  gap: 2px;
+}
+
+body.guide-editor-live .guide-editor-panel > header > div:first-child > span,
+body.guide-editor-live .guide-editor-panel > header > div:first-child > h2 {
+  display: block;
+  width: 100%;
+}
+
+/* Live editor: draggable and click-to-sort block handles */
+body.guide-editor-live .guide-editor-block-grip {
+  padding: 0;
+  border: 0;
+  color: #77736f;
+  cursor: grab;
+  touch-action: none;
+}
+
+body.guide-editor-live .guide-editor-block-grip:active {
+  cursor: grabbing;
+}
+
+body.guide-editor-live .guide-editor-block.sort-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(182, 78, 68, .12);
+}
+
+body.guide-editor-live .guide-editor-block.sort-selected .guide-editor-block-grip {
+  background: var(--accent);
+  color: #fff;
+}
+
+body.guide-editor-live .guide-editor-block.dragging {
+  opacity: .38;
+}
+
+body.guide-editor-live .guide-editor-block.drop-before::before,
+body.guide-editor-live .guide-editor-block.drop-after::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  z-index: 3;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(182, 78, 68, .1);
+}
+
+body.guide-editor-live .guide-editor-block.drop-before::before {
+  top: -6px;
+}
+
+body.guide-editor-live .guide-editor-block.drop-after::after {
+  bottom: -6px;
+}
+
+body.guide-editor-live .guide-editor-block {
+  position: relative;
+}
