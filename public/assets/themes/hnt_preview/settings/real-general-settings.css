@@ -117,3 +117,43 @@
     justify-self: start;
   }
 }
+
+
+.settings-block-form .settings-block-error {
+  color: #b64e44;
+  font-size: 8px;
+}
+
+.settings-blocked-list img {
+  object-fit: cover;
+}
+
+.settings-blocked-unblock-form {
+  display: contents;
+}
+
+.settings-blocked-empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed rgba(234, 210, 206, .8);
+  border-radius: 20px;
+  color: #8d8b87;
+  font-size: 9px;
+  text-align: center;
+}
+
+.settings-block-coverage-placeholder {
+  margin-top: 13px;
+  opacity: .72;
+}
+
+.settings-block-coverage-placeholder .settings-planned-badge {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 560px) {
+  .settings-block-coverage-placeholder {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
