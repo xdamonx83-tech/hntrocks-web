@@ -464,6 +464,10 @@
     let undoStack = [];
     let redoStack = [];
     let editSnapshot = null;
+    let selectedBlockId = null;
+    let draggedBlockId = null;
+    let dropAfterTarget = false;
+    let suppressSortClick = false;
   
     const escapeHtml = (value) => String(value ?? '')
       .replaceAll('&', '&amp;')
@@ -579,10 +583,19 @@
           ? 'step'
           : (block.type === 'notice' || block.type === 'warning' ? block.type : '');
         node.className = `guide-editor-block ${stateClass} type-${block.type}`.trim();
+        node.classList.toggle('sort-selected', selectedBlockId === block.id);
         node.dataset.editorBlock = block.id;
         node.innerHTML = `
           <aside>
-            <span class="guide-editor-block-grip" aria-hidden="true"><i class="ph ph-dots-six-vertical"></i></span>
+            <button
+              class="guide-editor-block-grip"
+              type="button"
+              draggable="true"
+              data-block-drag
+              aria-label="Block sortieren"
+              aria-pressed="${selectedBlockId === block.id ? 'true' : 'false'}"
+              title="Ziehen oder anklicken, um den Block zu sortieren"
+            ><i class="ph ph-dots-six-vertical" aria-hidden="true"></i></button>
             <span>${escapeHtml(labels[block.type] || block.type)}</span>
           </aside>
           <div class="guide-editor-block-fields">${blockFields(block)}</div>
@@ -746,16 +759,125 @@
       });
     });
   
+    const clearSortVisuals = () => {
+      blocksRoot.querySelectorAll('[data-editor-block]').forEach((node) => {
+        node.classList.remove('sort-selected', 'dragging', 'drop-before', 'drop-after');
+        node.querySelector('[data-block-drag]')?.setAttribute('aria-pressed', 'false');
+      });
+    };
+
+    const moveBlockToTarget = (sourceId, targetId, after = false) => {
+      blocksRoot.querySelectorAll('[data-editor-block]').forEach(collectBlock);
+      const sourceIndex = blocks.findIndex((block) => block.id === sourceId);
+      if (sourceIndex < 0) return false;
+
+      rememberBlocks();
+      const [moved] = blocks.splice(sourceIndex, 1);
+      let targetIndex = blocks.findIndex((block) => block.id === targetId);
+      if (targetIndex < 0) {
+        blocks.splice(sourceIndex, 0, moved);
+        return false;
+      }
+      if (after) targetIndex += 1;
+      blocks.splice(targetIndex, 0, moved);
+      return true;
+    };
+
+    blocksRoot.addEventListener('dragstart', (event) => {
+      const handle = event.target.closest('[data-block-drag]');
+      const node = handle?.closest('[data-editor-block]');
+      if (!handle || !node) {
+        event.preventDefault();
+        return;
+      }
+
+      suppressSortClick = true;
+      selectedBlockId = null;
+      draggedBlockId = node.dataset.editorBlock;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', draggedBlockId);
+      requestAnimationFrame(() => node.classList.add('dragging'));
+    });
+
+    blocksRoot.addEventListener('dragover', (event) => {
+      if (!draggedBlockId) return;
+      const target = event.target.closest('[data-editor-block]');
+      if (!target || target.dataset.editorBlock === draggedBlockId) return;
+
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      blocksRoot.querySelectorAll('.drop-before,.drop-after').forEach((node) => {
+        node.classList.remove('drop-before', 'drop-after');
+      });
+
+      const rect = target.getBoundingClientRect();
+      dropAfterTarget = event.clientY > rect.top + (rect.height / 2);
+      target.classList.add(dropAfterTarget ? 'drop-after' : 'drop-before');
+    });
+
+    blocksRoot.addEventListener('drop', (event) => {
+      if (!draggedBlockId) return;
+      const target = event.target.closest('[data-editor-block]');
+      event.preventDefault();
+
+      if (target && target.dataset.editorBlock !== draggedBlockId) {
+        if (moveBlockToTarget(draggedBlockId, target.dataset.editorBlock, dropAfterTarget)) {
+          renderBlocks();
+          changed();
+          toast('Blockreihenfolge aktualisiert.');
+        }
+      }
+
+      draggedBlockId = null;
+      dropAfterTarget = false;
+      clearSortVisuals();
+    });
+
+    blocksRoot.addEventListener('dragend', () => {
+      draggedBlockId = null;
+      dropAfterTarget = false;
+      clearSortVisuals();
+      setTimeout(() => { suppressSortClick = false; }, 0);
+    });
+
     blocksRoot.addEventListener('click', (event) => {
       const button = event.target.closest('button');
       const node = button?.closest('[data-editor-block]');
       if (!button || !node) return;
       const index = blocks.findIndex((block) => block.id === node.dataset.editorBlock);
       if (index < 0) return;
-  
+
+      if (button.hasAttribute('data-block-drag')) {
+        event.preventDefault();
+        if (suppressSortClick) return;
+
+        if (!selectedBlockId) {
+          selectedBlockId = node.dataset.editorBlock;
+          clearSortVisuals();
+          node.classList.add('sort-selected');
+          button.setAttribute('aria-pressed', 'true');
+          toast('Block gewählt. Klicke jetzt auf die Punkte der Zielposition.');
+          return;
+        }
+
+        if (selectedBlockId === node.dataset.editorBlock) {
+          selectedBlockId = null;
+          clearSortVisuals();
+          return;
+        }
+
+        if (moveBlockToTarget(selectedBlockId, node.dataset.editorBlock, false)) {
+          selectedBlockId = null;
+          renderBlocks();
+          changed();
+          toast('Blockreihenfolge aktualisiert.');
+        }
+        return;
+      }
+
       collectBlock(node);
       rememberBlocks();
-  
+
       if (button.hasAttribute('data-remove-block')) blocks.splice(index, 1);
       if (button.hasAttribute('data-move-up') && index > 0) {
         [blocks[index - 1], blocks[index]] = [blocks[index], blocks[index - 1]];
@@ -763,7 +885,7 @@
       if (button.hasAttribute('data-move-down') && index < blocks.length - 1) {
         [blocks[index + 1], blocks[index]] = [blocks[index], blocks[index + 1]];
       }
-  
+
       renderBlocks();
       changed();
     });
