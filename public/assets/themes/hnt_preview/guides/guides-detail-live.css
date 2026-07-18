@@ -391,3 +391,47 @@ body.guides-detail-live .guide-steps p {
     font-size: 12px;
   }
 }
+
+
+/* Live guide: smooth, active table of contents */
+body.guides-detail-live #guidesScroll {
+  scroll-behavior: smooth;
+}
+
+body.guides-detail-live .guide-article-section {
+  scroll-margin-top: 96px;
+}
+
+body.guides-detail-live .guide-detail-toc nav a {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color .22s ease,
+    color .22s ease,
+    transform .22s ease,
+    box-shadow .22s ease;
+}
+
+body.guides-detail-live .guide-detail-toc nav a:hover {
+  background: #f1f1ee;
+  color: var(--ink);
+  transform: translateX(2px);
+}
+
+body.guides-detail-live .guide-detail-toc nav a.active,
+body.guides-detail-live .guide-detail-toc nav a[aria-current="location"] {
+  background: var(--dark);
+  box-shadow: 0 9px 22px rgba(45, 46, 42, .12);
+  color: #fff;
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.guides-detail-live #guidesScroll {
+    scroll-behavior: auto;
+  }
+
+  body.guides-detail-live .guide-detail-toc nav a {
+    transition: none;
+  }
+}
