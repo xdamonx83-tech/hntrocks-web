@@ -202,6 +202,23 @@ class GuideController extends Controller
             ->paginate(12, ['*'], 'comments_page')
             ->withQueryString();
 
+        $revision = $guide->publishedRevision;
+        $canViewGamification = $privacy->canViewGamification($request->user(), $guide->author);
+        $relatedGuides = Guide::query()
+            ->published()
+            ->where('guides.id', '!=', $guide->id)
+            ->when($revision?->category_id, fn (Builder $query) => $query
+                ->whereHas('publishedRevision', fn (Builder $publishedRevision) => $publishedRevision
+                    ->where('category_id', $revision->category_id)))
+            ->with([
+                'publishedRevision.category',
+                'publishedRevision.coverMedia',
+            ])
+            ->orderByDesc('helpful_count')
+            ->orderByDesc('published_at')
+            ->limit(2)
+            ->get();
+
         return view('themes.hnt_preview.guides.show', [
             'guide' => $guide,
             'revision' => $guide->publishedRevision,
@@ -209,9 +226,17 @@ class GuideController extends Controller
             'isPreview' => false,
             'viewerHelpful' => $guide->isHelpfulFor($request->user()),
             'viewerBookmarked' => $guide->isBookmarkedBy($request->user()),
-            'authorReputation' => $privacy->canViewGamification($request->user(), $guide->author)
+            'authorReputation' => $canViewGamification
                 ? $reputation->totalFor($guide->author)
                 : null,
+            'authorPublishedGuideCount' => Guide::query()
+                ->published()
+                ->where('author_id', $guide->author_id)
+                ->count(),
+            'authorBadgeCount' => $canViewGamification
+                ? $guide->author?->badges()->count()
+                : null,
+            'relatedGuides' => $relatedGuides,
         ]);
     }
 }
