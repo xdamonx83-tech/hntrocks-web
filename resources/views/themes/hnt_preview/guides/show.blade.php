@@ -251,7 +251,7 @@
                                 data-guide-toggle-group="helpful"
                                 data-url="{{ route('guides.helpful.toggle', $guide) }}"
                                 data-active-label="{{ __('guides.helpful.marked') }}"
-                                data-inactive-label="{{ __('guides.helpful.label') }}"
+                                data-inactive-label="Als hilfreich markieren"
                                 type="button"
                             >
                                 <i class="ph ph-heart" aria-hidden="true"></i>
