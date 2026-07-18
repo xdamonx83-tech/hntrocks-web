@@ -295,6 +295,11 @@
                                 {{ $label }}
                             </button>
                         @endforeach
+                        <button class="planned" type="button" disabled title="Moment-Blöcke sind in Vorbereitung">
+                            <i class="ph ph-play-circle" aria-hidden="true"></i>
+                            Moment
+                            <em>Geplant</em>
+                        </button>
                     </div>
                 </div>
             </section>
