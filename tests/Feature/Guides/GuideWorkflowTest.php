@@ -483,6 +483,32 @@ class GuideWorkflowTest extends TestCase
             ->assertViewHas('bookmarkedGuideIds', fn (array $ids) => in_array($featured->id, $ids, true));
     }
 
+    public function test_guide_detail_widgets_use_real_content_and_related_guides(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $author = User::factory()->create(['name' => 'Real Detail Author']);
+        $relatedAuthor = User::factory()->create(['name' => 'Related Guide Author']);
+        $viewer = User::factory()->create();
+
+        $guide = $this->publishedGuide($author, $admin);
+        $guide->update(['helpful_count' => 9]);
+
+        $relatedGuide = $this->publishedGuide($relatedAuthor, $admin);
+        $relatedGuide->update(['helpful_count' => 4]);
+
+        $response = $this->actingAs($viewer)->get(route('guides.show', $guide));
+
+        $response
+            ->assertOk()
+            ->assertSee($guide->publishedRevision->title)
+            ->assertSee($relatedGuide->publishedRevision->title)
+            ->assertSee('Real Detail Author')
+            ->assertSee('Aufrufe · geplant')
+            ->assertDontSee('Erica Wyatt')
+            ->assertViewHas('authorPublishedGuideCount', 1)
+            ->assertViewHas('relatedGuides', fn ($guides) => $guides->contains(fn (Guide $item) => $item->is($relatedGuide)));
+    }
+
     private function draft(User $author): Guide
     {
         return app(GuideWorkflowService::class)->create($author);
