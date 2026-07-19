@@ -132,10 +132,15 @@ class ProfileController extends Controller
         $profileGuidesPreview = Guide::query()
             ->published()
             ->where('author_id', $profileUser->id)
+            ->where('show_in_profile', true)
             ->with(['publishedRevision.category', 'publishedRevision.coverMedia'])
             ->latest('published_at')
-            ->limit(4)
+            ->limit(12)
             ->get();
+
+        if ($activeSection === 'guides' && $profileGuidesPreview->isEmpty()) {
+            $activeSection = 'timeline';
+        }
 
         $profileQuestPreview = Quest::query()
             ->where('is_active', true)
@@ -980,6 +985,7 @@ class ProfileController extends Controller
             $activeSection = match (true) {
                 str_contains($routeName, '.about') => 'about',
                 str_contains($routeName, '.friends') => 'friends',
+                str_contains($routeName, '.guides') => 'guides',
                 str_contains($routeName, '.badges') => 'badges',
                 str_contains($routeName, '.trophies') => 'trophies',
                 str_contains($routeName, '.teams') => 'teams',
@@ -988,7 +994,7 @@ class ProfileController extends Controller
             };
         }
 
-        return in_array($activeSection, ['timeline', 'about', 'friends', 'badges', 'trophies', 'teams', 'contact'], true)
+        return in_array($activeSection, ['timeline', 'about', 'friends', 'guides', 'badges', 'trophies', 'teams', 'contact'], true)
             ? $activeSection
             : 'timeline';
     }
