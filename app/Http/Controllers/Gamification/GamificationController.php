@@ -9,7 +9,6 @@ use App\Models\Quest;
 use App\Models\XpEvent;
 use App\Services\Economy\CrownDailyStreakService;
 use App\Services\GamificationService;
-use App\Support\HntTheme;
 use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -114,7 +113,7 @@ class GamificationController extends Controller
 
         $sidebarData = ReworkFeedSidebar::forViewer($user);
 
-        return view(HntTheme::resolve('gamification.index'), [
+        return view('themes.hnt_preview.gamification.index', [
             'user' => $user,
             'recentEvents' => $recentEvents,
             'availableBadges' => $availableBadges,
