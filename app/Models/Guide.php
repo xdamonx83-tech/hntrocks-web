@@ -123,6 +123,32 @@ class Guide extends Model
         return $this->archived_at === null && $this->current_published_revision_id !== null;
     }
 
+    public function wasEverPublished(): bool
+    {
+        if ($this->current_published_revision_id !== null || $this->published_at !== null) {
+            return true;
+        }
+
+        if (array_key_exists('has_published_revision', $this->attributes)) {
+            return (bool) $this->attributes['has_published_revision'];
+        }
+
+        if ($this->relationLoaded('revisions')) {
+            return $this->revisions->contains(
+                fn (GuideRevision $revision): bool => $revision->status === 'published'
+            );
+        }
+
+        return $this->revisions()->where('status', 'published')->exists();
+    }
+
+    public function canBeDeletedByAuthor(): bool
+    {
+        return $this->status === 'draft'
+            && $this->archived_at === null
+            && ! $this->wasEverPublished();
+    }
+
     public function isOwnedBy(?User $user): bool
     {
         return $user !== null && (int) $this->author_id === (int) $user->id;
