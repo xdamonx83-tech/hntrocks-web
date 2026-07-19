@@ -23,6 +23,8 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class DashboardFeedLiveController extends Controller
 {
+    private const SHARED_HEADER_PLACEHOLDER = '<!-- HNT_SHARED_HEADER_COMPONENT -->';
+
     public function __invoke(Request $request): SymfonyResponse
     {
         $viewer = $request->user();
@@ -165,6 +167,12 @@ class DashboardFeedLiveController extends Controller
             $html
         );
 
+        // The feed still uses its prototype sanitizer for feed content, but the
+        // shared topbar is detached first and restored unchanged afterwards.
+        // This keeps the exact same Blade component, CSS and JavaScript on every
+        // page instead of rebuilding the header inside the feed response.
+        [$html, $sharedHeader] = $this->detachSharedHeader($html);
+
         $html = app(DashboardPrototypeSanitizer::class)->sanitize(
             $html,
             $viewer,
@@ -173,6 +181,10 @@ class DashboardFeedLiveController extends Controller
             $initialStreak
         );
         $html = app(DashboardPrototypeLocalizer::class)->localize($html);
+
+        if ($sharedHeader !== null) {
+            $html = str_replace(self::SHARED_HEADER_PLACEHOLDER, $sharedHeader, $html);
+        }
 
         $dashboardI18n = json_encode(
             trans('hnt_preview.dashboard'),
@@ -214,6 +226,51 @@ class DashboardFeedLiveController extends Controller
             ->header('Pragma', 'no-cache');
 
         return $this->applyNoFlash($request, $response);
+    }
+
+    /**
+     * @return array{0: string, 1: string|null}
+     */
+    private function detachSharedHeader(string $html): array
+    {
+        if (! preg_match(
+            '~<header\b[^>]*data-hnt-shared-header[^>]*>~i',
+            $html,
+            $openingMatch,
+            PREG_OFFSET_CAPTURE
+        )) {
+            return [$html, null];
+        }
+
+        $start = (int) $openingMatch[0][1];
+        $tail = substr($html, $start);
+
+        if (! preg_match_all('~</?header\b[^>]*>~i', $tail, $tagMatches, PREG_OFFSET_CAPTURE)) {
+            return [$html, null];
+        }
+
+        $depth = 0;
+        foreach ($tagMatches[0] as [$tag, $relativeOffset]) {
+            $isClosingTag = str_starts_with(strtolower($tag), '</header');
+            $depth += $isClosingTag ? -1 : 1;
+
+            if ($depth !== 0) {
+                continue;
+            }
+
+            $end = $start + (int) $relativeOffset + strlen($tag);
+            $sharedHeader = substr($html, $start, $end - $start);
+            $withoutHeader = substr_replace(
+                $html,
+                self::SHARED_HEADER_PLACEHOLDER,
+                $start,
+                $end - $start
+            );
+
+            return [$withoutHeader, $sharedHeader];
+        }
+
+        return [$html, null];
     }
 
     private function applyNoFlash(Request $request, Response $response): Response
