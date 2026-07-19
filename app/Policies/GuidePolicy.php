@@ -30,6 +30,11 @@ class GuidePolicy
             && $guide->status !== 'pending_review';
     }
 
+    public function delete(User $user, Guide $guide): bool
+    {
+        return $guide->isOwnedBy($user) && $guide->canBeDeletedByAuthor();
+    }
+
     public function preview(User $user, Guide $guide): bool
     {
         return $guide->isOwnedBy($user) || $user->isAdmin();
