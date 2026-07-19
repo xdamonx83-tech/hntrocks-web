@@ -8,6 +8,12 @@ body.hnt-single-post-page .social-feed-card {
   margin-top: var(--layout-gap, 12px);
 }
 
+/* Die Fortschrittskarte fehlt auf der Einzelansicht. Deshalb darf das
+   Community-Panel nicht weiterhin deren Höhe reservieren. */
+body.hnt-single-post-page .fixed-composition {
+  top: calc(var(--overview-h) + var(--layout-gap));
+}
+
 body.hnt-single-post-page .single-post-feed-head {
   min-height: 64px;
 }
