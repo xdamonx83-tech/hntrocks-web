@@ -140,6 +140,16 @@ class ActivateDashboardFeed
             return app(DashboardCupDetailLiveController::class)($request, $cup, $section);
         }
 
+        if ($request->routeIs('gamification.index')) {
+            if (! $request->user()) {
+                return $next($request);
+            }
+
+            $request->attributes->set('hnt_dashboard_feed_live', true);
+
+            return $next($request);
+        }
+
         if ($request->routeIs('feed.show')) {
             abort_unless($request->user(), 401);
             $request->attributes->set('hnt_dashboard_feed_live', true);
