@@ -10,15 +10,20 @@
     $headerIsGuides = request()->routeIs('guides.*');
     $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
+
+@once
+<link
+    data-hnt-shared-topbar-style
+    href="{{ asset('assets/themes/hnt_preview/fuckingdropdown.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/fuckingdropdown.css')) ?: time() }}"
+    rel="stylesheet"
+>
+@endonce
+
 <header
     class="site-header"
     data-hnt-shared-header
     @if($headerViewer)
-        data-header-badges-url="{{ route('socialite.header.live-badges') }}"
-        data-header-notifications-url="{{ route('socialite.header.notifications') }}"
-        data-header-messages-url="{{ route('socialite.header.messages') }}"
-        data-header-friends-url="{{ route('socialite.header.friend-requests') }}"
-        data-header-notifications-read-all-url="{{ route('notifications.read-all') }}"
+        data-hnt-header-endpoint="{{ route('feed.index') }}"
     @endif
 >
 <a aria-label="HNT.rocks {{ __('hnt_preview.header.feed') }}" class="brand" href="{{ route('feed.index') }}">
@@ -139,11 +144,20 @@
 </div>
 </header>
 
+@once
+<script>
+window.HNT_PREVIEW_I18N = @json(trans('hnt_preview'));
+window.HNT_DASHBOARD_HEADER_ENDPOINT = @json(route('feed.index'));
+</script>
+@auth
+<script src="{{ asset('assets/themes/hnt_preview/fuckingdropdown.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/fuckingdropdown.js')) ?: time() }}"></script>
+@endauth
+@endonce
+
 @auth
 @once
 <div class="hnt-chat-tabs-shell" data-hnt-chat-tabs-shell aria-live="polite"></div>
 <script>
-window.HNT_PREVIEW_I18N = @json(trans('hnt_preview'));
 (() => {
     if (!document.querySelector('.feed-shell')) {
         const compatibilityRoot = document.createElement('div');
