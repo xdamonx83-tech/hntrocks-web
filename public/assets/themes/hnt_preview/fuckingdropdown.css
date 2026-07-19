@@ -1,0 +1,162 @@
+/*
+ * HNT.ROCKS – gemeinsame Topbar-/Comms-Korrekturen
+ *
+ * Diese Datei wird vom gemeinsamen Header-Partial auf jeder HNT-Preview-Seite
+ * geladen. Die folgenden Regeln gelten deshalb identisch für Feed, Guides,
+ * Profil, Cups, Maps und alle weiteren Seiten mit diesem Partial.
+ */
+
+/* Chatbubble auf allen Desktop-Seiten zuverlässig sichtbar halten. */
+@media (min-width: 900px) {
+  .hnt-chat-tabs-shell.hnt-comms-dock {
+    right: 22px !important;
+    bottom: 20px !important;
+    z-index: 5000 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-rail {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-launcher {
+    position: relative !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+    border: .5px solid var(--hnt-border-medium, rgba(52, 48, 37, .22)) !important;
+    border-radius: 50% !important;
+    background: var(--hnt-surface-card-strong, #fafaf8) !important;
+    color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+    box-shadow: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-launcher:hover,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-launcher:focus-visible,
+.hnt-chat-tabs-shell.hnt-comms-dock.has-overview .hnt-comms-launcher,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__close:hover,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__close:focus-visible {
+  background: var(--hnt-brand-red-soft, rgba(182, 78, 68, .12)) !important;
+  color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+  outline: none !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-launcher i {
+  color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-launcher__count,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item.unread .hnt-comms-overview__avatar::after {
+  background: var(--hnt-brand-red, rgb(182 78 68)) !important;
+  color: var(--hnt-text-on-dark, #fff) !important;
+}
+
+/* Nachrichtenübersicht exakt in der Feed-Farbwelt. */
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview {
+  border-color: var(--hnt-border-medium, rgba(52, 48, 37, .22)) !important;
+  background: var(--hnt-surface-card-strong, #fafaf8) !important;
+  color: var(--hnt-text, #30302e) !important;
+  box-shadow: none !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__head {
+  border-color: var(--hnt-border-soft, rgba(52, 48, 37, .12)) !important;
+  background: var(--hnt-surface-card-strong, #fafaf8) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__close,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__search input,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item:hover,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item:focus-visible {
+  background: var(--hnt-surface-input, #ecece8) !important;
+  color: var(--hnt-text, #30302e) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__search,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__footer {
+  border-color: var(--hnt-border-soft, rgba(52, 48, 37, .12)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__search input:focus {
+  border-color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item.unread {
+  background: var(--hnt-brand-red-soft, rgba(182, 78, 68, .12)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item.unread:hover,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item.unread:focus-visible {
+  background: var(--hnt-brand-red-soft-hover, rgba(182, 78, 68, .20)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__eyebrow,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item time {
+  color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__meta,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__search i,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__copy small,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__empty {
+  color: var(--hnt-text-soft, #8f8b82) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__footer {
+  background: var(--hnt-dark, #30302e) !important;
+  color: var(--hnt-text-on-dark, #fff) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__footer:hover,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__footer:focus-visible {
+  color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+}
+
+/* Auch geöffnete Einzelchats benutzen auf jeder Seite dieselbe Palette. */
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot > .hnt-chat-tab.hnt-comms-active,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__body,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form {
+  border-color: var(--hnt-border-medium, rgba(52, 48, 37, .22)) !important;
+  background: var(--hnt-surface-card-strong, #fafaf8) !important;
+  color: var(--hnt-text, #30302e) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__bubble,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form input {
+  border-color: var(--hnt-border-soft, rgba(52, 48, 37, .12)) !important;
+  background: var(--hnt-surface-input, #ecece8) !important;
+  color: var(--hnt-text, #30302e) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__message.is-own .hnt-chat-tab__bubble {
+  border-color: rgba(182, 78, 68, .24) !important;
+  background: var(--hnt-brand-red-soft, rgba(182, 78, 68, .12)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__channel,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__empty i {
+  color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form input:focus {
+  border-color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+}
+
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form button:hover,
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form button:focus-visible {
+  background: var(--hnt-brand-red, rgb(182 78 68)) !important;
+  color: var(--hnt-text-on-dark, #fff) !important;
+}
