@@ -6,6 +6,47 @@
  * Profil, Cups, Maps und alle weiteren Seiten mit diesem Partial.
  */
 
+/* Echte Links im Hauptmenü müssen exakt dasselbe Raster wie Button-Einträge
+   verwenden. Ohne diese Korrektur greifen auf Maps/Guides die normalen
+   .main-nav-a-Regeln und verschieben Icon und Text. */
+header.site-header[data-hnt-shared-header] .main-nav-menu-grid > a,
+header.site-header[data-hnt-shared-header] .main-nav-menu-grid > a.active {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 51px !important;
+  height: auto !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  gap: 9px !important;
+  flex: none !important;
+  place-items: initial !important;
+  padding: 7px 9px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+  color: var(--hnt-text, #30302e) !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  white-space: normal !important;
+}
+
+header.site-header[data-hnt-shared-header] .main-nav-menu-grid > a > span:nth-child(2) {
+  min-width: 0 !important;
+  display: grid !important;
+  justify-self: stretch !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+header.site-header[data-hnt-shared-header] .main-nav-menu-grid > a:hover,
+header.site-header[data-hnt-shared-header] .main-nav-menu-grid > a:focus-visible {
+  background: var(--hnt-brand-red-soft, rgba(182, 78, 68, .12)) !important;
+  outline: none !important;
+}
+
 /* Chatbubble auf allen Desktop-Seiten zuverlässig sichtbar halten. */
 @media (min-width: 900px) {
   .hnt-chat-tabs-shell.hnt-comms-dock {
