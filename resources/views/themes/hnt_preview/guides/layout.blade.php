@@ -22,6 +22,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/guides/guides.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides.css')) ?: time() }}" rel="stylesheet">
 @endunless
 @stack('head')
+<link href="{{ asset('assets/themes/hnt_preview/guides/guides-header-feed-parity.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides-header-feed-parity.css')) ?: time() }}" rel="stylesheet">
 </head>
 <body data-page="guides" class="@yield('body_class')">
 @include('themes.hnt_preview.partials.icons')
