@@ -112,6 +112,12 @@ class GuideWorkflowService
                 'moderation_reason' => $revision->status === 'changes_requested' ? $revision->moderation_reason : null,
             ])->save();
 
+            if (array_key_exists('show_in_profile', $data)) {
+                $guide->forceFill([
+                    'show_in_profile' => (bool) $data['show_in_profile'],
+                ])->save();
+            }
+
             $referencedMediaIds = collect($blocks)
                 ->where('type', 'image')
                 ->pluck('media_id')
