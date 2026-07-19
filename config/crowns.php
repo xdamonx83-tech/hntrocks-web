@@ -28,6 +28,7 @@ return [
         'account.created' => [
             'amount' => 25,
             'daily_limit' => null,
+            'legacy' => true,
             'description' => 'Account erstellt',
         ],
         'profile_completed' => [
