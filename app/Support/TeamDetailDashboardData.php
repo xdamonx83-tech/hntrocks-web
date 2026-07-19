@@ -2,9 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\FeedComment;
 use App\Models\FeedPost;
-use App\Models\Report;
 use App\Models\Team;
 use App\Models\TeamContract;
 use App\Models\TeamMember;
@@ -78,40 +76,6 @@ class TeamDetailDashboardData
             ->latest()
             ->take(12)
             ->get();
-
-        $postIds = $posts->pluck('id')->map(fn ($id) => (int) $id)->filter()->values();
-        $commentIds = FeedComment::query()
-            ->whereIn('feed_post_id', $postIds->all())
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->values();
-
-        $reportedFeedKeys = ($postIds->isEmpty() && $commentIds->isEmpty())
-            ? collect()
-            : Report::query()
-                ->where('reporter_id', $viewer->id)
-                ->whereIn('status', ['open', 'in_review'])
-                ->where(function ($query) use ($postIds, $commentIds): void {
-                    if ($postIds->isNotEmpty()) {
-                        $query->orWhere(function ($postQuery) use ($postIds): void {
-                            $postQuery->where('reportable_type', FeedPost::class)
-                                ->whereIn('reportable_id', $postIds->all());
-                        });
-                    }
-
-                    if ($commentIds->isNotEmpty()) {
-                        $query->orWhere(function ($commentQuery) use ($commentIds): void {
-                            $commentQuery->where('reportable_type', FeedComment::class)
-                                ->whereIn('reportable_id', $commentIds->all());
-                        });
-                    }
-                })
-                ->get(['reportable_type', 'reportable_id'])
-                ->mapWithKeys(fn (Report $report): array => [
-                    ($report->reportable_type === FeedComment::class ? 'feed_comment:' : 'feed_post:')
-                        . (int) $report->reportable_id => true,
-                ]);
 
         $upcomingSession = $team->sessions()
             ->with(['creator.profile', 'responses.user.profile'])
@@ -194,7 +158,6 @@ class TeamDetailDashboardData
             'pendingMembers' => $pendingMembers,
             'posts' => $posts,
             'latestPost' => $posts->first(),
-            'reportedFeedKeys' => $reportedFeedKeys,
             'upcomingSession' => $upcomingSession,
             'recentSessions' => $recentSessions,
             'activeContracts' => $activeContracts,
