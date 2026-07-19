@@ -8,6 +8,7 @@
     $headerIsFeed = request()->routeIs('feed.index');
     $headerIsTeams = request()->routeIs('teams.*');
     $headerIsGuides = request()->routeIs('guides.*');
+    $headerIsRocks = request()->routeIs('rocks.*', 'crowns.*');
     $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
 
@@ -83,12 +84,12 @@
 </div>
 </section>
 </div>
-<div class="main-nav-item nav-more">
-<button aria-controls="moreNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger {{ $headerIsGuides ? 'is-current' : '' }}" type="button"><span>{{ __('hnt_preview.header.more') }}</span><svg><use href="#i-chevron"></use></svg></button>
+<div class="main-nav-item nav-more {{ $headerIsRocks ? 'is-current' : '' }}">
+<button aria-controls="moreNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger {{ ($headerIsGuides || $headerIsRocks) ? 'is-current' : '' }}" type="button"><span>{{ __('hnt_preview.header.more') }}</span><svg><use href="#i-chevron"></use></svg></button>
 <section class="main-nav-dropdown align-right" id="moreNavDropdown" role="menu">
 <header><span>{{ __('hnt_preview.header.more_eyebrow') }}</span><strong>{{ __('hnt_preview.header.more_title') }}</strong></header>
 <div class="main-nav-menu-grid">
-<button data-navigation-label="Shop &amp; Inventar" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-folder"></use></svg></span><span><strong>{{ __('hnt_preview.header.shop_inventory') }}</strong><small>{{ __('hnt_preview.header.shop_inventory_text') }}</small></span></button>
+<a class="{{ $headerIsRocks ? 'is-active' : '' }}" data-navigation-label="Shop &amp; Inventar" href="{{ route('rocks.index') }}" role="menuitem"><span class="main-nav-menu-icon yellow"><svg><use href="#i-folder"></use></svg></span><span><strong>{{ __('hnt_preview.header.shop_inventory') }}</strong><small>{{ __('hnt_preview.header.shop_inventory_text') }}</small></span></a>
 <a data-navigation-label="Maps" href="{{ route('maps.index') }}" role="menuitem"><span class="main-nav-menu-icon"><svg viewBox="0 0 24 24"><path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2z"></path><path d="M8 4v13M16 7v13"></path></svg></span><span><strong>Maps</strong><small>{{ $headerLocaleIsEnglish ? 'Interactive Hunt maps and community spots' : 'Interaktive Hunt-Karten und Community-Spots' }}</small></span></a>
 <a data-navigation-label="Guides" href="{{ route('guides.index') }}" role="menuitem"><span class="main-nav-menu-icon"><svg><use href="#i-bookmark"></use></svg></span><span><strong>{{ __('hnt_preview.header.guides') }}</strong><small>{{ __('hnt_preview.header.guides_text') }}</small></span></a>
 <button aria-disabled="true" data-unavailable="1" role="menuitem" type="button"><span class="main-nav-menu-icon purple"><svg><use href="#i-comment"></use></svg></span><span><strong>{{ __('hnt_preview.header.polls') }}</strong><small>{{ __('hnt_preview.header.polls_text') }}</small></span></button>
