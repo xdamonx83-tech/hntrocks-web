@@ -10,7 +10,17 @@
     $headerIsGuides = request()->routeIs('guides.*');
     $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
-<header class="site-header" data-hnt-shared-header>
+<header
+    class="site-header"
+    data-hnt-shared-header
+    @if($headerViewer)
+        data-header-badges-url="{{ route('socialite.header.live-badges') }}"
+        data-header-notifications-url="{{ route('socialite.header.notifications') }}"
+        data-header-messages-url="{{ route('socialite.header.messages') }}"
+        data-header-friends-url="{{ route('socialite.header.friend-requests') }}"
+        data-header-notifications-read-all-url="{{ route('notifications.read-all') }}"
+    @endif
+>
 <a aria-label="HNT.rocks {{ __('hnt_preview.header.feed') }}" class="brand" href="{{ route('feed.index') }}">
 <svg aria-hidden="true" class="brand-mark" viewbox="0 0 44 34">
 <path d="M8.2 5.5c4.4-4.4 10.8-4.2 14.5.1-1 4.7-4.2 8-8.8 9.3-3.9-1.4-6.2-4.7-5.7-9.4Z"></path>
