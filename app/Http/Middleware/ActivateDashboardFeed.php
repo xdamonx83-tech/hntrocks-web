@@ -11,8 +11,10 @@ use App\Http\Controllers\Cups\DashboardCupEditLiveController;
 use App\Http\Controllers\Cups\DashboardCupTeamManageLiveController;
 use App\Http\Controllers\Cups\DashboardCupsLiveController;
 use App\Http\Controllers\Feed\DashboardFeedLiveController;
+use App\Http\Controllers\Feed\DashboardSinglePostLiveController;
 use App\Models\Cup;
 use App\Models\CupSubmission;
+use App\Models\FeedPost;
 use App\Support\CupOrganizerAccess;
 use App\Support\HntTheme;
 use Closure;
@@ -138,11 +140,20 @@ class ActivateDashboardFeed
             return app(DashboardCupDetailLiveController::class)($request, $cup, $section);
         }
 
-        if ($request->routeIs('feed.show') && $request->boolean('hnt_preview_comments')) {
+        if ($request->routeIs('feed.show')) {
             abort_unless($request->user(), 401);
             $request->attributes->set('hnt_dashboard_feed_live', true);
 
-            return $next($request);
+            if ($request->boolean('hnt_preview_comments')) {
+                return $next($request);
+            }
+
+            $post = $this->resolveFeedPost($request);
+            if (! $post) {
+                return $next($request);
+            }
+
+            return app(DashboardSinglePostLiveController::class)($request, $post);
         }
 
         if (! $request->routeIs('feed.index')) {
@@ -175,5 +186,16 @@ class ActivateDashboardFeed
         }
 
         return CupSubmission::query()->find($parameter);
+    }
+
+    private function resolveFeedPost(Request $request): ?FeedPost
+    {
+        $parameter = $request->route('post');
+
+        if ($parameter instanceof FeedPost) {
+            return $parameter;
+        }
+
+        return FeedPost::query()->find($parameter);
     }
 }
