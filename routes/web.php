@@ -381,6 +381,9 @@ Route::get('/loadout-challenges/{challenge:slug}', [LoadoutChallengeController::
 Route::get('/moment-of-week', [MomentOfWeekController::class, 'index'])->name('moment-of-week.index');
 Route::get('/cup-ideas', [CupIdeaController::class, 'index'])->name('cup-ideas.index');
 Route::get('/u/{user:username}/about', [ProfileController::class, 'about'])->name('profile.about.public');
+Route::get('/u/{user:username}/guides', [ProfileController::class, 'show'])
+    ->defaults('socialite_section', 'guides')
+    ->name('profile.guides.public');
 Route::get('/u/{user:username}/badges', [ProfileController::class, 'badges'])->name('profile.badges.public');
 Route::get('/u/{user:username}/trophies', [ProfileController::class, 'trophies'])->name('profile.trophies.public');
 Route::get('/u/{user:username}/teams', [ProfileController::class, 'teams'])->name('profile.teams.public');
@@ -410,6 +413,9 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/trophy-room/prop-lab/models', [TrophyRoomController::class, 'uploadPropModel'])->name('trophy-room.prop-lab.models.upload');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/about', [ProfileController::class, 'about'])->name('profile.about');
+    Route::get('/profile/guides', [ProfileController::class, 'show'])
+        ->defaults('socialite_section', 'guides')
+        ->name('profile.guides');
     Route::get('/profile/friends', [ProfileController::class, 'friends'])->name('profile.friends');
     Route::get('/profile/badges', [ProfileController::class, 'badges'])->name('profile.badges');
     Route::get('/profile/trophies', [ProfileController::class, 'trophies'])->name('profile.trophies');
