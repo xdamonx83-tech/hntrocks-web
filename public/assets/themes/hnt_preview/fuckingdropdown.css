@@ -162,6 +162,14 @@
 }
 
 /* Die Guides-Übersicht enthielt noch eine alte Demo-Regel mit display:none. */
-body.guides-demo-index .hnt-chat-tabs-shell.hnt-comms-dock {
-  display: flex !important;
+@media (min-width: 900px) {
+  body.guides-demo-index .hnt-chat-tabs-shell.hnt-comms-dock {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 899px) {
+  body.guides-demo-index .hnt-chat-tabs-shell.hnt-comms-dock {
+    display: block !important;
+  }
 }
