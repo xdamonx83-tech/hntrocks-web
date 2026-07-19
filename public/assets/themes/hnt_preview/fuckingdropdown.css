@@ -160,3 +160,8 @@
   background: var(--hnt-brand-red, rgb(182 78 68)) !important;
   color: var(--hnt-text-on-dark, #fff) !important;
 }
+
+/* Die Guides-Übersicht enthielt noch eine alte Demo-Regel mit display:none. */
+body.guides-demo-index .hnt-chat-tabs-shell.hnt-comms-dock {
+  display: flex !important;
+}
