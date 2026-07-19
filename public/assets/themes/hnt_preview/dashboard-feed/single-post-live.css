@@ -1,0 +1,70 @@
+/* HNT.ROCKS — Einzelbeitrag im echten Dashboard-Feed-Layout. */
+
+body.hnt-single-post-page .personal-dashboard-card {
+  display: none !important;
+}
+
+body.hnt-single-post-page .social-feed-card {
+  margin-top: var(--layout-gap, 12px);
+}
+
+body.hnt-single-post-page .single-post-feed-head {
+  min-height: 64px;
+}
+
+body.hnt-single-post-page .single-post-back {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--hnt-surface-input, #ecece8);
+  color: var(--hnt-text, #30302e);
+  text-decoration: none;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+body.hnt-single-post-page .single-post-back:hover,
+body.hnt-single-post-page .single-post-back:focus-visible {
+  background: var(--hnt-dark, #30302e);
+  color: var(--hnt-text-on-dark, #fff);
+  outline: none;
+}
+
+body.hnt-single-post-page .single-post-back svg {
+  width: 13px;
+  height: 13px;
+  transform: rotate(225deg);
+}
+
+body.hnt-single-post-page .post-list {
+  min-height: 260px;
+}
+
+body.hnt-single-post-page .real-feed-loader {
+  display: none !important;
+}
+
+body.hnt-single-post-page .post-list > [data-real-feed-post] {
+  margin-bottom: 0;
+}
+
+@media (min-width: 900px) {
+  body.hnt-single-post-page .social-feed-card {
+    min-height: calc(100vh - var(--overview-h, 162px) - 96px);
+  }
+}
+
+@media (max-width: 899px) {
+  body.hnt-single-post-page .single-post-feed-head {
+    align-items: center;
+  }
+
+  body.hnt-single-post-page .single-post-back {
+    min-height: 40px;
+    font-size: 9px;
+  }
+}
