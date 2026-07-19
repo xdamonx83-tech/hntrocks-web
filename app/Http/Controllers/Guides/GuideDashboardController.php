@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Guides\SaveGuideRevisionRequest;
 use App\Models\Guide;
 use App\Models\GuideCategory;
+use App\Models\User;
+use App\Services\Guides\GuideDeletionService;
 use App\Services\Guides\GuideReputationService;
 use App\Services\Guides\GuideWorkflowService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -20,35 +23,99 @@ class GuideDashboardController extends Controller
 
     public function mine(Request $request, GuideReputationService $reputation): View
     {
+        $author = $request->user();
         $status = (string) $request->query('status', 'all');
         if ($status !== 'all' && ! in_array($status, Guide::STATUSES, true)) {
             $status = 'all';
         }
 
-        $query = Guide::query()
-            ->forAuthor($request->user())
+        $search = trim((string) $request->query('q', ''));
+        $sort = (string) $request->query('sort', 'updated');
+        if (! in_array($sort, ['updated', 'status', 'helpful'], true)) {
+            $sort = 'updated';
+        }
+
+        $query = $this->statusQuery($author, $status)
             ->with([
                 'workingRevision.category',
                 'workingRevision.coverMedia',
                 'publishedRevision.category',
                 'publishedRevision.coverMedia',
             ])
-            ->latest('updated_at');
+            ->withExists([
+                'revisions as has_published_revision' => fn (Builder $revisionQuery) => $revisionQuery
+                    ->where('status', 'published'),
+            ]);
 
-        if ($status !== 'all') {
-            $query->where('status', $status);
+        if ($search !== '') {
+            $query->where(function (Builder $guideQuery) use ($search): void {
+                $searchRevision = static function (Builder $revisionQuery) use ($search): void {
+                    $revisionQuery->where(function (Builder $fields) use ($search): void {
+                        $fields->where('title', 'like', '%'.$search.'%')
+                            ->orWhere('summary', 'like', '%'.$search.'%')
+                            ->orWhere('tags', 'like', '%'.$search.'%');
+                    });
+                };
+
+                $guideQuery
+                    ->whereHas('workingRevision', $searchRevision)
+                    ->orWhereHas('publishedRevision', $searchRevision);
+            });
         }
 
-        $counts = collect(Guide::STATUSES)
-            ->mapWithKeys(fn (string $guideStatus): array => [
-                $guideStatus => Guide::query()->forAuthor($request->user())->where('status', $guideStatus)->count(),
-            ]);
+        match ($sort) {
+            'helpful' => $query->orderByDesc('helpful_count')->latest('updated_at'),
+            'status' => $query->orderBy('status')->latest('updated_at'),
+            default => $query->latest('updated_at'),
+        };
+
+        $totalGuides = Guide::query()->forAuthor($author)->count();
+        $statusCounts = collect(['all' => $totalGuides]);
+        foreach (Guide::STATUSES as $guideStatus) {
+            $statusCounts->put($guideStatus, $this->statusQuery($author, $guideStatus)->count());
+        }
+
+        $guideReputation = $reputation->totalFor($author);
+        $publishedCount = Guide::query()
+            ->forAuthor($author)
+            ->whereNotNull('current_published_revision_id')
+            ->count();
+        $helpfulTotal = (int) Guide::query()->forAuthor($author)->sum('helpful_count');
+        $helpfulGuideCount = Guide::query()
+            ->forAuthor($author)
+            ->where('helpful_count', '>', 0)
+            ->count();
+
+        $latestDecision = Guide::query()
+            ->forAuthor($author)
+            ->whereIn('status', ['changes_requested', 'published', 'rejected', 'archived'])
+            ->with([
+                'workingRevision.category',
+                'publishedRevision.category',
+            ])
+            ->latest('updated_at')
+            ->first();
+
+        $versionGuide = Guide::query()
+            ->forAuthor($author)
+            ->whereNotNull('current_published_revision_id')
+            ->with(['workingRevision', 'publishedRevision'])
+            ->latest('updated_at')
+            ->first();
 
         return view('themes.hnt_preview.guides.mine', [
             'guides' => $query->paginate(12)->withQueryString(),
             'activeStatus' => $status,
-            'statusCounts' => $counts,
-            'guideReputation' => $reputation->totalFor($request->user()),
+            'activeSort' => $sort,
+            'search' => $search,
+            'statusCounts' => $statusCounts,
+            'totalGuides' => $totalGuides,
+            'guideReputation' => $guideReputation,
+            'publishedCount' => $publishedCount,
+            'helpfulTotal' => $helpfulTotal,
+            'helpfulGuideCount' => $helpfulGuideCount,
+            'latestDecision' => $latestDecision,
+            'versionGuide' => $versionGuide,
         ]);
     }
 
@@ -91,6 +158,24 @@ class GuideDashboardController extends Controller
         }
 
         return back()->with('status', __('guides.editor.saved'));
+    }
+
+    public function destroy(
+        Request $request,
+        Guide $guide,
+        GuideDeletionService $deletion,
+    ): RedirectResponse|JsonResponse {
+        $this->authorize('delete', $guide);
+        $deletion->deleteDraft($guide, $request->user());
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => __('guides_mine.deleted'),
+            ]);
+        }
+
+        return redirect()->route('guides.mine')->with('status', __('guides_mine.deleted'));
     }
 
     public function preview(Request $request, Guide $guide, GuideReputationService $reputation): View
@@ -150,5 +235,19 @@ class GuideDashboardController extends Controller
         $workflow->withdraw($guide, $request->user());
 
         return back()->with('status', __('guides.editor.withdrawn'));
+    }
+
+    private function statusQuery(User $author, string $status): Builder
+    {
+        $query = Guide::query()->forAuthor($author);
+
+        return match ($status) {
+            'all' => $query,
+            'draft' => $query
+                ->where('status', 'draft')
+                ->whereNull('current_published_revision_id'),
+            'published' => $query->whereNotNull('current_published_revision_id'),
+            default => $query->where('status', $status),
+        };
     }
 }
