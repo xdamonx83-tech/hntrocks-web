@@ -30,6 +30,7 @@ class Guide extends Model
         'current_published_revision_id',
         'working_revision_id',
         'is_featured',
+        'show_in_profile',
         'helpful_count',
         'bookmarks_count',
         'comments_count',
@@ -41,6 +42,7 @@ class Guide extends Model
     {
         return [
             'is_featured' => 'boolean',
+            'show_in_profile' => 'boolean',
             'helpful_count' => 'integer',
             'bookmarks_count' => 'integer',
             'comments_count' => 'integer',
