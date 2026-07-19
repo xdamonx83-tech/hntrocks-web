@@ -31,6 +31,7 @@
 </main>
 <script>
 window.HNT_DASHBOARD_HEADER_ENDPOINT = @json(route('feed.index'));
+window.HNT_TEAM_DETAIL_SECTION = @json($activeTeamSection ?? 'overview');
 window.HNT_PREVIEW_LOCALE = @json(str_replace('_', '-', app()->getLocale()));
 window.HNT_PREVIEW_USER_ID = @json(auth()->id());
 window.HNT_PREVIEW_LIVE_BADGES = {
