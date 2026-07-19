@@ -449,6 +449,7 @@
     const tagEntry = editor.querySelector('[data-tag-entry]');
     const undoButton = editor.querySelector('[data-editor-undo]');
     const redoButton = editor.querySelector('[data-editor-redo]');
+    const showInProfileInput = editor.querySelector('[data-guide-profile-visibility]');
     const submitDialog = document.querySelector('[data-guide-submit-dialog]');
     const submitButton = editor.querySelector('[data-submit-guide]');
     const submitConfirm = submitDialog?.querySelector('[data-guide-submit-confirm]');
@@ -519,10 +520,19 @@
       }
   
       if (block.type === 'image') {
-        const preview = block.media_id
+        const hasImage = Number(block.media_id || 0) > 0;
+        const preview = hasImage
           ? `<img class="guide-editor-image-preview" src="/guides/media/${Number(block.media_id)}" alt="">`
-          : '';
-        return `${preview}<label>${escapeHtml(labels.image_upload)}<input type="file" accept="image/jpeg,image/png,image/webp" data-image-input></label><label>${escapeHtml(labels.caption)}<input data-field="caption" maxlength="240" value="${escapeHtml(block.caption || '')}"></label>`;
+          : `<span class="guide-editor-image-placeholder"><i class="ph ph-image" aria-hidden="true"></i><strong>Noch kein Bild ausgewählt</strong></span>`;
+        return `<div class="guide-editor-image-upload">
+          ${preview}
+          <div>
+            <strong>${hasImage ? 'Inhaltsbild ersetzen' : escapeHtml(labels.image_upload)}</strong>
+            <small>JPG, PNG oder WebP. Das Bild wird sicher verarbeitet und ohne EXIF-Daten gespeichert.</small>
+            <button type="button" data-image-upload><i class="ph ph-upload-simple" aria-hidden="true"></i>${hasImage ? 'Anderes Bild wählen' : 'Bild auswählen'}</button>
+          </div>
+          <input type="file" accept="image/jpeg,image/png,image/webp" data-image-input hidden>
+        </div><label>${escapeHtml(labels.caption)}<input data-field="caption" maxlength="240" value="${escapeHtml(block.caption || '')}"></label>`;
       }
   
       return `<label>${escapeHtml(labels.box_title)}<input data-field="title" maxlength="120" value="${escapeHtml(block.title || '')}"></label><label>${escapeHtml(labels.text)}<textarea data-field="text" maxlength="1500">${text}</textarea></label>`;
@@ -639,6 +649,7 @@
         language: editor.querySelector('[name="language"]')?.value || 'de',
         difficulty: editor.querySelector('[name="difficulty"]')?.value || 'beginner',
         platform: platformInput?.value || 'all',
+        show_in_profile: showInProfileInput?.checked ?? true,
         content_blocks: blocks,
       };
     };
@@ -844,6 +855,13 @@
       const button = event.target.closest('button');
       const node = button?.closest('[data-editor-block]');
       if (!button || !node) return;
+
+      if (button.hasAttribute('data-image-upload')) {
+        event.preventDefault();
+        node.querySelector('[data-image-input]')?.click();
+        return;
+      }
+
       const index = blocks.findIndex((block) => block.id === node.dataset.editorBlock);
       if (index < 0) return;
 
