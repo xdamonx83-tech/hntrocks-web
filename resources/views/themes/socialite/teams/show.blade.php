@@ -24,9 +24,13 @@
 @include('themes.hnt_preview.partials.icons')
 <main class="app-shell team-detail-page-shell">
 @include('themes.hnt_preview.partials.header')
-@if(session('status'))<div class="team-detail-flash" role="status">{{ session('status') }}</div>@endif
-@if($errors->any())<div class="team-detail-flash is-error" role="alert">{{ $errors->first() }}</div>@endif
-@include('themes.socialite.teams.demo-overview')
+@if(session('status'))
+    <div class="team-detail-flash" role="status">{{ session('status') }}</div>
+@endif
+@if($errors->any())
+    <div class="team-detail-flash is-error" role="alert">{{ $errors->first() }}</div>
+@endif
+@include('themes.socialite.teams.live-overview')
 <div class="toast" id="toast"></div>
 </main>
 <script>
