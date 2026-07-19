@@ -45,6 +45,7 @@
             'timeline' => ['own' => 'profile.show', 'public' => 'profile.public', 'fallback' => '/profile'],
             'about' => ['own' => 'profile.about', 'public' => 'profile.about.public', 'fallback' => '/profile/about'],
             'friends' => ['own' => 'profile.friends', 'public' => 'profile.friends.public', 'fallback' => '/profile/friends'],
+            'guides' => ['own' => 'profile.guides', 'public' => 'profile.guides.public', 'fallback' => '/profile/guides'],
             'badges' => ['own' => 'profile.badges', 'public' => 'profile.badges.public', 'fallback' => '/profile/badges'],
             'trophies' => ['own' => 'profile.trophies', 'public' => 'profile.trophies.public', 'fallback' => '/profile/trophies'],
             'contact' => ['own' => 'profile.contact', 'public' => 'profile.contact.public', 'fallback' => '/profile/contact'],
@@ -58,6 +59,11 @@
         'timeline' => ['label' => __('ui.preview_profile_tab_profile'), 'count' => $postsCount],
         'about' => ['label' => __('ui.preview_profile_tab_info'), 'count' => null],
         'friends' => ['label' => __('ui.preview_profile_tab_friends'), 'count' => $friendsCount],
+    ];
+    if (($profileGuidesPreview ?? collect())->isNotEmpty()) {
+        $tabItems['guides'] = ['label' => 'Guides', 'count' => $profileGuidesPreview->count()];
+    }
+    $tabItems += [
         'badges' => ['label' => __('ui.preview_profile_tab_badges'), 'count' => $badgesCount],
         'trophies' => ['label' => __('ui.preview_profile_tab_trophies'), 'count' => (int) ($trophyStats['cup_submissions'] ?? 0)],
         'contact' => ['label' => __('ui.preview_profile_tab_links'), 'count' => null],
@@ -79,7 +85,7 @@
 @section('title', $displayName . ' · ' . __('ui.preview_profile_title_suffix') . ' · HNT.rocks')
 @section('robots', request()->routeIs('profile.public', 'profile.*.public')
     && ($profile?->profile_visibility ?? 'public') === 'public'
-    && in_array($activeSection, ['timeline', 'about', 'badges', 'trophies', 'teams'], true)
+    && in_array($activeSection, ['timeline', 'about', 'guides', 'badges', 'trophies', 'teams'], true)
         ? 'index,follow'
         : 'noindex,nofollow')
 
@@ -159,7 +165,7 @@
 
     <nav class="profile-tabs" aria-label="{{ __('ui.preview_profile_sections_aria') }}">
         @foreach($tabItems as $section => $item)
-            <a href="{{ $sectionUrl($section) }}" @class(['active' => $activeSection === $section])>
+            <a href="{{ $sectionUrl($section) }}" @class(['active' => $activeSection === $section]) @if($section === 'guides') data-profile-guides-tab @endif>
                 {{ $item['label'] }}
                 @if(! is_null($item['count']))<span>{{ number_format((int) $item['count']) }}</span>@endif
             </a>
@@ -177,23 +183,6 @@
                 <div class="progress-pills profile-completion-pills">
                     @foreach($missingCompletion as $key => $done)
                         <span>{{ $completionLabels[$key] ?? ucfirst((string) $key) }}</span>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        @if(($profileGuidesPreview ?? collect())->isNotEmpty())
-            <section class="profile-post-card profile-guides-panel">
-                <header><div><span>{{ __('guides.kicker') }}</span><h2>{{ __('guides.title') }}</h2></div><a href="{{ route('guides.index', ['q' => $profileUser->username]) }}">{{ __('guides.browse') }}</a></header>
-                <div class="profile-guide-preview-grid">
-                    @foreach($profileGuidesPreview as $profileGuide)
-                        @php($profileGuideRevision = $profileGuide->publishedRevision)
-                        <a href="{{ route('guides.show', $profileGuide) }}">
-                            <span class="profile-guide-preview-cover">
-                                @if($profileGuideRevision?->cover_media_id)<img src="{{ route('guides.media.show', $profileGuideRevision->cover_media_id) }}" alt="">@else<i class="ph ph-book-open-text"></i>@endif
-                            </span>
-                            <span><small>{{ $profileGuideRevision?->category?->label() }}</small><strong>{{ $profileGuideRevision?->title }}</strong><em><i class="ph ph-thumbs-up"></i>{{ $profileGuide->helpful_count }}</em></span>
-                        </a>
                     @endforeach
                 </div>
             </section>
@@ -243,6 +232,28 @@
                 @empty
                     <p class="post-text">{{ __('ui.preview_profile_no_friends') }}</p>
                 @endforelse
+            </div>
+        </section>
+    @elseif($activeSection === 'guides')
+        <section class="profile-post-card profile-guides-panel">
+            <header>
+                <div><span>{{ __('guides.kicker') }}</span><h2>Guides von {{ $displayName }}</h2></div>
+                <a href="{{ route('guides.index', ['q' => $profileUser->username]) }}">{{ __('guides.browse') }}</a>
+            </header>
+            <div class="profile-guide-preview-grid">
+                @foreach($profileGuidesPreview as $profileGuide)
+                    @php($profileGuideRevision = $profileGuide->publishedRevision)
+                    <a href="{{ route('guides.show', $profileGuide) }}">
+                        <span class="profile-guide-preview-cover">
+                            @if($profileGuideRevision?->cover_media_id)<img src="{{ route('guides.media.show', $profileGuideRevision->cover_media_id) }}" alt="">@else<i class="ph ph-book-open-text"></i>@endif
+                        </span>
+                        <span>
+                            <small>{{ $profileGuideRevision?->category?->label() }}</small>
+                            <strong>{{ $profileGuideRevision?->title }}</strong>
+                            <em><i class="ph ph-thumbs-up"></i>{{ $profileGuide->helpful_count }}</em>
+                        </span>
+                    </a>
+                @endforeach
             </div>
         </section>
     @elseif($activeSection === 'badges')
