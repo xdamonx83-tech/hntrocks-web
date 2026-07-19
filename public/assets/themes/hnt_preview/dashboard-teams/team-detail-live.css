@@ -1,0 +1,229 @@
+/* Real-data additions for the shared HNT team detail design. */
+.team-detail-page-shell .team-cover {
+  background-position: center;
+  background-size: cover;
+}
+
+.team-detail-page-shell .team-avatar.has-image {
+  overflow: hidden;
+  padding: 0;
+}
+
+.team-detail-page-shell .team-avatar.has-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.team-detail-page-shell .team-identity-actions form,
+.team-detail-page-shell .team-request-actions form {
+  margin: 0;
+}
+
+.team-detail-page-shell .team-identity-actions form {
+  display: contents;
+}
+
+.team-detail-page-shell .team-membership-state {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.7);
+  color: var(--hnt-text-muted, #92918a);
+  font-size: 11px;
+}
+
+.team-detail-page-shell .team-session-response {
+  display: flex;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.team-detail-page-shell .team-session-response button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid rgba(52,48,37,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+  color: var(--hnt-text, #30302e);
+  cursor: pointer;
+}
+
+.team-detail-page-shell .team-session-response button.active {
+  border-color: var(--hnt-brand-red, #b64e44);
+  background: var(--hnt-brand-red, #b64e44);
+  color: #fff;
+}
+
+.team-detail-page-shell .team-real-empty,
+.team-detail-page-shell .team-real-empty-card {
+  color: var(--hnt-text-muted, #92918a);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.team-detail-page-shell .team-real-empty-card {
+  min-height: 130px;
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  padding: 24px;
+  border: 1px dashed rgba(52,48,37,.16);
+  border-radius: 20px;
+  background: rgba(255,255,255,.48);
+  text-align: center;
+}
+
+.team-detail-page-shell .team-real-empty-card strong {
+  color: var(--hnt-text, #30302e);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.team-detail-page-shell .team-level-meta {
+  display: block;
+  margin-top: 11px;
+  color: var(--hnt-text-muted, #92918a);
+  font-size: 10px;
+}
+
+.team-detail-page-shell .team-latest-post-body,
+.team-detail-page-shell .team-real-post-copy {
+  color: #5f5e58;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.team-detail-page-shell .team-latest-post-body p,
+.team-detail-page-shell .team-real-post-copy p {
+  margin: 0 0 10px;
+}
+
+.team-detail-page-shell .team-latest-update footer a,
+.team-detail-page-shell .post-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.team-detail-page-shell .team-latest-update footer a svg,
+.team-detail-page-shell .post-actions a svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.team-detail-page-shell .team-media-picker {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.72);
+  cursor: pointer;
+}
+
+.team-detail-page-shell .team-media-picker.has-files {
+  background: rgba(182,78,68,.12);
+  color: var(--hnt-brand-red, #b64e44);
+}
+
+.team-detail-page-shell .team-media-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.team-detail-page-shell .team-real-post .post-more {
+  text-decoration: none;
+}
+
+.team-detail-page-shell .team-real-post-media {
+  overflow: hidden;
+  margin-top: 12px;
+  border-radius: 17px;
+  background: #ecece8;
+}
+
+.team-detail-page-shell .team-real-post-media img,
+.team-detail-page-shell .team-real-post-media video {
+  width: 100%;
+  max-height: 460px;
+  display: block;
+  object-fit: cover;
+}
+
+.team-detail-page-shell .poll a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: inherit;
+  text-decoration: none;
+}
+
+.team-detail-page-shell .team-request-actions {
+  align-items: center;
+}
+
+.team-detail-page-shell .team-request-actions form button {
+  width: 100%;
+}
+
+.team-detail-page-shell .team-status-card header > a,
+.team-detail-page-shell .team-roster-complete > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.team-detail-page-shell .team-status-card header > a {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.66);
+  color: inherit;
+}
+
+.team-detail-page-shell .team-status-card header > a svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.team-detail-page-shell .team-roster-complete > a {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--hnt-dark, #30302e);
+  color: #fff;
+  font-size: 10px;
+}
+
+.team-detail-page-shell .team-member-grid footer i.online {
+  background: var(--hnt-online, #7fb728);
+}
+
+@media (max-width: 899px) {
+  .team-detail-page-shell .team-session-response {
+    flex-wrap: wrap;
+  }
+
+  .team-detail-page-shell .team-session-response button {
+    flex: 1 1 90px;
+  }
+}
