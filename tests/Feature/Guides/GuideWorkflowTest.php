@@ -509,6 +509,48 @@ class GuideWorkflowTest extends TestCase
             ->assertViewHas('relatedGuides', fn ($guides) => $guides->contains(fn (Guide $item) => $item->is($relatedGuide)));
     }
 
+    public function test_editor_persists_profile_visibility_without_showing_forced_settings(): void
+    {
+        $author = User::factory()->create();
+        $guide = $this->draft($author);
+
+        $this->actingAs($author)
+            ->get(route('guides.edit', $guide))
+            ->assertOk()
+            ->assertSee('data-guide-profile-visibility', false)
+            ->assertDontSee('Kommentare nach Freigabe aktiv')
+            ->assertDontSee('Guide-Benachrichtigungen aktiv');
+
+        $this->actingAs($author)
+            ->putJson(route('guides.update', $guide), [
+                'show_in_profile' => false,
+            ])
+            ->assertOk();
+
+        $this->assertDatabaseHas('guides', [
+            'id' => $guide->id,
+            'show_in_profile' => false,
+        ]);
+    }
+
+    public function test_profile_guides_collection_only_contains_published_opted_in_guides(): void
+    {
+        $author = User::factory()->create();
+        $admin = User::factory()->create(['is_admin' => true]);
+        $guide = $this->publishedGuide($author, $admin);
+
+        $this->get(route('profile.public', $author))
+            ->assertOk()
+            ->assertViewHas('profileGuidesPreview', fn ($guides): bool => $guides->contains(fn (Guide $item): bool => $item->is($guide)));
+
+        $guide->update(['show_in_profile' => false]);
+
+        $this->get(route('profile.guides.public', $author))
+            ->assertOk()
+            ->assertViewHas('activeSection', 'timeline')
+            ->assertViewHas('profileGuidesPreview', fn ($guides): bool => $guides->isEmpty());
+    }
+
     public function test_guide_editor_uses_saved_data_and_marks_unavailable_blocks_as_planned(): void
     {
         $author = User::factory()->create(['name' => 'Real Editor Author']);
