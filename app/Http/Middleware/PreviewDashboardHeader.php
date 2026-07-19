@@ -94,9 +94,7 @@ class PreviewDashboardHeader
                         'unread' => (int) $conversation->unreadCountFor($user),
                         'time' => $latestAt?->diffForHumans(null, true, true, 1) ?: '—',
                         'url' => route('messages.show', $conversation),
-                        'chat_tab_url' => $other
-                            ? route('messages.with-user', $other)
-                            : route('messages.chat-tab', $conversation),
+                        'chat_tab_url' => route('messages.chat-tab', $conversation),
                     ];
                 })
                 ->values()
