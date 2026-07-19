@@ -1,0 +1,43 @@
+.main-nav-dropdown, .header-dropdown {
+    border-color: var(--hnt-border-medium) !important;
+    background: var(--hnt-surface-card-strong) !important;
+    color: var(--hnt-text) !important;
+    box-shadow: 0 18px 48px rgba(36, 36, 34, .12) !important;
+}
+.main-nav-dropdown {
+    position: absolute;
+    z-index: 490;
+    top: calc(100% + 12px);
+    left: 50%;
+    width: 286px;
+    overflow: hidden;
+    border: 1px solid rgba(211, 204, 182, .54);
+    border-radius: 15px !important;
+    background: radial-gradient(circle at 100% 0, rgba(255, 224, 112, .20), transparent 34%), rgba(255, 253, 246, .985);
+    box-shadow: 0 22px 55px rgba(41, 40, 35, .16);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -7px) scale(.985);
+    transform-origin: top center;
+    transition: opacity .17s ease, visibility .17s ease, transform .22s cubic-bezier(.22, .8, .24, 1);
+}
+.main-nav-menu-grid > button:hover, .main-nav-menu-grid > button:focus-visible, .header-menu-list > a:hover, .header-menu-list > a:focus-visible, .header-message-item:hover, .header-message-item:focus-visible, .header-notification-item:hover, .header-notification-item:focus-visible, .header-request-item:hover {
+    background: var(--hnt-brand-red-soft) !important;
+    outline: none !important;
+}
+.main-nav-menu-grid > button {
+    min-width: 0;
+    min-height: 51px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 9px;
+    border: 0;
+    border-radius: 16px;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+}

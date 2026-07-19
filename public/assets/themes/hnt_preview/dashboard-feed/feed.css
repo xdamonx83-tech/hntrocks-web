@@ -5466,7 +5466,7 @@ body.composer-open {
   width: 324px;
   overflow: hidden;
   border: 1px solid rgba(211,204,182,.54);
-  border-radius: 24px;
+  border-radius: 15px;
   background:
     radial-gradient(circle at 100% 0,rgba(255,224,112,.20),transparent 33%),
     rgba(255,253,246,.98);
@@ -6137,7 +6137,7 @@ body.composer-open {
   width: 286px;
   overflow: hidden;
   border: 1px solid rgba(211,204,182,.54);
-  border-radius: 23px;
+  border-radius: 15px;
   background:
     radial-gradient(circle at 100% 0,rgba(255,224,112,.20),transparent 34%),
     rgba(255,253,246,.985);

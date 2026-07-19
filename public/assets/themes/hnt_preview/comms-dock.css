@@ -2,7 +2,82 @@
  * Re-skins the existing, working private-message chat tabs without replacing
  * routes, controllers, polling, typing or message persistence.
  */
+:root {
+    /* Seite / atmosphärischer Hintergrund */
+    --hnt-page-base: #e4e7e6;
+    --hnt-page-middle: #e9eae8;
+    --hnt-page-warm: #fff9dc;
+    --hnt-page-members-start: #f4f1df;
+    --hnt-page-members-end: #fff8cf;
+    --hnt-page-glow-top: rgba(255, 245, 178, .97);
+    --hnt-page-glow-top-soft: rgba(255, 245, 178, .58);
+    --hnt-page-glow-bottom: rgba(255, 237, 151, .72);
+    --hnt-page-glow-bottom-soft: rgba(255, 237, 151, .32);
+    --hnt-page-members-glow: rgba(255, 228, 90, .42);
+    --hnt-page-members-cool: rgba(216, 222, 222, .72);
 
+    /* Texte */
+    --hnt-text: #30302e;
+    --hnt-text-strong: #e2e2e2;
+    --hnt-text-muted: #92918a;
+    --hnt-text-soft: #8f8b82;
+    --hnt-text-subtle: #62625d;
+    --hnt-text-accent: #9b761e;
+    --hnt-text-on-dark: #ffffff;
+
+    /* Flächen / Karten / Eingaben */
+    --hnt-surface: rgba(255, 255, 255, .78);
+    --hnt-surface-strong: rgba(255, 255, 255, .91);
+    --hnt-surface-card: #f5f5f2;
+    --hnt-surface-card-strong: #fafaf8;
+    --hnt-surface-control: rgba(255, 255, 255, .72);
+    --hnt-surface-input: #ecece8;
+    --hnt-surface-hover: #e4e3df;
+    --hnt-surface-faint: rgba(255, 255, 255, .18);
+    --hnt-surface-table: rgba(255, 255, 255, .76);
+    --hnt-surface-panel: #f0f0ed;
+
+    /* Hauptakzente */
+    --hnt-accent: #ffd55a;
+    --hnt-accent-strong: #ffcd4c;
+    --hnt-accent-gold: #d6a84f;
+    --hnt-accent-soft: rgba(255, 232, 160, .48);
+    --hnt-accent-soft-hover: rgba(255, 232, 160, .72);
+    --hnt-success: #78b41d;
+    --hnt-online: #7fb728;
+    --hnt-warning: #ff9d2a;
+    --hnt-danger: #b8463a;
+    --hnt-purple: #8f73c9;
+    --hnt-brand-red: rgb(182 78 68);
+    --hnt-brand-red-hover: rgb(163 66 58);
+    --hnt-brand-red-soft: rgba(182, 78, 68, .12);
+    --hnt-brand-red-soft-hover: rgba(182, 78, 68, .20);
+
+    /* Dunkle Kontraste */
+    --hnt-dark: #30302e;
+    --hnt-dark-soft: rgba(47, 47, 44, .12);
+
+    /* Linien */
+    --hnt-border: #d6d5d0;
+    --hnt-border-soft: rgba(52, 48, 37, .12);
+    --hnt-border-medium: rgba(52, 48, 37, .22);
+    --hnt-border-strong: #575752;
+
+    /* Fortschrittsbalken */
+    --hnt-progress-fill: rgb(182 78 68);
+    --hnt-progress-track: rgba(47, 47, 44, .12);
+
+    /* Bestehende Variablennamen bleiben als Brücke erhalten. */
+    --ink: var(--hnt-text);
+    --muted: var(--hnt-text-muted);
+    --paper: var(--hnt-surface);
+    --paper-strong: var(--hnt-surface-strong);
+    --yellow: var(--hnt-accent);
+    --green: var(--hnt-success);
+    --orange: var(--hnt-warning);
+    --dark: var(--hnt-dark);
+    --line: var(--hnt-border);
+}
 .hnt-chat-tabs-shell.hnt-comms-dock {
     position: fixed !important;
     right: 22px !important;
@@ -59,29 +134,16 @@
     display: none;
 }
 
-.hnt-comms-launcher {
-    position: relative;
-    width: 58px;
-    height: 66px;
-    display: grid;
-    grid-template-rows: 1fr auto;
-    place-items: center;
-    gap: 1px;
-    padding: 10px 6px 8px;
-    border: .5px solid rgba(242, 232, 216, .18);
-    border-radius: 23px;
-    background: #2f302d;
-    color: #f2e8d8;
-    font: inherit;
-    cursor: pointer;
-}
+
 
 .hnt-comms-launcher:hover,
-.hnt-comms-launcher:focus-visible {
-    background: #242522;
-    outline: none;
+.hnt-comms-launcher:focus-visible,
+.hnt-chat-tabs-shell.has-overview .hnt-comms-launcher,
+.hnt-comms-overview__close:hover,
+.hnt-comms-overview__close:focus-visible {
+    background: var(--hnt-brand-red-soft) !important;
+    color: var(--hnt-brand-red) !important;
 }
-
 .hnt-comms-launcher i {
     font-size: 22px;
 }
