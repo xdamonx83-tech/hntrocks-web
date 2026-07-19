@@ -45,6 +45,10 @@ class DashboardSinglePostLiveController extends Controller
 
         abort_unless($post->status === 'published' && $post->canBeViewedBy($viewer), 404);
 
+        if ($this->isDashboardPayloadRequest($request)) {
+            return app(DashboardFeedLiveController::class)($request);
+        }
+
         if ($request->boolean('data')) {
             return $this->dataResponse($request, $post);
         }
@@ -163,6 +167,23 @@ class DashboardSinglePostLiveController extends Controller
         $response->setContent($html);
 
         return $response;
+    }
+
+    private function isDashboardPayloadRequest(Request $request): bool
+    {
+        foreach ([
+            'dashboard_agenda',
+            'dashboard_community',
+            'dashboard_header',
+            'dashboard_progress',
+            'dashboard_streak',
+        ] as $parameter) {
+            if ($request->boolean($parameter)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function invokePrivate(object $instance, string $method, array $arguments = []): mixed
