@@ -308,30 +308,16 @@
                 <header>
                     <div>
                         <span>VERÖFFENTLICHUNG</span>
-                        <h2>Kommentare und Sichtbarkeit</h2>
+                        <h2>Profil-Sichtbarkeit</h2>
                     </div>
                 </header>
 
                 <div class="guide-editor-options">
                     <label>
-                        <input type="checkbox" checked disabled>
+                        <input type="checkbox" data-guide-profile-visibility @checked((bool) $guide->show_in_profile)>
                         <span>
-                            <strong>Kommentare nach Freigabe aktiv</strong>
-                            <small>Veröffentlichte Guides verwenden das echte Guide-Kommentarsystem.</small>
-                        </span>
-                    </label>
-                    <label>
-                        <input type="checkbox" checked disabled>
-                        <span>
-                            <strong>Guide-Benachrichtigungen aktiv</strong>
-                            <small>Kommentare, Antworten und Moderationsentscheidungen folgen deinen Benachrichtigungseinstellungen.</small>
-                        </span>
-                    </label>
-                    <label class="planned">
-                        <input type="checkbox" disabled>
-                        <span>
-                            <strong>Guide im Profil anzeigen <em>Geplant</em></strong>
-                            <small>Wird aktiviert, sobald der öffentliche Guide-Tab im Profil verfügbar ist.</small>
+                            <strong>Guide im Profil anzeigen</strong>
+                            <small>Nach der Freigabe erscheint der Guide im Profil-Tab „Guides“. Der Tab wird nur eingeblendet, wenn mindestens ein sichtbarer Guide vorhanden ist.</small>
                         </span>
                     </label>
                 </div>
