@@ -14,7 +14,6 @@ use App\Services\Economy\RocksService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
@@ -189,12 +188,16 @@ class RocksController extends Controller
 
     public function history(): RedirectResponse
     {
-        return redirect()->route('rocks.index', ['tab' => 'history']);
+        return redirect()->route('crowns.index', ['tab' => 'history']);
     }
 
     public function claimDailyLogin(): RedirectResponse
     {
-        return back()->with('error', __('ui.crowns_daily_login_app_only'));
+        $message = app()->getLocale() === 'en'
+            ? 'The daily reward is available only in the app.'
+            : 'Die tägliche Belohnung ist nur in der App verfügbar.';
+
+        return back()->with('error', $message);
     }
 
     public function collectPending(Request $request, RocksService $rocks): RedirectResponse
