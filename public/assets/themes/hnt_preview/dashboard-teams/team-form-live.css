@@ -1,0 +1,521 @@
+html,
+body {
+  height: 100%;
+}
+
+body[data-page="team-edit"],
+body[data-page="team-create"] {
+  overflow: hidden;
+}
+
+.team-form-page-shell {
+  --team-form-header-gap: 12px;
+  width: 100vw;
+  height: 100vh;
+  min-width: 1180px;
+  min-height: 680px;
+  display: grid;
+  grid-template-rows: 36px minmax(0,1fr);
+  overflow: hidden;
+}
+
+.team-form-page-shell > .site-header {
+  position: relative;
+  z-index: 90;
+  top: auto;
+}
+
+.team-form-page-shell .main-nav-direct.is-current {
+  background: var(--dark);
+  color: #fff;
+}
+
+.team-form-stage {
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-top: var(--team-form-header-gap);
+  clip-path: inset(0 round 0);
+}
+
+.team-form-scroll {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-bottom: 40px;
+}
+
+.team-form-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.team-form-heading {
+  min-height: 126px;
+  padding-top: 18px;
+}
+
+.team-form-workspace {
+  padding-bottom: 0;
+}
+
+.team-form-nav-card,
+.team-live-preview-card {
+  top: 0;
+}
+
+.team-form-card .profile-edit-form-head {
+  top: 0;
+}
+
+.team-form-card {
+  overflow: visible;
+}
+
+.team-form-card .profile-edit-panel {
+  min-height: 620px;
+}
+
+.team-cover-editor-preview {
+  position: relative;
+  min-height: 270px;
+  display: block;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 73% 23%,rgba(182,78,68,.34),transparent 31%),
+    repeating-linear-gradient(-45deg,transparent 0 11px,rgba(255,255,255,.06) 11px 13px),
+    linear-gradient(135deg,#2d2e2a,#454544);
+  background-position: center;
+  background-size: cover;
+}
+
+.team-cover-editor-preview::after,
+.team-live-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top,rgba(20,21,19,.64),transparent 64%);
+  pointer-events: none;
+}
+
+.team-cover-editor-preview > label {
+  position: absolute;
+  z-index: 4;
+  top: 16px;
+  right: 16px;
+  margin: 0;
+}
+
+.team-cover-editor-identity,
+.team-live-cover-identity {
+  position: absolute;
+  z-index: 3;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.team-cover-editor-identity > div:last-child,
+.team-live-cover-identity > div:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.team-cover-editor-identity span,
+.team-live-cover-identity span {
+  color: #b64e44;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.team-cover-editor-identity strong,
+.team-live-cover-identity strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.team-cover-editor-identity small,
+.team-live-cover-identity small {
+  overflow: hidden;
+  color: rgba(255,255,255,.65);
+  font-size: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.team-form-avatar-monogram,
+.team-cover-editor-identity > img,
+.team-live-cover-identity > img {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  border: 4px solid rgba(255,255,255,.93);
+  border-radius: 23px;
+  object-fit: cover;
+  box-shadow: 0 12px 28px rgba(0,0,0,.17);
+}
+
+.team-form-avatar-monogram {
+  display: grid;
+  place-items: center;
+  background: #f2dfdc;
+  color: #702c27;
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.team-avatar-editor-image {
+  width: 124px;
+  height: 124px;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(112,44,39,.10);
+}
+
+.team-avatar-editor-image .team-form-avatar-monogram,
+.team-avatar-editor-image img {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 24px;
+  object-fit: cover;
+  box-shadow: none;
+}
+
+.team-form-status-chip {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 15px;
+  background: #f2dfdc;
+  color: #702c27;
+  font-size: 8px;
+}
+
+.team-form-status-chip.complete {
+  background: #e7f4d6;
+  color: #6d9936;
+}
+
+.team-form-setting-group {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid rgba(234,210,206,.58);
+  border-radius: 22px;
+  background: rgba(255,255,255,.82);
+}
+
+.team-form-setting-group > header {
+  margin-bottom: 12px;
+}
+
+.team-form-setting-group > header span {
+  color: #898783;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+
+.team-form-setting-group > header h3 {
+  margin: 3px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.team-form-setting-group .profile-visibility-options {
+  margin-top: 0;
+}
+
+.team-form-danger-card,
+.team-form-create-note {
+  min-height: 98px;
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 13px;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 22px;
+}
+
+.team-form-danger-card {
+  background: #ededec;
+}
+
+.team-form-create-note {
+  background: #eaf4dc;
+}
+
+.team-form-danger-card > span,
+.team-form-create-note > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(255,255,255,.72);
+}
+
+.team-form-danger-card > span {
+  color: #b64e44;
+}
+
+.team-form-create-note > span {
+  color: #6d9936;
+}
+
+.team-form-danger-card > div,
+.team-form-create-note > div {
+  display: grid;
+  gap: 4px;
+}
+
+.team-form-danger-card strong,
+.team-form-create-note strong {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.team-form-danger-card p,
+.team-form-create-note p {
+  margin: 0;
+  color: #b64e44;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.team-form-create-note p {
+  color: #7d8d6d;
+}
+
+.team-form-danger-card button {
+  min-height: 37px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 19px;
+  background: #b64e44;
+  color: #fff;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.team-form-secondary-link {
+  background: #f2dfdc !important;
+  color: #9f4038 !important;
+}
+
+.team-live-preview-card {
+  padding-bottom: 16px;
+}
+
+.team-live-cover {
+  position: relative;
+  min-height: 172px;
+  overflow: hidden;
+  margin: 14px -15px 0;
+  background:
+    radial-gradient(circle at 73% 23%,rgba(182,78,68,.34),transparent 31%),
+    repeating-linear-gradient(-45deg,transparent 0 11px,rgba(255,255,255,.06) 11px 13px),
+    linear-gradient(135deg,#2d2e2a,#454544);
+  background-position: center;
+  background-size: cover;
+}
+
+.team-live-cover-lines {
+  position: absolute;
+  inset: 0;
+  opacity: .17;
+  background:
+    linear-gradient(90deg,transparent 49.5%,rgba(255,255,255,.08) 50%,transparent 50.5%),
+    linear-gradient(transparent 49.5%,rgba(255,255,255,.08) 50%,transparent 50.5%);
+  background-size: 54px 54px;
+}
+
+.team-live-cover-identity {
+  right: 15px;
+  bottom: 15px;
+  left: 15px;
+  gap: 11px;
+}
+
+.team-live-cover-identity .team-form-avatar-monogram,
+.team-live-cover-identity > img {
+  width: 62px;
+  height: 62px;
+  border-radius: 20px;
+  font-size: 18px;
+}
+
+.team-live-cover-identity strong {
+  font-size: 15px;
+}
+
+.team-live-description {
+  min-height: 72px;
+  margin: 13px 0 0;
+  color: #74736f;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.team-live-tags {
+  margin-top: 12px;
+}
+
+@media (min-width: 1200px) {
+  .team-form-page-shell {
+    --team-form-header-gap: clamp(12px,1.35vh,18px);
+    grid-template-rows: clamp(36px,5.4vh,58px) minmax(0,1fr);
+  }
+
+  .team-form-heading {
+    min-height: clamp(126px,15vh,168px);
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 761px) {
+  .team-form-workspace {
+    grid-template-columns: 230px minmax(0,1fr);
+  }
+
+  .team-live-preview-card {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  html,
+  body {
+    height: auto;
+  }
+
+  body[data-page="team-edit"],
+  body[data-page="team-create"] {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .team-form-page-shell {
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    min-height: 100dvh;
+    display: block;
+    overflow: visible;
+  }
+
+  .team-form-page-shell > .site-header {
+    position: relative;
+  }
+
+  .team-form-stage,
+  .team-form-scroll {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding-top: 0;
+    clip-path: none;
+  }
+
+  .team-form-nav-card,
+  .team-live-preview-card,
+  .team-form-card .profile-edit-form-head {
+    position: static;
+  }
+
+  .team-form-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .team-form-danger-card,
+  .team-form-create-note {
+    grid-template-columns: 48px minmax(0,1fr);
+  }
+
+  .team-form-danger-card button {
+    grid-column: 1 / -1;
+  }
+}
+
+.team-form-page-shell .team-form-flash {
+  margin: 0 30px 10px;
+}
+
+.team-form-page-shell .profile-edit-field em {
+  display: block;
+  margin-top: 4px;
+  color: #b8463a;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.team-form-page-shell .team-cover-editor-preview.has-current-cover,
+.team-form-page-shell .team-live-cover.has-current-cover {
+  background-position: center;
+  background-size: cover;
+}
+
+.team-form-page-shell .team-cover-editor-identity > img[hidden],
+.team-form-page-shell .team-live-cover-identity > img[hidden],
+.team-form-page-shell .team-avatar-editor-image img[hidden],
+.team-form-page-shell .team-form-avatar-monogram[hidden] {
+  display: none !important;
+}
+
+.team-form-page-shell .team-avatar-editor-image img {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  object-fit: cover;
+}
+
+.team-form-page-shell .team-danger-form {
+  display: none;
+}
+
+.team-form-page-shell .team-form-danger-card button[disabled] {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.team-form-page-shell .team-form-readonly {
+  color: #8f8b84 !important;
+}
+
+.team-form-page-shell .team-form-save-note {
+  color: #8e8981;
+  font-size: 9px;
+}
+
+.team-form-page-shell .team-live-preview-card .profile-live-info {
+  margin-top: 12px;
+}
+
+.team-form-page-shell .team-live-preview-card .profile-live-stats {
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .team-form-page-shell .team-form-flash {
+    margin-inline: 14px;
+  }
+}
