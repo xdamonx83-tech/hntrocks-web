@@ -22,7 +22,7 @@
 <link href="{{ asset('assets/themes/hnt_preview/guides/guides.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides.css')) ?: time() }}" rel="stylesheet">
 @endunless
 @stack('head')
-<link href="{{ asset('assets/themes/hnt_preview/guides/guides-header-feed-parity.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides-header-feed-parity.css')) ?: time() }}" rel="stylesheet">
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/shared-header.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/shared-header.css')) ?: time() }}" rel="stylesheet">
 </head>
 <body data-page="guides" class="@yield('body_class')">
 @include('themes.hnt_preview.partials.icons')
@@ -44,7 +44,24 @@
 </section>
 <div class="guide-toast" data-guide-toast role="status" aria-live="polite"></div>
 </main>
+<script>
+(() => {
+    const header = document.querySelector('[data-hnt-shared-header]');
+    if (header) {
+        delete header.dataset.headerBadgesUrl;
+        delete header.dataset.headerNotificationsUrl;
+        delete header.dataset.headerMessagesUrl;
+        delete header.dataset.headerFriendsUrl;
+        delete header.dataset.headerNotificationsReadAllUrl;
+    }
+
+    window.HNT_DASHBOARD_HEADER_ENDPOINT = @json(route('feed.index'));
+})();
+</script>
 <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/app.js')) ?: time() }}"></script>
+@auth
+<script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/real-dashboard-header.js')) ?: time() }}"></script>
+@endauth
 <script src="{{ asset('assets/themes/hnt_preview/guides/guides.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/guides/guides.js')) ?: time() }}" defer></script>
 @stack('scripts')
 </body>
