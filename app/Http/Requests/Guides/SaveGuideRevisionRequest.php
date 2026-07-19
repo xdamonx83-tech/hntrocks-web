@@ -28,6 +28,7 @@ class SaveGuideRevisionRequest extends FormRequest
             'language' => ['nullable', Rule::in(['de', 'en'])],
             'difficulty' => ['nullable', Rule::in(['beginner', 'advanced', 'expert'])],
             'platform' => ['nullable', Rule::in(['all', 'pc', 'playstation', 'xbox'])],
+            'show_in_profile' => ['nullable', 'boolean'],
             'content_blocks' => ['nullable', 'array', 'max:60'],
             'content_blocks.*' => ['array'],
             'content_blocks.*.id' => ['nullable', 'string', 'max:80'],
