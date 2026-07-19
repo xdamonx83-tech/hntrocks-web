@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function (): void {
             Route::middleware(['web', 'auth'])
                 ->group(base_path('routes/guides.php'));
+
+            Route::middleware(['web', 'auth'])
+                ->group(base_path('routes/rocks.php'));
         },
     )
     ->withCommands([
