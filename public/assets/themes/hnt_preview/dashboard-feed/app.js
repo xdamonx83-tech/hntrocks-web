@@ -958,7 +958,7 @@ document.addEventListener("keydown", (event) => {
 function updateHeaderBadge(type, value) {
   const badge = document.querySelector(`[data-header-badge="${type}"]`);
   const countLabel = document.querySelector(`[data-dropdown-count="${type}"]`);
-  const safeValue = Math.max(0, value);
+  const safeValue = Math.max(0, Number(value) || 0);
 
   if (badge) {
     badge.textContent = String(safeValue);
@@ -966,7 +966,8 @@ function updateHeaderBadge(type, value) {
   }
 
   if (countLabel) {
-    const suffix = type === "friends" ? "offen" : "ungelesen";
+    const suffix = countLabel.textContent.replace(/^[\d.\s]+/, "").trim()
+      || (type === "friends" ? "offen" : "ungelesen");
     countLabel.textContent = `${safeValue} ${suffix}`;
   }
 }
@@ -976,50 +977,138 @@ function currentHeaderBadgeValue(type) {
   return Number.parseInt(badge?.textContent || "0", 10) || 0;
 }
 
-document.querySelectorAll(".friend-accept, .friend-decline").forEach((button) => {
-  button.addEventListener("click", () => {
-    const request = button.closest(".header-request-item");
-    if (!request) return;
+const sharedHeader = document.querySelector("[data-hnt-shared-header]");
 
-    const accepted = button.classList.contains("friend-accept");
-    request.remove();
-
-    const nextValue = currentHeaderBadgeValue("friends") - 1;
-    updateHeaderBadge("friends", nextValue);
-    showToast(accepted ? "Freundschaftsanfrage angenommen" : "Freundschaftsanfrage abgelehnt");
-
-    const list = document.querySelector(".header-request-list");
-    if (list && !list.querySelector(".header-request-item")) {
-      list.innerHTML = '<div class="header-empty-state">Keine offenen Freundschaftsanfragen.</div>';
-    }
+async function headerJson(url, options = {}) {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    ...options,
+    headers: {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+      ...(csrfToken ? {"X-CSRF-TOKEN": csrfToken} : {}),
+      ...(options.headers || {}),
+    },
   });
+
+  if (!response.ok) {
+    throw new Error(`Header request failed (${response.status})`);
+  }
+
+  return response.json();
+}
+
+const headerPanels = {
+  notifications: {
+    url: sharedHeader?.dataset.headerNotificationsUrl,
+    list: ".header-notification-list",
+    count: (payload) => payload.unread_count,
+  },
+  messages: {
+    url: sharedHeader?.dataset.headerMessagesUrl,
+    list: ".header-message-list",
+    count: (payload) => payload.unread_count,
+  },
+  friends: {
+    url: sharedHeader?.dataset.headerFriendsUrl,
+    list: ".header-request-list",
+    count: (payload) => payload.count,
+  },
+};
+
+async function refreshHeaderPanel(type) {
+  const panel = headerPanels[type];
+  if (!sharedHeader || !panel?.url) return;
+
+  const payload = await headerJson(panel.url);
+  if (payload.authenticated === false) return;
+
+  const list = sharedHeader.querySelector(panel.list);
+  if (list && typeof payload.html === "string") {
+    list.innerHTML = payload.html;
+  }
+  updateHeaderBadge(type, panel.count(payload));
+}
+
+async function refreshHeaderBadges() {
+  const url = sharedHeader?.dataset.headerBadgesUrl;
+  if (!url) return;
+
+  const payload = await headerJson(url);
+  if (payload.authenticated === false) return;
+
+  updateHeaderBadge("notifications", payload.notifications_unread);
+  updateHeaderBadge("messages", payload.messages_unread);
+  updateHeaderBadge("friends", payload.friend_request_count);
+}
+
+async function refreshSharedHeader() {
+  if (!sharedHeader) return;
+
+  await Promise.allSettled([
+    refreshHeaderBadges(),
+    refreshHeaderPanel("notifications"),
+    refreshHeaderPanel("messages"),
+    refreshHeaderPanel("friends"),
+  ]);
+}
+
+if (sharedHeader?.dataset.headerBadgesUrl) {
+  void refreshSharedHeader();
+}
+
+sharedHeader?.addEventListener("submit", async (event) => {
+  const form = event.target.closest("form");
+  if (!form) return;
+
+  const isNotification = form.matches("[data-hnt-notification-read]");
+  const isFriendRequest = form.matches("[data-hnt-friend-request-action]");
+  if (!isNotification && !isFriendRequest) return;
+
+  event.preventDefault();
+  const submitButton = event.submitter || form.querySelector('button[type="submit"]');
+  if (submitButton) submitButton.disabled = true;
+
+  try {
+    const payload = await headerJson(form.action, {
+      method: (form.method || "POST").toUpperCase(),
+      body: new FormData(form),
+    });
+
+    if (payload.message) showToast(payload.message);
+
+    if (isNotification && payload.action_url) {
+      window.location.assign(payload.action_url);
+      return;
+    }
+
+    await Promise.allSettled([
+      refreshHeaderBadges(),
+      refreshHeaderPanel(isNotification ? "notifications" : "friends"),
+    ]);
+  } catch (error) {
+    showToast("Aktion konnte nicht ausgeführt werden");
+    if (submitButton) submitButton.disabled = false;
+  }
 });
 
-document.querySelectorAll(".header-message-item").forEach((item) => {
-  item.addEventListener("click", () => {
-    if (item.classList.contains("unread")) {
-      item.classList.remove("unread");
-      updateHeaderBadge("messages", currentHeaderBadgeValue("messages") - 1);
-    }
-    showToast("Nachricht geöffnet");
-  });
-});
+sharedHeader?.querySelector(".header-mark-all")?.addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  const url = sharedHeader.dataset.headerNotificationsReadAllUrl;
+  if (!url) return;
 
-document.querySelectorAll(".header-notification-item").forEach((item) => {
-  item.addEventListener("click", () => {
-    if (item.classList.contains("unread")) {
-      item.classList.remove("unread");
-      updateHeaderBadge("notifications", currentHeaderBadgeValue("notifications") - 1);
-    }
-    showToast("Benachrichtigung geöffnet");
-  });
-});
-
-document.querySelector(".header-mark-all")?.addEventListener("click", () => {
-  document.querySelectorAll(".header-notification-item.unread")
-    .forEach((item) => item.classList.remove("unread"));
-  updateHeaderBadge("notifications", 0);
-  showToast("Alle Benachrichtigungen als gelesen markiert");
+  button.disabled = true;
+  try {
+    const payload = await headerJson(url, {method: "POST"});
+    updateHeaderBadge("notifications", payload.unread_count ?? 0);
+    await refreshHeaderPanel("notifications");
+    showToast(payload.message || "Alle Benachrichtigungen wurden als gelesen markiert");
+  } catch (error) {
+    showToast("Benachrichtigungen konnten nicht aktualisiert werden");
+  } finally {
+    button.disabled = false;
+  }
 });
 
 
