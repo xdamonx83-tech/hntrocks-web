@@ -92,6 +92,45 @@ class Team extends Model
         return $this->hasMany(TeamSession::class);
     }
 
+    public function getMembersCountAttribute($value): int
+    {
+        if ($value !== null) {
+            return (int) $value;
+        }
+
+        if ($this->relationLoaded('members')) {
+            return $this->members->where('status', 'active')->count();
+        }
+
+        return $this->activeMembers()->count();
+    }
+
+    public function getPostsCountAttribute($value): int
+    {
+        if ($value !== null) {
+            return (int) $value;
+        }
+
+        if ($this->relationLoaded('feedPosts')) {
+            return $this->feedPosts->where('status', 'published')->count();
+        }
+
+        return $this->feedPosts()->where('status', 'published')->count();
+    }
+
+    public function getSessionsCountAttribute($value): int
+    {
+        if ($value !== null) {
+            return (int) $value;
+        }
+
+        if ($this->relationLoaded('sessions')) {
+            return $this->sessions->count();
+        }
+
+        return $this->sessions()->count();
+    }
+
     public function avatarUrl(): string
     {
         if ($this->avatar_path) {
