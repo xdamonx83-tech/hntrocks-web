@@ -1,6 +1,7 @@
 @php
     $demoCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-teams/team-detail-demo.css')) ?: time();
     $demoThemeVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-teams/team-detail-theme.css')) ?: time();
+    $liveCssVersion = @filemtime(public_path('assets/themes/hnt_preview/dashboard-teams/team-detail-live.css')) ?: time();
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -9,7 +10,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta name="csrf-token" content="{{ csrf_token() }}"/>
 <meta content="noindex,nofollow" name="robots"/>
-<title>Teamdetail Demo · HNT.ROCKS</title>
+<title>{{ $team->name }} · HNT.ROCKS</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
@@ -17,11 +18,14 @@
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-teams/team-detail-demo.css') }}?v={{ $demoCssVersion }}" rel="stylesheet"/>
 <link href="{{ asset('assets/themes/hnt_preview/dashboard-teams/team-detail-theme.css') }}?v={{ $demoThemeVersion }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/hnt_preview/dashboard-teams/team-detail-live.css') }}?v={{ $liveCssVersion }}" rel="stylesheet"/>
 </head>
 <body data-page="team-detail">
 @include('themes.hnt_preview.partials.icons')
 <main class="app-shell team-detail-page-shell">
 @include('themes.hnt_preview.partials.header')
+@if(session('status'))<div class="team-detail-flash" role="status">{{ session('status') }}</div>@endif
+@if($errors->any())<div class="team-detail-flash is-error" role="alert">{{ $errors->first() }}</div>@endif
 @include('themes.socialite.teams.demo-overview')
 <div class="toast" id="toast"></div>
 </main>
