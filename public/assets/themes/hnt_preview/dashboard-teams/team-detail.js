@@ -108,5 +108,8 @@
 
   scroll?.addEventListener('scroll', syncScrollState, { passive: true });
   syncScrollState();
-  openTeamPanel(window.location.hash.replace('#', '') || 'overview', false);
+
+  const requestedSection = window.location.hash.replace('#', '')
+    || String(window.HNT_TEAM_DETAIL_SECTION || 'overview');
+  openTeamPanel(requestedSection, false);
 })();
