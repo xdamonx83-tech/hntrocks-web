@@ -1,4 +1,26 @@
 /* Real-data additions for the shared HNT team detail design. */
+.team-detail-page-shell .team-detail-flash {
+  position: fixed;
+  z-index: 120;
+  top: 84px;
+  left: 50%;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 12px 18px;
+  border: 1px solid rgba(52,48,37,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.96);
+  color: var(--hnt-text, #30302e);
+  font-size: 11px;
+  box-shadow: 0 18px 48px rgba(36,36,34,.14);
+  transform: translateX(-50%);
+}
+
+.team-detail-page-shell .team-detail-flash.is-error {
+  border-color: rgba(182,78,68,.28);
+  background: #f8e9e7;
+  color: var(--hnt-brand-red, #b64e44);
+}
+
 .team-detail-page-shell .team-cover {
   background-position: center;
   background-size: cover;
@@ -219,6 +241,10 @@
 }
 
 @media (max-width: 899px) {
+  .team-detail-page-shell .team-detail-flash {
+    top: 70px;
+  }
+
   .team-detail-page-shell .team-session-response {
     flex-wrap: wrap;
   }
