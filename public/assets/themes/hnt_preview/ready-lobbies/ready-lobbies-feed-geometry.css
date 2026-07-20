@@ -3,6 +3,16 @@
  * Nur Abstände, Raster und proportionale Größen; keine Farben oder Funktionen.
  */
 
+/*
+ * Der gemeinsame Header wird bewusst auf Ready Lobbies fokussiert.
+ * Die alten LFG-Finden-/Erstellen-Einträge werden vollständig aus Layout,
+ * Tastaturfokus und Accessibility-Tree entfernt.
+ */
+header.site-header[data-hnt-shared-header] #lfgNavDropdown [data-navigation-label="LFG finden"],
+header.site-header[data-hnt-shared-header] #lfgNavDropdown [data-navigation-label="LFG erstellen"] {
+  display: none !important;
+}
+
 @media (min-width: 1200px) {
   body[data-page="ready-lobbies"] .ready-page-shell,
   body[data-page="ready-lobby-create"] .ready-create-page-shell {
