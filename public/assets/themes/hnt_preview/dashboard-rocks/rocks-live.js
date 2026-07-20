@@ -2,6 +2,14 @@
   const root = document.querySelector('[data-rocks-dashboard]');
   if (!root) return;
 
+  if (!document.querySelector('link[data-rocks-reference-fix]')) {
+    const referenceStyle = document.createElement('link');
+    referenceStyle.rel = 'stylesheet';
+    referenceStyle.href = '/assets/themes/hnt_preview/dashboard-rocks/rocks-reference-fix.css?v=20260720-1';
+    referenceStyle.dataset.rocksReferenceFix = '1';
+    document.head.appendChild(referenceStyle);
+  }
+
   const scroll = document.getElementById('rocksScroll');
   const stage = document.querySelector('.rocks-stage');
   const center = document.getElementById('rocksCenterFlow');
