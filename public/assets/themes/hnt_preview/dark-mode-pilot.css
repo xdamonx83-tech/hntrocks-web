@@ -1,0 +1,342 @@
+/*
+ * HNT.ROCKS dark-mode pilot.
+ * Scope: Feed and Einstellungen only. No sizing, spacing or radius changes.
+ */
+html[data-theme="dark"] body[data-hnt-theme-pilot] {
+  background: var(--hnt-bg) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] .app-shell {
+  background:
+    radial-gradient(circle at 100% 3%, rgba(75, 67, 57, .64) 0, rgba(35, 32, 28, .62) 24%, transparent 49%),
+    radial-gradient(circle at 0 100%, rgba(76, 54, 48, .42) 0, rgba(24, 23, 21, .48) 28%, transparent 54%),
+    linear-gradient(111deg, #11110f 0%, #191916 56%, #090908 100%) !important;
+}
+
+/* Shared topbar inside the pilot. */
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(.brand, .brand:visited) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] .brand-mark {
+  fill: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav,
+  .settings-button,
+  .header-circle,
+  .mobile-stats-trigger
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: rgba(32, 32, 30, .90) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav a,
+  .main-nav-trigger,
+  .main-nav-direct
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav a.active,
+  .main-nav-trigger.is-current,
+  .main-nav-item.is-current > .main-nav-trigger,
+  .main-nav-direct.active
+) {
+  background: var(--hnt-text) !important;
+  color: #171715 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav-dropdown,
+  .header-dropdown,
+  .hnt-comms-overview,
+  .hnt-chat-tab
+) {
+  border-color: var(--hnt-border) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 18px 48px var(--hnt-shadow) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav-dropdown > header,
+  .header-dropdown-head,
+  .header-profile-summary,
+  .header-profile-stats,
+  .hnt-comms-overview__head,
+  .hnt-comms-overview__search,
+  .hnt-comms-overview__footer,
+  .hnt-chat-tab__head,
+  .hnt-chat-tab__form
+) {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav-menu-grid > a,
+  .main-nav-menu-grid > button,
+  .header-menu-list > a,
+  .header-menu-list > button,
+  .header-request-item,
+  .header-message-item,
+  .header-notification-item,
+  .header-live-state,
+  .hnt-comms-overview__item
+) {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav-menu-grid > a:hover,
+  .main-nav-menu-grid > button:hover,
+  .header-menu-list > a:hover,
+  .header-menu-list > button:hover,
+  .header-request-item:hover,
+  .header-message-item:hover,
+  .header-notification-item:hover,
+  .hnt-comms-overview__item:hover
+) {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .main-nav-dropdown small,
+  .header-dropdown small,
+  .header-dropdown time,
+  .header-profile-summary span,
+  .header-profile-stats small,
+  .hnt-comms-overview__meta,
+  .hnt-comms-overview__copy small,
+  .hnt-chat-tab__meta
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .header-message-item.unread,
+  .header-notification-item.unread,
+  .hnt-comms-overview__item.unread
+) {
+  background: var(--hnt-brand-red-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot] :is(
+  .header-dropdown-footer,
+  .header-profile-logout,
+  .hnt-comms-overview__footer
+) {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Feed surfaces. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :where(
+  [class~="card"],
+  [class*="-card "],
+  [class$="-card"],
+  [class~="panel"],
+  [class*="-panel "],
+  [class$="-panel"],
+  [class~="widget"],
+  [class*="-widget "],
+  [class$="-widget"]
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: var(--hnt-surface) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .appointment,
+  .employee-row,
+  .search-field,
+  .profile-links button,
+  .composition-stat-grid > article,
+  .personal-progress-row,
+  .activity-item,
+  .week-row span,
+  .salary-row,
+  .story-item,
+  .post-action,
+  .feed-filter-button,
+  .comments-input-shell,
+  .comment-item
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+) {
+  border-color: var(--hnt-border) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  caret-color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(input, textarea)::placeholder {
+  color: var(--hnt-text-faint) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .section-head,
+  .salary-head,
+  .attendance-head,
+  .social-feed-head,
+  .post-header,
+  .post-footer,
+  .comments-modal-head,
+  .comments-modal-footer
+) {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  p,
+  small,
+  time,
+  .muted,
+  .profile-meta span,
+  .profile-stats span,
+  .post-meta,
+  .comment-meta
+) {
+  color: var(--hnt-text-soft);
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .post-card,
+  .landing-post,
+  .comments-modal,
+  .comments-post-context
+) {
+  border-color: var(--hnt-border) !important;
+  background: var(--hnt-surface-strong) !important;
+}
+
+/* Settings pilot. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-stage,
+  .settings-shell,
+  .settings-content,
+  .settings-panel
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :where(
+  [class~="settings-card"],
+  [class*="settings-"][class*="-card"],
+  .settings-nav,
+  .settings-main,
+  .settings-status-card,
+  .settings-save-footer
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: var(--hnt-surface) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-field-card,
+  .settings-choice-options label,
+  .settings-switch-row,
+  .settings-notification-card,
+  .settings-blocked-list article,
+  .settings-security-log article,
+  .settings-security-inline-form,
+  .settings-security-key,
+  .settings-recovery-codes,
+  .settings-status-row,
+  .settings-nav button
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-nav button.active,
+  .settings-choice-options label.active
+) {
+  border-color: rgba(196, 91, 80, .34) !important;
+  background: var(--hnt-brand-red-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+) {
+  border-color: var(--hnt-border) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  caret-color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(input, textarea)::placeholder {
+  color: var(--hnt-text-faint) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-section-intro p,
+  .settings-field-card small,
+  .settings-choice-card p,
+  .settings-choice-options small,
+  .settings-switch-row p,
+  .settings-notification-card p,
+  .settings-appearance-roadmap,
+  .settings-security-form-hint,
+  .settings-security-session-action small,
+  .settings-security-log-empty
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-header,
+  .settings-panel-head,
+  .settings-save-footer,
+  .settings-status-card header,
+  .settings-choice-card,
+  .settings-blocked-list article,
+  .settings-security-log article
+) {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-save-footer button.primary,
+  .settings-security-action-button,
+  .settings-security-inline-form button,
+  .settings-security-session-action button,
+  .settings-security-log-controls button
+) {
+  background: var(--hnt-text) !important;
+  color: #171715 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-delete-panel button,
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-inline-form.danger button {
+  background: var(--hnt-brand-red) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-planned-badge {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
