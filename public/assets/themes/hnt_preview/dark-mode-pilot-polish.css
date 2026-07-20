@@ -28,6 +28,30 @@ html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .real-comment-replies 
   background: rgba(242, 232, 216, .48) !important;
 }
 
+/* Force every non-card comment wrapper to exactly match the modal canvas. This
+   removes the darker inherited strip behind root and reply avatars. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .comments-list,
+  .real-comment-thread,
+  .real-comment-replies,
+  .real-comment-item,
+  .comment-item
+) {
+  border-color: transparent !important;
+  background-color: var(--hnt-surface-solid) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* The bubble remains the only visible card inside a comment row. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .real-comment-item,
+  .comment-item
+) > .comment-bubble {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+}
+
 /* Agenda period tabs: readable dark surfaces instead of pale disabled-looking pills. */
 html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .hnt-agenda-row > button:not(.active) {
   border-color: var(--hnt-border-soft) !important;
