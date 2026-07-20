@@ -1,142 +1,151 @@
-/* Landing-Header und Live-Inhalte an den aktuellen HNT.ROCKS-Webstil anbinden. */
+/* Landing-Header exakt an die Proportionen des aktuellen Feed-Headers anbinden. */
 body[data-page="landing"] .landing-header {
   position: sticky !important;
   z-index: 120 !important;
   top: 12px !important;
   width: 100% !important;
-  height: 52px !important;
-  min-height: 52px !important;
-  max-height: 52px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
   display: grid !important;
-  grid-template-columns: minmax(190px, 1fr) minmax(700px, 920px) 286px !important;
-  align-items: stretch !important;
-  gap: 10px !important;
-  margin: 0 0 24px !important;
+  grid-template-columns: minmax(0, 1fr) 480px 187px !important;
+  align-items: start !important;
+  gap: 5px !important;
+  margin: 0 0 20px !important;
   padding: 0 !important;
 }
 
 body[data-page="landing"] .landing-brand {
   width: max-content !important;
-  height: 52px !important;
-  min-height: 52px !important;
+  height: 36px !important;
   display: inline-flex !important;
   align-items: center !important;
-  align-self: start !important;
+  gap: 5px !important;
   color: #30302e !important;
   text-decoration: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: -.55px !important;
 }
 
+/* Das vorhandene falsche Wortlogo wird durch exakt das Feed-Emblem ersetzt. */
 body[data-page="landing"] .landing-brand-image {
-  display: block !important;
-  width: 158px !important;
-  height: 48px !important;
-  max-width: 158px !important;
+  content: url("/assets/themes/hnt_preview/images/hnt-brand-logo.svg") !important;
+  width: 31px !important;
+  min-width: 31px !important;
+  max-width: 31px !important;
+  height: 31px !important;
+  min-height: 31px !important;
+  max-height: 31px !important;
   object-fit: contain !important;
-  object-position: left center !important;
 }
 
-body[data-page="landing"] .landing-nav,
-body[data-page="landing"] .landing-header-actions {
-  height: 52px !important;
-  min-height: 52px !important;
-  max-height: 52px !important;
-  align-self: start !important;
+body[data-page="landing"] .landing-brand::after {
+  content: "HNT.ROCKS" !important;
+  color: #30302e !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: -.55px !important;
+  white-space: nowrap !important;
 }
 
 body[data-page="landing"] .landing-nav {
+  width: 480px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
   display: flex !important;
   align-items: center !important;
   gap: 0 !important;
-  padding: 5px 6px !important;
+  padding: 3px 5px !important;
   overflow: hidden !important;
   border-radius: 10px !important;
-  background: rgba(255, 255, 255, .78) !important;
+  background: rgba(255, 255, 255, .70) !important;
   backdrop-filter: blur(16px) !important;
 }
 
 body[data-page="landing"] .landing-nav a {
   min-width: 0 !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
-  display: inline-flex !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  display: grid !important;
   flex: 1 1 0 !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  padding: 0 10px !important;
+  place-items: center !important;
+  padding: 0 7px !important;
   overflow: hidden !important;
   border-radius: 10px !important;
   color: #62625d !important;
   text-decoration: none !important;
   white-space: nowrap !important;
+  cursor: pointer !important;
 }
 
 body[data-page="landing"] .landing-nav a svg {
-  width: 10px !important;
-  height: 10px !important;
-  flex: 0 0 10px !important;
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 1.5 !important;
+  display: none !important;
 }
 
 body[data-page="landing"] .landing-nav a.active {
-  min-width: 112px !important;
-  flex: 0 0 112px !important;
-  padding-inline: 16px !important;
+  min-width: 69px !important;
+  flex: 0 0 auto !important;
+  padding-inline: 15px !important;
   background: #30302e !important;
   color: #fff !important;
 }
 
 body[data-page="landing"] .landing-header-actions {
+  width: 187px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
   display: grid !important;
-  grid-template-columns: 132px 82px 52px !important;
+  grid-template-columns: 69px 72px 36px !important;
   gap: 5px !important;
 }
 
 body[data-page="landing"] .landing-login,
 body[data-page="landing"] .landing-language,
 body[data-page="landing"] .landing-register {
-  height: 52px !important;
-  min-height: 52px !important;
-  max-height: 52px !important;
-  border-radius: 10px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  border: 0 !important;
+  background: rgba(255, 255, 255, .72) !important;
 }
 
 body[data-page="landing"] .landing-login {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 7px !important;
+  gap: 6px !important;
+  border-radius: 10px !important;
 }
 
 body[data-page="landing"] .landing-language {
-  width: 82px !important;
+  width: 72px !important;
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
   align-items: stretch !important;
-  padding: 4px !important;
+  padding: 3px !important;
   border-radius: 999px !important;
 }
 
 body[data-page="landing"] .landing-language a {
   min-width: 0 !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
   display: grid !important;
   place-items: center !important;
   border-radius: 999px !important;
 }
 
 body[data-page="landing"] .landing-register {
-  width: 52px !important;
-  min-width: 52px !important;
-  max-width: 52px !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
   display: grid !important;
   place-items: center !important;
-  aspect-ratio: 1 !important;
   border-radius: 50% !important;
 }
 
@@ -147,7 +156,7 @@ body[data-page="landing"] .landing-hero {
   padding-top: 28px !important;
 }
 
-/* Öffentliche Feed-Medien bleiben Teil des echten Beitrags und werden nicht mit LFG vermischt. */
+/* Öffentliche Feed-Medien bleiben Teil des echten Beitrags. */
 body[data-page="landing"] .landing-post-media {
   margin: 0 13px 13px !important;
   overflow: hidden !important;
@@ -202,24 +211,4 @@ body[data-page="landing"] .map-route {
 
 body[data-page="landing"] .map-visual > article {
   box-shadow: 0 12px 30px rgba(28, 28, 27, .14) !important;
-}
-
-@media (max-width: 1500px) {
-  body[data-page="landing"] .landing-header {
-    grid-template-columns: 175px minmax(620px, 1fr) 270px !important;
-  }
-
-  body[data-page="landing"] .landing-brand-image {
-    width: 148px !important;
-    max-width: 148px !important;
-  }
-
-  body[data-page="landing"] .landing-nav a.active {
-    min-width: 98px !important;
-    flex-basis: 98px !important;
-  }
-
-  body[data-page="landing"] .landing-header-actions {
-    grid-template-columns: 122px 77px 52px !important;
-  }
 }
