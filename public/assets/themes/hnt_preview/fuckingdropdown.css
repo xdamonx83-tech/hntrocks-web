@@ -214,3 +214,19 @@ header.site-header[data-hnt-shared-header] .main-nav-menu-grid > a:focus-visible
     display: block !important;
   }
 }
+
+/* Gemeinsame Nachrichtenliste: exakt dieselbe Höhe wie im Feed. Sechs
+   Unterhaltungen passen vollständig; erst zusätzliche Einträge scrollen. */
+header.site-header[data-hnt-shared-header] .header-message-list {
+  min-height: 0 !important;
+  max-height: 390px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  align-content: start !important;
+}
+
+header.site-header[data-hnt-shared-header] .header-message-item {
+  min-height: 58px !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+}
