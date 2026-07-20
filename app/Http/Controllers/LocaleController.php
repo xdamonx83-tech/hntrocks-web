@@ -32,7 +32,7 @@ class LocaleController extends Controller
 
         return redirect()
             ->to(route('account.settings.edit').'#general')
-            ->with('status', __('settings.general_saved'))
+            ->with('status', __('theme.general_saved'))
             ->withCookie(Cookie::make(
                 'locale',
                 $validated['locale'],
