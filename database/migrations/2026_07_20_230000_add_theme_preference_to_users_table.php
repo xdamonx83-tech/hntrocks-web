@@ -11,7 +11,7 @@ return new class extends Migration
         if (! Schema::hasColumn('users', 'theme_preference')) {
             Schema::table('users', function (Blueprint $table): void {
                 $table->string('theme_preference', 12)
-                    ->default('system')
+                    ->default('light')
                     ->after('last_login_ip');
             });
         }
