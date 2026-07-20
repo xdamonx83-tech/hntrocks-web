@@ -25,7 +25,7 @@
 </div>
 </article>
 @endif
-<form id="settingsGeneralForm" method="POST" action="{{ route('account.settings.general.update') }}" data-save-title="{{ __('settings.save_footer_title') }}" data-save-hint="{{ __('settings.save_footer_hint') }}" data-initial-theme="{{ $themePreference }}">
+<form id="settingsGeneralForm" method="POST" action="{{ route('account.settings.general.update') }}" data-save-title="{{ __('settings.save_footer_title') }}" data-save-hint="{{ __('theme.save_footer_hint') }}" data-initial-theme="{{ $themePreference }}">
 @csrf
 @method('PUT')
 <div class="settings-general-grid">
@@ -56,29 +56,29 @@
 </div>
 <article class="settings-choice-card full settings-appearance-card">
 <div>
-<span>{{ __('settings.appearance_eyebrow') }}</span>
-<h3>{{ __('settings.appearance_title') }}</h3>
-<p>{{ __('settings.appearance_intro') }}</p>
+<span>{{ __('theme.appearance_eyebrow') }}</span>
+<h3>{{ __('theme.appearance_title') }}</h3>
+<p>{{ __('theme.appearance_intro') }}</p>
 </div>
-<div class="settings-choice-options" role="radiogroup" aria-label="{{ __('settings.appearance_label') }}">
+<div class="settings-choice-options" role="radiogroup" aria-label="{{ __('theme.appearance_label') }}">
 <label @class(['active' => $themePreference === 'light'])>
 <input type="radio" name="theme_preference" value="light" @checked($themePreference === 'light')>
 <i><svg><use href="#i-check"></use></svg></i>
-<span><strong>{{ __('settings.appearance_light') }}</strong><small>{{ __('settings.appearance_light_hint') }}</small></span>
+<span><strong>{{ __('theme.light') }}</strong><small>{{ __('theme.light_hint') }}</small></span>
 </label>
 <label @class(['active' => $themePreference === 'dark'])>
 <input type="radio" name="theme_preference" value="dark" @checked($themePreference === 'dark')>
 <i><svg><use href="#i-settings"></use></svg></i>
-<span><strong>{{ __('settings.appearance_dark') }}</strong><small>{{ __('settings.appearance_dark_hint') }}</small></span>
+<span><strong>{{ __('theme.dark') }}</strong><small>{{ __('theme.dark_hint') }}</small></span>
 </label>
 <label @class(['active' => $themePreference === 'system'])>
 <input type="radio" name="theme_preference" value="system" @checked($themePreference === 'system')>
 <i><svg><use href="#i-sliders"></use></svg></i>
-<span><strong>{{ __('settings.appearance_system') }}</strong><small>{{ __('settings.appearance_system_hint') }}</small></span>
+<span><strong>{{ __('theme.system') }}</strong><small>{{ __('theme.system_hint') }}</small></span>
 </label>
 </div>
 @error('theme_preference')<small role="alert">{{ $message }}</small>@enderror
 </article>
-<small class="settings-appearance-roadmap">{{ __('settings.appearance_pilot_notice') }}</small>
+<small class="settings-appearance-roadmap">{{ __('theme.pilot_notice') }}</small>
 </form>
 </section>
