@@ -1,0 +1,55 @@
+/*
+ * HNT.ROCKS dark-mode pilot – small visual polish after live review.
+ * Color/contrast only. No layout, sizing or behavior changes.
+ */
+
+/* Comment rows must stay transparent. Only the actual comment bubble is a surface. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .comment-item,
+  .real-comment-item,
+  .real-comment-replies
+) {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .comment-avatar,
+  .real-comment-replies .comment-avatar
+) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Keep the reply tree visible without drawing a block behind the avatars. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .real-comment-replies::before,
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .real-comment-replies .comment-item::before {
+  background: rgba(242, 232, 216, .48) !important;
+}
+
+/* Agenda period tabs: readable dark surfaces instead of pale disabled-looking pills. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .hnt-agenda-row > button:not(.active) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .hnt-agenda-row > button:not(.active) b {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .hnt-agenda-row > button:not(.active) small {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .hnt-agenda-row > button.active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .hnt-agenda-row > button.active :is(b, small) {
+  color: var(--hnt-text-on-dark) !important;
+}
