@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         then: function (): void {
+            Route::middleware(['web'])
+                ->group(base_path('routes/view-mode.php'));
+
             Route::middleware(['web', 'auth'])
                 ->group(base_path('routes/guides.php'));
 
@@ -31,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\ResolveHntViewMode::class,
             \App\Http\Middleware\EnforceSecuritySessionVersion::class,
             \App\Http\Middleware\EnforceUserBlockVisibility::class,
             \App\Http\Middleware\TrackVisitorEvent::class,
