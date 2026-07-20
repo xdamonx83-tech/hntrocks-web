@@ -54,7 +54,7 @@
     });
 
     navLinks.forEach((link) => {
-      link.classList.toggle(Boolean(current) && link.getAttribute('href') === `#${current.id}`);
+      link.classList.toggle('active', Boolean(current) && link.getAttribute('href') === `#${current.id}`);
     });
   };
 
