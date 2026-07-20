@@ -1,0 +1,52 @@
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card {
+  align-items: center;
+  gap: 18px;
+}
+
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options {
+  width: min(100%, 510px);
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options label {
+  min-width: 0;
+  min-height: 70px;
+  align-items: center;
+  cursor: pointer;
+  opacity: 1;
+}
+
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options label > span {
+  min-width: 0;
+}
+
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options label strong,
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options label small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options label:focus-within {
+  outline: 2px solid rgba(182, 78, 68, .35);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+}
