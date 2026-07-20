@@ -32,7 +32,7 @@ body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropd
 }
 
 body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item {
-  min-height: 64px !important;
+  min-height: 58px !important;
   background: transparent !important;
   color: var(--hnt-text, #30302e) !important;
 }
