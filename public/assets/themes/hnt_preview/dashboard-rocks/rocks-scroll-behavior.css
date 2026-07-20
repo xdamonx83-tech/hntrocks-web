@@ -1,0 +1,27 @@
+/* Feed-style sticky scrolling for the Rocks content column. Visual layout stays unchanged. */
+@media (min-width: 1181px) {
+  .rocks-center-card {
+    overflow: visible;
+  }
+
+  .rocks-center-head {
+    position: sticky;
+    top: var(--rocks-sticky-gap);
+    z-index: 12;
+  }
+
+  .rocks-scroll {
+    transition: clip-path .12s ease;
+  }
+
+  .rocks-scroll.rocks-content-docked {
+    clip-path:
+      inset(
+        var(--rocks-sticky-gap)
+        calc(var(--rocks-right-width) + var(--rocks-layout-gap))
+        0
+        calc(var(--rocks-left-width) + var(--rocks-layout-gap))
+        round 28px 28px 0 0
+      );
+  }
+}
