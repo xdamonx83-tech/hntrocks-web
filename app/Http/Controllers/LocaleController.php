@@ -20,13 +20,41 @@ class LocaleController extends Controller
     {
         $validated = $request->validate([
             'locale' => ['required', 'string', 'in:de,en'],
+            'theme_preference' => ['required', 'string', 'in:light,dark,system'],
         ]);
 
-        return $this->withLocale(
-            $request,
-            $validated['locale'],
-            redirect()->to(route('account.settings.edit').'#general')
-        );
+        $user = $request->user();
+        $user->theme_preference = $validated['theme_preference'];
+        $user->save();
+
+        $request->session()->put('locale', $validated['locale']);
+        App::setLocale($validated['locale']);
+
+        return redirect()
+            ->to(route('account.settings.edit').'#general')
+            ->with('status', __('settings.general_saved'))
+            ->withCookie(Cookie::make(
+                'locale',
+                $validated['locale'],
+                60 * 24 * 365,
+                null,
+                null,
+                $request->isSecure(),
+                true,
+                false,
+                'lax'
+            ))
+            ->withCookie(Cookie::make(
+                'hnt_theme_preference',
+                $validated['theme_preference'],
+                60 * 24 * 365,
+                null,
+                null,
+                $request->isSecure(),
+                false,
+                false,
+                'lax'
+            ));
     }
 
     private function withLocale(Request $request, string $locale, RedirectResponse $response): RedirectResponse
