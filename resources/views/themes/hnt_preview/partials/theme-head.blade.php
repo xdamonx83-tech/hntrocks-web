@@ -1,18 +1,18 @@
 @php
     $hntThemePreference = $themePreference
         ?? auth()->user()?->theme_preference
-        ?? request()->cookie('hnt_theme_preference', 'system');
+        ?? request()->cookie('hnt_theme_preference', 'light');
     $hntThemePilot = $themePilot ?? null;
 
     if (! in_array($hntThemePreference, ['light', 'dark', 'system'], true)) {
-        $hntThemePreference = 'system';
+        $hntThemePreference = 'light';
     }
 @endphp
 <script>
 (() => {
     const valid = ['light', 'dark', 'system'];
     const serverPreference = @json($hntThemePreference);
-    const preference = valid.includes(serverPreference) ? serverPreference : 'system';
+    const preference = valid.includes(serverPreference) ? serverPreference : 'light';
 
     try {
         localStorage.setItem('hnt_theme_preference', preference);
