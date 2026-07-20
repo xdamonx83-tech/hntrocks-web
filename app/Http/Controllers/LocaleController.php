@@ -20,11 +20,16 @@ class LocaleController extends Controller
     {
         $validated = $request->validate([
             'locale' => ['required', 'string', 'in:de,en'],
-            'theme_preference' => ['required', 'string', 'in:light,dark,system'],
+            'theme_preference' => ['nullable', 'string', 'in:light,dark,system'],
         ]);
 
         $user = $request->user();
-        $user->theme_preference = $validated['theme_preference'];
+        $themePreference = $validated['theme_preference']
+            ?? (in_array($user->theme_preference, ['light', 'dark', 'system'], true)
+                ? $user->theme_preference
+                : 'light');
+
+        $user->theme_preference = $themePreference;
         $user->save();
 
         $request->session()->put('locale', $validated['locale']);
@@ -46,7 +51,7 @@ class LocaleController extends Controller
             ))
             ->withCookie(Cookie::make(
                 'hnt_theme_preference',
-                $validated['theme_preference'],
+                $themePreference,
                 60 * 24 * 365,
                 null,
                 null,
