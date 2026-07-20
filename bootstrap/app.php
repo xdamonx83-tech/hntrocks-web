@@ -37,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\AddSecurityHeaders::class,
             \App\Http\Middleware\AppendCupCrosspostsToDashboardFeed::class,
             \App\Http\Middleware\ActivateDashboardFeed::class,
+            \App\Http\Middleware\ActivateHallOfFameRedesign::class,
             \App\Http\Middleware\ActivateProfileRedesign::class,
             \App\Http\Middleware\ActivateProfileEditRedesign::class,
             \App\Http\Middleware\ValidateProfileCoverDisplayMode::class,
