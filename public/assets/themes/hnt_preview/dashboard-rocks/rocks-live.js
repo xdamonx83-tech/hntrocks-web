@@ -5,9 +5,17 @@
   if (!document.querySelector('link[data-rocks-reference-fix]')) {
     const referenceStyle = document.createElement('link');
     referenceStyle.rel = 'stylesheet';
-    referenceStyle.href = '/assets/themes/hnt_preview/dashboard-rocks/rocks-reference-fix.css?v=20260720-1';
+    referenceStyle.href = '/assets/themes/hnt_preview/dashboard-rocks/rocks-reference-fix.css?v=20260720-2';
     referenceStyle.dataset.rocksReferenceFix = '1';
     document.head.appendChild(referenceStyle);
+  }
+
+  if (!document.querySelector('link[data-rocks-scroll-behavior]')) {
+    const scrollStyle = document.createElement('link');
+    scrollStyle.rel = 'stylesheet';
+    scrollStyle.href = '/assets/themes/hnt_preview/dashboard-rocks/rocks-scroll-behavior.css?v=20260720-1';
+    scrollStyle.dataset.rocksScrollBehavior = '1';
+    document.head.appendChild(scrollStyle);
   }
 
   const scroll = document.getElementById('rocksScroll');
@@ -68,6 +76,8 @@
       left.style.removeProperty('top');
       right.style.removeProperty('top');
       stickyHead?.classList.remove('is-stuck');
+      scroll.classList.remove('rocks-content-docked');
+      stage.classList.remove('rocks-columns-docked');
       return;
     }
 
@@ -84,7 +94,11 @@
     if (stickyHead) {
       const headRect = stickyHead.getBoundingClientRect();
       const scrollRect = scroll.getBoundingClientRect();
-      stickyHead.classList.toggle('is-stuck', scroll.scrollTop > 0 && headRect.top <= scrollRect.top + gap + 1);
+      const isStuck = scroll.scrollTop > 0 && headRect.top <= scrollRect.top + gap + 1;
+
+      stickyHead.classList.toggle('is-stuck', isStuck);
+      scroll.classList.toggle('rocks-content-docked', isStuck);
+      stage.classList.toggle('rocks-columns-docked', isStuck);
     }
   }
 
