@@ -1,5 +1,10 @@
 @import url("./global-radius-10.css");
 
+/* Native hidden states must win over component display:grid/flex rules. */
+[hidden] {
+  display: none !important;
+}
+
 /*
  * HNT.ROCKS – gemeinsame Topbar-/Comms-Korrekturen
  *
