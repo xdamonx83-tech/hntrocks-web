@@ -1,0 +1,813 @@
+/* HNT.ROCKS Hall of Fame – live dashboard layout */
+html,
+body {
+  height: 100%;
+}
+
+body[data-page="hall-of-fame"] {
+  overflow: hidden;
+}
+
+.hall-page-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+}
+
+.hall-stage {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+}
+
+.hall-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  padding: 0 0 24px;
+}
+
+.hall-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.hall-overview {
+  min-height: 250px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 28px;
+  padding: 24px 0 18px;
+}
+
+.hall-heading > span,
+.hall-toolbar > div > span,
+.hall-history-card header span,
+.hall-records-card header span,
+.hall-hunter-board header span,
+.hall-empty-state > span {
+  display: block;
+  color: var(--hnt-brand-red, #b64e44);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.hall-heading h1 {
+  margin: 10px 0 12px;
+  font-size: clamp(48px, 5.2vw, 84px);
+  font-weight: 300;
+  line-height: .95;
+  letter-spacing: -.055em;
+}
+
+.hall-heading > p {
+  max-width: 820px;
+  margin: 10px 0 0;
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.hall-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hall-meta span,
+.hall-card-state,
+.records-live {
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / .62);
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 7px;
+}
+
+.hall-meta .live {
+  color: #5b801c;
+}
+
+.hall-meta i,
+.hall-card-state i,
+.records-live i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #78b41d;
+}
+
+.hall-bars {
+  max-width: 1050px;
+  display: grid;
+  grid-template-columns: minmax(210px, 1.8fr) repeat(3, minmax(130px, .8fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.hall-summary-bar > span {
+  display: block;
+  margin: 0 0 6px 4px;
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 7px;
+}
+
+.hall-summary-bar > div {
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border: .5px solid transparent;
+  border-radius: 10px;
+  background: rgb(255 255 255 / .56);
+  overflow: hidden;
+}
+
+.hall-summary-bar > div b {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.hall-summary-bar .dark {
+  background: var(--hnt-dark, #30302e);
+  color: #fff;
+}
+
+.hall-summary-bar .red {
+  background: var(--hnt-brand-red, #b64e44);
+  color: #fff;
+}
+
+.hall-summary-bar .striped {
+  background: repeating-linear-gradient(135deg, #f7f6f2 0 7px, #e3e0d7 7px 11px);
+}
+
+.hall-summary-bar .outline {
+  border-color: var(--hnt-border-medium, #aaa79f);
+  background: rgb(255 255 255 / .22);
+}
+
+.hall-overview-stats {
+  min-width: 330px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  gap: 20px;
+  padding-bottom: 12px;
+}
+
+.hall-overview-stats article {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.hall-overview-stats strong {
+  font-size: clamp(38px, 3.4vw, 62px);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.hall-overview-stats span {
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 7px;
+}
+
+.hall-content,
+.hall-hunter-board {
+  border: .5px solid var(--hnt-border-medium, #d6d3cb);
+  border-radius: 10px;
+  background: rgb(250 250 248 / .9);
+  overflow: clip;
+}
+
+.hall-toolbar,
+.hall-hunter-board > header {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: .5px solid var(--hnt-border-soft, #e5e2da);
+  background: rgb(250 250 248 / .96);
+  backdrop-filter: blur(18px);
+}
+
+.hall-toolbar h2,
+.hall-history-card h2,
+.hall-records-card h2,
+.hall-hunter-board h2 {
+  margin: 2px 0 0;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -.035em;
+}
+
+.hall-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hall-segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--hnt-surface-input, #ecece8);
+}
+
+.hall-segmented button,
+.hall-season-select select,
+.hall-history-card header a,
+.hall-rank-card > a,
+.hall-empty-state a {
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.hall-segmented button {
+  min-width: 82px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--hnt-text-soft, #85827a);
+}
+
+.hall-segmented button.active {
+  background: var(--hnt-dark, #30302e);
+  color: #fff;
+}
+
+.hall-season-select {
+  position: relative;
+  min-width: 142px;
+}
+
+.hall-season-select select {
+  width: 100%;
+  appearance: none;
+  padding: 0 34px 0 13px;
+  background: #fff;
+  color: var(--hnt-text, #30302e);
+}
+
+.hall-season-select svg {
+  position: absolute;
+  top: 50%;
+  right: 11px;
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.hall-podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
+  padding: 16px;
+}
+
+.hall-rank-card {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: .5px solid var(--hnt-border-soft, #e5e2da);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.hall-rank-card.rank-one {
+  min-height: 420px;
+  border-color: rgb(182 78 68 / .35);
+  background: linear-gradient(160deg, rgb(182 78 68 / .14), #fff 34%);
+}
+
+.hall-rank-card.rank-two,
+.hall-rank-card.rank-three {
+  min-height: 382px;
+}
+
+.hall-card-state {
+  width: max-content;
+  min-height: 23px;
+  padding-inline: 8px;
+}
+
+.hall-card-state.champion {
+  background: rgb(182 78 68 / .13);
+  color: var(--hnt-brand-red, #b64e44);
+}
+
+.hall-card-state svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.hall-rank-number {
+  color: rgb(48 48 46 / .16);
+  font-size: 52px;
+  font-weight: 300;
+  line-height: .8;
+}
+
+.hall-team-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hall-team-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--hnt-dark, #30302e);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rank-one .hall-team-mark {
+  background: var(--hnt-brand-red, #b64e44);
+}
+
+.hall-team-head > div:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.hall-team-head strong {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hall-team-head span,
+.hall-score span,
+.hall-achievement-list span,
+.history-cup small,
+.hall-record-list small,
+.hunter-board-list small,
+.hall-empty-state p {
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 8px;
+}
+
+.hall-team-avatars,
+.history-team > div {
+  display: flex;
+  align-items: center;
+}
+
+.hall-team-avatars img,
+.history-team img {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hall-team-avatars img + img,
+.history-team img + img {
+  margin-left: -8px;
+}
+
+.hall-team-avatars > span {
+  margin-left: 8px;
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 8px;
+}
+
+.hall-score {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+
+.hall-score strong {
+  font-size: 42px;
+  font-weight: 300;
+  line-height: .9;
+}
+
+.hall-card-line {
+  height: 1px;
+  background: var(--hnt-border-soft, #e5e2da);
+}
+
+.hall-achievement-list {
+  display: grid;
+  gap: 8px;
+}
+
+.hall-achievement-list article {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.hall-achievement-list i {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(120 180 29 / .12);
+  color: #5b801c;
+}
+
+.hall-achievement-list svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.hall-rank-card > a,
+.hall-history-card header a,
+.hall-empty-state a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  background: var(--hnt-dark, #30302e);
+  color: #fff;
+  text-decoration: none;
+}
+
+.hall-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, .7fr);
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.hall-history-card,
+.hall-records-card {
+  border: .5px solid var(--hnt-border-soft, #e5e2da);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.hall-history-card > header,
+.hall-records-card > header {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: .5px solid var(--hnt-border-soft, #e5e2da);
+}
+
+.hall-history-list,
+.hall-record-list,
+.hunter-board-list {
+  display: grid;
+}
+
+.hall-history-list > article {
+  min-height: 78px;
+  display: grid;
+  grid-template-columns: 38px minmax(160px, 1.3fr) minmax(150px, .9fr) 70px 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: .5px solid var(--hnt-border-soft, #e5e2da);
+}
+
+.hall-history-list > article:last-child,
+.hall-record-list > article:last-child,
+.hunter-board-list > article:last-child {
+  border-bottom: 0;
+}
+
+.history-rank,
+.hunter-position {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--hnt-surface-input, #ecece8);
+  font-size: 9px;
+}
+
+.history-rank.champion,
+.hunter-position.champion {
+  background: rgb(182 78 68 / .14);
+  color: var(--hnt-brand-red, #b64e44);
+}
+
+.history-cup,
+.history-team {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.history-cup strong,
+.history-team > span,
+.hall-record-list strong,
+.hunter-board-list strong {
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-score {
+  justify-self: end;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.hall-history-list a,
+.hunter-board-list a {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--hnt-surface-input, #ecece8);
+  color: inherit;
+}
+
+.hall-history-list svg,
+.hunter-board-list svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.hall-records-card {
+  padding-bottom: 12px;
+}
+
+.hall-record-ring {
+  width: 148px;
+  height: 148px;
+  display: grid;
+  place-items: center;
+  margin: 18px auto;
+  border-radius: 50%;
+  background: conic-gradient(var(--hnt-brand-red, #b64e44) 0 70%, var(--hnt-surface-input, #ecece8) 70% 100%);
+}
+
+.hall-record-ring > div {
+  width: 116px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.hall-record-ring svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--hnt-brand-red, #b64e44);
+}
+
+.hall-record-ring strong {
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.hall-record-ring span {
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 8px;
+}
+
+.hall-record-list > article {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: .5px solid var(--hnt-border-soft, #e5e2da);
+}
+
+.hall-record-list > article > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgb(182 78 68 / .1);
+  color: var(--hnt-brand-red, #b64e44);
+}
+
+.hall-record-list svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.hall-record-list > article > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.hall-hunter-board {
+  margin-top: 12px;
+}
+
+.hall-hunter-board > header small {
+  color: var(--hnt-text-soft, #85827a);
+  font-size: 8px;
+}
+
+.hunter-board-list > article {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 34px 42px minmax(160px, 1.5fr) repeat(3, minmax(80px, .45fr)) 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border-bottom: .5px solid var(--hnt-border-soft, #e5e2da);
+}
+
+.hunter-board-list img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hunter-board-list > article > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.hall-empty-state {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 30px;
+  text-align: center;
+}
+
+.hall-empty-state h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.hall-empty-state p {
+  max-width: 520px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.hall-empty-state a {
+  margin-top: 4px;
+}
+
+.hall-filter-hidden,
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 1180px) {
+  .hall-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .hall-overview-stats {
+    width: 100%;
+    min-width: 0;
+    max-width: 520px;
+  }
+
+  .hall-bars {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hall-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 899px) {
+  body[data-page="hall-of-fame"] {
+    overflow: auto;
+  }
+
+  .hall-page-shell {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .hall-stage,
+  .hall-scroll {
+    height: auto;
+    overflow: visible;
+  }
+
+  .hall-overview {
+    padding-top: 16px;
+  }
+
+  .hall-heading h1 {
+    font-size: 48px;
+  }
+
+  .hall-toolbar {
+    position: relative;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hall-toolbar-actions {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hall-segmented,
+  .hall-season-select {
+    width: 100%;
+  }
+
+  .hall-segmented button {
+    flex: 1;
+  }
+
+  .hall-podium {
+    grid-template-columns: 1fr;
+  }
+
+  .hall-rank-card,
+  .hall-rank-card.rank-one,
+  .hall-rank-card.rank-two,
+  .hall-rank-card.rank-three {
+    min-height: 0;
+  }
+
+  .hall-detail-grid {
+    padding-inline: 10px;
+  }
+
+  .hall-history-list > article {
+    grid-template-columns: 34px minmax(0, 1fr) 54px 32px;
+  }
+
+  .history-team {
+    display: none;
+  }
+
+  .hunter-board-list > article {
+    grid-template-columns: 32px 40px minmax(0, 1fr) 32px;
+  }
+
+  .hunter-board-list > article > div:nth-of-type(n+2) {
+    display: none;
+  }
+}
