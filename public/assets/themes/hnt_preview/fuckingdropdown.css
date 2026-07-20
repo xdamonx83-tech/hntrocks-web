@@ -1,4 +1,5 @@
 @import url("./global-radius-10.css");
+@import url("./ready-lobbies/ready-lobbies-feed-geometry.css");
 
 /* Native hidden states must win over component display:grid/flex rules. */
 [hidden] {
