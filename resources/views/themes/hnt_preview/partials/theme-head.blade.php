@@ -44,6 +44,11 @@
     href="{{ asset('assets/themes/hnt_preview/dark-mode-pilot-fixes.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dark-mode-pilot-fixes.css')) ?: time() }}"
     rel="stylesheet"
 >
+<link
+    data-hnt-dark-pilot-polish
+    href="{{ asset('assets/themes/hnt_preview/dark-mode-pilot-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dark-mode-pilot-polish.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @if($hntThemePilot === 'settings')
 <link
     data-hnt-settings-appearance
