@@ -2,6 +2,13 @@
   const root = document.querySelector('[data-hall-root]');
   if (!root) return;
 
+  const cupsNav = document.querySelector('.nav-cups');
+  const cupsTrigger = cupsNav?.querySelector(':scope > .main-nav-trigger');
+  const hallMenuItem = cupsNav?.querySelector('[data-navigation-label="Hall of Fame"]');
+  cupsNav?.classList.add('is-current');
+  cupsTrigger?.classList.add('is-current');
+  hallMenuItem?.classList.add('is-active');
+
   const modeButtons = [...root.querySelectorAll('[data-hall-mode]')];
   const teamSections = [...root.querySelectorAll('[data-hall-teams-section]')];
   const hunterSection = root.querySelector('[data-hall-hunters-section]');
