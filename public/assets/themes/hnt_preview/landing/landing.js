@@ -10,7 +10,7 @@
     toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1700);
   };
 
-  const navLinks = [...document.querySelectorAll('.landing-nav a[href^="#"]')];
+  const navLinks = [...document.querySelectorAll('.landing-nav a[data-scrollspy][href^="#"]')];
   const sections = navLinks
     .map((link) => document.querySelector(link.getAttribute('href')))
     .filter(Boolean);
@@ -23,8 +23,11 @@
       if (section.offsetTop <= marker) current = section;
     });
 
-    navLinks.forEach((link) => {
-      link.classList.toggle('active', Boolean(current) && link.getAttribute('href') === `#${current.id}`);
+    document.querySelectorAll('.landing-nav a').forEach((link) => {
+      link.classList.toggle(
+        'active',
+        Boolean(current) && link.hasAttribute('data-scrollspy') && link.getAttribute('href') === `#${current.id}`
+      );
     });
   };
 
@@ -42,5 +45,19 @@
 
   document.querySelectorAll('.map-dot').forEach((button) => {
     button.addEventListener('click', () => showToast(button.textContent.trim()));
+  });
+
+  document.querySelectorAll('video[data-moment-preview]').forEach((video) => {
+    const revealFrame = () => {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+      try {
+        video.currentTime = Math.min(0.35, Math.max(0.05, video.duration * 0.03));
+      } catch (_) {
+        // Der Browser kann das Setzen vor dem ersten seekable-Frame ablehnen.
+      }
+    };
+
+    if (video.readyState >= 1) revealFrame();
+    else video.addEventListener('loadedmetadata', revealFrame, { once: true });
   });
 })();
