@@ -162,6 +162,16 @@ class LandingPageController extends Controller
 
         $query = User::query()->where('status', 'active');
 
+        if (Schema::hasTable('user_profiles')) {
+            $query->where(function ($visibility): void {
+                $visibility->whereDoesntHave('profile')
+                    ->orWhereHas('profile', function ($profile): void {
+                        $profile->whereNull('profile_visibility')
+                            ->orWhere('profile_visibility', '!=', 'private');
+                    });
+            });
+        }
+
         if (Schema::hasColumn('users', 'last_seen_at')) {
             $query->orderByDesc('last_seen_at');
         } else {
