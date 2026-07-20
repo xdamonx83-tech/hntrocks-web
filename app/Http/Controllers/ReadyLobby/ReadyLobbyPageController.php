@@ -14,6 +14,13 @@ class ReadyLobbyPageController extends Controller
         return $this->render($request);
     }
 
+    public function create(Request $request): View
+    {
+        return view('themes.hnt_preview.ready-lobbies.create', [
+            'viewer' => $request->user(),
+        ]);
+    }
+
     public function show(Request $request, LiveLobby $lobby): View
     {
         $lobby->expireIfNeeded();
