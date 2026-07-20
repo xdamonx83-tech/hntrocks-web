@@ -10,6 +10,36 @@
     toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1700);
   };
 
+  const isEnglish = document.documentElement.lang === 'en';
+  const guestAnchors = isEnglish
+    ? [
+        ['#start', 'Start'],
+        ['#community', 'Community'],
+        ['#lfg', 'LFG'],
+        ['#moments', 'Moments'],
+        ['#cups', 'Cups'],
+        ['#teams', 'Teams'],
+        ['#more', 'More'],
+      ]
+    : [
+        ['#start', 'Start'],
+        ['#community', 'Community'],
+        ['#lfg', 'LFG'],
+        ['#moments', 'Moments'],
+        ['#cups', 'Cups'],
+        ['#teams', 'Teams'],
+        ['#more', 'Mehr'],
+      ];
+
+  const allNavLinks = [...document.querySelectorAll('.landing-nav a')];
+  allNavLinks.forEach((link, index) => {
+    const item = guestAnchors[index];
+    if (!item) return;
+    link.href = item[0];
+    link.textContent = item[1];
+    link.dataset.scrollspy = '';
+  });
+
   const navLinks = [...document.querySelectorAll('.landing-nav a[data-scrollspy][href^="#"]')];
   const sections = navLinks
     .map((link) => document.querySelector(link.getAttribute('href')))
@@ -23,11 +53,8 @@
       if (section.offsetTop <= marker) current = section;
     });
 
-    document.querySelectorAll('.landing-nav a').forEach((link) => {
-      link.classList.toggle(
-        'active',
-        Boolean(current) && link.hasAttribute('data-scrollspy') && link.getAttribute('href') === `#${current.id}`
-      );
+    navLinks.forEach((link) => {
+      link.classList.toggle(Boolean(current) && link.getAttribute('href') === `#${current.id}`);
     });
   };
 
