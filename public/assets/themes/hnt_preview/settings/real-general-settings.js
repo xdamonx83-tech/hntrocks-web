@@ -17,7 +17,7 @@
   const notificationToggles = [...document.querySelectorAll(".notification-toggle")];
   const generalForm = forms.get("general");
   const appearanceInputs = [...document.querySelectorAll('input[name="theme_preference"]')];
-  const initialTheme = generalForm?.dataset.initialTheme || "system";
+  const initialTheme = generalForm?.dataset.initialTheme || "light";
 
   if (!saveButton || !discardButton) return;
 
@@ -55,7 +55,7 @@
 
   const previewTheme = (preference) => {
     document.dispatchEvent(new CustomEvent("hnt:theme-preview", {
-      detail: { preference: preference || "system" },
+      detail: { preference: preference || "light" },
     }));
   };
 
