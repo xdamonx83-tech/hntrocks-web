@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
             Route::middleware(['web', 'auth'])
                 ->group(base_path('routes/rocks.php'));
+
+            Route::middleware(['web', 'auth'])
+                ->group(base_path('routes/ready-lobbies.php'));
         },
     )
     ->withCommands([
