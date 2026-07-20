@@ -59,6 +59,17 @@
     if (headerLabel) headerLabel.textContent = 'Rocks';
   };
 
+  const updateActivityRocks = (profile) => {
+    const cards = [...document.querySelectorAll('.personal-activity-summary article')];
+    const card = cards.find((candidate) => /rocks/i.test(candidate.querySelector('span')?.textContent || '')) || cards[2];
+    if (!card) return;
+
+    const value = card.querySelector('strong');
+    const label = card.querySelector('span');
+    if (value) value.textContent = formatNumber(profile.rocks || 0);
+    if (label) label.textContent = t('rocks_available', 'Rocks verfügbar');
+  };
+
   const updateOverview = (profile, badges, progress) => {
     const metrics = document.querySelectorAll('.overview-progress .overview-metric');
     setMetric(
@@ -264,6 +275,7 @@
       updateProgressTable(profile, progress);
       updateAttention(badges);
       updateProfileLevel(profile, progress);
+      updateActivityRocks(profile);
       applyRocksLabels();
     } catch (error) {
       console.error('HNT live dashboard progress failed', error);
