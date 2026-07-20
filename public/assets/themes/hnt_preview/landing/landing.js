@@ -1,4 +1,12 @@
 (() => {
+  if (!document.querySelector('link[data-landing-header-parity]')) {
+    const parityStyle = document.createElement('link');
+    parityStyle.rel = 'stylesheet';
+    parityStyle.href = '/assets/themes/hnt_preview/landing/landing-header-parity.css?v=20260720-1';
+    parityStyle.dataset.landingHeaderParity = '1';
+    document.head.appendChild(parityStyle);
+  }
+
   const toast = document.getElementById('landingToast');
   let toastTimer = null;
 
