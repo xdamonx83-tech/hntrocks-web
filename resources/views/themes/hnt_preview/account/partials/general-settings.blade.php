@@ -1,10 +1,10 @@
 @php
     $user = $generalSettings['user'];
     $locale = $generalSettings['locale'];
-    $themePreference = old('theme_preference', $user->theme_preference ?? 'system');
+    $themePreference = old('theme_preference', $user->theme_preference ?? 'light');
     $themePreference = in_array($themePreference, ['light', 'dark', 'system'], true)
         ? $themePreference
-        : 'system';
+        : 'light';
     $memberSince = $user->created_at
         ? ($locale === 'en'
             ? $user->created_at->locale('en')->translatedFormat('M j, Y')
