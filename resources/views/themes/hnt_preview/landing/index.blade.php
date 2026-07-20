@@ -69,6 +69,13 @@
     $openLfgs = (int) ($stats['open_lfgs'] ?? 0);
     $activeTeams = (int) ($stats['active_teams'] ?? 0);
     $postAuthor = $featuredPost?->user;
+    $postMedia = $featuredPost?->media?->first();
+    $postMediaAsset = $postMedia?->mediaAsset;
+    $postMediaIsPublic = ! $postMediaAsset || $postMediaAsset->visibility !== 'private';
+    $postText = \Illuminate\Support\Str::lower((string) ($featuredPost?->body ?? ''));
+    $postTag = $featuredPost?->team_id
+        ? 'TEAM'
+        : (\Illuminate\Support\Str::contains($postText, ['community event', 'hunt news', 'officially concluded']) ? 'NEWS' : 'POST');
     $cupCover = $featuredCup?->cover_path
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($featuredCup->cover_path)
         : asset('assets/vikinger/img/cover/01.jpg');
@@ -103,11 +110,16 @@
 <main class="app-shell landing-shell">
 <header class="landing-header">
 <a class="landing-brand" href="{{ route('home') }}" aria-label="HNT.ROCKS">
-<svg aria-hidden="true" class="landing-brand-mark" viewBox="0 0 44 34"><path d="M8.2 5.5c4.4-4.4 10.8-4.2 14.5.1-1 4.7-4.2 8-8.8 9.3-3.9-1.4-6.2-4.7-5.7-9.4Z"></path><path d="M22.1 8.1c5.9-.2 10.2 4 10.4 9.2-3.4 3.2-8 4-12.3 2.1-2-3.8-1.3-8.2 1.9-11.3Z"></path><path d="M14.3 18.3c3.5-3.5 8.5-3.8 12.2-.9.4 4.7-1.8 8.5-6.1 10.5-4-.7-6.6-4.1-6.1-9.6Z"></path><circle cx="18.8" cy="15.5" r="3.4"></circle></svg>
-<span>HNT.ROCKS</span>
+<img class="landing-brand-image" src="{{ asset('assets/socialite/images/logo.png') }}" alt="HNT.ROCKS">
 </a>
 <nav class="landing-nav" aria-label="{{ $copy['community'] }}">
-<a class="active" href="#start">{{ $copy['start'] }}</a><a href="#community">{{ $copy['community'] }}</a><a href="#lfg">{{ $copy['lfg'] }}</a><a href="#moments">{{ $copy['moments'] }}</a><a href="#cups">{{ $copy['cups'] }}</a><a href="#teams">{{ $copy['teams'] }}</a><a href="#more">{{ $copy['more'] }}</a>
+<a class="active" data-scrollspy href="#start">{{ $copy['start'] }}</a>
+<a data-scrollspy href="#community"><span>{{ $copy['community'] }}</span><svg><use href="#i-chevron"></use></svg></a>
+<a href="#lfg"><span>{{ $copy['lfg'] }}</span><svg><use href="#i-chevron"></use></svg></a>
+<a data-scrollspy href="#moments">{{ $copy['moments'] }}</a>
+<a data-scrollspy href="#cups"><span>{{ $copy['cups'] }}</span><svg><use href="#i-chevron"></use></svg></a>
+<a href="#teams">{{ $copy['teams'] }}</a>
+<a data-scrollspy href="#maps"><span>{{ $copy['more'] }}</span><svg><use href="#i-chevron"></use></svg></a>
 </nav>
 <div class="landing-header-actions">
 <a class="landing-login" href="{{ route('login') }}"><svg><use href="#i-user"></use></svg><span>{{ $copy['login'] }}</span></a>
@@ -143,10 +155,23 @@
 
 <article class="landing-card feed-card"><header><div><span class="landing-kicker">COMMUNITY FEED</span><h2>{{ $copy['activity_title'] }}</h2></div><div class="landing-tabs"><button class="active" type="button">{{ $copy['for_you'] }}</button><button type="button">{{ $copy['following'] }}</button></div></header>
 @if($featuredPost)
-<article class="landing-post"><header><img src="{{ $postAuthor?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}" alt=""><div><strong>{{ $postAuthor?->name ?: ($postAuthor?->username ?: 'HNT Hunter') }}</strong><span>{{ $postAuthor?->username ? '@'.$postAuthor->username.' · ' : '' }}{{ $featuredPost->created_at?->diffForHumans() }}</span></div><span class="post-tag">POST</span></header><p>{{ \Illuminate\Support\Str::limit(trim(strip_tags((string) $featuredPost->body)), 260) }}</p>
-@if($featuredLfg)<div class="lfg-preview"><div><strong>{{ $featuredLfg->title }}</strong><span>{{ implode(' · ', array_slice($featuredLfg->displayTags(), 0, 3)) }}</span></div><div><strong>{{ $featuredLfg->preferred_time ?: '—' }}</strong><span>{{ $copy['start_time'] }}</span></div><div><strong>{{ (int) $featuredLfg->slots_filled }} / {{ (int) $featuredLfg->slots_total }}</strong><span>{{ $copy['team'] }}</span></div><a href="{{ route('login') }}">{{ $copy['join'] }} <svg><use href="#i-arrow"></use></svg></a></div>@endif
-<footer><span><svg><use href="#i-heart"></use></svg>{{ $nf((int) $featuredPost->reactions_count) }}</span><span><svg><use href="#i-comment"></use></svg>{{ $nf((int) $featuredPost->comments_count) }}</span></footer></article>
-@else<div class="landing-empty large"><strong>{{ $copy['no_post'] }}</strong><a class="landing-button dark" href="{{ route('register') }}">{{ $copy['join_community'] }}</a></div>@endif
+<article class="landing-post">
+<header><img src="{{ $postAuthor?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg') }}" alt=""><div><strong>{{ $postAuthor?->name ?: ($postAuthor?->username ?: 'HNT Hunter') }}</strong><span>{{ $postAuthor?->username ? '@'.$postAuthor->username.' · ' : '' }}{{ $featuredPost->created_at?->diffForHumans() }}</span></div><span class="post-tag">{{ $postTag }}</span></header>
+<p>{{ \Illuminate\Support\Str::limit(trim(strip_tags((string) $featuredPost->body)), 320) }}</p>
+@if($postMedia && $postMediaIsPublic)
+<div class="landing-post-media">
+@if($postMedia->isImage())
+<img src="{{ $postMedia->url() }}" alt="">
+@elseif($postMedia->isVideo())
+<video src="{{ $postMedia->url() }}" controls preload="metadata" playsinline></video>
+@endif
+</div>
+@endif
+<footer><span><svg><use href="#i-heart"></use></svg>{{ $nf((int) $featuredPost->reactions_count) }}</span><span><svg><use href="#i-comment"></use></svg>{{ $nf((int) $featuredPost->comments_count) }}</span></footer>
+</article>
+@else
+<div class="landing-empty large"><strong>{{ $copy['no_post'] }}</strong><a class="landing-button dark" href="{{ route('register') }}">{{ $copy['join_community'] }}</a></div>
+@endif
 </article>
 </div>
 
@@ -157,7 +182,27 @@
 </section>
 
 <section class="landing-showcase" id="moments">
-<article class="landing-card moments-card"><header><div><span class="landing-kicker">MOMENTS</span><h2>{{ $copy['moments_title'] }}</h2></div><a class="pill-link" href="{{ route('register') }}">{{ $copy['all_moments'] }}</a></header><div class="moments-grid">@forelse($recentMoments as $index => $moment)<article><a class="moment-tile moment-{{ $index + 1 }}" href="{{ route('register') }}"><span>{{ gmdate('i:s', max(0, (int) $moment->duration_seconds)) }}</span><i><svg><use href="#i-plus"></use></svg></i></a><strong>{{ $moment->caption ?: 'HNT Moment' }}</strong><small>{{ $nf((int) $moment->likes_count) }} Likes · {{ $nf((int) $moment->comments_count) }} Kommentare</small></article>@empty<div class="landing-empty large"><strong>{{ $copy['no_moments'] }}</strong></div>@endforelse</div></article>
+<article class="landing-card moments-card"><header><div><span class="landing-kicker">MOMENTS</span><h2>{{ $copy['moments_title'] }}</h2></div><a class="pill-link" href="{{ route('register') }}">{{ $copy['all_moments'] }}</a></header><div class="moments-grid">
+@forelse($recentMoments as $index => $moment)
+@php
+    $momentCover = $moment->cover;
+    $momentMedia = $moment->media;
+    $momentImage = $momentCover && $momentCover->visibility !== 'private' && $momentCover->isImage()
+        ? $momentCover
+        : (($momentMedia && $momentMedia->visibility !== 'private' && ($momentMedia->isImage() || filled($momentMedia->thumbnail_path))) ? $momentMedia : null);
+    $momentVideo = $momentMedia && $momentMedia->visibility !== 'private' && $momentMedia->isVideo() ? $momentMedia : null;
+@endphp
+<article><a class="moment-tile moment-{{ $index + 1 }}" href="{{ route('register') }}">
+@if($momentImage)
+<img src="{{ $momentImage->thumbnailUrl() }}" alt="">
+@elseif($momentVideo)
+<video data-moment-preview src="{{ $momentVideo->url() }}" muted playsinline preload="metadata"></video>
+@endif
+<span>{{ gmdate('i:s', max(0, (int) $moment->duration_seconds)) }}</span><i><svg><use href="#i-plus"></use></svg></i></a><strong>{{ $moment->caption ?: 'HNT Moment' }}</strong><small>{{ $nf((int) $moment->likes_count) }} Likes · {{ $nf((int) $moment->comments_count) }} Kommentare</small></article>
+@empty
+<div class="landing-empty large"><strong>{{ $copy['no_moments'] }}</strong></div>
+@endforelse
+</div></article>
 
 <article class="landing-card cup-card" id="cups"><header><div><span class="landing-kicker">{{ $copy['cup_title'] }}</span><h2>{{ $featuredCup?->title ?: $copy['cups'] }}</h2></div><span class="live-pill">{{ $copy['registration_open'] }}</span></header>@if($featuredCup)<div class="cup-content"><img src="{{ $cupCover }}" alt=""><div><p>{{ $featuredCup->displaySummary() }}</p><div class="cup-stats"><article><strong>{{ $nf((int) $featuredCup->active_teams_count) }}</strong><span>{{ $copy['teams'] }}</span></article><article><strong>{{ (int) $featuredCup->team_size }}</strong><span>Hunter / Team</span></article><article><strong>{{ $nf((int) $featuredCup->submissions_count) }}</strong><span>Scores</span></article></div><a class="landing-button dark" href="{{ route('login') }}">{{ $copy['view_cup'] }} <svg><use href="#i-arrow"></use></svg></a></div></div>@else<div class="landing-empty large"><strong>{{ $copy['no_cup'] }}</strong></div>@endif</article>
 </section>
