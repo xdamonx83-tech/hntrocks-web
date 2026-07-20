@@ -2,6 +2,7 @@
     $hntThemePreference = $themePreference
         ?? auth()->user()?->theme_preference
         ?? request()->cookie('hnt_theme_preference', 'system');
+    $hntThemePilot = $themePilot ?? null;
 
     if (! in_array($hntThemePreference, ['light', 'dark', 'system'], true)) {
         $hntThemePreference = 'system';
@@ -11,7 +12,7 @@
 (() => {
     const valid = ['light', 'dark', 'system'];
     const serverPreference = @json($hntThemePreference);
-    let preference = valid.includes(serverPreference) ? serverPreference : 'system';
+    const preference = valid.includes(serverPreference) ? serverPreference : 'system';
 
     try {
         localStorage.setItem('hnt_theme_preference', preference);
@@ -38,6 +39,13 @@
     href="{{ asset('assets/themes/hnt_preview/dark-mode-pilot.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dark-mode-pilot.css')) ?: time() }}"
     rel="stylesheet"
 >
+@if($hntThemePilot === 'settings')
+<link
+    data-hnt-settings-appearance
+    href="{{ asset('assets/themes/hnt_preview/settings/appearance-theme.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/settings/appearance-theme.css')) ?: time() }}"
+    rel="stylesheet"
+>
+@endif
 <script
     data-hnt-theme-runtime
     src="{{ asset('assets/themes/hnt_preview/theme-runtime.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/theme-runtime.js')) ?: time() }}"
