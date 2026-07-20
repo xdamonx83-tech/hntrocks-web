@@ -1,3 +1,35 @@
+@if(request()->routeIs('ready-lobbies.*'))
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="robots" content="noindex,nofollow">
+    <title>@yield('title', 'Ready Lobby') · HNT.ROCKS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet">
+    <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet">
+    @stack('head')
+</head>
+<body data-page="ready-lobbies">
+    @include('themes.hnt_preview.partials.icons')
+    <main class="app-shell ready-lobby-page-shell">
+        @include('themes.hnt_preview.partials.header')
+        <section class="ready-lobby-stage">
+            <div class="ready-lobby-scroll" id="readyLobbyScroll" tabindex="0">
+                @yield('content')
+            </div>
+        </section>
+        <div class="toast" id="toast"></div>
+    </main>
+    <script src="{{ asset('assets/themes/hnt_preview/dashboard-feed/app.js') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/app.js')) ?: time() }}"></script>
+    @stack('scripts')
+</body>
+</html>
+@else
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -188,3 +220,4 @@
     @stack('scripts')
 </body>
 </html>
+@endif
