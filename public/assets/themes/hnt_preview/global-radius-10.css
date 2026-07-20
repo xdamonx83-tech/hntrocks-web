@@ -104,13 +104,164 @@
   border-radius: var(--hnt-global-surface-radius) !important;
 }
 
+/* Zweiter visueller Durchgang: konkrete Live-Komponenten, deren Seiten-CSS
+   eigene Radien mit höherer Spezifität setzt. Es werden weiterhin nur Radien
+   überschrieben; Layout, Abstände, Farben und Größen bleiben unverändert. */
+
+/* Feed- und Moments-Kommentare. */
+body :is(
+  .comments-modal,
+  .comments-post-context,
+  .comment-bubble,
+  .comments-input-shell,
+  .real-comment-dialog__card,
+  .real-comment-menu
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Maps-Übersicht. */
+body[data-page="maps"] :is(
+  .maps-stage,
+  .maps-view-switch,
+  .map-plan-card,
+  .map-plan-art,
+  .map-plan-content,
+  .maps-feature-overview,
+  .maps-marker-grid > article,
+  .maps-feature-detail-grid > article,
+  .maps-bottom-note,
+  .maps-workflow,
+  .maps-workflow-steps > article,
+  .maps-community-main,
+  .maps-community-side,
+  .maps-community-numbers > article,
+  .maps-help-section,
+  .maps-help-rows > article
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Interaktive Map-Detailseite. */
+body[data-page="map-detail"] :is(
+  .map-switch-card,
+  .map-filter-card,
+  .map-layer-card,
+  .map-switch-item,
+  .map-detail-center,
+  .map-canvas-toolbar,
+  .map-canvas-frame,
+  .map-canvas-surface,
+  .map-live-error,
+  .hnt-map-lightbox-panel,
+  .hnt-map-cash-submission-panel
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Guide-Detail. */
+body.guides-detail-live :is(
+  .guide-preview-banner,
+  .guide-detail-cover,
+  .guide-detail-hero > aside > article,
+  .guide-detail-actions,
+  .guide-detail-toc > section,
+  .guide-version-card,
+  .guide-article,
+  .guide-article-end,
+  .guide-detail-sidebar > section,
+  .guide-related article,
+  .guide-block-callout,
+  .guide-step,
+  .guide-detail-report-menu form
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Moments-Feed und Erstellen-Dialog. */
+body[data-page="moments"] :is(
+  .moments-stage,
+  .moments-floating-head,
+  .moment-video-card,
+  .moments-empty-real,
+  .moments-filter-empty,
+  [role="dialog"],
+  .moment-create-modal,
+  .moment-create-dialog,
+  .moment-create-panel,
+  .moment-create-upload,
+  .moment-create-dropzone,
+  .moment-create-format,
+  .moment-create-crosspost,
+  .hh-moment-create-drop,
+  .hh-moment-create-cover
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Cups-Übersicht. */
+body[data-page="cups"] :is(
+  .cups-center-card,
+  .cups-featured,
+  .cups-featured-cover,
+  .cups-featured-copy,
+  .cups-section,
+  .cup-highlight-card,
+  .cup-highlight-art,
+  .cup-highlight-content,
+  .cups-empty-state,
+  .cups-my-card,
+  .cups-my-cover,
+  .cups-my-content,
+  .cups-timeline-card,
+  .cups-hall-card,
+  .cups-hub-card
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Cup-Detail. */
+body[data-page="cup-detail"] :is(
+  .cup-white-card,
+  .cup-progress-card,
+  .cup-scoring-card,
+  .cup-section-card,
+  .cup-team-modal__panel,
+  .cup-detail-left > article,
+  .cup-detail-right > article,
+  [class*="cup-"][class$="-card"]
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Mitgliederverzeichnis. */
+body[data-page="members"] :is(
+  .members-directory-card,
+  .members-table-row,
+  .members-empty-state,
+  .members-alert,
+  .members-mobile-filter-modal
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
 /* Bewusst runde Elemente dürfen durch die globale Schicht nicht eckig werden. */
 :where(
   .header-circle,
   .circle-button,
   .profile-settings,
   .post-more,
+  .comments-close,
+  .comments-send,
+  .real-comment-more,
   .hnt-comms-launcher,
+  .moment-sound-toggle,
+  .moment-play-toggle,
+  .moment-follow-button,
+  .member-avatar,
+  .member-row-actions a,
+  .member-row-actions button,
+  .members-shelf-icon,
   [class~="avatar"],
   [class*="-avatar "],
   [class$="-avatar"],
