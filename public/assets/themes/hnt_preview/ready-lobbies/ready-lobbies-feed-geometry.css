@@ -1,0 +1,114 @@
+/*
+ * Ready Lobby – Geometrie an den aktuellen Dashboard-Feed angleichen.
+ * Nur Abstände, Raster und proportionale Größen; keine Farben oder Funktionen.
+ */
+
+@media (min-width: 1200px) {
+  body[data-page="ready-lobbies"] .ready-page-shell,
+  body[data-page="ready-lobby-create"] .ready-create-page-shell {
+    padding: clamp(16px, 1.7vw, 32px) !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-page-shell,
+  body[data-page="ready-lobby-create"] .ready-create-page-shell {
+    display: grid !important;
+    grid-template-rows: clamp(36px, 5.4vh, 58px) minmax(0, 1fr) !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-stage {
+    min-height: 0 !important;
+    padding-top: clamp(12px, 1.35vh, 18px) !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-heading {
+    min-height: clamp(162px, 24.3vh, 260px) !important;
+    grid-template-columns: minmax(0, 1fr) clamp(390px, 25vw, 470px) !important;
+    align-items: end !important;
+    padding: 0 0 19px !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-heading h1,
+  body[data-page="ready-lobby-create"] .ready-create-heading h1 {
+    font-size: clamp(31px, 3.25vw, 56px) !important;
+    line-height: 1 !important;
+    letter-spacing: -1.3px !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-heading-stats strong {
+    font-size: clamp(42px, 3.55vw, 64px) !important;
+    line-height: .88 !important;
+    letter-spacing: -1.8px !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-filter-strip,
+  body[data-page="ready-lobbies"] .ready-workspace,
+  body[data-page="ready-lobbies"] .ready-main-column,
+  body[data-page="ready-lobbies"] .ready-right-sidebar,
+  body[data-page="ready-lobby-create"] .ready-create-workspace {
+    gap: clamp(3px, .32vw, 6px) !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-filter-strip {
+    margin-bottom: clamp(3px, .32vw, 6px) !important;
+  }
+
+  body[data-page="ready-lobbies"] .ready-workspace {
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 21.5vw, 385px) !important;
+  }
+
+  body[data-page="ready-lobby-create"] .ready-create-page-shell .profile-edit-scroll {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    padding-bottom: 40px !important;
+  }
+
+  body[data-page="ready-lobby-create"] .ready-create-page-shell .profile-edit-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  body[data-page="ready-lobby-create"] .ready-create-heading {
+    min-height: clamp(162px, 24.3vh, 260px) !important;
+    align-items: end !important;
+    padding: 0 0 19px !important;
+  }
+
+  body[data-page="ready-lobby-create"] .ready-create-workspace {
+    grid-template-columns:
+      clamp(300px, 23.95vw, 430px)
+      minmax(0, 1fr)
+      clamp(300px, 21.5vw, 385px) !important;
+    align-items: start !important;
+  }
+
+  body[data-page="ready-lobby-create"] :is(
+    .profile-edit-nav-card,
+    .profile-live-preview-card,
+    .profile-edit-form-head
+  ) {
+    top: clamp(12px, 1.35vh, 18px) !important;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  body[data-page="ready-lobbies"] .ready-page-shell,
+  body[data-page="ready-lobby-create"] .ready-create-page-shell {
+    padding: 16px !important;
+  }
+
+  body[data-page="ready-lobby-create"] .ready-create-page-shell {
+    display: grid !important;
+    grid-template-rows: 36px minmax(0, 1fr) !important;
+  }
+
+  body[data-page="ready-lobby-create"] .ready-create-page-shell .profile-edit-scroll {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+}
