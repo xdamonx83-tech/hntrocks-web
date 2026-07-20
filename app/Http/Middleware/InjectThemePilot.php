@@ -32,7 +32,7 @@ class InjectThemePilot
 
         $pilot = $request->routeIs('feed.index') ? 'feed' : 'settings';
         $themeHead = view('themes.hnt_preview.partials.theme-head', [
-            'themePreference' => $request->user()?->theme_preference ?? 'system',
+            'themePreference' => $request->user()?->theme_preference ?? 'light',
             'themePilot' => $pilot,
         ])->render();
 
