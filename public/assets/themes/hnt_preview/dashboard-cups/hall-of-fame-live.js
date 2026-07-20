@@ -10,7 +10,11 @@
   hallMenuItem?.classList.add('is-active');
 
   const modeButtons = [...root.querySelectorAll('[data-hall-mode]')];
-  const teamSections = [...root.querySelectorAll('[data-hall-teams-section]')];
+  const teamSections = [...root.querySelectorAll(
+    '[data-hall-teams-section] > .hall-podium, ' +
+    '[data-hall-teams-section] > .hall-detail-grid, ' +
+    '[data-hall-teams-section] > .hall-empty-state'
+  )];
   const hunterSection = root.querySelector('[data-hall-hunters-section]');
   const seasonSelect = root.querySelector('[data-hall-season]');
   const toast = document.getElementById('toast');
