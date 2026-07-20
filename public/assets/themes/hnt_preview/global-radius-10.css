@@ -1,0 +1,137 @@
+/*
+ * HNT.ROCKS – globale 10px-Radius-Schicht
+ *
+ * Diese Datei ändert ausschließlich border-radius-Werte. Sie wird über den
+ * gemeinsamen HNT-Header geladen und ist dadurch vollständig rückbaubar:
+ * Zum Zurücksetzen genügt es, die eine Link-Zeile im Header-Partial wieder zu
+ * entfernen. Bestehende Seiten-CSS, Layouts und Komponenten bleiben erhalten.
+ */
+
+:root {
+  --hnt-global-surface-radius: 10px;
+}
+
+/* Große und mittlere Oberflächen: Karten, Panels, Widgets und Overlays. */
+:where(
+  [class~="card"],
+  [class*="-card "],
+  [class$="-card"],
+  [class~="panel"],
+  [class*="-panel "],
+  [class$="-panel"],
+  [class~="widget"],
+  [class*="-widget "],
+  [class$="-widget"],
+  [class~="dropdown"],
+  [class*="-dropdown "],
+  [class$="-dropdown"],
+  [class~="modal"],
+  [class*="-modal "],
+  [class$="-modal"],
+  [class~="dialog"],
+  [class*="-dialog "],
+  [class$="-dialog"],
+  [class~="sheet"],
+  [class*="-sheet "],
+  [class$="-sheet"],
+  [class~="popover"],
+  [class*="-popover "],
+  [class$="-popover"],
+  [class~="toolbar"],
+  [class*="-toolbar "],
+  [class$="-toolbar"],
+  [class~="preview"],
+  [class*="-preview "],
+  [class$="-preview"],
+  [class~="notice"],
+  [class*="-notice "],
+  [class$="-notice"],
+  [class~="alert"],
+  [class*="-alert "],
+  [class$="-alert"]
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Gemeinsamer Header. Runde Icon-Schaltflächen werden weiter unten bewahrt. */
+:where(
+  .main-nav,
+  .main-nav > a,
+  .main-nav > .main-nav-item > .main-nav-trigger,
+  .main-nav-trigger.main-nav-direct,
+  .settings-button,
+  .mobile-stats-trigger,
+  .header-dropdown,
+  .main-nav-dropdown,
+  .hnt-comms-overview,
+  .hnt-chat-tab
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Häufige innere Flächen, die nicht als „Card“ benannt sind. */
+:where(
+  .header-live-state,
+  .header-request-item,
+  .header-message-item,
+  .header-notification-item,
+  .hnt-agenda-card,
+  .personal-progress-row,
+  .activity-item,
+  .composition-stat-grid article,
+  .guide-featured,
+  .guide-empty,
+  .guide-pagination,
+  .guide-category-list button,
+  .guide-status-widget article,
+  .team-member-row,
+  .team-request-row,
+  .team-session-row,
+  .rocks-transaction-row,
+  .rocks-inventory-item,
+  .gamification-quest-row,
+  .gamification-history-row
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Normale Formularflächen. Native/runde Controls bleiben unangetastet. */
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea
+) {
+  border-radius: var(--hnt-global-surface-radius) !important;
+}
+
+/* Bewusst runde Elemente dürfen durch die globale Schicht nicht eckig werden. */
+:where(
+  .header-circle,
+  .circle-button,
+  .profile-settings,
+  .post-more,
+  .hnt-comms-launcher,
+  [class~="avatar"],
+  [class*="-avatar "],
+  [class$="-avatar"],
+  [class~="badge"],
+  [class*="-badge "],
+  [class$="-badge"],
+  [class~="chip"],
+  [class*="-chip "],
+  [class$="-chip"],
+  [class~="pill"],
+  [class*="-pill "],
+  [class$="-pill"],
+  [class~="status"],
+  [class*="-status "],
+  [class$="-status"],
+  [class~="ring"],
+  [class*="-ring "],
+  [class$="-ring"],
+  [class~="dot"],
+  [class*="-dot "],
+  [class$="-dot"]
+) {
+  border-radius: 999px !important;
+}
