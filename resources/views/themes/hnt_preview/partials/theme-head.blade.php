@@ -39,6 +39,11 @@
     href="{{ asset('assets/themes/hnt_preview/dark-mode-pilot.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dark-mode-pilot.css')) ?: time() }}"
     rel="stylesheet"
 >
+<link
+    data-hnt-dark-pilot-fixes
+    href="{{ asset('assets/themes/hnt_preview/dark-mode-pilot-fixes.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dark-mode-pilot-fixes.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @if($hntThemePilot === 'settings')
 <link
     data-hnt-settings-appearance
