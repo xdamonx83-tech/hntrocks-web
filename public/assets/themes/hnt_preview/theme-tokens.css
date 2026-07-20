@@ -1,0 +1,77 @@
+/* HNT.ROCKS theme tokens. Layout, spacing and radii stay outside this file. */
+:root,
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --hnt-bg: #e4e7e6;
+  --hnt-bg-deep: #6f6e6d;
+  --hnt-surface: rgba(255, 255, 255, .78);
+  --hnt-surface-strong: rgba(255, 255, 255, .91);
+  --hnt-surface-solid: #f8f8f5;
+  --hnt-surface-soft: #ededeb;
+  --hnt-surface-input: #f0f0ed;
+  --hnt-surface-hover: rgba(255, 255, 255, .96);
+  --hnt-text: #30302e;
+  --hnt-text-soft: #92918a;
+  --hnt-text-faint: #aaa79f;
+  --hnt-text-on-dark: #fff;
+  --hnt-border: rgba(52, 48, 37, .16);
+  --hnt-border-soft: rgba(52, 48, 37, .10);
+  --hnt-divider: #e3dece;
+  --hnt-shadow: rgba(35, 35, 33, .12);
+  --hnt-overlay: rgba(28, 28, 27, .46);
+  --hnt-dark: #30302e;
+  --hnt-dark-soft: #3a3a37;
+  --hnt-brand-red: #b64e44;
+  --hnt-brand-red-soft: rgba(182, 78, 68, .13);
+  --hnt-green: #78b41d;
+  --hnt-yellow: #ffd55a;
+
+  --ink: var(--hnt-text);
+  --muted: var(--hnt-text-soft);
+  --paper: var(--hnt-surface);
+  --paper-strong: var(--hnt-surface-strong);
+  --dark: var(--hnt-dark);
+  --line: var(--hnt-divider);
+  --darkred: var(--hnt-brand-red);
+  --green: var(--hnt-green);
+  --yellow: var(--hnt-yellow);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --hnt-bg: #121210;
+  --hnt-bg-deep: #080807;
+  --hnt-surface: rgba(31, 31, 29, .88);
+  --hnt-surface-strong: rgba(38, 38, 35, .96);
+  --hnt-surface-solid: #20201e;
+  --hnt-surface-soft: #292926;
+  --hnt-surface-input: #2d2d29;
+  --hnt-surface-hover: #33332f;
+  --hnt-text: #f2e8d8;
+  --hnt-text-soft: #aaa398;
+  --hnt-text-faint: #7f7a72;
+  --hnt-text-on-dark: #f8f1e6;
+  --hnt-border: rgba(242, 232, 216, .15);
+  --hnt-border-soft: rgba(242, 232, 216, .09);
+  --hnt-divider: rgba(242, 232, 216, .13);
+  --hnt-shadow: rgba(0, 0, 0, .34);
+  --hnt-overlay: rgba(0, 0, 0, .68);
+  --hnt-dark: #0d0d0c;
+  --hnt-dark-soft: #181816;
+  --hnt-brand-red: #c45b50;
+  --hnt-brand-red-soft: rgba(196, 91, 80, .16);
+  --hnt-green: #8fbd42;
+  --hnt-yellow: #d8b34f;
+
+  --ink: var(--hnt-text);
+  --muted: var(--hnt-text-soft);
+  --paper: var(--hnt-surface);
+  --paper-strong: var(--hnt-surface-strong);
+  --dark: var(--hnt-dark);
+  --line: var(--hnt-divider);
+  --darkred: var(--hnt-brand-red);
+  --green: var(--hnt-green);
+  --yellow: var(--hnt-yellow);
+}
