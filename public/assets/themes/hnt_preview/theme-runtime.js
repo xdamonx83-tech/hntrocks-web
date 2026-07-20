@@ -41,7 +41,7 @@
   });
 
   document.addEventListener('hnt:theme-preview', (event) => {
-    apply(event.detail?.preference || 'system');
+    apply(event.detail?.preference || 'system', { persist: false });
   });
 
   const handleSystemChange = () => {
