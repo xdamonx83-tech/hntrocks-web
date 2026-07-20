@@ -15,6 +15,9 @@
   const initialSaveState = saveState?.innerHTML || "";
   const notificationMaster = document.getElementById("notificationMaster");
   const notificationToggles = [...document.querySelectorAll(".notification-toggle")];
+  const generalForm = forms.get("general");
+  const appearanceInputs = [...document.querySelectorAll('input[name="theme_preference"]')];
+  const initialTheme = generalForm?.dataset.initialTheme || "system";
 
   if (!saveButton || !discardButton) return;
 
@@ -50,6 +53,22 @@
     saveState.innerHTML = initialSaveState;
   };
 
+  const previewTheme = (preference) => {
+    document.dispatchEvent(new CustomEvent("hnt:theme-preview", {
+      detail: { preference: preference || "system" },
+    }));
+  };
+
+  const syncAppearance = ({ preview = true } = {}) => {
+    const selected = appearanceInputs.find((input) => input.checked)?.value || initialTheme;
+
+    appearanceInputs.forEach((input) => {
+      input.closest("label")?.classList.toggle("active", input.checked);
+    });
+
+    if (preview) previewTheme(selected);
+  };
+
   const syncNotificationMaster = () => {
     if (!notificationMaster || notificationToggles.length === 0) return;
 
@@ -73,6 +92,10 @@
     syncNotificationMaster();
   }
 
+  appearanceInputs.forEach((input) => {
+    input.addEventListener("change", () => syncAppearance());
+  });
+
   document.querySelectorAll("[data-settings-tab]").forEach((tab) => {
     tab.addEventListener("click", () => requestAnimationFrame(syncActions));
   });
@@ -88,10 +111,13 @@
           );
         }
 
+        if (panelName === "general") syncAppearance();
+
         clearDirtyState();
       });
     });
   });
 
+  syncAppearance({ preview: false });
   syncActions();
 })();
