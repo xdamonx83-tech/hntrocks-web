@@ -1,38 +1,44 @@
 /*
- * Landing-Topbar: letzte Paritätskorrektur zum echten Feed-Header.
- * Nur Active-Pill, Menütypografie und Abstand zu den Gastaktionen.
+ * Landing-Topbar: Parität zum echten Feed-Header.
+ * Ausschließlich Buttonform, Menütypografie und Abstand zu den Gastaktionen.
  */
 @media (min-width: 1200px) {
   body[data-page="landing"] .landing-nav {
-    padding: clamp(3px, .28vw, 5px) !important;
+    padding: clamp(8px, .92vh, 10px) clamp(5px, .3vw, 6px) !important;
     transform: translateX(calc(clamp(-66px, -3.22vw, -40px) - 3px)) !important;
   }
 
   body[data-page="landing"] .landing-nav a {
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    font-size: clamp(8px, .67vw, 12px) !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    font-size: clamp(7px, .56vw, 10px) !important;
     font-weight: 400 !important;
     line-height: 1 !important;
     letter-spacing: 0 !important;
   }
 
   body[data-page="landing"] .landing-nav a.active {
-    width: clamp(69px, 7.3vw, 130px) !important;
-    min-width: clamp(69px, 7.3vw, 130px) !important;
-    max-width: clamp(69px, 7.3vw, 130px) !important;
-    flex-basis: clamp(69px, 7.3vw, 130px) !important;
+    width: clamp(69px, 6.1vw, 122px) !important;
+    min-width: clamp(69px, 6.1vw, 122px) !important;
+    max-width: clamp(69px, 6.1vw, 122px) !important;
+    flex-basis: clamp(69px, 6.1vw, 122px) !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    border-radius: 10px !important;
+    font-size: clamp(7px, .56vw, 10px) !important;
     font-weight: 400 !important;
   }
 
   body[data-page="landing"] .landing-header-actions {
+    margin-left: clamp(5px, .5vw, 10px) !important;
     transform: translateX(calc(clamp(-66px, -3.22vw, -40px) - 3px)) !important;
   }
 
   body[data-page="landing"] .landing-login,
   body[data-page="landing"] .landing-language a {
-    font-size: clamp(8px, .67vw, 12px) !important;
+    font-size: clamp(7px, .56vw, 10px) !important;
     font-weight: 400 !important;
     line-height: 1 !important;
     letter-spacing: 0 !important;
