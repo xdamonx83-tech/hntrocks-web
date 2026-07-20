@@ -1,4 +1,7 @@
-/* Landing-Header exakt an die Proportionen des aktuellen Feed-Headers anbinden. */
+/*
+ * Landing-Topbar: dieselbe sichtbare Geometrie wie der eingeloggte Feed.
+ * Die Gastnavigation behält ausschließlich ihre Landing-Anker.
+ */
 body[data-page="landing"] .landing-header {
   position: sticky !important;
   z-index: 120 !important;
@@ -6,7 +9,6 @@ body[data-page="landing"] .landing-header {
   width: 100% !important;
   height: 36px !important;
   min-height: 36px !important;
-  max-height: 36px !important;
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) 480px 187px !important;
   align-items: start !important;
@@ -23,9 +25,6 @@ body[data-page="landing"] .landing-brand {
   gap: 5px !important;
   color: #30302e !important;
   text-decoration: none !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  letter-spacing: -.55px !important;
 }
 
 body[data-page="landing"] .landing-brand-image {
@@ -52,7 +51,6 @@ body[data-page="landing"] .landing-nav {
   width: 480px !important;
   height: 36px !important;
   min-height: 36px !important;
-  max-height: 36px !important;
   display: flex !important;
   align-items: center !important;
   gap: 0 !important;
@@ -85,8 +83,10 @@ body[data-page="landing"] .landing-nav a svg {
 }
 
 body[data-page="landing"] .landing-nav a.active {
+  width: 69px !important;
   min-width: 69px !important;
-  flex: 0 0 auto !important;
+  max-width: 69px !important;
+  flex: 0 0 69px !important;
   padding-inline: 15px !important;
   background: #30302e !important;
   color: #fff !important;
@@ -96,7 +96,6 @@ body[data-page="landing"] .landing-header-actions {
   width: 187px !important;
   height: 36px !important;
   min-height: 36px !important;
-  max-height: 36px !important;
   display: grid !important;
   grid-template-columns: 69px 72px 36px !important;
   gap: 5px !important;
@@ -155,15 +154,13 @@ body[data-page="landing"] .landing-hero {
   padding-top: 28px !important;
 }
 
-/* Dieselbe responsive Desktop-Skalierung wie im Feed. */
 @media (min-width: 1200px) {
   body[data-page="landing"] .landing-header {
     height: clamp(36px, 5.4vh, 58px) !important;
     min-height: clamp(36px, 5.4vh, 58px) !important;
-    max-height: clamp(36px, 5.4vh, 58px) !important;
     grid-template-columns:
       minmax(0, 1fr)
-      clamp(480px, 50.63vw, 910px)
+      clamp(480px, 50vw, 900px)
       clamp(220px, 17vw, 320px) !important;
     gap: clamp(5px, .5vw, 10px) !important;
     margin-bottom: clamp(20px, 2vw, 30px) !important;
@@ -181,7 +178,7 @@ body[data-page="landing"] .landing-hero {
   }
 
   body[data-page="landing"] .landing-brand {
-    gap: clamp(5px, .45vw, 8px) !important;
+    gap: 5px !important;
   }
 
   body[data-page="landing"] .landing-brand-image {
@@ -198,20 +195,25 @@ body[data-page="landing"] .landing-hero {
   }
 
   body[data-page="landing"] .landing-nav {
-    width: clamp(480px, 50.63vw, 910px) !important;
-    padding: clamp(3px, .28vw, 5px) !important;
+    width: clamp(480px, 50vw, 900px) !important;
+    padding: clamp(8px, .92vh, 10px) clamp(5px, .3vw, 6px) !important;
+    transform: translateX(clamp(-66px, -3.22vw, -40px)) !important;
   }
 
   body[data-page="landing"] .landing-nav a {
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    padding-inline: clamp(7px, .75vw, 14px) !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    padding-inline: clamp(7px, .7vw, 13px) !important;
+    border-radius: 999px !important;
     font-size: clamp(8px, .67vw, 12px) !important;
   }
 
   body[data-page="landing"] .landing-nav a.active {
-    min-width: clamp(69px, 7.3vw, 130px) !important;
+    width: clamp(69px, 6.1vw, 122px) !important;
+    min-width: clamp(69px, 6.1vw, 122px) !important;
+    max-width: clamp(69px, 6.1vw, 122px) !important;
+    flex-basis: clamp(69px, 6.1vw, 122px) !important;
   }
 
   body[data-page="landing"] .landing-header-actions {
@@ -221,6 +223,7 @@ body[data-page="landing"] .landing-hero {
       minmax(0, 1fr)
       clamp(36px, 5.4vh, 58px) !important;
     gap: clamp(5px, .5vw, 10px) !important;
+    transform: translateX(clamp(-75px, -3.66vw, -45px)) !important;
   }
 
   body[data-page="landing"] .landing-login {
