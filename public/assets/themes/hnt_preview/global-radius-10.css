@@ -286,3 +286,19 @@ body[data-page="members"] :is(
 ) {
   border-radius: 999px !important;
 }
+
+/* Nur die vier Icon-Aktionen rechts neben „Einstellungen“ sind echte Kreise. */
+header.site-header[data-hnt-shared-header] .header-actions > .header-action-menu:not(.settings-menu) {
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+header.site-header[data-hnt-shared-header] .header-actions > .header-action-menu:not(.settings-menu) > .header-circle {
+  width: auto !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+}
