@@ -1,0 +1,71 @@
+/* Latest Rocks reference layout — loaded after rocks-live.css */
+body[data-page="rocks"]{background:radial-gradient(circle at 10% 0%,rgba(255,255,255,.58),transparent 34%),linear-gradient(112deg,#e4e7e7 0%,#d9dcdb 55%,#aaa9a3 100%)}
+.rocks-page-shell{grid-template-rows:clamp(58px,7.2vh,82px) minmax(0,1fr)}
+.rocks-scroll{padding:8px 30px 48px}
+.rocks-flash{max-width:none;margin:0 0 10px}
+.rocks-overview{width:100%;max-width:none;min-height:240px;grid-template-columns:minmax(0,1fr) 330px;align-items:end;gap:34px;margin:0 0 12px;padding:8px 0 22px;border-radius:0;background:transparent;box-shadow:none}
+.rocks-heading h1{margin-top:9px;font-size:clamp(58px,4.4vw,78px);line-height:.98;letter-spacing:-2.8px}
+.rocks-heading p{max-width:850px;margin-top:13px;font-size:9px}
+.rocks-meta{margin-top:18px}
+.rocks-bars{grid-template-columns:minmax(300px,2.55fr) minmax(160px,1.08fr) minmax(185px,1.27fr) minmax(140px,.95fr);gap:10px;margin-top:18px}
+.rocks-summary-bar>span{margin:0 0 6px 3px}
+.rocks-summary-bar>div{min-height:38px;border-radius:18px}
+.rocks-summary-bar b{font-size:12px;font-weight:500}
+.rocks-summary-bar .yellow{background:var(--r-red);color:#fff}
+.rocks-summary-bar .striped{background:repeating-linear-gradient(135deg,rgba(255,255,255,.96) 0,rgba(255,255,255,.96) 7px,rgba(230,227,220,.88) 7px,rgba(230,227,220,.88) 14px)}
+.rocks-summary-bar .outline{border-color:#8f8b83;background:rgba(255,255,255,.08);justify-content:center}
+.rocks-overview-stats{grid-template-columns:repeat(3,minmax(80px,1fr));gap:20px;align-self:end;padding-bottom:2px}
+.rocks-overview-stats article{min-height:96px;place-content:end center;padding:0;border-radius:0;background:transparent}
+.rocks-overview-stats strong{font-size:clamp(48px,3.7vw,68px);line-height:.92;letter-spacing:-2px}
+.rocks-overview-stats span{margin-top:11px}
+.rocks-center-flow{width:auto;max-width:none;margin:0 298px 0 276px}
+.rocks-center-card{border-radius:28px;background:rgba(255,255,255,.9)}
+.rocks-center-head{min-height:60px;padding:11px 14px}
+.rocks-tabs button{min-height:30px;padding:0 13px;font-size:7px}
+.rocks-panels{padding:12px}
+.rocks-claim-card{min-height:162px;grid-template-columns:minmax(0,1fr) minmax(360px,.92fr);align-items:center;gap:18px;padding:18px;border-radius:23px;background:repeating-linear-gradient(135deg,rgba(255,255,255,.13) 0,rgba(255,255,255,.13) 2px,transparent 2px,transparent 9px),linear-gradient(105deg,#c94f45 0%,#ce625b 55%,#e9b9b5 100%);color:#2f302d}
+.rocks-claim-card.is-empty{min-height:105px;grid-template-columns:1fr;background:#ece9e2}
+.rocks-claim-main h3{font-size:24px;font-weight:400}
+.rocks-claim-main p{color:rgba(47,48,45,.62)}
+.rocks-claim-main button{background:var(--r-dark)}
+.rocks-pending-list article{min-height:43px;padding:6px 10px;background:rgba(255,255,255,.48)}
+.rocks-pending-list i{width:34px;height:34px;background:var(--r-dark);color:#fff}
+.rocks-pending-list small{color:rgba(47,48,45,.56)}
+.rocks-overview-grid{grid-template-columns:1.12fr .88fr;gap:10px;margin-top:10px}
+.rocks-progress-card,.rocks-next-card,.rocks-section-card,.rocks-equipped-card,.rocks-shop-section{padding:15px;border:1px solid rgba(191,79,70,.18);border-radius:21px;background:rgba(255,255,255,.76)}
+.rocks-progress-card header>strong{color:var(--r-ink);font-size:20px;font-weight:300}
+.rocks-daily-progress article{padding:8px 0 9px;border-bottom:1px dashed #d5d1c8;border-radius:0;background:transparent}
+.rocks-daily-progress article:last-child{border-bottom:0}
+.rocks-next-card>article{min-height:47px;padding:7px 9px;border-radius:15px;background:rgba(255,255,255,.88)}
+.rocks-fixed-column{position:absolute;z-index:18;display:grid;align-content:start;gap:12px}
+.rocks-fixed-left{left:30px;width:264px}
+.rocks-fixed-right{right:30px;width:286px}
+.rocks-wallet-card,.rocks-quick-card,.rocks-streak-card,.rocks-notice-card{border-radius:27px}
+.rocks-wallet-card{min-height:418px;padding:16px 14px 14px;background:radial-gradient(circle at 95% 0%,rgba(181,77,68,.28),transparent 35%),var(--r-dark);color:#fff}
+.rocks-wallet-card h2{font-size:17px}
+.rocks-wallet-card header button{background:rgba(255,255,255,.12);color:#fff}
+.rocks-balance-orbit{width:150px;height:150px;margin:16px auto 10px;background:conic-gradient(var(--r-red) 0 73%,rgba(255,255,255,.18) 73% 100%)}
+.rocks-balance-orbit:before{inset:14px;background:var(--r-dark)}
+.rocks-balance-orbit strong{font-size:31px}
+.rocks-balance-orbit span,.rocks-balance-orbit small{color:rgba(255,255,255,.48)}
+.rocks-wallet-summary{margin-top:7px;border-color:rgba(255,255,255,.18)}
+.rocks-wallet-summary span+span{border-color:rgba(255,255,255,.12)}
+.rocks-wallet-summary strong{color:var(--r-red);font-size:16px}
+.rocks-wallet-summary small{color:rgba(255,255,255,.4)}
+.rocks-wallet-pending{min-height:52px;margin-top:10px;padding:8px 10px;background:rgba(181,77,68,.23)}
+.rocks-wallet-pending span,.rocks-wallet-pending small{color:rgba(255,255,255,.48)}
+.rocks-wallet-pending strong{color:var(--r-red)}
+.rocks-wallet-pending.is-collected{background:rgba(255,255,255,.06)}
+.rocks-week-chart{border-color:rgba(255,255,255,.16)}
+.rocks-week-chart header span,.rocks-week-chart header strong{color:var(--r-red)}
+.rocks-week-chart>div i{background:rgba(255,255,255,.26)}
+.rocks-week-chart>div i.today{background:var(--r-red)}
+.rocks-week-chart footer{color:rgba(255,255,255,.38)}
+.rocks-quick-card,.rocks-streak-card,.rocks-notice-card{background:rgba(255,255,255,.88)}
+.rocks-streak-card header>strong{font-size:24px}
+.rocks-streak-days span{min-height:49px}
+.rocks-notice-card{background:#f0d8d4}
+.rocks-notice-card p,.rocks-notice-card>div small{color:#9a4c45}
+@media(max-width:1450px){.rocks-overview{grid-template-columns:minmax(0,1fr) 275px;gap:24px}.rocks-overview-stats{gap:10px}.rocks-center-flow{margin-left:246px;margin-right:268px}.rocks-fixed-left{width:234px}.rocks-fixed-right{width:256px}.rocks-claim-card{grid-template-columns:minmax(0,1fr) minmax(300px,.82fr)}}
+@media(max-width:1180px){body[data-page="rocks"]{overflow:auto}.rocks-page-shell{height:auto;min-width:0;min-height:100vh;display:block;overflow:visible}.rocks-stage,.rocks-scroll{height:auto;overflow:visible}.rocks-scroll{padding:16px}.rocks-overview{min-height:0;grid-template-columns:1fr}.rocks-overview-stats{grid-template-columns:repeat(3,1fr)}.rocks-overview-stats article{min-height:80px;place-content:center;border-radius:20px;background:rgba(255,255,255,.45)}.rocks-bars{grid-template-columns:repeat(2,minmax(0,1fr))}.rocks-center-flow{margin:0}.rocks-fixed-column{position:static;width:auto;margin-top:12px}.rocks-fixed-left,.rocks-fixed-right{left:auto;right:auto;grid-template-columns:repeat(2,minmax(0,1fr))}.rocks-wallet-card{min-height:0}}
+@media(max-width:760px){.rocks-heading h1{font-size:52px}.rocks-bars,.rocks-overview-grid,.rocks-featured-rewards,.rocks-rewards-grid,.rocks-equipped-grid,.rocks-shop-grid,.rocks-fixed-left,.rocks-fixed-right{grid-template-columns:1fr}.rocks-center-head{align-items:flex-start;flex-direction:column}.rocks-tabs{width:100%;overflow-x:auto}.rocks-claim-card{grid-template-columns:1fr}}
