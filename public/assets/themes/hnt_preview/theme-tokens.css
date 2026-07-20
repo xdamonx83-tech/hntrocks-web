@@ -23,9 +23,37 @@ html[data-theme="light"] {
   --hnt-dark: #30302e;
   --hnt-dark-soft: #3a3a37;
   --hnt-brand-red: #b64e44;
+  --hnt-brand-red-hover: #a3423a;
   --hnt-brand-red-soft: rgba(182, 78, 68, .13);
+  --hnt-brand-red-soft-hover: rgba(182, 78, 68, .20);
   --hnt-green: #78b41d;
   --hnt-yellow: #ffd55a;
+
+  /* Shared component aliases used by the header and comms dock. */
+  --hnt-text-strong: #30302e;
+  --hnt-text-muted: var(--hnt-text-soft);
+  --hnt-text-subtle: #62625d;
+  --hnt-text-accent: #9b761e;
+  --hnt-surface-card: #f5f5f2;
+  --hnt-surface-card-strong: #fafaf8;
+  --hnt-surface-control: rgba(255, 255, 255, .72);
+  --hnt-surface-faint: rgba(255, 255, 255, .18);
+  --hnt-surface-table: rgba(255, 255, 255, .76);
+  --hnt-surface-panel: #f0f0ed;
+  --hnt-accent: #ffd55a;
+  --hnt-accent-strong: #ffcd4c;
+  --hnt-accent-gold: #d6a84f;
+  --hnt-accent-soft: rgba(255, 232, 160, .48);
+  --hnt-accent-soft-hover: rgba(255, 232, 160, .72);
+  --hnt-success: var(--hnt-green);
+  --hnt-online: #7fb728;
+  --hnt-warning: #ff9d2a;
+  --hnt-danger: #b8463a;
+  --hnt-purple: #8f73c9;
+  --hnt-border-medium: rgba(52, 48, 37, .22);
+  --hnt-border-strong: #575752;
+  --hnt-progress-fill: var(--hnt-brand-red);
+  --hnt-progress-track: rgba(47, 47, 44, .12);
 
   --ink: var(--hnt-text);
   --muted: var(--hnt-text-soft);
@@ -38,7 +66,13 @@ html[data-theme="light"] {
   --yellow: var(--hnt-yellow);
 }
 
-html[data-theme="dark"] {
+/*
+ * Two selectors make the dark palette more specific than late :root blocks in
+ * feed.css and comms-dock.css. This prevents those components from restoring
+ * their light defaults after the theme files have loaded.
+ */
+:root[data-theme="dark"],
+html[data-theme="dark"][data-theme-preference] {
   color-scheme: dark;
 
   --hnt-bg: #121210;
@@ -61,9 +95,37 @@ html[data-theme="dark"] {
   --hnt-dark: #0d0d0c;
   --hnt-dark-soft: #181816;
   --hnt-brand-red: #c45b50;
+  --hnt-brand-red-hover: #d2695e;
   --hnt-brand-red-soft: rgba(196, 91, 80, .16);
+  --hnt-brand-red-soft-hover: rgba(196, 91, 80, .24);
   --hnt-green: #8fbd42;
   --hnt-yellow: #d8b34f;
+
+  /* Shared component aliases used by the header and comms dock. */
+  --hnt-text-strong: #f2e8d8;
+  --hnt-text-muted: #aaa398;
+  --hnt-text-subtle: #c7beb1;
+  --hnt-text-accent: #d8b34f;
+  --hnt-surface-card: #292926;
+  --hnt-surface-card-strong: #20201e;
+  --hnt-surface-control: rgba(41, 41, 38, .94);
+  --hnt-surface-faint: rgba(242, 232, 216, .055);
+  --hnt-surface-table: rgba(35, 35, 32, .96);
+  --hnt-surface-panel: #242421;
+  --hnt-accent: #d8b34f;
+  --hnt-accent-strong: #e2bf62;
+  --hnt-accent-gold: #d6a84f;
+  --hnt-accent-soft: rgba(216, 179, 79, .16);
+  --hnt-accent-soft-hover: rgba(216, 179, 79, .24);
+  --hnt-success: #8fbd42;
+  --hnt-online: #8fbd42;
+  --hnt-warning: #d99a45;
+  --hnt-danger: #c45b50;
+  --hnt-purple: #a58bcf;
+  --hnt-border-medium: rgba(242, 232, 216, .17);
+  --hnt-border-strong: rgba(242, 232, 216, .28);
+  --hnt-progress-fill: #c45b50;
+  --hnt-progress-track: rgba(242, 232, 216, .13);
 
   --ink: var(--hnt-text);
   --muted: var(--hnt-text-soft);
