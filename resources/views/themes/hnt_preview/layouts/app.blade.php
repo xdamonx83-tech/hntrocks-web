@@ -13,6 +13,7 @@
     <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/common.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/common.css')) ?: time() }}" rel="stylesheet">
     <link href="{{ asset('assets/themes/hnt_preview/dashboard-feed/feed.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-feed/feed.css')) ?: time() }}" rel="stylesheet">
     @stack('head')
+    <link href="{{ asset('assets/themes/hnt_preview/ready-lobbies/ready-lobbies-modern.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/ready-lobbies/ready-lobbies-modern.css')) ?: time() }}" rel="stylesheet">
 </head>
 <body data-page="ready-lobbies">
     @include('themes.hnt_preview.partials.icons')
