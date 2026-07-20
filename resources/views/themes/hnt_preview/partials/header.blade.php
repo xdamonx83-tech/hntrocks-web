@@ -9,6 +9,7 @@
     $headerIsTeams = request()->routeIs('teams.*');
     $headerIsGuides = request()->routeIs('guides.*');
     $headerIsRocks = request()->routeIs('rocks.*', 'crowns.*');
+    $headerIsReadyLobbies = request()->routeIs('ready-lobbies.*');
     $headerLocaleIsEnglish = app()->getLocale() === 'en';
 @endphp
 
@@ -49,14 +50,14 @@
 </div>
 </section>
 </div>
-<div class="main-nav-item nav-lfg">
-<button aria-controls="lfgNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger" type="button"><span>LFG</span><svg><use href="#i-chevron"></use></svg></button>
+<div class="main-nav-item nav-lfg {{ $headerIsReadyLobbies ? 'is-current' : '' }}">
+<button aria-controls="lfgNavDropdown" aria-expanded="false" aria-haspopup="true" class="main-nav-trigger {{ $headerIsReadyLobbies ? 'is-current' : '' }}" type="button"><span>LFG</span><svg><use href="#i-chevron"></use></svg></button>
 <section class="main-nav-dropdown" id="lfgNavDropdown" role="menu">
 <header><span>LOOKING FOR GROUP</span><strong>{{ __('hnt_preview.header.lfg_title') }}</strong></header>
 <div class="main-nav-menu-grid">
 <button data-navigation-label="LFG finden" role="menuitem" type="button"><span class="main-nav-menu-icon"><svg><use href="#i-search"></use></svg></span><span><strong>{{ __('hnt_preview.header.lfg_find') }}</strong><small>{{ __('hnt_preview.header.lfg_find_text') }}</small></span></button>
 <button data-navigation-label="LFG erstellen" role="menuitem" type="button"><span class="main-nav-menu-icon yellow"><svg><use href="#i-plus"></use></svg></span><span><strong>{{ __('hnt_preview.header.lfg_create') }}</strong><small>{{ __('hnt_preview.header.lfg_create_text') }}</small></span></button>
-<button aria-disabled="true" data-unavailable="1" role="menuitem" type="button"><span class="main-nav-menu-icon green"><svg><use href="#i-users"></use></svg></span><span><strong>{{ __('hnt_preview.header.ready_lobbies') }}</strong><small>{{ __('hnt_preview.header.ready_lobbies_text') }}</small></span><em>{{ __('hnt_preview.header.soon') }}</em></button>
+<a class="{{ $headerIsReadyLobbies ? 'is-active' : '' }}" data-navigation-label="Ready Lobbies" href="{{ route('ready-lobbies.index') }}" role="menuitem"><span class="main-nav-menu-icon green"><svg><use href="#i-users"></use></svg></span><span><strong>{{ __('hnt_preview.header.ready_lobbies') }}</strong><small>{{ __('hnt_preview.header.ready_lobbies_text') }}</small></span></a>
 </div>
 </section>
 </div>
