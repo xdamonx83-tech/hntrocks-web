@@ -1,0 +1,86 @@
+/* Rocks page only: restore the shared Feed dropdown presentation after page CSS. */
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown .header-live-state {
+  min-height: 128px !important;
+  display: grid !important;
+  place-content: center !important;
+  justify-items: center !important;
+  gap: 7px !important;
+  padding: 24px 20px !important;
+  color: var(--hnt-text-soft, #8f8b82) !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  text-align: center !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown .header-live-state strong {
+  display: block !important;
+  margin: 0 !important;
+  color: var(--hnt-text, #30302e) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item:link,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item:visited,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown-footer,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown-footer:link,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown-footer:visited {
+  text-decoration: none !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item {
+  min-height: 64px !important;
+  background: transparent !important;
+  color: var(--hnt-text, #30302e) !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item strong,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item small,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item time {
+  text-decoration: none !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item strong,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item strong {
+  color: var(--hnt-text, #30302e) !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item small,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item small {
+  color: var(--hnt-text-soft, #8f8b82) !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item time,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item time {
+  color: var(--hnt-brand-red, rgb(182 78 68)) !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item.unread,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item.unread {
+  background: transparent !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item:hover,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item:focus-visible,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item:hover,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item:focus-visible,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item.unread:hover,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-message-item.unread:focus-visible,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item.unread:hover,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-notification-item.unread:focus-visible {
+  background: var(--hnt-brand-red-soft, rgba(182, 78, 68, .12)) !important;
+  outline: none !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown-footer {
+  color: var(--hnt-text-on-dark, #fff) !important;
+}
+
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown-footer:hover,
+body[data-page="rocks"] header.site-header[data-hnt-shared-header] .header-dropdown-footer:focus-visible {
+  color: var(--hnt-text-on-dark, #fff) !important;
+  text-decoration: none !important;
+}
