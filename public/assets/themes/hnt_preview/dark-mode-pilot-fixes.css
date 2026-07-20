@@ -1,0 +1,439 @@
+/*
+ * HNT.ROCKS dark-mode pilot – visual fixes from the first live review.
+ * Scope is color/contrast only. No dimensions, spacing, radii or behavior.
+ */
+
+/* --------------------------------------------------------------------------
+   Shared header dropdowns
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] .header-dropdown {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, .38) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] :is(
+  .header-request-list,
+  .header-message-list,
+  .header-notification-list,
+  .header-menu-list
+) {
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] :is(
+  .header-request-item,
+  .header-message-item,
+  .header-notification-item,
+  .header-live-state,
+  .header-menu-list > a,
+  .header-menu-list > button
+) {
+  border-color: var(--hnt-divider) !important;
+  background: transparent !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] :is(
+  .header-request-item:hover,
+  .header-message-item:hover,
+  .header-notification-item:hover,
+  .header-menu-list > a:hover,
+  .header-menu-list > button:hover
+) {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] :is(
+  .header-request-item strong,
+  .header-message-item strong,
+  .header-notification-item strong,
+  .header-live-state strong,
+  .header-menu-list strong
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] :is(
+  .header-request-item p,
+  .header-message-item p,
+  .header-notification-item p,
+  .header-request-item span,
+  .header-message-item span,
+  .header-notification-item span,
+  .header-request-item time,
+  .header-message-item time,
+  .header-notification-item time,
+  .header-live-state,
+  .header-menu-list small,
+  .header-mark-all
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] :is(
+  .header-request-item.unread,
+  .header-message-item.unread,
+  .header-notification-item.unread
+) {
+  background: var(--hnt-brand-red-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+header.site-header[data-hnt-shared-header] .header-mark-all {
+  background: var(--hnt-surface-input) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Main feed card and posts
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .social-feed-card,
+  .social-feed-head,
+  .social-post,
+  .real-feed-post
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .social-feed-head {
+  background: var(--hnt-surface-strong) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .14) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .social-feed-head h2,
+  .post-author strong,
+  .post-head,
+  .post-body,
+  .post-body > p
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .post-author span,
+  .post-actions button,
+  .real-feed-loader
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .social-post {
+  box-shadow: inset 0 0 0 1px var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .post-actions {
+  border-color: var(--hnt-divider) !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .post-actions button:hover {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .post-more,
+  .feed-tabs > button:not(.active):not(.compose-button)
+) {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Post composer modal
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .post-composer-modal {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .48) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .post-composer-head,
+  .post-composer-body,
+  .post-composer-footer
+) {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .post-composer-head {
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .post-composer-footer {
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .post-composer-head h2,
+  .composer-identity strong,
+  .composer-type-copy strong
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .composer-identity span,
+  .composer-status,
+  .composer-tools > span,
+  .composer-textarea-shell > span
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .composer-audience,
+  .post-composer-close,
+  .composer-types button,
+  .composer-draft,
+  .composer-tools button
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .composer-types button.active {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .composer-textarea-shell,
+  .composer-tools,
+  .composer-type-panel
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: inset 0 0 0 1px var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .composer-type-panel {
+  background:
+    repeating-linear-gradient(135deg, rgba(242, 232, 216, .035) 0 2px, transparent 2px 9px),
+    var(--hnt-surface-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .composer-textarea-shell textarea,
+  .composer-textarea-shell textarea::placeholder
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .composer-textarea-shell textarea:not(:placeholder-shown) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .composer-avatar img {
+  border-color: var(--hnt-border-medium) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .composer-publish {
+  background: var(--hnt-brand-red) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Comments modal
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .comments-modal {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .48) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .comments-modal-head,
+  .comments-modal-content,
+  .comments-composer
+) {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .comments-modal-head {
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .comments-composer {
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .comments-title-row h2,
+  .comments-toolbar strong,
+  .comments-post-copy strong,
+  .real-comments-empty strong,
+  .comment-head strong,
+  .comment-bubble p
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .comments-title-row small,
+  .comments-post-copy span,
+  .comments-post-copy p,
+  .real-comments-empty span,
+  .comment-head span,
+  .comment-actions button,
+  .comments-compose-actions,
+  .comments-compose-actions > span
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] :is(
+  .comments-post-context,
+  .comment-bubble,
+  .comments-input-shell,
+  .comments-toolbar button,
+  .comments-close
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: inset 0 0 0 1px var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .comments-input-shell textarea {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .comments-input-shell textarea::placeholder {
+  color: var(--hnt-text-faint) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .comment-actions button:hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Post context menu
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .real-feed-menu {
+  border-color: var(--hnt-border-medium) !important;
+  background: rgba(32, 32, 30, .98) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, .42) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .real-feed-menu button {
+  background: transparent !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .real-feed-menu button:hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="feed"] .real-feed-menu button.danger {
+  color: #e4776d !important;
+}
+
+/* --------------------------------------------------------------------------
+   Comms overview and active chat. The selectors intentionally outrank the
+   dynamically loaded comms-dock.css without modifying that shared file.
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock :is(
+  .hnt-comms-overview__head,
+  .hnt-comms-overview__search,
+  .hnt-comms-overview__list
+) {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__item {
+  border-color: var(--hnt-divider) !important;
+  background: transparent !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-overview__copy strong {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot > .hnt-chat-tab.hnt-comms-active {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__body {
+  background:
+    linear-gradient(rgba(32, 32, 30, .98), rgba(32, 32, 30, .98)),
+    repeating-linear-gradient(135deg, transparent 0 12px, rgba(216, 179, 79, .035) 12px 13px) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form input {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__form input::placeholder {
+  color: var(--hnt-text-faint) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__bubble {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot
+.hnt-chat-tab__message.is-own .hnt-chat-tab__bubble {
+  border-color: rgba(196, 91, 80, .34) !important;
+  background: var(--hnt-brand-red-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot]
+.hnt-chat-tabs-shell.hnt-comms-dock .hnt-comms-panel-slot .hnt-chat-tab__time {
+  color: var(--hnt-text-faint) !important;
+}
