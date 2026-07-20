@@ -1,0 +1,114 @@
+/* Landing-Header exakt an den aktuellen HNT.ROCKS-Webstil anbinden. */
+body[data-page="landing"] .landing-header {
+  position: sticky !important;
+  z-index: 120 !important;
+  top: 12px !important;
+  width: 100% !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  display: grid !important;
+  grid-template-columns: minmax(180px, 1fr) minmax(560px, 910px) 286px !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  margin: 0 0 24px !important;
+  padding: 0 !important;
+}
+
+body[data-page="landing"] .landing-brand {
+  width: max-content !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  align-self: start !important;
+  color: #30302e !important;
+  text-decoration: none !important;
+}
+
+body[data-page="landing"] .landing-brand-mark {
+  width: 44px !important;
+  height: 34px !important;
+  flex: 0 0 44px !important;
+  fill: #30302e !important;
+}
+
+body[data-page="landing"] .landing-brand > span {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  letter-spacing: -.65px !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="landing"] .landing-nav,
+body[data-page="landing"] .landing-header-actions {
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  align-self: start !important;
+}
+
+body[data-page="landing"] .landing-nav {
+  padding: 5px !important;
+}
+
+body[data-page="landing"] .landing-nav a {
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+}
+
+body[data-page="landing"] .landing-header-actions {
+  display: grid !important;
+  grid-template-columns: 136px 82px 58px !important;
+  gap: 5px !important;
+}
+
+body[data-page="landing"] .landing-login,
+body[data-page="landing"] .landing-language,
+body[data-page="landing"] .landing-register {
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+}
+
+body[data-page="landing"] .landing-language {
+  width: 82px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  align-items: stretch !important;
+  padding: 4px !important;
+}
+
+body[data-page="landing"] .landing-language a {
+  min-width: 0 !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+}
+
+body[data-page="landing"] .landing-register {
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  aspect-ratio: 1 !important;
+  border-radius: 50% !important;
+}
+
+body[data-page="landing"] .landing-hero {
+  position: relative !important;
+  z-index: 1 !important;
+  min-height: 260px !important;
+  padding-top: 28px !important;
+}
+
+@media (max-width: 1350px) {
+  body[data-page="landing"] .landing-header {
+    grid-template-columns: 170px minmax(520px, 1fr) 260px !important;
+  }
+
+  body[data-page="landing"] .landing-header-actions {
+    grid-template-columns: 120px 77px 58px !important;
+  }
+}
