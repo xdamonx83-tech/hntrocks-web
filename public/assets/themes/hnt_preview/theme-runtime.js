@@ -7,7 +7,7 @@
     : preference;
 
   const apply = (preference, { persist = true } = {}) => {
-    const normalized = valid.has(preference) ? preference : 'system';
+    const normalized = valid.has(preference) ? preference : 'light';
     const resolved = resolve(normalized);
 
     document.documentElement.dataset.themePreference = normalized;
@@ -31,7 +31,7 @@
 
   const currentPreference = () => {
     const value = document.documentElement.dataset.themePreference;
-    return valid.has(value) ? value : 'system';
+    return valid.has(value) ? value : 'light';
   };
 
   window.HNTTheme = Object.freeze({
@@ -41,7 +41,7 @@
   });
 
   document.addEventListener('hnt:theme-preview', (event) => {
-    apply(event.detail?.preference || 'system', { persist: false });
+    apply(event.detail?.preference || 'light', { persist: false });
   });
 
   const handleSystemChange = () => {
