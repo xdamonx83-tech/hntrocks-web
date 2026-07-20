@@ -21,7 +21,7 @@
   if (!document.querySelector('link[data-rocks-header-dropdown-fix]')) {
     const dropdownStyle = document.createElement('link');
     dropdownStyle.rel = 'stylesheet';
-    dropdownStyle.href = '/assets/themes/hnt_preview/dashboard-rocks/rocks-header-dropdown-fix.css?v=20260720-1';
+    dropdownStyle.href = '/assets/themes/hnt_preview/dashboard-rocks/rocks-header-dropdown-fix.css?v=20260720-2';
     dropdownStyle.dataset.rocksHeaderDropdownFix = '1';
     document.head.appendChild(dropdownStyle);
   }
