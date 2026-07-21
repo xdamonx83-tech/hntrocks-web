@@ -1,0 +1,382 @@
+/* HNT.ROCKS Cups overview — dark mode only. Layout and behavior stay untouched. */
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"],
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .app-shell.cups-page-shell {
+  background:
+    radial-gradient(circle at 88% 0%, rgba(91, 67, 48, .20), transparent 31%),
+    radial-gradient(circle at 4% 86%, rgba(91, 45, 39, .12), transparent 28%),
+    linear-gradient(180deg, #11110f 0%, #171714 54%, #1c1815 100%) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cups-stage,
+  .cups-scroll,
+  .cups-overview,
+  .cups-center-flow,
+  .cups-fixed-column
+) {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cups-heading h1,
+  .cups-overview-stats strong,
+  .cups-center-title h2,
+  .cups-section h3,
+  .cups-my-content h2,
+  .cups-timeline-card h3,
+  .cups-hall-card h2,
+  .cups-hub-card h3,
+  .cup-highlight-content h4,
+  .cup-card-body h4
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cups-heading > p,
+  .cups-summary-bar > span,
+  .cups-overview-stats span,
+  .cups-section > header small,
+  .cups-my-content > p,
+  .cups-my-progress small,
+  .cups-mini-timeline small,
+  .cups-hub-card button small,
+  .cup-highlight-content p,
+  .cup-card-body p,
+  .cup-card-body ul,
+  .cup-card-body > div > em,
+  .cups-empty-state p,
+  .cups-pagination strong
+) {
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cups-heading > span,
+  .cups-center-title > span,
+  .cups-section > header span,
+  .cups-my-content > span,
+  .cups-timeline-card header span,
+  .cups-hall-card header span,
+  .cups-hub-card header span,
+  .cup-highlight-art > span,
+  .cup-card-art > span
+) {
+  color: var(--hnt-brand-red) !important;
+}
+
+/* Header meta and overview bars */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-meta span {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-meta .live {
+  border-color: rgba(116, 161, 61, .26) !important;
+  background: rgba(116, 161, 61, .16) !important;
+  color: #b8dc88 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-summary-bar .dark {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-summary-bar .yellow {
+  background: #c95a4f !important;
+  color: #fff3e4 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-summary-bar .striped {
+  background: repeating-linear-gradient(135deg, #292926 0 4px, #3a3935 4px 7px) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-summary-bar .outline {
+  border-color: var(--hnt-border-strong) !important;
+  background: transparent !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+/* Primary surfaces */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cups-center-card,
+  .cups-my-card,
+  .cups-timeline-card,
+  .cups-hall-card,
+  .cups-hub-card,
+  .cups-section
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-center-head {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-tabs button {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-tabs button.active {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cups-search,
+  .cups-filter-row select,
+  .cups-filter-row > button
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cups-search input,
+  .cups-filter-row select option
+) {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-search input::placeholder {
+  color: var(--hnt-text-muted) !important;
+}
+
+/* Featured Cup */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-cover {
+  background: #11110f !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-cover::after {
+  background:
+    linear-gradient(90deg, transparent 52%, rgba(35, 35, 32, .91) 100%),
+    linear-gradient(0deg, rgba(10, 10, 9, .16), rgba(10, 10, 9, .16)) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-cover > span {
+  background: rgba(28, 28, 26, .92) !important;
+  color: var(--hnt-text-soft) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-card-status span {
+  background: #302f2c !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-card-status span.active {
+  background: rgba(116, 161, 61, .16) !important;
+  color: #b8dc88 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-copy > p,
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-stats small {
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-stats {
+  border-color: var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-stats span + span {
+  border-left-color: var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-stats strong {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-actions a {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-featured-actions button {
+  background: #302f2c !important;
+  color: var(--hnt-text) !important;
+}
+
+/* Directory and highlight cards */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cup-highlight-card,
+  .cup-card
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .blood .cup-highlight-art,
+  .cup-card.blood .cup-card-art,
+  .cup-card.summer .cup-card-art
+) {
+  background: radial-gradient(circle at 76% 22%, rgba(182, 78, 68, .35), transparent 35%), #292926 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .frost .cup-highlight-art,
+  .cup-card.frost .cup-card-art
+) {
+  background: radial-gradient(circle at 76% 22%, rgba(112, 138, 144, .32), transparent 36%), #292c2d !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cup-card.quick .cup-card-art {
+  background: radial-gradient(circle at 76% 22%, rgba(182, 78, 68, .22), transparent 35%), #2b2a28 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cup-card.extract .cup-card-art {
+  background: radial-gradient(circle at 76% 22%, rgba(118, 87, 58, .28), transparent 35%), #292824 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cup-card.night .cup-card-art {
+  background: radial-gradient(circle at 76% 22%, rgba(105, 89, 137, .32), transparent 35%), #25242b !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cup-highlight-art,
+  .cup-card-art
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cup-highlight-art small,
+  .cup-card-art small
+) {
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cup-highlight-content > div span {
+  background: #302f2c !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cup-highlight-content > button,
+  .cup-card-body > a,
+  .cup-card-body > button,
+  .cups-pagination a,
+  .cups-pagination > span
+) {
+  background: #302f2c !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] :is(
+  .cup-card-body > div > span.finished,
+  .cup-card-body > div > span.planned
+) {
+  background: #302f2c !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cup-card-body > div > span.active {
+  background: rgba(116, 161, 61, .16) !important;
+  color: #b8dc88 !important;
+}
+
+/* Left column */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-team-stack img {
+  border-color: var(--hnt-surface) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-my-progress {
+  border-top-color: var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-my-progress > i {
+  background: #3b3934 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-my-actions a {
+  background: #302f2c !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-my-actions a:first-child {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Timeline */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-mini-timeline::before {
+  background: var(--hnt-border-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-mini-timeline time {
+  border-color: var(--hnt-border-strong) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-mini-timeline .current time {
+  border-color: #090908 !important;
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Hall of Fame */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hall-card header button {
+  background: #302f2c !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-podium article {
+  background: #2d2c29 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-podium .first {
+  background: rgba(214, 168, 79, .34) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-podium img {
+  border-color: rgba(242, 232, 216, .22) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-podium small,
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hall-stats small {
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hall-stats,
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hall-stats span + span {
+  border-color: var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hall-stats strong {
+  color: var(--hnt-text) !important;
+}
+
+/* Cup Hub */
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hub-card button {
+  border-top-color: var(--hnt-border-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hub-card button > svg {
+  background: #302f2c !important;
+  color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="cups"] .cups-hub-mobile-grid button {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
