@@ -35,16 +35,19 @@ class InjectThemePilot
             || preg_match('/<body\b[^>]*\bdata-page=["\']ready-lobby-create["\']/i', $html) === 1;
         $isReadyLobbiesPage = (! $isReadyLobbyCreatePage && $request->routeIs('ready-lobbies.*'))
             || preg_match('/<body\b[^>]*\bdata-page=["\']ready-lobbies["\']/i', $html) === 1;
+        $isMomentsPage = $request->routeIs('moments.index', 'moments.show')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']moments["\']/i', $html) === 1;
         $isFeedPage = $request->routeIs('feed.index')
             || preg_match('/<body\b[^>]*\bdata-page=["\']feed["\']/i', $html) === 1;
 
-        // Profile pages contain embedded feed markup. Therefore profile detection
-        // must win before feed detection or the wrong theme pilot is attached.
+        // Profile and Moments pages contain embedded feed markup. Their dedicated
+        // page detection must win before feed detection or the wrong pilot is attached.
         $pilot = match (true) {
             $isProfilePage => 'profile',
             $isSettingsPage => 'settings',
             $isReadyLobbyCreatePage => 'ready-lobby-create',
             $isReadyLobbiesPage => 'ready-lobbies',
+            $isMomentsPage => 'moments',
             $isFeedPage => 'feed',
             $hasSharedHeader => 'shared',
             default => null,
