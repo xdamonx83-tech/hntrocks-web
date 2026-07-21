@@ -76,6 +76,12 @@
     href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-polish.css')) ?: time() }}"
     rel="stylesheet"
 >
+@elseif($hntThemePilot === 'cups')
+<link
+    data-hnt-cups-dark-mode
+    href="{{ asset('assets/themes/hnt_preview/dashboard-cups/dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/dark-mode.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @elseif($hntThemePilot === 'moments')
 <link
     data-hnt-moments-dark-mode
