@@ -76,6 +76,12 @@
     href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-polish.css')) ?: time() }}"
     rel="stylesheet"
 >
+@elseif($hntThemePilot === 'ready-lobby-create')
+<link
+    data-hnt-ready-lobby-create-dark-mode
+    href="{{ asset('assets/themes/hnt_preview/ready-lobbies/create-dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/ready-lobbies/create-dark-mode.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @elseif($hntThemePilot === 'ready-lobbies')
 <link
     data-hnt-ready-lobbies-dark-mode
