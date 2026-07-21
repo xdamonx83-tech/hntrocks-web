@@ -30,7 +30,7 @@ class InjectThemePilot
         $pilot = match (true) {
             $request->routeIs('feed.index') || str_contains($html, 'data-page="feed"') => 'feed',
             $request->routeIs('account.settings.edit') => 'settings',
-            $request->routeIs('profile.*') || str_contains($html, 'data-page="profile"') => 'profile',
+            $request->routeIs('profile.*') || str_contains($html, 'data-page="profile"') || str_contains($html, 'data-page="profile-edit"') => 'profile',
             $hasSharedHeader => 'shared',
             default => null,
         };
@@ -45,6 +45,13 @@ class InjectThemePilot
             'themePilot' => $pilot,
         ])->render();
 
+        if ($pilot === 'profile') {
+            $profileFixAsset = 'assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-live-fix.css';
+            $profileFixFile = public_path($profileFixAsset);
+            $profileFixVersion = is_file($profileFixFile) ? (string) filemtime($profileFixFile) : (string) time();
+            $themeHead .= "\n".'<link data-hnt-profile-live-fix href="'.asset($profileFixAsset).'?v='.$profileFixVersion.'" rel="stylesheet">';
+        }
+
         if (! str_contains($html, 'data-hnt-theme-tokens')) {
             $html = preg_replace(
                 '/<\/head>/i',
@@ -52,6 +59,12 @@ class InjectThemePilot
                 $html,
                 1
             ) ?? $html;
+        } elseif ($pilot === 'profile' && ! str_contains($html, 'data-hnt-profile-live-fix')) {
+            $profileFixAsset = 'assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-live-fix.css';
+            $profileFixFile = public_path($profileFixAsset);
+            $profileFixVersion = is_file($profileFixFile) ? (string) filemtime($profileFixFile) : (string) time();
+            $profileFixLink = '<link data-hnt-profile-live-fix href="'.asset($profileFixAsset).'?v='.$profileFixVersion.'" rel="stylesheet">';
+            $html = preg_replace('/<\/head>/i', $profileFixLink."\n</head>", $html, 1) ?? $html;
         }
 
         if (! str_contains($html, 'data-hnt-theme-pilot=')) {
