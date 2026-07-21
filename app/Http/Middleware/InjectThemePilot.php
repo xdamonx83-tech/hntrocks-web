@@ -31,7 +31,9 @@ class InjectThemePilot
             || preg_match('/<body\b[^>]*\bdata-page=["\']profile(?:-edit)?["\']/i', $html) === 1;
         $isSettingsPage = $request->routeIs('account.settings.edit')
             || preg_match('/<body\b[^>]*\bdata-page=["\']settings["\']/i', $html) === 1;
-        $isReadyLobbiesPage = $request->routeIs('ready-lobbies.*')
+        $isReadyLobbyCreatePage = $request->routeIs('ready-lobbies.create')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']ready-lobby-create["\']/i', $html) === 1;
+        $isReadyLobbiesPage = (! $isReadyLobbyCreatePage && $request->routeIs('ready-lobbies.*'))
             || preg_match('/<body\b[^>]*\bdata-page=["\']ready-lobbies["\']/i', $html) === 1;
         $isFeedPage = $request->routeIs('feed.index')
             || preg_match('/<body\b[^>]*\bdata-page=["\']feed["\']/i', $html) === 1;
@@ -41,6 +43,7 @@ class InjectThemePilot
         $pilot = match (true) {
             $isProfilePage => 'profile',
             $isSettingsPage => 'settings',
+            $isReadyLobbyCreatePage => 'ready-lobby-create',
             $isReadyLobbiesPage => 'ready-lobbies',
             $isFeedPage => 'feed',
             $hasSharedHeader => 'shared',
