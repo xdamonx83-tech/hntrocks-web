@@ -43,6 +43,8 @@ class InjectThemePilot
             || preg_match('/<body\b[^>]*\bdata-page=["\']cup-detail["\']/i', $html) === 1;
         $isCupsOverviewPage = $request->routeIs('cups.index')
             || preg_match('/<body\b[^>]*\bdata-page=["\']cups["\']/i', $html) === 1;
+        $isRocksPage = $request->routeIs('crowns.index', 'crowns.history', 'rocks.index', 'rocks.history')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']rocks["\']/i', $html) === 1;
         $isFeedPage = $request->routeIs('feed.index')
             || preg_match('/<body\b[^>]*\bdata-page=["\']feed["\']/i', $html) === 1;
 
@@ -57,6 +59,7 @@ class InjectThemePilot
             $isCupTeamManagePage => 'cup-team-manage',
             $isCupDetailPage => 'cup-detail',
             $isCupsOverviewPage => 'cups',
+            $isRocksPage => 'rocks',
             $isFeedPage => 'feed',
             $hasSharedHeader => 'shared',
             default => null,
