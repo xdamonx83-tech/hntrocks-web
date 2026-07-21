@@ -45,11 +45,20 @@ class InjectThemePilot
             'themePilot' => $pilot,
         ])->render();
 
+        $profileForceStyle = '';
+
         if ($pilot === 'profile') {
-            $profileFixAsset = 'assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-live-fix.css';
-            $profileFixFile = public_path($profileFixAsset);
-            $profileFixVersion = is_file($profileFixFile) ? (string) filemtime($profileFixFile) : (string) time();
-            $themeHead .= "\n".'<link data-hnt-profile-live-fix href="'.asset($profileFixAsset).'?v='.$profileFixVersion.'" rel="stylesheet">';
+            $profileForceFile = public_path('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-force.css');
+
+            if (is_file($profileForceFile)) {
+                $profileForceCss = file_get_contents($profileForceFile);
+
+                if (is_string($profileForceCss) && $profileForceCss !== '') {
+                    $profileForceCss = str_ireplace('</style', '<\/style', $profileForceCss);
+                    $profileForceStyle = "<style data-hnt-profile-force>\n{$profileForceCss}\n</style>";
+                    $themeHead .= "\n".$profileForceStyle;
+                }
+            }
         }
 
         if (! str_contains($html, 'data-hnt-theme-tokens')) {
@@ -59,12 +68,13 @@ class InjectThemePilot
                 $html,
                 1
             ) ?? $html;
-        } elseif ($pilot === 'profile' && ! str_contains($html, 'data-hnt-profile-live-fix')) {
-            $profileFixAsset = 'assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-live-fix.css';
-            $profileFixFile = public_path($profileFixAsset);
-            $profileFixVersion = is_file($profileFixFile) ? (string) filemtime($profileFixFile) : (string) time();
-            $profileFixLink = '<link data-hnt-profile-live-fix href="'.asset($profileFixAsset).'?v='.$profileFixVersion.'" rel="stylesheet">';
-            $html = preg_replace('/<\/head>/i', $profileFixLink."\n</head>", $html, 1) ?? $html;
+        } elseif ($pilot === 'profile' && $profileForceStyle !== '' && ! str_contains($html, 'data-hnt-profile-force')) {
+            $html = preg_replace(
+                '/<\/head>/i',
+                $profileForceStyle."\n</head>",
+                $html,
+                1
+            ) ?? $html;
         }
 
         if (! str_contains($html, 'data-hnt-theme-pilot=')) {
