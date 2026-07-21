@@ -122,6 +122,12 @@
     href="{{ asset('assets/themes/hnt_preview/dashboard-cups/dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/dark-mode.css')) ?: time() }}"
     rel="stylesheet"
 >
+@elseif($hntThemePilot === 'map-detail')
+<link
+    data-hnt-map-detail-dark-mode
+    href="{{ asset('assets/themes/hnt_preview/dashboard-maps/map-detail-dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-maps/map-detail-dark-mode.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @elseif($hntThemePilot === 'maps')
 <link
     data-hnt-maps-dark-mode
