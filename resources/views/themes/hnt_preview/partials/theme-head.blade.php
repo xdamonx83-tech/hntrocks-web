@@ -82,6 +82,11 @@
     href="{{ asset('assets/themes/hnt_preview/dashboard-rocks/dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-rocks/dark-mode.css')) ?: time() }}"
     rel="stylesheet"
 >
+<link
+    data-hnt-rocks-dark-mode-polish
+    href="{{ asset('assets/themes/hnt_preview/dashboard-rocks/dark-mode-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-rocks/dark-mode-polish.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @elseif($hntThemePilot === 'cup-team-manage')
 <link
     data-hnt-cup-team-manage-dark-mode
