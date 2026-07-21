@@ -1,0 +1,396 @@
+/* Rocks dashboard dark mode. Loaded after rocks-live.css. */
+html[data-theme="dark"] body[data-page="rocks"] {
+  --rocks-bg: #141412;
+  --rocks-bg-soft: #181816;
+  --rocks-surface: #1d1d1a;
+  --rocks-surface-2: #23231f;
+  --rocks-surface-3: #292923;
+  --rocks-border: #3a3932;
+  --rocks-border-soft: #302f2a;
+  --rocks-text: #f2e8d8;
+  --rocks-text-soft: #c5bdae;
+  --rocks-muted: #969087;
+  --rocks-red: #cf5b50;
+  --rocks-gold: #d6a84f;
+  --rocks-green: #9bc96b;
+  background: var(--rocks-bg) !important;
+  color: var(--rocks-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .app-shell.rocks-page-shell {
+  --r-red: var(--rocks-red);
+  --r-red-dark: #e16a5e;
+  --r-red-soft: rgb(207 91 80 / .16);
+  --r-yellow: var(--rocks-gold);
+  --r-dark: #11110f;
+  --r-ink: var(--rocks-text);
+  --r-muted: var(--rocks-muted);
+  --r-line: var(--rocks-border);
+  --r-paper: rgb(29 29 26 / .96);
+  --r-soft: var(--rocks-surface-2);
+  background:
+    radial-gradient(circle at 100% 0, rgb(111 72 52 / .18), transparent 32%),
+    radial-gradient(circle at 0 100%, rgb(112 44 39 / .13), transparent 34%),
+    linear-gradient(135deg, #11110f 0%, #171714 52%, #211d18 100%) !important;
+  color: var(--rocks-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-stage,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-scroll,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-center-flow,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-panels,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-panel {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .site-brand,
+html[data-theme="dark"] body[data-page="rocks"] .brand-wordmark,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-heading h1,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview-stats strong,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-center-title h2,
+html[data-theme="dark"] body[data-page="rocks"] h2,
+html[data-theme="dark"] body[data-page="rocks"] h3,
+html[data-theme="dark"] body[data-page="rocks"] strong,
+html[data-theme="dark"] body[data-page="rocks"] b,
+html[data-theme="dark"] body[data-page="rocks"] label {
+  color: var(--rocks-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] p,
+html[data-theme="dark"] body[data-page="rocks"] small,
+html[data-theme="dark"] body[data-page="rocks"] time,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-heading p,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview-stats span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-summary-bar > span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-section-intro p,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-daily-progress small,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-next-card small,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-history-preview small,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-reward-card small,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-history-table header,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-history-table span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-card small,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-quick-card small,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-card p,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-notice-card p {
+  color: var(--rocks-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-heading > span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-center-title > span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-progress-card header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-next-card header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-section-card header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-section-intro > div > span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-card header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-quick-card header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-card header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-notice-card > span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-equipped-card header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-shop-section header span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-claim-main > span {
+  color: var(--rocks-red) !important;
+}
+
+/* Hero and summary */
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview {
+  background: rgb(29 29 26 / .84) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+  box-shadow: 0 18px 48px rgb(0 0 0 / .22) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-meta span {
+  background: var(--rocks-surface-2) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+  color: var(--rocks-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-meta .live {
+  background: rgb(105 148 68 / .14) !important;
+  color: var(--rocks-green) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-summary-bar > div {
+  background: var(--rocks-surface-2) !important;
+  color: var(--rocks-text) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-summary-bar .dark {
+  background: #0f0f0d !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-summary-bar .yellow {
+  background: linear-gradient(135deg, #a94b42, #cf5b50) !important;
+  color: var(--rocks-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-summary-bar .striped {
+  background: repeating-linear-gradient(135deg, #24241f 0, #24241f 7px, #30302a 7px, #30302a 14px) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-summary-bar .outline {
+  background: transparent !important;
+  border-color: #69675e !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview-stats article {
+  background: rgb(29 29 26 / .88) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+/* Main card and tabs */
+html[data-theme="dark"] body[data-page="rocks"] .rocks-center-card {
+  background: rgb(29 29 26 / .96) !important;
+  border: 1px solid var(--rocks-border) !important;
+  box-shadow: 0 18px 48px rgb(0 0 0 / .26) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-center-head {
+  background: rgb(29 29 26 / .94) !important;
+  border-color: var(--rocks-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-tabs button,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-filter-buttons button {
+  background: var(--rocks-surface-2) !important;
+  color: var(--rocks-text-soft) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-tabs button.active,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-filter-buttons button.active {
+  background: #0e0e0c !important;
+  color: var(--rocks-text) !important;
+  border-color: #0e0e0c !important;
+}
+
+/* Overview tab */
+html[data-theme="dark"] body[data-page="rocks"] .rocks-claim-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-claim-card.is-empty {
+  background: var(--rocks-surface-2) !important;
+  color: var(--rocks-text) !important;
+  border: 1px solid var(--rocks-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-claim-main p,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-claim-card.is-empty p {
+  color: var(--rocks-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-pending-list article {
+  background: var(--rocks-surface-3) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-progress-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-next-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-section-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-equipped-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-shop-section {
+  background: var(--rocks-surface-2) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-daily-progress article,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-next-card > article,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-history-preview article {
+  background: var(--rocks-surface-3) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-daily-progress i,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-progress-card footer i,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-upload-progress,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-week-chart > div {
+  background: #3a3932 !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-progress-card footer {
+  border-color: var(--rocks-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-next-card > article > span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-reward-icon {
+  background: rgb(207 91 80 / .16) !important;
+  color: #e8796e !important;
+  border: 1px solid rgb(207 91 80 / .24) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-featured-rewards article {
+  background: var(--rocks-surface-3) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+  color: var(--rocks-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-featured-rewards article.yellow {
+  background: linear-gradient(135deg, #4e3f20, #77602c) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-featured-rewards article.dark {
+  background: #121210 !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-featured-rewards span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-featured-rewards p {
+  color: var(--rocks-muted) !important;
+}
+
+/* Earn and history tabs */
+html[data-theme="dark"] body[data-page="rocks"] .rocks-info-pill {
+  background: rgb(105 148 68 / .14) !important;
+  color: var(--rocks-green) !important;
+  border: 1px solid rgb(105 148 68 / .2) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-info-pill.yellow {
+  background: rgb(214 168 79 / .14) !important;
+  color: var(--rocks-gold) !important;
+  border-color: rgb(214 168 79 / .22) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-reward-card {
+  background: var(--rocks-surface-2) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-app-streak-note {
+  background: #11110f !important;
+  border: 1px solid var(--rocks-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-history-table {
+  background: var(--rocks-surface-2) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-history-table > header {
+  background: var(--rocks-surface-3) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-history-table > article {
+  background: transparent !important;
+  border-color: var(--rocks-border-soft) !important;
+}
+
+/* Collection tab */
+html[data-theme="dark"] body[data-page="rocks"] .rocks-equipped-grid article,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-shop-grid article {
+  background: var(--rocks-surface-3) !important;
+  border: 1px solid var(--rocks-border-soft) !important;
+  color: var(--rocks-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-item-visual,
+html[data-theme="dark"] body[data-page="rocks"] .shop-visual {
+  background: #181816 !important;
+  border: 1px solid var(--rocks-border) !important;
+  color: var(--rocks-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-equipped-grid button,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-shop-grid button,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-section-card header button,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-equipped-card header a,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-shop-section header a {
+  background: #0e0e0c !important;
+  color: var(--rocks-text) !important;
+  border: 1px solid var(--rocks-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] button:disabled {
+  opacity: .46 !important;
+}
+
+/* Fixed side columns */
+html[data-theme="dark"] body[data-page="rocks"] .rocks-fixed-column > article,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-quick-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-card,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-notice-card {
+  background: var(--rocks-surface) !important;
+  border: 1px solid var(--rocks-border) !important;
+  box-shadow: 0 16px 38px rgb(0 0 0 / .22) !important;
+  color: var(--rocks-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-card header button,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-quick-card button,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-card button {
+  background: var(--rocks-surface-3) !important;
+  color: var(--rocks-text) !important;
+  border-color: var(--rocks-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-balance-orbit {
+  background: conic-gradient(var(--rocks-red) 0 66%, #45443d 66% 100%) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-balance-orbit > div {
+  background: var(--rocks-surface) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-summary span,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-total,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-days span {
+  background: var(--rocks-surface-3) !important;
+  border-color: var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-pending {
+  background: rgb(105 148 68 / .14) !important;
+  border: 1px solid rgb(105 148 68 / .2) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-pending.is-collected {
+  background: var(--rocks-surface-3) !important;
+  border-color: var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-quick-card button {
+  border-bottom-color: var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-quick-card button svg,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-wallet-card svg {
+  stroke: var(--rocks-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-days span.done {
+  background: #121210 !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-streak-days span.today {
+  background: rgb(214 168 79 / .18) !important;
+  border-color: rgb(214 168 79 / .36) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-notice-card {
+  background: linear-gradient(135deg, #2a201d, #231b19) !important;
+  border-color: rgb(207 91 80 / .24) !important;
+}
+
+/* Forms, empty states and feedback */
+html[data-theme="dark"] body[data-page="rocks"] input,
+html[data-theme="dark"] body[data-page="rocks"] select,
+html[data-theme="dark"] body[data-page="rocks"] textarea {
+  background: var(--rocks-surface-3) !important;
+  color: var(--rocks-text) !important;
+  border-color: var(--rocks-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-empty {
+  background: var(--rocks-surface-3) !important;
+  color: var(--rocks-muted) !important;
+  border-color: var(--rocks-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-flash.success {
+  background: rgb(105 148 68 / .16) !important;
+  color: var(--rocks-green) !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-flash.danger {
+  background: rgb(207 91 80 / .16) !important;
+  color: #ef8b81 !important;
+}
