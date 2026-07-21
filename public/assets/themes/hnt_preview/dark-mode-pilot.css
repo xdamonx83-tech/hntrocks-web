@@ -1,20 +1,29 @@
 /*
  * HNT.ROCKS dark-mode pilot.
- * Scope: Feed and Einstellungen only. No sizing, spacing or radius changes.
+ * Page surfaces: Feed, Einstellungen and Profil.
+ * Shared pages receive only the common topbar/dropdown palette.
  */
-html[data-theme="dark"] body[data-hnt-theme-pilot] {
+html[data-theme="dark"] body:is(
+  [data-hnt-theme-pilot="feed"],
+  [data-hnt-theme-pilot="settings"],
+  [data-hnt-theme-pilot="profile"]
+) {
   background: var(--hnt-bg) !important;
   color: var(--hnt-text) !important;
 }
 
-html[data-theme="dark"] body[data-hnt-theme-pilot] .app-shell {
+html[data-theme="dark"] body:is(
+  [data-hnt-theme-pilot="feed"],
+  [data-hnt-theme-pilot="settings"],
+  [data-hnt-theme-pilot="profile"]
+) .app-shell {
   background:
     radial-gradient(circle at 100% 3%, rgba(75, 67, 57, .64) 0, rgba(35, 32, 28, .62) 24%, transparent 49%),
     radial-gradient(circle at 0 100%, rgba(76, 54, 48, .42) 0, rgba(24, 23, 21, .48) 28%, transparent 54%),
     linear-gradient(111deg, #11110f 0%, #191916 56%, #090908 100%) !important;
 }
 
-/* Shared topbar inside the pilot. */
+/* Shared topbar on every page using the common header partial. */
 html[data-theme="dark"] body[data-hnt-theme-pilot] :is(.brand, .brand:visited) {
   color: var(--hnt-text) !important;
 }
