@@ -1,0 +1,67 @@
+/*
+ * Settings dark-mode: direct fixes for the remaining bright tab cards and
+ * the top action bar. Loaded last on the settings pilot.
+ */
+
+/* Left settings tabs use data attributes in the generated demo markup. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settings-tab] {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settings-tab]:hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settings-tab].active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settings-tab] :is(strong, small, span, i, svg) {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settings-tab]:not(.active) small {
+  color: var(--hnt-text-soft) !important;
+}
+
+/* The first direct child is the circular icon shell in the settings tabs. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settings-tab] > :first-child {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settings-tab].active > :first-child {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* The generated top action bar is identified by its real save/discard buttons. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(header, div, section):has(> #settingsSaveTop) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-strong) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(header, div, section):has(> #settingsSaveTop) :is(h1, h2, h3, strong, span) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] #settingsDiscardTop {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] #settingsSaveTop {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
