@@ -1,0 +1,264 @@
+/*
+ * HNT.ROCKS Ready Lobbies – dark mode.
+ * Overview only. Colors and contrast only; layout and behavior stay unchanged.
+ */
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(84, 69, 48, .22), transparent 28%),
+    radial-gradient(circle at 3% 94%, rgba(92, 48, 42, .16), transparent 26%),
+    linear-gradient(135deg, #11110f, #181714 62%, #211d18) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .ready-heading h1,
+  .ready-heading-stats strong,
+  .lobby-radar-card h2,
+  .ready-list-card h2,
+  .ready-match-card h2,
+  .ready-hunters-card h2,
+  .ready-status-card h2,
+  .ready-lobby-dialog h2
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .ready-heading p,
+  .ready-heading-stats span,
+  .ready-filter-strip small,
+  .radar-axis,
+  .radar-legend,
+  .radar-legend small,
+  .ready-radar-empty,
+  .ready-list-empty,
+  .ready-side-empty,
+  .ready-status-card p,
+  .ready-lobby-list small,
+  .lobby-list-metric span,
+  .match-checks small,
+  .match-checks article > span
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .ready-heading > div:first-child > span,
+  .ready-filter-strip span,
+  .lobby-radar-card header span,
+  .ready-list-card header span,
+  .ready-match-card header span,
+  .ready-hunters-card header span,
+  .ready-status-card header span,
+  .ready-lobby-dialog > header span
+) {
+  color: var(--hnt-accent-gold) !important;
+}
+
+/* Filter strip. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-filter-strip > button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-filter-strip > button:hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-filter-strip > button.active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-filter-strip > button.active :is(span, small) {
+  color: var(--hnt-text-soft) !important;
+}
+
+/* Main cards and sidebar surfaces. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .lobby-radar-card,
+  .ready-list-card,
+  .ready-match-card,
+  .ready-status-card
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-hunters-card {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Radar canvas. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] .lobby-radar {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background:
+    linear-gradient(120deg, rgba(29, 29, 27, .98), rgba(36, 35, 32, .96)),
+    repeating-linear-gradient(0deg, transparent 0 49px, rgba(242, 232, 216, .045) 49px 50px),
+    repeating-linear-gradient(90deg, transparent 0 69px, rgba(242, 232, 216, .045) 69px 70px) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .lobby-radar::before {
+  border-color: rgba(242, 232, 216, .16) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .lobby-radar::after {
+  border-color: rgba(242, 232, 216, .10) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .radar-grid-lines {
+  background:
+    radial-gradient(circle at 22% 38%, rgba(196, 91, 80, .18), transparent 19%),
+    radial-gradient(circle at 69% 48%, rgba(216, 179, 79, .08), transparent 22%) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .radar-route {
+  background: rgba(242, 232, 216, .14) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-radar-empty :is(strong, p, span),
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-list-empty :is(strong, p, span),
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-side-empty :is(strong, p, span) {
+  color: var(--hnt-text-soft) !important;
+}
+
+/* Radar/list controls. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .radar-controls button,
+  .ready-list-card > header button,
+  .ready-match-card header button,
+  .ready-lobby-circle
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .radar-controls button,
+  .ready-list-card > header button,
+  .ready-match-card header button,
+  .ready-lobby-circle
+):hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+/* Selected lobby card inside radar. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] .radar-selection {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: rgba(32, 32, 30, .97) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .34) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .radar-selection header :is(strong, span),
+html[data-theme="dark"] body[data-page="ready-lobbies"] .radar-selection > div :is(span, small) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .radar-selection > div {
+  border-color: var(--hnt-divider) !important;
+}
+
+/* Lobby list rows and buttons. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-list > article {
+  border-color: var(--hnt-divider) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-list > article > button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-list > article:first-child > button {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Best-match ring and checks. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-match-ring {
+  background: conic-gradient(var(--hnt-accent-gold) calc(var(--match) * 1%), rgba(242, 232, 216, .12) 0) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-match-ring::before {
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .match-checks article {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .match-checks strong,
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-match-ring strong {
+  color: var(--hnt-text) !important;
+}
+
+/* Status card and feedback control. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-status-card header > strong {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-feedback-button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .ready-create-link,
+  .ready-status-create,
+  .radar-selection > button,
+  .ready-list-empty a
+) {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Ready Lobby dialogs, including future populated states. */
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-modal-backdrop {
+  background: rgba(0, 0, 0, .72) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-dialog,
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-dialog > header {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-dialog :is(
+  input,
+  select,
+  textarea,
+  [class*="field"],
+  [class*="option"],
+  [class*="member"]
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-dialog :is(input, textarea)::placeholder {
+  color: var(--hnt-text-faint) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-lobby-spinner {
+  border-color: rgba(242, 232, 216, .14) !important;
+  border-top-color: var(--hnt-brand-red) !important;
+}
