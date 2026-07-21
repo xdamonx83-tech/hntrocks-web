@@ -11,6 +11,12 @@
 <div class="profile-twitch-loading"><span></span><strong>Stream wird vorbereitet</strong><small>Der Player startet nicht automatisch.</small></div>
 </div>
 </div>
+<div class="profile-twitch-offline-fallback">
+<span class="profile-social-brand twitch">T</span>
+<strong>{{ $profileTwitchChannel }} ist offline.</strong>
+<p>Der Stream ist momentan nicht live. Besuche den verbundenen Twitch-Kanal für Videos und weitere Inhalte.</p>
+<a href="{{ $profileTwitchUrl }}" target="_blank" rel="noopener noreferrer">Kanal öffnen ↗</a>
+</div>
 <div class="profile-twitch-mobile-fallback">
 <strong>Twitch-Stream öffnen</strong>
 <p>Auf sehr schmalen Displays öffnet sich der Stream direkt bei Twitch.</p>
