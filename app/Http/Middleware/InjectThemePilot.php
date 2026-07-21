@@ -12,10 +12,6 @@ class InjectThemePilot
     {
         $response = $next($request);
 
-        if (! $request->routeIs('feed.index', 'account.settings.edit')) {
-            return $response;
-        }
-
         if ($request->ajax() || $request->expectsJson()) {
             return $response;
         }
@@ -30,9 +26,22 @@ class InjectThemePilot
             return $response;
         }
 
-        $pilot = $request->routeIs('feed.index') ? 'feed' : 'settings';
+        $hasSharedHeader = str_contains($html, 'data-hnt-shared-header');
+        $pilot = match (true) {
+            $request->routeIs('feed.index') || str_contains($html, 'data-page="feed"') => 'feed',
+            $request->routeIs('account.settings.edit') => 'settings',
+            $request->routeIs('profile.*') || str_contains($html, 'data-page="profile"') => 'profile',
+            $hasSharedHeader => 'shared',
+            default => null,
+        };
+
+        if ($pilot === null) {
+            return $response;
+        }
+
         $themeHead = view('themes.hnt_preview.partials.theme-head', [
-            'themePreference' => $request->user()?->theme_preference ?? 'light',
+            'themePreference' => $request->user()?->theme_preference
+                ?? $request->cookie('hnt_theme_preference', 'light'),
             'themePilot' => $pilot,
         ])->render();
 
