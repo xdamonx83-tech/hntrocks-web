@@ -1,0 +1,146 @@
+/* Cup detail dark-mode polish for newer overview and prize components. */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-section-head button,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-ranking header button {
+  border: .5px solid var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-live-summary article {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-live-summary article:first-child {
+  border-color: rgb(207 91 80 / .36) !important;
+  background: rgb(207 91 80 / .14) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-live-summary span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-live-summary small {
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-live-summary strong {
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-feed,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-ranking,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-updates,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-faq {
+  border-color: var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-feed > article,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-ranking > article,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-updates > article,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-faq details {
+  border-color: var(--cup-dark-border-soft) !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-feed strong,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-ranking strong,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-updates strong,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-faq summary {
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-feed span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-feed time,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-ranking small,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-updates p,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-faq p {
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-ranking > article > b {
+  background: #080807 !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-ranking > article:first-of-type > b {
+  background: var(--cup-dark-red) !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-faq summary svg {
+  color: var(--cup-dark-text-soft) !important;
+  stroke: currentColor !important;
+}
+
+/* Prize tab redesign uses newer class names than the legacy cup-prize-grid. */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary {
+  border-color: var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary.fame {
+  background:
+    radial-gradient(circle at 90% 0, rgb(207 91 80 / .12), transparent 42%),
+    var(--cup-dark-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary.random {
+  border-color: #080807 !important;
+  background: #0d0d0c !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary strong {
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary p {
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary span {
+  color: var(--cup-dark-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary.random span {
+  color: var(--cup-dark-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-medal {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: #ef8c82 !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary.rocks .cup-prize-medal,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary.badge .cup-prize-medal {
+  background: rgb(207 91 80 / .14) !important;
+  color: #ef8c82 !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-secondary.random .cup-prize-medal {
+  background: rgb(255 255 255 / .07) !important;
+  color: var(--cup-dark-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-feature-bottom span {
+  border: .5px solid rgb(255 255 255 / .12) !important;
+  background: rgb(20 20 18 / .28) !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-footer {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-empty {
+  border: .5px solid var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text) !important;
+}
