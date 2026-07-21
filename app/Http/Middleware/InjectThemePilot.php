@@ -27,10 +27,19 @@ class InjectThemePilot
         }
 
         $hasSharedHeader = str_contains($html, 'data-hnt-shared-header');
+        $isProfilePage = $request->routeIs('profile.*')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']profile(?:-edit)?["\']/i', $html) === 1;
+        $isSettingsPage = $request->routeIs('account.settings.edit')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']settings["\']/i', $html) === 1;
+        $isFeedPage = $request->routeIs('feed.index')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']feed["\']/i', $html) === 1;
+
+        // Profile pages contain embedded feed markup. Therefore profile detection
+        // must win before feed detection or the wrong theme pilot is attached.
         $pilot = match (true) {
-            $request->routeIs('feed.index') || str_contains($html, 'data-page="feed"') => 'feed',
-            $request->routeIs('account.settings.edit') => 'settings',
-            $request->routeIs('profile.*') || str_contains($html, 'data-page="profile"') || str_contains($html, 'data-page="profile-edit"') => 'profile',
+            $isProfilePage => 'profile',
+            $isSettingsPage => 'settings',
+            $isFeedPage => 'feed',
             $hasSharedHeader => 'shared',
             default => null,
         };
