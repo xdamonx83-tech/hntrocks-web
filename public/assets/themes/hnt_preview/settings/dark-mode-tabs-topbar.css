@@ -42,15 +42,47 @@ html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] button[data-settin
   color: var(--hnt-text-on-dark) !important;
 }
 
-/* The generated top action bar is identified by its real save/discard buttons. */
-html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(header, div, section):has(> #settingsSaveTop) {
+/*
+ * The save buttons are nested in an action group, not direct children of the
+ * visible bar. Match the real wrapper by containment and common settings
+ * header/bar class names. This file is loaded last, so no light demo rule can
+ * restore the background afterwards.
+ */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  header,
+  [class*="settings"][class*="head"],
+  [class*="settings"][class*="bar"],
+  [class*="settings"][class*="top"]
+):has(#settingsSaveTop) {
   border-color: var(--hnt-border-soft) !important;
-  background: var(--hnt-surface-strong) !important;
+  background-color: var(--hnt-surface-strong) !important;
+  background-image: none !important;
   color: var(--hnt-text) !important;
   box-shadow: none !important;
 }
 
-html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(header, div, section):has(> #settingsSaveTop) :is(h1, h2, h3, strong, span) {
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  header,
+  [class*="settings"][class*="head"],
+  [class*="settings"][class*="bar"],
+  [class*="settings"][class*="top"]
+):has(#settingsSaveTop)::before,
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  header,
+  [class*="settings"][class*="head"],
+  [class*="settings"][class*="bar"],
+  [class*="settings"][class*="top"]
+):has(#settingsSaveTop)::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  header,
+  [class*="settings"][class*="head"],
+  [class*="settings"][class*="bar"],
+  [class*="settings"][class*="top"]
+):has(#settingsSaveTop) :is(h1, h2, h3, strong, span) {
   color: var(--hnt-text) !important;
 }
 
