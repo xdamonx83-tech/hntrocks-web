@@ -37,6 +37,8 @@ class InjectThemePilot
             || preg_match('/<body\b[^>]*\bdata-page=["\']ready-lobbies["\']/i', $html) === 1;
         $isMomentsPage = $request->routeIs('moments.index', 'moments.show')
             || preg_match('/<body\b[^>]*\bdata-page=["\']moments["\']/i', $html) === 1;
+        $isCupTeamManagePage = $request->routeIs('cups.teams.index')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']team-manage["\']/i', $html) === 1;
         $isCupDetailPage = $request->routeIs('cups.show', 'cups.show.section')
             || preg_match('/<body\b[^>]*\bdata-page=["\']cup-detail["\']/i', $html) === 1;
         $isCupsOverviewPage = $request->routeIs('cups.index')
@@ -52,6 +54,7 @@ class InjectThemePilot
             $isReadyLobbyCreatePage => 'ready-lobby-create',
             $isReadyLobbiesPage => 'ready-lobbies',
             $isMomentsPage => 'moments',
+            $isCupTeamManagePage => 'cup-team-manage',
             $isCupDetailPage => 'cup-detail',
             $isCupsOverviewPage => 'cups',
             $isFeedPage => 'feed',
