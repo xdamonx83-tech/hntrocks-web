@@ -1,0 +1,564 @@
+/*
+ * HNT.ROCKS profile dark mode.
+ * Palette only: no geometry, dimensions, spacing or behavior changes.
+ */
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] {
+  color: var(--hnt-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Main profile surfaces
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-page-card,
+  .profile-post-feed,
+  .profile-summary-card,
+  .profile-info-card,
+  .profile-level-card,
+  .profile-browser-card,
+  .profile-quest-card,
+  .profile-detail-card,
+  .profile-friend-card,
+  .profile-moment-card,
+  .profile-video-moment,
+  .profile-badge-card,
+  .profile-tab-empty,
+  .profile-filter-empty,
+  .profile-empty-state,
+  .social-feed-card
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-page-card,
+  .profile-post-feed,
+  .profile-summary-card
+) {
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-info-card,
+  .profile-level-card,
+  .profile-browser-card,
+  .profile-quest-card,
+  .profile-detail-card,
+  .profile-friend-card,
+  .profile-moment-card,
+  .profile-video-moment,
+  .profile-badge-card
+) {
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-quest-card {
+  background:
+    radial-gradient(circle at 100% 0, rgba(216, 179, 79, .10), transparent 34%),
+    var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-feed-head {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-strong) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .12) !important;
+}
+
+/* Keep profile and moment imagery untouched. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-photo-shell,
+  .profile-page-photo,
+  .profile-video-thumb,
+  .profile-video-cover,
+  .profile-moment-visual
+) {
+  filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Typography
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-page-heading h1,
+  .profile-page-heading h2,
+  .profile-page-card h1,
+  .profile-page-card h2,
+  .profile-page-card h3,
+  .profile-page-card strong,
+  .profile-feed-head h2,
+  .profile-detail-card h3,
+  .profile-video-copy h3,
+  .profile-quest-head h2
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-summary-top p,
+  .profile-bio,
+  .profile-bio p,
+  .profile-level-card > p,
+  .profile-detail-card p,
+  .profile-about-card p,
+  .profile-friend-card span,
+  .profile-friend-card small,
+  .profile-moment-card footer,
+  .profile-video-copy > p,
+  .profile-video-stats span,
+  .profile-badge-card p,
+  .profile-badge-card small,
+  .profile-quest-card > p,
+  .profile-quest-card footer span,
+  .profile-browser-head p,
+  .profile-tab-empty p,
+  .profile-filter-empty,
+  .profile-stat-labels,
+  .profile-detail-list dt
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-page-heading > div:first-child > span,
+  .profile-eyebrow,
+  .profile-feed-head .eyebrow,
+  .profile-detail-card header span,
+  .profile-panel-toolbar > div:first-child > span,
+  .profile-quest-head > div > span,
+  .profile-badge-card > div:nth-child(2) > span
+) {
+  color: var(--hnt-accent-gold) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Profile controls, tabs and icon shells
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-photo-shell > a,
+  .profile-info-head > a,
+  .profile-summary-actions > a,
+  .profile-summary-actions > button,
+  .profile-quest-arrow,
+  .profile-quest-footer button,
+  .profile-detail-card header > a,
+  .profile-detail-card header > button,
+  .friend-actions > a,
+  .friend-actions > button,
+  .profile-browser-arrow,
+  .profile-browser-actions button,
+  .profile-browser-pagination button,
+  .post-more
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-photo-shell > a:hover,
+  .profile-info-head > a:hover,
+  .profile-summary-actions > a:hover,
+  .profile-summary-actions > button:hover,
+  .profile-quest-arrow:hover,
+  .profile-quest-footer button:hover,
+  .profile-detail-card header > a:hover,
+  .profile-detail-card header > button:hover,
+  .friend-actions > a:hover,
+  .friend-actions > button:hover,
+  .profile-browser-arrow:hover,
+  .profile-browser-actions button:hover,
+  .profile-browser-pagination button:hover,
+  .post-more:hover
+) {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tabs > button {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tabs > button:hover {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tabs > button.active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tabs > button.compose-button {
+  border-color: rgba(216, 179, 79, .20) !important;
+  background: var(--hnt-accent-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-twitch-tab.is-live {
+  border-color: rgba(165, 139, 207, .30) !important;
+  background: rgba(165, 139, 207, .16) !important;
+  color: #cbb8e8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Summary, level and stat blocks
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-bio-points span {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-bio-points b {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-level-ring {
+  background: conic-gradient(var(--hnt-accent-gold) 0 var(--profile-level-progress, 259deg), var(--hnt-progress-track) var(--profile-level-progress, 259deg) 360deg) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-level-ring::before {
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-level-ring span {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-level-stats > span {
+  background: var(--hnt-surface-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-level-stats small {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-stat-pipeline .hatch {
+  background:
+    repeating-linear-gradient(135deg, transparent 0 4px, rgba(242, 232, 216, .18) 4px 5px),
+    var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-stat-pipeline .grey {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tags :is(.yellow, .blue, .purple, .green),
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-detail-tags span {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tags .yellow {
+  background: var(--hnt-accent-soft) !important;
+  color: #e4c466 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tags .blue {
+  background: rgba(86, 143, 151, .17) !important;
+  color: #91c4ca !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tags .purple {
+  background: rgba(165, 139, 207, .16) !important;
+  color: #c4afe3 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-tags .green {
+  background: rgba(143, 189, 66, .15) !important;
+  color: #b5d67c !important;
+}
+
+/* --------------------------------------------------------------------------
+   Quests and progress
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-quest-icon {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-accent-gold) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .quest-daily .profile-quest-icon,
+  .quest-moments .profile-quest-icon,
+  .quest-social .profile-quest-icon
+) {
+  background: var(--hnt-surface-input) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-quest-progress,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .badge-progress::before,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-match-bar {
+  background: var(--hnt-progress-track) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-quest-footer button {
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Info, friends, moments, badges and Twitch
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-detail-list div,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-video-stats {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-favorite-grid span {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-favorite-grid small {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-panel-filters button {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-panel-filters button.active {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .friend-avatar i {
+  border-color: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .friend-state.offline {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .friend-state.ready {
+  background: var(--hnt-accent-soft) !important;
+  color: #e2bf62 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .friend-state.online {
+  background: rgba(143, 189, 66, .16) !important;
+  color: #b4d47d !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-video-copy h3 a {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-badge-card.featured {
+  background: linear-gradient(135deg, rgba(216, 179, 79, .16), var(--hnt-surface-solid)) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-social-bar,
+  .profile-social-link,
+  .profile-twitch-summary-button,
+  .profile-twitch-player-shell,
+  .profile-twitch-status-card,
+  .profile-twitch-panel,
+  .profile-twitch-empty
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Profile feed cards use the same dark palette as the regular feed
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .social-post,
+  .post-card,
+  .profile-real-post,
+  .profile-shared-post,
+  .profile-real-poll,
+  .profile-real-poll > a,
+  .lfg-strip,
+  .rocks-progress,
+  .poll button
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-author strong,
+  .post-body > p,
+  .profile-shared-post strong,
+  .profile-real-poll > strong,
+  .profile-real-poll > a,
+  .lfg-strip b,
+  .rocks-progress strong
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-author span,
+  .post-body small,
+  .profile-shared-post small,
+  .profile-real-poll > small,
+  .lfg-strip small,
+  .rocks-progress small,
+  .post-actions button,
+  .post-actions a
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .post-actions {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-actions button:hover,
+  .post-actions a:hover
+) {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-real-poll > a i {
+  background: rgba(216, 179, 79, .18) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Composer and comments opened from the profile
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-composer-modal,
+  .post-composer-head,
+  .post-composer-body,
+  .post-composer-footer,
+  .comments-modal,
+  .comments-modal-head,
+  .comments-modal-content,
+  .comments-composer,
+  .comments-post-context
+) {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .composer-audience,
+  .post-composer-close,
+  .composer-types button,
+  .composer-textarea-shell,
+  .composer-type-panel,
+  .composer-tools,
+  .composer-tools button,
+  .composer-draft,
+  .comments-close,
+  .comments-toolbar button,
+  .comments-input-shell
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .composer-types button.active {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-composer-modal textarea,
+  .comments-input-shell textarea
+) {
+  background: transparent !important;
+  color: var(--hnt-text) !important;
+  caret-color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-composer-modal textarea,
+  .comments-input-shell textarea
+)::placeholder {
+  color: var(--hnt-text-faint) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .composer-identity span,
+  .composer-status span,
+  .comments-post-copy span,
+  .comments-post-copy p,
+  .comments-modal-head small,
+  .comment-meta
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] #commentsModal #commentsList,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] #commentsModal #commentsList .real-comment-thread,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] #commentsModal #commentsList .real-comment-replies,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] #commentsModal #commentsList article.comment-item.real-comment-item {
+  border-color: transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] #commentsModal #commentsList article.comment-item.real-comment-item > .comment-bubble {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .real-comment-replies::before,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .real-comment-replies .comment-item::before {
+  background: rgba(242, 232, 216, .42) !important;
+}
+
+/* Context menus and media overlays opened from profile posts. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-menu,
+  .post-more-menu,
+  .post-context-menu,
+  .profile-post-menu,
+  .emoji-picker,
+  .media-viewer-panel
+) {
+  border-color: var(--hnt-border) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: 0 18px 48px var(--hnt-shadow) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-menu button,
+  .post-more-menu button,
+  .post-context-menu button,
+  .profile-post-menu button
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .post-menu button:hover,
+  .post-more-menu button:hover,
+  .post-context-menu button:hover,
+  .profile-post-menu button:hover
+) {
+  background: var(--hnt-surface-hover) !important;
+}
