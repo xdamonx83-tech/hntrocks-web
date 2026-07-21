@@ -1,0 +1,102 @@
+/*
+ * Exact last-line profile dark-mode corrections.
+ * This file is inlined by InjectThemePilot after every page stylesheet.
+ */
+
+/* Left profile level: Rocks and Badges. */
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+.profile-page-left section.profile-level-card div.profile-level-stats > span {
+  border: 1px solid rgba(242, 232, 216, .10) !important;
+  background: #292926 !important;
+  background-color: #292926 !important;
+  background-image: none !important;
+  color: #f2e8d8 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+.profile-page-left section.profile-level-card div.profile-level-stats > span > strong {
+  color: #f2e8d8 !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+.profile-page-left section.profile-level-card div.profile-level-stats > span > small {
+  color: #aaa398 !important;
+}
+
+/* Info tab: Community & Fortschritt. */
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabInfo article.profile-favorites-card div.profile-favorite-grid > span {
+  border: 1px solid rgba(242, 232, 216, .10) !important;
+  background: #292926 !important;
+  background-color: #292926 !important;
+  background-image: none !important;
+  color: #f2e8d8 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabInfo article.profile-favorites-card div.profile-favorite-grid > span > strong {
+  color: #f2e8d8 !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabInfo article.profile-favorites-card div.profile-favorite-grid > span > small {
+  color: #aaa398 !important;
+}
+
+/* Moments: exact copy/footer element from feed-moments.blade.php. */
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabMoments article.profile-video-moment > div.profile-video-copy {
+  border-color: rgba(242, 232, 216, .10) !important;
+  background: #252522 !important;
+  background-color: #252522 !important;
+  background-image: none !important;
+  color: #f2e8d8 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabMoments article.profile-video-moment > div.profile-video-copy h3,
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabMoments article.profile-video-moment > div.profile-video-copy h3 > a {
+  color: #f2e8d8 !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabMoments article.profile-video-moment > div.profile-video-copy > p,
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabMoments article.profile-video-moment > div.profile-video-copy .profile-video-stats,
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabMoments article.profile-video-moment > div.profile-video-copy .profile-video-stats > span {
+  color: #aaa398 !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+section#profileTabMoments .profile-panel-filters > button:not(.active) {
+  border: 1px solid rgba(242, 232, 216, .10) !important;
+  background: #292926 !important;
+  color: #aaa398 !important;
+  box-shadow: none !important;
+}
+
+/* Remaining white profile utility circles visible in the screenshots. */
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+.profile-photo-shell > a,
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+.profile-photo-shell > button,
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+.profile-info-card .profile-info-head > a,
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+.profile-detail-card > header > a {
+  border-color: rgba(242, 232, 216, .10) !important;
+  background: #292926 !important;
+  color: #f2e8d8 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] main.profile-page-shell
+:is(.profile-photo-shell > a, .profile-photo-shell > button, .profile-info-card .profile-info-head > a, .profile-detail-card > header > a) svg {
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
