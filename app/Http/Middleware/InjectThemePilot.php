@@ -43,6 +43,7 @@ class InjectThemePilot
             || preg_match('/<body\b[^>]*\bdata-page=["\']cup-detail["\']/i', $html) === 1;
         $isCupsOverviewPage = $request->routeIs('cups.index')
             || preg_match('/<body\b[^>]*\bdata-page=["\']cups["\']/i', $html) === 1;
+        $isMapsOverviewPage = $request->routeIs('maps.index');
         $isRocksPage = $request->routeIs('crowns.index', 'crowns.history', 'rocks.index', 'rocks.history')
             || preg_match('/<body\b[^>]*\bdata-page=["\']rocks["\']/i', $html) === 1;
         $isGuideDetailPage = $request->routeIs('guides.show', 'guides.preview')
@@ -63,6 +64,7 @@ class InjectThemePilot
             $isCupTeamManagePage => 'cup-team-manage',
             $isCupDetailPage => 'cup-detail',
             $isCupsOverviewPage => 'cups',
+            $isMapsOverviewPage => 'maps',
             $isRocksPage => 'rocks',
             $isGuideDetailPage => 'guide-detail',
             $isGuidesOverviewPage => 'guides-overview',
