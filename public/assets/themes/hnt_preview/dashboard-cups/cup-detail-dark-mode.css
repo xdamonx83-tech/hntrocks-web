@@ -1,0 +1,430 @@
+/* Cup detail dark mode. Loaded after every legacy cup-detail stylesheet. */
+html[data-theme="dark"] body[data-page="cup-detail"] {
+  --cup-dark-bg: #141412;
+  --cup-dark-bg-soft: #181816;
+  --cup-dark-surface: #1d1d1a;
+  --cup-dark-surface-2: #23231f;
+  --cup-dark-surface-3: #292923;
+  --cup-dark-border: #3a3932;
+  --cup-dark-border-soft: #302f2a;
+  --cup-dark-text: #f2e8d8;
+  --cup-dark-text-soft: #c5bdae;
+  --cup-dark-muted: #969087;
+  --cup-dark-red: #cf5b50;
+  --cup-dark-gold: #d6a84f;
+  background: var(--cup-dark-bg) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .app-shell.cup-detail-page-shell {
+  background:
+    radial-gradient(circle at 100% 0, rgb(111 72 52 / .18), transparent 32%),
+    radial-gradient(circle at 0 100%, rgb(112 44 39 / .12), transparent 34%),
+    linear-gradient(135deg, #11110f 0%, #171714 52%, #211d18 100%) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-detail-stage,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-detail-scroll,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-detail-overview,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-center-flow,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-center-top-cards,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-section-panels {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .brand-logo,
+html[data-theme="dark"] body[data-page="cup-detail"] .brand-wordmark,
+html[data-theme="dark"] body[data-page="cup-detail"] .site-brand {
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-detail-heading h1,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-stats strong,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-white-card h2,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-participation-card h2,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-section-title h2,
+html[data-theme="dark"] body[data-page="cup-detail"] h3,
+html[data-theme="dark"] body[data-page="cup-detail"] h4,
+html[data-theme="dark"] body[data-page="cup-detail"] strong,
+html[data-theme="dark"] body[data-page="cup-detail"] b,
+html[data-theme="dark"] body[data-page="cup-detail"] dd {
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-detail-heading > span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-white-card header span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-section-title > span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-participation-card header span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-description-copy > span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-submit-copy > span {
+  color: var(--cup-dark-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-hero-description,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-progress-summary span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-stats span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-description-copy p,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-rule-grid p,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-grid p,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-note,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-note,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-organizer span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-submission-list small,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-days,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-hours,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-events span,
+html[data-theme="dark"] body[data-page="cup-detail"] dt,
+html[data-theme="dark"] body[data-page="cup-detail"] small,
+html[data-theme="dark"] body[data-page="cup-detail"] p {
+  color: var(--cup-dark-muted) !important;
+}
+
+/* Hero chips and progress bars */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-hero-meta {
+  color: var(--cup-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-hero-meta > span {
+  border: .5px solid var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-hero-meta .live {
+  border-color: rgb(126 168 71 / .34) !important;
+  background: rgb(126 168 71 / .16) !important;
+  color: #bfe28d !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-bar > span {
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-bar .dark {
+  background: #080807 !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-bar .yellow {
+  background: rgb(207 91 80 / .9) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-bar .striped {
+  background: repeating-linear-gradient(135deg, #35342f 0 4px, #22221f 4px 8px) !important;
+  color: var(--cup-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-bar .outline {
+  border-color: #777168 !important;
+  background: transparent !important;
+  color: var(--cup-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-overview-stats span {
+  color: var(--cup-dark-muted) !important;
+}
+
+/* Main cards */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-white-card,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-participation-card,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-stack,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-section-card {
+  border: .5px solid var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface) !important;
+  color: var(--cup-dark-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-cover-card {
+  border: .5px solid var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-cover-card::after {
+  background: linear-gradient(transparent 25%, rgb(12 12 10 / .9)) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-cover-copy button,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-white-card header button,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-organizer button,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-scoring-actions button {
+  border: .5px solid var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-scoring-actions button:nth-child(2) {
+  border-color: #080807 !important;
+  background: #080807 !important;
+  color: var(--cup-dark-text) !important;
+}
+
+/* Progress and scoring */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-progress-summary em {
+  background: rgb(207 91 80 / .14) !important;
+  color: #ef8c82 !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-milestone-bars i {
+  background: #080807 !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-milestone-bars .active i {
+  background: var(--cup-dark-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-milestone-bars small {
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-score-ring {
+  background: conic-gradient(var(--cup-dark-red) 0 260deg, #36352f 260deg 360deg) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-score-ring::before {
+  background: var(--cup-dark-surface) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-score-ring span,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-scoring-actions span {
+  color: var(--cup-dark-muted) !important;
+}
+
+/* Participation card */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-participation-top {
+  border-bottom: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-participation-segments span {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-my-team {
+  border: .5px solid #080807 !important;
+  background: #0d0d0c !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-members article {
+  border-color: rgb(255 255 255 / .08) !important;
+  background: rgb(255 255 255 / .035) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-button {
+  background: var(--cup-dark-red) !important;
+  color: #fff !important;
+}
+
+/* Left data card */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-stack details {
+  border-bottom-color: var(--cup-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-stack summary {
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-stack dt {
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-stack dd {
+  color: var(--cup-dark-text) !important;
+}
+
+/* Sticky section header and tabs */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-center-flow .cup-section-head,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-section-head {
+  border-color: var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-2) !important;
+  box-shadow: 0 10px 24px rgb(0 0 0 / .18) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-section-tabs button {
+  border: .5px solid transparent !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-section-tabs button.active {
+  border-color: #080807 !important;
+  background: #080807 !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-tab-panel {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-bg-soft) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+/* Overview tab */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-description-panel {
+  border-color: var(--cup-dark-border) !important;
+  background:
+    radial-gradient(circle at 100% 0, rgb(207 91 80 / .12), transparent 38%),
+    var(--cup-dark-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-description-facts > span {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-description-facts small {
+  color: var(--cup-dark-muted) !important;
+}
+
+/* Schedule */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-schedule-block {
+  border-color: var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-schedule-block .cup-calendar-head {
+  border-bottom-color: var(--cup-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-calendar-head button {
+  border: .5px solid var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-days span.active {
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-events {
+  border-left-color: rgb(207 91 80 / .7) !important;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(20% - 1px), rgb(207 91 80 / .24) calc(20% - 1px) 20%) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-events article {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface-3) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-events .registration {
+  background: #080807 !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-events .deadline {
+  background: rgb(207 91 80 / .14) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-timeline-events img,
+html[data-theme="dark"] body[data-page="cup-detail"] .team-avatars img {
+  border-color: var(--cup-dark-surface-2) !important;
+}
+
+/* Rules, leaderboard and prizes */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-rule-grid article,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-leaderboard article,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-grid article,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-submission-list article {
+  border: .5px solid var(--cup-dark-border-soft) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-rule-grid article > span {
+  background: rgb(207 91 80 / .16) !important;
+  color: #ef8c82 !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-leaderboard article:first-of-type {
+  border-color: rgb(207 91 80 / .42) !important;
+  background: rgb(207 91 80 / .22) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-leaderboard article > b {
+  background: #080807 !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-grid article.first {
+  border-color: rgb(214 168 79 / .42) !important;
+  background: rgb(214 168 79 / .16) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-prize-grid article.random,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-submit-copy {
+  background: #0d0d0c !important;
+  color: var(--cup-dark-text) !important;
+}
+
+/* Submission tab */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-upload-zone {
+  border-color: rgb(207 91 80 / .5) !important;
+  background: var(--cup-dark-surface-2) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-upload-zone > span {
+  background: rgb(207 91 80 / .16) !important;
+  color: #ef8c82 !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-submit-copy button {
+  background: var(--cup-dark-red) !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-submission-list em {
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-text-soft) !important;
+}
+
+/* Team creation modal */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal__backdrop {
+  background: rgb(0 0 0 / .72) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal__panel,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal__head,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal form,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal__field,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal__footer {
+  border-color: var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal input,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal textarea,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal select {
+  border-color: var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal input::placeholder,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal textarea::placeholder {
+  color: var(--cup-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-team-modal__close {
+  border-color: var(--cup-dark-border) !important;
+  background: var(--cup-dark-surface-3) !important;
+  color: var(--cup-dark-text) !important;
+}
+
+/* Keep scrollbars subtle where the detail layout intentionally uses internal scrolling. */
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-stack,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-tab-panel {
+  scrollbar-color: rgb(207 91 80 / .38) transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-data-stack::-webkit-scrollbar-thumb,
+html[data-theme="dark"] body[data-page="cup-detail"] .cup-tab-panel::-webkit-scrollbar-thumb {
+  background: rgb(207 91 80 / .38) !important;
+}
