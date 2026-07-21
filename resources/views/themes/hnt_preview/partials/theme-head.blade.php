@@ -82,6 +82,11 @@
     href="{{ asset('assets/themes/hnt_preview/dashboard-cups/cup-detail-dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/cup-detail-dark-mode.css')) ?: time() }}"
     rel="stylesheet"
 >
+<link
+    data-hnt-cup-detail-dark-mode-polish
+    href="{{ asset('assets/themes/hnt_preview/dashboard-cups/cup-detail-dark-mode-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-cups/cup-detail-dark-mode-polish.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @elseif($hntThemePilot === 'cups')
 <link
     data-hnt-cups-dark-mode
