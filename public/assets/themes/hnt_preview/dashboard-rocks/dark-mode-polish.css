@@ -1,0 +1,18 @@
+/* Rocks dark-mode polish: keep the hero open like the original layout. */
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview-stats article {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview-stats article::before,
+html[data-theme="dark"] body[data-page="rocks"] .rocks-overview-stats article::after {
+  content: none !important;
+}
