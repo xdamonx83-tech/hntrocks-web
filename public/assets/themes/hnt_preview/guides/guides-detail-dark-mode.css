@@ -1,0 +1,352 @@
+/* Guide detail dark mode. Loaded after guides-detail-live.css. */
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live {
+  --guide-dark-bg: #141412;
+  --guide-dark-bg-soft: #181816;
+  --guide-dark-surface: #1d1d1a;
+  --guide-dark-surface-2: #23231f;
+  --guide-dark-surface-3: #292923;
+  --guide-dark-border: #3a3932;
+  --guide-dark-border-soft: #302f2a;
+  --guide-dark-text: #f2e8d8;
+  --guide-dark-text-soft: #c7bfb2;
+  --guide-dark-muted: #969087;
+  --guide-dark-red: #cf5b50;
+  --guide-dark-gold: #d6a84f;
+  --guide-dark-green: #9bc96b;
+  background: var(--guide-dark-bg) !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .app-shell.guides-page-shell {
+  background:
+    radial-gradient(circle at 100% 0, rgb(111 72 52 / .18), transparent 32%),
+    radial-gradient(circle at 0 100%, rgb(112 44 39 / .13), transparent 34%),
+    linear-gradient(135deg, #11110f 0%, #171714 52%, #211d18 100%) !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guides-stage,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guides-scroll,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-hero,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-copy,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-layout {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .site-brand,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .brand-wordmark,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-copy h1,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-copy strong,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-hero > aside strong,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-toc h2,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-sidebar h2,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article h2,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article h3,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article h4,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article strong,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-info-list strong,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-related strong,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-shell h2,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment strong {
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-copy > p,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-author span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-hero > aside span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-version-card p,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-version-placeholder,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article p,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article li,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-figure figcaption,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-info-list span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-author-reputation p,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-author-reputation small,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-related span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-related > p,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment p,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment header span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-empty {
+  color: var(--guide-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-copy h1,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-copy > p,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-author {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-author {
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-author > a,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-edit-link,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-related a,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-author-reputation > a {
+  color: var(--guide-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-chip {
+  background: var(--guide-dark-surface-2) !important;
+  border: 1px solid var(--guide-dark-border-soft) !important;
+  color: var(--guide-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-chip.success {
+  background: rgb(105 148 68 / .16) !important;
+  border-color: rgb(105 148 68 / .25) !important;
+  color: var(--guide-dark-green) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-cover > span {
+  background: rgb(20 20 18 / .84) !important;
+  border: 1px solid rgb(242 232 216 / .16) !important;
+  color: var(--guide-dark-text) !important;
+}
+
+/* Hero statistics remain individual cards; the hero itself stays open. */
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-hero > aside article {
+  background: rgb(29 29 26 / .96) !important;
+  border: 1px solid var(--guide-dark-border) !important;
+  box-shadow: 0 14px 34px rgb(0 0 0 / .18) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-hero > aside .guide-action-placeholder {
+  background: var(--guide-dark-surface-2) !important;
+}
+
+/* Action bar */
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions {
+  background: rgb(29 29 26 / .97) !important;
+  border: 1px solid var(--guide-dark-border) !important;
+  box-shadow: 0 16px 42px rgb(0 0 0 / .22) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions button,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions .guide-action-login,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions summary {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border-soft) !important;
+  color: var(--guide-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions button:hover,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions button.active,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions .guide-action-login:hover {
+  background: #0f0f0d !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-actions button.active {
+  border-color: rgb(207 91 80 / .45) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-report-menu form {
+  background: var(--guide-dark-surface) !important;
+  border: 1px solid var(--guide-dark-border) !important;
+  box-shadow: 0 18px 46px rgb(0 0 0 / .38) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-report-menu select,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-report-menu textarea {
+  background: var(--guide-dark-surface-3) !important;
+  border-color: var(--guide-dark-border) !important;
+  color: var(--guide-dark-text) !important;
+}
+
+/* TOC, article and right rail */
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-toc section,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-sidebar section {
+  background: rgb(29 29 26 / .97) !important;
+  border: 1px solid var(--guide-dark-border) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-toc nav a {
+  background: transparent !important;
+  color: var(--guide-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-toc nav a:hover {
+  background: var(--guide-dark-surface-2) !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-toc nav a.active {
+  background: #0e0e0c !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-version-card {
+  background: var(--guide-dark-surface) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-version-card > strong {
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-version-placeholder {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article-section {
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article-section > span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-toc section > span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-detail-sidebar section > span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-related header span,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-shell > header span {
+  color: var(--guide-dark-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-note {
+  background: var(--guide-dark-surface-2) !important;
+  border: 1px solid var(--guide-dark-border-soft) !important;
+  color: var(--guide-dark-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-note > i {
+  background: var(--guide-dark-surface-3) !important;
+  color: var(--guide-dark-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-note.warning {
+  background: rgb(207 91 80 / .12) !important;
+  border-color: rgb(207 91 80 / .28) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-steps li,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-check-list li {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-step-label {
+  color: var(--guide-dark-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-figure {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article-end {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article-end button,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-article-end a {
+  background: #0e0e0c !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-info-list > div {
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-info-list .green {
+  color: var(--guide-dark-green) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-author-reputation > div {
+  background: transparent !important;
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-author-reputation > div strong {
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-related a {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-related-cover-placeholder {
+  background: var(--guide-dark-surface-3) !important;
+  color: var(--guide-dark-gold) !important;
+}
+
+/* Comments */
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-dialog::backdrop {
+  background: rgb(0 0 0 / .68) !important;
+  backdrop-filter: blur(6px);
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-shell {
+  background: var(--guide-dark-surface) !important;
+  border: 1px solid var(--guide-dark-border) !important;
+  box-shadow: 0 26px 80px rgb(0 0 0 / .5) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-shell > header,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment-composer,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-login {
+  background: var(--guide-dark-surface) !important;
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-shell > header button {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border-soft) !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment > div {
+  background: var(--guide-dark-surface-2) !important;
+  border: 1px solid var(--guide-dark-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment header em {
+  background: rgb(207 91 80 / .15) !important;
+  color: #e8796e !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment footer button,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment footer summary {
+  color: var(--guide-dark-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment details form {
+  background: var(--guide-dark-surface-3) !important;
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment textarea,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment-composer textarea {
+  background: var(--guide-dark-surface-3) !important;
+  border-color: var(--guide-dark-border) !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment-composer > div {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comment-composer button,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guides-pagination button,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-comments-login a {
+  background: #0e0e0c !important;
+  color: var(--guide-dark-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live input::placeholder,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live textarea::placeholder {
+  color: #777168 !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guide-preview-banner,
+html[data-theme="dark"] body[data-page="guides"].guides-detail-live .guides-alert {
+  background: var(--guide-dark-surface-2) !important;
+  border-color: var(--guide-dark-border) !important;
+  color: var(--guide-dark-text-soft) !important;
+}
