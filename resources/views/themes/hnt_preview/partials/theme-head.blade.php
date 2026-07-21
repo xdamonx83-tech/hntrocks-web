@@ -71,6 +71,11 @@
     href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode.css')) ?: time() }}"
     rel="stylesheet"
 >
+<link
+    data-hnt-profile-dark-mode-polish
+    href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-polish.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode-polish.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @endif
 <script
     data-hnt-theme-runtime
