@@ -60,6 +60,11 @@
     href="{{ asset('assets/themes/hnt_preview/settings/dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/settings/dark-mode.css')) ?: time() }}"
     rel="stylesheet"
 >
+<link
+    data-hnt-settings-dark-tabs-topbar
+    href="{{ asset('assets/themes/hnt_preview/settings/dark-mode-tabs-topbar.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/settings/dark-mode-tabs-topbar.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @endif
 <script
     data-hnt-theme-runtime
