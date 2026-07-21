@@ -1,0 +1,54 @@
+/*
+ * Ready Lobbies dark-mode polish.
+ * Loaded after the base ready-lobbies dark-mode file so the shared .app-shell
+ * background from common.css cannot restore the light dashboard gradient.
+ */
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] {
+  background: #121210 !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-page-shell,
+html[data-theme="dark"] body[data-page="ready-lobbies"] main.app-shell.ready-page-shell {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(84, 69, 48, .22), transparent 28%),
+    radial-gradient(circle at 3% 94%, rgba(92, 48, 42, .16), transparent 26%),
+    linear-gradient(135deg, #11110f, #181714 62%, #211d18) !important;
+  background-color: #121210 !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] :is(
+  .ready-stage,
+  .ready-scroll,
+  [data-ready-lobby-root],
+  .ready-heading,
+  .ready-workspace,
+  .ready-main-column,
+  .ready-right-sidebar
+) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .brand,
+html[data-theme="dark"] body[data-page="ready-lobbies"] .brand:visited {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .brand-mark {
+  color: var(--hnt-text) !important;
+  fill: currentColor !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-heading h1,
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-heading-stats strong {
+  color: var(--hnt-text) !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-heading p,
+html[data-theme="dark"] body[data-page="ready-lobbies"] .ready-heading-stats span {
+  color: var(--hnt-text-soft) !important;
+}
