@@ -1,0 +1,351 @@
+/*
+ * HNT.ROCKS Ready Lobby creation – dark mode.
+ * Colors and contrast only; layout, spacing and behavior remain unchanged.
+ */
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"],
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-create-page-shell {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(84, 69, 48, .22), transparent 28%),
+    radial-gradient(circle at 3% 94%, rgba(92, 48, 42, .16), transparent 26%),
+    linear-gradient(135deg, #11110f, #181714 62%, #211d18) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .ready-create-page-shell .profile-edit-scroll,
+  .ready-create-heading,
+  .ready-create-workspace
+) {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Hero and global copy. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .ready-create-heading h1,
+  .profile-edit-nav-card h2,
+  .profile-edit-form-head h2,
+  .profile-edit-section-intro h3,
+  .profile-live-preview-card h2,
+  .ready-mmr-card h3,
+  .ready-squad-size strong,
+  .profile-edit-save-footer strong
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .ready-create-heading p,
+  .profile-edit-section-intro p,
+  .profile-edit-nav-list small,
+  .profile-edit-nav-progress small,
+  .profile-live-completion small,
+  .profile-edit-field small,
+  .profile-setting-row small,
+  .ready-expiry-card p,
+  .ready-contact-note p,
+  .ready-mmr-card p,
+  .ready-squad-size small,
+  .ready-preview-match-card article span,
+  #readySlotPreview article div small,
+  .ready-preview-squad article div small
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .ready-create-heading > div:first-child > span,
+  .profile-edit-nav-card > header span,
+  .profile-edit-form-head > div > span,
+  .profile-edit-section-intro > span,
+  .profile-live-preview-card > header span,
+  .ready-mmr-card header span,
+  .ready-squad-preview-card header span,
+  .ready-preview-match-card header span
+) {
+  color: var(--hnt-accent-gold) !important;
+}
+
+/* Top state and link. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .save-state {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .save-state.dirty {
+  background: var(--hnt-accent-soft) !important;
+  color: var(--hnt-accent-strong) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-heading-actions > a {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Main cards. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .profile-edit-nav-card,
+  .profile-edit-form-card,
+  .profile-live-preview-card
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+/* Left navigation. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-list button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-list button:hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-list button.active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-list button > svg {
+  background: rgba(242, 232, 216, .07) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-list button.active > svg {
+  background: rgba(242, 232, 216, .10) !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-list button > i {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-list button.active > i {
+  color: var(--hnt-accent-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-nav-progress {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .profile-edit-nav-progress > i,
+  .profile-live-completion > i
+) {
+  background: var(--hnt-progress-track) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .profile-edit-nav-progress > i b,
+  .profile-live-completion > i b
+) {
+  background: var(--hnt-accent-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .ready-expiry-card,
+  .ready-contact-note,
+  .ready-switch-link
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .ready-expiry-card > span,
+  .ready-contact-note > span
+) {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+}
+
+/* Sticky form header and intro cards. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-form-head {
+  border-color: var(--hnt-divider) !important;
+  background: rgba(32, 32, 30, .98) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-form-head button:not(.primary) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .profile-edit-form-head button.primary,
+  .profile-edit-save-footer button
+) {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-section-intro {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-panel) !important;
+  color: var(--hnt-text) !important;
+}
+
+/* Form fields. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-field {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-field > span {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-field :is(input, select, textarea) {
+  background: transparent !important;
+  color: var(--hnt-text) !important;
+  color-scheme: dark !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-field :is(input, textarea)::placeholder {
+  color: var(--hnt-text-faint) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-field select option {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+/* Team-size and squad controls. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-squad-size label {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-squad-size label:has(input:checked) {
+  border-color: var(--hnt-accent-gold) !important;
+  background: var(--hnt-accent-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-squad-size label > span {
+  color: var(--hnt-accent-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-squad-size label > i {
+  background: var(--hnt-surface-hover) !important;
+  color: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-squad-size label:has(input:checked) > i {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-setting-row {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-panel) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-setting-icon {
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-toggle i {
+  background: rgba(242, 232, 216, .14) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-toggle input:checked + i {
+  background: #0d0d0c !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  .ready-mmr-card,
+  .ready-squad-preview-card,
+  .ready-preview-match-card
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-panel) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] #readyMmrStars button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] #readyMmrStars button.active {
+  border-color: var(--hnt-accent-gold) !important;
+  background: var(--hnt-accent-gold) !important;
+  color: #171612 !important;
+}
+
+/* Squad rows in editor and live preview. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  #readySlotPreview article,
+  .ready-preview-squad article
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  #readySlotPreview article > span,
+  .ready-preview-squad article > span
+) {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] :is(
+  #readySlotPreview article div strong,
+  .ready-preview-squad article div strong,
+  .ready-preview-match-card article strong
+) {
+  color: var(--hnt-text) !important;
+}
+
+/* Live preview. The hero itself intentionally remains the dark radar artwork. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-live-preview-card > header > a {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-preview-match-card article {
+  border-color: var(--hnt-divider) !important;
+}
+
+/* Save footer. */
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-save-footer {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-panel) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-save-footer > div:first-child > span {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .profile-edit-save-footer a {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="ready-lobby-create"] .ready-create-error {
+  border: 1px solid rgba(196, 91, 80, .30) !important;
+  background: var(--hnt-brand-red-soft) !important;
+  color: #e7aaa4 !important;
+}
