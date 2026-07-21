@@ -1,0 +1,214 @@
+/* HNT.ROCKS Maps overview — dark mode only. Layout and behavior stay untouched. */
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"],
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .app-shell.maps-page-shell {
+  background:
+    radial-gradient(circle at 88% 0%, rgba(91, 67, 48, .20), transparent 31%),
+    radial-gradient(circle at 4% 86%, rgba(91, 45, 39, .12), transparent 28%),
+    linear-gradient(180deg, #11110f 0%, #171714 54%, #1c1815 100%) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-stage,
+  .maps-scroll,
+  .maps-heading,
+  .maps-view-panel,
+  .maps-plan-grid,
+  .maps-feature-detail-grid,
+  .maps-community-section
+) {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-heading h1,
+  .maps-heading-stats strong,
+  .map-plan-content h2,
+  .map-plan-meta strong,
+  .maps-feature-overview h2,
+  .maps-feature-detail-grid h3,
+  .maps-bottom-note h2,
+  .maps-workflow-intro h2,
+  .maps-workflow-steps strong,
+  .maps-community-main h2,
+  .maps-community-side h2,
+  .maps-community-list strong,
+  .maps-community-numbers strong,
+  .maps-help-section h2,
+  .maps-help-rows strong
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-heading p,
+  .maps-heading-stats span,
+  .map-plan-content > p,
+  .map-plan-meta small,
+  .map-plan-content li,
+  .maps-feature-overview header p,
+  .maps-marker-grid small,
+  .maps-feature-detail-grid p,
+  .maps-bottom-note p,
+  .maps-workflow-intro p,
+  .maps-workflow-steps p,
+  .maps-community-list p,
+  .maps-community-numbers small,
+  .maps-help-rows p
+) {
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-heading-copy > span,
+  .map-plan-kicker,
+  .maps-feature-overview > header span,
+  .maps-feature-detail-grid > article > span,
+  .maps-bottom-note span,
+  .maps-workflow-intro > span,
+  .maps-community-main header span,
+  .maps-community-side > span,
+  .maps-help-section > header span
+) {
+  color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-view-switch {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-control) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-view-switch button {
+  background: transparent !important;
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-view-switch button.active {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .map-plan-card,
+  .maps-feature-overview,
+  .maps-feature-detail-grid > article,
+  .maps-bottom-note,
+  .maps-workflow,
+  .maps-community-main,
+  .maps-community-side,
+  .maps-help-section
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-card:hover,
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-card.selected {
+  border-color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-art {
+  background: var(--hnt-surface-panel) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-art > span {
+  background: rgba(20, 20, 18, .88) !important;
+  color: var(--hnt-text-soft) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-art > button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: rgba(20, 20, 18, .90) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-meta {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-meta > span + span {
+  border-left-color: var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-content li > i,
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-community-index {
+  background: var(--hnt-brand-red-soft) !important;
+  color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-open-button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .map-plan-card.selected .map-open-button {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-marker-grid article,
+  .maps-workflow-steps article,
+  .maps-community-numbers article,
+  .maps-community-chips span
+) {
+  background: var(--hnt-surface-panel) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-marker-grid article.cash,
+  .maps-workflow-steps article:first-child,
+  .maps-community-numbers article:first-child
+) {
+  background: var(--hnt-brand-red-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-marker-grid article > i,
+  .maps-workflow-steps i
+) {
+  background: var(--hnt-surface-strong) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-workflow-steps i {
+  color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-feature-overview header button,
+  .maps-feature-detail-grid button,
+  .maps-workflow-intro button,
+  .maps-community-main header button,
+  .maps-community-list button
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-community-side > button {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] :is(
+  .maps-community-main > header,
+  .maps-community-list > article,
+  .maps-help-rows,
+  .maps-help-rows article
+) {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-community-list > article > span,
+html[data-theme="dark"] body[data-hnt-theme-pilot="maps"] .maps-community-chips span {
+  color: var(--hnt-text-soft) !important;
+}
