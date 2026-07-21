@@ -37,17 +37,20 @@ class InjectThemePilot
             || preg_match('/<body\b[^>]*\bdata-page=["\']ready-lobbies["\']/i', $html) === 1;
         $isMomentsPage = $request->routeIs('moments.index', 'moments.show')
             || preg_match('/<body\b[^>]*\bdata-page=["\']moments["\']/i', $html) === 1;
+        $isCupsOverviewPage = $request->routeIs('cups.index')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']cups["\']/i', $html) === 1;
         $isFeedPage = $request->routeIs('feed.index')
             || preg_match('/<body\b[^>]*\bdata-page=["\']feed["\']/i', $html) === 1;
 
-        // Profile and Moments pages contain embedded feed markup. Their dedicated
-        // page detection must win before feed detection or the wrong pilot is attached.
+        // Dedicated pages can contain embedded feed markup. Their explicit page
+        // detection must win before feed detection or the wrong pilot is attached.
         $pilot = match (true) {
             $isProfilePage => 'profile',
             $isSettingsPage => 'settings',
             $isReadyLobbyCreatePage => 'ready-lobby-create',
             $isReadyLobbiesPage => 'ready-lobbies',
             $isMomentsPage => 'moments',
+            $isCupsOverviewPage => 'cups',
             $isFeedPage => 'feed',
             $hasSharedHeader => 'shared',
             default => null,
