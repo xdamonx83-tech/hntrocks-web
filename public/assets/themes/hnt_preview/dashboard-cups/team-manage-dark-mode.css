@@ -1,0 +1,414 @@
+/* Cup team management dark mode. Loaded after all legacy team-manage styles. */
+html[data-theme="dark"] body[data-page="team-manage"] {
+  --tm-bg: #141412;
+  --tm-bg-soft: #181816;
+  --tm-surface: #1d1d1a;
+  --tm-surface-2: #23231f;
+  --tm-surface-3: #292923;
+  --tm-border: #3a3932;
+  --tm-border-soft: #302f2a;
+  --tm-text: #f2e8d8;
+  --tm-text-soft: #c5bdae;
+  --tm-muted: #969087;
+  --tm-red: #cf5b50;
+  --tm-gold: #d6a84f;
+  --tm-green: #9bc96b;
+  background: var(--tm-bg) !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .app-shell.team-manage-page-shell {
+  background:
+    radial-gradient(circle at 100% 0, rgb(111 72 52 / .18), transparent 32%),
+    radial-gradient(circle at 0 100%, rgb(112 44 39 / .13), transparent 34%),
+    linear-gradient(135deg, #11110f 0%, #171714 52%, #211d18 100%) !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-stage,
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-scroll,
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-overview,
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-center-flow,
+html[data-theme="dark"] body[data-page="team-manage"] .team-panels,
+html[data-theme="dark"] body[data-page="team-manage"] .team-panel {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .site-brand,
+html[data-theme="dark"] body[data-page="team-manage"] .brand-wordmark,
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-heading h1,
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-overview-stats strong,
+html[data-theme="dark"] body[data-page="team-manage"] h2,
+html[data-theme="dark"] body[data-page="team-manage"] h3,
+html[data-theme="dark"] body[data-page="team-manage"] strong,
+html[data-theme="dark"] body[data-page="team-manage"] b,
+html[data-theme="dark"] body[data-page="team-manage"] label {
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] p,
+html[data-theme="dark"] body[data-page="team-manage"] small,
+html[data-theme="dark"] body[data-page="team-manage"] time,
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-overview-stats span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-bar > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-table article > div > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-card-head p,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-stats small,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-details span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-list small,
+html[data-theme="dark"] body[data-page="team-manage"] .team-activity-card li,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-history li,
+html[data-theme="dark"] body[data-page="team-manage"] .team-finder-players article span {
+  color: var(--tm-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-heading > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-center-title > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-panel-card header span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-section-intro > div > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-identity-copy > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-quick-card header > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-main > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-lock-card > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-recruiting-toggle > div > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-recruiting-info > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-upload-rules header span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-danger-zone > div > span {
+  color: var(--tm-red) !important;
+}
+
+/* Hero, meta and progress */
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-heading p {
+  color: var(--tm-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-meta > span {
+  border: .5px solid var(--tm-border) !important;
+  background: var(--tm-surface-2) !important;
+  color: var(--tm-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-meta > span.live {
+  border-color: rgb(126 168 71 / .35) !important;
+  background: rgb(126 168 71 / .15) !important;
+  color: #bfe28d !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-meta .live i,
+html[data-theme="dark"] body[data-page="team-manage"] .member-state.ready i,
+html[data-theme="dark"] body[data-page="team-manage"] .team-roster-state i {
+  background: var(--tm-green) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-bar > div {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-2) !important;
+  color: var(--tm-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-bar .dark {
+  background: #080807 !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-bar .yellow {
+  background: rgb(207 91 80 / .24) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-bar .yellow i {
+  background: var(--tm-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-bar .striped {
+  background: repeating-linear-gradient(135deg, #35342f 0 4px, #22221f 4px 8px) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-manage-bar .outline {
+  border-color: #777168 !important;
+  background: transparent !important;
+}
+
+/* Main columns and cards */
+html[data-theme="dark"] body[data-page="team-manage"] .team-identity-card,
+html[data-theme="dark"] body[data-page="team-manage"] .team-quick-card,
+html[data-theme="dark"] body[data-page="team-manage"] .team-center-card,
+html[data-theme="dark"] body[data-page="team-manage"] .team-panel-card,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-cards > article,
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-summary > article,
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-list > article,
+html[data-theme="dark"] body[data-page="team-manage"] .team-finder-players > article {
+  border: .5px solid var(--tm-border) !important;
+  background: var(--tm-surface) !important;
+  color: var(--tm-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-center-head {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-2) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-tabs button {
+  border: .5px solid transparent !important;
+  background: var(--tm-surface-3) !important;
+  color: var(--tm-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-tabs button.active {
+  border-color: #080807 !important;
+  background: #080807 !important;
+  color: var(--tm-text) !important;
+}
+
+/* Left identity and shortcuts */
+html[data-theme="dark"] body[data-page="team-manage"] .team-cover-mini {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-cover-mini::after {
+  background: linear-gradient(transparent 25%, rgb(12 12 10 / .88)) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-cover-mini a,
+html[data-theme="dark"] body[data-page="team-manage"] .team-panel-card header button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-table article > button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-card-head button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-finder-players article > button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-list article > button {
+  border: .5px solid var(--tm-border) !important;
+  background: var(--tm-surface-3) !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-identity-copy,
+html[data-theme="dark"] body[data-page="team-manage"] .team-quick-card {
+  background: var(--tm-surface) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-completion i,
+html[data-theme="dark"] body[data-page="team-manage"] .team-upload-progress,
+html[data-theme="dark"] body[data-page="team-manage"] .team-lock-card > div {
+  background: #37362f !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-completion i b,
+html[data-theme="dark"] body[data-page="team-manage"] .team-upload-progress i,
+html[data-theme="dark"] body[data-page="team-manage"] .team-lock-card > div i {
+  background: var(--tm-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-identity-pills span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-status-pills span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-details span,
+html[data-theme="dark"] body[data-page="team-manage"] .platform,
+html[data-theme="dark"] body[data-page="team-manage"] .member-state,
+html[data-theme="dark"] body[data-page="team-manage"] .team-roster-state {
+  border-color: var(--tm-border-soft) !important;
+  background: var(--tm-surface-3) !important;
+  color: var(--tm-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-identity-pills span:first-child,
+html[data-theme="dark"] body[data-page="team-manage"] .team-status-pills .ready,
+html[data-theme="dark"] body[data-page="team-manage"] .member-state.ready {
+  border-color: rgb(126 168 71 / .32) !important;
+  background: rgb(126 168 71 / .14) !important;
+  color: #bfe28d !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-quick-card > button {
+  border-top-color: var(--tm-border-soft) !important;
+  background: transparent !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-quick-card > button:hover {
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-quick-card > button > svg {
+  color: var(--tm-red) !important;
+  stroke: currentColor !important;
+}
+
+/* Forms and controls */
+html[data-theme="dark"] body[data-page="team-manage"] input,
+html[data-theme="dark"] body[data-page="team-manage"] textarea,
+html[data-theme="dark"] body[data-page="team-manage"] select {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-3) !important;
+  color: var(--tm-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] input::placeholder,
+html[data-theme="dark"] body[data-page="team-manage"] textarea::placeholder {
+  color: var(--tm-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-name-form > div,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-link {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-name-form button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-link button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-primary-button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-ready > button,
+html[data-theme="dark"] body[data-page="team-manage"] .team-recruiting-toggle button {
+  border-color: var(--tm-red) !important;
+  background: var(--tm-red) !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] button:disabled {
+  border-color: var(--tm-border-soft) !important;
+  background: var(--tm-surface-2) !important;
+  color: #716c64 !important;
+}
+
+/* Overview tab */
+html[data-theme="dark"] body[data-page="team-manage"] .team-readiness-steps > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-table > article,
+html[data-theme="dark"] body[data-page="team-manage"] .team-activity-card li,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-history li,
+html[data-theme="dark"] body[data-page="team-manage"] .team-upload-rules > div {
+  border-color: var(--tm-border-soft) !important;
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-readiness-steps i,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-history li > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-upload-rules > div > span {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-3) !important;
+  color: var(--tm-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-readiness-steps .done i,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-history li > span.accepted {
+  background: #080807 !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-danger-zone {
+  border-color: rgb(207 91 80 / .38) !important;
+  background: rgb(207 91 80 / .09) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-danger-zone button {
+  border-color: rgb(207 91 80 / .45) !important;
+  background: rgb(207 91 80 / .18) !important;
+  color: #ef8c82 !important;
+}
+
+/* Member, invite, submission and recruiting tabs */
+html[data-theme="dark"] body[data-page="team-manage"] .team-section-intro {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-member-stats > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-summary > article {
+  border-color: var(--tm-border-soft) !important;
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-roster-note,
+html[data-theme="dark"] body[data-page="team-manage"] .team-recruiting-info,
+html[data-theme="dark"] body[data-page="team-manage"] .team-lock-card {
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-code {
+  border-color: var(--tm-border) !important;
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-code canvas,
+html[data-theme="dark"] body[data-page="team-manage"] .team-invite-code img {
+  background: #fff !important;
+  padding: 8px !important;
+  border-radius: 10px !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-list > article > span,
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-list > article > em {
+  border-color: var(--tm-border-soft) !important;
+  background: var(--tm-surface-3) !important;
+  color: var(--tm-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-list > article > span.approved {
+  background: rgb(126 168 71 / .14) !important;
+  color: #bfe28d !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-submission-list > article > span.review {
+  background: rgb(214 168 79 / .15) !important;
+  color: #e8c46e !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-recruiting-toggle {
+  border-color: var(--tm-border) !important;
+  background:
+    radial-gradient(circle at 100% 0, rgb(207 91 80 / .12), transparent 40%),
+    var(--tm-surface) !important;
+}
+
+/* Team chat */
+html[data-theme="dark"] body[data-page="team-manage"] .team-chat-card,
+html[data-theme="dark"] body[data-page="team-manage"] .team-chat-card > header,
+html[data-theme="dark"] body[data-page="team-manage"] .team-chat-compose {
+  border-color: var(--tm-border) !important;
+  background: #0d0d0c !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-chat-list article > div {
+  border-color: rgb(255 255 255 / .06) !important;
+  background: var(--tm-surface-2) !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-chat-list article.own > div {
+  background: rgb(207 91 80 / .16) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-chat-compose input {
+  background: var(--tm-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .team-chat-compose button {
+  background: var(--tm-red) !important;
+  color: #fff !important;
+}
+
+/* Confirmation and submission modals */
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-confirm"],
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-submission-modal"] {
+  border-color: var(--tm-border) !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-confirm"][class*="backdrop"],
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-submission-modal"][class*="backdrop"] {
+  background: rgb(0 0 0 / .72) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-confirm"][class*="panel"],
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-submission-modal"][class*="panel"],
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-submission-modal"] form,
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-submission-modal"] header,
+html[data-theme="dark"] body[data-page="team-manage"] [class*="team-submission-modal"] footer {
+  background: var(--tm-surface) !important;
+  color: var(--tm-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="team-manage"] .toast {
+  border-color: var(--tm-border) !important;
+  background: #080807 !important;
+  color: var(--tm-text) !important;
+}
