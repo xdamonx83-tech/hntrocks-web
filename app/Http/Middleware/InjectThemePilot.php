@@ -45,7 +45,9 @@ class InjectThemePilot
             || preg_match('/<body\b[^>]*\bdata-page=["\']cups["\']/i', $html) === 1;
         $isRocksPage = $request->routeIs('crowns.index', 'crowns.history', 'rocks.index', 'rocks.history')
             || preg_match('/<body\b[^>]*\bdata-page=["\']rocks["\']/i', $html) === 1;
-        $isGuidesOverviewPage = $request->routeIs('guides.index')
+        $isGuideDetailPage = $request->routeIs('guides.show', 'guides.preview')
+            || preg_match('/<body\b[^>]*\bdata-page=["\']guides["\'][^>]*\bclass=["\'][^"\']*\bguides-detail-live\b/i', $html) === 1;
+        $isGuidesOverviewPage = (! $isGuideDetailPage && $request->routeIs('guides.index'))
             || preg_match('/<body\b[^>]*\bdata-page=["\']guides["\'][^>]*\bclass=["\'][^"\']*\bguides-demo-index\b/i', $html) === 1;
         $isFeedPage = $request->routeIs('feed.index')
             || preg_match('/<body\b[^>]*\bdata-page=["\']feed["\']/i', $html) === 1;
@@ -62,6 +64,7 @@ class InjectThemePilot
             $isCupDetailPage => 'cup-detail',
             $isCupsOverviewPage => 'cups',
             $isRocksPage => 'rocks',
+            $isGuideDetailPage => 'guide-detail',
             $isGuidesOverviewPage => 'guides-overview',
             $isFeedPage => 'feed',
             $hasSharedHeader => 'shared',
