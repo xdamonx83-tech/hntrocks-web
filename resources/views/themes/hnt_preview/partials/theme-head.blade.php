@@ -55,6 +55,11 @@
     href="{{ asset('assets/themes/hnt_preview/settings/appearance-theme.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/settings/appearance-theme.css')) ?: time() }}"
     rel="stylesheet"
 >
+<link
+    data-hnt-settings-dark-mode
+    href="{{ asset('assets/themes/hnt_preview/settings/dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/settings/dark-mode.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @endif
 <script
     data-hnt-theme-runtime
