@@ -65,6 +65,12 @@
     href="{{ asset('assets/themes/hnt_preview/settings/dark-mode-tabs-topbar.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/settings/dark-mode-tabs-topbar.css')) ?: time() }}"
     rel="stylesheet"
 >
+@elseif($hntThemePilot === 'profile')
+<link
+    data-hnt-profile-dark-mode
+    href="{{ asset('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode.css') }}?v={{ @filemtime(public_path('assets/themes/hnt_preview/dashboard-profile/profile-dark-mode.css')) ?: time() }}"
+    rel="stylesheet"
+>
 @endif
 <script
     data-hnt-theme-runtime
