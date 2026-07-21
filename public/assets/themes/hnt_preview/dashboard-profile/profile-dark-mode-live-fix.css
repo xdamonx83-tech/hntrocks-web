@@ -1,0 +1,231 @@
+/*
+ * HNT.ROCKS profile dark-mode hard fix.
+ * Loaded directly by profile/live and profile/edit-live after every page stylesheet.
+ * Colors only. No geometry, sizing, spacing or behavior changes.
+ */
+
+/* --------------------------------------------------------------------------
+   Public profile
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-page="profile"] .profile-level-stats > span,
+html[data-theme="dark"] body[data-page="profile"] .profile-bio-points > span,
+html[data-theme="dark"] body[data-page="profile"] .profile-favorite-grid > span {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: #292926 !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-level-stats :is(strong, small),
+html[data-theme="dark"] body[data-page="profile"] .profile-bio-points :is(b, span),
+html[data-theme="dark"] body[data-page="profile"] .profile-favorite-grid :is(strong, small) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-level-stats small,
+html[data-theme="dark"] body[data-page="profile"] .profile-favorite-grid small {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-level-ring::before {
+  background: #20201e !important;
+}
+
+/* Every circular utility control that was still using the light mockup shell. */
+html[data-theme="dark"] body[data-page="profile"] :is(
+  .profile-quest-arrow,
+  .profile-photo-shell > a,
+  .profile-photo-shell > button,
+  .profile-info-head > a,
+  .profile-info-head > button,
+  .profile-summary-actions > a,
+  .profile-summary-actions > button,
+  .profile-detail-card > header > a,
+  .profile-detail-card > header > button,
+  .profile-browser-arrow,
+  .profile-browser-actions button,
+  .profile-browser-pagination button
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: #292926 !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] :is(
+  .profile-quest-arrow,
+  .profile-photo-shell > a,
+  .profile-photo-shell > button,
+  .profile-info-head > a,
+  .profile-info-head > button,
+  .profile-summary-actions > a,
+  .profile-summary-actions > button,
+  .profile-detail-card > header > a,
+  .profile-detail-card > header > button,
+  .profile-browser-arrow,
+  .profile-browser-actions button,
+  .profile-browser-pagination button
+) :is(svg, .ph) {
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Moments caption/footer shells and filters. */
+html[data-theme="dark"] body[data-page="profile"] .profile-video-moment,
+html[data-theme="dark"] body[data-page="profile"] .profile-video-moment .profile-video-copy,
+html[data-theme="dark"] body[data-page="profile"] .profile-moment-card,
+html[data-theme="dark"] body[data-page="profile"] .profile-moment-card > footer {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: #252522 !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-video-copy :is(h3, h3 a) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-video-copy > p,
+html[data-theme="dark"] body[data-page="profile"] .profile-video-stats span,
+html[data-theme="dark"] body[data-page="profile"] .profile-moment-card > footer {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-video-stats {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-panel-filters > button {
+  border-color: var(--hnt-border-soft) !important;
+  background: #292926 !important;
+  color: var(--hnt-text-soft) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-panel-filters > button:hover {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile"] .profile-panel-filters > button.active {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Profile editor
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-page="profile-edit"] :is(
+  .profile-edit-nav-card,
+  .profile-edit-form-card,
+  .profile-live-preview-card,
+  .profile-edit-form-head,
+  .profile-edit-section-intro,
+  .profile-edit-save-footer,
+  .profile-cover-mode-card,
+  .profile-media-note,
+  .profile-media-guidelines > article,
+  .profile-setting-row,
+  .profile-social-list > label,
+  .profile-social-preview,
+  .profile-visibility-options > label,
+  .profile-privacy-note,
+  .profile-crop-dialog,
+  .profile-crop-dialog > header,
+  .profile-crop-body,
+  .profile-crop-dialog > footer
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: #20201e !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] :is(
+  .profile-edit-field input,
+  .profile-edit-field select,
+  .profile-edit-field textarea,
+  .profile-social-list input,
+  .profile-live-bio,
+  .profile-live-info > article,
+  .profile-live-stats,
+  .profile-live-stats > span,
+  .profile-live-completion
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background-color: #292926 !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] :is(
+  .profile-edit-field input,
+  .profile-edit-field textarea,
+  .profile-social-list input
+)::placeholder {
+  color: var(--hnt-text-faint) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-edit-field input:disabled {
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text-soft) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-edit-nav-list > button,
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-cover-mode-options > label,
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-visibility-options > label {
+  border-color: var(--hnt-border-soft) !important;
+  background: #292926 !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-edit-nav-list > button.active {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] :is(
+  .profile-edit-nav-list > button > svg,
+  .profile-cover-mode-icon,
+  .visibility-icon,
+  .profile-setting-icon,
+  .profile-live-preview-card > header > a,
+  .profile-crop-dialog [data-crop-close]
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: #30302d !important;
+  color: var(--hnt-text) !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] :is(
+  .profile-cover-mode-options > label:has(input:checked),
+  .profile-visibility-options > label:has(input:checked)
+) {
+  border-color: rgba(196, 91, 80, .58) !important;
+  background: rgba(196, 91, 80, .16) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-live-stats > span + span,
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-live-info > article + article {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-live-tags > span {
+  border-color: var(--hnt-border-soft) !important;
+  background: #30302d !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="profile-edit"] .profile-crop-stage {
+  border-color: var(--hnt-border-soft) !important;
+  background: #0d0d0c !important;
+}
