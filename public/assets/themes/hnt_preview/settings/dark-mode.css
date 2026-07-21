@@ -1,0 +1,404 @@
+/*
+ * HNT.ROCKS settings dark mode.
+ * Visual theme only: no layout, dimensions, spacing or behavior changes.
+ */
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] {
+  color: var(--hnt-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Primary settings surfaces
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-header,
+  .settings-panel-head,
+  .settings-section-intro,
+  .settings-save-footer,
+  .settings-choice-card,
+  .settings-master-row,
+  .settings-field-card,
+  .settings-switch-row,
+  .settings-notification-card,
+  .settings-block-form,
+  .settings-security-section,
+  .settings-two-factor-card,
+  .settings-security-actions-grid > article,
+  .settings-delete-panel
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-section-intro,
+  .settings-panel-head,
+  .settings-header,
+  .settings-save-footer
+) {
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-field-card,
+  .settings-switch-row,
+  .settings-notification-card,
+  .settings-block-form,
+  .settings-security-inline-form,
+  .settings-security-key,
+  .settings-recovery-codes
+) {
+  background: var(--hnt-surface-soft) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Left navigation
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-nav {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-nav button {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-nav button:hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-nav button.active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-nav button :is(strong, small, i, span) {
+  color: inherit !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-nav button:not(.active) small {
+  color: var(--hnt-text-soft) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Typography and separators
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-header h1,
+  .settings-panel-head h2,
+  .settings-section-intro h3,
+  .settings-choice-card h3,
+  .settings-master-row h3,
+  .settings-notification-card strong,
+  .settings-switch-row strong,
+  .settings-blocked-head h3,
+  .settings-blocked-list strong,
+  .settings-security-highlight h3,
+  .settings-security-section h3,
+  .settings-two-factor-card h3,
+  .settings-security-actions-grid h3,
+  .settings-status-card h2,
+  .settings-status-card h3
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-header p,
+  .settings-panel-head span,
+  .settings-section-intro p,
+  .settings-choice-card p,
+  .settings-master-row p,
+  .settings-field-card small,
+  .settings-notification-card small,
+  .settings-switch-row small,
+  .settings-blocked-list span,
+  .settings-blocked-list small,
+  .settings-security-highlight p,
+  .settings-security-section p,
+  .settings-security-section small,
+  .settings-two-factor-card p,
+  .settings-security-actions-grid p,
+  .settings-status-card p,
+  .settings-status-card small,
+  .settings-status-card span
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-section-intro > span,
+  .settings-choice-card > div > span,
+  .settings-master-row > div > span,
+  .settings-blocked-head span,
+  .settings-security-highlight > div > span,
+  .settings-security-section header span,
+  .settings-two-factor-card > div > span,
+  .settings-security-actions-grid article > span
+) {
+  color: var(--hnt-accent-gold) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-panel-head,
+  .settings-section-intro,
+  .settings-save-footer,
+  .settings-security-section header,
+  .settings-status-row,
+  .settings-blocked-list article,
+  .settings-security-log article
+) {
+  border-color: var(--hnt-divider) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Inputs, selects and form controls
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  caret-color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(input, textarea)::placeholder {
+  color: var(--hnt-text-faint) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  input[readonly],
+  input:disabled,
+  select:disabled,
+  textarea:disabled
+) {
+  background: var(--hnt-surface-panel) !important;
+  color: var(--hnt-text-soft) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-notification-icon,
+  .settings-row-icon,
+  .settings-generated-avatar,
+  .settings-security-highlight-icon
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Notification and privacy panels
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-master-row {
+  border-color: rgba(196, 91, 80, .22) !important;
+  background: var(--hnt-brand-red-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-notification-card:hover,
+  .settings-switch-row:hover
+) {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-notification-card.is-placeholder,
+  .settings-switch-row.is-placeholder,
+  .settings-block-coverage-placeholder
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: rgba(41, 41, 38, .62) !important;
+  color: var(--hnt-text-soft) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-planned-badge {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Blocked users
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-block-form {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-blocked-list {
+  border-color: var(--hnt-border-medium) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-blocked-list article {
+  background: var(--hnt-surface-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-blocked-empty {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-block-coverage-active {
+  border-color: rgba(143, 189, 66, .22) !important;
+  background: rgba(143, 189, 66, .10) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Security area
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-highlight {
+  border-color: rgba(143, 189, 66, .24) !important;
+  background: rgba(143, 189, 66, .11) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-highlight > strong {
+  color: var(--hnt-success) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-section {
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-two-factor-card {
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-log {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+  scrollbar-color: var(--hnt-text-faint) var(--hnt-surface-solid);
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-log article {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-log :is(strong, b) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-log :is(span, small, time, p) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-log-controls {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-log-controls button {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-actions-grid > article {
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-security-actions-grid > article.danger {
+  border-color: rgba(196, 91, 80, .22) !important;
+  background: rgba(196, 91, 80, .08) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Sticky/save header and buttons
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-header,
+  .settings-panel-head,
+  .settings-save-footer
+) {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .16) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-save-footer button:not(.primary),
+  .settings-panel-head button:not(.primary),
+  .settings-header button:not(.primary)
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] :is(
+  .settings-save-footer button.primary,
+  .settings-panel-head button.primary,
+  .settings-header button.primary,
+  .settings-block-form > button,
+  .settings-security-section footer button,
+  .settings-security-action-button
+) {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Right security status card and ring
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-status-card {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-status-card :is(
+  .circle-button,
+  button
+) {
+  border-color: var(--hnt-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-status-card :is(
+  [class*="ring"],
+  [class*="score"],
+  [class*="gauge"]
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-status-card :is(
+  [class*="ring"],
+  [class*="score"],
+  [class*="gauge"]
+)::before {
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-status-row {
+  border-color: var(--hnt-divider) !important;
+  background: transparent !important;
+  color: var(--hnt-text) !important;
+}
+
+/* Keep the three appearance previews meaningful in dark mode. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options label {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="settings"] .settings-appearance-card .settings-choice-options label.active {
+  border-color: rgba(196, 91, 80, .46) !important;
+  background: var(--hnt-brand-red-soft) !important;
+}
