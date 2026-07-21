@@ -1,0 +1,357 @@
+/*
+ * HNT.ROCKS profile dark-mode live polish.
+ * Loaded last so hard light values from legacy profile CSS cannot win.
+ * Colors only: no geometry, spacing, sizing or behavior changes.
+ */
+
+/* --------------------------------------------------------------------------
+   Public profile: stubborn light shells and controls
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-page-left .profile-level-card .profile-level-stats > span,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-summary-card .profile-bio-points > span,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-info-dashboard .profile-favorite-grid > span {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-page-left .profile-level-card .profile-level-stats :is(strong, small),
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-summary-card .profile-bio-points :is(b, span),
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-info-dashboard .profile-favorite-grid :is(strong, small) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-info-dashboard .profile-favorite-grid small,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-page-left .profile-level-card .profile-level-stats small {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-summary-card .profile-level-ring::before {
+  background: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-summary-card .profile-summary-actions > a,
+  .profile-summary-card .profile-summary-actions > button,
+  .profile-info-card .profile-info-head > a,
+  .profile-info-card .profile-info-head > button,
+  .profile-detail-card > header > a,
+  .profile-detail-card > header > button,
+  .profile-photo-shell > a,
+  .profile-photo-shell > button
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-summary-card .profile-summary-actions > a,
+  .profile-summary-card .profile-summary-actions > button,
+  .profile-info-card .profile-info-head > a,
+  .profile-info-card .profile-info-head > button,
+  .profile-detail-card > header > a,
+  .profile-detail-card > header > button,
+  .profile-photo-shell > a,
+  .profile-photo-shell > button
+) :is(svg, .ph) {
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* --------------------------------------------------------------------------
+   Moments: remove the remaining light caption/footer block and filter pills
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-video-moment,
+  .profile-video-copy,
+  .profile-moment-card,
+  .profile-moment-card > footer
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-video-copy :is(h3, h3 a) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-video-copy > p,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-video-stats span,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-moment-card > footer {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-video-stats {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-panel-filters > button {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text-soft) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-panel-filters > button:hover {
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-panel-filters > button.active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Profile editor: frame, cards, fields, options and preview
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-edit-nav-card,
+  .profile-edit-form-card,
+  .profile-live-preview-card,
+  .profile-edit-form-head,
+  .profile-edit-section-intro,
+  .profile-edit-save-footer,
+  .profile-cover-mode-card,
+  .profile-media-note,
+  .profile-media-guidelines > article,
+  .profile-setting-row,
+  .profile-social-list > label,
+  .profile-social-preview,
+  .profile-visibility-options > label,
+  .profile-privacy-note,
+  .profile-crop-dialog,
+  .profile-crop-dialog > header,
+  .profile-crop-body,
+  .profile-crop-dialog > footer
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-form-head,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-save-footer,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-live-preview-card > header,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-crop-dialog > header,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-crop-dialog > footer {
+  border-color: var(--hnt-divider) !important;
+  background: var(--hnt-surface-strong) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-edit-heading h1,
+  .profile-edit-nav-card h2,
+  .profile-edit-form-head h2,
+  .profile-edit-section-intro h3,
+  .profile-live-preview-card h2,
+  .profile-live-preview-card strong,
+  .profile-media-layout h3,
+  .profile-cover-mode-card legend,
+  .profile-crop-dialog h2
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-edit-heading p,
+  .profile-edit-nav-card small,
+  .profile-edit-section-intro p,
+  .profile-edit-field small,
+  .profile-media-note p,
+  .profile-media-guidelines small,
+  .profile-setting-row small,
+  .profile-social-list small,
+  .profile-social-preview p,
+  .profile-visibility-options small,
+  .profile-privacy-note p,
+  .profile-live-preview-card p,
+  .profile-live-preview-card small,
+  .profile-crop-dialog p
+) {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-edit-nav-card header > div > span,
+  .profile-edit-form-head > div:first-child > span,
+  .profile-edit-section-intro > span,
+  .profile-live-preview-card > header span,
+  .profile-media-note > span,
+  .profile-social-preview > div:first-child > span
+) {
+  color: var(--hnt-accent-gold) !important;
+}
+
+/* Editor navigation, icon shells and action controls. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-nav-list > button {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-nav-list > button:hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-nav-list > button.active {
+  border-color: rgba(242, 232, 216, .08) !important;
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-nav-list > button > svg,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-cover-mode-icon,
+  .visibility-icon,
+  .profile-setting-icon,
+  .profile-live-preview-card > header > a,
+  .profile-crop-dialog [data-crop-close]
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text) !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-nav-list > button.active > svg {
+  background: rgba(242, 232, 216, .10) !important;
+  color: var(--hnt-accent-gold) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  #profileDiscardTop,
+  #profileSaveTop,
+  .profile-edit-save-footer a,
+  .profile-edit-save-footer button,
+  .profile-cover-preview button,
+  .profile-avatar-editor button,
+  .profile-social-preview-buttons button,
+  .profile-crop-dialog footer button
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  #profileSaveTop.primary,
+  .profile-edit-save-footer button[type="submit"],
+  .profile-crop-dialog footer button.primary
+) {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Form fields and choice cards. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-edit-field input,
+  .profile-edit-field select,
+  .profile-edit-field textarea,
+  .profile-social-list input
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  caret-color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-edit-field input,
+  .profile-edit-field textarea,
+  .profile-social-list input
+)::placeholder {
+  color: var(--hnt-text-faint) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-field input:disabled {
+  background: var(--hnt-surface-soft) !important;
+  color: var(--hnt-text-soft) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-cover-mode-options > label,
+  .profile-visibility-options > label
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-cover-mode-options > label:has(input:checked),
+  .profile-visibility-options > label:has(input:checked)
+) {
+  border-color: rgba(196, 91, 80, .58) !important;
+  background: rgba(196, 91, 80, .16) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-cover-mode-options > label > i,
+  .profile-visibility-options > label > i
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-cover-mode-options > label:has(input:checked) > i,
+  .profile-visibility-options > label:has(input:checked) > i
+) {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* Live preview: bio and stats were still inherited from the light mockup. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] :is(
+  .profile-live-bio,
+  .profile-live-info > article,
+  .profile-live-stats,
+  .profile-live-stats > span,
+  .profile-live-completion
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  background-image: none !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-live-stats > span + span,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-live-info > article + article {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-live-tags > span {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-hover) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-live-completion > i,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-edit-nav-progress > i,
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-toggle > i {
+  background: var(--hnt-progress-track) !important;
+}
+
+/* Crop modal remains dark as well. */
+html[data-theme="dark"] body[data-hnt-theme-pilot="profile"] .profile-crop-stage {
+  border-color: var(--hnt-border-soft) !important;
+  background: #0d0d0c !important;
+}
