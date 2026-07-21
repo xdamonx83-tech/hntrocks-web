@@ -1,0 +1,228 @@
+/* HNT.ROCKS map detail — dark mode only. Map geometry and behavior stay untouched. */
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"],
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .app-shell.map-detail-page-shell {
+  background:
+    radial-gradient(circle at 88% 0%, rgba(91, 67, 48, .20), transparent 31%),
+    radial-gradient(circle at 4% 86%, rgba(91, 45, 39, .12), transparent 28%),
+    linear-gradient(180deg, #11110f 0%, #171714 54%, #1c1815 100%) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-detail-page-shell {
+  --text: var(--hnt-text);
+  --muted: var(--hnt-text-muted);
+  --card: var(--hnt-surface-card);
+  --card-strong: var(--hnt-surface-card-strong);
+  --input: var(--hnt-surface-input);
+  --border: var(--hnt-border);
+  --dark: var(--hnt-dark);
+  --red: var(--hnt-brand-red);
+  --red-soft: var(--hnt-brand-red-soft);
+  --bg-app: var(--hnt-surface-solid);
+  --bg-outer: var(--hnt-bg);
+  --card-bg: var(--hnt-surface-card);
+  --tag-bg: var(--hnt-surface-input);
+  --text-main: var(--hnt-text);
+  --text-muted: var(--hnt-text-muted);
+  --accent-primary: var(--hnt-brand-red);
+  --border-color: var(--hnt-border);
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-detail-stage,
+  .map-detail-scroll,
+  .map-detail-heading,
+  .map-detail-workspace,
+  .map-detail-left
+) {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-detail-heading h1,
+  .map-detail-heading-stats strong,
+  .map-switch-card h2,
+  .map-filter-card h2,
+  .map-layer-card h2,
+  .map-canvas-toolbar h2,
+  .map-layer-card strong,
+  .marker-detail-card h2,
+  .marker-comments-card h2,
+  .map-cash-modal-panel h2,
+  .map-selected-popover strong,
+  .marker-detail-meta strong,
+  .marker-comment-list strong
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-detail-heading-stats span,
+  .map-detail-heading-meta span,
+  .map-switch-item small,
+  .map-filter-chip,
+  .map-layer-card small,
+  .map-toolbar-actions button,
+  .map-canvas-status,
+  .map-selected-popover small,
+  .marker-detail-meta span,
+  .marker-vote-row small,
+  .marker-comment-list small,
+  .hnt-map-cash-submission-form > p
+) {
+  color: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-switch-card,
+  .map-filter-card,
+  .map-layer-card,
+  .map-detail-center,
+  .marker-detail-card,
+  .marker-comments-card,
+  .map-cash-modal-panel,
+  .map-overlay-panel,
+  .hnt-map-lightbox-panel,
+  .hnt-map-cash-detail-panel
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-strong) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-switch-item,
+  .map-filter-search,
+  .map-filter-chip,
+  .marker-comment-list article,
+  .marker-detail-preview,
+  .map-cash-modal-field
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-card) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-switch-item.active {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-switch-item.active small {
+  color: rgba(242, 232, 216, .58) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-switch-card header a,
+  .map-filter-card header button,
+  .marker-detail-card header button,
+  .map-cash-modal-panel header button,
+  .marker-comments-head-tools button,
+  .map-toolbar-actions button,
+  .marker-vote-row button,
+  .marker-detail-modal-actions button,
+  .map-cash-modal-close
+) {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-toolbar-actions button.active,
+  .marker-detail-modal-actions button:first-child
+) {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-filter-search input,
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-share-fallback input,
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(input, textarea, select) {
+  color: var(--hnt-text) !important;
+  caret-color: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(input, textarea)::placeholder {
+  color: var(--hnt-text-faint) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-layer-card > label,
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-canvas-toolbar,
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .marker-detail-meta article {
+  border-color: var(--hnt-divider) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-layer-card label > i {
+  background: var(--hnt-surface-input) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-layer-card label > i::after {
+  background: var(--hnt-text-muted) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-layer-card input:checked + i {
+  background: #090908 !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-layer-card input:checked + i::after {
+  background: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-canvas-surface,
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .hnt-map-canvas {
+  background: var(--hnt-surface-panel) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip,
+  .hnt-map-compound-label,
+  .hnt-map-measure-hint,
+  .hnt-map-empty-markers,
+  .hnt-map-toast,
+  .map-selected-popover
+) {
+  border-color: var(--hnt-border) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .leaflet-tooltip-top.hnt-map-compound-label::before {
+  border-top-color: var(--hnt-surface-solid) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-detail-marker {
+  border-color: rgba(242, 232, 216, .82) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-detail-marker.selected {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-canvas-status button,
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .hnt-map-popup-action,
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .map-cash-modal-actions .hnt-map-popup-action[type="submit"] {
+  background: #090908 !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] :is(
+  .map-overlay-modal,
+  .map-cash-modal,
+  .hnt-map-lightbox
+) {
+  background: rgba(0, 0, 0, .68) !important;
+}
+
+html[data-theme="dark"] body[data-hnt-theme-pilot="map-detail"] .hnt-map-cash-submission-form :is(input, textarea) {
+  border-color: var(--hnt-border) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
