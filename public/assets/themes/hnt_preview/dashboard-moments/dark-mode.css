@@ -1,0 +1,169 @@
+/*
+ * HNT.ROCKS Moments – dark mode polish.
+ * Colors and contrast only. Video geometry, swipe behavior and positioning stay unchanged.
+ */
+
+html[data-theme="dark"] body[data-page="moments"] {
+  background: #11110f !important;
+  color: var(--hnt-text) !important;
+}
+
+/* The common dashboard shell otherwise restores the light feed gradient. */
+html[data-theme="dark"] body[data-page="moments"] .app-shell.moments-shell {
+  background:
+    radial-gradient(circle at 92% 7%, rgba(84, 69, 48, .22), transparent 28%),
+    radial-gradient(circle at 4% 94%, rgba(92, 48, 42, .15), transparent 27%),
+    linear-gradient(135deg, #11110f, #181714 62%, #211d18) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] :is(.brand, .brand:visited) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .brand-mark {
+  fill: var(--hnt-text) !important;
+}
+
+/* Main Moments surface. */
+html[data-theme="dark"] body[data-page="moments"] .moments-stage {
+  border-color: var(--hnt-border-soft) !important;
+  background: #151513 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-floating-head {
+  border-color: var(--hnt-border-soft) !important;
+  background: rgba(31, 31, 29, .97) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-floating-head nav {
+  background: var(--hnt-surface-input) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-floating-head nav button {
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-floating-head nav button.active {
+  background: #0d0d0c !important;
+  color: var(--hnt-text-on-dark) !important;
+}
+
+/* The original ambient layer contains a white veil. Keep the poster glow, but dark. */
+html[data-theme="dark"] body[data-page="moments"] .moment-ambient {
+  background:
+    linear-gradient(rgba(17, 17, 15, .82), rgba(17, 17, 15, .82)),
+    var(--moment-poster) center / cover no-repeat !important;
+  filter: blur(30px) saturate(.68) brightness(.55) !important;
+  opacity: .62 !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moment-ambient::after {
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 24%, rgba(21, 21, 19, .42) 66%, rgba(21, 21, 19, .94) 100%) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moment-video-card {
+  border-color: rgba(242, 232, 216, .18) !important;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, .34) !important;
+}
+
+/* Small controls around the vertical player. */
+html[data-theme="dark"] body[data-page="moments"] .moment-sound-toggle {
+  border: 1px solid rgba(242, 232, 216, .16) !important;
+  background: rgba(24, 25, 22, .78) !important;
+  color: var(--hnt-text-on-dark) !important;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-navigation button {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-navigation button:not(:disabled):hover {
+  background: var(--hnt-surface-hover) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-navigation button:disabled {
+  background: rgba(41, 41, 38, .62) !important;
+  color: var(--hnt-text-faint) !important;
+  opacity: .72 !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-navigation span {
+  border: 1px solid var(--hnt-border-soft) !important;
+  background: rgba(13, 13, 12, .82) !important;
+  color: var(--hnt-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-page-dots i {
+  background: rgba(242, 232, 216, .24) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-page-dots i.active {
+  background: var(--hnt-brand-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] .moments-swipe-hint {
+  padding: 5px 9px;
+  border: 1px solid var(--hnt-border-soft);
+  border-radius: 999px;
+  background: rgba(13, 13, 12, .68);
+  color: var(--hnt-text-soft) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Empty states and the comments modal use the same Moments palette. */
+html[data-theme="dark"] body[data-page="moments"] :is(
+  .moments-filter-empty,
+  .moments-empty-real
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] #momentsCommentsModal {
+  background: rgba(0, 0, 0, .72) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] #momentsCommentsModal :is(
+  .comments-modal,
+  .comments-modal-head,
+  .comments-modal-content,
+  .comments-composer
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-solid) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] #momentsCommentsModal :is(
+  .comments-post-context,
+  .comment-bubble,
+  .comments-input-shell,
+  .comments-empty-live
+) {
+  border-color: var(--hnt-border-soft) !important;
+  background: var(--hnt-surface-input) !important;
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] #momentsCommentsModal :is(
+  textarea,
+  input
+) {
+  color: var(--hnt-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="moments"] #momentsCommentsModal textarea::placeholder {
+  color: var(--hnt-text-faint) !important;
+  opacity: 1 !important;
+}
