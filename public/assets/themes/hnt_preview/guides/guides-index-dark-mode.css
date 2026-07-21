@@ -1,0 +1,291 @@
+/* Guides overview dark mode. Loaded after guides-index-demo.css. */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index {
+  --guides-bg: #141412;
+  --guides-bg-soft: #181816;
+  --guides-surface: #1d1d1a;
+  --guides-surface-2: #23231f;
+  --guides-surface-3: #292923;
+  --guides-border: #3a3932;
+  --guides-border-soft: #302f2a;
+  --guides-text: #f2e8d8;
+  --guides-text-soft: #c5bdae;
+  --guides-muted: #969087;
+  --guides-red: #cf5b50;
+  --guides-gold: #d6a84f;
+  --guides-green: #9bc96b;
+  background: var(--guides-bg) !important;
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .app-shell.guides-page-shell {
+  background:
+    radial-gradient(circle at 100% 0, rgb(111 72 52 / .18), transparent 32%),
+    radial-gradient(circle at 0 100%, rgb(112 44 39 / .13), transparent 34%),
+    linear-gradient(135deg, #11110f 0%, #171714 52%, #211d18 100%) !important;
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-stage,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-scroll,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-overview-layout,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-main-column,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-category-column,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-right-column {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .site-brand,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .brand-wordmark,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero h1,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero-stats strong,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index h2,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index h3,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index strong,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index b,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index label {
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index p,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index small,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index time,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero p,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero-stats span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card p,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card footer > span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-section-head > strong,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-widget-empty {
+  color: var(--guides-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero > div:first-child > span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-section-head span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-side-card > span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-side-card header span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-featured > div > span {
+  color: var(--guides-red) !important;
+}
+
+/* Keep the hero open like the feed, not inside a card. */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero-stats article {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero-actions a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero-actions button {
+  background: var(--guides-surface-2) !important;
+  border: 1px solid var(--guides-border-soft) !important;
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero-actions .primary,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-hero-actions form button {
+  background: #0e0e0c !important;
+  border-color: #0e0e0c !important;
+  color: var(--guides-text) !important;
+}
+
+/* Main surfaces */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-side-card,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-toolbar,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-featured,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card {
+  background: rgb(29 29 26 / .96) !important;
+  border-color: var(--guides-border) !important;
+  box-shadow: 0 18px 46px rgb(0 0 0 / .18) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-side-card > header,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-top-authors > header,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-featured footer,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card footer,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-top-authors article {
+  border-color: var(--guides-border) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-side-card header b {
+  background: var(--guides-surface-3) !important;
+  border: 1px solid var(--guides-border-soft) !important;
+  color: var(--guides-text-soft) !important;
+}
+
+/* Categories */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list button {
+  background: transparent !important;
+  color: var(--guides-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list a:hover,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list button:hover {
+  background: var(--guides-surface-2) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list a.active,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list button.active {
+  background: #0e0e0c !important;
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list a > span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list button > span {
+  background: var(--guides-surface-3) !important;
+  border: 1px solid var(--guides-border-soft) !important;
+  color: var(--guides-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list a.active > span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list button.active > span {
+  background: rgb(255 255 255 / .08) !important;
+  border-color: rgb(255 255 255 / .08) !important;
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list a b,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-category-list button b {
+  color: var(--guides-muted) !important;
+}
+
+/* Toolbar and filters */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-search,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-toolbar select {
+  background: var(--guides-surface-2) !important;
+  border: 1px solid var(--guides-border-soft) !important;
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-search input {
+  color: var(--guides-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-search input::placeholder {
+  color: #817b72 !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-search i,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-search svg {
+  color: var(--guides-muted) !important;
+}
+
+/* Featured guide */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-featured > div,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card-body {
+  background: var(--guides-surface) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-chip,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card-cover > span {
+  background: var(--guides-surface-3) !important;
+  border: 1px solid var(--guides-border-soft) !important;
+  color: var(--guides-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-chip.accent,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-chip.danger {
+  background: rgb(207 91 80 / .16) !important;
+  border-color: rgb(207 91 80 / .24) !important;
+  color: #e8796e !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-chip.success {
+  background: rgb(105 148 68 / .14) !important;
+  border-color: rgb(105 148 68 / .22) !important;
+  color: var(--guides-green) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-featured footer > a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card footer > a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-author-card > a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-create-widget > a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-status-widget > a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-create-form button {
+  background: #0e0e0c !important;
+  border-color: #0e0e0c !important;
+  color: var(--guides-text) !important;
+}
+
+/* Guide cards */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card-author button,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card-login-save {
+  background: var(--guides-surface-3) !important;
+  border: 1px solid var(--guides-border-soft) !important;
+  color: var(--guides-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card-author button.saved {
+  background: var(--guides-red) !important;
+  border-color: var(--guides-red) !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-card a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-top-authors a {
+  color: var(--guides-text) !important;
+}
+
+/* Right widgets and nested cards */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-create-widget article,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-status-widget article {
+  background: var(--guides-surface-2) !important;
+  border: 1px solid var(--guides-border-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-create-widget article > i,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-create-widget article > svg {
+  background: var(--guides-surface-3) !important;
+  color: var(--guides-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-reputation-ring {
+  background: var(--guides-surface-2) !important;
+  border-color: #4a4942 !important;
+  border-top-color: var(--guides-red) !important;
+  border-right-color: var(--guides-gold) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-reputation-ring span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-create-widget article small,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-top-authors small,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-status-widget article span {
+  color: var(--guides-muted) !important;
+}
+
+/* Section header, pagination and empty states */
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-section-head,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-grid {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-pagination a,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-pagination span,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-empty {
+  background: var(--guides-surface-2) !important;
+  border-color: var(--guides-border) !important;
+  color: var(--guides-text-soft) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-real-featured-placeholder,
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guide-real-cover-placeholder {
+  background: linear-gradient(135deg, #1d1d1a, #292923) !important;
+  color: var(--guides-red) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-alert.success {
+  background: rgb(105 148 68 / .14) !important;
+  border: 1px solid rgb(105 148 68 / .22) !important;
+  color: var(--guides-green) !important;
+}
+
+html[data-theme="dark"] body[data-page="guides"].guides-demo-index .guides-alert.error {
+  background: rgb(207 91 80 / .14) !important;
+  border: 1px solid rgb(207 91 80 / .22) !important;
+  color: #e8796e !important;
+}
