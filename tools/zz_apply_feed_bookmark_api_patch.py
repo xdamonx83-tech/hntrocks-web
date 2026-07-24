@@ -77,15 +77,11 @@ replace_once(
 controller_paths = [
     "app/Http/Controllers/Api/V1/ApiFeedController.php",
     "app/Http/Controllers/Api/V1/ApiFeedEngagementController.php",
-    "app/Http/Controllers/Api/V1/ApiMembersController.php",
-    "app/Http/Controllers/Api/V1/ApiHashtagController.php",
 ]
 relation_pattern = re.compile(r"(?m)^(\s*)'viewerBookmark',\s*$")
 for path in controller_paths:
     file = Path(path)
     text = file.read_text()
-    if "recentReactions.user.profile" in text:
-        raise SystemExit(f"{path}: recent reaction relation already present")
     updated, count = relation_pattern.subn(
         lambda match: (
             f"{match.group(1)}'viewerBookmark',\n"
