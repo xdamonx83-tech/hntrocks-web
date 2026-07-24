@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\GuideOverviewResource;
 use App\Models\Guide;
+use App\Models\GuideMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ApiGuidesController extends Controller
 {
@@ -171,5 +174,32 @@ class ApiGuidesController extends Controller
                 'overview_stats' => $stats,
             ],
         ]);
+    }
+
+    public function media(GuideMedia $media): StreamedResponse
+    {
+        $media->loadMissing('guide.publishedRevision');
+        $guide = $media->guide;
+        $publishedRevision = $guide?->publishedRevision;
+
+        abort_unless(
+            $guide instanceof Guide
+                && $guide->isPublished()
+                && (int) $publishedRevision?->cover_media_id === (int) $media->id,
+            404,
+        );
+
+        $disk = $media->disk ?: 'local';
+        abort_unless(Storage::disk($disk)->exists($media->path), 404);
+
+        return Storage::disk($disk)->response(
+            $media->path,
+            null,
+            [
+                'Content-Type' => $media->mime_type,
+                'Cache-Control' => 'private, max-age=86400',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
+        );
     }
 }
