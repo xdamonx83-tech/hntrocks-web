@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::middleware(['web', 'auth'])
                 ->group(base_path('routes/guides.php'));
 
+            Route::middleware(['api', 'api.token', 'block.visibility'])
+                ->prefix('api/v1')
+                ->name('api.v1.')
+                ->group(base_path('routes/api-guides.php'));
+
             Route::middleware(['web', 'auth'])
                 ->group(base_path('routes/rocks.php'));
 
