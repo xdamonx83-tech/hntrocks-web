@@ -24,9 +24,9 @@ jobs:
         shell: bash
         run: |
           set +e
-          python3 tools/zz_apply_feed_bookmark_api_patch.py > tools/zz_feed_bookmark_patch_error.log 2>&1
+          python3 tools/zz_apply_feed_bookmark_api_patch.py > .github/feed_bookmark_patch_error.txt 2>&1
           status=$?
-          cat tools/zz_feed_bookmark_patch_error.log
+          cat .github/feed_bookmark_patch_error.txt
           echo "status=$status" >> "$GITHUB_OUTPUT"
           exit 0
 
@@ -36,7 +36,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tools/zz_feed_bookmark_patch_error.log
+          git add -f .github/feed_bookmark_patch_error.txt
           git commit -m "chore: capture feed bookmark patch failure"
           git push origin HEAD:${{ github.head_ref }}
 
@@ -46,8 +46,8 @@ jobs:
           rm -f .github/workflows/zz-apply-feed-bookmark-api-patch.yml
           rm -f .github/workflows/zz-apply-feed-bookmark-api-pr.yml
           rm -f .github/patch-trigger-feed-bookmark-api
+          rm -f .github/feed_bookmark_patch_error.txt
           rm -f tools/zz_apply_feed_bookmark_api_patch.py
-          rm -f tools/zz_feed_bookmark_patch_error.log
 
       - name: Commit patch
         if: steps.apply.outputs.status == '0'
