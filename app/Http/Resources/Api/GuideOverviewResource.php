@@ -5,7 +5,6 @@ namespace App\Http\Resources\Api;
 use App\Models\GuideMedia;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class GuideOverviewResource extends JsonResource
 {
@@ -52,16 +51,6 @@ class GuideOverviewResource extends JsonResource
             return null;
         }
 
-        $asset = $coverMedia->mediaAsset;
-        if ($asset) {
-            return $asset->thumbnailUrl();
-        }
-
-        $path = trim((string) $coverMedia->path);
-        if ($path === '') {
-            return null;
-        }
-
-        return Storage::disk($coverMedia->disk ?: 'public')->url($path);
+        return route('guides.media.show', $coverMedia);
     }
 }
