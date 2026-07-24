@@ -1,0 +1,49 @@
+name: Apply feed bookmark API PR patch
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Apply patch
+        run: python3 tools/zz_apply_feed_bookmark_api_patch.py
+
+      - name: Remove temporary patch files
+        run: |
+          rm -f .github/workflows/zz-apply-feed-bookmark-api-patch.yml
+          rm -f .github/workflows/zz-apply-feed-bookmark-api-pr.yml
+          rm -f .github/patch-trigger-feed-bookmark-api
+          rm -f tools/zz_apply_feed_bookmark_api_patch.py
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Add feed bookmark API support"
+          git push origin HEAD:${{ github.head_ref }}
+
+      - name: Validate changed PHP files
+        run: |
+          php -l routes/api.php
+          php -l app/Models/FeedPost.php
+          php -l app/Http/Resources/Api/FeedPostResource.php
+          php -l app/Http/Controllers/Api/V1/ApiFeedController.php
+          php -l app/Http/Controllers/Api/V1/ApiFeedEngagementController.php
+          php -l app/Http/Controllers/Api/V1/ApiMembersController.php
+          php -l app/Http/Controllers/Api/V1/ApiHashtagController.php
