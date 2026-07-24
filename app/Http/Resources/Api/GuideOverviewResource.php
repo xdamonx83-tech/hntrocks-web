@@ -51,6 +51,6 @@ class GuideOverviewResource extends JsonResource
             return null;
         }
 
-        return route('guides.media.show', $coverMedia, false);
+        return 'guides/media/'.$coverMedia->id;
     }
 }
