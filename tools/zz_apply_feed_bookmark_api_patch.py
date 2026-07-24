@@ -2,104 +2,104 @@ from pathlib import Path
 import re
 
 
-def replace_once(path: str, old: str, new: str) -> None:
-    file = Path(path)
-    text = file.read_text()
-    count = text.count(old)
-    if count != 1:
-        raise SystemExit(
-            f"{path}: expected one match, found {count}: {old[:90]!r}"
-        )
-    file.write_text(text.replace(old, new, 1))
+def read(path: str) -> str:
+    return Path(path).read_text()
+
+
+def write(path: str, text: str) -> None:
+    Path(path).write_text(text)
 
 
 routes = "routes/api.php"
-replace_once(
-    routes,
-    "use App\\Http\\Controllers\\Feed\\FeedTranslationController;\n",
-    "use App\\Http\\Controllers\\Feed\\FeedBookmarkController;\n"
-    "use App\\Http\\Controllers\\Feed\\FeedTranslationController;\n",
-)
-replace_once(
-    routes,
-    "        Route::post('/feed/{post}/reaction', "
-    "[ApiFeedEngagementController::class, 'toggleReaction'])"
-    "->name('feed.reactions.toggle');\n",
-    "        Route::post('/feed/{post}/reaction', "
-    "[ApiFeedEngagementController::class, 'toggleReaction'])"
-    "->name('feed.reactions.toggle');\n"
-    "        Route::post('/feed/{post}/bookmark', "
-    "[FeedBookmarkController::class, 'toggle'])"
-    "->name('feed.bookmarks.toggle');\n",
-)
+text = read(routes)
+if "use App\\Http\\Controllers\\Feed\\FeedBookmarkController;" not in text:
+    text = text.replace(
+        "use App\\Http\\Controllers\\Feed\\FeedTranslationController;",
+        "use App\\Http\\Controllers\\Feed\\FeedBookmarkController;\n"
+        "use App\\Http\\Controllers\\Feed\\FeedTranslationController;",
+        1,
+    )
+if "/feed/{post}/bookmark" not in text:
+    pattern = re.compile(
+        r"^(\s*Route::post\('/feed/\{post\}/reaction'.*?;\s*)$",
+        re.M,
+    )
+    match = pattern.search(text)
+    if not match:
+        raise SystemExit("routes/api.php: feed reaction route not found")
+    indent = re.match(r"\s*", match.group(1)).group(0)
+    bookmark_route = (
+        f"{indent}Route::post('/feed/{{post}}/bookmark', "
+        "[FeedBookmarkController::class, 'toggle'])"
+        "->name('feed.bookmarks.toggle');"
+    )
+    text = text[: match.end()] + bookmark_route + text[match.end() :]
+write(routes, text)
 
 model = "app/Models/FeedPost.php"
-replace_once(
-    model,
-    """    public function reactions(): HasMany
-    {
-        return $this->hasMany(FeedReaction::class);
-    }
-
-
-    public function translations(): HasMany
-""",
-    """    public function reactions(): HasMany
-    {
-        return $this->hasMany(FeedReaction::class);
-    }
-
-    public function recentReactions(): HasMany
+text = read(model)
+if "public function recentReactions(): HasMany" not in text:
+    marker = "    public function translations(): HasMany"
+    index = text.find(marker)
+    if index < 0:
+        raise SystemExit("FeedPost.php: translations relation not found")
+    method = """    public function recentReactions(): HasMany
     {
         return $this->hasMany(FeedReaction::class)->latest()->limit(3);
     }
 
-    public function translations(): HasMany
-""",
-)
+"""
+    text = text[:index] + method + text[index:]
+write(model, text)
 
 resource = "app/Http/Resources/Api/FeedPostResource.php"
-replace_once(
-    resource,
-    "            'reactions_count' => (int) ($this->reactions_count ?? 0),\n"
-    "            'bookmarks_count' => (int) ($this->bookmarks_count ?? 0),\n",
-    """            'reactions_count' => (int) ($this->reactions_count ?? 0),
-            'reaction_preview' => $this->whenLoaded(
-                'recentReactions',
-                fn () => UserResource::collection(
-                    $this->recentReactions->pluck('user')->filter()->values()
-                )
-            ),
-            'bookmarks_count' => (int) ($this->bookmarks_count ?? 0),
-""",
-)
+text = read(resource)
+if "'reaction_preview'" not in text:
+    line_pattern = re.compile(
+        r"^(\s*)'reactions_count' => .*?,\s*$",
+        re.M,
+    )
+    match = line_pattern.search(text)
+    if not match:
+        raise SystemExit("FeedPostResource.php: reactions_count line not found")
+    indent = match.group(1)
+    payload = """
+{indent}'reaction_preview' => $this->whenLoaded(
+{indent}    'recentReactions',
+{indent}    fn () => UserResource::collection(
+{indent}        $this->recentReactions->pluck('user')->filter()->values()
+{indent}    )
+{indent}),""".format(indent=indent)
+    text = text[: match.end()] + payload + text[match.end() :]
+write(resource, text)
 
-controller_paths = [
+for path in [
     "app/Http/Controllers/Api/V1/ApiFeedController.php",
     "app/Http/Controllers/Api/V1/ApiFeedEngagementController.php",
-]
-relation_pattern = re.compile(r"(?m)^(\s*)'viewerBookmark',\s*$")
-for path in controller_paths:
-    file = Path(path)
-    text = file.read_text()
-    updated, count = relation_pattern.subn(
-        lambda match: (
-            f"{match.group(1)}'viewerBookmark',\n"
-            f"{match.group(1)}'recentReactions.user.profile',"
-        ),
-        text,
-    )
-    if count < 1:
-        raise SystemExit(f"{path}: no viewerBookmark relation found")
-    file.write_text(updated)
+]:
+    text = read(path)
+    if "recentReactions.user.profile" not in text:
+        pattern = re.compile(r"^(\s*)'viewerBookmark',\s*$", re.M)
+        match = pattern.search(text)
+        if not match:
+            raise SystemExit(f"{path}: viewerBookmark relation not found")
+        indent = match.group(1)
+        text = pattern.sub(
+            lambda item: (
+                f"{item.group(1)}'viewerBookmark',\n"
+                f"{item.group(1)}'recentReactions.user.profile',"
+            ),
+            text,
+        )
+    write(path, text)
 
-expected = {
+checks = {
     routes: ["FeedBookmarkController", "/feed/{post}/bookmark"],
     model: ["recentReactions"],
     resource: ["reaction_preview", "recentReactions"],
 }
-for path, tokens in expected.items():
-    text = Path(path).read_text()
+for path, tokens in checks.items():
+    text = read(path)
     for token in tokens:
         if token not in text:
             raise SystemExit(f"{path}: missing patched token {token!r}")
