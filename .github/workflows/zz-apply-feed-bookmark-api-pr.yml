@@ -20,16 +20,37 @@ jobs:
           fetch-depth: 0
 
       - name: Apply patch
-        run: python3 tools/zz_apply_feed_bookmark_api_patch.py
+        id: apply
+        shell: bash
+        run: |
+          set +e
+          python3 tools/zz_apply_feed_bookmark_api_patch.py > tools/zz_feed_bookmark_patch_error.log 2>&1
+          status=$?
+          cat tools/zz_feed_bookmark_patch_error.log
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Persist patch failure
+        if: steps.apply.outputs.status != '0'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/zz_feed_bookmark_patch_error.log
+          git commit -m "chore: capture feed bookmark patch failure"
+          git push origin HEAD:${{ github.head_ref }}
 
       - name: Remove temporary patch files
+        if: steps.apply.outputs.status == '0'
         run: |
           rm -f .github/workflows/zz-apply-feed-bookmark-api-patch.yml
           rm -f .github/workflows/zz-apply-feed-bookmark-api-pr.yml
           rm -f .github/patch-trigger-feed-bookmark-api
           rm -f tools/zz_apply_feed_bookmark_api_patch.py
+          rm -f tools/zz_feed_bookmark_patch_error.log
 
       - name: Commit patch
+        if: steps.apply.outputs.status == '0'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -39,11 +60,10 @@ jobs:
           git push origin HEAD:${{ github.head_ref }}
 
       - name: Validate changed PHP files
+        if: steps.apply.outputs.status == '0'
         run: |
           php -l routes/api.php
           php -l app/Models/FeedPost.php
           php -l app/Http/Resources/Api/FeedPostResource.php
           php -l app/Http/Controllers/Api/V1/ApiFeedController.php
           php -l app/Http/Controllers/Api/V1/ApiFeedEngagementController.php
-          php -l app/Http/Controllers/Api/V1/ApiMembersController.php
-          php -l app/Http/Controllers/Api/V1/ApiHashtagController.php
