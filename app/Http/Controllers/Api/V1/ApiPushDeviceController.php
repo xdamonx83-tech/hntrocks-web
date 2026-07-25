@@ -7,6 +7,7 @@ use App\Models\UserPushDevice;
 use App\Services\Push\FcmPushService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
 
 class ApiPushDeviceController extends Controller
@@ -22,7 +23,7 @@ class ApiPushDeviceController extends Controller
             ->values();
 
         return response()->json([
-            'message' => 'Push devices loaded.',
+            'message' => $this->isEnglish() ? 'Push devices loaded.' : 'Push-Geräte geladen.',
             'devices' => $devices,
         ]);
     }
@@ -42,7 +43,7 @@ class ApiPushDeviceController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed.',
+                'message' => $this->isEnglish() ? 'Validation failed.' : 'Validierung fehlgeschlagen.',
                 'errors' => $validator->errors(),
             ], 422);
         }
@@ -70,7 +71,7 @@ class ApiPushDeviceController extends Controller
         );
 
         return response()->json([
-            'message' => 'Push device registered.',
+            'message' => $this->isEnglish() ? 'Push device registered.' : 'Push-Gerät registriert.',
             'device' => $this->devicePayload($device),
             'counts' => [
                 'push_devices' => $request->user()->pushDevices()->active()->count(),
@@ -87,7 +88,7 @@ class ApiPushDeviceController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed.',
+                'message' => $this->isEnglish() ? 'Validation failed.' : 'Validierung fehlgeschlagen.',
                 'errors' => $validator->errors(),
             ], 422);
         }
@@ -97,10 +98,14 @@ class ApiPushDeviceController extends Controller
         $deviceId = trim((string) ($data['device_id'] ?? ''));
 
         if ($token === '' && $deviceId === '') {
+            $message = $this->isEnglish()
+                ? 'Token or device_id is required.'
+                : 'Token oder device_id wird benötigt.';
+
             return response()->json([
-                'message' => 'Token or device_id is required.',
+                'message' => $message,
                 'errors' => [
-                    'token' => ['Token or device_id is required.'],
+                    'token' => [$message],
                 ],
             ], 422);
         }
@@ -120,7 +125,7 @@ class ApiPushDeviceController extends Controller
         });
 
         return response()->json([
-            'message' => 'Push device removed.',
+            'message' => $this->isEnglish() ? 'Push device removed.' : 'Push-Gerät entfernt.',
             'revoked' => $revoked,
             'counts' => [
                 'push_devices' => $request->user()->pushDevices()->active()->count(),
@@ -132,10 +137,14 @@ class ApiPushDeviceController extends Controller
     {
         if (! $push->isConfigured()) {
             return response()->json([
-                'message' => 'Firebase Cloud Messaging ist serverseitig noch nicht konfiguriert.',
+                'message' => $this->isEnglish()
+                    ? 'Firebase Cloud Messaging is not configured on the server yet.'
+                    : 'Firebase Cloud Messaging ist serverseitig noch nicht konfiguriert.',
                 'errors' => [
                     'fcm' => [
-                        'Bitte Firebase Service Account JSON auf dem Server hinterlegen und HNT_PUSH_FCM_PROJECT_ID setzen.',
+                        $this->isEnglish()
+                            ? 'Add the Firebase service account JSON on the server and set HNT_PUSH_FCM_PROJECT_ID.'
+                            : 'Bitte Firebase Service Account JSON auf dem Server hinterlegen und HNT_PUSH_FCM_PROJECT_ID setzen.',
                     ],
                 ],
             ], 422);
@@ -145,26 +154,45 @@ class ApiPushDeviceController extends Controller
 
         if ($activeDevices < 1) {
             return response()->json([
-                'message' => 'Für diesen Account ist noch kein aktives Push-Gerät registriert.',
+                'message' => $this->isEnglish()
+                    ? 'No active push device is registered for this account.'
+                    : 'Für diesen Account ist noch kein aktives Push-Gerät registriert.',
                 'errors' => [
-                    'devices' => ['Bitte zuerst das Gerät in der App registrieren.'],
+                    'devices' => [
+                        $this->isEnglish()
+                            ? 'Register the device in the app first.'
+                            : 'Bitte zuerst das Gerät in der App registrieren.',
+                    ],
                 ],
             ], 422);
         }
 
+        $messages = [
+            'de' => [
+                'title' => 'hnt.rocks Push-Test',
+                'body' => 'Wenn du diese Nachricht siehst, funktioniert der Push-Weg bis zu diesem Gerät.',
+            ],
+            'en' => [
+                'title' => 'hnt.rocks push test',
+                'body' => 'If you can see this notification, push delivery to this device is working.',
+            ],
+        ];
+        $fallback = $messages[$this->isEnglish() ? 'en' : 'de'];
+
         $result = $push->sendToUser(
             $request->user(),
-            'hnt.rocks Push-Test',
-            'Wenn du diese Nachricht siehst, funktioniert der Push-Weg bis zu diesem Gerät.',
+            $fallback['title'],
+            $fallback['body'],
             'hntrocks://notifications',
             [
                 'type' => 'push_test',
                 'target' => 'notifications',
-            ]
+            ],
+            $messages
         );
 
         return response()->json([
-            'message' => 'Test push sent.',
+            'message' => $this->isEnglish() ? 'Test push sent.' : 'Test-Push gesendet.',
             'result' => $result,
             'counts' => [
                 'push_devices' => $request->user()->pushDevices()->active()->count(),
@@ -187,5 +215,10 @@ class ApiPushDeviceController extends Controller
             'created_at' => $device->created_at?->toIso8601String(),
             'updated_at' => $device->updated_at?->toIso8601String(),
         ];
+    }
+
+    private function isEnglish(): bool
+    {
+        return App::currentLocale() === 'en';
     }
 }
