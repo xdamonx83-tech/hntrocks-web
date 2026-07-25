@@ -15,7 +15,7 @@ Route::get('/guides/editor/options', [ApiGuideEditorController::class, 'options'
 Route::post('/guides/drafts', [ApiGuideEditorController::class, 'store'])->name('guides.drafts.store');
 Route::get('/guides/drafts/media/{media}', [GuideMediaController::class, 'show'])->name('guides.drafts.media.show');
 Route::get('/guides/drafts/{guide:slug}', [ApiGuideEditorController::class, 'show'])->name('guides.drafts.show');
-Route::put('/guides/drafts/{guide:slug}', [ApiGuideEditorController::class, 'update'])->name('guides.drafts.update');
+Route::patch('/guides/drafts/{guide:slug}', [ApiGuideEditorController::class, 'update'])->name('guides.drafts.update');
 Route::post('/guides/drafts/{guide:slug}/media', [ApiGuideEditorController::class, 'media'])->name('guides.drafts.media.store');
 Route::post('/guides/drafts/{guide:slug}/submit', [ApiGuideEditorController::class, 'submit'])->name('guides.drafts.submit');
 
