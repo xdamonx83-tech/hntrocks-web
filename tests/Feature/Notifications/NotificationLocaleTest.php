@@ -5,9 +5,12 @@ namespace Tests\Feature\Notifications;
 use App\Http\Middleware\SetApiLocale;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Models\UserPushDevice;
 use App\Services\Notifications\NotificationLocaleResolver;
+use App\Services\Push\FcmPushService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
@@ -62,5 +65,32 @@ class NotificationLocaleTest extends TestCase
         $this->assertSame('Malachi hat deinen Beitrag kommentiert.', $messages['de']['body']);
         $this->assertSame('New comment', $messages['en']['title']);
         $this->assertSame('Malachi commented on your post.', $messages['en']['body']);
+    }
+
+    public function test_push_toast_uses_the_registered_device_locale(): void
+    {
+        $device = new UserPushDevice(['locale' => 'en-US']);
+        $method = new ReflectionMethod(FcmPushService::class, 'messageForDevice');
+        $method->setAccessible(true);
+
+        $message = $method->invoke(
+            new FcmPushService(),
+            $device,
+            'Deutscher Titel',
+            'Deutscher Text',
+            [
+                'de' => [
+                    'title' => 'Deutscher Titel',
+                    'body' => 'Deutscher Text',
+                ],
+                'en' => [
+                    'title' => 'English title',
+                    'body' => 'English body',
+                ],
+            ]
+        );
+
+        $this->assertSame('English title', $message['title']);
+        $this->assertSame('English body', $message['body']);
     }
 }
