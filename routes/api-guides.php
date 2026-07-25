@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\ApiGuidesController;
 use App\Http\Controllers\Guides\GuideBookmarkController;
 use App\Http\Controllers\Guides\GuideCommentController;
 use App\Http\Controllers\Guides\GuideHelpfulController;
+use App\Http\Controllers\Guides\GuideMediaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/guides', [ApiGuidesController::class, 'index'])->name('guides.index');
@@ -12,6 +13,7 @@ Route::get('/guides/media/{media}', [ApiGuidesController::class, 'media'])->name
 
 Route::get('/guides/editor/options', [ApiGuideEditorController::class, 'options'])->name('guides.editor.options');
 Route::post('/guides/drafts', [ApiGuideEditorController::class, 'store'])->name('guides.drafts.store');
+Route::get('/guides/drafts/media/{media}', [GuideMediaController::class, 'show'])->name('guides.drafts.media.show');
 Route::get('/guides/drafts/{guide:slug}', [ApiGuideEditorController::class, 'show'])->name('guides.drafts.show');
 Route::put('/guides/drafts/{guide:slug}', [ApiGuideEditorController::class, 'update'])->name('guides.drafts.update');
 Route::post('/guides/drafts/{guide:slug}/media', [ApiGuideEditorController::class, 'media'])->name('guides.drafts.media.store');
