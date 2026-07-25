@@ -40,6 +40,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'hh_vid',
         ]);
 
+        $middleware->api(prepend: [
+            \App\Http\Middleware\SetApiLocale::class,
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\ResolveHntViewMode::class,

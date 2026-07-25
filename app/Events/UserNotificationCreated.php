@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\UserNotification;
+use App\Services\Notifications\NotificationLocaleResolver;
 use App\Services\Notifications\PushPayloadResolver;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -43,14 +44,26 @@ class UserNotificationCreated implements ShouldBroadcastNow
             (string) $notification->id,
             (string) ($notification->actor_id ?? '')
         );
-        $body = $this->displayBody($notification);
+
+        /** @var NotificationLocaleResolver $resolver */
+        $resolver = app(NotificationLocaleResolver::class);
+        $translations = $resolver->messages($notification);
+        $preferredLocale = $resolver->normalize($this->preferredLocale($notification));
+        $message = $translations[$preferredLocale]
+            ?? $translations['de']
+            ?? [
+                'title' => 'hnt.rocks',
+                'body' => 'Du hast eine neue Benachrichtigung.',
+            ];
 
         return [
             'notification_id' => $notification->id,
             'type' => (string) $notification->type,
-            'title' => $this->displayTitle($notification),
-            'body' => $body,
-            'message' => $body,
+            'title' => $message['title'],
+            'body' => $message['body'],
+            'message' => $message['body'],
+            'locale' => $preferredLocale,
+            'translations' => $translations,
             'action_url' => $actionUrl,
             'actor_id' => $notification->actor_id,
             'created_at' => $notification->created_at?->toISOString(),
@@ -59,26 +72,21 @@ class UserNotificationCreated implements ShouldBroadcastNow
         ];
     }
 
-    private function displayTitle(UserNotification $notification): string
+    private function preferredLocale(UserNotification $notification): ?string
     {
         try {
-            $title = trim($notification->displayTitle());
+            $user = $notification->user;
+            if (! $user) {
+                return null;
+            }
+
+            return $user->pushDevices()
+                ->active()
+                ->latest('last_seen_at')
+                ->value('locale');
         } catch (Throwable) {
-            $title = trim((string) $notification->title);
+            return null;
         }
-
-        return $title !== '' ? $title : 'hnt.rocks';
-    }
-
-    private function displayBody(UserNotification $notification): string
-    {
-        try {
-            $body = trim((string) $notification->displayBody());
-        } catch (Throwable) {
-            $body = trim((string) $notification->body);
-        }
-
-        return $body !== '' ? $body : 'Du hast eine neue Benachrichtigung.';
     }
 
     private function actionUrl(UserNotification $notification): ?string
@@ -93,7 +101,7 @@ class UserNotificationCreated implements ShouldBroadcastNow
     private function loadNotificationRelations(UserNotification $notification): void
     {
         try {
-            $notification->loadMissing(['actor.profile']);
+            $notification->loadMissing(['user', 'actor.profile']);
         } catch (Throwable) {
             // Optional relations must not prevent the base notification payload.
         }

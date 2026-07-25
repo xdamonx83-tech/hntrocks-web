@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Events\UserNotificationCreated;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Services\Notifications\NotificationLocaleResolver;
 use App\Services\Notifications\PushPayloadResolver;
 use App\Services\Push\FcmPushService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -89,27 +91,24 @@ class NotificationService
                 return;
             }
 
-            $title = trim($notification->displayTitle());
-            $body = trim((string) $notification->displayBody());
-
-            if ($title === '') {
-                $title = 'hnt.rocks';
-            }
-
-            if ($body === '') {
-                $body = trim((string) $notification->body);
-            }
-
-            if ($body === '') {
-                $body = 'Du hast eine neue Benachrichtigung.';
-            }
+            /** @var NotificationLocaleResolver $resolver */
+            $resolver = app(NotificationLocaleResolver::class);
+            $localizedMessages = $resolver->messages($notification);
+            $fallbackLocale = $resolver->normalize(App::currentLocale());
+            $fallback = $localizedMessages[$fallbackLocale]
+                ?? $localizedMessages['de']
+                ?? [
+                    'title' => 'hnt.rocks',
+                    'body' => 'Du hast eine neue Benachrichtigung.',
+                ];
 
             $push->sendToUser(
                 $recipient,
-                $title,
-                $body,
+                $fallback['title'],
+                $fallback['body'],
                 $notification->actionUrl(),
-                app(PushPayloadResolver::class)->forNotification($notification)
+                app(PushPayloadResolver::class)->forNotification($notification),
+                $localizedMessages
             );
         } catch (Throwable $error) {
             Log::warning('Push dispatch for user notification failed.', [
