@@ -154,7 +154,7 @@ class ApiGuideEditorController extends Controller
                 'media' => [
                     'id' => (int) $media->id,
                     'kind' => (string) $media->kind,
-                    'url' => 'guides/media/'.(int) $media->id,
+                    'url' => 'guides/drafts/media/'.(int) $media->id,
                     'width' => $media->width ? (int) $media->width : null,
                     'height' => $media->height ? (int) $media->height : null,
                 ],
@@ -219,7 +219,7 @@ class ApiGuideEditorController extends Controller
                 ] : null,
                 'cover_media_id' => $revision->cover_media_id ? (int) $revision->cover_media_id : null,
                 'cover_url' => $revision->cover_media_id
-                    ? 'guides/media/'.(int) $revision->cover_media_id
+                    ? 'guides/drafts/media/'.(int) $revision->cover_media_id
                     : null,
                 'tags' => array_values(array_filter((array) $revision->tags)),
                 'language' => (string) ($revision->language ?: 'de'),
@@ -267,7 +267,7 @@ class ApiGuideEditorController extends Controller
                 if ($type === 'image') {
                     $mediaId = (int) ($block['media_id'] ?? 0);
                     $payload['media_id'] = $mediaId > 0 ? $mediaId : null;
-                    $payload['media_url'] = $mediaId > 0 ? 'guides/media/'.$mediaId : null;
+                    $payload['media_url'] = $mediaId > 0 ? 'guides/drafts/media/'.$mediaId : null;
                     $payload['caption'] = (string) ($block['caption'] ?? '');
                 }
 
