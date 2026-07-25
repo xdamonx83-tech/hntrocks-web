@@ -75,8 +75,12 @@ class UserNotificationCreated implements ShouldBroadcastNow
     private function preferredLocale(UserNotification $notification): ?string
     {
         try {
-            return $notification->user
-                ?->pushDevices()
+            $user = $notification->user;
+            if (! $user) {
+                return null;
+            }
+
+            return $user->pushDevices()
                 ->active()
                 ->latest('last_seen_at')
                 ->value('locale');
