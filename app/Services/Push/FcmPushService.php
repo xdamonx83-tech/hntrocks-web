@@ -22,8 +22,14 @@ class FcmPushService
             && trim((string) $account['private_key']) !== '';
     }
 
-    public function sendToUser(User $user, string $title, string $body, ?string $actionUrl = null, array $data = []): array
-    {
+    public function sendToUser(
+        User $user,
+        string $title,
+        string $body,
+        ?string $actionUrl = null,
+        array $data = [],
+        array $localizedMessages = []
+    ): array {
         $devices = $user->pushDevices()->active()->get();
 
         $sent = 0;
@@ -32,7 +38,19 @@ class FcmPushService
 
         foreach ($devices as $device) {
             try {
-                $responses[] = $this->sendToDevice($device, $title, $body, $actionUrl, $data);
+                $message = $this->messageForDevice(
+                    $device,
+                    $title,
+                    $body,
+                    $localizedMessages
+                );
+                $responses[] = $this->sendToDevice(
+                    $device,
+                    $message['title'],
+                    $message['body'],
+                    $actionUrl,
+                    $data
+                );
                 $sent++;
             } catch (Throwable $error) {
                 $failed++;
@@ -112,6 +130,41 @@ class FcmPushService
         ];
     }
 
+    private function messageForDevice(
+        UserPushDevice $device,
+        string $fallbackTitle,
+        string $fallbackBody,
+        array $localizedMessages
+    ): array {
+        $locale = $this->localeCode($device->locale);
+        $message = $localizedMessages[$locale] ?? null;
+
+        if (! is_array($message)) {
+            return [
+                'title' => $fallbackTitle,
+                'body' => $fallbackBody,
+            ];
+        }
+
+        $title = trim((string) ($message['title'] ?? ''));
+        $body = trim((string) ($message['body'] ?? ''));
+
+        return [
+            'title' => $title !== '' ? $title : $fallbackTitle,
+            'body' => $body !== '' ? $body : $fallbackBody,
+        ];
+    }
+
+    private function localeCode(?string $locale): string
+    {
+        $value = strtolower(trim((string) $locale));
+        $language = explode('-', str_replace('_', '-', $value), 2)[0];
+
+        return in_array($language, ['de', 'en'], true)
+            ? $language
+            : 'de';
+    }
+
     private function accessToken(): string
     {
         $account = $this->serviceAccount();
@@ -129,7 +182,7 @@ class FcmPushService
             ->acceptJson()
             ->timeout($this->timeout())
             ->post('https://oauth2.googleapis.com/token', [
-                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'grant_type' => 'urn:ietf:params:oauth-type:jwt-bearer',
                 'assertion' => $jwt,
             ]);
 
