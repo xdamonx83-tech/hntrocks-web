@@ -88,7 +88,7 @@ class GuideContentService
         }
 
         $blocks = $this->sanitizeBlocks((array) $revision->content_blocks);
-        if ($blocks === []) {
+        if (count($blocks) < 3) {
             $errors['content_blocks'][] = __('guides.validation.blocks_required');
         } elseif (collect($blocks)->contains(fn (array $block): bool => ! $this->blockIsComplete($block))) {
             $errors['content_blocks'][] = __('guides.validation.blocks_incomplete');
