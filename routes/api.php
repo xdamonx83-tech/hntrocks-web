@@ -133,6 +133,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/feed/{post}/poll/vote', [ApiFeedController::class, 'votePoll'])->name('feed.poll.vote');
         Route::post('/feed/comments/{comment}/update', [ApiFeedEngagementController::class, 'updateComment'])->name('feed.comments.update');
         Route::post('/feed/comments/{comment}/delete', [ApiFeedEngagementController::class, 'destroyComment'])->name('feed.comments.destroy');
+        Route::get('/feed/comments/{comment}/reactions', [ApiFeedEngagementController::class, 'commentReactions'])->name('feed.comments.reactions.index');
         Route::post('/feed/comments/{comment}/reaction', [ApiFeedEngagementController::class, 'toggleCommentReaction'])->name('feed.comments.reactions.toggle');
         Route::post('/feed/comments/{comment}/translation', [FeedTranslationController::class, 'comment'])->name('feed.comments.translation');
 

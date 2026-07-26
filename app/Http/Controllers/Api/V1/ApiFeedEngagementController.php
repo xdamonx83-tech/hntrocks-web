@@ -48,6 +48,37 @@ class ApiFeedEngagementController extends Controller
         ]);
     }
 
+    public function commentReactions(Request $request, FeedComment $comment): JsonResponse
+    {
+        $comment->loadMissing(['post.user', 'post.team']);
+        $post = $comment->post;
+
+        abort_unless($post && $this->canUsePost($request, $post), 403);
+
+        $reactions = $comment->reactions()
+            ->with('user.profile')
+            ->latest()
+            ->get()
+            ->filter(fn ($reaction) => $reaction->user !== null)
+            ->values();
+
+        return response()->json([
+            'total' => $reactions->count(),
+            'users' => $reactions->map(function ($reaction): array {
+                $user = $reaction->user;
+
+                return [
+                    'id' => (int) $user->id,
+                    'name' => (string) ($user->name ?: $user->username ?: 'Hunter'),
+                    'username' => (string) ($user->username ?: ''),
+                    'avatar_url' => $user->avatarUrl(),
+                    'type' => (string) ($reaction->type ?: 'like'),
+                    'reacted_at' => optional($reaction->created_at)->diffForHumans(),
+                ];
+            })->values(),
+        ]);
+    }
+
     public function comments(Request $request, FeedPost $post): AnonymousResourceCollection
     {
         abort_unless($this->canUsePost($request, $post), 404);
