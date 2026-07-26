@@ -28,10 +28,12 @@ class ApiFeedController extends Controller
                 'team',
                 'sharedPost.user.profile',
                 'sharedPost.team',
+            'sharedPost.viewerShare',
                 'sharedPost.media.mediaAsset',
                 'media.mediaAsset',
                 'viewerReaction',
                 'viewerBookmark',
+            'viewerShare',
                 'previewComments' => function ($query): void {
                     $query
                         ->with([
@@ -81,10 +83,12 @@ class ApiFeedController extends Controller
             'team',
             'sharedPost.user.profile',
             'sharedPost.team',
+            'sharedPost.viewerShare',
             'sharedPost.media.mediaAsset',
             'media.mediaAsset',
             'viewerReaction',
             'viewerBookmark',
+            'viewerShare',
                 'previewComments' => function ($query): void {
                     $query
                         ->with([
@@ -231,7 +235,8 @@ class ApiFeedController extends Controller
         $gamification->award($request->user(), 'feed_post_created', source: $post);
         $mentions->syncForFeedPost($post, $request->user(), $post->body, $notifications);
 
-        $post->loadMissing(['user.profile', 'media.mediaAsset', 'viewerReaction', 'viewerBookmark', 'poll.options.votes', 'poll.votes']);
+        $post->loadMissing(['user.profile', 'media.mediaAsset', 'viewerReaction', 'viewerBookmark',
+            'viewerShare', 'poll.options.votes', 'poll.votes']);
         $post->loadCount(['comments', 'reactions', 'bookmarks']);
         $post->loadCount('sharedByPosts as shares_count');
 
@@ -266,10 +271,12 @@ class ApiFeedController extends Controller
             'team',
             'sharedPost.user.profile',
             'sharedPost.team',
+            'sharedPost.viewerShare',
             'sharedPost.media.mediaAsset',
             'media.mediaAsset',
             'viewerReaction',
             'viewerBookmark',
+            'viewerShare',
             'poll.options.votes',
             'poll.votes',
         ]);
@@ -336,10 +343,12 @@ class ApiFeedController extends Controller
             'team',
             'sharedPost.user.profile',
             'sharedPost.team',
+            'sharedPost.viewerShare',
             'sharedPost.media.mediaAsset',
             'media.mediaAsset',
             'viewerReaction',
             'viewerBookmark',
+            'viewerShare',
             'poll.options.votes',
             'poll.votes',
         ]);
@@ -448,10 +457,12 @@ class ApiFeedController extends Controller
             'team',
             'sharedPost.user.profile',
             'sharedPost.team',
+            'sharedPost.viewerShare',
             'sharedPost.media.mediaAsset',
             'media.mediaAsset',
             'viewerReaction',
             'viewerBookmark',
+            'viewerShare',
             'poll.options.votes',
             'poll.votes',
         ]);

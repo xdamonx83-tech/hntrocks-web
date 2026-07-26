@@ -44,6 +44,7 @@ class FeedPostResource extends JsonResource
             'viewer' => [
                 'reaction' => $this->whenLoaded('viewerReaction', fn () => $this->viewerReaction?->type),
                 'bookmarked' => $this->whenLoaded('viewerBookmark', fn () => $this->viewerBookmark !== null),
+                'shared' => $this->viewerHasShared(),
                 'can_edit' => $request->user() && (int) $request->user()->id === (int) $this->user_id,
                 'can_delete' => $request->user() && ((int) $request->user()->id === (int) $this->user_id || $request->user()->isAdmin()),
             ],
@@ -52,6 +53,21 @@ class FeedPostResource extends JsonResource
         ];
     }
 
+
+    private function viewerHasShared(): bool
+    {
+        if ($this->isSharedPost()) {
+            if (! $this->relationLoaded('sharedPost') || ! $this->sharedPost) {
+                return false;
+            }
+
+            return $this->sharedPost->relationLoaded('viewerShare')
+                && $this->sharedPost->viewerShare !== null;
+        }
+
+        return $this->relationLoaded('viewerShare')
+            && $this->viewerShare !== null;
+    }
 
     private function translationPayload(Request $request): array
     {

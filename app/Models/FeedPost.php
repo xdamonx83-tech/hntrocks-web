@@ -154,6 +154,11 @@ class FeedPost extends Model
         return $this->hasOne(FeedBookmark::class)->where('user_id', auth()->id());
     }
 
+    public function viewerShare(): HasOne
+    {
+        return $this->hasOne(self::class, 'shared_post_id')->where('user_id', auth()->id());
+    }
+
     public function isTeamPost(): bool
     {
         return $this->team_id !== null;
