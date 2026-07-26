@@ -41,6 +41,7 @@ use App\Http\Controllers\Api\V1\ApiTeamsController;
 use App\Http\Controllers\Api\V1\ApiUserLoadoutController;
 use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
 use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
+use App\Http\Controllers\Feed\FeedBookmarkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Presence\PresenceHeartbeatController;
 use App\Http\Controllers\Reports\ReportController;
@@ -125,6 +126,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/feed/{post}/update', [ApiFeedController::class, 'update'])->name('feed.update');
         Route::post('/feed/{post}/delete', [ApiFeedController::class, 'destroy'])->name('feed.destroy');
         Route::post('/feed/{post}/share', [ApiFeedController::class, 'share'])->name('feed.share');
+        Route::post('/feed/{post}/bookmark', [FeedBookmarkController::class, 'toggle'])->name('feed.bookmarks.toggle');
         Route::post('/feed/{post}/translation', [FeedTranslationController::class, 'post'])->name('feed.translation.post');
         Route::get('/feed/{post}/comments', [ApiFeedEngagementController::class, 'comments'])->name('feed.comments.index');
         Route::post('/feed/{post}/comments', [ApiFeedEngagementController::class, 'storeComment'])->name('feed.comments.store');
