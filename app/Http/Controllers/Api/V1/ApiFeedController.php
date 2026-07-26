@@ -12,6 +12,7 @@ use App\Services\MediaService;
 use App\Services\MentionService;
 use App\Services\NotificationService;
 use App\Services\Translation\FeedTranslationService;
+use App\Services\UserBlockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -20,8 +21,10 @@ use Illuminate\Support\Facades\Storage;
 
 class ApiFeedController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request, UserBlockService $blocks): AnonymousResourceCollection
     {
+        $blockedUserIds = $blocks->blockedUserIds($request->user());
+
         $posts = FeedPost::query()
             ->with([
                 'user.profile',
@@ -68,6 +71,17 @@ class ApiFeedController extends Controller
                         });
                 });
             })
+            ->when($blockedUserIds !== [], function ($query) use ($blockedUserIds): void {
+                $query
+                    ->whereNotIn('user_id', $blockedUserIds)
+                    ->where(function ($sharedPostQuery) use ($blockedUserIds): void {
+                        $sharedPostQuery
+                            ->whereNull('shared_post_id')
+                            ->orWhereDoesntHave('sharedPost', function ($originalPostQuery) use ($blockedUserIds): void {
+                                $originalPostQuery->whereIn('user_id', $blockedUserIds);
+                            });
+                    });
+            })
             ->when(
                 $request->boolean('bookmarked'),
                 fn ($query) => $query->whereHas(
@@ -83,7 +97,7 @@ class ApiFeedController extends Controller
         return FeedPostResource::collection($posts);
     }
 
-    public function show(Request $request, FeedPost $post): FeedPostResource
+    public function show(Request $request, FeedPost $post, UserBlockService $blocks): FeedPostResource
     {
         $post->loadMissing([
             'user.profile',
@@ -113,6 +127,12 @@ class ApiFeedController extends Controller
         $post->loadCount('sharedByPosts as shares_count');
 
         abort_unless($post->status === 'published' && $post->canBeViewedBy($request->user()), 404);
+
+        $blockedUserIds = $blocks->blockedUserIds($request->user());
+        $blockedAuthor = in_array((int) $post->user_id, $blockedUserIds, true)
+            || ($post->sharedPost && in_array((int) $post->sharedPost->user_id, $blockedUserIds, true));
+
+        abort_if($blockedAuthor, 404);
 
         return new FeedPostResource($post);
     }
