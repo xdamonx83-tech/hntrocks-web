@@ -28,6 +28,15 @@ class FeedPostResource extends JsonResource
             'author' => new UserResource($this->whenLoaded('user')),
             'media' => FeedPostMediaResource::collection($this->whenLoaded('media')),
             'shared_post' => $this->whenLoaded('sharedPost', fn () => $this->sharedPost ? new self($this->sharedPost) : null),
+            'comments_preview' => FeedCommentResource::collection($this->whenLoaded('previewComments')),
+            'reactions_preview' => $this->whenLoaded('previewReactions', function () {
+                return UserResource::collection(
+                    $this->previewReactions
+                        ->pluck('user')
+                        ->filter()
+                        ->values()
+                );
+            }),
             'comments_count' => (int) ($this->comments_count ?? 0),
             'reactions_count' => (int) ($this->reactions_count ?? 0),
             'bookmarks_count' => (int) ($this->bookmarks_count ?? 0),

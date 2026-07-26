@@ -32,6 +32,16 @@ class ApiFeedController extends Controller
                 'media.mediaAsset',
                 'viewerReaction',
                 'viewerBookmark',
+                'previewComments' => function ($query): void {
+                    $query
+                        ->with([
+                            'user.profile',
+                            'media.mediaAsset',
+                            'viewerReaction',
+                        ])
+                        ->withCount('reactions');
+                },
+                'previewReactions.user.profile',
                 'poll.options.votes',
                 'poll.votes',
             ])
@@ -75,6 +85,16 @@ class ApiFeedController extends Controller
             'media.mediaAsset',
             'viewerReaction',
             'viewerBookmark',
+                'previewComments' => function ($query): void {
+                    $query
+                        ->with([
+                            'user.profile',
+                            'media.mediaAsset',
+                            'viewerReaction',
+                        ])
+                        ->withCount('reactions');
+                },
+                'previewReactions.user.profile',
             'poll.options.votes',
             'poll.votes',
         ]);

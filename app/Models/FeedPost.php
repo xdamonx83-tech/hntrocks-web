@@ -108,9 +108,24 @@ class FeedPost extends Model
         return $this->hasMany(FeedComment::class)->latest();
     }
 
+    public function previewComments(): HasMany
+    {
+        return $this->hasMany(FeedComment::class)
+            ->whereNull('parent_id')
+            ->latest()
+            ->limit(2);
+    }
+
     public function reactions(): HasMany
     {
         return $this->hasMany(FeedReaction::class);
+    }
+
+    public function previewReactions(): HasMany
+    {
+        return $this->hasMany(FeedReaction::class)
+            ->latest()
+            ->limit(3);
     }
 
 
