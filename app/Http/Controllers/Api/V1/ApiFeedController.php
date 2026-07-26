@@ -68,6 +68,13 @@ class ApiFeedController extends Controller
                         });
                 });
             })
+            ->when(
+                $request->boolean('bookmarked'),
+                fn ($query) => $query->whereHas(
+                    'bookmarks',
+                    fn ($bookmarkQuery) => $bookmarkQuery->where('user_id', $request->user()->id)
+                )
+            )
             ->orderByDesc('is_pinned')
             ->orderByDesc('pinned_at')
             ->latest()
