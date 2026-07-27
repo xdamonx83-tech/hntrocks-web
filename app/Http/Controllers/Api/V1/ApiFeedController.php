@@ -24,6 +24,11 @@ class ApiFeedController extends Controller
 {
     public function index(Request $request, UserBlockService $blocks): AnonymousResourceCollection
     {
+        $validated = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $searchTerm = trim((string) ($validated['q'] ?? ''));
         $blockedUserIds = $blocks->blockedUserIds($request->user());
         $friendIds = [];
 
@@ -116,6 +121,30 @@ class ApiFeedController extends Controller
                     fn ($bookmarkQuery) => $bookmarkQuery->where('user_id', $request->user()->id)
                 )
             )
+            ->when($searchTerm !== '', function ($query) use ($searchTerm): void {
+                $like = '%'.addcslashes($searchTerm, '\%_').'%';
+
+                $query->where(function ($searchQuery) use ($like): void {
+                    $searchQuery
+                        ->where('title', 'like', $like)
+                        ->orWhere('body', 'like', $like)
+                        ->orWhereHas('user', function ($userQuery) use ($like): void {
+                            $userQuery
+                                ->where('name', 'like', $like)
+                                ->orWhere('username', 'like', $like);
+                        })
+                        ->orWhereHas('sharedPost', function ($sharedPostQuery) use ($like): void {
+                            $sharedPostQuery
+                                ->where('title', 'like', $like)
+                                ->orWhere('body', 'like', $like)
+                                ->orWhereHas('user', function ($userQuery) use ($like): void {
+                                    $userQuery
+                                        ->where('name', 'like', $like)
+                                        ->orWhere('username', 'like', $like);
+                                });
+                        });
+                });
+            })
             ->orderByDesc('is_pinned')
             ->orderByDesc('pinned_at')
             ->latest()
