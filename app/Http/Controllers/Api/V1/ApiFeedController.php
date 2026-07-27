@@ -126,8 +126,7 @@ class ApiFeedController extends Controller
 
                 $query->where(function ($searchQuery) use ($like): void {
                     $searchQuery
-                        ->where('title', 'like', $like)
-                        ->orWhere('body', 'like', $like)
+                        ->where('body', 'like', $like)
                         ->orWhereHas('user', function ($userQuery) use ($like): void {
                             $userQuery
                                 ->where('name', 'like', $like)
@@ -135,8 +134,7 @@ class ApiFeedController extends Controller
                         })
                         ->orWhereHas('sharedPost', function ($sharedPostQuery) use ($like): void {
                             $sharedPostQuery
-                                ->where('title', 'like', $like)
-                                ->orWhere('body', 'like', $like)
+                                ->where('body', 'like', $like)
                                 ->orWhereHas('user', function ($userQuery) use ($like): void {
                                     $userQuery
                                         ->where('name', 'like', $like)
