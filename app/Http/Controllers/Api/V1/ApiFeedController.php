@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\FeedPostResource;
 use App\Models\FeedPost;
+use App\Models\Friendship;
 use App\Services\AI\MediaAiDisclosureService;
 use App\Services\GamificationService;
 use App\Services\Gifs\GifProviderService;
@@ -24,6 +25,23 @@ class ApiFeedController extends Controller
     public function index(Request $request, UserBlockService $blocks): AnonymousResourceCollection
     {
         $blockedUserIds = $blocks->blockedUserIds($request->user());
+        $friendIds = [];
+
+        if ($request->boolean('friends')) {
+            $viewerId = (int) $request->user()->id;
+
+            $friendIds = Friendship::query()
+                ->forUser($viewerId)
+                ->where('status', Friendship::STATUS_ACCEPTED)
+                ->get(['user_one_id', 'user_two_id'])
+                ->map(fn (Friendship $friendship): int => (int) $friendship->user_one_id === $viewerId
+                    ? (int) $friendship->user_two_id
+                    : (int) $friendship->user_one_id)
+                ->filter(fn (int $friendId): bool => $friendId !== $viewerId)
+                ->unique()
+                ->values()
+                ->all();
+        }
 
         $posts = FeedPost::query()
             ->with([
@@ -81,6 +99,15 @@ class ApiFeedController extends Controller
                                 $originalPostQuery->whereIn('user_id', $blockedUserIds);
                             });
                     });
+            })
+            ->when($request->boolean('friends'), function ($query) use ($friendIds): void {
+                if ($friendIds === []) {
+                    $query->whereRaw('1 = 0');
+
+                    return;
+                }
+
+                $query->whereIn('user_id', $friendIds);
             })
             ->when(
                 $request->boolean('bookmarked'),
