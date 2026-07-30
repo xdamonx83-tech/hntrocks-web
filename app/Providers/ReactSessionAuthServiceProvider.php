@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\Api\V1\LandingSummaryController;
 use App\Http\Controllers\Auth\ReactSessionAuthController;
 use App\Http\Controllers\Auth\SocialProviderIndexController;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,10 @@ class ReactSessionAuthServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        Route::middleware(['api', 'throttle:60,1'])
+            ->get('/api/v1/landing', LandingSummaryController::class)
+            ->name('api.v1.landing');
+
         Route::middleware(['web', 'throttle:60,1'])
             ->get('/auth/social/providers', SocialProviderIndexController::class)
             ->name('react.auth.social-providers');
