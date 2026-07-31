@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Controllers\Api\V1\LandingSummaryController;
 use App\Http\Controllers\Auth\ReactSessionAuthController;
+use App\Http\Controllers\Auth\ReactSessionLogoutController;
 use App\Http\Controllers\Auth\SocialProviderIndexController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -23,5 +24,9 @@ class ReactSessionAuthServiceProvider extends ServiceProvider
         Route::middleware(['web', 'auth', 'throttle:10,1'])
             ->get('/auth/react/session', ReactSessionAuthController::class)
             ->name('react.auth.session');
+
+        Route::middleware(['web', 'throttle:20,1'])
+            ->get('/auth/react/logout', ReactSessionLogoutController::class)
+            ->name('react.auth.logout');
     }
 }
