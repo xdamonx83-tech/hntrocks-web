@@ -200,6 +200,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/moments', [ApiMomentsController::class, 'index'])->name('moments.index');
         Route::post('/moments', [ApiMomentsController::class, 'store'])->name('moments.store');
         Route::get('/moments/studio/{project}/status', [ApiMomentsController::class, 'studioStatus'])->name('moments.studio.status');
+        Route::get('/moments/saved', [ApiMomentsController::class, 'saved'])->name('moments.saved.index');
         Route::get('/moments/{moment}', [ApiMomentsController::class, 'show'])->name('moments.show');
         Route::patch('/moments/{moment}', [ApiMomentsController::class, 'update'])->name('moments.update');
         Route::delete('/moments/{moment}', [ApiMomentsController::class, 'destroy'])->name('moments.destroy');
