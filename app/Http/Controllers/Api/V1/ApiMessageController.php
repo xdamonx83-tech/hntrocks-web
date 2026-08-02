@@ -26,6 +26,7 @@ class ApiMessageController extends Controller
         $conversations = Conversation::query()
             ->forUser($user)
             ->whereIn('type', $this->typesFor($type))
+            ->whereHas('messages')
             ->with(['users.profile', 'users.privacySettings', 'latestMessage.user.profile', 'latestMessage.user.privacySettings'])
             ->latest('updated_at')
             ->paginate(30);
