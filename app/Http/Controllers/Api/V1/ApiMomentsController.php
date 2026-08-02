@@ -7,6 +7,7 @@ use App\Http\Resources\Api\MomentCommentResource;
 use App\Http\Resources\Api\MomentResource;
 use App\Jobs\RenderMomentStudioProject;
 use App\Models\Moment;
+use App\Models\MomentBookmark;
 use App\Models\MomentComment;
 use App\Models\MomentStudioProject;
 use App\Models\User;
@@ -34,6 +35,33 @@ class ApiMomentsController extends Controller
             ->published()
             ->latest('published_at')
             ->latest('id')
+            ->paginate(20);
+
+        return MomentResource::collection($moments);
+    }
+
+    public function saved(Request $request): AnonymousResourceCollection
+    {
+        $viewerId = (int) $request->user()->id;
+
+        $moments = Moment::query()
+            ->with([
+                'user.profile',
+                'media',
+                'cover',
+                'reactions' => fn ($query) => $query->where('user_id', $viewerId)->where('type', 'like'),
+                'bookmarks' => fn ($query) => $query->where('user_id', $viewerId),
+            ])
+            ->whereHas('bookmarks', fn ($query) => $query->where('user_id', $viewerId))
+            ->published()
+            ->orderByDesc(
+                MomentBookmark::query()
+                    ->select('created_at')
+                    ->whereColumn('moment_id', 'moments.id')
+                    ->where('user_id', $viewerId)
+                    ->limit(1)
+            )
+            ->latest('moments.id')
             ->paginate(20);
 
         return MomentResource::collection($moments);
