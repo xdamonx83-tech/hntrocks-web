@@ -13,7 +13,7 @@
     # Laravel keeps handling API, social callbacks, maps, guides, LFG, teams,
     # legal pages, admin pages and every route not listed here.
     RewriteRule ^$ app/index.html [L]
-    RewriteRule ^(?:feed|saved|members|messages|moments|play|discover|settings|404)/?$ app/index.html [L]
+    RewriteRule ^(?:feed|saved|members|messages|moments|play|discover|ready-lobbies|settings|404)/?$ app/index.html [L]
     RewriteRule ^moments/create/?$ app/index.html [L]
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
     RewriteRule ^dashboards/default/?$ app/index.html [L]
