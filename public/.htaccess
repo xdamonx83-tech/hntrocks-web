@@ -10,11 +10,13 @@
 
     # HNT.ROCKS React frontend lives in public/app.
     # Only routes that already exist in the React app are handed to its SPA.
-    # Laravel keeps handling API, social callbacks, maps, guides, LFG, team details,
+    # Laravel keeps handling API, social callbacks, maps, guides, LFG, team create/manage pages,
     # legal pages, admin pages and every route not listed here.
     RewriteRule ^$ app/index.html [L]
     RewriteRule ^(?:feed|saved|members|messages|moments|play|discover|ready-lobbies|teams|settings|404)/?$ app/index.html [L]
     RewriteRule ^moments/create/?$ app/index.html [L]
+    RewriteCond %{REQUEST_URI} !^/teams/(?:create|manage)/?$ [NC]
+    RewriteRule ^teams/[^/]+/?$ app/index.html [L]
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
     RewriteRule ^dashboards/default/?$ app/index.html [L]
     RewriteRule ^pages/user/(?:overview|hunter-dna|projects|permissions|friends|social)/?$ app/index.html [L]
