@@ -20,6 +20,12 @@ class ApiTeamsController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
+        $sort = (string) $request->query('sort', 'newest');
+
+        if (! in_array($sort, ['newest', 'members', 'name'], true)) {
+            $sort = 'newest';
+        }
+
         $teams = Team::query()
             ->with('owner.profile')
             ->withCount('activeMembers')
@@ -33,11 +39,32 @@ class ApiTeamsController extends Controller
                             ->where('status', 'active');
                     });
             })
+            ->when($request->filled('q'), function ($query) use ($request): void {
+                $search = trim((string) $request->query('q'));
+
+                $query->where(function ($searchQuery) use ($search): void {
+                    $searchQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('tagline', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
             ->when($request->filled('platform'), fn ($query) => $query->where('platform', $request->string('platform')))
             ->when($request->filled('playstyle'), fn ($query) => $query->where('playstyle', $request->string('playstyle')))
             ->when($request->filled('region'), fn ($query) => $query->where('region', $request->string('region')))
-            ->latest()
-            ->paginate(24);
+            ->when($request->filled('language'), fn ($query) => $query->where('language', $request->string('language')))
+            ->when(
+                in_array($request->query('recruitment_status'), ['open', 'closed'], true),
+                fn ($query) => $query->where('recruitment_status', $request->query('recruitment_status'))
+            )
+            ->when(
+                $sort === 'members',
+                fn ($query) => $query->orderByDesc('active_members_count')->orderByDesc('created_at')
+            )
+            ->when($sort === 'name', fn ($query) => $query->orderBy('name'))
+            ->when($sort === 'newest', fn ($query) => $query->latest())
+            ->paginate(24)
+            ->withQueryString();
 
         return TeamResource::collection($teams);
     }
