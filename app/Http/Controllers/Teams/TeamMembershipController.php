@@ -7,11 +7,16 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Services\GamificationService;
 use App\Services\NotificationService;
+use App\Services\Teams\TeamMembershipService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class TeamMembershipController extends Controller
 {
+    public function __construct(private readonly TeamMembershipService $teamMemberships)
+    {
+    }
+
     public function join(Request $request, Team $team, NotificationService $notifications, GamificationService $gamification): RedirectResponse
     {
         $team->loadMissing(['members', 'owner']);
@@ -23,6 +28,8 @@ class TeamMembershipController extends Controller
         if ($team->isActiveMember($request->user())) {
             return back()->with('status', __('ui.team_already_member'));
         }
+
+        $this->teamMemberships->assertCanRequest($request->user(), $team);
 
         $validated = $request->validate([
             'message' => ['nullable', 'string', 'max:500'],
@@ -135,13 +142,13 @@ class TeamMembershipController extends Controller
         abort_unless($team->canManage($request->user()), 403);
         abort_unless($member->team_id === $team->id, 404);
 
-        $member->update([
-            'status' => 'active',
-            'role' => 'member',
-            'accepted_by' => $request->user()->id,
-            'joined_at' => now(),
-        ]);
+        $acceptedMember = $this->teamMemberships->acceptMembership($member, $request->user());
 
+        if ($acceptedMember === null) {
+            return back()->withErrors(['team' => __('ui.team_member_joined_elsewhere')]);
+        }
+
+        $member = $acceptedMember;
         $member->loadMissing('user');
         $gamification->award($member->user, 'team_joined', source: $member);
         $notifications->send($member->user, $request->user(), 'team_join_accepted', __('ui.team_join_accepted_title'), __('ui.team_join_accepted_body', ['team' => $team->name]), route('teams.show', $team));
