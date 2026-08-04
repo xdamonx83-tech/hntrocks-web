@@ -4,7 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use RuntimeException;
 
 return new class extends Migration
 {
@@ -34,7 +33,7 @@ return new class extends Migration
             ->pluck('user_id');
 
         if ($duplicateUserIds->isNotEmpty()) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 'Single-team migration stopped: users with multiple active memberships: '.
                 $duplicateUserIds->implode(', ')
             );
