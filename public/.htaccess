@@ -17,6 +17,7 @@
     RewriteRule ^moments/create/?$ app/index.html [L]
     RewriteCond %{REQUEST_URI} !^/teams/(?:create|manage)/?$ [NC]
     RewriteRule ^teams/[^/]+/?$ app/index.html [L]
+    RewriteRule ^teams/[^/]+/(?:feed|members|requests)/?$ app/index.html [L]
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
     RewriteRule ^dashboards/default/?$ app/index.html [L]
     RewriteRule ^pages/user/(?:overview|hunter-dna|projects|permissions|friends|social)/?$ app/index.html [L]
