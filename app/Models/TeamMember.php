@@ -20,6 +20,19 @@ class TeamMember extends Model
         'joined_at',
     ];
 
+    protected $hidden = [
+        'active_user_id',
+    ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (TeamMember $member): void {
+            $member->active_user_id = $member->status === 'active'
+                ? $member->user_id
+                : null;
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -56,6 +69,7 @@ class TeamMember extends Model
         return match ($this->status) {
             'pending' => __('ui.role_status_pending'),
             'declined' => __('ui.role_status_declined'),
+            'withdrawn' => __('ui.role_status_withdrawn'),
             default => __('ui.role_status_active'),
         };
     }

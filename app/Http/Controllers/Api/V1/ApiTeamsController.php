@@ -10,6 +10,7 @@ use App\Models\TeamMember;
 use App\Services\GamificationService;
 use App\Services\NotificationService;
 use App\Services\MediaService;
+use App\Services\Teams\TeamMembershipService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\Storage;
 
 class ApiTeamsController extends Controller
 {
+    public function __construct(private readonly TeamMembershipService $teamMemberships)
+    {
+    }
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $sort = (string) $request->query('sort', 'newest');
@@ -83,18 +88,10 @@ class ApiTeamsController extends Controller
             'recruitment_status' => ['required', 'string', 'in:open,closed'],
         ]);
 
-        $team = Team::create([
+        $team = $this->teamMemberships->createOwnedTeam($request->user(), [
             ...$validated,
-            'owner_id' => $request->user()->id,
             'slug' => $this->uniqueSlug($validated['name']),
             'status' => 'active',
-        ]);
-
-        $team->members()->create([
-            'user_id' => $request->user()->id,
-            'role' => 'owner',
-            'status' => 'active',
-            'joined_at' => now(),
         ]);
 
         $gamification->award($request->user(), 'team_created', source: $team);
@@ -212,6 +209,8 @@ class ApiTeamsController extends Controller
             ));
         }
 
+        $this->teamMemberships->assertCanRequest($request->user(), $team);
+
         $validated = $request->validate([
             'message' => ['nullable', 'string', 'max:500'],
         ]);
@@ -275,13 +274,15 @@ class ApiTeamsController extends Controller
             ], 422);
         }
 
-        $member->update([
-            'status' => 'active',
-            'role' => 'member',
-            'accepted_by' => $request->user()->id,
-            'joined_at' => now(),
-        ]);
+        $acceptedMember = $this->teamMemberships->acceptMembership($member, $request->user());
 
+        if ($acceptedMember === null) {
+            return response()->json([
+                'message' => __('ui.team_member_joined_elsewhere'),
+            ], 422);
+        }
+
+        $member = $acceptedMember;
         $member->loadMissing('user');
         if ($member->user) {
             $gamification->award($member->user, 'team_joined', source: $member);
@@ -381,8 +382,7 @@ class ApiTeamsController extends Controller
             ]);
         }
 
-        $team->update(['status' => 'archived']);
-        $team->delete();
+        $this->teamMemberships->archiveTeam($team);
 
         return response()->json([
             'message' => __('ui.team_archived_status'),
@@ -593,7 +593,8 @@ class ApiTeamsController extends Controller
                 'can_archive' => $team->isOwner($request->user()),
                 'can_join' => $team->visibility === 'public'
                     && $team->recruitment_status === 'open'
-                    && ($viewerMembership === null || $viewerMembership->status === 'declined'),
+                    && ! $this->teamMemberships->hasActiveMembership($request->user())
+                    && ($viewerMembership === null || in_array($viewerMembership->status, ['declined', 'withdrawn'], true)),
             ],
         ];
     }

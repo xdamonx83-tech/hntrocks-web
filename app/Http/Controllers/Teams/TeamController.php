@@ -12,6 +12,7 @@ use App\Models\LfgPost;
 use App\Models\User;
 use App\Services\MediaService;
 use App\Services\GamificationService;
+use App\Services\Teams\TeamMembershipService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +21,10 @@ use Illuminate\View\View;
 
 class TeamController extends Controller
 {
+    public function __construct(private readonly TeamMembershipService $teamMemberships)
+    {
+    }
+
     public function index(Request $request): View
     {
         $query = Team::query()
@@ -208,9 +213,8 @@ class TeamController extends Controller
 
         $slug = $this->uniqueSlug($validated['name']);
 
-        $team = Team::create([
+        $team = $this->teamMemberships->createOwnedTeam($request->user(), [
             ...$validated,
-            'owner_id' => $request->user()->id,
             'slug' => $slug,
             'status' => 'active',
         ]);
@@ -232,13 +236,6 @@ class TeamController extends Controller
         }
 
         $team->save();
-
-        $team->members()->create([
-            'user_id' => $request->user()->id,
-            'role' => 'owner',
-            'status' => 'active',
-            'joined_at' => now(),
-        ]);
 
         $gamification->award($request->user(), 'team_created', source: $team);
 
@@ -467,8 +464,7 @@ class TeamController extends Controller
         $team->loadMissing('members');
         abort_unless($team->isOwner($request->user()), 403);
 
-        $team->update(['status' => 'archived']);
-        $team->delete();
+        $this->teamMemberships->archiveTeam($team);
 
         return redirect()->route('teams.index')->with('status', __('ui.team_archived_status'));
     }
