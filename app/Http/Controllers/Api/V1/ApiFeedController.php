@@ -22,6 +22,8 @@ class ApiFeedController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
+        $viewer = $request->user();
+
         $posts = FeedPost::query()
             ->with([
                 'user.profile',
@@ -38,22 +40,29 @@ class ApiFeedController extends Controller
             ->withCount(['comments', 'reactions', 'bookmarks'])
             ->withCount('sharedByPosts as shares_count')
             ->where('status', 'published')
-            ->where(function ($query) use ($request): void {
-                $query->where(function ($normalPosts) use ($request): void {
-                    $normalPosts->whereNull('team_id')
-                        ->where(function ($visibility) use ($request): void {
-                            $visibility->whereIn('visibility', ['public', 'followers'])
-                                ->orWhere(function ($private) use ($request): void {
-                                    $private->where('visibility', 'private')
-                                        ->where('user_id', $request->user()->id);
-                                });
-                        });
-                })->orWhere(function ($teamPosts) use ($request): void {
-                    $teamPosts->whereNotNull('team_id')
-                        ->whereHas('team', function ($teamQuery) use ($request): void {
-                            $teamQuery->where('visibility', '!=', 'private')
-                                ->orWhereHas('activeMembers', fn ($memberQuery) => $memberQuery->where('user_id', $request->user()->id));
-                        });
+            ->when(! $viewer->isAdmin(), function ($query) use ($viewer): void {
+                $query->where(function ($visiblePosts) use ($viewer): void {
+                    $visiblePosts->where(function ($normalPosts) use ($viewer): void {
+                        $normalPosts->whereNull('team_id')
+                            ->where(function ($visibility) use ($viewer): void {
+                                $visibility->whereIn('visibility', ['public', 'followers'])
+                                    ->orWhere(function ($private) use ($viewer): void {
+                                        $private->where('visibility', 'private')
+                                            ->where('user_id', $viewer->id);
+                                    });
+                            });
+                    })->orWhere(function ($teamPosts) use ($viewer): void {
+                        $teamPosts->whereNotNull('team_id')
+                            ->where(function ($teamVisibility) use ($viewer): void {
+                                $teamVisibility->where(function ($publicTeamPost): void {
+                                    $publicTeamPost->where('visibility', 'public')
+                                        ->whereHas('team', fn ($teamQuery) => $teamQuery->where('visibility', 'public'));
+                                })->orWhereHas(
+                                    'team.activeMembers',
+                                    fn ($memberQuery) => $memberQuery->where('user_id', $viewer->id)
+                                );
+                            });
+                    });
                 });
             })
             ->orderByDesc('is_pinned')
@@ -287,7 +296,10 @@ class ApiFeedController extends Controller
 
         $visibility = (string) ($validated['visibility'] ?? $post->visibility ?? 'public');
         if ($post->isTeamPost()) {
-            $visibility = 'team';
+            $post->loadMissing('team');
+            $visibility = $visibility === 'public' && $post->team?->visibility === 'public'
+                ? 'public'
+                : 'team';
         } elseif ($visibility === 'team') {
             $visibility = 'public';
         }

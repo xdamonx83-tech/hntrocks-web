@@ -152,6 +152,10 @@ class FeedPost extends Model
             return false;
         }
 
+        if ($user->isAdmin()) {
+            return true;
+        }
+
         if ($this->isSharedPost()) {
             $this->loadMissing('sharedPost');
 
@@ -167,7 +171,7 @@ class FeedPost extends Model
                 return false;
             }
 
-            if ($this->team->visibility !== 'private') {
+            if ($this->visibility === 'public' && $this->team->visibility === 'public') {
                 return true;
             }
 

@@ -226,7 +226,12 @@ class ApiFeedEngagementController extends Controller
         $post = $comment->post;
 
         abort_unless($post && $this->canUsePost($request, $post), 403);
-        abort_unless((int) $comment->user_id === (int) $request->user()->id || (int) $post->user_id === (int) $request->user()->id, 403);
+        abort_unless(
+            (int) $comment->user_id === (int) $request->user()->id
+            || (int) $post->user_id === (int) $request->user()->id
+            || $request->user()->isAdmin(),
+            403
+        );
 
         $commentId = (int) $comment->id;
         $postId = (int) $post->id;

@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\ApiNotificationController;
 use App\Http\Controllers\Api\V1\ApiPushDeviceController;
 use App\Http\Controllers\Api\V1\ApiSavedFeedController;
 use App\Http\Controllers\Api\V1\ApiSearchController;
+use App\Http\Controllers\Api\V1\ApiTeamFeedController;
 use App\Http\Controllers\Api\V1\ApiTeamLfgController;
 use App\Http\Controllers\Api\V1\ApiTeamsController;
 use App\Http\Controllers\Api\V1\ApiUserLoadoutController;
@@ -154,6 +155,8 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/teams', [ApiTeamsController::class, 'index'])->name('teams.index');
         Route::post('/teams', [ApiTeamsController::class, 'store'])->name('teams.store');
         Route::get('/teams/{team:slug}', [ApiTeamsController::class, 'show'])->name('teams.show');
+        Route::get('/teams/{team:slug}/feed', [ApiTeamFeedController::class, 'index'])->name('teams.feed.index');
+        Route::post('/teams/{team:slug}/feed', [ApiTeamFeedController::class, 'store'])->name('teams.feed.store');
         Route::post('/teams/{team:slug}', [ApiTeamsController::class, 'update'])->name('teams.update');
         Route::post('/teams/{team:slug}/join', [ApiTeamsController::class, 'join'])->name('teams.join');
         Route::post('/teams/{team:slug}/members/{member}/accept', [ApiTeamsController::class, 'acceptJoinRequest'])->name('teams.members.accept');
