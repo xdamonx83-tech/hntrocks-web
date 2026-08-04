@@ -159,12 +159,7 @@ class ApiTeamFeedController extends Controller
             return $post;
         });
 
-        $gamification->award(
-            $request->user(),
-            'feed_post_created',
-            source: $post,
-            description: __('ui.team_feed_post_created_description')
-        );
+        $gamification->award($request->user(), 'feed_post_created', source: $post);
         $mentions->syncForFeedPost($post, $request->user(), $post->body, $notifications);
 
         $post->loadMissing([
@@ -180,7 +175,7 @@ class ApiTeamFeedController extends Controller
         $post->loadCount('sharedByPosts as shares_count');
 
         return response()->json([
-            'message' => __('ui.team_feed_post_published'),
+            'message' => __('ui.feed_post_published'),
             'post' => new FeedPostResource($post),
         ], 201);
     }
