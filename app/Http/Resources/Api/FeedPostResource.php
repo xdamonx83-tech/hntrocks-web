@@ -26,6 +26,13 @@ class FeedPostResource extends JsonResource
             'ai_user_declared' => (bool) $this->ai_user_declared,
             'ai_label_visible' => $this->hasVisibleAiContentLabel(),
             'author' => new UserResource($this->whenLoaded('user')),
+            'team' => $this->whenLoaded('team', fn () => $this->team ? [
+                'id' => (int) $this->team->id,
+                'name' => (string) $this->team->name,
+                'slug' => (string) $this->team->slug,
+                'visibility' => (string) $this->team->visibility,
+                'avatar_url' => $this->team->avatarUrl(),
+            ] : null),
             'media' => FeedPostMediaResource::collection($this->whenLoaded('media')),
             'shared_post' => $this->whenLoaded('sharedPost', fn () => $this->sharedPost ? new self($this->sharedPost) : null),
             'comments_count' => (int) ($this->comments_count ?? 0),

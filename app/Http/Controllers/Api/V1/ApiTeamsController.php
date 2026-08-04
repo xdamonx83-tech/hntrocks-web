@@ -35,14 +35,16 @@ class ApiTeamsController extends Controller
             ->with('owner.profile')
             ->withCount('activeMembers')
             ->where('status', 'active')
-            ->where(function ($query) use ($request): void {
-                $query->where('visibility', 'public')
-                    ->orWhere('owner_id', $request->user()->id)
-                    ->orWhereHas('members', function ($memberQuery) use ($request): void {
-                        $memberQuery
-                            ->where('user_id', $request->user()->id)
-                            ->where('status', 'active');
-                    });
+            ->when(! $request->user()->isAdmin(), function ($query) use ($request): void {
+                $query->where(function ($visibleTeams) use ($request): void {
+                    $visibleTeams->where('visibility', 'public')
+                        ->orWhere('owner_id', $request->user()->id)
+                        ->orWhereHas('members', function ($memberQuery) use ($request): void {
+                            $memberQuery
+                                ->where('user_id', $request->user()->id)
+                                ->where('status', 'active');
+                        });
+                });
             })
             ->when($request->filled('q'), function ($query) use ($request): void {
                 $search = trim((string) $request->query('q'));
@@ -535,7 +537,11 @@ class ApiTeamsController extends Controller
             'pendingMembers as pending_members_count',
         ]);
 
-        if ($team->visibility === 'private' && ! $team->isActiveMember($request->user())) {
+        if (
+            $team->visibility === 'private'
+            && ! $team->isActiveMember($request->user())
+            && ! $request->user()->isAdmin()
+        ) {
             abort(404);
         }
 
@@ -585,6 +591,7 @@ class ApiTeamsController extends Controller
                     'joined_at' => $viewerMembership->joined_at?->toISOString(),
                 ] : null,
                 'is_member' => $team->isActiveMember($request->user()),
+                'is_admin' => $request->user()->isAdmin(),
                 'is_owner' => $team->isOwner($request->user()),
                 'can_manage' => $team->canManage($request->user()),
                 'can_leave' => $viewerMembership !== null
