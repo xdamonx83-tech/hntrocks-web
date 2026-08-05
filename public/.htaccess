@@ -15,6 +15,7 @@
     RewriteRule ^$ app/index.html [L]
     RewriteRule ^(?:feed|saved|members|messages|moments|play|discover|ready-lobbies|teams|cups|settings|404)/?$ app/index.html [L]
     RewriteRule ^moments/create/?$ app/index.html [L]
+    RewriteRule ^cups/create/?$ app/index.html [L]
     RewriteRule ^teams/create/?$ app/index.html [L]
     RewriteCond %{REQUEST_URI} !^/teams/manage/?$ [NC]
     RewriteRule ^teams/[^/]+/?$ app/index.html [L]
@@ -22,6 +23,7 @@
     # Cup overview is React; reserved Laravel cup pages and deeper action sections stay in Laravel.
     RewriteCond %{REQUEST_URI} !^/cups/(?:create|hall-of-fame)/?$ [NC]
     RewriteRule ^cups/[^/]+/?$ app/index.html [L]
+    RewriteRule ^cups/[^/]+/(?:edit|manage)/?$ app/index.html [L]
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
     RewriteRule ^dashboards/default/?$ app/index.html [L]
     RewriteRule ^pages/user/(?:overview|hunter-dna|projects|permissions|friends|social)/?$ app/index.html [L]

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\ApiBootstrapController;
 use App\Http\Controllers\Api\V1\ApiCrownDailyStreakController;
 use App\Http\Controllers\Api\V1\ApiCupChatController;
 use App\Http\Controllers\Api\V1\ApiCupsController;
+use App\Http\Controllers\Cups\CupController as CupManagementController;
 use App\Http\Controllers\Api\V1\ApiCupRegistrationController;
 use App\Http\Controllers\Api\V1\ApiCupTeamChatController;
 use App\Http\Controllers\Api\V1\ApiCupTeamsController;
@@ -234,6 +235,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/crowns/shop/{item:key}/purchase', [ApiCrownsController::class, 'purchase'])->middleware('throttle:12,1')->name('crowns.shop.purchase');
         Route::post('/crowns/inventory/{inventoryItem}/equip', [ApiCrownsController::class, 'equip'])->middleware('throttle:20,1')->name('crowns.inventory.equip');
         Route::post('/crowns/inventory/slots/{slot}/unequip', [ApiCrownsController::class, 'unequip'])->middleware('throttle:20,1')->name('crowns.inventory.unequip');
+        Route::get('/cups/manage/options', [CupManagementController::class, 'apiOptions'])->name('cups.manage.options');
+        Route::post('/cups', [CupManagementController::class, 'apiStore'])->name('cups.manage.store');
+        Route::post('/cups/{cup:slug}', [CupManagementController::class, 'apiUpdate'])->name('cups.manage.update');
+        Route::post('/cups/{cup:slug}/archive', [CupManagementController::class, 'apiArchive'])->name('cups.manage.archive');
         Route::get('/cups', [ApiCupsController::class, 'index'])->name('cups.index');
         Route::get('/cups/{cup:slug}', [ApiCupsController::class, 'show'])->name('cups.show');
         Route::get('/cups/{cup:slug}/chat', [ApiCupChatController::class, 'index'])->name('cups.chat.index');
