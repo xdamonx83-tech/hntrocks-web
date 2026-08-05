@@ -54,6 +54,15 @@ class CupResource extends JsonResource
             'ends_at' => $this->ends_at?->toISOString(),
             'registration_opens_at' => $this->registration_opens_at?->toISOString(),
             'registration_closes_at' => $this->registration_closes_at?->toISOString(),
+            'management' => $this->when($this->canManage($request->user()), [
+                'rules_preset' => $this->rulesPreset(),
+                'ai_prompt_preset' => $this->aiPromptPreset(),
+                'allowed_platforms' => $this->allowedPlatforms(),
+                'max_submissions_per_participant' => $this->maxSubmissionsPerParticipant(),
+                'max_scored_submissions_per_participant' => $this->maxScoredSubmissionsPerParticipant(),
+                'require_profile_complete' => $this->requiresCompleteProfile(),
+                'min_community_actions' => $this->requiredCommunityActions(),
+            ]),
         ];
     }
 

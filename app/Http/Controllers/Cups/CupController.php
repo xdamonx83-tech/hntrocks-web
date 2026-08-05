@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Cups;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\CupResource;
 use App\Models\Cup;
 use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Support\HntTheme;
 use App\Support\ReworkFeedSidebar;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -328,6 +330,143 @@ class CupController extends Controller
         $cup->delete();
 
         return redirect()->route('cups.index')->with('status', __('ui.cup_archived_status'));
+    }
+
+
+    public function apiOptions(Request $request): JsonResponse
+    {
+        $this->guardAdmin($request);
+
+        return response()->json([
+            'can_create' => true,
+            'rules_presets' => Cup::rulesPresetOptions(),
+            'ai_prompt_presets' => Cup::aiPromptPresetOptions(),
+            'platforms' => [
+                'PC' => 'PC',
+                'PlayStation' => 'PlayStation 5',
+                'Xbox' => 'Xbox Series X|S',
+            ],
+            'statuses' => [
+                'planned' => __('ui.cup_status_planned'),
+                'active' => __('ui.cup_status_active'),
+                'finished' => __('ui.cup_status_finished'),
+                'archived' => __('ui.cup_status_archived'),
+            ],
+        ]);
+    }
+
+    public function apiStore(
+        Request $request,
+        MediaService $mediaService,
+        GamificationService $gamification
+    ): JsonResponse {
+        $this->guardAdmin($request);
+
+        $validated = $this->validatedCupData($request);
+        $contentSettings = $this->extractCupContentSettings($validated);
+        $rulesSettings = $this->extractCupRulesSettings($validated);
+
+        if ($request->hasFile('cover')) {
+            $mediaService->assertAllowed($request->file('cover'), $request->user(), 'cups/covers');
+        }
+
+        unset($validated['cover']);
+        $validated['owner_id'] = $request->user()->id;
+        $validated['slug'] = $this->uniqueSlug($validated['title']);
+        $validated['settings'] = array_merge($rulesSettings, [
+            'scoring' => 'bounty_first_extract_required',
+            'submission_cooldown_minutes' => (int) config('hunthub.cups.submission_cooldown_minutes', 30),
+            'mode' => ((int) ($validated['team_size'] ?? 1) <= 1 || strcasecmp((string) ($validated['title'] ?? ''), 'Bayou Blood Cup') === 0)
+                ? 'solo_leaderboard'
+                : 'team_leaderboard',
+            'event_key' => strcasecmp((string) ($validated['title'] ?? ''), 'Bayou Blood Cup') === 0
+                ? 'bayou_blood_cup'
+                : null,
+            'content' => $contentSettings,
+        ]);
+
+        $cup = Cup::create($validated);
+
+        if ($request->hasFile('cover')) {
+            $asset = $mediaService->store($request->file('cover'), $request->user(), 'cups/covers', [
+                'visibility' => $cup->visibility,
+                'attachable' => $cup,
+            ]);
+            $cup->update(['cover_path' => $asset->path]);
+        }
+
+        $gamification->award(
+            $request->user(),
+            'cup_created',
+            source: $cup,
+            description: __('ui.cup_gamification_created')
+        );
+
+        $cup->load('owner.profile')->loadCount('activeTeams');
+
+        return response()->json([
+            'message' => __('ui.cup_created_status'),
+            'data' => new CupResource($cup),
+        ], 201);
+    }
+
+    public function apiUpdate(Request $request, Cup $cup, MediaService $mediaService): JsonResponse
+    {
+        $this->guardAdmin($request);
+
+        $validated = $this->validatedCupData($request, $cup);
+        $contentSettings = $this->extractCupContentSettings($validated);
+        $rulesSettings = $this->extractCupRulesSettings($validated, $cup);
+
+        if ($request->hasFile('cover')) {
+            $mediaService->assertAllowed($request->file('cover'), $request->user(), 'cups/covers');
+        }
+
+        unset($validated['cover']);
+        $settings = is_array($cup->settings) ? $cup->settings : [];
+        $settings['mode'] = ((int) ($validated['team_size'] ?? $cup->team_size ?? 1) <= 1 || strcasecmp((string) ($validated['title'] ?? $cup->title ?? ''), 'Bayou Blood Cup') === 0)
+            ? 'solo_leaderboard'
+            : 'team_leaderboard';
+        $settings['event_key'] = strcasecmp((string) ($validated['title'] ?? $cup->title ?? ''), 'Bayou Blood Cup') === 0
+            ? 'bayou_blood_cup'
+            : ($settings['event_key'] ?? null);
+        $settings['scoring'] = 'bounty_first_extract_required';
+        $settings['content'] = $contentSettings;
+        $validated['settings'] = array_merge($settings, $rulesSettings);
+
+        $cup->update($validated);
+
+        if ($request->hasFile('cover')) {
+            $asset = $mediaService->store($request->file('cover'), $request->user(), 'cups/covers', [
+                'visibility' => $cup->visibility,
+                'attachable' => $cup,
+            ]);
+            $cup->update(['cover_path' => $asset->path]);
+        }
+
+        $cup->load('owner.profile')->loadCount('activeTeams');
+
+        return response()->json([
+            'message' => __('ui.cup_saved_status'),
+            'data' => new CupResource($cup),
+        ]);
+    }
+
+    public function apiArchive(Request $request, Cup $cup): JsonResponse
+    {
+        $this->guardAdmin($request);
+
+        $cupId = (int) $cup->id;
+        $cupSlug = (string) $cup->slug;
+        $cup->update(['status' => 'archived']);
+        $cup->delete();
+
+        return response()->json([
+            'message' => __('ui.cup_archived_status'),
+            'archived' => true,
+            'cup_id' => $cupId,
+            'cup_slug' => $cupSlug,
+        ]);
     }
 
     private function guardAdmin(Request $request): void
