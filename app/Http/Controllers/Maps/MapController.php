@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Maps;
 
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
-use App\Support\HntTheme;
 use App\Support\MapVoteVisitorIdentity;
-use App\Support\ReworkFeedSidebar;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
@@ -63,7 +62,7 @@ class MapController extends Controller
         ],
     ];
 
-    public function index(Request $request): View
+    public function index(Request $request): View|Response
     {
         $maps = collect(self::MAPS)->map(function (array $map, string $slug): array {
             $data = $this->readMapData($slug, $map['data']);
@@ -78,20 +77,94 @@ class MapController extends Controller
             ];
         })->values();
 
-        if (! HntTheme::previewActive($request->user())) {
-            return view('themes.hnt_preview.maps.index', compact('maps'));
+        $reactIndex = public_path('app/index.html');
+
+        abort_unless(
+            File::isFile($reactIndex),
+            503,
+            'The React application bundle is unavailable.',
+        );
+
+        return $this->reactMapsResponse($request, $maps, $reactIndex);
+    }
+
+    /**
+     * Serve the current React application for the public Maps overview while
+     * keeping canonical metadata, structured data and indexable fallback HTML
+     * in the first server response.
+     */
+    private function reactMapsResponse(
+        Request $request,
+        \Illuminate\Support\Collection $maps,
+        string $reactIndex,
+    ): Response {
+        $requestedLocale = strtolower((string) $request->header('X-HNT-Locale', ''));
+
+        if (in_array($requestedLocale, ['de', 'en'], true)) {
+            app()->setLocale($requestedLocale);
         }
 
-        $sidebarData = ReworkFeedSidebar::forViewer($request->user());
+        $html = File::get($reactIndex);
+        $locale = app()->getLocale() === 'de' ? 'de' : 'en';
+        $title = __('ui.maps_meta_title');
 
-        return view('themes.rework.maps.index', [
+        $head = view('react.maps-seo', [
+            'mode' => 'head',
             'maps' => $maps,
-            'socialiteMembers' => $sidebarData['members'],
-            'socialiteProfileStats' => $sidebarData['profileStats'],
-            'socialiteCrownsSummary' => $sidebarData['crownsSummary'],
-            'socialiteHighlightTopPost' => $sidebarData['highlightTopPost'],
-            'socialiteHighlightLfg' => $sidebarData['highlightLfg'],
-            'socialiteHighlightCup' => $sidebarData['highlightCup'],
+        ])->render();
+
+        $fallback = view('react.maps-seo', [
+            'mode' => 'fallback',
+            'maps' => $maps,
+        ])->render();
+
+        $html = preg_replace(
+            '~<html\s+lang="[^"]*"~i',
+            '<html lang="'.$locale.'"',
+            $html,
+            1,
+        ) ?? $html;
+
+        $html = preg_replace(
+            '~<title>.*?</title>~is',
+            '<title>'.e($title).'</title>',
+            $html,
+            1,
+        ) ?? $html;
+
+        $html = preg_replace(
+            '~<meta\s+name="description"[^>]*>~i',
+            '',
+            $html,
+            1,
+        ) ?? $html;
+
+        abort_unless(
+            str_contains($html, '</head>'),
+            503,
+            'The React application head could not be prepared.',
+        );
+
+        $html = str_replace('</head>', $head."\n</head>", $html);
+        $rootPattern = '~<div\s+id="root"\s*></div>~i';
+
+        abort_unless(
+            preg_match($rootPattern, $html) === 1,
+            503,
+            'The React application root could not be prepared.',
+        );
+
+        $html = preg_replace(
+            $rootPattern,
+            '<div id="root">'.$fallback.'</div>',
+            $html,
+            1,
+        ) ?? $html;
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+            'Content-Language' => $locale,
+            'Cache-Control' => 'no-cache, private',
         ]);
     }
 

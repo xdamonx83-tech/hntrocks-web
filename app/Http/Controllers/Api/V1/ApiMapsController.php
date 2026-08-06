@@ -62,9 +62,21 @@ class ApiMapsController extends Controller
     public function index(): JsonResponse
     {
         $maps = collect(self::MAPS)->map(function (array $map, string $slug): array {
+            $markers = $this->readMarkers($slug, $map['data']);
+            $markerCounts = array_fill_keys(self::MARKER_TYPES, 0);
+
+            foreach ($markers as $marker) {
+                $type = $marker['type'] ?? null;
+
+                if (is_string($type) && array_key_exists($type, $markerCounts)) {
+                    $markerCounts[$type]++;
+                }
+            }
+
             return [
                 ...$this->mapPayload($slug, $map),
-                'marker_count' => count($this->readMarkers($slug, $map['data'])),
+                'marker_count' => count($markers),
+                'marker_counts' => $markerCounts,
             ];
         })->values();
 
