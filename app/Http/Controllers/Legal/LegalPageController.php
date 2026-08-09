@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Legal;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
@@ -140,17 +139,6 @@ class LegalPageController extends Controller
             'Content-Language' => 'de',
             'Cache-Control' => 'no-cache, private',
         ]);
-    }
-
-    public function api(string $slug): JsonResponse
-    {
-        $page = $this->page($slug);
-
-        return response()->json(
-            $this->payload($slug, $page),
-            200,
-            ['Cache-Control' => 'public, max-age=300'],
-        );
     }
 
     private function page(string $slug): array
