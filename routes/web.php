@@ -58,6 +58,7 @@ use App\Http\Controllers\Gamification\GamificationController;
 use App\Http\Controllers\Hashtags\HashtagController;
 use App\Http\Controllers\LFG\LfgApplicationController;
 use App\Http\Controllers\LFG\LfgController;
+use App\Http\Controllers\Legal\LegalPageController;
 use App\Http\Controllers\Members\MembersController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Messages\MessageController;
@@ -143,12 +144,24 @@ Route::get('/maps/markers/{marker}/comments', [MapMarkerCommentController::class
     ->middleware('throttle:60,1')
     ->name('maps.markers.comments.index');
 
-Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
-Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
-Route::view('/nutzungsbedingungen', 'legal.nutzungsbedingungen')->name('legal.nutzungsbedingungen');
-Route::view('/netiquette', 'legal.netiquette')->name('legal.netiquette');
-Route::view('/account-deletion', 'legal.account-deletion')->name('legal.account_deletion');
-Route::view('/child-safety-standards', 'legal.child-safety')->name('legal.child_safety');
+Route::get('/impressum', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'impressum')
+    ->name('legal.impressum');
+Route::get('/datenschutz', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'datenschutz')
+    ->name('legal.datenschutz');
+Route::get('/nutzungsbedingungen', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'nutzungsbedingungen')
+    ->name('legal.nutzungsbedingungen');
+Route::get('/netiquette', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'netiquette')
+    ->name('legal.netiquette');
+Route::get('/account-deletion', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'account-deletion')
+    ->name('legal.account_deletion');
+Route::get('/child-safety-standards', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'child-safety-standards')
+    ->name('legal.child_safety');
 Route::view('/design/socialite-feed', 'design.socialite-feed')->name('design.socialite.feed');
 Route::view('/design/socialite-feed-live', 'design.socialite-feed-live')->name('design.socialite.feed.live');
 Route::view('/design/socialite-theme-feed', 'themes.socialite.feed.index')->name('design.socialite.theme-feed');

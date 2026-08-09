@@ -42,6 +42,7 @@ use App\Http\Controllers\Api\V1\MapCashSpotSubmissionApiController;
 use App\Http\Controllers\Api\V1\MapMarkerInteractionController;
 use App\Http\Controllers\Feed\FeedBookmarkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
+use App\Http\Controllers\Legal\LegalPageController;
 use App\Http\Controllers\Presence\PresenceHeartbeatController;
 use App\Http\Controllers\Reports\ReportController;
 use Illuminate\Broadcasting\BroadcastController;
@@ -56,6 +57,16 @@ Route::get('/v1/health', function (): array {
 })->name('api.health');
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    Route::get('/legal/{slug}', [LegalPageController::class, 'api'])
+        ->whereIn('slug', [
+            'impressum',
+            'datenschutz',
+            'nutzungsbedingungen',
+            'netiquette',
+            'account-deletion',
+            'child-safety-standards',
+        ])
+        ->name('legal.show');
     Route::get('/maps', [ApiMapsController::class, 'index'])->name('maps.index');
     Route::get('/maps/{slug}', [ApiMapsController::class, 'show'])->name('maps.show');
     Route::post('/maps/{slug}/cash-spots', [MapCashSpotSubmissionApiController::class, 'store'])->name('maps.cash-spots.store');
