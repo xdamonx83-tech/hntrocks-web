@@ -15,8 +15,12 @@ class SetLocale
 
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $this->validLocale(Session::get('locale'));
+        $locale = $this->mapsReactLocale($request);
         $rememberDetectedLocale = false;
+
+        if ($locale === null) {
+            $locale = $this->validLocale(Session::get('locale'));
+        }
 
         if ($locale === null) {
             $locale = $this->validLocale($request->cookie('locale'));
@@ -39,6 +43,23 @@ class SetLocale
         }
 
         return $response;
+    }
+
+    private function mapsReactLocale(Request $request): ?string
+    {
+        if (! $request->is('maps', 'maps/*')) {
+            return null;
+        }
+
+        foreach (['hnt-next-locale', 'hnt-locale'] as $cookieName) {
+            $locale = $this->validLocale($request->cookie($cookieName));
+
+            if ($locale !== null) {
+                return $locale;
+            }
+        }
+
+        return null;
     }
 
     private function validLocale(mixed $locale): ?string
