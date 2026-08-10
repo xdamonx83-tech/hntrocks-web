@@ -968,3 +968,168 @@ body.hnt-map-lightbox-open { overflow: hidden; }
     .hnt-map-tools { width: calc(100vw - 20px); }
     .hnt-map-filter-options { grid-template-columns: 1fr; }
 }
+
+/* React Maps detail polish: current HNT.ROCKS shell, August 2026. */
+.hnt-map-react-detail .hnt-map-filter-chip > span {
+    width: auto;
+    height: auto;
+    min-width: 0;
+    flex: 1 1 auto;
+    border-radius: 0;
+    background: transparent;
+}
+.hnt-map-react-detail .hnt-map-filter-chip > .hnt-map-filter-dot {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+}
+.hnt-map-react-detail .hnt-map-filter-chip > .hnt-map-filter-label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-main);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.hnt-map-react-detail .hnt-map-filter-chip:has(input:not(:checked)) .hnt-map-filter-label {
+    color: var(--text-muted);
+}
+
+/* Generic marker popups are removed in maps.js. Keep an explicit visual guard. */
+.hnt-map-react-detail .leaflet-popup {
+    display: none !important;
+}
+
+/* Existing cash-spot detail modal, visually aligned with the current app cards/dialogs. */
+.hnt-map-react-detail .hnt-map-lightbox {
+    background: rgba(8, 8, 8, .72);
+    backdrop-filter: blur(10px);
+}
+.hnt-map-react-detail .hnt-map-lightbox-panel,
+.hnt-map-react-detail .hnt-map-cash-detail-panel {
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background: var(--card-bg);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .58);
+}
+.hnt-map-react-detail .hnt-map-cash-detail-panel {
+    padding-top: 0;
+}
+.hnt-map-react-detail .hnt-map-cash-detail-grip {
+    display: none;
+}
+.hnt-map-react-detail .hnt-map-cash-detail-media {
+    border-radius: 17px 0 0 17px;
+    background: #121210;
+}
+.hnt-map-react-detail .hnt-map-cash-detail-info {
+    gap: 18px;
+    border-left-color: var(--border-color);
+    background: var(--card-bg);
+}
+.hnt-map-react-detail .hnt-map-cash-detail-eyebrow {
+    color: var(--accent-primary);
+}
+.hnt-map-react-detail .hnt-map-cash-detail-header h2 {
+    color: var(--text-main);
+}
+.hnt-map-react-detail .hnt-map-lightbox-close,
+.hnt-map-react-detail .hnt-map-cash-detail-header .hnt-map-lightbox-close {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .035);
+    color: var(--text-main);
+}
+.hnt-map-react-detail .hnt-map-lightbox-close:hover,
+.hnt-map-react-detail .hnt-map-lightbox-close:focus-visible {
+    border-color: rgba(214, 168, 79, .52);
+    background: rgba(214, 168, 79, .1);
+}
+.hnt-map-react-detail .hnt-map-cash-detail-votes,
+.hnt-map-react-detail .hnt-map-cash-detail-comments {
+    border-color: var(--border-color);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .025);
+    box-shadow: none;
+}
+
+/* Cash-spot submission modal uses the same restrained dialog language. */
+.hnt-map-react-detail .hnt-map-cash-submission-panel {
+    width: min(520px, 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background: var(--card-bg);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .58);
+}
+.hnt-map-react-detail .hnt-map-cash-submission-panel .hnt-map-lightbox-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-color);
+}
+.hnt-map-react-detail .hnt-map-cash-submission-panel .hnt-map-lightbox-header h2 {
+    color: var(--text-main);
+    font-size: 16px;
+    font-weight: 750;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-form {
+    gap: 16px;
+    padding: 18px;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-form > p {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-form label {
+    gap: 7px;
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 650;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-form input:not([type="hidden"]) {
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    outline: none;
+    background: #1a1a18;
+    color: var(--text-main);
+    font: inherit;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-form input:not([type="hidden"]):focus {
+    border-color: rgba(214, 168, 79, .62);
+    box-shadow: 0 0 0 2px rgba(214, 168, 79, .09);
+}
+.hnt-map-react-detail .hnt-map-cash-submission-actions {
+    gap: 8px;
+    padding-top: 2px;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-actions .hnt-map-popup-action {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-actions .hnt-map-popup-action[type="submit"] {
+    border-color: rgba(214, 168, 79, .5);
+    background: rgba(214, 168, 79, .14);
+    color: #ead79f;
+}
+.hnt-map-react-detail .hnt-map-cash-submission-actions .hnt-map-popup-action:hover {
+    border-color: rgba(214, 168, 79, .55);
+    background: rgba(214, 168, 79, .1);
+}
+
+@media (max-width: 768px) {
+    .hnt-map-react-detail .hnt-map-cash-detail-media {
+        border-radius: 0;
+    }
+    .hnt-map-react-detail .hnt-map-cash-detail-info {
+        border-left: 0;
+        border-top: 1px solid var(--border-color);
+    }
+}

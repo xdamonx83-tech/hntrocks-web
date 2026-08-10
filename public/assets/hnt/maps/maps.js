@@ -671,15 +671,6 @@
                 fillColor: colors[marker.type],
                 fillOpacity: 1
             });
-        var popup = document.createElement('div');
-        var title = document.createElement('strong');
-        var type = document.createElement('span');
-        title.textContent = marker.label;
-        type.textContent = config.typeLabels[marker.type] || marker.type;
-        popup.appendChild(title);
-        popup.appendChild(type);
-        point.bindPopup(popup);
-
         if (marker.type === 'compound') {
             var compoundLabel = document.createElement('span');
             compoundLabel.textContent = marker.label;
