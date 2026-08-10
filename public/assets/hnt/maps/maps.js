@@ -1189,42 +1189,6 @@ function matchesSearch(reference, queryForms) {
         toastTimer = window.setTimeout(function () { toast.hidden = true; }, 2600);
     }
 
-    function currentViewUrl() {
-        var center = map.getCenter();
-        var url = new URL(window.location.href);
-        url.searchParams.set('x', center.lng.toFixed(2));
-        url.searchParams.set('y', center.lat.toFixed(2));
-        url.searchParams.set('z', map.getZoom().toFixed(2));
-        return url.toString();
-    }
-
-    function showShareFallback(url) {
-        var fallback = document.querySelector('[data-map-share-fallback]');
-        var input = document.querySelector('[data-map-share-url]');
-        if (!fallback || !input) {
-            return;
-        }
-
-        input.value = url;
-        fallback.hidden = false;
-        input.focus();
-        input.select();
-    }
-
-    document.querySelector('[data-map-share]')?.addEventListener('click', function () {
-        var url = currentViewUrl();
-
-        if (!navigator.clipboard || !window.isSecureContext) {
-            showShareFallback(url);
-            return;
-        }
-
-        navigator.clipboard.writeText(url).then(function () {
-            showMapToast(config.shareSuccessText);
-        }).catch(function () {
-            showShareFallback(url);
-        });
-    });
 
     function resetMapView() {
         var fittedZoom = map.getBoundsZoom(bounds, false, window.L.point(20, 20));
