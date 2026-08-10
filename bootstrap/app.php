@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: [
             'hh_cookie_consent',
             'hh_vid',
+            'hnt-next-locale',
+            'hnt-locale',
         ]);
 
         $middleware->web(append: [
