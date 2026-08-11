@@ -50,6 +50,9 @@
     var width = Number(config.width);
     var height = Number(config.height);
     var initialZoomOffset = window.matchMedia('(max-width: 768px)').matches ? 0.25 : 0.5;
+    var accentColor = window.getComputedStyle(mapElement).getPropertyValue('--accent-primary').trim()
+        || window.getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-primary-main').trim()
+        || '#00b8d4';
 
     function markerLatLng(marker) {
         return [Number(marker.y), Number(marker.x)];
@@ -1056,7 +1059,7 @@ function matchesSearch(reference, queryForms) {
             radius: 6,
             color: '#171713',
             weight: 2,
-            fillColor: '#d6a84f',
+            fillColor: accentColor,
             fillOpacity: 1,
             interactive: false
         }).bindTooltip(label, {
@@ -1103,7 +1106,7 @@ function matchesSearch(reference, queryForms) {
         measureMarker(start, config.measureMarkerAText).addTo(finishedMeasurements);
         measureMarker(latlng, config.measureMarkerBText).addTo(finishedMeasurements);
         window.L.polyline([start, latlng], {
-            color: '#e2c477',
+            color: accentColor,
             weight: 2.5,
             opacity: 0.9,
             interactive: false
@@ -1155,7 +1158,7 @@ function matchesSearch(reference, queryForms) {
 
         if (!previewLine) {
             previewLine = window.L.polyline(points, {
-                color: '#d6b968',
+                color: accentColor,
                 weight: 2,
                 opacity: 0.72,
                 dashArray: '6 7',
