@@ -257,15 +257,47 @@
         });
     }
 
+    function mapCommentAuthorization() {
+        try {
+            var raw = window.localStorage.getItem('hnt.next.auth.session');
+            if (!raw) {
+                return null;
+            }
+
+            var session = JSON.parse(raw);
+            if (!session || typeof session.access_token !== 'string' || typeof session.token_type !== 'string') {
+                return null;
+            }
+
+            if (session.expires_at && Date.parse(session.expires_at) <= Date.now()) {
+                return null;
+            }
+
+            return session.token_type + ' ' + session.access_token;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function mapCommentHeaders(includeContentType) {
+        var headers = {'Accept': 'application/json'};
+        var authorization = mapCommentAuthorization();
+
+        if (includeContentType) {
+            headers['Content-Type'] = 'application/json';
+        }
+        if (authorization) {
+            headers.Authorization = authorization;
+        }
+
+        return headers;
+    }
+
     function commentRequest(url, method, body) {
         return fetch(url, {
             method: method,
             credentials: 'same-origin',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-            },
+            headers: mapCommentHeaders(true),
             body: body === undefined ? undefined : JSON.stringify(body)
         }).then(function (response) {
             return response.json().catch(function () { return {}; }).then(function (data) {
@@ -422,7 +454,7 @@
 
         fetch(marker.comments_url, {
             credentials: 'same-origin',
-            headers: {'Accept': 'application/json'}
+            headers: mapCommentHeaders(false)
         }).then(function (response) {
             if (!response.ok) {
                 throw new Error(config.cashSpotCommentErrorText);
@@ -495,7 +527,7 @@
         closeButton.type = 'button';
         closeButton.className = 'hnt-map-lightbox-close';
         closeButton.setAttribute('aria-label', config.closeText);
-        closeButton.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+        closeButton.textContent = '×';
         closeButton.addEventListener('click', closeCashDetailModal);
 
         cashDetailImage = document.createElement('img');

@@ -285,7 +285,7 @@ class MapController extends Controller
                 }
 
                 $safeMarker['id'] = $marker->id;
-                $safeMarker['comments_url'] = route('maps.markers.comments.index', $marker);
+                $safeMarker['comments_url'] = route('api.v1.maps.markers.comments.index', $marker);
                 $safeMarker['comment_store_url'] = auth()->check()
                     ? route('maps.markers.comments.store', $marker)
                     : null;

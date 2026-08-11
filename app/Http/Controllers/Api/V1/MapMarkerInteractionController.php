@@ -8,6 +8,7 @@ use App\Models\HntMapMarker;
 use App\Models\HntMapMarkerComment;
 use App\Models\HntMapMarkerVote;
 use App\Models\User;
+use App\Support\FeedTextRenderer;
 use App\Support\MapVoteVisitorIdentity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,11 +30,16 @@ class MapMarkerInteractionController extends Controller
             ->get();
 
         return response()->json([
+            'ok' => true,
             'comments' => $comments
                 ->map(fn (HntMapMarkerComment $comment): array => $this->commentPayload($comment, $viewer))
                 ->values(),
             'comment_count' => $marker->comments()->count(),
             'viewer_can_comment' => $viewer !== null,
+            'routes' => [
+                'store' => route('api.v1.maps.markers.comments.store', $marker),
+                'login' => route('login'),
+            ],
         ]);
     }
 
@@ -48,6 +54,7 @@ class MapMarkerInteractionController extends Controller
         $comment->load('user');
 
         return response()->json([
+            'ok' => true,
             'comment' => $this->commentPayload($comment, $request->user()),
             'comment_count' => $marker->comments()->count(),
         ], 201);
@@ -62,6 +69,7 @@ class MapMarkerInteractionController extends Controller
         $comment->load('user');
 
         return response()->json([
+            'ok' => true,
             'comment' => $this->commentPayload($comment, $request->user()),
         ]);
     }
@@ -196,20 +204,31 @@ class MapMarkerInteractionController extends Controller
         $comment->loadMissing('user');
         $author = $comment->user;
         $canEdit = $viewer !== null && (int) $comment->user_id === (int) $viewer->id;
+        $canDelete = $canEdit || $viewer?->isAdmin() === true;
+        $profileUrl = $author && $viewer && (int) $author->id === (int) $viewer->id
+            ? route('profile.show')
+            : ($author ? route('profile.public', $author) : '#');
 
         return [
             'id' => $comment->id,
             'body' => $comment->body,
+            'body_html' => FeedTextRenderer::render((string) $comment->body),
             'created_at' => $comment->created_at?->toISOString(),
             'updated_at' => $comment->updated_at?->toISOString(),
             'created_at_label' => $comment->created_at?->diffForHumans() ?? '',
+            'updated_at_label' => $comment->updated_at?->diffForHumans() ?? '',
             'user' => [
                 'id' => $author?->id,
                 'name' => $author?->name ?? 'User',
                 'avatar_url' => $author?->avatarUrl() ?? asset('assets/vikinger/img/default-avatar.svg'),
+                'profile_url' => $profileUrl,
             ],
             'can_edit' => $canEdit,
-            'can_delete' => $canEdit || $viewer?->isAdmin() === true,
+            'can_delete' => $canDelete,
+            'routes' => [
+                'update' => $canEdit ? route('api.v1.maps.marker-comments.update', $comment) : null,
+                'delete' => $canDelete ? route('api.v1.maps.marker-comments.destroy', $comment) : null,
+            ],
         ];
     }
 }
