@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{{ __('ui.moments') }} · HNT.rocks</title>
-    <link href="/assets/socialite/images/favicon.png" rel="icon" type="image/png">
+    @include('partials.favicon')
     <link rel="stylesheet" href="/assets/socialite/css/tailwind.css">
     <link rel="stylesheet" href="/assets/socialite/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">

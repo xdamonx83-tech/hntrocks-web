@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="dark">
 
     <!-- Favicon -->
-    <link href="/assets/socialite/images/favicon.png" rel="icon" type="image/png">
+    @include('partials.favicon')
 
     <!-- SEO meta -->
     @include('partials.seo-meta')

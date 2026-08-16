@@ -8,7 +8,7 @@
     <meta name="color-scheme" content="light">
     <meta name="theme-color" content="#f6f4ef">
     <title>@yield('title', 'Admin · hnt.rocks')</title>
-    <link rel="icon" type="image/png" href="{{ asset('assets/socialite/images/logo-icon.png') }}">
+    @include('partials.favicon')
     <link rel="stylesheet" href="{{ asset('assets/admin/admin.css') }}?v=521">
     @stack('head')
 </head>
