@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Favicon -->
-    <link href="/assets/socialite/images/favicon.png" rel="icon" type="image/png">
+    @include('partials.favicon')
 
     <!-- title and description-->
     <title>Socialite Feed Prototype · HNT.rocks</title>
