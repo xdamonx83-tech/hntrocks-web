@@ -102,7 +102,9 @@ class FeedPost extends Model
 
     public function comments(): HasMany
     {
-        return $this->hasMany(FeedComment::class)->latest();
+        return $this->hasMany(FeedComment::class)
+            ->visibleInThread()
+            ->latest();
     }
 
     public function reactions(): HasMany
