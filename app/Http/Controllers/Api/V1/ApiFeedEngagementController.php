@@ -8,6 +8,7 @@ use App\Http\Resources\Api\FeedPostResource;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
 use App\Models\FeedReaction;
+use App\Services\Feed\FeedCommentTreeService;
 use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Services\MentionService;
@@ -220,7 +221,7 @@ class ApiFeedEngagementController extends Controller
         ]);
     }
 
-    public function destroyComment(Request $request, FeedComment $comment): JsonResponse
+    public function destroyComment(Request $request, FeedComment $comment, FeedCommentTreeService $commentTrees): JsonResponse
     {
         $comment->loadMissing(['post.user', 'post.team']);
         $post = $comment->post;
@@ -235,7 +236,7 @@ class ApiFeedEngagementController extends Controller
 
         $commentId = (int) $comment->id;
         $postId = (int) $post->id;
-        $comment->delete();
+        $commentTrees->deleteTree($comment);
 
         $post->loadMissing(['user.profile', 'media.mediaAsset', 'viewerReaction', 'viewerBookmark']);
         $post->loadCount(['comments', 'reactions', 'bookmarks']);

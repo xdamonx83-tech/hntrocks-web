@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Feed;
 use App\Http\Controllers\Controller;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
+use App\Services\Feed\FeedCommentTreeService;
 use App\Services\GamificationService;
 use App\Services\MediaService;
 use App\Services\NotificationService;
@@ -343,7 +344,7 @@ class FeedCommentController extends Controller
         return redirect($post->permalink($comment))->with('status', __('ui.comment_updated'));
     }
 
-    public function destroy(Request $request, FeedComment $comment): RedirectResponse|JsonResponse
+    public function destroy(Request $request, FeedComment $comment, FeedCommentTreeService $commentTrees): RedirectResponse|JsonResponse
     {
         $comment->loadMissing('post');
         $post = $comment->post;
@@ -361,13 +362,7 @@ class FeedCommentController extends Controller
         $postId = $post->id;
         $commentId = $comment->id;
 
-        if (empty($comment->parent_id)) {
-            FeedComment::query()
-                ->where('parent_id', $comment->id)
-                ->delete();
-        }
-
-        $comment->delete();
+        $commentTrees->deleteTree($comment);
 
         if ($request->expectsJson()) {
             $commentCount = $post->comments()->count();
