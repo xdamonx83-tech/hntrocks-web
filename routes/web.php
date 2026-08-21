@@ -133,6 +133,9 @@ Route::get('/app-beta', [AppBetaController::class, 'index'])->name('app-beta.ind
 Route::post('/app-beta', [AppBetaController::class, 'store'])->middleware('throttle:6,1')->name('app-beta.store');
 Route::get('/rocks', ReactAppController::class)->name('rocks.index');
 Route::get('/rocks/{path}', ReactAppController::class)->where('path', '.*')->name('rocks.react');
+Route::get('/pages/user/{section}', ReactAppController::class)
+    ->whereIn('section', ['overview', 'hunter-dna', 'projects', 'permissions', 'friends', 'social', 'twitch'])
+    ->name('react.profile.section');
 Route::get('/maps', [MapController::class, 'index'])->name('maps.index');
 Route::get('/maps/{slug}', [MapController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
