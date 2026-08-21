@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\NotificationService;
 use App\Services\SecurityLogService;
+use App\Services\Twitch\TwitchLiveStatusService;
 use App\Services\Search\PlayerSearchQuery;
 use Illuminate\Support\Facades\Storage;
 
@@ -164,7 +165,7 @@ class ApiMembersController extends Controller
     }
 
 
-    public function show(Request $request, User $user): JsonResponse
+    public function show(Request $request, User $user, TwitchLiveStatusService $twitch): JsonResponse
     {
         abort_unless($user->status === 'active', 404);
 
@@ -188,6 +189,7 @@ class ApiMembersController extends Controller
             'user' => new UserResource($user),
             'profile_summary' => $this->publicProfileSummary($request, $user, $isOwnProfile),
             'viewer' => $this->viewerState($viewer, $user, $isOwnProfile),
+            'twitch' => $twitch->statusForUrl($user->profile?->twitch_url),
         ]);
     }
 
