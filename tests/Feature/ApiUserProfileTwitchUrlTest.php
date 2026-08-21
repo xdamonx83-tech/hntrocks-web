@@ -14,12 +14,8 @@ class ApiUserProfileTwitchUrlTest extends TestCase
 
     public function test_user_profile_api_returns_saved_twitch_url(): void
     {
-        $viewer = User::factory()->create([
-            'status' => 'active',
-        ]);
-        $target = User::factory()->create([
-            'status' => 'active',
-        ]);
+        $viewer = $this->createActiveUser();
+        $target = $this->createActiveUser();
 
         $target->profile()->create([
             'profile_visibility' => 'public',
@@ -38,7 +34,7 @@ class ApiUserProfileTwitchUrlTest extends TestCase
 
     public function test_me_profile_api_saves_twitch_url(): void
     {
-        $user = User::factory()->create(['status' => 'active']);
+        $user = $this->createActiveUser();
         $user->profile()->create(['profile_visibility' => 'public']);
         $token = ApiAccessToken::createForUser($user, 'Twitch profile update test')['access_token'];
 
@@ -78,8 +74,8 @@ class ApiUserProfileTwitchUrlTest extends TestCase
             ]),
         ]);
 
-        $viewer = User::factory()->create(['status' => 'active']);
-        $target = User::factory()->create(['status' => 'active']);
+        $viewer = $this->createActiveUser();
+        $target = $this->createActiveUser();
         $target->profile()->create([
             'profile_visibility' => 'public',
             'twitch_url' => 'https://www.twitch.tv/krispiearmy',
@@ -95,4 +91,16 @@ class ApiUserProfileTwitchUrlTest extends TestCase
             ->assertJsonPath('twitch.viewer_count', 42);
     }
 
+    private function createActiveUser(): User
+    {
+        $nonce = 'twitch_'.bin2hex(random_bytes(6));
+
+        return User::query()->create([
+            'name' => 'Twitch API Test',
+            'username' => $nonce,
+            'email' => $nonce.'@example.invalid',
+            'password' => 'Patch335-Twitch-Test-2026!',
+            'status' => 'active',
+        ]);
+    }
 }
