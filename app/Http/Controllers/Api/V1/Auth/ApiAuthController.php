@@ -681,6 +681,7 @@ class ApiAuthController extends Controller
             'language' => ['nullable', 'string', 'max:40'],
             'hunt_role' => ['nullable', 'string', 'max:60'],
             'discord_name' => ['nullable', 'string', 'max:80'],
+            'twitch_url' => ['nullable', 'url', 'max:255'],
             'is_lfg_available' => ['nullable', 'boolean'],
             'hunter_dna' => ['nullable', 'array:voice,preferred_mode,experience,temper,goals,mentor'],
             'hunter_dna.voice' => ['nullable', Rule::in(['yes', 'no', 'optional'])],
@@ -722,6 +723,7 @@ class ApiAuthController extends Controller
             'language',
             'hunt_role',
             'discord_name',
+            'twitch_url',
         ];
 
         $updates = [];
