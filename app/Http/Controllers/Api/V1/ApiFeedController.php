@@ -12,6 +12,7 @@ use App\Services\MediaService;
 use App\Services\MentionService;
 use App\Services\NotificationService;
 use App\Services\Translation\FeedTranslationService;
+use App\Services\Twitch\TwitchLiveStatusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ApiFeedController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request, TwitchLiveStatusService $twitch): AnonymousResourceCollection
     {
         $viewer = $request->user();
 
@@ -69,6 +70,16 @@ class ApiFeedController extends Controller
             ->orderByDesc('pinned_at')
             ->latest()
             ->paginate(20);
+
+        $twitch->warmStatusesForUrls(
+            $posts->getCollection()
+                ->flatMap(fn (FeedPost $post): array => [
+                    $post->user?->profile?->twitch_url,
+                    $post->sharedPost?->user?->profile?->twitch_url,
+                ])
+                ->filter()
+                ->all()
+        );
 
         return FeedPostResource::collection($posts);
     }

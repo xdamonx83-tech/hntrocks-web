@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Services\Translation\FeedTranslationService;
+use App\Services\Twitch\TwitchLiveStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,6 +27,7 @@ class FeedPostResource extends JsonResource
             'ai_user_declared' => (bool) $this->ai_user_declared,
             'ai_label_visible' => $this->hasVisibleAiContentLabel(),
             'author' => new UserResource($this->whenLoaded('user')),
+            'author_twitch_live' => $this->authorTwitchLive(),
             'team' => $this->whenLoaded('team', fn () => $this->team ? [
                 'id' => (int) $this->team->id,
                 'name' => (string) $this->team->name,
@@ -50,6 +52,22 @@ class FeedPostResource extends JsonResource
         ];
     }
 
+
+    private function authorTwitchLive(): bool
+    {
+        $post = $this->resource;
+
+        if (! $post->relationLoaded('user') || ! $post->user || ! $post->user->relationLoaded('profile')) {
+            return false;
+        }
+
+        $url = $post->user->profile?->twitch_url;
+        if (! filled($url)) {
+            return false;
+        }
+
+        return (bool) app(TwitchLiveStatusService::class)->statusForUrl($url)['is_live'];
+    }
 
     private function translationPayload(Request $request): array
     {
