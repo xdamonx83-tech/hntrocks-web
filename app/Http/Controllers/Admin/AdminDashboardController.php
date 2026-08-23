@@ -17,7 +17,9 @@ use App\Models\Report;
 use App\Models\Team;
 use App\Models\TeamLfgPost;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -32,6 +34,7 @@ class AdminDashboardController extends Controller
         $today = $now->copy()->startOfDay();
         $weekStart = $now->copy()->subDays(7);
         $monthStart = $now->copy()->startOfMonth();
+        $activityStart = $now->copy()->subDays(30);
 
         $usersTotal = User::count();
         $usersToday = User::where('created_at', '>=', $today)->count();
@@ -76,7 +79,7 @@ class AdminDashboardController extends Controller
                 'label' => 'Mitglieder',
                 'value' => $usersTotal,
                 'meta' => '+'.$usersThisMonth.' diesen Monat',
-                'accent' => 'gold',
+                'accent' => 'blue',
                 'route' => route('admin.users.index'),
             ],
             [
@@ -97,7 +100,7 @@ class AdminDashboardController extends Controller
                 'label' => 'Cup-Feedback',
                 'value' => $newFeedback,
                 'meta' => 'neu / in Prüfung',
-                'accent' => 'blue',
+                'accent' => 'gold',
                 'route' => route('admin.cup-feedback.index'),
             ],
         ];
@@ -161,6 +164,8 @@ class AdminDashboardController extends Controller
                 ->limit(5)
                 ->get(),
             'weeklySeries' => $this->weeklySeries(),
+            'memberGrowth' => $this->memberGrowthSeries(),
+            'topActiveMembers' => $this->topActiveMembers($activityStart),
         ]);
     }
 
@@ -188,6 +193,147 @@ class AdminDashboardController extends Controller
         }
 
         return $series;
+    }
+
+    private function memberGrowthSeries(): array
+    {
+        $today = now()->startOfDay();
+        $currentStart = $today->copy()->subDays(29);
+        $previousStart = $currentStart->copy()->subDays(30);
+
+        $dailyLabels = [];
+        $dailyCurrent = [];
+        $dailyPrevious = [];
+
+        for ($index = 0; $index < 30; $index++) {
+            $currentDay = $currentStart->copy()->addDays($index);
+            $previousDay = $previousStart->copy()->addDays($index);
+
+            $dailyLabels[] = $currentDay->format('d.m');
+            $dailyCurrent[] = User::where('created_at', '>=', $currentDay)
+                ->where('created_at', '<', $currentDay->copy()->addDay())
+                ->count();
+            $dailyPrevious[] = User::where('created_at', '>=', $previousDay)
+                ->where('created_at', '<', $previousDay->copy()->addDay())
+                ->count();
+        }
+
+        $monthlyLabels = [];
+        $monthlyCurrent = [];
+        $monthlyPrevious = [];
+
+        for ($monthsAgo = 11; $monthsAgo >= 0; $monthsAgo--) {
+            $month = now()->startOfMonth()->subMonths($monthsAgo);
+            $previousYearMonth = $month->copy()->subYear();
+
+            $monthlyLabels[] = $month->locale(app()->getLocale())->isoFormat('MMM');
+            $monthlyCurrent[] = User::where('created_at', '>=', $month)
+                ->where('created_at', '<', $month->copy()->addMonth())
+                ->count();
+            $monthlyPrevious[] = User::where('created_at', '>=', $previousYearMonth)
+                ->where('created_at', '<', $previousYearMonth->copy()->addMonth())
+                ->count();
+        }
+
+        $currentTotal = array_sum($dailyCurrent);
+        $previousTotal = array_sum($dailyPrevious);
+        $growthPercent = $previousTotal > 0
+            ? (int) round((($currentTotal - $previousTotal) / $previousTotal) * 100)
+            : ($currentTotal > 0 ? 100 : 0);
+
+        return [
+            'daily' => [
+                'labels' => $dailyLabels,
+                'current' => $dailyCurrent,
+                'previous' => $dailyPrevious,
+            ],
+            'monthly' => [
+                'labels' => $monthlyLabels,
+                'current' => $monthlyCurrent,
+                'previous' => $monthlyPrevious,
+            ],
+            'currentTotal' => $currentTotal,
+            'previousTotal' => $previousTotal,
+            'growthPercent' => $growthPercent,
+            'periodLabel' => $currentStart->format('d.m').' – '.$today->format('d.m.Y'),
+        ];
+    }
+
+    private function topActiveMembers(Carbon $since): Collection
+    {
+        $activity = [];
+        $sources = [
+            ['table' => 'feed_posts', 'weight' => 5, 'key' => 'posts'],
+            ['table' => 'feed_comments', 'weight' => 3, 'key' => 'comments'],
+            ['table' => 'feed_reactions', 'weight' => 1, 'key' => 'reactions'],
+            ['table' => 'moment_comments', 'weight' => 3, 'key' => 'comments'],
+            ['table' => 'moment_reactions', 'weight' => 1, 'key' => 'reactions'],
+        ];
+
+        foreach ($sources as $source) {
+            $table = $source['table'];
+
+            if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'user_id') || ! Schema::hasColumn($table, 'created_at')) {
+                continue;
+            }
+
+            $query = DB::table($table)
+                ->select('user_id', DB::raw('COUNT(*) as total'))
+                ->whereNotNull('user_id')
+                ->where('created_at', '>=', $since);
+
+            if (Schema::hasColumn($table, 'deleted_at')) {
+                $query->whereNull('deleted_at');
+            }
+
+            foreach ($query->groupBy('user_id')->get() as $row) {
+                $userId = (int) $row->user_id;
+                $count = (int) $row->total;
+
+                $activity[$userId] ??= [
+                    'score' => 0,
+                    'posts' => 0,
+                    'comments' => 0,
+                    'reactions' => 0,
+                    'actions' => 0,
+                ];
+
+                $activity[$userId][$source['key']] += $count;
+                $activity[$userId]['actions'] += $count;
+                $activity[$userId]['score'] += $count * $source['weight'];
+            }
+        }
+
+        if ($activity === []) {
+            return collect();
+        }
+
+        uasort($activity, static fn (array $left, array $right): int => $right['score'] <=> $left['score']);
+        $topActivity = array_slice($activity, 0, 5, true);
+        $userIds = array_map('intval', array_keys($topActivity));
+        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+        $maxScore = max(1, (int) collect($topActivity)->max('score'));
+
+        return collect($topActivity)
+            ->map(function (array $metrics, int|string $userId) use ($users, $maxScore): ?array {
+                $user = $users->get((int) $userId);
+
+                if (! $user) {
+                    return null;
+                }
+
+                return [
+                    'user' => $user,
+                    'score' => (int) $metrics['score'],
+                    'actions' => (int) $metrics['actions'],
+                    'posts' => (int) $metrics['posts'],
+                    'comments' => (int) $metrics['comments'],
+                    'reactions' => (int) $metrics['reactions'],
+                    'percent' => max(5, (int) round(($metrics['score'] / $maxScore) * 100)),
+                ];
+            })
+            ->filter()
+            ->values();
     }
 
     private function appBetaRequestCount(): int
