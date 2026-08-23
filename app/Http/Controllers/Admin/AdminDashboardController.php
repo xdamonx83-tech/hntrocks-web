@@ -200,6 +200,47 @@ class AdminDashboardController extends Controller
         $today = now()->startOfDay();
         $currentStart = $today->copy()->subDays(29);
         $previousStart = $currentStart->copy()->subDays(30);
+        $currentMonthStart = now()->startOfMonth()->subMonths(11);
+        $historyStart = $currentMonthStart->copy()->subYear();
+
+        if ($previousStart->lt($historyStart)) {
+            $historyStart = $previousStart->copy();
+        }
+
+        $dailyCurrentByDate = [];
+        $dailyPreviousByDate = [];
+        $monthlyByKey = [];
+
+        for ($index = 0; $index < 30; $index++) {
+            $dailyCurrentByDate[$currentStart->copy()->addDays($index)->format('Y-m-d')] = 0;
+            $dailyPreviousByDate[$previousStart->copy()->addDays($index)->format('Y-m-d')] = 0;
+        }
+
+        for ($monthsAgo = 23; $monthsAgo >= 0; $monthsAgo--) {
+            $month = now()->startOfMonth()->subMonths($monthsAgo);
+            $monthlyByKey[$month->format('Y-m')] = 0;
+        }
+
+        foreach (User::query()
+            ->where('created_at', '>=', $historyStart)
+            ->select(['id', 'created_at'])
+            ->cursor() as $user) {
+            $createdAt = $user->created_at;
+            $dateKey = $createdAt->format('Y-m-d');
+            $monthKey = $createdAt->format('Y-m');
+
+            if (array_key_exists($dateKey, $dailyCurrentByDate)) {
+                $dailyCurrentByDate[$dateKey]++;
+            }
+
+            if (array_key_exists($dateKey, $dailyPreviousByDate)) {
+                $dailyPreviousByDate[$dateKey]++;
+            }
+
+            if (array_key_exists($monthKey, $monthlyByKey)) {
+                $monthlyByKey[$monthKey]++;
+            }
+        }
 
         $dailyLabels = [];
         $dailyCurrent = [];
@@ -210,12 +251,8 @@ class AdminDashboardController extends Controller
             $previousDay = $previousStart->copy()->addDays($index);
 
             $dailyLabels[] = $currentDay->format('d.m');
-            $dailyCurrent[] = User::where('created_at', '>=', $currentDay)
-                ->where('created_at', '<', $currentDay->copy()->addDay())
-                ->count();
-            $dailyPrevious[] = User::where('created_at', '>=', $previousDay)
-                ->where('created_at', '<', $previousDay->copy()->addDay())
-                ->count();
+            $dailyCurrent[] = $dailyCurrentByDate[$currentDay->format('Y-m-d')] ?? 0;
+            $dailyPrevious[] = $dailyPreviousByDate[$previousDay->format('Y-m-d')] ?? 0;
         }
 
         $monthlyLabels = [];
@@ -227,12 +264,8 @@ class AdminDashboardController extends Controller
             $previousYearMonth = $month->copy()->subYear();
 
             $monthlyLabels[] = $month->locale(app()->getLocale())->isoFormat('MMM');
-            $monthlyCurrent[] = User::where('created_at', '>=', $month)
-                ->where('created_at', '<', $month->copy()->addMonth())
-                ->count();
-            $monthlyPrevious[] = User::where('created_at', '>=', $previousYearMonth)
-                ->where('created_at', '<', $previousYearMonth->copy()->addMonth())
-                ->count();
+            $monthlyCurrent[] = $monthlyByKey[$month->format('Y-m')] ?? 0;
+            $monthlyPrevious[] = $monthlyByKey[$previousYearMonth->format('Y-m')] ?? 0;
         }
 
         $currentTotal = array_sum($dailyCurrent);
