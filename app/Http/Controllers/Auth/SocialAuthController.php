@@ -13,7 +13,6 @@ use App\Services\ReferralService;
 use App\Services\SecurityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -21,11 +20,6 @@ use RuntimeException;
 
 class SocialAuthController extends Controller
 {
-    private const MOBILE_RETURN_SESSION_PREFIX = 'hunthub_social_mobile.return.';
-    private const MOBILE_ANDROID_PACKAGE = 'rocks.hnt.app';
-    private const MOBILE_CALLBACK_URL = 'https://hnt.rocks/auth/mobile/callback';
-    private const MOBILE_WEB_FALLBACK_URL = 'https://hnt.rocks/auth/sign-in';
-
     public function redirect(string $provider, Request $request, SocialProviderService $social): RedirectResponse
     {
         try {
@@ -157,44 +151,6 @@ class SocialAuthController extends Controller
         }
     }
 
-    public function mobileReturn(Request $request): Response|RedirectResponse
-    {
-        $handoff = trim((string) $request->query('handoff', ''));
-
-        if (! preg_match('/^[A-Za-z0-9]{48}$/', $handoff)) {
-            return redirect('/auth/sign-in');
-        }
-
-        $query = $request->session()->pull($this->mobileReturnSessionKey($handoff));
-
-        if (! is_array($query) || $query === []) {
-            return redirect('/auth/sign-in');
-        }
-
-        $query = $this->sanitizeMobileReturnQuery($query);
-
-        if (! isset($query['status'])) {
-            return redirect('/auth/sign-in');
-        }
-
-        $callbackUrl = self::MOBILE_CALLBACK_URL
-            . '?'
-            . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
-        $intentUrl = $this->androidIntentUrl($callbackUrl);
-
-        return response()
-            ->view('auth.mobile-social-return', [
-                'intentUrl' => $intentUrl,
-                'fallbackUrl' => self::MOBILE_WEB_FALLBACK_URL,
-                'success' => $query['status'] === 'ok',
-                'provider' => $query['provider'] ?? null,
-            ])
-            ->header('Cache-Control', 'no-store, private, max-age=0')
-            ->header('Pragma', 'no-cache')
-            ->header('Referrer-Policy', 'no-referrer')
-            ->header('X-Robots-Tag', 'noindex, nofollow, noarchive');
-    }
-
     private function validateState(string $provider, Request $request, SocialProviderService $social): void
     {
         $expected = $request->session()->pull($social->stateSessionKey($provider));
@@ -239,62 +195,11 @@ class SocialAuthController extends Controller
 
     private function mobileSocialRedirect(array $query): RedirectResponse
     {
-        $handoff = Str::random(48);
-        request()->session()->put(
-            $this->mobileReturnSessionKey($handoff),
-            $this->sanitizeMobileReturnQuery($query),
-        );
+        $deepLink = trim((string) config('social.mobile.deep_link_url', 'hntrocks://auth/social'));
+        $deepLink = $deepLink !== '' ? $deepLink : 'hntrocks://auth/social';
+        $separator = str_contains($deepLink, '?') ? '&' : '?';
 
-        return redirect('/auth/mobile/return?handoff=' . rawurlencode($handoff));
-    }
-
-    private function mobileReturnSessionKey(string $handoff): string
-    {
-        return self::MOBILE_RETURN_SESSION_PREFIX . $handoff;
-    }
-
-    private function sanitizeMobileReturnQuery(array $query): array
-    {
-        $limits = [
-            'status' => 20,
-            'code' => 512,
-            'error' => 100,
-            'message' => 500,
-            'provider' => 40,
-            'expires_in' => 20,
-        ];
-        $safe = [];
-
-        foreach ($limits as $key => $limit) {
-            if (! array_key_exists($key, $query) || ! is_scalar($query[$key])) {
-                continue;
-            }
-
-            $value = trim((string) $query[$key]);
-
-            if ($value !== '') {
-                $safe[$key] = Str::limit($value, $limit, '');
-            }
-        }
-
-        if (isset($safe['status']) && ! in_array($safe['status'], ['ok', 'error'], true)) {
-            $safe['status'] = 'error';
-        }
-
-        return $safe;
-    }
-
-    private function androidIntentUrl(string $callbackUrl): string
-    {
-        $parts = parse_url($callbackUrl);
-        $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
-        $fallback = rawurlencode(self::MOBILE_WEB_FALLBACK_URL);
-
-        return 'intent://hnt.rocks/auth/mobile/callback'
-            . $query
-            . '#Intent;scheme=https;package=' . self::MOBILE_ANDROID_PACKAGE
-            . ';S.browser_fallback_url=' . $fallback
-            . ';end';
+        return redirect()->away($deepLink . $separator . http_build_query($query, '', '&', PHP_QUERY_RFC3986));
     }
 
     private function resolveUser(

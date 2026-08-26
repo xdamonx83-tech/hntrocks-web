@@ -116,9 +116,6 @@ Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
     ->whereIn('provider', ['google', 'discord', 'twitch', 'steam', 'microsoft', 'facebook'])
     ->name('social.callback');
-Route::get('/auth/mobile/return', [SocialAuthController::class, 'mobileReturn'])
-    ->middleware('throttle:30,1')
-    ->name('social.mobile.return');
 
 Route::get('/language/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 Route::get('/ref/{code}', [ReferralController::class, 'accept'])->name('referrals.accept');
