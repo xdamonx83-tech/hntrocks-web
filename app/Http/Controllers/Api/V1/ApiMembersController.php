@@ -1016,6 +1016,7 @@ class ApiMembersController extends Controller
                 'last_xp_at' => $user->last_xp_at?->toISOString(),
             ],
             'counts' => [
+                'rocks' => (int) ($user->crownWallet?->balance ?? 0),
                 'badges' => $user->badges()->count(),
                 'active_quests' => Quest::query()->where('is_active', true)->count(),
                 'completed_quests' => $user->questProgress()->whereNotNull('completed_at')->count(),
