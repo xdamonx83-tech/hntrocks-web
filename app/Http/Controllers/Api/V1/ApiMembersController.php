@@ -837,6 +837,7 @@ class ApiMembersController extends Controller
 
     private function publicProfileSummary(Request $request, User $user, bool $isOwnProfile): array
     {
+        $user->loadMissing('crownWallet');
         $locale = $this->resolveApiLocale($request);
         $level = max(1, (int) ($user->level ?: 1));
         $xpTotal = max(0, (int) ($user->xp_total ?: 0));
@@ -1002,6 +1003,7 @@ class ApiMembersController extends Controller
             ->values();
 
         return [
+            'rocks' => (int) ($user->crownWallet?->balance ?? 0),
             'hunter_trust' => $this->hunterTrustSummary($user),
             'progress' => [
                 'level' => $level,
