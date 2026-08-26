@@ -26,10 +26,14 @@ class TwitchLiveStatusService
             }
         }
 
-        $missing = array_values(array_filter(
-            $channels,
-            fn (string $channel): bool => ! is_array(Cache::get('twitch:stream-status:'.sha1($channel)))
-        ));
+        try {
+            $missing = array_values(array_filter(
+                $channels,
+                fn (string $channel): bool => ! is_array(Cache::get('twitch:stream-status:'.sha1($channel)))
+            ));
+        } catch (Throwable) {
+            return;
+        }
 
         if ($missing === []) {
             return;
@@ -107,11 +111,15 @@ class TwitchLiveStatusService
             return $this->emptyStatus(null);
         }
 
-        return Cache::remember(
-            'twitch:stream-status:'.sha1($channel),
-            now()->addSeconds(60),
-            fn (): array => $this->fetchStatus($channel),
-        );
+        try {
+            return Cache::remember(
+                'twitch:stream-status:'.sha1($channel),
+                now()->addSeconds(60),
+                fn (): array => $this->fetchStatus($channel),
+            );
+        } catch (Throwable) {
+            return $this->emptyStatus($channel);
+        }
     }
 
     public function channelFromUrl(?string $url): ?string
