@@ -7,11 +7,14 @@ use App\Models\AppRemoteFeedCard;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class AppRemoteConfigService
 {
     public const DEFAULT_KEY = 'default';
+
+    private const ACTIVE_CONFIG_CACHE_KEY = 'app_remote_config:active:default';
 
     private const ALLOWED_THEME_VARIANTS = [
         'hnt_default',
@@ -62,6 +65,8 @@ class AppRemoteConfigService
     ];
 
     private const STORAGE_BRANDING_PATTERN = '#^/storage/app-branding/[A-Za-z0-9._/-]+$#';
+
+    private const STORAGE_APPEARANCE_PATTERN = '#^/storage/app-backgrounds/[A-Za-z0-9._/-]+$#';
 
     private const DEFAULT_THEME_PALETTE = [
         'canvas' => '#1A1A18',
@@ -117,6 +122,16 @@ class AppRemoteConfigService
                 'logo_dark_url' => null,
                 'logo_updated_at' => null,
             ],
+            'appearance' => [
+                'auth_background' => [
+                    'url' => null,
+                    'version' => 0,
+                ],
+                'feed_background' => [
+                    'url' => null,
+                    'version' => 0,
+                ],
+            ],
             'limits' => [
                 'moment_upload_max_mb' => 250,
                 'feed_video_upload_max_mb' => 250,
@@ -126,12 +141,19 @@ class AppRemoteConfigService
 
     public function activeConfig(): array
     {
-        $record = AppRemoteConfig::query()
-            ->where('key', self::DEFAULT_KEY)
-            ->where('is_active', true)
-            ->first();
+        return Cache::remember(self::ACTIVE_CONFIG_CACHE_KEY, now()->addMinutes(5), function (): array {
+            $record = AppRemoteConfig::query()
+                ->where('key', self::DEFAULT_KEY)
+                ->where('is_active', true)
+                ->first();
 
-        return $this->normalizeConfig($record?->config_json ?? []);
+            return $this->normalizeConfig($record?->config_json ?? []);
+        });
+    }
+
+    public function invalidateActiveConfigCache(): void
+    {
+        Cache::forget(self::ACTIVE_CONFIG_CACHE_KEY);
     }
 
     public function previewConfig(?AppRemoteConfig $record = null): array
@@ -150,6 +172,7 @@ class AppRemoteConfigService
             'maintenance',
             'theme',
             'branding',
+            'appearance',
             'limits',
         ]));
 
@@ -186,10 +209,39 @@ class AppRemoteConfigService
         $config['branding']['logo_dark_url'] = $this->normalizeBrandingUrl($config['branding']['logo_dark_url'] ?? null);
         $config['branding']['logo_updated_at'] = $this->normalizeNullableString($config['branding']['logo_updated_at'] ?? null, 80);
 
+        foreach (['auth_background', 'feed_background'] as $background) {
+            $config['appearance'][$background]['url'] = $this->normalizeAppearanceUrl(
+                $config['appearance'][$background]['url'] ?? null
+            );
+            $config['appearance'][$background]['version'] = max(
+                0,
+                (int) ($config['appearance'][$background]['version'] ?? 0)
+            );
+        }
+
         $config['limits']['moment_upload_max_mb'] = $this->clampInt($config['limits']['moment_upload_max_mb'], 1, 500, 250);
         $config['limits']['feed_video_upload_max_mb'] = $this->clampInt($config['limits']['feed_video_upload_max_mb'], 1, 500, 250);
 
         return $config;
+    }
+
+    public function withAppearanceRevisions(array $previousConfig, array $nextConfig): array
+    {
+        $previous = $this->normalizeConfig($previousConfig);
+        $next = $this->normalizeConfig($nextConfig);
+
+        foreach (['auth_background', 'feed_background'] as $background) {
+            $previousUrl = $previous['appearance'][$background]['url'];
+            $nextUrl = $next['appearance'][$background]['url'];
+            $previousVersion = (int) $previous['appearance'][$background]['version'];
+            $nextVersion = (int) $next['appearance'][$background]['version'];
+
+            $next['appearance'][$background]['version'] = $previousUrl !== $nextUrl
+                ? max($previousVersion + 1, $nextVersion)
+                : max($previousVersion, $nextVersion);
+        }
+
+        return $next;
     }
 
     public function validateActionUrl(?string $url): ?string
@@ -215,41 +267,12 @@ class AppRemoteConfigService
 
     public function normalizeBrandingUrl(mixed $url): ?string
     {
-        $url = trim((string) $url);
+        return $this->normalizeStorageUrl($url, self::STORAGE_BRANDING_PATTERN);
+    }
 
-        if ($url === '' || preg_match('#^(javascript|data):#i', $url) === 1 || str_contains($url, '<svg')) {
-            return null;
-        }
-
-        if (preg_match(self::STORAGE_BRANDING_PATTERN, $url) === 1 && ! str_contains($url, '..')) {
-            return $url;
-        }
-
-        $parts = parse_url($url);
-
-        if (! is_array($parts) || ! isset($parts['scheme'], $parts['host'], $parts['path'])) {
-            return null;
-        }
-
-        if (strtolower((string) $parts['scheme']) !== 'https') {
-            return null;
-        }
-
-        $host = strtolower((string) $parts['host']);
-        $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
-        $allowedHosts = array_filter(array_unique([$appHost, 'hnt.rocks']));
-
-        if (! in_array($host, $allowedHosts, true)) {
-            return null;
-        }
-
-        $path = (string) $parts['path'];
-
-        if (preg_match(self::STORAGE_BRANDING_PATTERN, $path) !== 1 || str_contains($path, '..')) {
-            return null;
-        }
-
-        return $parts['scheme'].'://'.$parts['host'].$path;
+    public function normalizeAppearanceUrl(mixed $url): ?string
+    {
+        return $this->normalizeStorageUrl($url, self::STORAGE_APPEARANCE_PATTERN);
     }
 
     public function cardStyleVariant(?string $variant): string
@@ -354,5 +377,44 @@ class AppRemoteConfigService
         $value = trim((string) $value);
 
         return $value === '' ? null : Str::limit($value, $limit, '');
+    }
+
+    private function normalizeStorageUrl(mixed $url, string $storagePattern): ?string
+    {
+        $url = trim((string) $url);
+
+        if ($url === '' || preg_match('#^(javascript|data):#i', $url) === 1 || str_contains($url, '<svg')) {
+            return null;
+        }
+
+        if (preg_match($storagePattern, $url) === 1 && ! str_contains($url, '..')) {
+            return $url;
+        }
+
+        $parts = parse_url($url);
+
+        if (! is_array($parts) || ! isset($parts['scheme'], $parts['host'], $parts['path'])) {
+            return null;
+        }
+
+        if (strtolower((string) $parts['scheme']) !== 'https') {
+            return null;
+        }
+
+        $host = strtolower((string) $parts['host']);
+        $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+        $allowedHosts = array_filter(array_unique([$appHost, 'hnt.rocks']));
+
+        if (! in_array($host, $allowedHosts, true)) {
+            return null;
+        }
+
+        $path = (string) $parts['path'];
+
+        if (preg_match($storagePattern, $path) !== 1 || str_contains($path, '..')) {
+            return null;
+        }
+
+        return $parts['scheme'].'://'.$parts['host'].$path;
     }
 }
