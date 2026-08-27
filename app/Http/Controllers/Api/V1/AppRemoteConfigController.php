@@ -15,11 +15,14 @@ class AppRemoteConfigController extends Controller
     {
         $locale = strtolower((string) $request->query('locale', app()->getLocale()));
         $appVersionCode = $request->integer('app_version_code') ?: null;
+        $user = $request->user();
 
         return response()->json([
             'message' => 'Remote config loaded.',
             'config' => $remoteConfig->activeConfig(),
-            'feed_cards' => $remoteConfig->visibleFeedCards($request->user(), $appVersionCode, $locale),
+            'feed_cards' => $user
+                ? $remoteConfig->visibleFeedCards($user, $appVersionCode, $locale)
+                : [],
             'server_time' => now()->toIso8601String(),
         ]);
     }
