@@ -115,6 +115,7 @@ class AppRemoteConfigAppearanceTest extends TestCase
 
         $this->actingAs($admin)->post('/admin/app-remote-config', [
             'is_active' => '1',
+            'remote_appearance_form' => '1',
             'config_json' => json_encode($defaults),
             'auth_background_file' => UploadedFile::fake()->image('auth.jpg', 1600, 900),
             'feed_background_file' => UploadedFile::fake()->image('feed.png', 1600, 900),
@@ -131,6 +132,71 @@ class AppRemoteConfigAppearanceTest extends TestCase
 
         Storage::disk('public')->assertExists(str_replace('/storage/', '', $auth['url']));
         Storage::disk('public')->assertExists(str_replace('/storage/', '', $feed['url']));
+    }
+
+    public function test_admin_feed_upload_wins_over_stale_null_json_and_uses_canonical_storage_url(): void
+    {
+        Storage::fake('public');
+        config(['filesystems.disks.public.url' => 'http://internal.invalid/storage']);
+
+        $admin = $this->user(['is_admin' => true]);
+        $defaults = app(AppRemoteConfigService::class)->defaults();
+
+        $this->actingAs($admin)->post('/admin/app-remote-config', [
+            'is_active' => '1',
+            'remote_appearance_form' => '1',
+            'config_json' => json_encode($defaults),
+            'feed_background_file' => UploadedFile::fake()->image('feed.png', 1600, 900),
+        ])->assertRedirect('/admin/app-remote-config');
+
+        $stored = AppRemoteConfig::query()->where('key', 'default')->firstOrFail();
+        $feed = $stored->config_json['appearance']['feed_background'];
+
+        $this->assertSame(1, $feed['version']);
+        $this->assertStringStartsWith('/storage/app-backgrounds/feed-background-', $feed['url']);
+        Storage::disk('public')->assertExists(str_replace('/storage/', '', $feed['url']));
+    }
+
+    public function test_admin_feed_upload_replace_and_clear_increments_version_each_time(): void
+    {
+        Storage::fake('public');
+
+        $admin = $this->user(['is_admin' => true]);
+        $defaults = app(AppRemoteConfigService::class)->defaults();
+
+        $this->actingAs($admin)->post('/admin/app-remote-config', [
+            'is_active' => '1',
+            'remote_appearance_form' => '1',
+            'config_json' => json_encode($defaults),
+            'feed_background_file' => UploadedFile::fake()->image('feed-1.png', 1600, 900),
+        ])->assertRedirect('/admin/app-remote-config');
+
+        $stored = AppRemoteConfig::query()->where('key', 'default')->firstOrFail();
+        $firstUrl = $stored->config_json['appearance']['feed_background']['url'];
+        $this->assertSame(1, $stored->config_json['appearance']['feed_background']['version']);
+
+        $this->actingAs($admin)->post('/admin/app-remote-config', [
+            'is_active' => '1',
+            'remote_appearance_form' => '1',
+            'config_json' => json_encode($stored->config_json),
+            'feed_background_file' => UploadedFile::fake()->image('feed-2.png', 1600, 900),
+        ])->assertRedirect('/admin/app-remote-config');
+
+        $stored->refresh();
+        $secondUrl = $stored->config_json['appearance']['feed_background']['url'];
+        $this->assertSame(2, $stored->config_json['appearance']['feed_background']['version']);
+        $this->assertNotSame($firstUrl, $secondUrl);
+
+        $this->actingAs($admin)->post('/admin/app-remote-config', [
+            'is_active' => '1',
+            'remote_appearance_form' => '1',
+            'config_json' => json_encode($stored->config_json),
+            'feed_background_clear' => '1',
+        ])->assertRedirect('/admin/app-remote-config');
+
+        $stored->refresh();
+        $this->assertNull($stored->config_json['appearance']['feed_background']['url']);
+        $this->assertSame(3, $stored->config_json['appearance']['feed_background']['version']);
     }
 
     public function test_changing_or_clearing_background_increments_its_revision_only(): void
