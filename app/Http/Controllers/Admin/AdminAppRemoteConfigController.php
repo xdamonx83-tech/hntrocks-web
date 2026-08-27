@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use JsonException;
 
@@ -199,6 +200,12 @@ class AdminAppRemoteConfigController extends Controller
         $filename = $prefix.'-'.now()->format('Ymd-His').'-'.Str::lower(Str::random(8)).'.'.$extension;
         $path = $file->storeAs('app-backgrounds', $filename, 'public');
 
-        return Storage::disk('public')->url($path);
+        if (! is_string($path) || trim($path) === '') {
+            throw ValidationException::withMessages([
+                $key => 'Der Hintergrund konnte nicht gespeichert werden. Bitte Storage-Berechtigungen prüfen.',
+            ]);
+        }
+
+        return '/storage/'.ltrim($path, '/');
     }
 }
