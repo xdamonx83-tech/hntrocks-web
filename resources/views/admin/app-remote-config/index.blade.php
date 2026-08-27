@@ -56,6 +56,7 @@
     <form id="remote-config-form" method="post" action="{{ route('admin.app-remote-config.update') }}" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="remote_branding_form" value="0" data-hnt-branding-dirty>
+        <input type="hidden" name="remote_appearance_form" value="1">
         <label class="hh-admin-menu-check hh-admin-menu-create-check">
             <input type="checkbox" name="is_active" value="1" @checked($config->is_active)>
             <span>API aktiv ausliefern</span>
