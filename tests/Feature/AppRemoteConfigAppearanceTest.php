@@ -117,7 +117,7 @@ class AppRemoteConfigAppearanceTest extends TestCase
             'is_active' => '1',
             'config_json' => json_encode($defaults),
             'auth_background_file' => UploadedFile::fake()->image('auth.jpg', 1600, 900),
-            'feed_background_file' => UploadedFile::fake()->image('feed.webp', 1600, 900),
+            'feed_background_file' => UploadedFile::fake()->image('feed.png', 1600, 900),
         ])->assertRedirect('/admin/app-remote-config');
 
         $config = AppRemoteConfig::query()->where('key', 'default')->firstOrFail();
