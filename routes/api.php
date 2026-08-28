@@ -71,6 +71,8 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
 
     Route::middleware('api.token')->group(function (): void {
+        require __DIR__.'/api-guides.php';
+
         Route::get('/app/remote-config', [AppRemoteConfigController::class, 'show'])->name('app.remote-config.show');
         Route::post('/app/remote-feed-cards/{remote_id}/dismiss', [AppRemoteConfigController::class, 'dismiss'])
             ->where('remote_id', '[A-Za-z0-9_\-:]+')
