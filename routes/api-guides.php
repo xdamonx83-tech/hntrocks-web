@@ -24,6 +24,7 @@ Route::post('/guides/drafts/{guide:slug}/submit', [ApiGuideEditorController::cla
 Route::post('/guides/drafts/{guide:slug}/withdraw', [ApiMyGuidesController::class, 'withdraw'])->name('guides.drafts.withdraw');
 Route::delete('/guides/drafts/{guide:slug}', [ApiMyGuidesController::class, 'destroy'])->name('guides.drafts.destroy');
 
+Route::post('/guides/{guide:slug}/revision', [ApiGuideEditorController::class, 'beginRevision'])->name('guides.revisions.store');
 Route::get('/guides/{guide:slug}', [ApiGuidesController::class, 'show'])->name('guides.show');
 Route::get('/guides/{guide:slug}/comments', [ApiGuidesController::class, 'comments'])->name('guides.comments.index');
 Route::post('/guides/{guide:slug}/helpful', [GuideHelpfulController::class, 'toggle'])->name('guides.helpful.toggle');

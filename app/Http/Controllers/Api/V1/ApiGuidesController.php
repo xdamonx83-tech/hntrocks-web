@@ -267,6 +267,7 @@ class ApiGuidesController extends Controller
                     'helpful' => $guide->isHelpfulFor($viewer),
                     'bookmarked' => $guide->isBookmarkedBy($viewer),
                     'owns_guide' => $guide->isOwnedBy($viewer),
+                    'can_edit' => $viewer?->can('update', $guide) ?? false,
                 ],
                 'counts' => [
                     'helpful' => (int) $guide->helpful_count,

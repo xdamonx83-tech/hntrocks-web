@@ -86,6 +86,21 @@ class ApiGuideEditorController extends Controller
         ]);
     }
 
+    public function beginRevision(
+        Request $request,
+        Guide $guide,
+        GuideWorkflowService $workflow,
+    ): JsonResponse {
+        $this->authorize('update', $guide);
+        $revision = $workflow->ensureWorkingRevision($guide, $request->user());
+        $freshGuide = $guide->fresh(['workingRevision.category', 'publishedRevision.category']);
+
+        return response()->json([
+            'message' => __('guides.editor.saved'),
+            'data' => $this->draftPayload($freshGuide, $revision, $request),
+        ]);
+    }
+
     public function update(
         SaveGuideRevisionRequest $request,
         Guide $guide,
