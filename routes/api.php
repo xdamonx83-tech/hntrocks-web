@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\ApiBootstrapController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeGameController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeInvitationController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeMatchController;
+use App\Http\Controllers\Api\V1\Arcade\ArcadeBroadcastController;
 use App\Http\Controllers\Api\V1\ApiCrownDailyStreakController;
 use App\Http\Controllers\Api\V1\ApiCupChatController;
 use App\Http\Controllers\Api\V1\ApiCupsController;
@@ -48,7 +49,6 @@ use App\Http\Controllers\Feed\FeedBookmarkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Presence\PresenceHeartbeatController;
 use App\Http\Controllers\Reports\ReportController;
-use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/v1/health', function (): array {
@@ -95,7 +95,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::patch('/maps/marker-comments/{comment}', [MapMarkerInteractionController::class, 'updateComment'])->name('maps.marker-comments.update');
         Route::delete('/maps/marker-comments/{comment}', [MapMarkerInteractionController::class, 'destroyComment'])->name('maps.marker-comments.destroy');
 
-        Route::post('/broadcasting/auth', [BroadcastController::class, 'authenticate'])->name('broadcasting.auth');
+        Route::post('/broadcasting/auth', [ArcadeBroadcastController::class, 'authenticate'])->name('broadcasting.auth');
         Route::post('/presence/heartbeat', PresenceHeartbeatController::class)->middleware('throttle:20,1')->name('presence.heartbeat');
         Route::get('/bootstrap', ApiBootstrapController::class)->name('bootstrap');
         Route::get('/me', [ApiAuthController::class, 'me'])->name('me');

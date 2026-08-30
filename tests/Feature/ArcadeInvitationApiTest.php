@@ -15,7 +15,7 @@ class ArcadeInvitationApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_invitation_api_requires_authentication(): void { $this->getJson('/api/v1/arcade/invitations')->assertUnauthorized(); $this->postJson('/api/v1/arcade/games/hunt-wins/invitations')->assertUnauthorized(); }
+    public function test_invitation_api_requires_authentication(): void { $this->game(); $this->getJson('/api/v1/arcade/invitations')->assertUnauthorized(); $this->postJson('/api/v1/arcade/games/hunt-wins/invitations')->assertUnauthorized(); }
     public function test_self_invitation_is_rejected(): void { $user = $this->user(); $this->postAs($user, $this->game(), $user)->assertUnprocessable(); }
     public function test_non_friend_invitation_is_rejected(): void { $this->postAs($this->user(), $this->game(), $this->user())->assertForbidden(); }
     public function test_accepted_friend_invitation_is_allowed(): void { [$a, $b] = $this->friends(); $this->postAs($a, $this->game(), $b)->assertSuccessful()->assertJsonPath('data.status', 'pending'); }

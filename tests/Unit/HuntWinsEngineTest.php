@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Services\Arcade\Engines\HuntWinsEngine;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class HuntWinsEngineTest extends TestCase
 {

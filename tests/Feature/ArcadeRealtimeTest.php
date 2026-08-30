@@ -8,13 +8,13 @@ use App\Models\Arcade\ArcadeGame;
 use App\Models\Arcade\ArcadeMatch;
 use App\Models\User;
 use App\Services\Arcade\Engines\HuntWinsEngine;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class ArcadeRealtimeTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function test_valid_move_emits_match_update_after_commit_with_current_version(): void
     {
@@ -27,12 +27,17 @@ class ArcadeRealtimeTest extends TestCase
         });
     }
 
-    public function test_private_match_channel_allows_participant_and_rejects_unrelated_user(): void
+    public function test_private_match_channel_allows_participants_and_denies_everyone_else(): void
     {
         [$player, $other, $match] = $this->activeMatch();
         $payload = ['socket_id' => '1234.5678', 'channel_name' => 'private-arcade.match.'.$match->id];
         $this->withToken($this->token($player))->postJson('/api/v1/broadcasting/auth', $payload)->assertSuccessful();
+        $this->withToken($this->token($other))->postJson('/api/v1/broadcasting/auth', $payload)->assertSuccessful();
         $this->withToken($this->token($this->user()))->postJson('/api/v1/broadcasting/auth', $payload)->assertForbidden();
+        $this->postJson('/api/v1/broadcasting/auth', $payload)->assertUnauthorized();
+        $this->withToken($this->token($player))->postJson('/api/v1/broadcasting/auth', ['socket_id' => '1234.5678', 'channel_name' => 'private-arcade.match.999999'])->assertForbidden();
+        $match->players()->where('user_id', $player->id)->update(['user_id' => null]);
+        $this->withToken($this->token($player))->postJson('/api/v1/broadcasting/auth', $payload)->assertForbidden();
     }
 
     private function activeMatch(): array
