@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,16 @@ class FeedComment extends Model
         'body',
         'source_language',
     ];
+
+    public function scopeVisibleInThread(Builder $query): Builder
+    {
+        return $query->where(function (Builder $visible): void {
+            $visible->whereNull('parent_id')
+                ->orWhereHas('parent', function (Builder $parent): void {
+                    $parent->whereNull('parent_id');
+                });
+        });
+    }
 
     public function post(): BelongsTo
     {

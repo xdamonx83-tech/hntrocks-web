@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class MapController extends Controller
@@ -27,55 +28,31 @@ class MapController extends Controller
         'tarot',
     ];
 
-    private const MAPS = [
-        'stillwater-bayou' => [
-            'name' => 'Stillwater Bayou',
-            'width' => 2048,
-            'height' => 2048,
-            'image' => 'assets/hnt/maps/stillwater-bayou/map.webp',
-            'lines' => 'assets/hnt/maps/stillwater-bayou/lines.png',
-            'data' => 'maps/stillwater-bayou.json',
-        ],
-        'lawson-delta' => [
-            'name' => 'Lawson Delta',
-            'width' => 2048,
-            'height' => 2048,
-            'image' => 'assets/hnt/maps/lawson-delta/map.webp',
-            'lines' => 'assets/hnt/maps/lawson-delta/lines.png',
-            'data' => 'maps/lawson-delta.json',
-        ],
-        'desalle' => [
-            'name' => 'DeSalle',
-            'width' => 2048,
-            'height' => 2048,
-            'image' => 'assets/hnt/maps/desalle/map.webp',
-            'lines' => 'assets/hnt/maps/desalle/lines.png',
-            'data' => 'maps/desalle.json',
-        ],
-        'mammons-gulch' => [
-            'name' => "Mammon's Gulch",
-            'width' => 2048,
-            'height' => 2048,
-            'image' => 'assets/hnt/maps/mammons-gulch/map.webp',
-            'lines' => 'assets/hnt/maps/mammons-gulch/lines.png',
-            'data' => 'maps/mammons-gulch.json',
-        ],
-    ];
-
     public function index(Request $request): View|Response
     {
-        $maps = collect(self::MAPS)->map(function (array $map, string $slug): array {
-            $data = $this->readMapData($slug, $map['data']);
+        $maps = HntMap::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->map(function (HntMap $map): array {
+                $markers = $this->readDatabaseMarkers($map);
 
-            return [
-                ...$map,
-                'slug' => $slug,
-                'image_url' => asset($map['image']),
-                'image_available' => File::isFile(public_path($map['image'])),
-                'marker_count' => count($data['markers']),
-                'data_available' => $data['error'] === null,
-            ];
-        })->values();
+                return [
+                    'slug' => $map->slug,
+                    'name' => $map->name,
+                    'width' => $map->width,
+                    'height' => $map->height,
+                    'image' => $map->image_path,
+                    'lines' => $map->lines_path,
+                    'image_url' => $this->assetUrl($map->image_path),
+                    'lines_url' => $this->assetUrl($map->lines_path, true),
+                    'image_available' => $this->assetExists($map->image_path),
+                    'marker_count' => count($markers),
+                    'data_available' => true,
+                ];
+            })
+            ->values();
 
         $reactIndex = public_path('app/index.html');
 
@@ -170,67 +147,54 @@ class MapController extends Controller
 
     public function show(Request $request, MapVoteVisitorIdentity $visitorIdentity, string $slug): View
     {
-        abort_unless(isset(self::MAPS[$slug]), 404);
+        $map = HntMap::query()
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
 
-        $map = self::MAPS[$slug];
         $viewerVisitorHash = $request->user() === null
             ? $visitorIdentity->hashFromRequest($request)
             : null;
-        $data = $this->readMapData($slug, $map['data'], $viewerVisitorHash);
-        $imageAvailable = File::isFile(public_path($map['image']));
-        $linesAvailable = File::isFile(public_path($map['lines']));
+        $markers = $this->readDatabaseMarkers($map, $viewerVisitorHash);
 
         return view('themes.hnt_preview.maps.show', [
             'map' => [
-                ...$map,
-                'slug' => $slug,
-                'image_url' => asset($map['image']),
-                'lines_url' => $linesAvailable ? asset($map['lines']) : null,
-                'cash_spot_submission_url' => route('maps.cash-spots.store', ['map' => $slug]),
+                'slug' => $map->slug,
+                'name' => $map->name,
+                'width' => $map->width,
+                'height' => $map->height,
+                'image' => $map->image_path,
+                'lines' => $map->lines_path,
+                'image_url' => $this->assetUrl($map->image_path),
+                'lines_url' => $this->assetUrl($map->lines_path, true),
+                'cash_spot_submission_url' => route('maps.cash-spots.store', ['map' => $map->slug]),
             ],
-            'markers' => $data['markers'],
+            'markers' => $markers,
             'markerTypes' => self::MARKER_TYPES,
-            'availableMaps' => collect(self::MAPS)->map(fn (array $availableMap, string $availableSlug): array => [
-                'slug' => $availableSlug,
-                'name' => $availableMap['name'],
-                'url' => route('maps.show', $availableSlug),
-            ])->values(),
-            'imageAvailable' => $imageAvailable,
-            'dataError' => $data['error'],
+            'availableMaps' => HntMap::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get(['slug', 'name'])
+                ->map(fn (HntMap $availableMap): array => [
+                    'slug' => $availableMap->slug,
+                    'name' => $availableMap->name,
+                    'url' => route('maps.show', $availableMap->slug),
+                ])
+                ->values(),
+            'imageAvailable' => $this->assetExists($map->image_path),
+            'dataError' => null,
         ]);
     }
 
     /**
-     * @return array{markers: array<int, array<string, mixed>>, error: string|null}
+     * @return array<int, array<string, mixed>>
      */
-    private function readMapData(string $slug, string $relativePath, ?string $viewerVisitorHash = null): array
-    {
-        $databaseMarkers = $this->readDatabaseMarkers($slug, $viewerVisitorHash);
-
-        if ($databaseMarkers !== null) {
-            return ['markers' => $databaseMarkers, 'error' => null];
-        }
-
-        return $this->readJsonMarkers($relativePath);
-    }
-
-    /**
-     * A null result deliberately selects the JSON fallback. This also protects
-     * deploys where application code arrives before its migrations or seeder.
-     *
-     * @return array<int, array<string, mixed>>|null
-     */
-    private function readDatabaseMarkers(string $slug, ?string $viewerVisitorHash = null): ?array
+    private function readDatabaseMarkers(HntMap $map, ?string $viewerVisitorHash = null): array
     {
         try {
-            if (! Schema::hasTable('hnt_maps') || ! Schema::hasTable('hnt_map_markers')) {
-                return null;
-            }
-
-            $map = HntMap::query()->where('slug', $slug)->where('is_active', true)->first();
-
-            if ($map === null) {
-                return null;
+            if (! Schema::hasTable('hnt_map_markers')) {
+                return [];
             }
 
             $markersQuery = $map->markers()
@@ -262,13 +226,7 @@ class MapController extends Controller
                 $markersQuery->withCount('comments');
             }
 
-            $markers = $markersQuery->get();
-
-            if ($markers->isEmpty()) {
-                return null;
-            }
-
-            return $markers->map(function ($marker) use ($votesAvailable, $commentsAvailable): ?array {
+            return $markersQuery->get()->map(function ($marker) use ($votesAvailable, $commentsAvailable): ?array {
                 $safeMarker = $this->safeMarker([
                     'type' => $marker->type,
                     'x' => $marker->x,
@@ -285,7 +243,7 @@ class MapController extends Controller
                 }
 
                 $safeMarker['id'] = $marker->id;
-                $safeMarker['comments_url'] = route('maps.markers.comments.index', $marker);
+                $safeMarker['comments_url'] = route('api.v1.maps.markers.comments.index', $marker);
                 $safeMarker['comment_store_url'] = auth()->check()
                     ? route('maps.markers.comments.store', $marker)
                     : null;
@@ -305,42 +263,8 @@ class MapController extends Controller
                 ];
             })->filter()->values()->all();
         } catch (Throwable) {
-            return null;
+            return [];
         }
-    }
-
-    /**
-     * @return array{markers: array<int, array<string, mixed>>, error: string|null}
-     */
-    private function readJsonMarkers(string $relativePath): array
-    {
-        $path = resource_path('data/'.$relativePath);
-
-        if (! File::isFile($path)) {
-            return ['markers' => [], 'error' => 'missing'];
-        }
-
-        try {
-            $decoded = json_decode(File::get($path), true, 512, JSON_THROW_ON_ERROR);
-        } catch (Throwable) {
-            return ['markers' => [], 'error' => 'invalid'];
-        }
-
-        if (! is_array($decoded) || ! is_array($decoded['markers'] ?? null)) {
-            return ['markers' => [], 'error' => 'invalid'];
-        }
-
-        $markers = [];
-
-        foreach ($decoded['markers'] as $marker) {
-            $safeMarker = is_array($marker) ? $this->safeMarker($marker) : null;
-
-            if ($safeMarker !== null) {
-                $markers[] = $safeMarker;
-            }
-        }
-
-        return ['markers' => $markers, 'error' => null];
     }
 
     /**
@@ -376,6 +300,36 @@ class MapController extends Controller
         return $safeMarker;
     }
 
+    private function assetUrl(?string $relativePath, bool $requireFile = false): ?string
+    {
+        $relativePath = is_string($relativePath) ? trim($relativePath) : null;
+
+        if (! $this->isSafeRelativePath($relativePath)) {
+            return null;
+        }
+
+        if ($requireFile && ! $this->assetExists($relativePath)) {
+            return null;
+        }
+
+        return asset($relativePath);
+    }
+
+    private function assetExists(?string $relativePath): bool
+    {
+        $relativePath = is_string($relativePath) ? trim($relativePath) : null;
+
+        if (! $this->isSafeRelativePath($relativePath)) {
+            return false;
+        }
+
+        if (str_starts_with($relativePath, 'storage/')) {
+            return Storage::disk('public')->exists(substr($relativePath, strlen('storage/')));
+        }
+
+        return File::isFile(public_path($relativePath));
+    }
+
     private function cashSpotImageUrl(mixed $sourceImage): ?string
     {
         if (! is_string($sourceImage)) {
@@ -384,21 +338,11 @@ class MapController extends Controller
 
         $sourceImage = trim($sourceImage);
 
-        if ($sourceImage === ''
-            || str_starts_with($sourceImage, '/')
-            || str_contains($sourceImage, '..')
-            || str_contains($sourceImage, '\\')
-            || str_contains($sourceImage, "\0")
-            || preg_match('/^[a-z][a-z0-9+.-]*:/i', $sourceImage) === 1) {
+        if (! $this->isSafeRelativePath($sourceImage)) {
             return null;
         }
 
         $segments = explode('/', $sourceImage);
-
-        if (in_array('', $segments, true)) {
-            return null;
-        }
-
         $path = storage_path('app/public/maps/cash-spots/'.$sourceImage);
 
         if (! File::isFile($path)) {
@@ -406,5 +350,17 @@ class MapController extends Controller
         }
 
         return '/storage/maps/cash-spots/'.implode('/', array_map('rawurlencode', $segments));
+    }
+
+    private function isSafeRelativePath(?string $path): bool
+    {
+        return is_string($path)
+            && $path !== ''
+            && ! str_starts_with($path, '/')
+            && ! str_contains($path, '..')
+            && ! str_contains($path, '\\')
+            && ! str_contains($path, "\0")
+            && preg_match('/^[a-z][a-z0-9+.-]*:/i', $path) !== 1
+            && ! in_array('', explode('/', $path), true);
     }
 }

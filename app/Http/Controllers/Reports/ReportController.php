@@ -7,6 +7,8 @@ use App\Models\Cup;
 use App\Models\CupSubmission;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
+use App\Models\Guide;
+use App\Models\GuideComment;
 use App\Models\LfgPost;
 use App\Models\MediaAsset;
 use App\Models\Moment;
@@ -81,6 +83,8 @@ class ReportController extends Controller
             $reportable instanceof User => (int) $reportable->id === (int) $user->id,
             $reportable instanceof FeedPost => (int) $reportable->user_id === (int) $user->id,
             $reportable instanceof FeedComment => (int) $reportable->user_id === (int) $user->id,
+            $reportable instanceof Guide => (int) $reportable->author_id === (int) $user->id,
+            $reportable instanceof GuideComment => (int) $reportable->user_id === (int) $user->id,
             $reportable instanceof LfgPost => $reportable->isOwner($user),
             $reportable instanceof Team => $reportable->canManage($user),
             $reportable instanceof TeamLfgPost => $reportable->canManage($user),
@@ -124,6 +128,8 @@ class ReportController extends Controller
             $reportable instanceof User => 'user',
             $reportable instanceof FeedPost => 'feed_post',
             $reportable instanceof FeedComment => 'feed_comment',
+            $reportable instanceof Guide => 'guide',
+            $reportable instanceof GuideComment => 'guide_comment',
             $reportable instanceof LfgPost => 'lfg',
             $reportable instanceof Team => 'team',
             $reportable instanceof TeamLfgPost => 'team_lfg',
@@ -142,6 +148,8 @@ class ReportController extends Controller
             'user' => User::class,
             'feed_post' => FeedPost::class,
             'feed_comment' => FeedComment::class,
+            'guide' => Guide::class,
+            'guide_comment' => GuideComment::class,
             'team' => Team::class,
             'lfg' => LfgPost::class,
             'team_lfg' => TeamLfgPost::class,

@@ -36,6 +36,7 @@ class UserResource extends JsonResource
                 'language' => $profile?->language,
                 'hunt_role' => $profile?->hunt_role,
                 'discord_name' => $profile?->discord_name,
+                'twitch_url' => $profile?->twitch_url,
                 'is_lfg_available' => (bool) ($profile?->is_lfg_available ?? false),
                 'hunter_dna' => HunterDna::payload($profile?->hunter_dna),
                 'hunter_dna_completed_at' => $profile?->hunter_dna_completed_at?->toISOString(),

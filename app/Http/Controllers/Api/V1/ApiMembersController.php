@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\NotificationService;
 use App\Services\SecurityLogService;
+use App\Services\Twitch\TwitchLiveStatusService;
 use App\Services\Search\PlayerSearchQuery;
 use Illuminate\Support\Facades\Storage;
 
@@ -164,7 +165,7 @@ class ApiMembersController extends Controller
     }
 
 
-    public function show(Request $request, User $user): JsonResponse
+    public function show(Request $request, User $user, TwitchLiveStatusService $twitch): JsonResponse
     {
         abort_unless($user->status === 'active', 404);
 
@@ -188,6 +189,7 @@ class ApiMembersController extends Controller
             'user' => new UserResource($user),
             'profile_summary' => $this->publicProfileSummary($request, $user, $isOwnProfile),
             'viewer' => $this->viewerState($viewer, $user, $isOwnProfile),
+            'twitch' => $twitch->statusForUrl($user->profile?->twitch_url),
         ]);
     }
 
@@ -835,6 +837,7 @@ class ApiMembersController extends Controller
 
     private function publicProfileSummary(Request $request, User $user, bool $isOwnProfile): array
     {
+        $user->loadMissing('crownWallet');
         $locale = $this->resolveApiLocale($request);
         $level = max(1, (int) ($user->level ?: 1));
         $xpTotal = max(0, (int) ($user->xp_total ?: 0));
@@ -1000,6 +1003,7 @@ class ApiMembersController extends Controller
             ->values();
 
         return [
+            'rocks' => (int) ($user->crownWallet?->balance ?? 0),
             'hunter_trust' => $this->hunterTrustSummary($user),
             'progress' => [
                 'level' => $level,
@@ -1012,6 +1016,7 @@ class ApiMembersController extends Controller
                 'last_xp_at' => $user->last_xp_at?->toISOString(),
             ],
             'counts' => [
+                'rocks' => (int) ($user->crownWallet?->balance ?? 0),
                 'badges' => $user->badges()->count(),
                 'active_quests' => Quest::query()->where('is_active', true)->count(),
                 'completed_quests' => $user->questProgress()->whereNotNull('completed_at')->count(),

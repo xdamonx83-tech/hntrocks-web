@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminNavigationController;
 use App\Http\Controllers\Admin\AdminMomentOfWeekController;
 use App\Http\Controllers\Admin\AdminLoadoutChallengeController;
 use App\Http\Controllers\Admin\AdminMapController;
+use App\Http\Controllers\Admin\AdminRemoteMapController;
 use App\Http\Controllers\Admin\AdminWeeklyContractController;
 use App\Http\Controllers\Admin\AdminApprovedOutboundLinkController;
 use App\Http\Controllers\Admin\AdminAppPushController;
@@ -58,6 +59,7 @@ use App\Http\Controllers\Gamification\GamificationController;
 use App\Http\Controllers\Hashtags\HashtagController;
 use App\Http\Controllers\LFG\LfgApplicationController;
 use App\Http\Controllers\LFG\LfgController;
+use App\Http\Controllers\Legal\LegalPageController;
 use App\Http\Controllers\Members\MembersController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Messages\MessageController;
@@ -73,6 +75,7 @@ use App\Http\Controllers\Presence\PresenceHeartbeatController;
 use App\Http\Controllers\Socialite\HeaderLiveController;
 use App\Http\Controllers\Referrals\ReferralController;
 use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\React\ReactAppController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\TrophyRoom\TrophyRoomController;
 use App\Http\Controllers\Teams\TeamFeedController;
@@ -129,6 +132,17 @@ Route::get('/out/{link:slug}/go', [ApprovedOutboundLinkController::class, 'go'])
 Route::get('/sitemap.xml', SitemapController::class)->name('seo.sitemap');
 Route::get('/app-beta', [AppBetaController::class, 'index'])->name('app-beta.index');
 Route::post('/app-beta', [AppBetaController::class, 'store'])->middleware('throttle:6,1')->name('app-beta.store');
+Route::get('/rocks', ReactAppController::class)->name('rocks.index');
+Route::get('/rocks/{path}', ReactAppController::class)->where('path', '.*')->name('rocks.react');
+Route::get('/guides', ReactAppController::class)->name('guides.react.index');
+Route::get('/guides/create', ReactAppController::class)->name('guides.react.create');
+Route::get('/guides/mine', ReactAppController::class)->name('guides.react.mine');
+Route::get('/guides/{slug}', ReactAppController::class)
+    ->where('slug', '[a-z0-9-]+')
+    ->name('guides.react.show');
+Route::get('/pages/user/{section}', ReactAppController::class)
+    ->whereIn('section', ['overview', 'hunter-dna', 'projects', 'permissions', 'friends', 'social', 'twitch'])
+    ->name('react.profile.section');
 Route::get('/maps', [MapController::class, 'index'])->name('maps.index');
 Route::get('/maps/{slug}', [MapController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
@@ -143,12 +157,24 @@ Route::get('/maps/markers/{marker}/comments', [MapMarkerCommentController::class
     ->middleware('throttle:60,1')
     ->name('maps.markers.comments.index');
 
-Route::view('/impressum', 'legal.impressum')->name('legal.impressum');
-Route::view('/datenschutz', 'legal.datenschutz')->name('legal.datenschutz');
-Route::view('/nutzungsbedingungen', 'legal.nutzungsbedingungen')->name('legal.nutzungsbedingungen');
-Route::view('/netiquette', 'legal.netiquette')->name('legal.netiquette');
-Route::view('/account-deletion', 'legal.account-deletion')->name('legal.account_deletion');
-Route::view('/child-safety-standards', 'legal.child-safety')->name('legal.child_safety');
+Route::get('/impressum', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'impressum')
+    ->name('legal.impressum');
+Route::get('/datenschutz', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'datenschutz')
+    ->name('legal.datenschutz');
+Route::get('/nutzungsbedingungen', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'nutzungsbedingungen')
+    ->name('legal.nutzungsbedingungen');
+Route::get('/netiquette', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'netiquette')
+    ->name('legal.netiquette');
+Route::get('/account-deletion', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'account-deletion')
+    ->name('legal.account_deletion');
+Route::get('/child-safety-standards', [LegalPageController::class, 'show'])
+    ->defaults('legalSlug', 'child-safety-standards')
+    ->name('legal.child_safety');
 Route::view('/design/socialite-feed', 'design.socialite-feed')->name('design.socialite.feed');
 Route::view('/design/socialite-feed-live', 'design.socialite-feed-live')->name('design.socialite.feed.live');
 Route::view('/design/socialite-theme-feed', 'themes.socialite.feed.index')->name('design.socialite.theme-feed');
@@ -373,7 +399,7 @@ Route::get('/u/{user:username}/about', [ProfileController::class, 'about'])->nam
 Route::get('/u/{user:username}/badges', [ProfileController::class, 'badges'])->name('profile.badges.public');
 Route::get('/u/{user:username}/trophies', [ProfileController::class, 'trophies'])->name('profile.trophies.public');
 Route::get('/u/{user:username}/teams', [ProfileController::class, 'teams'])->name('profile.teams.public');
-Route::get('/u/{user:username}', [ProfileController::class, 'show'])->name('profile.public');
+Route::get('/u/{user:username}', \App\Http\Controllers\React\ReactAppController::class)->name('profile.public');
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
@@ -598,6 +624,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/moment-of-week', [AdminMomentOfWeekController::class, 'store'])->name('moment-of-week.store');
         Route::put('/moment-of-week/{spotlight}', [AdminMomentOfWeekController::class, 'update'])->name('moment-of-week.update');
         Route::delete('/moment-of-week/{spotlight}', [AdminMomentOfWeekController::class, 'destroy'])->name('moment-of-week.destroy');
+        require __DIR__.'/admin-guides.php';
+
         Route::get('/content', [AdminContentController::class, 'index'])->name('content.index');
         Route::get('/contracts', [AdminWeeklyContractController::class, 'index'])->name('contracts.index');
         Route::post('/contracts', [AdminWeeklyContractController::class, 'store'])->name('contracts.store');
@@ -613,6 +641,10 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/hunt-news/{item}/publish', [AdminHuntNewsController::class, 'publish'])->name('hunt-news.publish');
         Route::post('/hunt-news/{item}/skip', [AdminHuntNewsController::class, 'skip'])->name('hunt-news.skip');
         Route::get('/maps', [AdminMapController::class, 'index'])->name('maps.index');
+        Route::get('/maps/create', [AdminRemoteMapController::class, 'create'])->name('maps.create');
+        Route::post('/maps', [AdminRemoteMapController::class, 'store'])->name('maps.store');
+        Route::get('/maps/{map:slug}/edit', [AdminRemoteMapController::class, 'edit'])->name('maps.edit');
+        Route::put('/maps/{map:slug}', [AdminRemoteMapController::class, 'update'])->name('maps.update');
         Route::get('/maps/cash-spots', [AdminMapController::class, 'cashSpots'])->name('maps.cash-spots.index');
         Route::get('/maps/{map:slug}/markers', [AdminMapController::class, 'markers'])->name('maps.markers');
         Route::post('/maps/{map:slug}/markers', [AdminMapController::class, 'storeMarker'])->name('maps.markers.store');

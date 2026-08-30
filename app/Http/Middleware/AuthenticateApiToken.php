@@ -16,6 +16,10 @@ class AuthenticateApiToken
         $token = ApiAccessToken::findValidPlainToken($request->bearerToken());
 
         if (! $token || ! $token->user) {
+            if ($request->isMethod('GET') && $request->is('api/v1/app/remote-config')) {
+                return $next($request);
+            }
+
             return new JsonResponse([
                 'message' => 'Unauthenticated.',
             ], 401);

@@ -18,13 +18,6 @@ use Throwable;
 
 class SitemapController extends Controller
 {
-    private const MAP_SLUGS = [
-        'stillwater-bayou',
-        'lawson-delta',
-        'desalle',
-        'mammons-gulch',
-    ];
-
     public function __invoke(): Response
     {
         $mapLastModified = $this->mapLastModified();
@@ -47,9 +40,9 @@ class SitemapController extends Controller
             $this->url(route('legal.child_safety'), now(), 'yearly', '0.3'),
         ]);
 
-        foreach (self::MAP_SLUGS as $slug) {
-            $urls->push($this->url(route('maps.show', $slug), $mapLastModified->get($slug, now()), 'weekly', '0.8'));
-        }
+        $mapLastModified->each(function (CarbonInterface $lastModified, string $slug) use ($urls): void {
+            $urls->push($this->url(route('maps.show', $slug), $lastModified, 'weekly', '0.8'));
+        });
 
         if (Schema::hasTable('cups')) {
             Cup::query()
@@ -132,34 +125,42 @@ class SitemapController extends Controller
         ];
     }
 
+    /**
+     * @return Collection<string, CarbonInterface>
+     */
     private function mapLastModified(): Collection
     {
-        $lastModified = collect(self::MAP_SLUGS)->mapWithKeys(fn (string $slug): array => [$slug => now()]);
-
         try {
             if (! Schema::hasTable('hnt_maps')) {
-                return $lastModified;
+                return collect();
             }
 
-            $query = HntMap::query()->whereIn('slug', self::MAP_SLUGS);
+            $query = HntMap::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('name');
 
             if (Schema::hasTable('hnt_map_markers')) {
                 $query->withMax('markers', 'updated_at');
             }
 
-            $query->get()->each(function (HntMap $map) use ($lastModified): void {
-                $timestamps = collect([
-                    $map->updated_at,
-                    $map->created_at,
-                    $map->getAttribute('markers_max_updated_at'),
-                ])->filter()->map(fn ($timestamp) => $timestamp instanceof CarbonInterface ? $timestamp : Carbon::parse($timestamp));
+            return $query
+                ->get()
+                ->mapWithKeys(function (HntMap $map): array {
+                    $timestamps = collect([
+                        $map->updated_at,
+                        $map->created_at,
+                        $map->getAttribute('markers_max_updated_at'),
+                    ])->filter()->map(
+                        fn ($timestamp) => $timestamp instanceof CarbonInterface
+                            ? $timestamp
+                            : Carbon::parse($timestamp)
+                    );
 
-                $lastModified->put($map->slug, $timestamps->max() ?: now());
-            });
+                    return [$map->slug => $timestamps->max() ?: now()];
+                });
         } catch (Throwable) {
-            // Keep the public sitemap available while map tables are unavailable.
+            return collect();
         }
-
-        return $lastModified;
     }
 }

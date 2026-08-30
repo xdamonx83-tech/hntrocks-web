@@ -56,6 +56,7 @@
     <form id="remote-config-form" method="post" action="{{ route('admin.app-remote-config.update') }}" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="remote_branding_form" value="0" data-hnt-branding-dirty>
+        <input type="hidden" name="remote_appearance_form" value="1">
         <label class="hh-admin-menu-check hh-admin-menu-create-check">
             <input type="checkbox" name="is_active" value="1" @checked($config->is_active)>
             <span>API aktiv ausliefern</span>
@@ -140,6 +141,53 @@
             </div>
         </section>
 
+        <section class="hh-remote-branding-panel" aria-labelledby="remote-backgrounds-heading">
+            <div class="hh-card-title-row">
+                <div>
+                    <h2 id="remote-backgrounds-heading">Remote App Hintergründe</h2>
+                    <p class="hh-muted">Auth und Feed können ohne App-Release ausgetauscht werden. JPG, PNG oder WebP, maximal 8 MB.</p>
+                </div>
+            </div>
+
+            <div class="hh-remote-upload-grid">
+                <div>
+                    <label class="hh-admin-menu-field">
+                        <span>Auth-Hintergrund</span>
+                        <input type="file" name="auth_background_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                    </label>
+                    <p class="hh-muted">Version: {{ data_get($appearance, 'auth_background.version', 0) }}</p>
+                    @if(! empty(data_get($appearance, 'auth_background.url')))
+                        <div class="hh-remote-current-logo">
+                            <span>Aktueller Auth-Hintergrund</span>
+                            <img src="{{ data_get($appearance, 'auth_background.url') }}" alt="Aktueller Remote Auth Hintergrund">
+                        </div>
+                        <label class="hh-admin-menu-check hh-admin-menu-create-check">
+                            <input type="checkbox" name="auth_background_clear" value="1">
+                            <span>Remote Auth-Hintergrund entfernen</span>
+                        </label>
+                    @endif
+                </div>
+
+                <div>
+                    <label class="hh-admin-menu-field">
+                        <span>Feed-Hintergrund</span>
+                        <input type="file" name="feed_background_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                    </label>
+                    <p class="hh-muted">Version: {{ data_get($appearance, 'feed_background.version', 0) }}</p>
+                    @if(! empty(data_get($appearance, 'feed_background.url')))
+                        <div class="hh-remote-current-logo">
+                            <span>Aktueller Feed-Hintergrund</span>
+                            <img src="{{ data_get($appearance, 'feed_background.url') }}" alt="Aktueller Remote Feed Hintergrund">
+                        </div>
+                        <label class="hh-admin-menu-check hh-admin-menu-create-check">
+                            <input type="checkbox" name="feed_background_clear" value="1">
+                            <span>Remote Feed-Hintergrund entfernen</span>
+                        </label>
+                    @endif
+                </div>
+            </div>
+        </section>
+
         <div class="hh-admin-menu-field">
             <label for="config-json">JSON</label>
             <textarea id="config-json" class="hh-admin-menu-input" name="config_json" rows="24" spellcheck="false" required>{{ old('config_json', $configJson) }}</textarea>
@@ -194,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.querySelectorAll('input[name="palette_enabled"], input[name="logo_enabled"], input[type="file"]').forEach((input) => {
+    document.querySelectorAll('input[name="palette_enabled"], input[name="logo_enabled"], input[name="logo_file"], input[name="logo_dark_file"]').forEach((input) => {
         input.addEventListener('change', markDirty);
     });
 

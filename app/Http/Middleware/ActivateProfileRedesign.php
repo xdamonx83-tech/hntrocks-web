@@ -23,7 +23,6 @@ class ActivateProfileRedesign
         'profile.trophies',
         'profile.teams',
         'profile.contact',
-        'profile.public',
         'profile.about.public',
         'profile.friends.public',
         'profile.badges.public',

@@ -50,6 +50,9 @@
     var width = Number(config.width);
     var height = Number(config.height);
     var initialZoomOffset = window.matchMedia('(max-width: 768px)').matches ? 0.25 : 0.5;
+    var accentColor = window.getComputedStyle(mapElement).getPropertyValue('--accent-primary').trim()
+        || window.getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-primary-main').trim()
+        || '#00b8d4';
 
     function markerLatLng(marker) {
         return [Number(marker.y), Number(marker.x)];
@@ -254,15 +257,47 @@
         });
     }
 
+    function mapCommentAuthorization() {
+        try {
+            var raw = window.localStorage.getItem('hnt.next.auth.session');
+            if (!raw) {
+                return null;
+            }
+
+            var session = JSON.parse(raw);
+            if (!session || typeof session.access_token !== 'string' || typeof session.token_type !== 'string') {
+                return null;
+            }
+
+            if (session.expires_at && Date.parse(session.expires_at) <= Date.now()) {
+                return null;
+            }
+
+            return session.token_type + ' ' + session.access_token;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function mapCommentHeaders(includeContentType) {
+        var headers = {'Accept': 'application/json'};
+        var authorization = mapCommentAuthorization();
+
+        if (includeContentType) {
+            headers['Content-Type'] = 'application/json';
+        }
+        if (authorization) {
+            headers.Authorization = authorization;
+        }
+
+        return headers;
+    }
+
     function commentRequest(url, method, body) {
         return fetch(url, {
             method: method,
             credentials: 'same-origin',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-            },
+            headers: mapCommentHeaders(true),
             body: body === undefined ? undefined : JSON.stringify(body)
         }).then(function (response) {
             return response.json().catch(function () { return {}; }).then(function (data) {
@@ -419,7 +454,7 @@
 
         fetch(marker.comments_url, {
             credentials: 'same-origin',
-            headers: {'Accept': 'application/json'}
+            headers: mapCommentHeaders(false)
         }).then(function (response) {
             if (!response.ok) {
                 throw new Error(config.cashSpotCommentErrorText);
@@ -492,7 +527,7 @@
         closeButton.type = 'button';
         closeButton.className = 'hnt-map-lightbox-close';
         closeButton.setAttribute('aria-label', config.closeText);
-        closeButton.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+        closeButton.textContent = '×';
         closeButton.addEventListener('click', closeCashDetailModal);
 
         cashDetailImage = document.createElement('img');
@@ -671,15 +706,6 @@
                 fillColor: colors[marker.type],
                 fillOpacity: 1
             });
-        var popup = document.createElement('div');
-        var title = document.createElement('strong');
-        var type = document.createElement('span');
-        title.textContent = marker.label;
-        type.textContent = config.typeLabels[marker.type] || marker.type;
-        popup.appendChild(title);
-        popup.appendChild(type);
-        point.bindPopup(popup);
-
         if (marker.type === 'compound') {
             var compoundLabel = document.createElement('span');
             compoundLabel.textContent = marker.label;
@@ -1065,7 +1091,7 @@ function matchesSearch(reference, queryForms) {
             radius: 6,
             color: '#171713',
             weight: 2,
-            fillColor: '#d6a84f',
+            fillColor: accentColor,
             fillOpacity: 1,
             interactive: false
         }).bindTooltip(label, {
@@ -1112,7 +1138,7 @@ function matchesSearch(reference, queryForms) {
         measureMarker(start, config.measureMarkerAText).addTo(finishedMeasurements);
         measureMarker(latlng, config.measureMarkerBText).addTo(finishedMeasurements);
         window.L.polyline([start, latlng], {
-            color: '#e2c477',
+            color: accentColor,
             weight: 2.5,
             opacity: 0.9,
             interactive: false
@@ -1164,7 +1190,7 @@ function matchesSearch(reference, queryForms) {
 
         if (!previewLine) {
             previewLine = window.L.polyline(points, {
-                color: '#d6b968',
+                color: accentColor,
                 weight: 2,
                 opacity: 0.72,
                 dashArray: '6 7',
@@ -1198,42 +1224,6 @@ function matchesSearch(reference, queryForms) {
         toastTimer = window.setTimeout(function () { toast.hidden = true; }, 2600);
     }
 
-    function currentViewUrl() {
-        var center = map.getCenter();
-        var url = new URL(window.location.href);
-        url.searchParams.set('x', center.lng.toFixed(2));
-        url.searchParams.set('y', center.lat.toFixed(2));
-        url.searchParams.set('z', map.getZoom().toFixed(2));
-        return url.toString();
-    }
-
-    function showShareFallback(url) {
-        var fallback = document.querySelector('[data-map-share-fallback]');
-        var input = document.querySelector('[data-map-share-url]');
-        if (!fallback || !input) {
-            return;
-        }
-
-        input.value = url;
-        fallback.hidden = false;
-        input.focus();
-        input.select();
-    }
-
-    document.querySelector('[data-map-share]')?.addEventListener('click', function () {
-        var url = currentViewUrl();
-
-        if (!navigator.clipboard || !window.isSecureContext) {
-            showShareFallback(url);
-            return;
-        }
-
-        navigator.clipboard.writeText(url).then(function () {
-            showMapToast(config.shareSuccessText);
-        }).catch(function () {
-            showShareFallback(url);
-        });
-    });
 
     function resetMapView() {
         var fittedZoom = map.getBoundsZoom(bounds, false, window.L.point(20, 20));

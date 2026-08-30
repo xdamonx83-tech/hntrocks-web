@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#070605">
     @include('partials.seo-meta')
-    <link rel="icon" type="image/png" href="{{ asset('assets/vikinger/img/favicon-96x96.png') }}" sizes="96x96">
+    @include('partials.favicon')
     <link rel="stylesheet" href="{{ asset('assets/vikinger/css/hnt-local-fonts.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vikinger/css/styles.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/socialite/css/tailwind.css') }}">

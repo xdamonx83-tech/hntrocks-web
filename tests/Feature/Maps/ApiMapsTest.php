@@ -10,10 +10,34 @@ class ApiMapsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_maps_index_is_public_and_contains_stillwater_bayou(): void
+    public function test_maps_index_is_public_and_uses_active_database_maps(): void
     {
+        HntMap::query()->create([
+            'slug' => 'remote-test-map',
+            'name' => 'Remote Test Map',
+            'width' => 2048,
+            'height' => 2048,
+            'image_path' => 'assets/hnt/maps/stillwater-bayou/map.webp',
+            'lines_path' => null,
+            'sort_order' => 5,
+            'is_active' => true,
+        ]);
+
+        HntMap::query()->create([
+            'slug' => 'hidden-test-map',
+            'name' => 'Hidden Test Map',
+            'width' => 2048,
+            'height' => 2048,
+            'image_path' => 'assets/hnt/maps/stillwater-bayou/map.webp',
+            'sort_order' => 6,
+            'is_active' => false,
+        ]);
+
         $response = $this->getJson('/api/v1/maps')
             ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'remote-test-map')
+            ->assertJsonPath('data.0.name', 'Remote Test Map')
             ->assertJsonStructure([
                 'data' => [[
                     'slug',
@@ -24,22 +48,33 @@ class ApiMapsTest extends TestCase
                     'lines_url',
                     'marker_types',
                     'marker_count',
+                    'marker_counts',
                 ]],
             ]);
 
-        $this->assertIsArray($response->json('data'));
-        $this->assertTrue(
-            collect($response->json('data'))->contains('slug', 'stillwater-bayou')
-        );
+        $this->assertStringStartsWith('http', $response->json('data.0.image_url'));
+        $this->assertNull($response->json('data.0.lines_url'));
     }
 
-    public function test_stillwater_bayou_is_public_and_returns_native_map_data(): void
+    public function test_dynamic_database_map_detail_is_public(): void
     {
-        $response = $this->getJson('/api/v1/maps/stillwater-bayou')
+        HntMap::query()->create([
+            'slug' => 'new-hunt-map',
+            'name' => 'New Hunt Map',
+            'width' => 3072,
+            'height' => 3072,
+            'image_path' => 'assets/hnt/maps/stillwater-bayou/map.webp',
+            'lines_path' => null,
+            'sort_order' => 0,
+            'is_active' => true,
+        ]);
+
+        $response = $this->getJson('/api/v1/maps/new-hunt-map')
             ->assertOk()
-            ->assertJsonPath('data.slug', 'stillwater-bayou')
-            ->assertJsonPath('data.width', 2048)
-            ->assertJsonPath('data.height', 2048)
+            ->assertJsonPath('data.slug', 'new-hunt-map')
+            ->assertJsonPath('data.name', 'New Hunt Map')
+            ->assertJsonPath('data.width', 3072)
+            ->assertJsonPath('data.height', 3072)
             ->assertJsonStructure([
                 'data' => [
                     'slug',
@@ -49,45 +84,36 @@ class ApiMapsTest extends TestCase
                     'image_url',
                     'lines_url',
                     'marker_types',
-                    'markers' => [[
-                        'id',
-                        'type',
-                        'x',
-                        'y',
-                        'label',
-                        'label_de',
-                        'label_en',
-                        'image_url',
-                        'up_count',
-                        'down_count',
-                        'viewer_vote',
-                        'comment_count',
-                    ]],
+                    'markers',
                 ],
             ]);
 
-        $this->assertStringStartsWith('http', $response->json('data.image_url'));
-        $linesUrl = $response->json('data.lines_url');
-        $this->assertTrue($linesUrl === null || is_string($linesUrl));
-
-        if ($linesUrl !== null) {
-            $this->assertStringStartsWith('http', $linesUrl);
-        }
         $this->assertIsArray($response->json('data.markers'));
     }
 
-    public function test_unknown_map_slug_returns_not_found(): void
+    public function test_unknown_or_inactive_map_slug_returns_not_found(): void
     {
+        HntMap::query()->create([
+            'slug' => 'inactive-map',
+            'name' => 'Inactive Map',
+            'width' => 2048,
+            'height' => 2048,
+            'image_path' => 'assets/hnt/maps/stillwater-bayou/map.webp',
+            'is_active' => false,
+        ]);
+
         $this->getJson('/api/v1/maps/unknown-map')->assertNotFound();
+        $this->getJson('/api/v1/maps/inactive-map')->assertNotFound();
     }
 
     public function test_api_returns_only_approved_database_markers_and_never_resolves_viewer_vote(): void
     {
-        $map = HntMap::create([
-            'slug' => 'stillwater-bayou',
-            'name' => 'Stillwater Bayou',
+        $map = HntMap::query()->create([
+            'slug' => 'marker-test-map',
+            'name' => 'Marker Test Map',
             'width' => 2048,
             'height' => 2048,
+            'image_path' => 'assets/hnt/maps/stillwater-bayou/map.webp',
             'is_active' => true,
         ]);
 
@@ -109,7 +135,7 @@ class ApiMapsTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $this->getJson('/api/v1/maps/stillwater-bayou')
+        $this->getJson('/api/v1/maps/marker-test-map')
             ->assertOk()
             ->assertJsonCount(1, 'data.markers')
             ->assertJsonPath('data.markers.0.id', $approved->id)

@@ -27,8 +27,10 @@
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
     RewriteRule ^dashboards/default/?$ app/index.html [L]
     RewriteRule ^pages/user/(?:overview|hunter-dna|projects|permissions|friends|social)/?$ app/index.html [L]
+    # Android App Link browser fallback. Drop the one-time mobile login query parameters.
+    RewriteRule ^auth/mobile/callback/?$ /auth/sign-in [R=302,L,NE,QSD]
     RewriteRule ^auth/?$ app/index.html [L]
-    RewriteRule ^auth/(?:sign-in|two-factor|sign-up|password-reset|password-sent|password-new|get-verification|set-verification|terms-and-conditions|privacy-policy)/?$ app/index.html [L]
+    RewriteRule ^auth/(?:sign-in|two-factor|sign-up|sign-up-v2|password-reset|password-sent|password-new|get-verification|set-verification|terms-and-conditions|privacy-policy)/?$ app/index.html [L]
 
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$

@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#070605">
     @include('partials.seo-meta')
 
-    <link rel="icon" type="image/png" href="{{ asset('assets/vikinger/img/favicon-96x96.png') }}" sizes="96x96">
+    @include('partials.favicon')
     <link rel="stylesheet" href="{{ asset('assets/socialite/css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/socialite/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/socialite/css/hnt-auth-palette.css') }}?v=503">
