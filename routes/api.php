@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\V1\ApiBootstrapController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeGameController;
+use App\Http\Controllers\Api\V1\Arcade\ArcadeInvitationController;
+use App\Http\Controllers\Api\V1\Arcade\ArcadeMatchController;
 use App\Http\Controllers\Api\V1\ApiCrownDailyStreakController;
 use App\Http\Controllers\Api\V1\ApiCupChatController;
 use App\Http\Controllers\Api\V1\ApiCupsController;
@@ -76,6 +78,15 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
 
         Route::get('/arcade/games', [ArcadeGameController::class, 'index'])->name('arcade.games.index');
         Route::get('/arcade/games/{game}', [ArcadeGameController::class, 'show'])->where('game', '[A-Za-z0-9-]+')->name('arcade.games.show');
+        Route::get('/arcade/invitations', [ArcadeInvitationController::class, 'index'])->name('arcade.invitations.index');
+        Route::post('/arcade/games/{game}/invitations', [ArcadeInvitationController::class, 'store'])->middleware('throttle:10,1')->name('arcade.invitations.store');
+        Route::post('/arcade/invitations/{invitation}/accept', [ArcadeInvitationController::class, 'accept'])->middleware('throttle:20,1')->name('arcade.invitations.accept');
+        Route::post('/arcade/invitations/{invitation}/decline', [ArcadeInvitationController::class, 'decline'])->middleware('throttle:20,1')->name('arcade.invitations.decline');
+        Route::post('/arcade/invitations/{invitation}/cancel', [ArcadeInvitationController::class, 'cancel'])->middleware('throttle:20,1')->name('arcade.invitations.cancel');
+        Route::get('/arcade/matches', [ArcadeMatchController::class, 'index'])->name('arcade.matches.index');
+        Route::get('/arcade/matches/{match}', [ArcadeMatchController::class, 'show'])->name('arcade.matches.show');
+        Route::post('/arcade/matches/{match}/ready', [ArcadeMatchController::class, 'ready'])->middleware('throttle:30,1')->name('arcade.matches.ready');
+        Route::post('/arcade/matches/{match}/moves', [ArcadeMatchController::class, 'move'])->middleware('throttle:120,1')->name('arcade.matches.moves.store');
         Route::get('/app/remote-config', [AppRemoteConfigController::class, 'show'])->name('app.remote-config.show');
         Route::post('/app/remote-feed-cards/{remote_id}/dismiss', [AppRemoteConfigController::class, 'dismiss'])
             ->where('remote_id', '[A-Za-z0-9_\-:]+')
