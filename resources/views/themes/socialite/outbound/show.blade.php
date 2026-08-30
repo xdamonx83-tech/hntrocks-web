@@ -55,7 +55,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
         }
 
         .out-card {
@@ -77,18 +77,18 @@
             pointer-events: none;
         }
 
-        .out-inner { padding: 46px 48px 44px; }
+        .out-inner { padding: 32px 40px 30px; }
 
         .out-logo {
             display: flex;
             justify-content: center;
-            margin-bottom: 44px;
+            margin-bottom: 24px;
         }
 
         .out-logo img {
             display: block;
-            width: 190px;
-            max-width: 72%;
+            width: 50px;
+            max-width: 50px;
             height: auto;
         }
 
@@ -96,9 +96,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 9px;
             color: var(--hnt-primary-strong);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             letter-spacing: .13em;
             text-transform: uppercase;
@@ -115,22 +115,22 @@
 
         h1 {
             margin: 0;
-            font-size: clamp(32px, 5vw, 46px);
+            font-size: clamp(26px, 3vw, 34px);
             line-height: 1.08;
-            letter-spacing: -.035em;
+            letter-spacing: -.03em;
             font-weight: 650;
         }
 
         .out-intro {
-            margin: 14px 0 0;
+            margin: 10px 0 0;
             color: var(--hnt-muted);
-            font-size: 15px;
-            line-height: 1.65;
+            font-size: 14px;
+            line-height: 1.55;
         }
 
         .out-target {
-            margin-top: 30px;
-            padding: 20px;
+            margin-top: 20px;
+            padding: 16px 18px;
             border: 1px solid var(--hnt-line-strong);
             border-radius: 18px;
             background: rgba(169, 182, 115, .035);
@@ -140,7 +140,7 @@
         .out-info-title {
             display: block;
             color: var(--hnt-muted);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             letter-spacing: .1em;
             text-transform: uppercase;
@@ -149,66 +149,66 @@
         .out-domain {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            font-size: 22px;
+            gap: 9px;
+            margin-top: 8px;
+            font-size: 20px;
             line-height: 1.25;
             font-weight: 700;
             overflow-wrap: anywhere;
         }
 
         .out-domain svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             flex: 0 0 auto;
             color: var(--hnt-primary);
         }
 
         .out-link-title {
             display: block;
-            margin-top: 9px;
+            margin-top: 7px;
             color: var(--hnt-text);
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.45;
             opacity: .84;
         }
 
         .out-link-description {
-            margin: 12px 0 0;
+            margin: 8px 0 0;
             color: var(--hnt-muted);
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 13px;
+            line-height: 1.5;
         }
 
         .out-info {
-            margin-top: 16px;
-            padding: 18px 20px;
+            margin-top: 12px;
+            padding: 14px 18px;
             border: 1px solid var(--hnt-line);
             border-radius: 18px;
             background: rgba(255, 255, 255, .015);
         }
 
         .out-info p {
-            margin: 8px 0 0;
+            margin: 6px 0 0;
             color: var(--hnt-muted);
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 12px;
+            line-height: 1.5;
         }
 
         .out-points {
             display: grid;
-            gap: 8px;
-            margin: 14px 0 0;
+            gap: 6px;
+            margin: 10px 0 0;
             padding: 0;
             list-style: none;
         }
 
         .out-points li {
             position: relative;
-            padding-left: 18px;
+            padding-left: 17px;
             color: var(--hnt-muted);
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.45;
         }
 
         .out-points li::before {
@@ -226,27 +226,27 @@
             display: grid;
             grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
             gap: 12px;
-            margin-top: 28px;
+            margin-top: 18px;
         }
 
         .out-button {
-            min-height: 48px;
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 9px;
             border-radius: 18px;
             border: 1px solid transparent;
-            padding: 12px 18px;
+            padding: 10px 16px;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 750;
             transition: transform .16s ease, border-color .16s ease, background .16s ease;
         }
 
         .out-button:hover { transform: translateY(-1px); }
 
-        .out-button svg { width: 18px; height: 18px; }
+        .out-button svg { width: 17px; height: 17px; }
 
         .out-back {
             border-color: var(--hnt-line);
@@ -267,19 +267,19 @@
         .out-continue:hover { background: var(--hnt-primary-strong); }
 
         .out-note {
-            margin: 18px 0 0;
+            margin: 12px 0 0;
             text-align: center;
             color: rgba(155, 148, 135, .72);
-            font-size: 11px;
-            line-height: 1.5;
+            font-size: 10px;
+            line-height: 1.4;
         }
 
         @media (max-width: 640px) {
-            .out-shell { padding: 14px; }
-            .out-inner { padding: 34px 24px 28px; }
-            .out-logo { margin-bottom: 34px; }
+            .out-shell { padding: 12px; }
+            .out-inner { padding: 26px 20px 24px; }
+            .out-logo { margin-bottom: 20px; }
             .out-actions { grid-template-columns: 1fr; }
-            .out-domain { font-size: 19px; }
+            .out-domain { font-size: 18px; }
         }
     </style>
 </head>
