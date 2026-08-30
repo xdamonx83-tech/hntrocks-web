@@ -34,7 +34,7 @@ class ArcadeRealtimeTest extends TestCase
         $this->withToken($this->token($player))->postJson('/api/v1/broadcasting/auth', $payload)->assertSuccessful();
         $this->withToken($this->token($other))->postJson('/api/v1/broadcasting/auth', $payload)->assertSuccessful();
         $this->withToken($this->token($this->user()))->postJson('/api/v1/broadcasting/auth', $payload)->assertForbidden();
-        $this->postJson('/api/v1/broadcasting/auth', $payload)->assertUnauthorized();
+        $this->withoutHeader('Authorization')->postJson('/api/v1/broadcasting/auth', $payload)->assertUnauthorized();
         $this->withToken($this->token($player))->postJson('/api/v1/broadcasting/auth', ['socket_id' => '1234.5678', 'channel_name' => 'private-arcade.match.999999'])->assertForbidden();
         $match->players()->where('user_id', $player->id)->update(['user_id' => null]);
         $this->withToken($this->token($player))->postJson('/api/v1/broadcasting/auth', $payload)->assertForbidden();
