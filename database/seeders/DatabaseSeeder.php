@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(ArcadeGameSeeder::class);
         $users = [
             [
                 'email' => 'admin@hunthub.local',
