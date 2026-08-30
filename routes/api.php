@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\ApiBootstrapController;
+use App\Http\Controllers\Api\V1\Arcade\ArcadeGameController;
 use App\Http\Controllers\Api\V1\ApiCrownDailyStreakController;
 use App\Http\Controllers\Api\V1\ApiCupChatController;
 use App\Http\Controllers\Api\V1\ApiCupsController;
@@ -73,6 +74,8 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::middleware('api.token')->group(function (): void {
         require __DIR__.'/api-guides.php';
 
+        Route::get('/arcade/games', [ArcadeGameController::class, 'index'])->name('arcade.games.index');
+        Route::get('/arcade/games/{game}', [ArcadeGameController::class, 'show'])->where('game', '[A-Za-z0-9-]+')->name('arcade.games.show');
         Route::get('/app/remote-config', [AppRemoteConfigController::class, 'show'])->name('app.remote-config.show');
         Route::post('/app/remote-feed-cards/{remote_id}/dismiss', [AppRemoteConfigController::class, 'dismiss'])
             ->where('remote_id', '[A-Za-z0-9_\-:]+')

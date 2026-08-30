@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Admin\AdminContentController;
+use App\Http\Controllers\Admin\AdminArcadeGameController;
 use App\Http\Controllers\Admin\AdminCupFeedbackController;
 use App\Http\Controllers\Admin\AdminCupIdeaController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -608,6 +609,9 @@ Route::middleware('auth')->group(function (): void {
         ]);
     })->name('gamification.achievements.pending');
     Route::prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/arcade-games', [AdminArcadeGameController::class, 'index'])->name('arcade-games.index');
+        Route::get('/arcade-games/{game:key}/edit', [AdminArcadeGameController::class, 'edit'])->name('arcade-games.edit');
+        Route::put('/arcade-games/{game:key}', [AdminArcadeGameController::class, 'update'])->name('arcade-games.update');
         Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/status', [AdminUserController::class, 'updateStatus'])->name('users.status');

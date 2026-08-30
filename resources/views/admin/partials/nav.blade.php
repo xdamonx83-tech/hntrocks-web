@@ -7,6 +7,7 @@
             ['label' => 'Feedback & Tickets', 'route' => 'admin.feedback-tickets.index', 'active' => 'admin.feedback-tickets.*', 'icon' => 'message-question'],
         ],
         'COMMUNITY' => [
+            ['label' => 'Arcade-Spiele', 'route' => 'admin.arcade-games.index', 'active' => 'admin.arcade-games.*', 'icon' => 'game'],
             ['label' => 'Cup-Feedback', 'route' => 'admin.cup-feedback.index', 'active' => 'admin.cup-feedback.*', 'icon' => 'message-question'],
             ['label' => 'Cup-Ideen', 'route' => 'admin.cup-ideas.index', 'active' => 'admin.cup-ideas.*', 'icon' => 'award'],
             ['label' => 'Moment der Woche', 'route' => 'admin.moment-of-week.index', 'active' => 'admin.moment-of-week.*', 'icon' => 'award'],
