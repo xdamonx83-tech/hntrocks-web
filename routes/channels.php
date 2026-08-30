@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Conversation;
+use App\Models\Arcade\ArcadeMatchPlayer;
 use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
@@ -17,3 +18,6 @@ Broadcast::channel('conversation.{conversationId}', function ($user, $conversati
         ->whereHas('users', fn ($users) => $users->where('users.id', $user->id))
         ->exists();
 });
+
+Broadcast::channel('arcade.match.{matchId}', fn ($user, $matchId) => ArcadeMatchPlayer::query()
+    ->where('match_id', $matchId)->where('user_id', $user->id)->exists());
