@@ -12,12 +12,18 @@ class PushPayloadResolver
             (string) $notification->type,
             $notification->actionUrl(),
             (string) $notification->id,
-            (string) ($notification->actor_id ?? '')
+            (string) ($notification->actor_id ?? ''),
+            (array) ($notification->data ?? []),
         );
     }
 
-    public function forRaw(string $type, ?string $actionUrl, string $notificationId = '', string $actorId = ''): array
-    {
+    public function forRaw(
+        string $type,
+        ?string $actionUrl,
+        string $notificationId = '',
+        string $actorId = '',
+        array $data = [],
+    ): array {
         $payload = [
             'type' => $type,
             'target' => $this->fallbackTarget($type),
@@ -26,13 +32,21 @@ class PushPayloadResolver
             'actor_id' => $actorId,
         ];
 
-        return array_merge($payload, $this->targetData($type, $actionUrl));
+        return array_merge(
+            $payload,
+            $this->targetData($type, $actionUrl),
+            $this->notificationData($data),
+        );
     }
 
     private function targetData(string $type, ?string $actionUrl): array
     {
         $type = strtolower(trim($type));
         $path = $this->pathFor($actionUrl);
+
+        if ($arcade = $this->arcadeTarget($path)) {
+            return $arcade;
+        }
 
         if ($feed = $this->feedTarget($type, $path)) {
             return $feed;
@@ -59,6 +73,50 @@ class PushPayloadResolver
         }
 
         return [];
+    }
+
+    private function arcadeTarget(string $path): ?array
+    {
+        if (preg_match('#^/arcade/matches/([0-9]+)/?$#', $path, $matches)) {
+            return [
+                'target' => 'arcade_match',
+                'match_id' => (string) $matches[1],
+            ];
+        }
+
+        if ($path === '/arcade') {
+            return ['target' => 'arcade'];
+        }
+
+        return null;
+    }
+
+    private function notificationData(array $data): array
+    {
+        $allowed = [
+            'game_slug',
+            'game_name',
+            'game_name_de',
+            'game_name_en',
+            'match_id',
+            'invitation_id',
+            'actor_id',
+            'result',
+            'winner_seat',
+        ];
+        $payload = [];
+
+        foreach ($allowed as $key) {
+            if (! array_key_exists($key, $data) || $data[$key] === null) {
+                continue;
+            }
+
+            if (is_scalar($data[$key])) {
+                $payload[$key] = $data[$key];
+            }
+        }
+
+        return $payload;
     }
 
     private function feedTarget(string $type, string $path): ?array
@@ -147,6 +205,12 @@ class PushPayloadResolver
 
     private function fallbackTarget(string $type): string
     {
+        $type = strtolower(trim($type));
+
+        if (str_starts_with($type, 'arcade_')) {
+            return 'arcade';
+        }
+
         return $this->isFriendRequestType($type)
             ? 'friend_request'
             : 'notification';

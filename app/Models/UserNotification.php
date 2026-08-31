@@ -97,11 +97,11 @@ class UserNotification extends Model
         'referral_profile_completed' => 'ui.notification_referral_profile_completed_body',
     ];
 
-    protected $fillable = ['user_id', 'actor_id', 'type', 'title', 'body', 'action_url', 'read_at'];
+    protected $fillable = ['user_id', 'actor_id', 'type', 'title', 'body', 'action_url', 'data', 'dedupe_key', 'read_at'];
 
     protected function casts(): array
     {
-        return ['read_at' => 'datetime'];
+        return ['read_at' => 'datetime', 'data' => 'array'];
     }
 
     public function user(): BelongsTo

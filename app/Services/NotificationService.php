@@ -12,8 +12,16 @@ use Throwable;
 
 class NotificationService
 {
-    public function send(?User $recipient, ?User $actor, string $type, string $title, string $body, ?string $actionUrl = null): ?UserNotification
-    {
+    public function send(
+        ?User $recipient,
+        ?User $actor,
+        string $type,
+        string $title,
+        string $body,
+        ?string $actionUrl = null,
+        array $data = [],
+        ?string $dedupeKey = null,
+    ): ?UserNotification {
         if (! $recipient) {
             return null;
         }
@@ -27,15 +35,29 @@ class NotificationService
         }
 
         $actionUrl = UserNotification::normalizeActionUrl($actionUrl);
-
-        $notification = UserNotification::create([
+        $attributes = [
             'user_id' => $recipient->id,
             'actor_id' => $actor?->id,
             'type' => $type,
             'title' => $title,
             'body' => $body,
             'action_url' => $actionUrl,
-        ]);
+            'data' => $data ?: null,
+        ];
+
+        $normalizedDedupeKey = trim((string) $dedupeKey);
+        if ($normalizedDedupeKey !== '') {
+            $notification = UserNotification::query()->createOrFirst(
+                ['dedupe_key' => $normalizedDedupeKey],
+                $attributes,
+            );
+
+            if (! $notification->wasRecentlyCreated) {
+                return $notification;
+            }
+        } else {
+            $notification = UserNotification::create($attributes);
+        }
 
         $this->dispatchPush($notification);
         $this->dispatchBroadcast($notification);
@@ -43,8 +65,36 @@ class NotificationService
         return $notification;
     }
 
-    public function sendMany(iterable $recipients, ?User $actor, string $type, string $title, string $body, ?string $actionUrl = null): void
-    {
+    public function sendUnique(
+        string $dedupeKey,
+        ?User $recipient,
+        ?User $actor,
+        string $type,
+        string $title,
+        string $body,
+        ?string $actionUrl = null,
+        array $data = [],
+    ): ?UserNotification {
+        return $this->send(
+            $recipient,
+            $actor,
+            $type,
+            $title,
+            $body,
+            $actionUrl,
+            $data,
+            $dedupeKey,
+        );
+    }
+
+    public function sendMany(
+        iterable $recipients,
+        ?User $actor,
+        string $type,
+        string $title,
+        string $body,
+        ?string $actionUrl = null,
+    ): void {
         collect($recipients)
             ->filter()
             ->unique('id')
@@ -101,7 +151,7 @@ class NotificationService
                 $title,
                 $body,
                 $notification->actionUrl(),
-                app(PushPayloadResolver::class)->forNotification($notification)
+                app(PushPayloadResolver::class)->forNotification($notification),
             );
         } catch (Throwable $error) {
             Log::warning('Push dispatch for user notification failed.', [

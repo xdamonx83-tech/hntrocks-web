@@ -37,12 +37,7 @@ class UserNotificationCreated implements ShouldBroadcastNow
         $notification = $this->notification;
         $this->loadNotificationRelations($notification);
         $actionUrl = $this->actionUrl($notification);
-        $pushPayload = (new PushPayloadResolver())->forRaw(
-            (string) $notification->type,
-            $actionUrl,
-            (string) $notification->id,
-            (string) ($notification->actor_id ?? '')
-        );
+        $pushPayload = app(PushPayloadResolver::class)->forNotification($notification);
         $body = $this->displayBody($notification);
 
         return [
@@ -53,6 +48,7 @@ class UserNotificationCreated implements ShouldBroadcastNow
             'message' => $body,
             'action_url' => $actionUrl,
             'actor_id' => $notification->actor_id,
+            'data' => (array) ($notification->data ?? []),
             'created_at' => $notification->created_at?->toISOString(),
             'target' => $pushPayload['target'] ?? 'notification',
             'payload' => $pushPayload,

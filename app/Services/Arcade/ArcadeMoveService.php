@@ -14,37 +14,86 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class ArcadeMoveService
 {
-    public function __construct(private readonly ArcadeGameEngineRegistry $engines) {}
+    public function __construct(
+        private readonly ArcadeGameEngineRegistry $engines,
+        private readonly ArcadeNotificationService $notifications,
+    ) {
+    }
 
     public function move(ArcadeMatch $match, User $actor, string $clientMoveId, array $payload): ArcadeMatch
     {
-        return DB::transaction(function () use ($match, $actor, $clientMoveId, $payload): ArcadeMatch {
+        $fresh = DB::transaction(function () use ($match, $actor, $clientMoveId, $payload): ArcadeMatch {
             $match = ArcadeMatch::query()->with('game')->lockForUpdate()->findOrFail($match->id);
             $player = $match->players()->where('user_id', $actor->id)->first();
-            if (! $player) throw new AccessDeniedHttpException;
-            $existing = ArcadeMatchMove::query()->where('match_id', $match->id)->where('client_move_id', $clientMoveId)->first();
+            if (! $player) {
+                throw new AccessDeniedHttpException;
+            }
+
+            $existing = ArcadeMatchMove::query()
+                ->where('match_id', $match->id)
+                ->where('client_move_id', $clientMoveId)
+                ->first();
             if ($existing) {
-                if ($existing->match_player_id !== $player->id || $existing->move_type !== 'drop' || $existing->payload !== $payload) throw new ConflictHttpException('client_move_id was already used for a different move.');
+                if ($existing->match_player_id !== $player->id
+                    || $existing->move_type !== 'drop'
+                    || $existing->payload !== $payload) {
+                    throw new ConflictHttpException('client_move_id was already used for a different move.');
+                }
+
                 return $match->fresh(['game', 'players.user']);
             }
-            if ($match->status !== ArcadeMatchStatus::Active) throw new ConflictHttpException('This match is not active.');
-            if ((int) $match->current_seat !== (int) $player->seat) throw new ConflictHttpException('It is not your turn.');
+
+            if ($match->status !== ArcadeMatchStatus::Active) {
+                throw new ConflictHttpException('This match is not active.');
+            }
+            if ((int) $match->current_seat !== (int) $player->seat) {
+                throw new ConflictHttpException('It is not your turn.');
+            }
 
             $before = (int) $match->version;
             $state = $this->engines->resolve($match->game)->apply($match->state, (int) $player->seat, $payload);
             $finished = $state['winner_seat'] !== null || $state['draw'];
-            $match->fill(['state' => $state, 'version' => $before + 1, 'current_seat' => $finished ? null : $state['turn_seat'], 'winner_seat' => $state['winner_seat'], 'status' => $finished ? ArcadeMatchStatus::Finished : ArcadeMatchStatus::Active, 'finished_at' => $finished ? now() : null])->save();
+            $match->fill([
+                'state' => $state,
+                'version' => $before + 1,
+                'current_seat' => $finished ? null : $state['turn_seat'],
+                'winner_seat' => $state['winner_seat'],
+                'status' => $finished ? ArcadeMatchStatus::Finished : ArcadeMatchStatus::Active,
+                'finished_at' => $finished ? now() : null,
+            ])->save();
+
             $sequence = ((int) $match->moves()->max('sequence')) + 1;
-            $match->moves()->create(['match_player_id' => $player->id, 'sequence' => $sequence, 'client_move_id' => $clientMoveId, 'move_type' => 'drop', 'payload' => $payload, 'state_version_before' => $before, 'state_version_after' => $before + 1]);
+            $match->moves()->create([
+                'match_player_id' => $player->id,
+                'sequence' => $sequence,
+                'client_move_id' => $clientMoveId,
+                'move_type' => 'drop',
+                'payload' => $payload,
+                'state_version_before' => $before,
+                'state_version_after' => $before + 1,
+            ]);
+
             if ($finished) {
                 $match->players()->get()->each(function ($participant) use ($state): void {
-                    $result = $state['draw'] ? ArcadeMatchPlayerResult::Draw : ((int) $participant->seat === (int) $state['winner_seat'] ? ArcadeMatchPlayerResult::Win : ArcadeMatchPlayerResult::Loss);
+                    $result = $state['draw']
+                        ? ArcadeMatchPlayerResult::Draw
+                        : ((int) $participant->seat === (int) $state['winner_seat']
+                            ? ArcadeMatchPlayerResult::Win
+                            : ArcadeMatchPlayerResult::Loss);
                     $participant->update(['result' => $result]);
                 });
             }
+
             $fresh = $match->fresh(['game', 'players.user']);
             DB::afterCommit(fn () => ArcadeMatchUpdated::dispatch($fresh));
+
             return $fresh;
         });
+
+        if ($fresh->status === ArcadeMatchStatus::Finished) {
+            $this->notifications->matchFinished($fresh);
+        }
+
+        return $fresh;
     }
 }
