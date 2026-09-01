@@ -4,6 +4,7 @@ namespace App\Enums\Arcade;
 
 enum ArcadeGameStatus: string
 {
+    case Draft = 'draft';
     case Active = 'active';
     case ComingSoon = 'coming_soon';
     case Maintenance = 'maintenance';

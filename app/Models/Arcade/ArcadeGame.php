@@ -6,6 +6,8 @@ use App\Enums\Arcade\ArcadeGameStatus;
 use App\Enums\Arcade\ArcadeGameType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -30,6 +32,23 @@ class ArcadeGame extends Model
     public function scopePublicCatalog(Builder $query): Builder
     {
         return $query->whereIn('status', [ArcadeGameStatus::Active->value, ArcadeGameStatus::ComingSoon->value, ArcadeGameStatus::Maintenance->value, ArcadeGameStatus::Event->value]);
+    }
+
+    public function releases(): HasMany
+    {
+        return $this->hasMany(ArcadeGameRelease::class, 'game_id');
+    }
+
+    public function publishedRelease(): HasOne
+    {
+        return $this->hasOne(ArcadeGameRelease::class, 'game_id')
+            ->where('status', ArcadeGameRelease::STATUS_PUBLISHED)
+            ->latestOfMany('published_at');
+    }
+
+    public function launchTickets(): HasMany
+    {
+        return $this->hasMany(ArcadeLaunchTicket::class, 'game_id');
     }
 
     public function getRouteKeyName(): string { return 'key'; }
