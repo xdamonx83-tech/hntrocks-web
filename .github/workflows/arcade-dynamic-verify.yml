@@ -1,0 +1,56 @@
+name: Arcade Dynamic Publisher Verify
+
+on:
+  push:
+    branches:
+      - agent/arcade-dynamic-publisher-foundation
+
+permissions:
+  contents: read
+
+jobs:
+  arcade-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite
+          coverage: none
+          tools: composer:v2, phpunit:12.4
+      - name: Install application dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Provide standard Laravel test base
+        run: |
+          cat > tests/TestCase.php <<'PHP'
+          <?php
+
+          namespace Tests;
+
+          use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+
+          abstract class TestCase extends BaseTestCase
+          {
+              // Standard Laravel application test base.
+          }
+          PHP
+      - name: Run Arcade test group
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
+        run: |
+          phpunit --bootstrap vendor/autoload.php \
+            tests/Feature/ArcadeDynamicPublisherTest.php \
+            tests/Feature/ArcadeGameCatalogApiTest.php \
+            tests/Feature/ArcadeInvitationApiTest.php \
+            tests/Feature/ArcadeMatchApiTest.php \
+            tests/Feature/ArcadeRealtimeTest.php \
+            tests/Unit/HuntWinsEngineTest.php
