@@ -10,6 +10,7 @@ use App\Models\Arcade\ArcadeMatch;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class ArcadeLaunchTicketService
 {
@@ -50,12 +51,17 @@ class ArcadeLaunchTicketService
             'expires_at' => $expiresAt,
         ]);
 
-        $contractVersion = (int) config('arcade.dynamic_contract_version', 1);
-        $launchUrl = $release->entrypoint_url.'#hnt_contract='.$contractVersion.'&hnt_launch_ticket='.rawurlencode($rawToken);
+        $contractVersion = (int) config('arcade.dynamic_contract_version', 2);
+        $exchangeUrl = $this->exchangeUrl();
+        $launchUrl = $release->entrypoint_url
+            .'#hnt_contract='.$contractVersion
+            .'&hnt_launch_ticket='.rawurlencode($rawToken)
+            .'&hnt_exchange='.rawurlencode($exchangeUrl);
 
         return [
             'contract_version' => $contractVersion,
             'launch_url' => $launchUrl,
+            'exchange_url' => $exchangeUrl,
             'origin' => $this->policy->origin($release->entrypoint_url),
             'expires_at' => $expiresAt->toIso8601String(),
             'release' => [
@@ -88,7 +94,7 @@ class ArcadeLaunchTicketService
             $this->policy->assertTrustedHttpsUrl($ticket->release->entrypoint_url, 'entrypoint_url');
 
             return [
-                'contract_version' => (int) config('arcade.dynamic_contract_version', 1),
+                'contract_version' => (int) config('arcade.dynamic_contract_version', 2),
                 'game' => [
                     'key' => $ticket->game->key,
                     'type' => $ticket->game->type->value,
@@ -118,5 +124,24 @@ class ArcadeLaunchTicketService
                 ],
             ];
         });
+    }
+
+    private function exchangeUrl(): string
+    {
+        $url = trim((string) config('arcade.dynamic_exchange_url'));
+        $parts = parse_url($url);
+
+        if (
+            ! is_array($parts)
+            || strtolower((string) ($parts['scheme'] ?? '')) !== 'https'
+            || empty($parts['host'])
+            || isset($parts['user'])
+            || isset($parts['pass'])
+            || (isset($parts['port']) && (int) $parts['port'] !== 443)
+        ) {
+            throw new RuntimeException('ARCADE_DYNAMIC_EXCHANGE_URL must be an absolute HTTPS URL without credentials or a non-standard port.');
+        }
+
+        return $url;
     }
 }

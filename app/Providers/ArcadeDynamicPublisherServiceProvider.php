@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Controllers\Admin\AdminArcadeGameController;
 use App\Http\Controllers\Admin\AdminArcadeGameReleaseController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeLaunchTicketController;
+use App\Http\Middleware\ArcadeDynamicExchangeCors;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,8 +28,11 @@ class ArcadeDynamicPublisherServiceProvider extends ServiceProvider
             ->prefix('api/v1')
             ->name('api.v1.')
             ->group(function (): void {
+                Route::options('/arcade/launch-tickets/exchange', fn () => response()->noContent())
+                    ->middleware(ArcadeDynamicExchangeCors::class);
+
                 Route::post('/arcade/launch-tickets/exchange', [ArcadeLaunchTicketController::class, 'exchange'])
-                    ->middleware('throttle:60,1')
+                    ->middleware([ArcadeDynamicExchangeCors::class, 'throttle:60,1'])
                     ->name('arcade.launch-tickets.exchange');
 
                 Route::middleware('api.token')->group(function (): void {

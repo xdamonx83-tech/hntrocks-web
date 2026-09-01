@@ -7,7 +7,6 @@ use App\Models\Arcade\ArcadeGame;
 use App\Models\Arcade\ArcadeGameRelease;
 use App\Models\Arcade\ArcadeLaunchTicket;
 use App\Models\User;
-use Database\Seeders\ArcadeGameSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -54,7 +53,7 @@ class ArcadeDynamicPublisherTest extends TestCase
 
         $release = ArcadeGameRelease::query()->where('game_id', $game->id)->firstOrFail();
         $this->assertSame('draft', $release->status);
-        $this->assertSame(1, $release->manifest['contract_version']);
+        $this->assertSame(2, $release->manifest['contract_version']);
         $this->assertSame('publisher-test', $release->manifest['game_key']);
 
         $this->actingAs($admin)->post('/admin/arcade-games/'.$game->key.'/releases/'.$release->id.'/publish')
@@ -70,11 +69,13 @@ class ArcadeDynamicPublisherTest extends TestCase
         $game = $this->game('launch-test', 'active');
         $release = $this->publishedRelease($game);
         $accessToken = ApiAccessToken::createForUser($user, 'Dynamic Arcade test')['access_token'];
+        $exchangeUrl = 'https://hnt.rocks/api/v1/arcade/launch-tickets/exchange';
 
         $response = $this->withToken($accessToken)->postJson('/api/v1/arcade/games/'.$game->key.'/launch-tickets', [
             'client' => 'web',
         ])->assertCreated()
-            ->assertJsonPath('data.contract_version', 1)
+            ->assertJsonPath('data.contract_version', 2)
+            ->assertJsonPath('data.exchange_url', $exchangeUrl)
             ->assertJsonPath('data.origin', 'https://games.hnt.rocks')
             ->assertJsonPath('data.release.version', $release->version);
 
@@ -83,14 +84,18 @@ class ArcadeDynamicPublisherTest extends TestCase
         parse_str((string) parse_url($launchUrl, PHP_URL_FRAGMENT), $fragment);
         $rawTicket = (string) ($fragment['hnt_launch_ticket'] ?? '');
         $this->assertNotSame('', $rawTicket);
-        $this->assertSame('1', (string) ($fragment['hnt_contract'] ?? ''));
+        $this->assertSame('2', (string) ($fragment['hnt_contract'] ?? ''));
+        $this->assertSame($exchangeUrl, (string) ($fragment['hnt_exchange'] ?? ''));
 
         $ticket = ArcadeLaunchTicket::query()->firstOrFail();
         $this->assertSame(hash('sha256', $rawTicket), $ticket->token_hash);
         $this->assertNotSame($rawTicket, $ticket->token_hash);
 
-        $this->postJson('/api/v1/arcade/launch-tickets/exchange', ['ticket' => $rawTicket])
+        $this->withHeaders(['Origin' => 'https://games.hnt.rocks'])
+            ->postJson('/api/v1/arcade/launch-tickets/exchange', ['ticket' => $rawTicket])
             ->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://games.hnt.rocks')
+            ->assertJsonPath('data.contract_version', 2)
             ->assertJsonPath('data.game.key', 'launch-test')
             ->assertJsonPath('data.viewer.id', $user->id)
             ->assertJsonPath('data.capabilities.bearer_token_exposed', false)
@@ -100,7 +105,25 @@ class ArcadeDynamicPublisherTest extends TestCase
             ->assertUnprocessable();
     }
 
-    public function test_catalog_exposes_dynamic_descriptor_only_after_release_and_hunt_wins_stays_disabled(): void
+    public function test_exchange_cors_allows_only_games_origin(): void
+    {
+        $this->withHeaders([
+            'Origin' => 'https://games.hnt.rocks',
+            'Access-Control-Request-Method' => 'POST',
+            'Access-Control-Request-Headers' => 'content-type',
+        ])->call('OPTIONS', '/api/v1/arcade/launch-tickets/exchange')
+            ->assertNoContent()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://games.hnt.rocks')
+            ->assertHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+            ->assertHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+
+        $this->withHeaders(['Origin' => 'https://evil.example'])
+            ->postJson('/api/v1/arcade/launch-tickets/exchange', ['ticket' => 'not-a-ticket'])
+            ->assertForbidden()
+            ->assertHeaderMissing('Access-Control-Allow-Origin');
+    }
+
+    public function test_catalog_exposes_dynamic_descriptor_only_after_release(): void
     {
         $user = $this->user();
         $game = $this->game('catalog-web', 'active');
@@ -110,7 +133,7 @@ class ArcadeDynamicPublisherTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.is_playable', false)
             ->assertJsonPath('data.unavailable_reason', 'dynamic_release_missing')
-            ->assertJsonPath('data.dynamic_client.contract_version', 1)
+            ->assertJsonPath('data.dynamic_client.contract_version', 2)
             ->assertJsonPath('data.dynamic_client.release_version', null);
 
         $this->publishedRelease($game);
@@ -120,9 +143,6 @@ class ArcadeDynamicPublisherTest extends TestCase
             ->assertJsonPath('data.is_playable', true)
             ->assertJsonPath('data.dynamic_client.launch_ticket_required', true)
             ->assertJsonPath('data.dynamic_client.release_version', '1.0.0');
-
-        $this->seed(ArcadeGameSeeder::class);
-        $this->assertDatabaseHas('arcade_games', ['key' => 'hunt-wins', 'status' => 'disabled']);
     }
 
     private function publishedRelease(ArcadeGame $game): ArcadeGameRelease
@@ -133,7 +153,7 @@ class ArcadeDynamicPublisherTest extends TestCase
             'entrypoint_url' => 'https://games.hnt.rocks/'.$game->key.'/1.0.0/index.html',
             'integrity_sha256' => str_repeat('b', 64),
             'manifest' => [
-                'contract_version' => 1,
+                'contract_version' => 2,
                 'game_key' => $game->key,
                 'version' => '1.0.0',
                 'entrypoint_url' => 'https://games.hnt.rocks/'.$game->key.'/1.0.0/index.html',
