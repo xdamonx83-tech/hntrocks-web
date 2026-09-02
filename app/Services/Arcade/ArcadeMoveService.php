@@ -8,6 +8,7 @@ use App\Events\ArcadeMatchUpdated;
 use App\Models\Arcade\ArcadeMatch;
 use App\Models\Arcade\ArcadeMatchMove;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -30,14 +31,16 @@ class ArcadeMoveService
                 throw new AccessDeniedHttpException;
             }
 
+            $engine = $this->engines->resolve($match->game);
+            $moveType = $engine->moveType();
             $existing = ArcadeMatchMove::query()
                 ->where('match_id', $match->id)
                 ->where('client_move_id', $clientMoveId)
                 ->first();
             if ($existing) {
                 if ($existing->match_player_id !== $player->id
-                    || $existing->move_type !== 'drop'
-                    || $existing->payload !== $payload) {
+                    || $existing->move_type !== $moveType
+                    || ! $this->payloadsMatch($existing->payload, $payload)) {
                     throw new ConflictHttpException('client_move_id was already used for a different move.');
                 }
 
@@ -52,8 +55,8 @@ class ArcadeMoveService
             }
 
             $before = (int) $match->version;
-            $state = $this->engines->resolve($match->game)->apply($match->state, (int) $player->seat, $payload);
-            $finished = $state['winner_seat'] !== null || $state['draw'];
+            $state = $engine->apply($match->state, (int) $player->seat, $payload);
+            $finished = ($state['winner_seat'] ?? null) !== null || ($state['draw'] ?? false) === true;
             $match->fill([
                 'state' => $state,
                 'version' => $before + 1,
@@ -68,7 +71,7 @@ class ArcadeMoveService
                 'match_player_id' => $player->id,
                 'sequence' => $sequence,
                 'client_move_id' => $clientMoveId,
-                'move_type' => 'drop',
+                'move_type' => $moveType,
                 'payload' => $payload,
                 'state_version_before' => $before,
                 'state_version_after' => $before + 1,
@@ -98,5 +101,10 @@ class ArcadeMoveService
         }
 
         return $fresh;
+    }
+
+    private function payloadsMatch(array $stored, array $incoming): bool
+    {
+        return Arr::sortRecursive($stored) === Arr::sortRecursive($incoming);
     }
 }
