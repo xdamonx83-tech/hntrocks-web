@@ -25,12 +25,13 @@ jobs:
 
       - name: Prepare test environment
         run: |
-          cp .env.example .env
+          touch .env
           php artisan key:generate
           touch database/database.sqlite
 
       - name: Memory engine and Arcade regression tests
         env:
+          APP_ENV: testing
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
           CACHE_STORE: array
