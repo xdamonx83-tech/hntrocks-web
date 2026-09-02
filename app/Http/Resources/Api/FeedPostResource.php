@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api;
 
 use App\Services\Translation\FeedTranslationService;
 use App\Services\Twitch\TwitchLiveStatusService;
+use App\Support\FeedTextRenderer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,6 +15,8 @@ class FeedPostResource extends JsonResource
         return [
             'id' => $this->id,
             'body' => $this->body,
+            'body_html' => FeedTextRenderer::render($this->body),
+            'internal_link_previews' => FeedTextRenderer::internalLinkPreviews($this->body, 1),
             'source_language' => $this->source_language,
             'translation' => $this->translationPayload($request),
             'background_style' => $this->background_style,
@@ -51,7 +54,6 @@ class FeedPostResource extends JsonResource
             'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
-
 
     private function authorTwitchLive(): bool
     {

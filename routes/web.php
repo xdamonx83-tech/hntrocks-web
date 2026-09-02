@@ -135,6 +135,8 @@ Route::get('/app-beta', [AppBetaController::class, 'index'])->name('app-beta.ind
 Route::post('/app-beta', [AppBetaController::class, 'store'])->middleware('throttle:6,1')->name('app-beta.store');
 Route::get('/rocks', ReactAppController::class)->name('rocks.index');
 Route::get('/rocks/{path}', ReactAppController::class)->where('path', '.*')->name('rocks.react');
+Route::get('/arcade', ReactAppController::class)->name('arcade.react.index');
+Route::get('/arcade/{path}', ReactAppController::class)->where('path', '.*')->name('arcade.react');
 Route::get('/guides', ReactAppController::class)->name('guides.react.index');
 Route::get('/guides/create', ReactAppController::class)->name('guides.react.create');
 Route::get('/guides/mine', ReactAppController::class)->name('guides.react.mine');
