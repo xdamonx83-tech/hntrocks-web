@@ -19,15 +19,21 @@ jobs:
           php-version: '8.4'
           extensions: mbstring, sqlite3, pdo_sqlite
           coverage: none
+          tools: phpunit:12
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Prepare test environment
+      - name: Prepare isolated test harness
         run: |
-          touch .env
-          php artisan key:generate
+          php -r 'echo "APP_KEY=base64:".base64_encode(random_bytes(32)).PHP_EOL;' > .env
           touch database/database.sqlite
+          cat > tests/TestCase.php <<'PHP'
+          <?php
+          namespace Tests;
+          use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+          abstract class TestCase extends BaseTestCase {}
+          PHP
 
       - name: Memory engine and Arcade regression tests
         env:
@@ -39,7 +45,7 @@ jobs:
           QUEUE_CONNECTION: sync
           BROADCAST_CONNECTION: log
         run: >-
-          php artisan test
+          phpunit --bootstrap vendor/autoload.php
           tests/Unit/MemoryEngineTest.php
           tests/Unit/HuntWinsEngineTest.php
           tests/Feature/ArcadeMemoryApiTest.php
@@ -61,5 +67,9 @@ jobs:
           php -l tests/Unit/MemoryEngineTest.php
           php -l tests/Feature/ArcadeMemoryApiTest.php
 
-      - name: Diff check
-        run: git diff --check fed5a75e52c7fe05244aff43bfa2c98b204352c2 HEAD
+      - name: Cleanup isolated harness and diff check
+        if: always()
+        run: |
+          rm -f tests/TestCase.php .env database/database.sqlite
+          git status --short
+          git diff --check fed5a75e52c7fe05244aff43bfa2c98b204352c2 HEAD
