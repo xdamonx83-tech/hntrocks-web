@@ -45,6 +45,16 @@ class HuntWinsEngine implements ArcadeGameEngine
         return $state;
     }
 
+    public function publicState(array $state, ?int $viewerSeat = null): array
+    {
+        return $state;
+    }
+
+    public function moveType(): string
+    {
+        return 'drop';
+    }
+
     private function hasFour(array $board, int $row, int $column, int $seat): bool
     {
         foreach ([[0, 1], [1, 0], [1, 1], [1, -1]] as [$dr, $dc]) {
