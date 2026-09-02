@@ -15,5 +15,5 @@ class ArcadeMatchUpdated implements ShouldBroadcastNow
     public function __construct(public ArcadeMatch $match) {}
     public function broadcastOn(): array { return [new PrivateChannel('arcade.match.'.$this->match->id)]; }
     public function broadcastAs(): string { return 'arcade.match.updated'; }
-    public function broadcastWith(): array { return ['match_id' => $this->match->id, 'version' => $this->match->version, 'status' => $this->match->status->value, 'state' => $this->match->state, 'current_seat' => $this->match->current_seat, 'winner_seat' => $this->match->winner_seat, 'started_at' => $this->match->started_at?->toISOString(), 'finished_at' => $this->match->finished_at?->toISOString()]; }
+    public function broadcastWith(): array { return ['match_id' => $this->match->id, 'version' => $this->match->version, 'status' => $this->match->status->value, 'current_seat' => $this->match->current_seat, 'winner_seat' => $this->match->winner_seat, 'started_at' => $this->match->started_at?->toISOString(), 'finished_at' => $this->match->finished_at?->toISOString()]; }
 }
