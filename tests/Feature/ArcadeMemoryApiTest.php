@@ -266,10 +266,13 @@ class ArcadeMemoryApiTest extends TestCase
 
     private function memoryGame(): ArcadeGame
     {
-        return ArcadeGame::create([
-            'key' => 'hunt-memory', 'name_de' => 'Memory', 'name_en' => 'Memory', 'type' => 'native', 'status' => 'active',
-            'min_players' => 2, 'max_players' => 2, 'casual_enabled' => true, 'ranked_enabled' => true, 'client_engine_key' => 'hunt-memory',
-        ]);
+        return ArcadeGame::firstOrCreate(
+            ['key' => 'hunt-memory'],
+            [
+                'name_de' => 'Memory', 'name_en' => 'Memory', 'type' => 'native', 'status' => 'active',
+                'min_players' => 2, 'max_players' => 2, 'casual_enabled' => true, 'ranked_enabled' => true, 'client_engine_key' => 'hunt-memory',
+            ],
+        );
     }
 
     private function ready(User $user, ArcadeMatch $match) { return $this->withToken($this->token($user))->postJson("/api/v1/arcade/matches/{$match->id}/ready"); }
