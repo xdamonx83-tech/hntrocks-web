@@ -1,0 +1,64 @@
+name: Arcade Memory Backend Verification
+
+on:
+  push:
+    branches:
+      - agent/arcade-memory-engine
+  workflow_dispatch:
+
+jobs:
+  arcade-memory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Prepare test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+
+      - name: Memory engine and Arcade regression tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+          BROADCAST_CONNECTION: log
+        run: >-
+          php artisan test
+          tests/Unit/MemoryEngineTest.php
+          tests/Unit/HuntWinsEngineTest.php
+          tests/Feature/ArcadeMemoryApiTest.php
+          tests/Feature/ArcadeMatchApiTest.php
+          tests/Feature/ArcadeRealtimeTest.php
+          tests/Feature/ArcadeNotificationApiTest.php
+          tests/Feature/ArcadeRankedStatsRewardsTest.php
+
+      - name: PHP syntax checks
+        run: |
+          php -l app/Services/Arcade/Engines/ArcadeGameEngine.php
+          php -l app/Services/Arcade/Engines/HuntWinsEngine.php
+          php -l app/Services/Arcade/Engines/MemoryEngine.php
+          php -l app/Services/Arcade/ArcadeGameEngineRegistry.php
+          php -l app/Services/Arcade/ArcadeMoveService.php
+          php -l app/Http/Resources/Api/ArcadeMatchResource.php
+          php -l app/Http/Controllers/Api/V1/Arcade/ArcadeMatchController.php
+          php -l app/Events/ArcadeMatchUpdated.php
+          php -l tests/Unit/MemoryEngineTest.php
+          php -l tests/Feature/ArcadeMemoryApiTest.php
+
+      - name: Diff check
+        run: git diff --check fed5a75e52c7fe05244aff43bfa2c98b204352c2 HEAD
