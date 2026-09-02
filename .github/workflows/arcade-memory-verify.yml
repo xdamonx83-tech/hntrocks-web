@@ -26,7 +26,7 @@ jobs:
           composer install --no-interaction --prefer-dist
           cp composer.json /tmp/composer.json.arcade-memory
           cp composer.lock /tmp/composer.lock.arcade-memory
-          composer require --dev mockery/mockery:^1.6 --no-interaction
+          composer require --dev mockery/mockery:^1.6 fakerphp/faker:^1.24 --no-interaction
 
       - name: Prepare isolated test harness
         run: |
