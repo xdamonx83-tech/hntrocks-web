@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\ApiAccessToken;
 use App\Models\Arcade\ArcadeGame;
 use App\Models\User;
+use App\Services\Arcade\ArcadeGameEngineRegistry;
+use App\Services\Arcade\Engines\MemoryEngine;
 use Database\Seeders\ArcadeGameSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -111,13 +113,80 @@ class ArcadeGameCatalogApiTest extends TestCase
         ]);
     }
 
-    public function test_hunt_wins_seed_is_idempotent_and_disabled(): void
+    public function test_memory_seed_is_idempotent_and_preserves_existing_hunt_wins_enablement(): void
     {
-        $this->seed(ArcadeGameSeeder::class); $this->seed(ArcadeGameSeeder::class);
-        $this->assertDatabaseCount('arcade_games', 1);
-        $game = ArcadeGame::query()->where('key', 'hunt-wins')->firstOrFail();
-        $this->assertSame('disabled', $game->status->value); $this->assertSame(2, $game->min_players); $this->assertSame(2, $game->max_players);
-        $this->assertTrue($game->casual_enabled); $this->assertTrue($game->ranked_enabled); $this->assertSame('hunt-wins', $game->client_engine_key);
+        $this->seed(ArcadeGameSeeder::class);
+
+        $this->assertDatabaseCount('arcade_games', 2);
+        $huntWins = ArcadeGame::query()->where('key', 'hunt-wins')->firstOrFail();
+        $memory = ArcadeGame::query()->where('key', 'hunt-memory')->firstOrFail();
+
+        $this->assertSame('disabled', $memory->status->value);
+        $this->assertSame('native', $memory->type->value);
+        $this->assertSame('hunt-memory', $memory->client_engine_key);
+        $this->assertSame('Hunt Memory', $memory->name_de);
+        $this->assertSame('Hunt Memory', $memory->name_en);
+        $this->assertSame('Ein düsteres Memory-Duell für zwei Hunter.', $memory->description_de);
+        $this->assertSame('A dark memory duel for two hunters.', $memory->description_en);
+        $this->assertSame(2, $memory->min_players);
+        $this->assertSame(2, $memory->max_players);
+        $this->assertTrue($memory->casual_enabled);
+        $this->assertTrue($memory->ranked_enabled);
+        $this->assertSame(1, $memory->game_version);
+        $this->assertSame([], $memory->reward_settings);
+        $this->assertSame([
+            'ranked_reward_enabled' => false,
+            'ranked_win_reward' => 0,
+            'ranked_draw_reward' => 0,
+            'ranked_loss_reward' => 0,
+        ], $memory->rankedRewardSettings());
+        $this->assertGreaterThan($huntWins->sort_order, $memory->sort_order);
+        $this->assertInstanceOf(MemoryEngine::class, app(ArcadeGameEngineRegistry::class)->resolve($memory));
+
+        $huntWins->update(['status' => 'event', 'casual_enabled' => false, 'ranked_enabled' => true, 'sort_order' => 77]);
+        $memory->update(['status' => 'maintenance', 'sort_order' => 88]);
+
+        $this->seed(ArcadeGameSeeder::class);
+
+        $this->assertDatabaseCount('arcade_games', 2);
+        $huntWins->refresh();
+        $memory->refresh();
+        $this->assertSame('event', $huntWins->status->value);
+        $this->assertFalse($huntWins->casual_enabled);
+        $this->assertTrue($huntWins->ranked_enabled);
+        $this->assertSame(77, $huntWins->sort_order);
+        $this->assertSame('maintenance', $memory->status->value);
+        $this->assertSame(88, $memory->sort_order);
+    }
+
+    public function test_memory_catalog_and_admin_use_generic_arcade_fields(): void
+    {
+        $this->seed(ArcadeGameSeeder::class);
+        $memory = ArcadeGame::query()->where('key', 'hunt-memory')->firstOrFail();
+
+        $this->getAs('/api/v1/arcade/games')->assertOk()->assertJsonMissing(['key' => 'hunt-memory']);
+
+        $memory->update(['status' => 'active']);
+        $this->getAs('/api/v1/arcade/games?locale=en')->assertOk()
+            ->assertJsonFragment([
+                'key' => 'hunt-memory',
+                'name' => 'Hunt Memory',
+                'description' => 'A dark memory duel for two hunters.',
+                'type' => 'native',
+                'client_engine_key' => 'hunt-memory',
+                'min_players' => 2,
+                'max_players' => 2,
+                'casual_enabled' => true,
+                'ranked_enabled' => true,
+                'game_version' => 1,
+            ]);
+
+        $admin = $this->user(['is_admin' => true]);
+        $this->actingAs($admin)->get('/admin/arcade-games')->assertOk()->assertSee('hunt-memory')->assertSee('Hunt Memory');
+        $this->actingAs($admin)->get('/admin/arcade-games/hunt-memory/edit')->assertOk()
+            ->assertSee('name="min_client_version"', false)
+            ->assertSee('name="reward_settings[ranked_reward_enabled]"', false)
+            ->assertSee('name="reward_settings[ranked_win_reward]"', false);
     }
 
     private function game(string $key, string $status = 'active', int $sort = 0, array $extra = []): ArcadeGame

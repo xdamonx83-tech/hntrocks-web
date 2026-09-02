@@ -26,6 +26,7 @@ class ArcadeGameRequest extends FormRequest
             'casual_enabled' => ['nullable', 'boolean'],
             'ranked_enabled' => ['nullable', 'boolean'],
             'game_version' => ['required', 'integer', 'min:1'],
+            'min_client_version' => ['nullable', 'string', 'max:100'],
             'client_engine_key' => ['nullable', 'string', 'max:100'],
             'launch_url' => ['nullable', 'url:https', function ($attribute, $value, $fail): void {
                 if ($value && (! in_array(strtolower((string) parse_url($value, PHP_URL_HOST)), config('arcade.trusted_web_hosts'), true))) {

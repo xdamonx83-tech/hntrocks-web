@@ -32,6 +32,9 @@ class AdminArcadeGameController extends Controller
         $data = $request->safe()->except('cover');
         $data['casual_enabled'] = $request->boolean('casual_enabled');
         $data['ranked_enabled'] = $request->boolean('ranked_enabled');
+        if (array_key_exists('reward_settings', $data)) {
+            $data['reward_settings'] = array_merge((array) ($game->reward_settings ?? []), (array) $data['reward_settings']);
+        }
         $data['updated_by'] = $request->user()->id;
         if ($request->hasFile('cover')) $data['cover_path'] = $request->file('cover')->store('arcade/covers', 'public');
         $game->update($data);
