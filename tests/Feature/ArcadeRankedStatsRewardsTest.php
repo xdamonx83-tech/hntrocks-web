@@ -174,7 +174,7 @@ class ArcadeRankedStatsRewardsTest extends TestCase
             ->assertJsonPath('data.0.wins', 5)
             ->assertJsonPath('data.0.win_rate', 62.5)
             ->assertJsonPath('data.1.user.username', $a->username)
-            ->assertJsonPath('data.1.win_rate', 50.0)
+            ->assertJsonPath('data.1.win_rate', 50)
             ->assertJsonPath('data.2.user.username', $c->username)
             ->assertJsonPath('meta.mode', 'ranked');
         $response->assertJsonMissing(['username' => $d->username]);
@@ -208,10 +208,10 @@ class ArcadeRankedStatsRewardsTest extends TestCase
         $this->getAs($user, '/api/v1/arcade/games/my-stats/stats/me')->assertOk()
             ->assertJsonPath('data.ranked.matches_played', 4)
             ->assertJsonPath('data.ranked.wins', 3)
-            ->assertJsonPath('data.ranked.win_rate', 75.0)
+            ->assertJsonPath('data.ranked.win_rate', 75)
             ->assertJsonPath('data.casual.matches_played', 2)
             ->assertJsonPath('data.casual.draws', 1)
-            ->assertJsonPath('data.casual.win_rate', 50.0);
+            ->assertJsonPath('data.casual.win_rate', 50);
 
         $emptyGame = $this->game('empty-stats');
         $this->getAs($user, '/api/v1/arcade/games/empty-stats/stats/me')->assertOk()
