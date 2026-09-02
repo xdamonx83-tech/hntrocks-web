@@ -22,7 +22,11 @@ jobs:
           tools: phpunit:12
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: |
+          composer install --no-interaction --prefer-dist
+          cp composer.json /tmp/composer.json.arcade-memory
+          cp composer.lock /tmp/composer.lock.arcade-memory
+          composer require --dev mockery/mockery:^1.6 --no-interaction
 
       - name: Prepare isolated test harness
         run: |
@@ -71,5 +75,7 @@ jobs:
         if: always()
         run: |
           rm -f tests/TestCase.php .env database/database.sqlite
+          cp /tmp/composer.json.arcade-memory composer.json
+          cp /tmp/composer.lock.arcade-memory composer.lock
           git status --short
           git diff --check fed5a75e52c7fe05244aff43bfa2c98b204352c2 HEAD
