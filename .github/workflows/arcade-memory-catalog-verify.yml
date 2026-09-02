@@ -45,6 +45,7 @@ jobs:
 
       - name: Prepare isolated test harness
         run: |
+          mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
           php -r 'echo "APP_KEY=base64:".base64_encode(random_bytes(32)).PHP_EOL;' > .env
           cat > tests/TestCase.php <<'PHP'
           <?php
