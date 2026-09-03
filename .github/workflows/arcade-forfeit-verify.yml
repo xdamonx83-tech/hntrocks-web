@@ -32,16 +32,41 @@ jobs:
       CACHE_STORE: array
       SESSION_DRIVER: array
       QUEUE_CONNECTION: sync
+      BROADCAST_CONNECTION: log
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: mbstring, pdo_mysql
           coverage: none
-      - run: composer install --no-interaction --prefer-dist --no-progress
-      - run: touch .env
-      - run: php artisan key:generate --force
-      - run: php artisan migrate --force
-      - run: vendor/bin/phpunit tests/Feature/ArcadeMatchForfeitTest.php tests/Feature/ArcadeMemoryApiTest.php tests/Feature/ArcadeRankedStatsRewardsTest.php
-      - run: php -l app/Services/Arcade/ArcadeMatchService.php && php -l app/Services/Arcade/ArcadeMatchResultProcessor.php && php -l app/Http/Controllers/Api/V1/Arcade/ArcadeMatchController.php && php -l app/Providers/ArcadeLifecycleRouteServiceProvider.php
+          tools: phpunit:12
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp composer.json /tmp/composer.json.arcade-forfeit
+          cp composer.lock /tmp/composer.lock.arcade-forfeit
+          composer require --dev mockery/mockery:^1.6 fakerphp/faker:^1.24 --no-interaction --no-progress
+      - name: Prepare isolated test harness
+        run: |
+          mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
+          php -r 'echo "APP_KEY=base64:".base64_encode(random_bytes(32)).PHP_EOL;' > .env
+          cat > tests/TestCase.php <<'PHP'
+          <?php
+          namespace Tests;
+          use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+          abstract class TestCase extends BaseTestCase {}
+          PHP
+      - name: Arcade forfeit regression tests
+        run: phpunit --bootstrap vendor/autoload.php tests/Feature/ArcadeMatchForfeitTest.php tests/Feature/ArcadeMemoryApiTest.php tests/Feature/ArcadeRankedStatsRewardsTest.php
+      - name: PHP syntax checks
+        run: php -l app/Services/Arcade/ArcadeMatchService.php && php -l app/Services/Arcade/ArcadeMatchResultProcessor.php && php -l app/Http/Controllers/Api/V1/Arcade/ArcadeMatchController.php && php -l app/Providers/ArcadeLifecycleRouteServiceProvider.php && php -l tests/Feature/ArcadeMatchForfeitTest.php
+      - name: Cleanup isolated harness and diff check
+        if: always()
+        run: |
+          rm -f tests/TestCase.php .env
+          cp /tmp/composer.json.arcade-forfeit composer.json
+          cp /tmp/composer.lock.arcade-forfeit composer.lock
+          git diff --check f703700f38df76ae53ad292571ae8029eaa78560 HEAD
