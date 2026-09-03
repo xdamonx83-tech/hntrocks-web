@@ -51,7 +51,7 @@ class HuntersMarkArcadeTest extends TestCase
         $this->assertSame(123, $game->sort_order);
         $this->assertFalse($game->casual_enabled);
         $this->assertFalse($game->ranked_enabled);
-        $this->assertSame(['ranked_reward_enabled' => true, 'ranked_win_reward' => 17], $game->reward_settings);
+        $this->assertEquals(['ranked_reward_enabled' => true, 'ranked_win_reward' => 17], $game->reward_settings);
     }
 
     public function test_registry_resolves_hunters_mark_engine(): void
