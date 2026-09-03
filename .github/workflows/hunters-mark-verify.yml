@@ -1,0 +1,72 @@
+name: Hunters Mark Verify
+
+on:
+  push:
+    branches:
+      - agent/live-hunters-mark
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: hnt_test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: hnt_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      BROADCAST_CONNECTION: log
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql
+          coverage: none
+          tools: phpunit:12
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp composer.json /tmp/composer.json.hunters-mark
+          cp composer.lock /tmp/composer.lock.hunters-mark
+          composer require --dev mockery/mockery:^1.6 fakerphp/faker:^1.24 --no-interaction --no-progress
+      - name: Prepare isolated test harness
+        run: |
+          mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
+          php -r 'echo "APP_KEY=base64:".base64_encode(random_bytes(32)).PHP_EOL;' > .env
+          cat > tests/TestCase.php <<'PHP'
+          <?php
+          namespace Tests;
+          use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+          abstract class TestCase extends BaseTestCase {}
+          PHP
+      - name: Hunter's Mark and Arcade regression tests
+        run: phpunit --bootstrap vendor/autoload.php tests/Unit/HuntersMarkEngineTest.php tests/Feature/HuntersMarkArcadeTest.php tests/Feature/ArcadeMemoryApiTest.php tests/Feature/ArcadeRankedStatsRewardsTest.php tests/Feature/ArcadeMatchForfeitTest.php
+      - name: PHP syntax checks
+        run: php -l app/Services/Arcade/Engines/HuntersMarkEngine.php && php -l app/Services/Arcade/ArcadeGameEngineRegistry.php && php -l database/seeders/ArcadeGameSeeder.php && php -l tests/Unit/HuntersMarkEngineTest.php && php -l tests/Feature/HuntersMarkArcadeTest.php
+      - name: Cleanup isolated harness and diff check
+        if: always()
+        run: |
+          rm -f tests/TestCase.php .env
+          cp /tmp/composer.json.hunters-mark composer.json
+          cp /tmp/composer.lock.hunters-mark composer.lock
+          git diff --check 325c5efedcc42d8462f68c28c33bae675d52a341 HEAD
