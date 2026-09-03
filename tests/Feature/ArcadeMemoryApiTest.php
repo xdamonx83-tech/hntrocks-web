@@ -65,7 +65,7 @@ class ArcadeMemoryApiTest extends TestCase
         $this->assertSame('matched', $matched['state']['cards'][$second]['status']);
         $this->assertArrayHasKey('motif_id', $matched['state']['cards'][$first]);
         $this->assertArrayHasKey('motif_id', $matched['state']['cards'][$second]);
-        $this->assertSame(1, $matched['state']['scores']['1']);
+        $this->assertSame(1, $matched['state']['scores']['1'], 'response='.json_encode($matched['state']['scores']).' db='.json_encode($match->fresh()->state['scores']));
         $this->assertSame(1, $matched['state']['matched_pairs']);
         $this->assertSame(1, $matched['current_seat']);
 
