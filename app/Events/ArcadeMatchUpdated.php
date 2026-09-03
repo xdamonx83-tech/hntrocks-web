@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Enums\Arcade\ArcadeMatchStatus;
 use App\Models\Arcade\ArcadeMatch;
 use App\Services\Arcade\ArcadeGameEngineRegistry;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -19,9 +20,17 @@ class ArcadeMatchUpdated implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         $this->match->loadMissing('game');
-        $state = app(ArcadeGameEngineRegistry::class)
-            ->resolve($this->match->game)
-            ->publicState((array) ($this->match->state ?? []));
+        $rawState = (array) ($this->match->state ?? []);
+
+        // A match cancelled before it ever started has no gameplay state that
+        // needs engine-specific sanitising. Keeping this path engine-agnostic
+        // also lets generic/future arcade games be cancelled safely while they
+        // are still waiting for players.
+        $state = $this->match->status === ArcadeMatchStatus::Cancelled && $this->match->started_at === null
+            ? $rawState
+            : app(ArcadeGameEngineRegistry::class)
+                ->resolve($this->match->game)
+                ->publicState($rawState);
 
         return ['match_id' => $this->match->id, 'version' => $this->match->version, 'status' => $this->match->status->value, 'state' => $state, 'current_seat' => $this->match->current_seat, 'winner_seat' => $this->match->winner_seat, 'started_at' => $this->match->started_at?->toISOString(), 'finished_at' => $this->match->finished_at?->toISOString()];
     }
