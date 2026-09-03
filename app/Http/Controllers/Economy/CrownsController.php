@@ -10,6 +10,7 @@ use App\Support\ReworkFeedSidebar;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View as ViewFactory;
 use Illuminate\View\View;
 
 class CrownsController extends Controller
@@ -59,7 +60,12 @@ class CrownsController extends Controller
                 ->withQueryString()
             : null;
 
-        return view($this->themeView('crowns.history'), [
+        $historyView = HntTheme::previewLive()
+            && ViewFactory::exists('themes.hnt_preview.crowns.history')
+                ? 'themes.hnt_preview.crowns.history'
+                : $this->themeView('crowns.history');
+
+        return view($historyView, [
             'summary' => $crowns->summary($user),
             'transactions' => $transactions,
         ]);
@@ -100,4 +106,3 @@ class CrownsController extends Controller
             : 'themes.socialite.' . $view;
     }
 }
-
