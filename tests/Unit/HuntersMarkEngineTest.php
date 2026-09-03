@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Services\Arcade\Engines\HuntersMarkEngine;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class HuntersMarkEngineTest extends TestCase
 {
