@@ -18,6 +18,7 @@ class ArcadeMoveService
     public function __construct(
         private readonly ArcadeGameEngineRegistry $engines,
         private readonly ArcadeNotificationService $notifications,
+        private readonly ArcadeMatchResultProcessor $results,
     ) {
     }
 
@@ -85,6 +86,8 @@ class ArcadeMoveService
                             : ArcadeMatchPlayerResult::Loss);
                     $participant->update(['result' => $result]);
                 });
+
+                $this->results->process($match);
             }
 
             $fresh = $match->fresh(['game', 'players.user']);
