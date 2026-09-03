@@ -17,6 +17,7 @@ class ArcadeMatchController extends Controller
     public function index(Request $request) { return ArcadeMatchResource::collection(ArcadeMatch::query()->whereHas('players', fn ($q) => $q->where('user_id', $request->user()->id))->with(['game', 'players.user'])->latest()->paginate(30)); }
     public function show(Request $request, ArcadeMatch $match): ArcadeMatchResource { $this->authorizeParticipant($match, $request); return new ArcadeMatchResource($match); }
     public function ready(Request $request, ArcadeMatch $match): ArcadeMatchResource { return new ArcadeMatchResource($this->matches->ready($match, $request->user())); }
+    public function forfeit(Request $request, ArcadeMatch $match): ArcadeMatchResource { return new ArcadeMatchResource($this->matches->forfeit($match, $request->user())); }
     public function move(Request $request, ArcadeMatch $match): ArcadeMatchResource
     {
         $data = $request->validate([
