@@ -60,12 +60,12 @@ class CrownsController extends Controller
                 ->withQueryString()
             : null;
 
-        $historyView = HntTheme::previewLive()
-            && ViewFactory::exists('themes.hnt_preview.crowns.history')
-                ? 'themes.hnt_preview.crowns.history'
-                : $this->themeView('crowns.history');
-
-        return view($historyView, [
+        return ViewFactory::first([
+            HntTheme::themeViewName('crowns.history', HntTheme::active()),
+            'themes.hnt_preview.crowns.history',
+            'themes.rework.crowns.history',
+            'themes.socialite.crowns.history',
+        ], [
             'summary' => $crowns->summary($user),
             'transactions' => $transactions,
         ]);
