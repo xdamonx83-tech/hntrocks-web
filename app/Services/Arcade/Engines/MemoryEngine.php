@@ -113,6 +113,8 @@ class MemoryEngine implements ArcadeGameEngine
         if ($firstMotif === $secondMotif) {
             $state['cards'][$firstIndex]['status'] = 'matched';
             $state['cards'][$secondIndex]['status'] = 'matched';
+            $state['cards'][$firstIndex]['matched_by_seat'] = $seat;
+            $state['cards'][$secondIndex]['matched_by_seat'] = $seat;
             $state['scores'][(string) $seat] = (int) ($state['scores'][(string) $seat] ?? 0) + 1;
             $state['matched_pairs'] = (int) ($state['matched_pairs'] ?? 0) + 1;
             $state['revealed_indices'] = [];
@@ -150,6 +152,10 @@ class MemoryEngine implements ArcadeGameEngine
 
             if (in_array($card['status'], ['revealed', 'matched'], true)) {
                 $projected['motif_id'] = $card['motif_id'];
+            }
+
+            if (($card['status'] ?? null) === 'matched' && in_array((int) ($card['matched_by_seat'] ?? 0), [1, 2], true)) {
+                $projected['matched_by_seat'] = (int) $card['matched_by_seat'];
             }
 
             return $projected;
