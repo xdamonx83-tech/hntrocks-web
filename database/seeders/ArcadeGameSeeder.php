@@ -29,7 +29,7 @@ class ArcadeGameSeeder extends Seeder
             ],
         );
 
-        ArcadeGame::query()->firstOrCreate(
+        $memory = ArcadeGame::query()->firstOrCreate(
             ['key' => 'hunt-memory'],
             [
                 'name_de' => 'Hunt Memory',
@@ -44,6 +44,26 @@ class ArcadeGameSeeder extends Seeder
                 'casual_enabled' => true,
                 'ranked_enabled' => true,
                 'client_engine_key' => 'hunt-memory',
+                'game_version' => 1,
+                'reward_settings' => [],
+            ],
+        );
+
+        ArcadeGame::query()->firstOrCreate(
+            ['key' => 'hunters-mark'],
+            [
+                'name_de' => "Hunter's Mark",
+                'name_en' => "Hunter's Mark",
+                'description_de' => 'Ein düsteres Zeichen-Duell für zwei Hunter.',
+                'description_en' => 'A dark mark duel for two hunters.',
+                'type' => 'native',
+                'status' => 'disabled',
+                'sort_order' => ((int) $memory->sort_order) + 10,
+                'min_players' => 2,
+                'max_players' => 2,
+                'casual_enabled' => true,
+                'ranked_enabled' => true,
+                'client_engine_key' => 'hunters-mark',
                 'game_version' => 1,
                 'reward_settings' => [],
             ],
