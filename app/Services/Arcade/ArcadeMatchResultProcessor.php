@@ -41,6 +41,8 @@ class ArcadeMatchResultProcessor
                 return false;
             }
 
+            $terminationType = (string) data_get($match->state, 'termination.type', '');
+
             foreach ($match->players as $player) {
                 if (! $player->user_id || ! $player->user) {
                     continue;
@@ -57,7 +59,8 @@ class ArcadeMatchResultProcessor
 
                 $this->incrementStats($match, (int) $player->user_id, $result);
 
-                if ($match->mode === ArcadeMatchMode::Ranked) {
+                $isForfeitLoss = $terminationType === 'forfeit' && $result === ArcadeMatchPlayerResult::Loss;
+                if ($match->mode === ArcadeMatchMode::Ranked && ! $isForfeitLoss) {
                     $this->rewardRankedResult($match, $player->user, $result);
                 }
             }
