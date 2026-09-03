@@ -13,7 +13,7 @@ class ApprovedOutboundLinkController extends Controller
     {
         abort_unless($link->is_active, 404);
 
-        return view('themes.socialite.outbound.show', [
+        return view('outbound.show', [
             'link' => $link,
         ]);
     }
