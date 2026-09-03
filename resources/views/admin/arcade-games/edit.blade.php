@@ -1,6 +1,7 @@
 @extends('admin.layouts.app')
 @section('title', 'Arcade-Spiel bearbeiten')
 @section('content')
+@php($rankedRewards = $game->rankedRewardSettings())
 <h1>{{ $game->name_de }} bearbeiten</h1>
 <p>Technischer Key: <code>{{ $game->key }}</code> (nicht bearbeitbar)</p>
 <form method="post" enctype="multipart/form-data" action="{{ route('admin.arcade-games.update', $game) }}">@csrf @method('put')
@@ -9,6 +10,17 @@
 <label>Typ <select name="type">@foreach(['native','web'] as $v)<option @selected(old('type',$game->type->value)===$v)>{{ $v }}</option>@endforeach</select></label>
 <label>Status <select name="status">@foreach(['active','coming_soon','maintenance','event','disabled'] as $v)<option @selected(old('status',$game->status->value)===$v)>{{ $v }}</option>@endforeach</select></label>
 <label><input type="checkbox" name="casual_enabled" value="1" @checked(old('casual_enabled',$game->casual_enabled))> Casual</label><label><input type="checkbox" name="ranked_enabled" value="1" @checked(old('ranked_enabled',$game->ranked_enabled))> Ranked</label>
+<fieldset>
+<legend>Ranked Rocks / Bounty Marks</legend>
+<p>Diese Werte gelten ausschließlich für beendete Ranked-Matches dieses Spiels.</p>
+<input type="hidden" name="reward_settings[ranked_reward_enabled]" value="0">
+<label><input type="checkbox" name="reward_settings[ranked_reward_enabled]" value="1" @checked(old('reward_settings.ranked_reward_enabled',$rankedRewards['ranked_reward_enabled']))> Ranked-Belohnungen aktivieren</label>
+@error('reward_settings.ranked_reward_enabled')<div>{{ $message }}</div>@enderror
+@foreach(['ranked_win_reward'=>'Rocks bei Sieg','ranked_draw_reward'=>'Rocks bei Unentschieden','ranked_loss_reward'=>'Rocks bei Niederlage'] as $field=>$label)
+<label>{{ $label }}<input type="number" min="0" max="{{ \App\Models\Arcade\ArcadeGame::MAX_RANKED_REWARD }}" name="reward_settings[{{ $field }}]" value="{{ old('reward_settings.'.$field,$rankedRewards[$field]) }}"></label>
+@error('reward_settings.'.$field)<div>{{ $message }}</div>@enderror
+@endforeach
+</fieldset>
 <label>Cover <input type="file" name="cover" accept="image/*"></label><button type="submit">Speichern</button>
 </form>
 @endsection
