@@ -71,6 +71,7 @@ class HuntersGallowsEngine implements ArcadeGameEngine
     {
         $word = (string) ($state['secret_word'] ?? '');
         $revealed = (array) ($state['revealed_positions'] ?? []);
+        $isTerminal = ($state['winner_seat'] ?? null) !== null || ($state['draw'] ?? false) === true;
 
         return [
             'masked_word' => array_map(
@@ -92,6 +93,7 @@ class HuntersGallowsEngine implements ArcadeGameEngine
             'winner_seat' => $state['winner_seat'] ?? null,
             'draw' => (bool) ($state['draw'] ?? false),
             'solved_by_seat' => $state['solved_by_seat'] ?? null,
+            'solution_word' => $isTerminal ? $word : null,
         ];
     }
 

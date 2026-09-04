@@ -28,9 +28,11 @@ class HuntersGallowsEngineTest extends TestCase
         $this->assertSame(array_fill(0, 8, '*'), $public['masked_word']);
         $this->assertSame('weapons', $public['category_key']);
         $this->assertSame(1, $public['current_seat']);
+        $this->assertArrayHasKey('solution_word', $public);
+        $this->assertNull($public['solution_word']);
         $encoded = json_encode($public);
         $this->assertStringNotContainsString('WINFIELD', $encoded);
-        foreach (['secret_word', 'word', 'answer', 'solution', 'revealed_positions'] as $forbidden) {
+        foreach (['secret_word', 'revealed_positions'] as $forbidden) {
             $this->assertStringNotContainsString('"'.$forbidden.'"', $encoded);
         }
     }
@@ -69,6 +71,7 @@ class HuntersGallowsEngineTest extends TestCase
         $this->assertSame([false, true, false, false, true, false, false, false], $state['revealed_positions']);
         $this->assertSame(['I'], $state['guessed_letters']);
         $this->assertSame(2, $state['turn_seat']);
+        $this->assertNull($this->engine->publicState($state)['solution_word']);
     }
 
     public function test_incorrect_guess_adds_mistake_and_duplicate_invalid_payload_and_turn_are_rejected(): void
@@ -96,6 +99,7 @@ class HuntersGallowsEngineTest extends TestCase
         $this->assertSame(1, $state['winner_seat']);
         $this->assertSame(1, $state['solved_by_seat']);
         $this->assertNull($state['turn_seat']);
+        $this->assertSame('WINFIELD', $this->engine->publicState($state)['solution_word']);
         $this->expectValidation(fn () => $this->engine->apply($state, 2, ['action' => 'guess_letter', 'letter' => 'A']));
 
         $wrong = $this->engine->apply($this->engine->initialize(), 1, ['action' => 'solve', 'word' => 'OUTLAW']);
@@ -116,12 +120,18 @@ class HuntersGallowsEngineTest extends TestCase
         $state = $this->engine->apply($state, 1, ['action' => 'guess_letter', 'letter' => 'Z']);
         $this->assertSame(2, $state['winner_seat']);
         $this->assertNull($state['turn_seat']);
+        $public = $this->engine->publicState($state);
+        $this->assertSame('WINFIELD', $public['solution_word']);
+        $this->assertArrayNotHasKey('secret_word', $public);
+        $this->assertArrayNotHasKey('revealed_positions', $public);
     }
 
     public function test_fully_revealed_word_uses_score_then_mistakes_then_draw(): void
     {
         $higherScore = $this->almostRevealed(['score' => 7, 'mistakes' => 5], ['score' => 1, 'mistakes' => 0]);
-        $this->assertSame(1, $this->finishWithD($higherScore)['winner_seat']);
+        $scoreWinner = $this->finishWithD($higherScore);
+        $this->assertSame(1, $scoreWinner['winner_seat']);
+        $this->assertSame('WINFIELD', $this->engine->publicState($scoreWinner)['solution_word']);
 
         $fewerMistakes = $this->almostRevealed(['score' => 1, 'mistakes' => 1], ['score' => 2, 'mistakes' => 3]);
         $this->assertSame(1, $this->finishWithD($fewerMistakes)['winner_seat']);
@@ -131,6 +141,7 @@ class HuntersGallowsEngineTest extends TestCase
         $this->assertTrue($finished['draw']);
         $this->assertNull($finished['winner_seat']);
         $this->assertNull($finished['turn_seat']);
+        $this->assertSame('WINFIELD', $this->engine->publicState($finished)['solution_word']);
     }
 
     private function almostRevealed(array $one, array $two): array

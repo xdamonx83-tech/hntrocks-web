@@ -68,8 +68,11 @@ class HuntersGallowsArcadeTest extends TestCase
         $this->assertIsObject($payload['state']['players']);
         $this->assertSame(0, $payload['state']['players']->{'1'}['score']);
         $this->assertSame(0, $payload['state']['players']->{'2'}['score']);
+        $this->assertArrayHasKey('solution_word', $payload['state']);
+        $this->assertNull($payload['state']['solution_word']);
         $this->assertStringNotContainsString('WINFIELD', $encoded);
         $this->assertStringNotContainsString('secret_word', $encoded);
+        $this->assertStringNotContainsString('revealed_positions', $encoded);
     }
 
     public function test_realtime_broadcast_never_exposes_secret_or_internal_state(): void
@@ -82,6 +85,7 @@ class HuntersGallowsArcadeTest extends TestCase
         $this->assertSame(array_fill(0, 8, '*'), $payload['state']['masked_word']);
         $this->assertSame('weapons', $payload['state']['category_key']);
         $this->assertSame(1, $payload['state']['current_seat']);
+        $this->assertNull($payload['state']['solution_word']);
         $this->assertStringNotContainsString('WINFIELD', $encoded);
         $this->assertStringNotContainsString('secret_word', $encoded);
         $this->assertStringNotContainsString('revealed_positions', $encoded);
@@ -107,6 +111,12 @@ class HuntersGallowsArcadeTest extends TestCase
         $this->assertSame(ArcadeMatchStatus::Finished, $match->status);
         $this->assertSame(2, $match->winner_seat);
         $this->assertNull($match->current_seat);
+        $request = Request::create('/api/v1/arcade/matches/'.$match->id);
+        $request->setUserResolver(fn () => $two);
+        $payload = (new ArcadeMatchResource($match))->resolve($request);
+        $this->assertSame('WINFIELD', $payload['state']['solution_word']);
+        $this->assertArrayNotHasKey('secret_word', $payload['state']);
+        $this->assertArrayNotHasKey('revealed_positions', $payload['state']);
         $this->assertDatabaseHas('arcade_user_stats', ['user_id' => $two->id, 'game_id' => $game->id, 'wins' => 1]);
         $this->assertDatabaseHas('arcade_user_stats', ['user_id' => $one->id, 'game_id' => $game->id, 'losses' => 1]);
     }
@@ -122,11 +132,16 @@ class HuntersGallowsArcadeTest extends TestCase
         $match = app(ArcadeMoveService::class)->move($match, $one, 'draw-1', ['action' => 'guess_letter', 'letter' => 'D']);
         $this->assertTrue($match->state['draw']);
         $this->assertSame('draw', $match->players->firstWhere('seat', 1)->result->value);
+        $this->assertSame('WINFIELD', app(HuntersGallowsEngine::class)->publicState($match->state)['solution_word']);
 
         [, $one, , $forfeitMatch] = $this->activeMatch();
         $forfeited = app(ArcadeMatchService::class)->forfeit($forfeitMatch, $one);
         $this->assertSame(2, $forfeited->winner_seat);
         $this->assertSame('forfeit', $forfeited->state['termination']['type']);
+        $request = Request::create('/api/v1/arcade/matches/'.$forfeited->id);
+        $request->setUserResolver(fn () => $one);
+        $payload = (new ArcadeMatchResource($forfeited))->resolve($request);
+        $this->assertSame('WINFIELD', $payload['state']['solution_word']);
     }
 
     private function activeMatch(): array
