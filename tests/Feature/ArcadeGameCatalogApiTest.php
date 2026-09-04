@@ -117,7 +117,7 @@ class ArcadeGameCatalogApiTest extends TestCase
     {
         $this->seed(ArcadeGameSeeder::class);
 
-        $this->assertDatabaseCount('arcade_games', 2);
+        $this->assertDatabaseCount('arcade_games', 4);
         $huntWins = ArcadeGame::query()->where('key', 'hunt-wins')->firstOrFail();
         $memory = ArcadeGame::query()->where('key', 'hunt-memory')->firstOrFail();
 
@@ -165,7 +165,7 @@ class ArcadeGameCatalogApiTest extends TestCase
 
         $this->seed(ArcadeGameSeeder::class);
 
-        $this->assertDatabaseCount('arcade_games', 2);
+        $this->assertDatabaseCount('arcade_games', 4);
         $huntWins->refresh();
         $memory->refresh();
 

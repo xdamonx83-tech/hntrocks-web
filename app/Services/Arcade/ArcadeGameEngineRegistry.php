@@ -4,6 +4,7 @@ namespace App\Services\Arcade;
 
 use App\Models\Arcade\ArcadeGame;
 use App\Services\Arcade\Engines\ArcadeGameEngine;
+use App\Services\Arcade\Engines\HuntersGallowsEngine;
 use App\Services\Arcade\Engines\HuntersMarkEngine;
 use App\Services\Arcade\Engines\HuntWinsEngine;
 use App\Services\Arcade\Engines\MemoryEngine;
@@ -17,6 +18,7 @@ class ArcadeGameEngineRegistry
             'hunt-wins' => app(HuntWinsEngine::class),
             'hunt-memory' => app(MemoryEngine::class),
             'hunters-mark' => app(HuntersMarkEngine::class),
+            'hunters-gallows' => app(HuntersGallowsEngine::class),
             default => throw new RuntimeException("No server game engine registered for {$game->key}."),
         };
     }

@@ -49,7 +49,7 @@ class ArcadeGameSeeder extends Seeder
             ],
         );
 
-        ArcadeGame::query()->firstOrCreate(
+        $huntersMark = ArcadeGame::query()->firstOrCreate(
             ['key' => 'hunters-mark'],
             [
                 'name_de' => "Hunter's Mark",
@@ -64,6 +64,26 @@ class ArcadeGameSeeder extends Seeder
                 'casual_enabled' => true,
                 'ranked_enabled' => true,
                 'client_engine_key' => 'hunters-mark',
+                'game_version' => 1,
+                'reward_settings' => [],
+            ],
+        );
+
+        ArcadeGame::query()->firstOrCreate(
+            ['key' => 'hunters-gallows'],
+            [
+                'name_de' => "Hunter's Gallows",
+                'name_en' => "Hunter's Gallows",
+                'description_de' => 'Ein düsteres Wortduell für zwei Hunter.',
+                'description_en' => 'A dark word duel for two hunters.',
+                'type' => 'native',
+                'status' => 'disabled',
+                'sort_order' => ((int) $huntersMark->sort_order) + 10,
+                'min_players' => 2,
+                'max_players' => 2,
+                'casual_enabled' => true,
+                'ranked_enabled' => true,
+                'client_engine_key' => 'hunters-gallows',
                 'game_version' => 1,
                 'reward_settings' => [],
             ],
