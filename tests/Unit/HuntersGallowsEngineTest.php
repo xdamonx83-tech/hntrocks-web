@@ -35,6 +35,33 @@ class HuntersGallowsEngineTest extends TestCase
         }
     }
 
+    public function test_curated_word_pool_contains_only_unique_valid_ascii_words(): void
+    {
+        $reflection = new \ReflectionClass(HuntersGallowsEngine::class);
+        $constant = $reflection->getReflectionConstant('WORDS');
+        $this->assertNotFalse($constant);
+
+        $pool = $constant->getValue();
+        $this->assertIsArray($pool);
+        $seen = [];
+
+        foreach ($pool as $category => $words) {
+            $this->assertIsString($category);
+            $this->assertNotSame('', $category);
+            $this->assertIsArray($words);
+            $this->assertNotEmpty($words);
+
+            foreach ($words as $word) {
+                $this->assertIsString($word);
+                $this->assertMatchesRegularExpression('/^[A-Z]+$/', $word);
+                $this->assertNotContains($word, $seen, "Duplicate Gallows word {$word}.");
+                $seen[] = $word;
+            }
+        }
+
+        $this->assertNotEmpty($seen);
+    }
+
     public function test_correct_repeated_letter_scores_every_new_position_and_switches_seat(): void
     {
         $state = $this->engine->apply($this->engine->initialize(), 1, ['action' => 'guess_letter', 'letter' => 'i']);

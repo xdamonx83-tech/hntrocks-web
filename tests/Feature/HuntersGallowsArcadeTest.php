@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\Arcade\ArcadeMatchMode;
 use App\Enums\Arcade\ArcadeMatchStatus;
+use App\Events\ArcadeMatchUpdated;
 use App\Http\Resources\Api\ArcadeMatchResource;
 use App\Models\Arcade\ArcadeGame;
 use App\Models\Arcade\ArcadeMatch;
@@ -66,6 +67,21 @@ class HuntersGallowsArcadeTest extends TestCase
         $this->assertSame(array_fill(0, 8, '*'), $payload['state']['masked_word']);
         $this->assertStringNotContainsString('WINFIELD', $encoded);
         $this->assertStringNotContainsString('secret_word', $encoded);
+    }
+
+    public function test_realtime_broadcast_never_exposes_secret_or_internal_state(): void
+    {
+        [, , , $match] = $this->activeMatch();
+
+        $payload = (new ArcadeMatchUpdated($match))->broadcastWith();
+        $encoded = json_encode($payload);
+
+        $this->assertSame(array_fill(0, 8, '*'), $payload['state']['masked_word']);
+        $this->assertSame('weapons', $payload['state']['category_key']);
+        $this->assertSame(1, $payload['state']['current_seat']);
+        $this->assertStringNotContainsString('WINFIELD', $encoded);
+        $this->assertStringNotContainsString('secret_word', $encoded);
+        $this->assertStringNotContainsString('revealed_positions', $encoded);
     }
 
     public function test_generic_move_pipeline_accepts_guess_rejects_invalid_and_finishes_solve(): void
