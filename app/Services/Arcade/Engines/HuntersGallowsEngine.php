@@ -81,7 +81,11 @@ class HuntersGallowsEngine implements ArcadeGameEngine
             'guessed_letters' => array_values((array) ($state['guessed_letters'] ?? [])),
             'current_seat' => $state['turn_seat'] ?? null,
             'max_mistakes' => (int) ($state['max_mistakes'] ?? self::MAX_MISTAKES),
-            'players' => [
+            // Keep seat keys as an object in the serialized API payload.
+            // Laravel JsonResource recursively reindexes arrays whose keys are
+            // purely numeric, which would otherwise turn seats 1/2 into a
+            // zero-based JSON list and break the public state contract.
+            'players' => (object) [
                 '1' => $this->publicPlayer($state, 1),
                 '2' => $this->publicPlayer($state, 2),
             ],

@@ -62,9 +62,12 @@ class HuntersGallowsArcadeTest extends TestCase
 
         $request = Request::create('/api/v1/arcade/matches/'.$match->id);
         $request->setUserResolver(fn () => $one);
-        $payload = (new ArcadeMatchResource($match))->toArray($request);
+        $payload = (new ArcadeMatchResource($match))->resolve($request);
         $encoded = json_encode($payload);
         $this->assertSame(array_fill(0, 8, '*'), $payload['state']['masked_word']);
+        $this->assertIsObject($payload['state']['players']);
+        $this->assertSame(0, $payload['state']['players']->{'1'}['score']);
+        $this->assertSame(0, $payload['state']['players']->{'2'}['score']);
         $this->assertStringNotContainsString('WINFIELD', $encoded);
         $this->assertStringNotContainsString('secret_word', $encoded);
     }
