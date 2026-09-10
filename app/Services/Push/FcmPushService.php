@@ -52,6 +52,49 @@ class FcmPushService
         ];
     }
 
+    public function sendToAllActiveDevices(string $title, string $body, ?string $actionUrl = null, array $data = []): array
+    {
+        $sent = 0;
+        $failed = 0;
+        $devices = 0;
+        $failureDetails = [];
+
+        UserPushDevice::query()
+            ->active()
+            ->whereNotNull('token')
+            ->where('token', '!=', '')
+            ->orderBy('id')
+            ->chunkById(100, function ($chunk) use ($title, $body, $actionUrl, $data, &$sent, &$failed, &$devices, &$failureDetails): void {
+                foreach ($chunk as $device) {
+                    $devices++;
+
+                    try {
+                        $this->sendToDevice($device, $title, $body, $actionUrl, $data);
+                        $sent++;
+                    } catch (Throwable $error) {
+                        $failed++;
+
+                        // Keep the audit payload bounded even for a large broadcast.
+                        if (count($failureDetails) < 100) {
+                            $failureDetails[] = [
+                                'device_id' => $device->id,
+                                'ok' => false,
+                                'error' => $error->getMessage(),
+                            ];
+                        }
+                    }
+                }
+            });
+
+        return [
+            'sent' => $sent,
+            'failed' => $failed,
+            'devices' => $devices,
+            'failures' => $failureDetails,
+            'failures_truncated' => $failed > count($failureDetails),
+        ];
+    }
+
     public function sendToDevice(UserPushDevice $device, string $title, string $body, ?string $actionUrl = null, array $data = []): array
     {
         if (! $this->isConfigured()) {
@@ -129,7 +172,7 @@ class FcmPushService
             ->acceptJson()
             ->timeout($this->timeout())
             ->post('https://oauth2.googleapis.com/token', [
-                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'grant_type' => 'urn:ietf:params:oauth-grant-type:jwt-bearer',
                 'assertion' => $jwt,
             ]);
 
