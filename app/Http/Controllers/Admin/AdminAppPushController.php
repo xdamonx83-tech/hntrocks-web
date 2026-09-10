@@ -47,29 +47,42 @@ class AdminAppPushController extends Controller
         $this->guardAdmin($request);
 
         $data = $request->validate([
-            'target_user_id' => ['required', 'integer', 'exists:users,id'],
+            'send_scope' => ['required', 'string', 'in:user,broadcast'],
+            'target_user_id' => ['nullable', 'required_if:send_scope,user', 'integer', 'exists:users,id'],
             'title' => ['required', 'string', 'max:120'],
             'body' => ['required', 'string', 'max:800'],
             'action_url' => ['nullable', 'string', 'max:255'],
             'confirm_send' => ['accepted'],
+            'confirm_broadcast' => ['nullable'],
         ]);
+
+        $isBroadcast = $data['send_scope'] === 'broadcast';
+        if ($isBroadcast && ! $request->boolean('confirm_broadcast')) {
+            throw ValidationException::withMessages([
+                'confirm_broadcast' => 'Bitte den Broadcast an alle aktiven App-Geräte ausdrücklich bestätigen.',
+            ]);
+        }
 
         $actionUrl = $remoteConfig->validateActionUrl($data['action_url'] ?? null);
         if (($data['action_url'] ?? null) && $actionUrl === null) {
             throw ValidationException::withMessages(['action_url' => 'Dieses Push-Ziel ist nicht erlaubt.']);
         }
 
-        $target = User::query()->findOrFail($data['target_user_id']);
+        $target = $isBroadcast
+            ? null
+            : User::query()->findOrFail((int) $data['target_user_id']);
+
         $payload = [
             'type' => 'admin_push',
             'target' => $this->targetFromActionUrl($actionUrl),
             'source' => 'admin',
+            'scope' => $isBroadcast ? 'broadcast' : 'user',
         ];
 
         if (! $push->isConfigured()) {
             AppPushLog::query()->create([
                 'admin_user_id' => $request->user()->id,
-                'target_user_id' => $target->id,
+                'target_user_id' => $target?->id,
                 'title' => $data['title'],
                 'body' => $data['body'],
                 'action_url' => $actionUrl,
@@ -82,11 +95,13 @@ class AdminAppPushController extends Controller
             return back()->withErrors(['fcm' => 'Firebase Cloud Messaging ist serverseitig nicht konfiguriert.']);
         }
 
-        $result = $push->sendToUser($target, $data['title'], $data['body'], $actionUrl, $payload);
+        $result = $isBroadcast
+            ? $push->sendToAllActiveDevices($data['title'], $data['body'], $actionUrl, $payload)
+            : $push->sendToUser($target, $data['title'], $data['body'], $actionUrl, $payload);
 
         AppPushLog::query()->create([
             'admin_user_id' => $request->user()->id,
-            'target_user_id' => $target->id,
+            'target_user_id' => $target?->id,
             'title' => $data['title'],
             'body' => $data['body'],
             'action_url' => $actionUrl,
@@ -96,14 +111,22 @@ class AdminAppPushController extends Controller
             'failed_count' => (int) ($result['failed'] ?? 0),
         ]);
 
-        UserNotification::query()->create([
-            'user_id' => $target->id,
-            'actor_id' => null,
-            'type' => 'admin_push',
-            'title' => $data['title'],
-            'body' => $data['body'],
-            'action_url' => $actionUrl,
-        ]);
+        if ($target !== null) {
+            UserNotification::query()->create([
+                'user_id' => $target->id,
+                'actor_id' => null,
+                'type' => 'admin_push',
+                'title' => $data['title'],
+                'body' => $data['body'],
+                'action_url' => $actionUrl,
+            ]);
+        }
+
+        if ($isBroadcast) {
+            return redirect()
+                ->route('admin.app-push.index')
+                ->with('status', 'Broadcast gesendet: '.$result['sent'].' erfolgreich, '.$result['failed'].' fehlgeschlagen.');
+        }
 
         return redirect()
             ->route('admin.app-push.index', ['q' => $target->email])
