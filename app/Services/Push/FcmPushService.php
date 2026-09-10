@@ -305,6 +305,7 @@ class FcmPushService
         }
 
         return str_contains($body, 'UNREGISTERED')
+            || str_contains($body, 'NotRegistered')
             || str_contains($body, 'INVALID_ARGUMENT')
             || str_contains($body, 'registration token is not a valid');
     }
