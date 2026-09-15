@@ -254,7 +254,12 @@
                     </div>
 
                     <div class="cup-form-locale-grid">
-                        @foreach (['de' => __('ui.language_german'), 'en' => __('ui.language_english')] as $locale => $languageLabel)
+                        @foreach ([
+                            'de' => __('ui.language_german'),
+                            'en' => __('ui.language_english'),
+                            'es' => 'Español',
+                            'ru' => 'Русский',
+                        ] as $locale => $languageLabel)
                             <div class="cup-form-locale-card">
                                 <h3>{{ __('ui.cup_form_language_section', ['language' => $languageLabel]) }}</h3>
 
