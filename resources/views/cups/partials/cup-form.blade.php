@@ -254,7 +254,12 @@
                     </div>
 
                     <div class="grid xl:grid-cols-2 gap-5">
-                        @foreach (['de' => __('ui.language_german'), 'en' => __('ui.language_english')] as $locale => $languageLabel)
+                        @foreach ([
+                            'de' => __('ui.language_german'),
+                            'en' => __('ui.language_english'),
+                            'es' => 'Español',
+                            'ru' => 'Русский',
+                        ] as $locale => $languageLabel)
                             <div class="rounded-xl bg-secondery p-4 dark:bg-white/5 space-y-4">
                                 <h3 class="text-sm font-bold text-black dark:text-white">{{ __('ui.cup_form_language_section', ['language' => $languageLabel]) }}</h3>
 
