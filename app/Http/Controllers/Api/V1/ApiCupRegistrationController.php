@@ -43,6 +43,18 @@ class ApiCupRegistrationController extends Controller
             ], 422);
         }
 
+        $eligibility = $cup->participationEligibility($request->user());
+        if (! ($eligibility['eligible'] ?? false)) {
+            $message = implode(' ', $eligibility['messages'] ?? []);
+
+            return response()->json([
+                'message' => $message,
+                'errors' => [
+                    'cup' => [$message],
+                ],
+            ], 422);
+        }
+
         if ($cup->isSoloLeaderboard()) {
             $request->validate([
                 'name' => ['nullable', 'string', 'max:100'],

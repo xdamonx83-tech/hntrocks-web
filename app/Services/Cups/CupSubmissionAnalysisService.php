@@ -51,6 +51,24 @@ class CupSubmissionAnalysisService
         }
 
         $similar = $phash ? $this->findSimilarSubmission($cup, $phash, $ignoreSubmissionId) : null;
+
+        if ($cup->usesManualReviewScoring()) {
+            return $this->result([
+                'status' => 'review_required',
+                'invalid_reason' => null,
+                'message' => __('ui.cup_submission_summary_waiting_review'),
+                'sha256_hash' => $sha256,
+                'phash' => $phash,
+                'image_width' => $basic['width'],
+                'image_height' => $basic['height'],
+                'raw_ai_result' => [
+                    'manual_review' => true,
+                    'ai_skipped' => true,
+                    'similar_match' => $similar,
+                ],
+            ]);
+        }
+
         $ai = $this->parseSummaryScreen($cup, $path, $mimeType);
 
         if (! $ai['ok']) {

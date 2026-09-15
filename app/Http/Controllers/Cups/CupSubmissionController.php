@@ -493,6 +493,12 @@ class CupSubmissionController extends Controller
 
     private function applyGamertagConsistency(CupSubmissionAnalysisService $analysisService, array $analysis, CupTeam $team): array
     {
+        $team->loadMissing('cup');
+
+        if ($team->cup?->usesManualReviewScoring() === true) {
+            return $analysis;
+        }
+
         $currentName = trim((string) ($analysis['ai_gamertag'] ?? ''));
         $currentNormalized = trim((string) ($analysis['ai_gamertag_normalized'] ?? ''));
         if ($currentNormalized === '' && $currentName !== '') {

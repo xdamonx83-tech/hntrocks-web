@@ -519,7 +519,7 @@ class CupController extends Controller
             'hall_of_fame_note' => ['nullable', 'string', 'max:2000'],
             'hall_of_fame_note_de' => ['nullable', 'string', 'max:2000'],
             'hall_of_fame_note_en' => ['nullable', 'string', 'max:2000'],
-            'rules_preset' => ['nullable', 'string', 'in:classic_bounty,console_mini_fair,summer_trio_first_trophy'],
+            'rules_preset' => ['nullable', 'string', 'in:classic_bounty,console_mini_fair,summer_trio_first_trophy,manual_bounty_banish'],
             'ai_prompt_preset' => ['nullable', 'string', 'in:classic_summary,console_platform,awards_first_trophy'],
             'allowed_platforms' => ['nullable', 'array'],
             'allowed_platforms.*' => ['string', 'in:PC,PlayStation,Xbox'],
@@ -566,6 +566,10 @@ class CupController extends Controller
             $allowedPlatforms = ['PlayStation', 'Xbox'];
         }
 
+        if ($rulesPreset === 'manual_bounty_banish' && $isNewCup && $allowedPlatforms === []) {
+            $allowedPlatforms = ['PC', 'PlayStation', 'Xbox'];
+        }
+
         $validated['platform'] = $this->platformLabelFromAllowedPlatforms($allowedPlatforms);
 
         $maxUploads = $this->nullablePositiveInt(
@@ -589,6 +593,13 @@ class CupController extends Controller
             $maxScored ??= 5;
             $minCommunityActions = max(1, $minCommunityActions);
             $profileComplete = true;
+        }
+
+        if ($rulesPreset === 'manual_bounty_banish' && $isNewCup) {
+            $validated['team_size'] = 1;
+            $maxUploads ??= 10;
+            $maxScored ??= 5;
+            $minCommunityActions = max(1, $minCommunityActions);
         }
 
         foreach ([

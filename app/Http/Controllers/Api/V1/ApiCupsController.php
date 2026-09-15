@@ -49,6 +49,7 @@ class ApiCupsController extends Controller
         $leaderboard = $this->leaderboardFor($cup);
         $viewerTeam = $cup->teamFor($request->user());
         $viewerSubmissions = collect();
+        $eligibility = $cup->participationEligibility($request->user());
 
         if ($viewerTeam) {
             $viewerTeam->loadMissing('owner.profile');
@@ -60,7 +61,8 @@ class ApiCupsController extends Controller
             'leaderboard' => CupLeaderboardEntryResource::collection($leaderboard),
             'viewer' => [
                 'can_manage' => $cup->canManage($request->user()),
-                'can_register' => $viewerTeam === null && $cup->isRegistrationOpen(),
+                'can_register' => $viewerTeam === null && $cup->isRegistrationOpen() && (bool) ($eligibility['eligible'] ?? false),
+                'eligibility' => $eligibility,
                 'registered' => $viewerTeam !== null,
                 'team' => $viewerTeam ? new CupLeaderboardEntryResource($viewerTeam) : null,
                 'can_submit' => $viewerTeam !== null && $viewerTeam->status === 'active' && $cup->isSubmissionOpen() && $viewerTeam->canSubmitForCup($request->user()),
@@ -94,6 +96,18 @@ class ApiCupsController extends Controller
                 'message' => __('ui.cup_team_error_registration_closed'),
                 'errors' => [
                     'cup' => [__('ui.cup_team_error_registration_closed')],
+                ],
+            ], 422);
+        }
+
+        $eligibility = $cup->participationEligibility($request->user());
+        if (! ($eligibility['eligible'] ?? false)) {
+            $message = implode(' ', $eligibility['messages'] ?? []);
+
+            return response()->json([
+                'message' => $message,
+                'errors' => [
+                    'cup' => [$message],
                 ],
             ], 422);
         }
@@ -217,6 +231,18 @@ class ApiCupsController extends Controller
                 'message' => $message,
                 'errors' => [
                     'team' => [$message],
+                ],
+            ], 422);
+        }
+
+        $eligibility = $cup->participationEligibility($request->user());
+        if (! ($eligibility['eligible'] ?? false)) {
+            $message = implode(' ', $eligibility['messages'] ?? []);
+
+            return response()->json([
+                'message' => $message,
+                'errors' => [
+                    'submission' => [$message],
                 ],
             ], 422);
         }
@@ -458,6 +484,12 @@ class ApiCupsController extends Controller
 
     private function applyGamertagConsistency(CupSubmissionAnalysisService $analysisService, array $analysis, CupTeam $team): array
     {
+        $team->loadMissing('cup');
+
+        if ($team->cup?->usesManualReviewScoring() === true) {
+            return $analysis;
+        }
+
         $currentName = trim((string) ($analysis['ai_gamertag'] ?? ''));
         $currentNormalized = trim((string) ($analysis['ai_gamertag_normalized'] ?? ''));
         if ($currentNormalized === '' && $currentName !== '') {

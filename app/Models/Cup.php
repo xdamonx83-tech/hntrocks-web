@@ -317,6 +317,7 @@ class Cup extends Model
             'classic_bounty' => __('ui.cup_rules_preset_classic_bounty'),
             'console_mini_fair' => __('ui.cup_rules_preset_console_mini_fair'),
             'summer_trio_first_trophy' => __('ui.cup_rules_preset_summer_trio_first_trophy'),
+            'manual_bounty_banish' => __('ui.cup_rules_preset_manual_bounty_banish'),
         ];
     }
 
@@ -361,6 +362,11 @@ class Cup extends Model
     public function usesSummerFirstTrophyScoring(): bool
     {
         return $this->rulesPreset() === 'summer_trio_first_trophy' || $this->aiPromptPreset() === 'awards_first_trophy';
+    }
+
+    public function usesManualReviewScoring(): bool
+    {
+        return $this->rulesPreset() === 'manual_bounty_banish';
     }
 
     public function maxSubmissionsPerParticipant(): ?int
@@ -457,10 +463,12 @@ class Cup extends Model
             })
             ->count();
 
-        $cupIdeas = CupIdea::query()->where('user_id', $user->id)->count();
-        $feedbackEntries = CupFeedbackEntry::query()->where('user_id', $user->id)->count();
+        $moments = Moment::query()
+            ->where('user_id', $user->id)
+            ->published()
+            ->count();
 
-        return (int) $feedPosts + (int) $cupIdeas + (int) $feedbackEntries;
+        return (int) $feedPosts + (int) $moments;
     }
 
     public function normalizePlatform(string $platform): ?string
