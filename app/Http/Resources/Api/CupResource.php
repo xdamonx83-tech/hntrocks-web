@@ -21,11 +21,13 @@ class CupResource extends JsonResource
             'scoring_rules' => $this->displayScoringRules(),
             'prizes' => $this->prizeRows(),
             'prize_notes' => $this->prizeNotes(),
-            // App/Web API: expose both maintained Cup language variants so native clients
+            // App/Web API: expose every maintained Cup language variant so native clients
             // can switch language locally without depending on the default API locale.
             'content' => [
                 'de' => $this->localizedCupContent('de'),
                 'en' => $this->localizedCupContent('en'),
+                'es' => $this->localizedCupContent('es'),
+                'ru' => $this->localizedCupContent('ru'),
             ],
             'platform' => $this->platform,
             'region' => $this->region,
@@ -93,29 +95,70 @@ class CupResource extends JsonResource
         ];
 
         return [
-            'summary' => trim((string) $this->localizedContentSetting('summary', $defaults['summary'] ?? '', $locale)),
-            'description' => trim((string) $this->localizedContentSetting('description', $defaults['description'] ?? '', $locale)),
-            'rules' => trim((string) $this->localizedContentSetting('rules', $defaults['rules'] ?? '', $locale)),
-            'scoring_rules' => trim((string) $this->localizedContentSetting('scoring_rules', $defaults['scoring_rules'] ?? '', $locale)),
+            'summary' => trim((string) $this->localizedContentValue('summary', $defaults['summary'] ?? '', $locale)),
+            'description' => trim((string) $this->localizedContentValue('description', $defaults['description'] ?? '', $locale)),
+            'rules' => trim((string) $this->localizedContentValue('rules', $defaults['rules'] ?? '', $locale)),
+            'scoring_rules' => trim((string) $this->localizedContentValue('scoring_rules', $defaults['scoring_rules'] ?? '', $locale)),
             'prizes' => $this->localizedPrizeRows($locale, $defaults['prizes'] ?? []),
             'prize_notes' => $this->localizedPrizeNotes($locale, $defaults),
         ];
     }
 
+    private function localizedContentValue(string $key, mixed $default, string $locale): mixed
+    {
+        $settings = is_array($this->settings) ? $this->settings : [];
+        $candidates = array_values(array_unique([$locale, 'en', 'de']));
+
+        foreach ($candidates as $candidate) {
+            $value = data_get($settings, 'content.locales.'.$candidate.'.'.$key);
+            if ($this->filledContentValue($value)) {
+                return $value;
+            }
+        }
+
+        $legacy = data_get($settings, 'content.'.$key);
+        if ($this->filledContentValue($legacy)) {
+            return $legacy;
+        }
+
+        return $default;
+    }
+
+    private function filledContentValue(mixed $value): bool
+    {
+        if (is_array($value)) {
+            return $value !== [];
+        }
+
+        return trim((string) $value) !== '';
+    }
+
     private function localizedPrizeRows(string $locale, array $defaults = []): array
     {
-        $labels = [
-            'first' => __('ui.cup_first_place', [], $locale),
-            'second' => __('ui.cup_second_place', [], $locale),
-            'third' => __('ui.cup_third_place', [], $locale),
-        ];
+        $labels = match ($locale) {
+            'es' => [
+                'first' => '1.er puesto',
+                'second' => '2.º puesto',
+                'third' => '3.er puesto',
+            ],
+            'ru' => [
+                'first' => '1-е место',
+                'second' => '2-е место',
+                'third' => '3-е место',
+            ],
+            default => [
+                'first' => __('ui.cup_first_place', [], $locale),
+                'second' => __('ui.cup_second_place', [], $locale),
+                'third' => __('ui.cup_third_place', [], $locale),
+            ],
+        };
 
         return collect($labels)
             ->map(function (string $label, string $place) use ($defaults, $locale): array {
                 return [
                     'place' => $place,
                     'label' => $label,
-                    'text' => trim((string) $this->localizedContentSetting('prizes.'.$place, $defaults[$place] ?? '', $locale)),
+                    'text' => trim((string) $this->localizedContentValue('prizes.'.$place, $defaults[$place] ?? '', $locale)),
                 ];
             })
             ->filter(fn (array $row): bool => $row['text'] !== '')
@@ -125,23 +168,34 @@ class CupResource extends JsonResource
 
     private function localizedPrizeNotes(string $locale, array $defaults = []): array
     {
-        $labels = [
-            'prize_note' => __('ui.cup_prize_note_title', [], $locale),
-            'cashout_note' => __('ui.cup_cashout_note_title', [], $locale),
-            'hall_of_fame_note' => __('ui.cup_hall_of_fame_note_title', [], $locale),
-        ];
+        $labels = match ($locale) {
+            'es' => [
+                'prize_note' => 'Nota sobre los premios',
+                'cashout_note' => 'Pago',
+                'hall_of_fame_note' => 'Salón de la fama',
+            ],
+            'ru' => [
+                'prize_note' => 'Примечание о призах',
+                'cashout_note' => 'Выплата',
+                'hall_of_fame_note' => 'Зал славы',
+            ],
+            default => [
+                'prize_note' => __('ui.cup_prize_note_title', [], $locale),
+                'cashout_note' => __('ui.cup_cashout_note_title', [], $locale),
+                'hall_of_fame_note' => __('ui.cup_hall_of_fame_note_title', [], $locale),
+            ],
+        };
 
         return collect($labels)
             ->map(function (string $label, string $key) use ($defaults, $locale): array {
                 return [
                     'key' => $key,
                     'label' => $label,
-                    'text' => trim((string) $this->localizedContentSetting($key, $defaults[$key] ?? '', $locale)),
+                    'text' => trim((string) $this->localizedContentValue($key, $defaults[$key] ?? '', $locale)),
                 ];
             })
             ->filter(fn (array $note): bool => $note['text'] !== '')
             ->values()
             ->all();
     }
-
 }
