@@ -1761,6 +1761,8 @@ return [
     'cup_form_language_section' => ':language',
     'language_german' => 'German',
     'language_english' => 'English',
+    'language_spanish' => 'Spanish',
+    'language_russian' => 'Russian',
     'cup_form_summary_help' => 'Short text for cup cards and compact overviews. Use the detailed description for longer content.',
     'cup_form_description' => 'Detailed description',
     'cup_form_description_placeholder' => 'Describe the cup, audience, flow and special details. This text appears in the overview tab.',

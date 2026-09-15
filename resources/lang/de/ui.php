@@ -1761,6 +1761,8 @@ return [
     'cup_form_language_section' => ':language',
     'language_german' => 'Deutsch',
     'language_english' => 'Englisch',
+    'language_spanish' => 'Spanisch',
+    'language_russian' => 'Russisch',
     'cup_form_summary_help' => 'Kurztext für Cup-Karten und kompakte Übersichten. Für längere Inhalte bitte die ausführliche Beschreibung nutzen.',
     'cup_form_description' => 'Ausführliche Beschreibung',
     'cup_form_description_placeholder' => 'Beschreibe den Cup, Zielgruppe, Ablauf und Besonderheiten. Dieser Text erscheint im Übersicht-Tab.',

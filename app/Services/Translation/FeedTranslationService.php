@@ -16,7 +16,7 @@ class FeedTranslationService
     {
         $locale = strtolower(substr((string) $locale, 0, 2));
 
-        return in_array($locale, ['de', 'en'], true) ? $locale : null;
+        return in_array($locale, ['de', 'en', 'es', 'ru'], true) ? $locale : null;
     }
 
     public function shouldOfferTranslation(?string $text, ?string $sourceLanguage, ?string $targetLocale): bool
@@ -40,56 +40,80 @@ class FeedTranslationService
             return null;
         }
 
-        $lower = strtolower($text);
+        $lower = function_exists('mb_strtolower')
+            ? mb_strtolower($text, 'UTF-8')
+            : strtolower($text);
+
+        // Russian is unambiguous for the supported language set.
+        if (preg_match('/\p{Cyrillic}/u', $text)) {
+            return 'ru';
+        }
+
+        // Strong Spanish markers. Keep this before the German umlaut check,
+        // because Spanish can also contain ü.
+        if (preg_match('/[ñáéíóú¿¡]/iu', $text)) {
+            return 'es';
+        }
 
         if (preg_match('/[äöüß]/iu', $text)) {
             return 'de';
         }
 
-        preg_match_all('/[a-zäöüß]{2,}/iu', $lower, $matches);
+        preg_match_all('/[\p{L}]{2,}/u', $lower, $matches);
         $words = $matches[0] ?? [];
 
         if (count($words) < 2 && strlen($lower) < 12) {
             return null;
         }
 
-        $deWords = [
-            'der','die','das','den','dem','des','und','oder','aber','nicht','kein','keine','ist','sind','war','wird','werden','ich','du','wir','ihr','sie','mein','dein','mit','für','auf','zum','zur','von','wie','was','wenn','dann','auch','noch','nur','schon','einen','eine','einem','einer','habe','hat','haben','kann','können','muss','müssen','heute','morgen','spieler','jagd','beute','punkte','hochladen','gewinnen','teilnehmen'
+        $lexicons = [
+            'de' => [
+                'der','die','das','den','dem','des','und','oder','aber','nicht','kein','keine','ist','sind','war','wird','werden','ich','du','wir','ihr','sie','mein','dein','mit','für','auf','zum','zur','von','wie','was','wenn','dann','auch','noch','nur','schon','einen','eine','einem','einer','habe','hat','haben','kann','können','muss','müssen','heute','morgen','spieler','jagd','beute','punkte','hochladen','gewinnen','teilnehmen'
+            ],
+            'en' => [
+                'the','and','or','but','not','no','is','are','was','were','will','would','can','could','i','you','we','they','my','your','with','for','on','to','from','of','in','this','that','these','those','if','then','also','just','already','have','has','had','player','hunt','bounty','points','upload','win','join','today','tomorrow','community','cup'
+            ],
+            'es' => [
+                'el','la','los','las','un','una','unos','unas','y','o','pero','no','es','son','era','ser','estar','yo','tú','tu','usted','nosotros','ellos','mi','mis','con','para','por','de','del','en','este','esta','estos','estas','que','si','entonces','también','ya','tener','tiene','tienen','puede','pueden','hoy','mañana','jugador','jugadores','caza','recompensa','puntos','subir','ganar','unirse','hola','mundo'
+            ],
+            'ru' => [
+                'и','или','но','не','нет','это','есть','был','была','будет','я','ты','вы','мы','они','мой','твой','с','для','на','в','из','что','если','тогда','тоже','уже','иметь','есть','может','могут','сегодня','завтра','игрок','игроки','охота','награда','очки','загрузить','победа','присоединиться'
+            ],
         ];
 
-        $enWords = [
-            'the','and','or','but','not','no','is','are','was','were','will','would','can','could','i','you','we','they','my','your','with','for','on','to','from','of','in','this','that','these','those','if','then','also','just','already','have','has','had','player','hunt','bounty','points','upload','win','join','today','tomorrow','community','cup'
-        ];
-
-        $deScore = 0;
-        $enScore = 0;
+        $scores = array_fill_keys(array_keys($lexicons), 0);
 
         foreach ($words as $word) {
-            $word = strtolower($word);
-
-            if (in_array($word, $deWords, true)) {
-                $deScore += 2;
-            }
-
-            if (in_array($word, $enWords, true)) {
-                $enScore += 2;
+            foreach ($lexicons as $locale => $knownWords) {
+                if (in_array($word, $knownWords, true)) {
+                    $scores[$locale] += 2;
+                }
             }
         }
 
-        if (preg_match('/\b(ich|du|wir|nicht|und|oder|aber|für|dass|wenn|spieler|punkte)\b/i', $lower)) {
-            $deScore++;
+        $strongPatterns = [
+            'de' => '/\b(ich|du|wir|nicht|und|oder|aber|für|dass|wenn|spieler|punkte)\b/iu',
+            'en' => '/\b(the|you|and|not|with|for|that|this|player|points)\b/iu',
+            'es' => '/\b(yo|tú|usted|nosotros|no|y|pero|para|por|que|jugador|puntos)\b/iu',
+            'ru' => '/\b(я|ты|вы|мы|они|не|и|но|для|что|игрок|очки)\b/iu',
+        ];
+
+        foreach ($strongPatterns as $locale => $pattern) {
+            if (preg_match($pattern, $lower)) {
+                $scores[$locale]++;
+            }
         }
 
-        if (preg_match('/\b(the|you|and|not|with|for|that|this|player|points)\b/i', $lower)) {
-            $enScore++;
-        }
+        arsort($scores);
+        $locales = array_keys($scores);
+        $values = array_values($scores);
 
-        if ($deScore >= $enScore + 2) {
-            return 'de';
-        }
+        $bestLocale = $locales[0] ?? null;
+        $bestScore = $values[0] ?? 0;
+        $secondScore = $values[1] ?? 0;
 
-        if ($enScore >= $deScore + 2) {
-            return 'en';
+        if ($bestLocale !== null && $bestScore >= 2 && $bestScore >= $secondScore + 2) {
+            return $bestLocale;
         }
 
         return null;
@@ -103,7 +127,7 @@ class FeedTranslationService
         return [
             'target_locale' => $target,
             'source_locale' => $source,
-            'should_offer' => $source !== null && $source !== $target && trim(strip_tags((string) $text)) !== '',
+            'should_offer' => false,
         ];
     }
 
@@ -193,7 +217,7 @@ class FeedTranslationService
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => 'You translate user-generated community posts for hnt.rocks. Translate only between German and English. Preserve usernames, @mentions, URLs, emojis, line breaks, Hunt: Showdown terms, platform names and profanity tone. Return only the translated text, no explanation.',
+                            'content' => 'You translate user-generated community posts for hnt.rocks between German, English, Spanish and Russian. The source and target language codes are provided by the user message. Preserve usernames, @mentions, URLs, emojis, line breaks, Hunt: Showdown terms, platform names and profanity tone. Return only the translated text, no explanation.',
                         ],
                         [
                             'role' => 'user',

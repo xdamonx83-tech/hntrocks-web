@@ -81,6 +81,8 @@ class FeedTranslationController extends Controller
         return match (strtolower((string) $locale)) {
             'en' => __('ui.language_english'),
             'de' => __('ui.language_german'),
+            'es' => __('ui.language_spanish'),
+            'ru' => __('ui.language_russian'),
             default => __('ui.translation_language_unknown'),
         };
     }
