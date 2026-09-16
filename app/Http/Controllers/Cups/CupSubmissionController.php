@@ -288,6 +288,12 @@ class CupSubmissionController extends Controller
         $submission->loadMissing('submitter');
         $notifications->send($submission->submitter, $request->user(), 'cup_submission_rejected', __('ui.cup_submission_notification_rejected_title'), __('ui.cup_submission_notification_rejected_body', ['cup' => $cup->title]), route('cups.show.section', [$cup, 'submissions']));
 
+        if ($request->input('return_to') === 'admin' && $request->user()?->isAdmin()) {
+            return redirect()
+                ->route('admin.cup-submissions.index', ['status' => 'open'])
+                ->with('status', __('ui.cup_submission_rejected_status'));
+        }
+
         return redirect()->route('cups.show.section', [$cup, 'submissions'])->with('status', __('ui.cup_submission_rejected_status'));
     }
 
@@ -300,6 +306,8 @@ class CupSubmissionController extends Controller
         $validated = $request->validate([
             'kills' => ['required', 'integer', 'min:0', 'max:99'],
             'bounty_tokens' => ['required', 'integer', 'min:0', 'max:4'],
+            'banishes' => ['nullable', 'integer', 'min:0', 'max:2'],
+            'extracted' => ['nullable', 'boolean'],
             'points' => ['nullable', 'integer', 'min:0', 'max:999'],
             'review_note' => ['nullable', 'string', 'max:1200'],
         ]);
@@ -307,9 +315,14 @@ class CupSubmissionController extends Controller
         DB::transaction(function () use ($request, $cup, $submission, $validated): void {
             $kills = max(0, min(99, (int) $validated['kills']));
             $bountyTokens = max(0, min(4, (int) $validated['bounty_tokens']));
+            $banishes = max(0, min(2, (int) ($validated['banishes'] ?? 0)));
+            $extracted = array_key_exists('extracted', $validated)
+                ? (bool) $validated['extracted']
+                : true;
+
             $points = array_key_exists('points', $validated) && $validated['points'] !== null && $validated['points'] !== ''
                 ? max(0, min(999, (int) $validated['points']))
-                : CupSubmission::calculatePointsForCup($cup, $kills, $bountyTokens, true);
+                : CupSubmission::calculatePointsForCup($cup, $kills, $bountyTokens, $extracted, $banishes);
 
             $raw = is_array($submission->ai_raw_result) ? $submission->ai_raw_result : [];
             $history = is_array($raw['manual_score_overrides'] ?? null) ? $raw['manual_score_overrides'] : [];
@@ -320,11 +333,15 @@ class CupSubmissionController extends Controller
                     'status' => $submission->status,
                     'kills' => (int) $submission->kills,
                     'bounty_tokens' => (int) $submission->bounty_tokens,
+                    'banishes' => (int) $submission->banishes,
+                    'extracted' => (bool) $submission->extracted,
                     'points' => (int) $submission->points,
                 ],
                 'new' => [
                     'kills' => $kills,
                     'bounty_tokens' => $bountyTokens,
+                    'banishes' => $banishes,
+                    'extracted' => $extracted,
                     'points' => $points,
                 ],
             ];
@@ -335,7 +352,8 @@ class CupSubmissionController extends Controller
                 'status' => 'approved_manual',
                 'kills' => $kills,
                 'bounty_tokens' => $bountyTokens,
-                'extracted' => true,
+                'banishes' => $banishes,
+                'extracted' => $extracted,
                 'points' => $points,
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
@@ -351,6 +369,12 @@ class CupSubmissionController extends Controller
             $this->lockRosterFromSubmission($team, $submission);
             $this->recalculateTeamTotals($team);
         });
+
+        if ($request->input('return_to') === 'admin' && $request->user()?->isAdmin()) {
+            return redirect()
+                ->route('admin.cup-submissions.index', ['status' => 'open'])
+                ->with('status', __('ui.cup_submission_manual_score_saved'));
+        }
 
         return redirect()->route('cups.show.section', [$cup, 'submissions'])->with('status', __('ui.cup_submission_manual_score_saved'));
     }

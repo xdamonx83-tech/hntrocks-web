@@ -10,6 +10,7 @@
             ['label' => 'Arcade-Spiele', 'route' => 'admin.arcade-games.index', 'active' => 'admin.arcade-games.*', 'icon' => 'game'],
             ['label' => 'Cup-Feedback', 'route' => 'admin.cup-feedback.index', 'active' => 'admin.cup-feedback.*', 'icon' => 'message-question'],
             ['label' => 'Cup-Ideen', 'route' => 'admin.cup-ideas.index', 'active' => 'admin.cup-ideas.*', 'icon' => 'award'],
+            ['label' => 'Cup-Einreichungen', 'route' => 'admin.cup-submissions.index', 'active' => 'admin.cup-submissions.*', 'icon' => 'document-text'],
             ['label' => 'Moment der Woche', 'route' => 'admin.moment-of-week.index', 'active' => 'admin.moment-of-week.*', 'icon' => 'award'],
             ['label' => 'Inhalte', 'route' => 'admin.content.index', 'active' => 'admin.content.*', 'icon' => 'document-text'],
             ['label' => 'Guides', 'route' => 'admin.guides.index', 'active' => 'admin.guides.*', 'icon' => 'document-text'],

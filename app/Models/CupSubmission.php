@@ -14,7 +14,7 @@ class CupSubmission extends Model
 
     protected $fillable = [
         'cup_id', 'cup_team_id', 'submitted_by', 'reviewed_by', 'screenshot_media_asset_id',
-        'kills', 'bounty_tokens', 'extracted', 'reported_kills', 'reported_bounty_tokens',
+        'kills', 'bounty_tokens', 'banishes', 'extracted', 'reported_kills', 'reported_bounty_tokens',
         'reported_extracted', 'points', 'status', 'note', 'review_note',
         'screen_type', 'ai_valid_extract', 'ai_kills', 'ai_bounty_tokens', 'ai_confidence',
         'ai_complete_screenshot', 'ai_kills_source', 'ai_ambiguous_kills', 'ai_suspected_tampering',
@@ -26,7 +26,7 @@ class CupSubmission extends Model
     protected function casts(): array
     {
         return [
-            'kills' => 'integer', 'bounty_tokens' => 'integer', 'extracted' => 'boolean',
+            'kills' => 'integer', 'bounty_tokens' => 'integer', 'banishes' => 'integer', 'extracted' => 'boolean',
             'reported_kills' => 'integer', 'reported_bounty_tokens' => 'integer',
             'reported_extracted' => 'boolean', 'points' => 'integer',
             'ai_valid_extract' => 'boolean', 'ai_kills' => 'integer', 'ai_bounty_tokens' => 'integer',
@@ -58,8 +58,25 @@ class CupSubmission extends Model
         return $bountyPoints + $killPoints;
     }
 
-    public static function calculatePointsForCup(Cup $cup, int $kills, int $bountyTokens, bool $extracted): int
-    {
+    public static function calculatePointsForCup(
+        Cup $cup,
+        int $kills,
+        int $bountyTokens,
+        bool $extracted,
+        int $banishes = 0,
+    ): int {
+        if ($cup->usesManualReviewScoring()) {
+            if (! $extracted || $bountyTokens <= 0) {
+                return 0;
+            }
+
+            $kills = max(0, $kills);
+            $bountyTokens = min(4, max(0, $bountyTokens));
+            $banishes = min(2, max(0, $banishes));
+
+            return $kills + ($bountyTokens * 2) + ($banishes * 2);
+        }
+
         if (! $cup->usesSummerFirstTrophyScoring()) {
             return self::calculatePoints($kills, $bountyTokens, $extracted);
         }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Admin\AdminContentController;
+use App\Http\Controllers\Admin\AdminCupSubmissionController;
 use App\Http\Controllers\Admin\AdminArcadeGameController;
 use App\Http\Controllers\Admin\AdminCupFeedbackController;
 use App\Http\Controllers\Admin\AdminCupIdeaController;
@@ -633,6 +634,7 @@ Route::middleware('auth')->group(function (): void {
         require __DIR__.'/admin-guides.php';
 
         Route::get('/content', [AdminContentController::class, 'index'])->name('content.index');
+        Route::get('/cup-submissions', [AdminCupSubmissionController::class, 'index'])->name('cup-submissions.index');
         Route::get('/contracts', [AdminWeeklyContractController::class, 'index'])->name('contracts.index');
         Route::post('/contracts', [AdminWeeklyContractController::class, 'store'])->name('contracts.store');
         Route::put('/contracts/{contract}', [AdminWeeklyContractController::class, 'update'])->name('contracts.update');
