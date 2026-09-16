@@ -704,6 +704,9 @@ Route::middleware('auth')->group(function (): void {
     });
 });
 
+Route::get('/cups/{cup:slug}/submit', ReactAppController::class)
+    ->name('cups.react.submit');
+
 Route::get('/cups/{cup:slug}/{section}', [CupController::class, 'showSection'])
     ->whereIn('section', ['rules', 'prizes', 'leaderboard', 'participants', 'submit', 'submissions'])
     ->name('cups.show.section');
