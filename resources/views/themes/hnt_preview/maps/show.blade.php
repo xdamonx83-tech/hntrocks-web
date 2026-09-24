@@ -80,6 +80,7 @@
         ],
         'markerTypes' => $markerTypes,
         'availableMaps' => $availableMaps,
+        'seo' => $seo,
         'imageAvailable' => $imageAvailable,
         'dataError' => $dataError,
         'runtimeConfig' => $runtimeConfig,
