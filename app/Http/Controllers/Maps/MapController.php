@@ -27,6 +27,18 @@ class MapController extends Controller
         'tarot',
     ];
 
+    private const SEO_MARKER_TYPES = [
+        'compound',
+        'boss',
+        'spawn',
+        'supply',
+        'extract',
+        'cash',
+        'tower',
+        'bugs',
+        'wild',
+    ];
+
     private const MAPS = [
         'stillwater-bayou' => [
             'name' => 'Stillwater Bayou',
@@ -179,6 +191,34 @@ class MapController extends Controller
         $data = $this->readMapData($slug, $map['data'], $viewerVisitorHash);
         $imageAvailable = File::isFile(public_path($map['image']));
         $linesAvailable = File::isFile(public_path($map['lines']));
+        $availableMaps = collect(self::MAPS)->map(fn (array $availableMap, string $availableSlug): array => [
+            'slug' => $availableSlug,
+            'name' => $availableMap['name'],
+            'url' => route('maps.show', $availableSlug),
+        ])->values();
+        $markerCounts = array_fill_keys(self::SEO_MARKER_TYPES, 0);
+        $compounds = [];
+
+        foreach ($data['markers'] as $marker) {
+            $type = $marker['type'];
+
+            if (array_key_exists($type, $markerCounts)) {
+                $markerCounts[$type]++;
+            }
+
+            if ($type !== 'compound') {
+                continue;
+            }
+
+            $name = trim((string) ($marker['label'] ?? ''));
+
+            if ($name !== '' && $name !== __('ui.maps_type_compound')) {
+                $compounds[mb_strtolower($name)] = $name;
+            }
+        }
+
+        $compounds = array_values($compounds);
+        usort($compounds, 'strnatcasecmp');
 
         return view('themes.hnt_preview.maps.show', [
             'map' => [
@@ -190,11 +230,22 @@ class MapController extends Controller
             ],
             'markers' => $data['markers'],
             'markerTypes' => self::MARKER_TYPES,
-            'availableMaps' => collect(self::MAPS)->map(fn (array $availableMap, string $availableSlug): array => [
-                'slug' => $availableSlug,
-                'name' => $availableMap['name'],
-                'url' => route('maps.show', $availableSlug),
-            ])->values(),
+            'availableMaps' => $availableMaps,
+            'seo' => [
+                'name' => $map['name'],
+                'slug' => $slug,
+                'description' => __('ui.maps_map_summary_'.str_replace('-', '_', $slug)),
+                'marker_count' => count($data['markers']),
+                'marker_counts' => $markerCounts,
+                'compounds' => $compounds,
+                'map_links' => [
+                    'overview' => [
+                        'name' => __('ui.maps_title'),
+                        'url' => route('maps.index'),
+                    ],
+                    'other_maps' => $availableMaps->reject(fn (array $availableMap): bool => $availableMap['slug'] === $slug)->values()->all(),
+                ],
+            ],
             'imageAvailable' => $imageAvailable,
             'dataError' => $data['error'],
         ]);
