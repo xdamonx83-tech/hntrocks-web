@@ -1,3 +1,7 @@
+# Match the original request line so internal rewrites to index.php or app/index.html
+# cannot turn a production response into a preview response (or vice versa).
+Header always set X-Robots-Tag "noindex, nofollow" "expr=%{THE_REQUEST} =~ m#^[A-Z]+ /(?:design-preview|app-preview)(?:/|[? ])#"
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
