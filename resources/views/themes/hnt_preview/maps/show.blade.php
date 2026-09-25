@@ -120,7 +120,6 @@
             'url' => url('/'),
         ],
     ], $jsonOptions);
-
     $breadcrumbData = json_encode([
         '@context' => 'https://schema.org',
         '@type' => 'BreadcrumbList',
