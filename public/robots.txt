@@ -38,6 +38,9 @@ Disallow: /cup-feedback
 Disallow: /cup-feedback/
 
 # Technical, preview and redirect areas
+# Google must be able to crawl design-preview to read its X-Robots-Tag noindex.
+Allow: /design-preview$
+Allow: /design-preview/
 Disallow: /design
 Disallow: /design/
 Disallow: /out
