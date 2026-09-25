@@ -41,6 +41,7 @@ use App\Http\Controllers\Api\V1\ApiTeamLfgController;
 use App\Http\Controllers\Api\V1\ApiTeamsController;
 use App\Http\Controllers\Api\V1\ApiUserLoadoutController;
 use App\Http\Controllers\Api\V1\AppRemoteConfigController;
+use App\Http\Controllers\Api\V1\WebAppearanceController;
 use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
 use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
 use App\Http\Controllers\Api\V1\MapCashSpotSubmissionApiController;
@@ -60,6 +61,7 @@ Route::get('/v1/health', function (): array {
 })->name('api.health');
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    Route::get('/appearance', WebAppearanceController::class)->name('appearance.show');
     Route::get('/maps', [ApiMapsController::class, 'index'])->name('maps.index');
     Route::get('/maps/{slug}', [ApiMapsController::class, 'show'])->name('maps.show');
     Route::post('/maps/{slug}/cash-spots', [MapCashSpotSubmissionApiController::class, 'store'])->name('maps.cash-spots.store');
