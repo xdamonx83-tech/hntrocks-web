@@ -26,6 +26,7 @@
             ['label' => 'Kampagnenlinks', 'route' => 'admin.campaign-links.index', 'active' => 'admin.campaign-links.*', 'icon' => 'link-2'],
             ['label' => 'Navigation', 'route' => 'admin.navigation.index', 'active' => 'admin.navigation.*', 'icon' => 'category'],
             ['label' => 'App Remote Config', 'route' => 'admin.app-remote-config.index', 'active' => 'admin.app-remote-config.*', 'icon' => 'setting-2'],
+            ['label' => 'Website Appearance', 'route' => 'admin.appearance.index', 'active' => 'admin.appearance.*', 'icon' => 'monitor'],
             ['label' => 'Feed Cards', 'route' => 'admin.app-remote-feed-cards.index', 'active' => 'admin.app-remote-feed-cards.*', 'icon' => 'document-text'],
             ['label' => 'App Push', 'route' => 'admin.app-push.index', 'active' => 'admin.app-push.*', 'icon' => 'notification'],
             ['label' => 'Theme Preview', 'route' => 'admin.theme-preview.index', 'active' => 'admin.theme-preview.*', 'icon' => 'monitor'],
