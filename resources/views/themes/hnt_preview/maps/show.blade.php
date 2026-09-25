@@ -120,6 +120,15 @@
             'url' => url('/'),
         ],
     ], $jsonOptions);
+    $breadcrumbData = json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => __('ui.maps_detail_breadcrumb_home'), 'item' => url('/')],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => __('ui.maps_detail_breadcrumb_maps'), 'item' => $seo['map_links']['overview']['url']],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $seo['name'], 'item' => $canonical],
+        ],
+    ], $jsonOptions);
 
     $html = \Illuminate\Support\Facades\File::get($reactIndex);
     $html = preg_replace('~<html\\s+lang="[^"]*"~i', '<html lang="'.e($locale).'"', $html, 1) ?? $html;
@@ -138,6 +147,7 @@
         '<meta property="og:url" content="'.e($canonical).'">',
         '<meta property="og:image" content="'.e($ogImage).'">',
         '<script type="application/ld+json">'.$structuredData.'</script>',
+        '<script type="application/ld+json">'.$breadcrumbData.'</script>',
     ]);
 
     abort_unless(str_contains($html, '</head>'), 503, 'The React application head could not be prepared.');
@@ -147,6 +157,7 @@
     abort_unless(preg_match($rootPattern, $html) === 1, 503, 'The React application root could not be prepared.');
 
     $bootstrap = '<script id="hntMapDetailData" type="application/json">'.$payloadJson.'</script>';
-    $html = preg_replace($rootPattern, $bootstrap.'<div id="root"></div>', $html, 1) ?? $html;
+    $info = view('themes.hnt_preview.maps.info', ['seo' => $seo])->render();
+    $html = preg_replace_callback($rootPattern, fn () => $bootstrap.'<div id="root"></div>'.$info, $html, 1) ?? $html;
 @endphp
 {!! $html !!}
