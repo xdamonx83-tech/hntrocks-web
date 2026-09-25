@@ -13,6 +13,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 
@@ -21,7 +22,7 @@ class SitemapController extends Controller
     public function __invoke(): Response
     {
         $mapLastModified = $this->mapLastModified();
-        $mapsLastModified = $mapLastModified->max() ?: now();
+        $mapsLastModified = $mapLastModified->filter()->max();
 
         $urls = collect([
             $this->url(route('home'), now(), 'daily', '1.0'),
@@ -40,7 +41,7 @@ class SitemapController extends Controller
             $this->url(route('legal.child_safety'), now(), 'yearly', '0.3'),
         ]);
 
-        $mapLastModified->each(function (CarbonInterface $lastModified, string $slug) use ($urls): void {
+        $mapLastModified->each(function (?CarbonInterface $lastModified, string $slug) use ($urls): void {
             $urls->push($this->url(route('maps.show', $slug), $lastModified, 'weekly', '0.8'));
         });
 
@@ -52,7 +53,7 @@ class SitemapController extends Controller
                 ->limit(250)
                 ->get(['id', 'slug', 'updated_at', 'created_at'])
                 ->each(function (Cup $cup) use ($urls): void {
-                    $urls->push($this->url(route('cups.show', $cup), $cup->updated_at ?: $cup->created_at, 'weekly', '0.8'));
+                    $urls->push($this->url(route('cups.show', $cup), ($cup->updated_at ?: $cup->created_at) ?: now(), 'weekly', '0.8'));
                 });
         }
 
@@ -63,7 +64,7 @@ class SitemapController extends Controller
                 ->limit(250)
                 ->get(['id', 'slug', 'updated_at', 'created_at'])
                 ->each(function (LoadoutChallenge $challenge) use ($urls): void {
-                    $urls->push($this->url(route('loadout-challenges.show', $challenge), $challenge->updated_at ?: $challenge->created_at, 'weekly', '0.7'));
+                    $urls->push($this->url(route('loadout-challenges.show', $challenge), ($challenge->updated_at ?: $challenge->created_at) ?: now(), 'weekly', '0.7'));
                 });
         }
 
@@ -74,7 +75,7 @@ class SitemapController extends Controller
                 ->first(['id', 'updated_at', 'created_at']);
 
             if ($lastCupIdea) {
-                $urls->push($this->url(route('cup-ideas.index'), $lastCupIdea->updated_at ?: $lastCupIdea->created_at, 'weekly', '0.7'));
+                $urls->push($this->url(route('cup-ideas.index'), ($lastCupIdea->updated_at ?: $lastCupIdea->created_at) ?: now(), 'weekly', '0.7'));
             }
         }
 
@@ -85,7 +86,7 @@ class SitemapController extends Controller
                 ->first(['id', 'updated_at', 'created_at']);
 
             if ($lastSpotlight) {
-                $urls->push($this->url(route('moment-of-week.index'), $lastSpotlight->updated_at ?: $lastSpotlight->created_at, 'weekly', '0.7'));
+                $urls->push($this->url(route('moment-of-week.index'), ($lastSpotlight->updated_at ?: $lastSpotlight->created_at) ?: now(), 'weekly', '0.7'));
             }
         }
 
@@ -101,7 +102,7 @@ class SitemapController extends Controller
                 ->limit(500)
                 ->get()
                 ->each(function (User $user) use ($urls): void {
-                    $urls->push($this->url(route('profile.public', $user), $user->updated_at ?: $user->created_at, 'weekly', '0.6'));
+                    $urls->push($this->url(route('profile.public', $user), ($user->updated_at ?: $user->created_at) ?: now(), 'weekly', '0.6'));
                 });
         }
 
@@ -119,48 +120,84 @@ class SitemapController extends Controller
     {
         return [
             'loc' => $loc,
-            'lastmod' => $lastmod instanceof CarbonInterface ? $lastmod->toDateString() : ($lastmod ?: now()->toDateString()),
+            'lastmod' => $lastmod instanceof CarbonInterface ? $lastmod->toDateString() : $lastmod,
             'changefreq' => $changefreq,
             'priority' => $priority,
         ];
     }
 
     /**
-     * @return Collection<string, CarbonInterface>
+     * @return Collection<string, CarbonInterface|null>
      */
     private function mapLastModified(): Collection
     {
         try {
-            if (! Schema::hasTable('hnt_maps')) {
-                return collect();
+            if (Schema::hasTable('hnt_maps')) {
+                $query = HntMap::query()
+                    ->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->orderBy('name');
+
+                if (Schema::hasTable('hnt_map_markers')) {
+                    $query->withMax(['markers' => fn ($query) => $query->where('status', 'approved')], 'updated_at');
+                }
+
+                return $query->get()->mapWithKeys(fn (HntMap $map): array => [
+                    $map->slug => $this->mapTimestamp($map) ?? $this->jsonMapTimestamp($map->slug),
+                ]);
             }
+        } catch (Throwable) {
+            // Fall back to bundled map files when the map tables are unavailable.
+        }
 
-            $query = HntMap::query()
-                ->where('is_active', true)
-                ->orderBy('sort_order')
-                ->orderBy('name');
+        $directory = resource_path('data/maps');
 
-            if (Schema::hasTable('hnt_map_markers')) {
-                $query->withMax('markers', 'updated_at');
-            }
+        if (! File::isDirectory($directory)) {
+            return collect();
+        }
 
-            return $query
-                ->get()
-                ->mapWithKeys(function (HntMap $map): array {
-                    $timestamps = collect([
-                        $map->updated_at,
-                        $map->created_at,
-                        $map->getAttribute('markers_max_updated_at'),
-                    ])->filter()->map(
-                        fn ($timestamp) => $timestamp instanceof CarbonInterface
-                            ? $timestamp
-                            : Carbon::parse($timestamp)
-                    );
-
-                    return [$map->slug => $timestamps->max() ?: now()];
-                });
+        try {
+            return collect(File::files($directory))
+                ->filter(fn ($file): bool => preg_match('/^[a-z0-9-]+\.json$/', $file->getFilename()) === 1)
+                ->mapWithKeys(fn ($file): array => [
+                    pathinfo($file->getFilename(), PATHINFO_FILENAME) => $this->fileTimestamp($file->getPathname()),
+                ]);
         } catch (Throwable) {
             return collect();
+        }
+    }
+
+    private function mapTimestamp(HntMap $map): ?CarbonInterface
+    {
+        return collect([
+            $map->updated_at ?: $map->created_at,
+            $map->getAttribute('markers_max_updated_at'),
+        ])->filter()->map(
+            fn ($timestamp) => $timestamp instanceof CarbonInterface ? $timestamp : Carbon::parse($timestamp)
+        )->max();
+    }
+
+    private function jsonMapTimestamp(string $slug): ?CarbonInterface
+    {
+        if (preg_match('/^[a-z0-9-]+$/', $slug) !== 1) {
+            return null;
+        }
+
+        return $this->fileTimestamp(resource_path('data/maps/'.$slug.'.json'));
+    }
+
+    private function fileTimestamp(string $path): ?CarbonInterface
+    {
+        try {
+            if (! File::isFile($path)) {
+                return null;
+            }
+
+            $modified = File::lastModified($path);
+
+            return $modified > 0 ? Carbon::createFromTimestamp($modified) : null;
+        } catch (Throwable) {
+            return null;
         }
     }
 }

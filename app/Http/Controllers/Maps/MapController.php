@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -26,6 +27,18 @@ class MapController extends Controller
         'bugs',
         'wild',
         'tarot',
+    ];
+
+    private const SEO_MARKER_TYPES = [
+        'compound',
+        'boss',
+        'spawn',
+        'supply',
+        'extract',
+        'cash',
+        'tower',
+        'bugs',
+        'wild',
     ];
 
     public function index(Request $request): View|Response
@@ -156,6 +169,41 @@ class MapController extends Controller
             ? $visitorIdentity->hashFromRequest($request)
             : null;
         $markers = $this->readDatabaseMarkers($map, $viewerVisitorHash);
+        $availableMaps = HntMap::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['slug', 'name'])
+            ->map(fn (HntMap $availableMap): array => [
+                'slug' => $availableMap->slug,
+                'name' => $availableMap->name,
+                'url' => route('maps.show', $availableMap->slug),
+            ])
+            ->values();
+        $markerCounts = array_fill_keys(self::SEO_MARKER_TYPES, 0);
+        $compounds = [];
+
+        foreach ($markers as $marker) {
+            $type = $marker['type'];
+
+            if (array_key_exists($type, $markerCounts)) {
+                $markerCounts[$type]++;
+            }
+
+            if ($type !== 'compound') {
+                continue;
+            }
+
+            $name = trim((string) ($marker['label'] ?? ''));
+
+            if ($name !== '' && $name !== __('ui.maps_type_compound')) {
+                $compounds[mb_strtolower($name)] = $name;
+            }
+        }
+
+        $compounds = array_values($compounds);
+        usort($compounds, 'strnatcasecmp');
+        $summaryKey = 'ui.maps_map_summary_'.str_replace('-', '_', $map->slug);
 
         return view('themes.hnt_preview.maps.show', [
             'map' => [
@@ -171,17 +219,27 @@ class MapController extends Controller
             ],
             'markers' => $markers,
             'markerTypes' => self::MARKER_TYPES,
-            'availableMaps' => HntMap::query()
-                ->where('is_active', true)
-                ->orderBy('sort_order')
-                ->orderBy('name')
-                ->get(['slug', 'name'])
-                ->map(fn (HntMap $availableMap): array => [
-                    'slug' => $availableMap->slug,
-                    'name' => $availableMap->name,
-                    'url' => route('maps.show', $availableMap->slug),
-                ])
-                ->values(),
+            'availableMaps' => $availableMaps,
+            'seo' => [
+                'name' => $map->name,
+                'slug' => $map->slug,
+                'description' => Lang::has($summaryKey)
+                    ? __($summaryKey)
+                    : __('ui.maps_detail_meta_description', ['map' => $map->name]),
+                'marker_count' => count($markers),
+                'marker_counts' => $markerCounts,
+                'compounds' => $compounds,
+                'map_links' => [
+                    'overview' => [
+                        'name' => __('ui.maps_title'),
+                        'url' => route('maps.index'),
+                    ],
+                    'other_maps' => $availableMaps
+                        ->reject(fn (array $availableMap): bool => $availableMap['slug'] === $map->slug)
+                        ->values()
+                        ->all(),
+                ],
+            ],
             'imageAvailable' => $this->assetExists($map->image_path),
             'dataError' => null,
         ]);
