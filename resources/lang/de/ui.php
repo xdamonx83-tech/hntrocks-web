@@ -4151,7 +4151,7 @@ return [
     'maps_detail_breadcrumb_label' => 'Brotkrumennavigation',
     'maps_detail_breadcrumb_home' => 'Startseite',
     'maps_detail_breadcrumb_maps' => 'Karten',
-    'maps_detail_info_heading' => 'Interaktive :map Karte – Hunt: Showdown 1896',
+    'maps_detail_info_heading' => 'Interaktive Karte für :map – Hunt: Showdown 1896',
     'maps_detail_info_marker_types' => 'Marker nach Typ',
     'maps_detail_info_compounds' => 'Compounds auf :map',
     'maps_detail_info_features' => 'Kartenfunktionen',
