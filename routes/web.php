@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\AdminWeeklyContractController;
 use App\Http\Controllers\Admin\AdminApprovedOutboundLinkController;
 use App\Http\Controllers\Admin\AdminAppPushController;
 use App\Http\Controllers\Admin\AdminAppRemoteConfigController;
+use App\Http\Controllers\Admin\AdminWebAppearanceController;
 use App\Http\Controllers\Admin\AdminAppRemoteFeedCardController;
 use App\Http\Controllers\Admin\AdminCampaignLinkController;
 use App\Http\Controllers\Admin\AdminGamificationController;
@@ -679,6 +680,9 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/navigation', [AdminNavigationController::class, 'index'])->name('navigation.index');
         Route::post('/navigation', [AdminNavigationController::class, 'update'])->name('navigation.update');
         Route::get('/app-remote-config', [AdminAppRemoteConfigController::class, 'index'])->name('app-remote-config.index');
+        Route::get('/appearance', [AdminWebAppearanceController::class, 'index'])->name('appearance.index');
+        Route::post('/appearance', [AdminWebAppearanceController::class, 'update'])->name('appearance.update');
+        Route::delete('/appearance/{slot}', [AdminWebAppearanceController::class, 'reset'])->whereIn('slot', ['auth', 'landing', 'app', 'topbar', 'sidebar'])->name('appearance.reset');
         Route::post('/app-remote-config', [AdminAppRemoteConfigController::class, 'update'])->name('app-remote-config.update');
         Route::get('/app-remote-feed-cards', [AdminAppRemoteFeedCardController::class, 'index'])->name('app-remote-feed-cards.index');
         Route::post('/app-remote-feed-cards', [AdminAppRemoteFeedCardController::class, 'store'])->name('app-remote-feed-cards.store');
