@@ -17,23 +17,39 @@ Header always set X-Robots-Tag "noindex, nofollow" "expr=%{THE_REQUEST} =~ m#^[A
     # Laravel keeps handling API, social callbacks, maps, guides, LFG and global team management,
     # legal pages, admin pages and every route not listed here.
     RewriteRule ^$ index.php [L]
+    # Every SPA handoff is read-only; write requests must reach Laravel.
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^(?:feed|saved|members|messages|moments|play|discover|ready-lobbies|teams|cups|settings|404)/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^moments/create/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^cups/create/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^teams/create/?$ app/index.html [L]
     RewriteCond %{REQUEST_URI} !^/teams/manage/?$ [NC]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^teams/[^/]+/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^teams/[^/]+/(?:feed|members|requests|manage)/?$ app/index.html [L]
     # Cup overview is React; reserved Laravel cup pages and deeper action sections stay in Laravel.
     RewriteCond %{REQUEST_URI} !^/cups/(?:create|hall-of-fame)/?$ [NC]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^cups/[^/]+/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^cups/[^/]+/(?:edit|manage)/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^dashboards/default/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^pages/user/(?:overview|hunter-dna|projects|permissions|friends|social)/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
+    RewriteRule ^profile(?:/edit)?/?$ app/index.html [L]
     # Android App Link browser fallback. Drop the one-time mobile login query parameters.
     RewriteRule ^auth/mobile/callback/?$ /auth/sign-in [R=302,L,NE,QSD]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^auth/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^auth/(?:sign-in|two-factor|sign-up|sign-up-v2|password-reset|password-sent|password-new|get-verification|set-verification|terms-and-conditions|privacy-policy)/?$ app/index.html [L]
 
     RewriteCond %{REQUEST_FILENAME} !-d
