@@ -59,7 +59,9 @@ REMOTE_CURRENT="$(git rev-parse "origin/$CURRENT_BRANCH")"
 REMOTE_FEATURE="$(git rev-parse "origin/$FEATURE_BRANCH")"
 
 [[ "$CURRENT_HEAD" == "$REMOTE_CURRENT" ]] || die "Server-Branch '$CURRENT_BRANCH' ist nicht exakt auf seinem Remote-HEAD. Lokal: $CURRENT_HEAD / Remote: $REMOTE_CURRENT"
-[[ -z "$(git status --porcelain)" ]] || die "Backend-Arbeitsverzeichnis ist nicht sauber. Keine fremden Änderungen überschrieben."
+git diff --quiet || die "Es gibt uncommittete TRACKED Änderungen im Backend. Keine fremden Änderungen überschrieben."
+git diff --cached --quiet || die "Es gibt gestagte TRACKED Änderungen im Backend. Keine fremden Änderungen überschrieben."
+[[ -z "$(git status --porcelain --untracked-files=all -- "${FILES[@]}")" ]] || die "Mindestens eine Admin-Preview-Zieldatei ist lokal verändert/untracked. Preview nicht anwenden."
 git merge-base --is-ancestor "$CURRENT_HEAD" "$REMOTE_FEATURE" || die "Preview-Branch basiert nicht auf dem aktuell laufenden Serverstand '$CURRENT_BRANCH' ($CURRENT_HEAD)."
 
 mkdir -p "$BACKUP_DIR/files"
