@@ -82,8 +82,8 @@
       circle.appendChild(title);
       pointsGroup.appendChild(circle);
     };
-    currentPoints.forEach((point) => addPoint(point, 'current', '#FA2256'));
-    previousPoints.forEach((point) => addPoint(point, 'previous', '#246CF9'));
+    currentPoints.forEach((point) => addPoint(point, 'current', '#E07A5F'));
+    previousPoints.forEach((point) => addPoint(point, 'previous', '#858C96'));
     buttons.forEach((button) => button.classList.toggle('is-active', button.dataset.growthMode === mode));
   };
   buttons.forEach((button) => {
