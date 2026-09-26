@@ -52,6 +52,33 @@ class LandingSummaryController extends Controller
             })
             ->count();
 
+        $membersPreview = User::query()
+            ->where('status', 'active')
+            ->whereNotNull('avatar_path')
+            ->where('avatar_path', '!=', '')
+            ->where(function (Builder $privacy): void {
+                $privacy->whereDoesntHave('privacySettings')
+                    ->orWhereHas('privacySettings', function (Builder $settings): void {
+                        $settings->where('profile_visibility', 'public');
+                    });
+            })
+            ->where(function (Builder $profile): void {
+                $profile->whereDoesntHave('profile')
+                    ->orWhereHas('profile', function (Builder $details): void {
+                        $details->where('profile_visibility', 'public');
+                    });
+            })
+            ->orderByDesc('last_seen_at')
+            ->orderByDesc('id')
+            ->limit(18)
+            ->get(['id', 'name', 'username', 'avatar_path'])
+            ->map(static fn (User $user): array => [
+                'name' => $user->name ?: $user->username,
+                'username' => $user->username,
+                'avatar_url' => $user->avatarUrl(),
+            ])
+            ->all();
+
         return response()->json([
             'stats' => [
                 'public_members' => $publicMembers,
@@ -72,6 +99,7 @@ class LandingSummaryController extends Controller
                     'shares' => (int) $topPost->shares_count,
                 ],
             ] : null,
+            'members_preview' => $membersPreview,
             'privacy' => [
                 'public_posts_only' => true,
                 'public_profiles_only' => true,

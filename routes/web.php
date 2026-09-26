@@ -78,6 +78,7 @@ use App\Http\Controllers\Socialite\HeaderLiveController;
 use App\Http\Controllers\Referrals\ReferralController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\React\ReactAppController;
+use App\Http\Controllers\React\ReactPreviewAppController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\TrophyRoom\TrophyRoomController;
 use App\Http\Controllers\Teams\TeamFeedController;
@@ -134,6 +135,10 @@ Route::get('/out/{link:slug}/go', [ApprovedOutboundLinkController::class, 'go'])
 Route::get('/sitemap.xml', SitemapController::class)->name('seo.sitemap');
 Route::get('/app-beta', [AppBetaController::class, 'index'])->name('app-beta.index');
 Route::post('/app-beta', [AppBetaController::class, 'store'])->middleware('throttle:6,1')->name('app-beta.store');
+Route::get('/design-preview/{path?}', ReactPreviewAppController::class)
+    ->where('path', '.*')
+    ->name('react.design-preview');
+
 Route::get('/rocks', ReactAppController::class)->name('rocks.index');
 Route::get('/rocks/{path}', ReactAppController::class)->where('path', '.*')->name('rocks.react');
 Route::get('/arcade', ReactAppController::class)->name('arcade.react.index');
