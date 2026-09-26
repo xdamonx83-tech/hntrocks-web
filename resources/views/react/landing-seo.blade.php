@@ -320,6 +320,21 @@
                 </div>
             </section>
 
+            <section class="public-section public-community" id="app" aria-labelledby="public-app-title">
+                <div class="public-container">
+                    <div class="public-section-copy">
+                        <span class="public-eyebrow">{{ __('ui.landing_app_eyebrow') }}</span>
+                        <h2 id="public-app-title">{{ __('ui.landing_app_title') }}</h2>
+                        <p>{{ __('ui.landing_app_body') }}</p>
+                        <div class="public-actions">
+                            <a class="public-button primary" href="https://play.google.com/store/apps/details?id=rocks.hnt.app" target="_blank" rel="noreferrer">
+                                {{ __('ui.landing_app_store_cta') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="public-section public-final-cta" aria-labelledby="public-final-title">
                 <div class="public-container public-final-inner">
                     <div>
