@@ -55,14 +55,70 @@ class ApiNotificationController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $notifications = $request->user()
+        $filter = strtolower((string) $request->query('filter', 'all'));
+        $allowedFilters = ['all', 'unread', 'interactions', 'teams', 'cups', 'system'];
+
+        if (!in_array($filter, $allowedFilters, true)) {
+            $filter = 'all';
+        }
+
+        $cupCondition = "LEFT(type, 4) = 'cup_'";
+        $teamCondition = "(LEFT(type, 5) = 'team_' OR LEFT(type, 4) = 'lfg_')";
+        $interactionCondition = "(LEFT(type, 5) = 'feed_' OR LEFT(type, 7) = 'moment_' OR LEFT(type, 7) = 'friend_' OR type LIKE '%mention%')";
+
+        $counts = $request->user()
             ->notificationItems()
             ->standard()
-            ->with('actor.profile')
+            ->selectRaw(
+                "COUNT(*) AS total_count,
+                SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) AS unread_count,
+                SUM(CASE WHEN type LIKE '%mention%' THEN 1 ELSE 0 END) AS mentions_count,
+                SUM(CASE WHEN NOT ({$cupCondition}) AND NOT ({$teamCondition}) AND {$interactionCondition} THEN 1 ELSE 0 END) AS interactions_count,
+                SUM(CASE WHEN {$teamCondition} THEN 1 ELSE 0 END) AS teams_count,
+                SUM(CASE WHEN {$cupCondition} THEN 1 ELSE 0 END) AS cups_count,
+                SUM(CASE WHEN NOT ({$cupCondition}) AND NOT ({$teamCondition}) AND NOT ({$interactionCondition}) THEN 1 ELSE 0 END) AS system_count"
+            )
+            ->first();
+
+        $notificationsQuery = $request->user()
+            ->notificationItems()
+            ->standard()
+            ->with('actor.profile');
+
+        if ($filter === 'unread') {
+            $notificationsQuery->whereNull('read_at');
+        } elseif ($filter === 'interactions') {
+            $notificationsQuery
+                ->whereRaw("NOT ({$cupCondition})")
+                ->whereRaw("NOT ({$teamCondition})")
+                ->whereRaw($interactionCondition);
+        } elseif ($filter === 'teams') {
+            $notificationsQuery->whereRaw($teamCondition);
+        } elseif ($filter === 'cups') {
+            $notificationsQuery->whereRaw($cupCondition);
+        } elseif ($filter === 'system') {
+            $notificationsQuery
+                ->whereRaw("NOT ({$cupCondition})")
+                ->whereRaw("NOT ({$teamCondition})")
+                ->whereRaw("NOT ({$interactionCondition})");
+        }
+
+        $notifications = $notificationsQuery
             ->latest()
             ->paginate(30);
 
-        return NotificationResource::collection($notifications);
+        return NotificationResource::collection($notifications)->additional([
+            'filter' => $filter,
+            'counts' => [
+                'total' => (int) ($counts->total_count ?? 0),
+                'unread' => (int) ($counts->unread_count ?? 0),
+                'mentions' => (int) ($counts->mentions_count ?? 0),
+                'interactions' => (int) ($counts->interactions_count ?? 0),
+                'teams' => (int) ($counts->teams_count ?? 0),
+                'cups' => (int) ($counts->cups_count ?? 0),
+                'system' => (int) ($counts->system_count ?? 0),
+            ],
+        ]);
     }
 
     public function read(Request $request, UserNotification $notification): JsonResponse
