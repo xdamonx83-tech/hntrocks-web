@@ -20,6 +20,7 @@ Header always set X-Robots-Tag "noindex, nofollow" "expr=%{THE_REQUEST} =~ m#^[A
     # Every SPA handoff is read-only; write requests must reach Laravel.
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^(?:feed|saved|members|messages|notifications|moments|play|discover|ready-lobbies|teams|cups|settings|404)/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^ready-lobbies/[^/]+/?$ app/index.html [L]
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^moments/create/?$ app/index.html [L]
