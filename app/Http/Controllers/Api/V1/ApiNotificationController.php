@@ -66,19 +66,34 @@ class ApiNotificationController extends Controller
         $teamCondition = "(LEFT(type, 5) = 'team_' OR LEFT(type, 4) = 'lfg_')";
         $interactionCondition = "(LEFT(type, 5) = 'feed_' OR LEFT(type, 7) = 'moment_' OR LEFT(type, 7) = 'friend_' OR type LIKE '%mention%')";
 
-        $counts = $request->user()
-            ->notificationItems()
-            ->standard()
-            ->selectRaw(
-                "COUNT(*) AS total_count,
-                SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) AS unread_count,
-                SUM(CASE WHEN type LIKE '%mention%' THEN 1 ELSE 0 END) AS mentions_count,
-                SUM(CASE WHEN NOT ({$cupCondition}) AND NOT ({$teamCondition}) AND {$interactionCondition} THEN 1 ELSE 0 END) AS interactions_count,
-                SUM(CASE WHEN {$teamCondition} THEN 1 ELSE 0 END) AS teams_count,
-                SUM(CASE WHEN {$cupCondition} THEN 1 ELSE 0 END) AS cups_count,
-                SUM(CASE WHEN NOT ({$cupCondition}) AND NOT ({$teamCondition}) AND NOT ({$interactionCondition}) THEN 1 ELSE 0 END) AS system_count"
-            )
-            ->first();
+        $includeCounts = $request->boolean('include_counts', true);
+        $countsPayload = null;
+
+        if ($includeCounts) {
+            $counts = $request->user()
+                ->notificationItems()
+                ->standard()
+                ->selectRaw(
+                    "COUNT(*) AS total_count,
+                    SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) AS unread_count,
+                    SUM(CASE WHEN type LIKE '%mention%' THEN 1 ELSE 0 END) AS mentions_count,
+                    SUM(CASE WHEN NOT ({$cupCondition}) AND NOT ({$teamCondition}) AND {$interactionCondition} THEN 1 ELSE 0 END) AS interactions_count,
+                    SUM(CASE WHEN {$teamCondition} THEN 1 ELSE 0 END) AS teams_count,
+                    SUM(CASE WHEN {$cupCondition} THEN 1 ELSE 0 END) AS cups_count,
+                    SUM(CASE WHEN NOT ({$cupCondition}) AND NOT ({$teamCondition}) AND NOT ({$interactionCondition}) THEN 1 ELSE 0 END) AS system_count"
+                )
+                ->first();
+
+            $countsPayload = [
+                'total' => (int) ($counts->total_count ?? 0),
+                'unread' => (int) ($counts->unread_count ?? 0),
+                'mentions' => (int) ($counts->mentions_count ?? 0),
+                'interactions' => (int) ($counts->interactions_count ?? 0),
+                'teams' => (int) ($counts->teams_count ?? 0),
+                'cups' => (int) ($counts->cups_count ?? 0),
+                'system' => (int) ($counts->system_count ?? 0),
+            ];
+        }
 
         $notificationsQuery = $request->user()
             ->notificationItems()
@@ -107,18 +122,16 @@ class ApiNotificationController extends Controller
             ->latest()
             ->paginate(30);
 
-        return NotificationResource::collection($notifications)->additional([
+        $additional = [
             'filter' => $filter,
-            'counts' => [
-                'total' => (int) ($counts->total_count ?? 0),
-                'unread' => (int) ($counts->unread_count ?? 0),
-                'mentions' => (int) ($counts->mentions_count ?? 0),
-                'interactions' => (int) ($counts->interactions_count ?? 0),
-                'teams' => (int) ($counts->teams_count ?? 0),
-                'cups' => (int) ($counts->cups_count ?? 0),
-                'system' => (int) ($counts->system_count ?? 0),
-            ],
-        ]);
+        ];
+
+        if ($countsPayload !== null) {
+            $additional['counts'] = $countsPayload;
+        }
+
+        return NotificationResource::collection($notifications)
+            ->additional($additional);
     }
 
     public function read(Request $request, UserNotification $notification): JsonResponse
