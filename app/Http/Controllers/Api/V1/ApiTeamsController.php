@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\TeamResource;
 use App\Http\Resources\Api\UserResource;
+use App\Models\FeedPost;
 use App\Models\Team;
 use App\Models\TeamMember;
 use App\Services\GamificationService;
@@ -25,23 +26,39 @@ class ApiTeamsController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
+        $viewer = $request->user();
         $sort = (string) $request->query('sort', 'newest');
+        $mine = $request->boolean('mine');
 
         if (! in_array($sort, ['newest', 'members', 'name'], true)) {
             $sort = 'newest';
         }
 
         $teams = Team::query()
-            ->with('owner.profile')
+            ->with([
+                'owner.profile',
+                'members' => fn ($query) => $query->where('user_id', $viewer->id),
+            ])
             ->withCount('activeMembers')
             ->where('status', 'active')
-            ->when(! $request->user()->isAdmin(), function ($query) use ($request): void {
-                $query->where(function ($visibleTeams) use ($request): void {
+            ->when(! $viewer->isAdmin(), function ($query) use ($viewer): void {
+                $query->where(function ($visibleTeams) use ($viewer): void {
                     $visibleTeams->where('visibility', 'public')
-                        ->orWhere('owner_id', $request->user()->id)
-                        ->orWhereHas('members', function ($memberQuery) use ($request): void {
+                        ->orWhere('owner_id', $viewer->id)
+                        ->orWhereHas('members', function ($memberQuery) use ($viewer): void {
                             $memberQuery
-                                ->where('user_id', $request->user()->id)
+                                ->where('user_id', $viewer->id)
+                                ->where('status', 'active');
+                        });
+                });
+            })
+            ->when($mine, function ($query) use ($viewer): void {
+                $query->where(function ($mineQuery) use ($viewer): void {
+                    $mineQuery
+                        ->where('owner_id', $viewer->id)
+                        ->orWhereHas('members', function ($memberQuery) use ($viewer): void {
+                            $memberQuery
+                                ->where('user_id', $viewer->id)
                                 ->where('status', 'active');
                         });
                 });
@@ -73,7 +90,35 @@ class ApiTeamsController extends Controller
             ->paginate(24)
             ->withQueryString();
 
-        return TeamResource::collection($teams);
+        $collection = TeamResource::collection($teams);
+
+        if (! $request->boolean('include_summary', true)) {
+            return $collection;
+        }
+
+        return $collection->additional([
+            'summary' => [
+                'public_teams' => Team::query()
+                    ->where('status', 'active')
+                    ->where('visibility', 'public')
+                    ->count(),
+                'recruiting_teams' => Team::query()
+                    ->where('status', 'active')
+                    ->where('visibility', 'public')
+                    ->where('recruitment_status', 'open')
+                    ->count(),
+                'active_members' => TeamMember::query()
+                    ->where('status', 'active')
+                    ->whereHas('team', fn ($query) => $query->where('status', 'active'))
+                    ->count(),
+                'activity_7d' => FeedPost::query()
+                    ->whereNotNull('team_id')
+                    ->where('status', 'published')
+                    ->where('created_at', '>=', now()->subDays(7))
+                    ->whereHas('team', fn ($query) => $query->where('status', 'active'))
+                    ->count(),
+            ],
+        ]);
     }
 
     public function store(Request $request, GamificationService $gamification): JsonResponse
