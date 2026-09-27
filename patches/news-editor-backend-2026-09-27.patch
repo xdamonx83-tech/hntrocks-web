@@ -2798,7 +2798,7 @@ index 7e7c349d..360ea58e 100755
 +                {
 +                    "url": "https://github.com/sebastianbergmann",
 +                    "type": "github"
-++                },
++                },
 +                {
 +                    "url": "https://liberapay.com/sebastianbergmann",
 +                    "type": "liberapay"
@@ -3198,7 +3198,7 @@ index 7e7c349d..360ea58e 100755
 +            "version": "5.0.2",
 +            "source": {
 +                "type": "git",
-++                "url": "https://github.com/sebastianbergmann/version.git",
++                "url": "https://github.com/sebastianbergmann/version.git",
 +                "reference": "c687e3387b99f5b03b6caa64c74b63e2936ff874"
 +            },
 +            "dist": {
