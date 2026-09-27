@@ -20,6 +20,7 @@ use App\Services\SecurityLogService;
 use App\Services\UserDataExportService;
 use App\Services\MediaService;
 use App\Services\ReferralService;
+use App\Services\ProfileModerationService;
 use App\Support\HunterDna;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -669,7 +670,7 @@ class ApiAuthController extends Controller
     }
 
 
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(Request $request, ProfileModerationService $profileModeration): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => ['nullable', 'string', 'max:80'],
@@ -748,6 +749,10 @@ class ApiAuthController extends Controller
 
         if ($updates !== []) {
             $profile->fill($updates)->save();
+
+            if (array_key_exists('headline', $updates) || array_key_exists('bio', $updates)) {
+                $profileModeration->scan($profile);
+            }
         }
 
         $user->load('profile');
