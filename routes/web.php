@@ -632,6 +632,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/profile-moderation/backfill', [AdminProfileModerationController::class, 'backfill'])->name('profile-moderation.backfill');
         Route::post('/profile-moderation/flags/{flag}/review', [AdminProfileModerationController::class, 'review'])->name('profile-moderation.review');
         Route::post('/profile-moderation/users/{user}/rescan', [AdminProfileModerationController::class, 'rescan'])->name('profile-moderation.rescan');
+        Route::post('/profile-moderation/users/{user}/hide-field', [AdminProfileModerationController::class, 'hideField'])->name('profile-moderation.hide-field');
+        Route::post('/profile-moderation/users/{user}/restore-field', [AdminProfileModerationController::class, 'restoreField'])->name('profile-moderation.restore-field');
         Route::post('/profile-moderation/users/{user}/clear-field', [AdminProfileModerationController::class, 'clearField'])->name('profile-moderation.clear-field');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/{report}', [AdminReportController::class, 'update'])->name('reports.update');
