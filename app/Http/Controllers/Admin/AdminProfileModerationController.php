@@ -69,6 +69,10 @@ class AdminProfileModerationController extends Controller
                 ->where('status', ProfileModerationFlag::STATUS_PENDING)
                 ->where('score', '>=', 80)
                 ->count(),
+            'low' => ProfileModerationFlag::query()
+                ->where('status', ProfileModerationFlag::STATUS_PENDING)
+                ->where('score', '<', 40)
+                ->count(),
             'confirmed' => ProfileModerationFlag::query()->where('status', ProfileModerationFlag::STATUS_CONFIRMED)->count(),
             'actioned' => ProfileModerationFlag::query()->where('status', ProfileModerationFlag::STATUS_ACTIONED)->count(),
         ];
