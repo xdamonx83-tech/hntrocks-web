@@ -3390,3 +3390,303 @@ index 00000000..8ea48f45
 +            $table->foreignId('published_by_user_id')->nullable()->constrained('users')->nullOnDelete();
 +            $table->timestamps();
 +
++            $table->index(['status', 'scheduled_at']);
++            $table->index(['status', 'published_at']);
++        });
++
++        Schema::create('news_article_translations', function (Blueprint $table): void {
++            $table->id();
++            $table->foreignId('news_article_id')->constrained('news_articles')->cascadeOnDelete();
++            $table->string('locale', 5);
++            $table->string('slug', 190)->nullable();
++            $table->string('title', 240)->nullable();
++            $table->text('excerpt')->nullable();
++            $table->json('content_json')->nullable();
++            $table->string('seo_title', 240)->nullable();
++            $table->text('seo_description')->nullable();
++            $table->string('canonical_url', 2048)->nullable();
++            $table->timestamps();
++
++            $table->unique(['news_article_id', 'locale']);
++            $table->unique(['locale', 'slug']);
++            $table->index(['locale', 'title']);
++        });
++
++        Schema::create('news_article_revisions', function (Blueprint $table): void {
++            $table->id();
++            $table->foreignId('news_article_id')->constrained('news_articles')->cascadeOnDelete();
++            $table->unsignedInteger('revision_number');
++            $table->unsignedInteger('lock_version');
++            $table->string('revision_type', 24)->default('autosave');
++            $table->json('snapshot_json');
++            $table->foreignId('editor_user_id')->nullable()->constrained('users')->nullOnDelete();
++            $table->timestamp('created_at')->useCurrent();
++
++            $table->unique(['news_article_id', 'revision_number']);
++            $table->index(['news_article_id', 'created_at']);
++        });
++    }
++
++    public function down(): void
++    {
++        Schema::dropIfExists('news_article_revisions');
++        Schema::dropIfExists('news_article_translations');
++        Schema::dropIfExists('news_articles');
++    }
++};
+diff --git a/phpunit.xml b/phpunit.xml
+new file mode 100644
+index 00000000..d5cdd3f5
+--- /dev/null
++++ b/phpunit.xml
+@@ -0,0 +1,25 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
++         bootstrap="vendor/autoload.php"
++         colors="true"
++         cacheDirectory=".phpunit.cache">
++    <testsuites>
++        <testsuite name="Unit">
++            <directory>tests/Unit</directory>
++        </testsuite>
++        <testsuite name="Feature">
++            <directory>tests/Feature</directory>
++        </testsuite>
++    </testsuites>
++    <php>
++        <env name="APP_ENV" value="testing" force="true"/>
++        <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" force="true"/>
++        <env name="DB_CONNECTION" value="sqlite" force="true"/>
++        <env name="DB_DATABASE" value=":memory:" force="true"/>
++        <env name="CACHE_STORE" value="array" force="true"/>
++        <env name="MAIL_MAILER" value="array" force="true"/>
++        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
++        <env name="SESSION_DRIVER" value="array" force="true"/>
++    </php>
++</phpunit>
+diff --git a/routes/api.php b/routes/api.php
+index a4ecfc6e..3928eab1 100644
+--- a/routes/api.php
++++ b/routes/api.php
+@@ -46,6 +46,9 @@ use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
+ use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
+ use App\Http\Controllers\Api\V1\MapCashSpotSubmissionApiController;
+ use App\Http\Controllers\Api\V1\MapMarkerInteractionController;
++use App\Http\Controllers\Api\V1\NewsArticleAdminController;
++use App\Http\Controllers\Api\V1\NewsArticleMediaController;
++use App\Http\Controllers\Api\V1\NewsArticlePreviewController;
+ use App\Http\Controllers\Feed\FeedBookmarkController;
+ use App\Http\Controllers\Feed\FeedTranslationController;
+ use App\Http\Controllers\Presence\PresenceHeartbeatController;
+@@ -285,3 +288,31 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
+         Route::post('/notifications/{notification}/read', [ApiNotificationController::class, 'read'])->name('notifications.read');
+     });
+ });
++
++Route::middleware(['api.token', 'news.admin'])
++    ->prefix('v1/admin/news')
++    ->name('api.v1.admin.news.')
++    ->group(function (): void {
++        Route::get('/articles', [NewsArticleAdminController::class, 'index'])->name('articles.index');
++        Route::post('/articles', [NewsArticleAdminController::class, 'store'])->name('articles.store');
++        Route::get('/articles/{article}', [NewsArticleAdminController::class, 'show'])->name('articles.show');
++        Route::patch('/articles/{article}', [NewsArticleAdminController::class, 'update'])->name('articles.update');
++        Route::get('/articles/{article}/media', [NewsArticleMediaController::class, 'articleMedia'])->name('articles.media.index');
++        Route::post('/articles/{article}/workflow', [NewsArticleAdminController::class, 'workflow'])->name('articles.workflow');
++        Route::get('/articles/{article}/revisions', [NewsArticleAdminController::class, 'revisions'])->name('articles.revisions.index');
++        Route::get('/articles/{article}/revisions/{revision}', [NewsArticleAdminController::class, 'showRevision'])->name('articles.revisions.show');
++        Route::post('/articles/{article}/revisions/{revision}/restore', [NewsArticleAdminController::class, 'restoreRevision'])->name('articles.revisions.restore');
++        Route::post('/articles/{article}/preview', [NewsArticlePreviewController::class, 'issue'])->name('articles.preview.issue');
++        Route::post('/media', [NewsArticleMediaController::class, 'store'])->name('media.store');
++        Route::get('/media/{asset}', [NewsArticleMediaController::class, 'showAdmin'])->name('media.show');
++    });
++
++Route::get('/v1/news/preview/{article}/{locale}', [NewsArticlePreviewController::class, 'show'])
++    ->where('locale', 'de|en|es|ru')
++    ->middleware(['signed', 'throttle:30,1'])
++    ->name('api.v1.news.preview.show');
++
++Route::get('/v1/news/media/{asset}/{variant}', [NewsArticleMediaController::class, 'show'])
++    ->where('variant', 'original|thumbnail')
++    ->middleware(['signed', 'throttle:60,1'])
++    ->name('api.v1.news.media.show');
+diff --git a/routes/console.php b/routes/console.php
+index bf6d645f..e283315b 100755
+--- a/routes/console.php
++++ b/routes/console.php
+@@ -4,6 +4,7 @@ use Illuminate\Console\Command;
+ use Illuminate\Support\Facades\Artisan;
+ use Illuminate\Support\Facades\DB;
+ use Illuminate\Support\Facades\Route;
++use Illuminate\Support\Facades\Schedule;
+ use Illuminate\Support\Facades\Schema;
+ use Illuminate\Support\Facades\Storage;
+ 
+@@ -11,6 +12,15 @@ Artisan::command('hunthub:status', function (): void {
+     $this->info('hnt.rocks Laravel foundation is ready.');
+ })->purpose('Show hnt.rocks foundation status');
+ 
++Artisan::command('hnt:news:publish-scheduled', function (\App\Services\NewsArticleEditorService $editor): int {
++    $published = $editor->publishDue();
++    $this->info('Scheduled news articles published: '.$published);
++
++    return Command::SUCCESS;
++})->purpose('Publish due HNT.ROCKS news articles');
++
++Schedule::command('hnt:news:publish-scheduled')->everyMinute()->withoutOverlapping();
++
+ Artisan::command('hunthub:health', function (): int {
+     $ok = true;
+ 
+@@ -819,4 +829,3 @@ Artisan::command('hnt:hunt-news:sync {--limit=16 : Maximale Anzahl geprüfter Ne
+ 
+     return Command::SUCCESS;
+ })->purpose('Import official Hunt: Showdown news and optionally publish new items as HuntNews feed posts');
+-
+diff --git a/tests/Feature/NewsArticleAdminApiTest.php b/tests/Feature/NewsArticleAdminApiTest.php
+new file mode 100644
+index 00000000..df6bb8a8
+--- /dev/null
++++ b/tests/Feature/NewsArticleAdminApiTest.php
+@@ -0,0 +1,280 @@
++<?php
++
++namespace Tests\Feature;
++
++use App\Models\ApiAccessToken;
++use App\Models\MediaAsset;
++use App\Models\NewsArticle;
++use App\Models\User;
++use Illuminate\Foundation\Testing\RefreshDatabase;
++use Illuminate\Http\UploadedFile;
++use Illuminate\Support\Facades\Storage;
++use Illuminate\Support\Str;
++use Tests\TestCase;
++
++class NewsArticleAdminApiTest extends TestCase
++{
++    use RefreshDatabase;
++
++    public function test_news_admin_api_requires_a_valid_admin_token(): void
++    {
++        $this->getJson('/api/v1/admin/news/articles')->assertUnauthorized();
++
++        $user = $this->user();
++        $this->withToken($this->token($user))
++            ->getJson('/api/v1/admin/news/articles')
++            ->assertForbidden();
++
++        $this->withToken($this->token($this->user(['is_admin' => true])))
++            ->getJson('/api/v1/admin/news/articles')
++            ->assertOk();
++    }
++
++    public function test_admin_can_create_autosave_and_restore_a_news_article_revision(): void
++    {
++        $admin = $this->user(['is_admin' => true]);
++        $token = $this->token($admin);
++
++        $created = $this->withToken($token)->postJson('/api/v1/admin/news/articles', [
++            'category_key' => 'updates',
++            'tags' => ['update-2-0', 'winter'],
++            'featured' => true,
++            'comments_enabled' => true,
++            'translations' => [
++                'de' => [
++                    'title' => 'Neue Jagd',
++                    'slug' => 'neue-jagd',
++                    'excerpt' => 'Ein kurzer Teaser.',
++                    'content_json' => [['type' => 'paragraph', 'text' => 'Der erste Absatz.']],
++                    'seo_title' => 'Neue Jagd | HNT.ROCKS',
++                    'seo_description' => 'SEO Beschreibung.',
++                ],
++            ],
++        ])->assertCreated()->assertJsonPath('data.status', 'draft')->assertJsonPath('data.lock_version', 1);
++
++        $articleId = (int) $created->json('data.id');
++        $this->assertDatabaseCount('news_article_revisions', 1);
++
++        $updated = $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$articleId, [
++            'lock_version' => 1,
++            'translations' => ['de' => ['title' => 'Neue Jagd: Update']],
++            'tags' => ['update-2-0', 'winter', 'karten'],
++        ])->assertOk()->assertJsonPath('data.lock_version', 2)
++            ->assertJsonPath('data.translations.de.title', 'Neue Jagd: Update');
++
++        $revision = $this->withToken($token)->getJson('/api/v1/admin/news/articles/'.$articleId.'/revisions')
++            ->assertOk()
++            ->assertJsonPath('data.0.revision_number', 2)
++            ->json('data.1');
++
++        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$articleId.'/revisions/'.$revision['id'].'/restore', [
++            'lock_version' => $updated->json('data.lock_version'),
++        ])->assertOk()->assertJsonPath('data.lock_version', 3)
++            ->assertJsonPath('data.translations.de.title', 'Neue Jagd');
++
++        $this->assertDatabaseCount('news_article_revisions', 4);
++    }
++
++    public function test_stale_autosaves_are_rejected_with_a_conflict(): void
++    {
++        $admin = $this->user(['is_admin' => true]);
++        $token = $this->token($admin);
++        $article = $this->createDraft($admin, $token);
++
++        $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$article->id, [
++            'lock_version' => 1,
++            'featured' => true,
++        ])->assertOk();
++
++        $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$article->id, [
++            'lock_version' => 1,
++            'featured' => false,
++        ])->assertConflict();
++    }
++
++    public function test_publishing_requires_all_four_complete_locales_and_scheduling_publishes_when_due(): void
++    {
++        $admin = $this->user(['is_admin' => true]);
++        $token = $this->token($admin);
++        $article = $this->createDraft($admin, $token);
++
++        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
++            'action' => 'publish',
++            'lock_version' => 1,
++        ])->assertUnprocessable()->assertJsonValidationErrors('translations');
++
++        $translationData = [];
++        foreach (NewsArticle::LOCALES as $locale) {
++            $translationData[$locale] = [
++                'title' => 'Story '.$locale,
++                'slug' => 'story-'.$locale,
++                'content_json' => [['type' => 'paragraph', 'text' => 'A translated story.']],
++            ];
++        }
++
++        $updated = $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$article->id, [
++            'lock_version' => 1,
++            'translations' => $translationData,
++        ])->assertOk();
++
++        $scheduledFor = now()->addMinute();
++        $scheduled = $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
++            'action' => 'schedule',
++            'lock_version' => $updated->json('data.lock_version'),
++            'scheduled_at' => $scheduledFor->toIso8601String(),
++        ])->assertOk()->assertJsonPath('data.status', 'scheduled');
++
++        $this->travelTo($scheduledFor->copy()->addSecond());
++        $this->artisan('hnt:news:publish-scheduled')->assertSuccessful();
++        $this->assertDatabaseHas('news_articles', [
++            'id' => $article->id,
++            'status' => NewsArticle::STATUS_PUBLISHED,
++        ]);
++
++        $archived = $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
++            'action' => 'archive',
++            'lock_version' => 4,
++        ])->assertOk()->assertJsonPath('data.status', 'archived');
++
++        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
++            'action' => 'draft',
