@@ -150,6 +150,41 @@ class NewsContentBlocksTest extends TestCase
         }
     }
 
+    public function test_v2_media_text_keeps_multiple_paragraphs_for_both_column_orders(): void
+    {
+        foreach (['left', 'right'] as $position) {
+            $layout = ['type' => 'hntMediaTextLayout', 'attrs' => ['mediaAssetId' => 31, 'mediaType' => 'image', 'posterAssetId' => null, 'position' => $position, 'ratio' => '50-50', 'alt' => 'Hunter', 'caption' => ''], 'content' => [
+                ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Paragraph one.']]],
+                ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Paragraph two.']]],
+                ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Paragraph three.'], ['type' => 'hardBreak'], ['type' => 'text', 'text' => 'Still paragraph three.']]],
+            ]];
+            $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [$layout]];
+            $html = NewsContentDocument::render($document, [31 => ['url' => '/media/image']]);
+            $this->assertSame([31 => 'image'], NewsContentDocument::validate($document));
+            $this->assertStringContainsString('news-media-text '.$position.' ratio-50-50', $html);
+            $this->assertStringContainsString('<div class="news-media-text-copy"><p>Paragraph one.</p><p>Paragraph two.</p><p>Paragraph three.<br>Still paragraph three.</p></div>', $html);
+        }
+    }
+
+    public function test_legacy_flat_media_text_renders_but_placeholder_is_never_saved_or_rendered(): void
+    {
+        $legacy = ['schema_version' => 2, 'type' => 'doc', 'content' => [[
+            'type' => 'hntMediaTextLayout', 'attrs' => ['mediaAssetId' => 32, 'mediaType' => 'image', 'posterAssetId' => null, 'position' => 'right', 'ratio' => '40-60', 'alt' => '', 'caption' => '', 'text' => "First paragraph.\n\nSecond paragraph."],
+        ]]];
+        $this->assertSame([32 => 'image'], NewsContentDocument::validate($legacy));
+        $legacyHtml = NewsContentDocument::render($legacy, [32 => ['url' => '/media/image']]);
+        $this->assertStringContainsString('<div class="news-media-text-copy"><p>First paragraph.</p><p>Second paragraph.</p></div>', $legacyHtml);
+
+        foreach (["Click here and write your story...", "Click here and write your story…"] as $placeholder) {
+            $legacy['content'][0]['attrs']['text'] = $placeholder;
+            $this->assertNotEmpty($this->validate($legacy));
+            $this->assertStringNotContainsString($placeholder, NewsContentDocument::render($legacy, [32 => ['url' => '/media/image']]));
+            $placeholderNode = ['schema_version' => 2, 'type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $placeholder]]]]];
+            $this->assertNotEmpty($this->validate($placeholderNode));
+            $this->assertStringNotContainsString($placeholder, NewsContentDocument::render($placeholderNode, []));
+        }
+    }
+
     public function test_v2_hnt_quote_renders_multiline_text_with_optional_background_and_author(): void
     {
         $quote = ['type' => 'hntQuote', 'attrs' => ['author' => 'HNT Team', 'backgroundMediaAssetId' => null, 'backgroundPosition' => 'center', 'overlay' => 60], 'content' => [

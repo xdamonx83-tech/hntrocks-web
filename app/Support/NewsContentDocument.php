@@ -6,6 +6,7 @@ use InvalidArgumentException;
 
 class NewsContentDocument
 {
+    private const EDITOR_PLACEHOLDERS = ['click here and write your story...', 'click here and write your story…'];
     private const WIDTHS = ['25%', '33%', '40%', '50%', '60%', '66%', '75%', '100%'];
     private const ALIGNMENTS = ['left', 'center', 'right'];
     private const LAYOUTS = ['normal', 'wide', 'full', 'float'];
@@ -85,7 +86,7 @@ class NewsContentDocument
         $children = $node['content'] ?? [];
         if ($type === 'text') {
             self::keys($node, ['type', 'text', 'marks']);
-            if (! is_string($node['text'] ?? null) || $node['text'] === '' || mb_strlen($node['text']) > 20000) throw new InvalidArgumentException('Invalid News text.');
+            if (! is_string($node['text'] ?? null) || $node['text'] === '' || mb_strlen($node['text']) > 20000 || self::isEditorPlaceholder($node['text'])) throw new InvalidArgumentException('Invalid News text.');
             if (! self::list($node['marks'] ?? [], 0, 12)) throw new InvalidArgumentException('Invalid News marks.');
             foreach ($node['marks'] ?? [] as $mark) self::mark($mark);
             return;
@@ -125,13 +126,17 @@ class NewsContentDocument
                 self::string($item['caption'] ?? '', 1000);
             }
         } elseif ($type === 'hntMediaTextLayout') {
-            self::keys($attrs, ['mediaAssetId', 'mediaType', 'posterAssetId', 'position', 'ratio', 'alt', 'caption']);
+            self::keys($attrs, ['mediaAssetId', 'mediaType', 'posterAssetId', 'position', 'ratio', 'alt', 'caption', 'text']);
             if (! in_array($attrs['mediaType'] ?? null, ['image', 'video'], true) || ! in_array($attrs['position'] ?? null, ['left', 'right'], true)
                 || ! in_array($attrs['ratio'] ?? null, self::RATIOS, true)) throw new InvalidArgumentException('Invalid media text layout.');
             self::mediaAttr($attrs, 'mediaAssetId', $attrs['mediaType'], $assets);
             if (! empty($attrs['posterAssetId'])) self::mediaAttr($attrs, 'posterAssetId', 'image', $assets);
             self::string($attrs['alt'] ?? '', 300);
             self::string($attrs['caption'] ?? '', 1000);
+            if (array_key_exists('text', $attrs)) {
+                self::string($attrs['text'], 20000);
+                if (self::isEditorPlaceholder($attrs['text'])) throw new InvalidArgumentException('Editor placeholder cannot be saved.');
+            }
         } elseif ($type === 'hntQuote') {
             self::keys($attrs, ['author', 'backgroundMediaAssetId', 'backgroundPosition', 'overlay']);
             self::string($attrs['author'] ?? '', 240);
@@ -193,6 +198,11 @@ class NewsContentDocument
         if (! is_string($value) || mb_strlen($value) > $max) throw new InvalidArgumentException('Invalid News string.');
     }
 
+    private static function isEditorPlaceholder(string $value): bool
+    {
+        return in_array(mb_strtolower(trim($value)), self::EDITOR_PLACEHOLDERS, true);
+    }
+
     private static function keys(array $value, array $allowed): void
     {
         if (array_diff(array_keys($value), $allowed) !== []) throw new InvalidArgumentException('Unsupported News field.');
@@ -205,8 +215,11 @@ class NewsContentDocument
 
     private static function plainNode(array $node): string
     {
-        if (($node['type'] ?? null) === 'text') return $node['text'] ?? '';
+        if (($node['type'] ?? null) === 'text') return self::isEditorPlaceholder($node['text'] ?? '') ? '' : ($node['text'] ?? '');
         if (($node['type'] ?? null) === 'hardBreak') return "\n";
+        if (($node['type'] ?? null) === 'hntMediaTextLayout' && empty($node['content']) && is_string($node['attrs']['text'] ?? null)) {
+            return self::isEditorPlaceholder($node['attrs']['text']) ? '' : $node['attrs']['text'];
+        }
         $separator = in_array($node['type'] ?? null, ['blockquote', 'hntQuote'], true) ? "\n"
             : (in_array($node['type'] ?? null, ['paragraph', 'heading'], true) ? '' : ' ');
         return implode($separator, array_map(self::plainNode(...), $node['content'] ?? []));
@@ -218,7 +231,9 @@ class NewsContentDocument
         $attrs = $node['attrs'] ?? [];
         $children = implode('', array_map(fn ($child) => self::renderNode($child, $media), $node['content'] ?? []));
         if ($type === 'text') {
-            $text = nl2br(e($node['text'] ?? ''), false);
+            $textValue = $node['text'] ?? '';
+            if (self::isEditorPlaceholder($textValue)) return '';
+            $text = nl2br(e($textValue), false);
             foreach ($node['marks'] ?? [] as $mark) {
                 $markType = $mark['type'] ?? '';
                 $tag = ['bold' => 'strong', 'italic' => 'em', 'underline' => 'u', 'strike' => 's', 'code' => 'code'][$markType] ?? null;
@@ -244,6 +259,9 @@ class NewsContentDocument
             $mediaHtml = self::mediaFigure($attrs, $media, ($attrs['mediaType'] ?? '') === 'video');
             $position = $attrs['position'] ?? 'left';
             $ratio = $attrs['ratio'] ?? '50-50';
+            if ($children === '' && is_string($attrs['text'] ?? null) && $attrs['text'] !== '' && ! self::isEditorPlaceholder($attrs['text'])) {
+                $children = implode('', array_map(fn ($paragraph) => '<p>'.nl2br(e($paragraph), false).'</p>', preg_split('/\n{2,}/', $attrs['text']) ?: []));
+            }
             return '<section class="news-media-text '.e($position).' ratio-'.e($ratio).'"><div class="news-media-text-media">'.$mediaHtml.'</div><div class="news-media-text-copy">'.$children.'</div></section>';
         }
         if ($type === 'hntQuote') {
