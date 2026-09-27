@@ -44,6 +44,24 @@ class ProfileModerationServiceTest extends TestCase
         ]);
     }
 
+    public function test_direct_threat_is_high_priority(): void
+    {
+        $user = User::factory()->create();
+        $profile = $user->profile()->create([
+            'profile_visibility' => 'public',
+            'bio' => 'I will kill you when I see you.',
+        ]);
+
+        app(ProfileModerationService::class)->scan($profile);
+
+        $this->assertDatabaseHas('profile_moderation_flags', [
+            'user_id' => $user->id,
+            'category' => 'threats',
+            'status' => ProfileModerationFlag::STATUS_PENDING,
+            'score' => 90,
+        ]);
+    }
+
     public function test_old_pending_flag_becomes_superseded_after_text_is_cleaned(): void
     {
         $user = User::factory()->create();
