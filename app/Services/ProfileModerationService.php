@@ -69,19 +69,28 @@ class ProfileModerationService
                 $createdOrUpdated[] = $flag;
             }
 
-            ProfileModerationFlag::query()
+            $staleFlags = ProfileModerationFlag::query()
                 ->where('user_profile_id', $profile->id)
                 ->where('field', $field)
                 ->where('source', 'automatic')
-                ->where('status', ProfileModerationFlag::STATUS_PENDING)
+                ->whereIn('status', [
+                    ProfileModerationFlag::STATUS_PENDING,
+                    ProfileModerationFlag::STATUS_CONFIRMED,
+                ])
                 ->when(
                     $activeFingerprints !== [],
                     fn ($query) => $query->whereNotIn('fingerprint', $activeFingerprints)
                 )
-                ->update([
-                    'status' => ProfileModerationFlag::STATUS_SUPERSEDED,
+                ->get();
+
+            foreach ($staleFlags as $staleFlag) {
+                $staleFlag->forceFill([
+                    'status' => $staleFlag->status === ProfileModerationFlag::STATUS_CONFIRMED
+                        ? ProfileModerationFlag::STATUS_ACTIONED
+                        : ProfileModerationFlag::STATUS_SUPERSEDED,
                     'reviewed_at' => now(),
-                ]);
+                ])->save();
+            }
         }
 
         return $createdOrUpdated;
