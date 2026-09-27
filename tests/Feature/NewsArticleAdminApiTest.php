@@ -92,29 +92,15 @@ class NewsArticleAdminApiTest extends TestCase
         ])->assertConflict();
     }
 
-    public function test_publishing_requires_all_four_complete_locales_and_scheduling_publishes_when_due(): void
+    public function test_scheduling_with_one_complete_locale_and_incomplete_others_publishes_when_due(): void
     {
         $admin = $this->user(['is_admin' => true]);
         $token = $this->token($admin);
         $article = $this->createDraft($admin, $token);
 
-        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
-            'action' => 'publish',
-            'lock_version' => 1,
-        ])->assertUnprocessable()->assertJsonValidationErrors('translations');
-
-        $translationData = [];
-        foreach (NewsArticle::LOCALES as $locale) {
-            $translationData[$locale] = [
-                'title' => 'Story '.$locale,
-                'slug' => 'story-'.$locale,
-                'content_json' => [['type' => 'paragraph', 'text' => 'A translated story.']],
-            ];
-        }
-
         $updated = $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$article->id, [
             'lock_version' => 1,
-            'translations' => $translationData,
+            'translations' => ['en' => ['title' => 'Unfinished translation']],
         ])->assertOk();
 
         $scheduledFor = now()->addMinute();
@@ -142,6 +128,60 @@ class NewsArticleAdminApiTest extends TestCase
         ])->assertOk()->assertJsonPath('data.status', 'draft');
 
         $this->travelBack();
+    }
+
+    public function test_publishing_requires_one_complete_locale_and_accepts_de_or_en_only(): void
+    {
+        $admin = $this->user(['is_admin' => true]);
+        $token = $this->token($admin);
+        $incomplete = $this->withToken($token)->postJson('/api/v1/admin/news/articles', [
+            'translations' => ['de' => ['title' => 'Noch unvollständig', 'slug' => 'noch-unvollstaendig']],
+        ])->assertCreated();
+        $incompleteId = $incomplete->json('data.id');
+        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$incompleteId.'/workflow', [
+            'action' => 'publish', 'lock_version' => 1,
+        ])->assertUnprocessable()->assertJsonValidationErrors('translations');
+
+        $de = $this->createDraft($admin, $token);
+        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$de->id.'/workflow', [
+            'action' => 'publish', 'lock_version' => 1,
+        ])->assertOk()->assertJsonPath('data.status', 'published');
+        $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$de->id, [
+            'lock_version' => 2, 'translations' => ['de' => ['content_json' => []]],
+        ])->assertUnprocessable()->assertJsonValidationErrors('translations');
+
+        $en = $this->withToken($token)->postJson('/api/v1/admin/news/articles', [
+            'translations' => [
+                'en' => ['title' => 'English only', 'slug' => 'english-only', 'content_json' => [['type' => 'paragraph', 'text' => 'English content.']]],
+                'es' => ['title' => 'Incomplete Spanish'],
+            ],
+        ])->assertCreated();
+        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$en->json('data.id').'/workflow', [
+            'action' => 'publish', 'lock_version' => 1,
+        ])->assertOk()->assertJsonPath('data.status', 'published');
+    }
+
+    public function test_paragraph_rich_text_accepts_safe_runs_and_rejects_unsafe_links(): void
+    {
+        $admin = $this->user(['is_admin' => true]);
+        $token = $this->token($admin);
+        $article = $this->createDraft($admin, $token);
+        $valid = [['type' => 'paragraph', 'text' => "Bold link\n", 'runs' => [
+            ['text' => 'Bold', 'bold' => true],
+            ['text' => ' link', 'href' => 'https://hnt.rocks/news'],
+            ['text' => "\n"],
+        ]]];
+
+        $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$article->id, [
+            'lock_version' => 1, 'translations' => ['de' => ['content_json' => $valid]],
+        ])->assertOk()->assertJsonPath('data.translations.de.content_json.0.runs.0.bold', true);
+
+        $invalid = [['type' => 'paragraph', 'text' => 'Click', 'runs' => [
+            ['text' => 'Click', 'href' => 'javascript:alert(1)'],
+        ]]];
+        $this->withToken($token)->patchJson('/api/v1/admin/news/articles/'.$article->id, [
+            'lock_version' => 2, 'translations' => ['de' => ['content_json' => $invalid]],
+        ])->assertUnprocessable()->assertJsonValidationErrors('translations.de.content_json');
     }
 
     public function test_signed_preview_exposes_draft_locale_temporarily_and_rejects_tampering(): void

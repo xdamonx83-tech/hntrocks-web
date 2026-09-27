@@ -52,6 +52,25 @@ class NewsPublicApiTest extends TestCase
         $this->getJson('/api/v1/news/es/abendjagd')->assertNotFound();
     }
 
+    public function test_incomplete_translations_are_absent_from_public_api_alternates_and_sitemap(): void
+    {
+        $article = $this->article('published', [
+            'de' => ['slug' => 'nur-deutsch', 'title' => 'Nur Deutsch', 'content_json' => [['type' => 'paragraph', 'text' => 'Ein Artikel.']]],
+            'en' => ['slug' => 'unfinished-english', 'title' => 'Unfinished English', 'content_json' => []],
+        ]);
+
+        $this->getJson('/api/v1/news/de/nur-deutsch')->assertOk()
+            ->assertJsonPath('data.id', $article->id)
+            ->assertJsonMissingPath('alternates.en');
+        $this->getJson('/api/v1/news/en/unfinished-english')->assertNotFound();
+        $this->getJson('/api/v1/news?locale=de')->assertOk()->assertJsonPath('meta.total', 1);
+        $this->getJson('/api/v1/news?locale=en')->assertOk()->assertJsonPath('meta.total', 0);
+
+        $sitemap = $this->get('/sitemap.xml')->assertOk();
+        $sitemap->assertSee(route('news.article', ['locale' => 'de', 'slug' => 'nur-deutsch']), false);
+        $sitemap->assertDontSee(route('news.article', ['locale' => 'en', 'slug' => 'unfinished-english']), false);
+    }
+
     public function test_public_media_route_serves_only_assets_referenced_by_published_articles(): void
     {
         Storage::fake('local');

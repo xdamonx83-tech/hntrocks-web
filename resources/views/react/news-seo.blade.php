@@ -1,7 +1,7 @@
 @if($mode === 'head')
     @php
         $ogLocale = ['de' => 'de_DE', 'en' => 'en_US', 'es' => 'es_ES', 'ru' => 'ru_RU'][$locale];
-        $xDefault = $alternates['en'] ?? $canonical;
+        $xDefault = ($alternates['en'] ?? reset($alternates)) ?: $canonical;
     @endphp
     <meta name="description" content="{{ $description }}">
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
@@ -47,10 +47,34 @@
         @if($article['hero_media'])<figure><img src="{{ $article['hero_media']['url'] }}" alt="{{ $article['hero_media']['alt_text'] ?? '' }}" style="width:100%;max-height:600px;object-fit:cover"></figure>@endif
         <article>
             @foreach(($translation->content_json ?? []) as $block)
-                @php($asset = $media[(int) ($block['media_id'] ?? 0)] ?? null)
-                @php($before = $media[(int) ($block['before_media_id'] ?? 0)] ?? null)
-                @php($after = $media[(int) ($block['after_media_id'] ?? 0)] ?? null)
-                @if(($block['type'] ?? '') === 'paragraph')<p>{{ $block['text'] ?? '' }}</p>
+                @php
+                    $asset = $media[(int) ($block['media_id'] ?? 0)] ?? null;
+                    $before = $media[(int) ($block['before_media_id'] ?? 0)] ?? null;
+                    $after = $media[(int) ($block['after_media_id'] ?? 0)] ?? null;
+                @endphp
+                @if(($block['type'] ?? '') === 'paragraph')
+                    @php
+                        $richHtml = '';
+                        if (is_array($block['runs'] ?? null)) {
+                            foreach ($block['runs'] as $run) {
+                                if (!is_array($run)) continue;
+                                $piece = nl2br(e($run['text'] ?? ''));
+                                if (!empty($run['italic'])) $piece = '<em>'.$piece.'</em>';
+                                if (!empty($run['bold'])) $piece = '<strong>'.$piece.'</strong>';
+                                $href = $run['href'] ?? null;
+                                $isLocal = is_string($href) && str_starts_with($href, '/') && !str_starts_with($href, '//');
+                                $isWeb = is_string($href) && filter_var($href, FILTER_VALIDATE_URL)
+                                    && in_array(strtolower((string) parse_url($href, PHP_URL_SCHEME)), ['http', 'https'], true);
+                                if (is_string($href) && strlen($href) <= 2048 && ($isLocal || $isWeb)) {
+                                    $piece = '<a href="'.e($href).'" rel="noopener noreferrer">'.$piece.'</a>';
+                                }
+                                $richHtml .= $piece;
+                            }
+                        } else {
+                            $richHtml = nl2br(e($block['text'] ?? ''));
+                        }
+                    @endphp
+                    <p>{!! $richHtml !!}</p>
                 @elseif(($block['type'] ?? '') === 'heading')<h{{ (int) ($block['level'] ?? 2) === 3 ? '3' : '2' }}>{{ $block['text'] ?? '' }}</h{{ (int) ($block['level'] ?? 2) === 3 ? '3' : '2' }}>
                 @elseif(($block['type'] ?? '') === 'image' && $asset)<figure><img src="{{ $asset['url'] }}" alt="{{ $block['alt'] ?? '' }}" style="max-width:100%">@if(!empty($block['caption']))<figcaption>{{ $block['caption'] }}</figcaption>@endif</figure>
                 @elseif(($block['type'] ?? '') === 'video' && $asset)<figure><video controls preload="metadata" src="{{ $asset['url'] }}">Your browser cannot play this video.</video>@if(!empty($block['caption']))<figcaption>{{ $block['caption'] }}</figcaption>@endif</figure>

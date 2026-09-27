@@ -50,11 +50,11 @@ class SitemapController extends Controller
             NewsArticle::query()->published()->with('translations')->orderBy('id')->chunk(200, function ($articles) use ($urls): void {
                 foreach ($articles as $article) {
                     foreach ($article->translations as $translation) {
-                        if (! in_array($translation->locale, NewsArticle::LOCALES, true) || ! is_string($translation->slug) || $translation->slug === '') {
+                        if (! in_array($translation->locale, NewsArticle::LOCALES, true) || ! $translation->isPublishable()) {
                             continue;
                         }
 
-                        $loc = $translation->canonical_url ?: route('news.article', [
+                        $loc = route('news.article', [
                             'locale' => $translation->locale,
                             'slug' => $translation->slug,
                         ]);

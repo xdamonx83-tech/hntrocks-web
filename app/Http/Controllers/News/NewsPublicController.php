@@ -80,6 +80,7 @@ class NewsPublicController extends Controller
     {
         abort_unless(in_array($variant, ['original', 'thumbnail'], true), 404);
         abort_unless($article->status === NewsArticle::STATUS_PUBLISHED && $article->published_at?->lte(now()), 404);
+        abort_unless($article->translations()->publishable()->exists(), 404);
         abort_unless($asset->context === 'news' && $asset->visibility === 'private' && $asset->status === 'ready', 404);
         abort_unless($this->articleUsesAsset($article, (int) $asset->id), 404);
         $path = $variant === 'original' ? $asset->path : $asset->thumbnail_path;
@@ -126,7 +127,7 @@ class NewsPublicController extends Controller
             ->with(['translations', 'heroMedia'])->firstOrFail();
         $translation = $article->translationForLocale($locale);
         abort_unless($translation, 404);
-        $canonical = $translation->canonical_url ?: route('news.article', ['locale' => $locale, 'slug' => $translation->slug]);
+        $canonical = route('news.article', ['locale' => $locale, 'slug' => $translation->slug]);
         $title = $translation->seo_title ?: $translation->title;
         $description = $translation->seo_description ?: $translation->excerpt ?: $this->overviewDescription($locale);
         $media = $this->mediaForArticle($article, $translation);
@@ -162,8 +163,7 @@ class NewsPublicController extends Controller
     private function publishedForLocale(string $locale): Builder
     {
         return NewsArticle::query()->published()->whereHas('translations', fn ($q) => $q
-            ->where('locale', $locale)->whereNotNull('slug')->where('slug', '!=', '')
-            ->whereNotNull('title')->where('title', '!=', ''));
+            ->where('locale', $locale)->publishable());
     }
 
     private function publicArticle(NewsArticle $article, string $locale): array
@@ -208,7 +208,8 @@ class NewsPublicController extends Controller
     private function articleUsesAsset(NewsArticle $article, int $assetId): bool
     {
         if ((int) $article->hero_media_asset_id === $assetId) return true;
-        foreach ($article->translations()->get(['content_json']) as $translation) {
+        foreach ($article->translations()->get() as $translation) {
+            if (! $translation->isPublishable()) continue;
             foreach (($translation->content_json ?? []) as $block) {
                 if (! is_array($block)) continue;
                 foreach (['media_id', 'poster_media_id', 'before_media_id', 'after_media_id'] as $key) {
@@ -221,8 +222,9 @@ class NewsPublicController extends Controller
 
     private function alternateMap(NewsArticle $article): array
     {
-        return $article->translations->filter(fn ($item) => in_array($item->locale, self::LOCALES, true) && $item->slug)
-            ->mapWithKeys(fn ($item) => [$item->locale => route('news.article', ['locale' => $item->locale, 'slug' => $item->slug])])->all();
+        $translations = $article->translations->keyBy('locale');
+        return collect(self::LOCALES)->filter(fn ($locale) => $translations->get($locale)?->isPublishable())
+            ->mapWithKeys(fn ($locale) => [$locale => route('news.article', ['locale' => $locale, 'slug' => $translations->get($locale)->slug])])->all();
     }
 
     private function overviewAlternates(): array

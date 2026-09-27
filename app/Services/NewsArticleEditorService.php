@@ -61,6 +61,9 @@ class NewsArticleEditorService
             $before = $this->snapshot($article);
             $this->applyEditorData($article, $data);
             $article->unsetRelation('translations');
+            if (in_array($article->status, [NewsArticle::STATUS_PUBLISHED, NewsArticle::STATUS_SCHEDULED], true)) {
+                $this->assertPublishable($article);
+            }
             $after = $this->snapshot($article);
 
             if ($before !== $after) {
@@ -238,6 +241,10 @@ class NewsArticleEditorService
             }
             $article->translations()->whereNotIn('locale', $restoredLocales)->delete();
 
+            if (in_array($article->status, [NewsArticle::STATUS_PUBLISHED, NewsArticle::STATUS_SCHEDULED], true)) {
+                $this->assertPublishable($article);
+            }
+
             $article->refresh()->load('translations', 'heroMedia');
             $this->recordRevision($article, $editor, 'restore');
 
@@ -345,26 +352,15 @@ class NewsArticleEditorService
 
     private function assertPublishable(NewsArticle $article): void
     {
-        $translations = $article->translations()->get()->keyBy('locale');
-        $missing = [];
-
-        foreach (NewsArticle::LOCALES as $locale) {
-            $translation = $translations->get($locale);
-            if (! $translation
-                || trim((string) $translation->title) === ''
-                || trim((string) $translation->slug) === ''
-                || ! is_array($translation->content_json)
-                || $translation->content_json === []
-                || $this->hasInvalidContent($locale, $translation->content_json)) {
-                $missing[] = $locale;
+        foreach ($article->translations()->get() as $translation) {
+            if ($translation->isPublishable() && ! $this->hasInvalidContent($translation->locale, $translation->content_json)) {
+                return;
             }
         }
 
-        if ($missing !== []) {
-            throw ValidationException::withMessages([
-                'translations' => 'Complete all locales and use valid news media before publishing: '.implode(', ', $missing).'.',
-            ]);
-        }
+        throw ValidationException::withMessages([
+            'translations' => 'Complete at least one locale with a title, slug, and valid content before publishing.',
+        ]);
     }
 
     private function recordRevision(NewsArticle $article, ?User $editor, string $type): void

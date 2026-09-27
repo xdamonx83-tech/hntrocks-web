@@ -37,7 +37,7 @@ class NewsContentBlocks implements ValidationRule
 
             $type = $block['type'];
             $allowed = match ($type) {
-                'paragraph' => ['type', 'text'],
+                'paragraph' => ['type', 'text', 'runs'],
                 'heading' => ['type', 'text', 'level'],
                 'image' => ['type', 'media_id', 'alt', 'caption'],
                 'video' => ['type', 'media_id', 'poster_media_id', 'caption'],
@@ -60,6 +60,42 @@ class NewsContentBlocks implements ValidationRule
 
                         return;
                     }
+                }
+            }
+
+            if ($type === 'paragraph' && array_key_exists('runs', $block)) {
+                $runs = $block['runs'];
+                if (! is_array($runs) || ! array_is_list($runs) || count($runs) < 1 || count($runs) > 300) {
+                    $fail("The :attribute paragraph block at position {$index} has invalid rich text runs.");
+                    return;
+                }
+
+                $combined = '';
+                foreach ($runs as $run) {
+                    if (! is_array($run) || array_diff(array_keys($run), ['text', 'bold', 'italic', 'href']) !== []
+                        || ! is_string($run['text'] ?? null) || $run['text'] === ''
+                        || (isset($run['bold']) && ! is_bool($run['bold']))
+                        || (isset($run['italic']) && ! is_bool($run['italic']))) {
+                        $fail("The :attribute paragraph block at position {$index} has an invalid rich text run.");
+                        return;
+                    }
+
+                    if (isset($run['href'])) {
+                        $href = $run['href'];
+                        $isLocal = is_string($href) && str_starts_with($href, '/') && ! str_starts_with($href, '//');
+                        $isWeb = is_string($href) && filter_var($href, FILTER_VALIDATE_URL)
+                            && in_array(strtolower((string) parse_url($href, PHP_URL_SCHEME)), ['http', 'https'], true);
+                        if (strlen((string) $href) > 2048 || (! $isLocal && ! $isWeb)) {
+                            $fail("The :attribute paragraph block at position {$index} has an invalid link.");
+                            return;
+                        }
+                    }
+                    $combined .= $run['text'];
+                }
+
+                if ($combined !== $block['text']) {
+                    $fail("The :attribute paragraph block at position {$index} has rich text that differs from its plain text.");
+                    return;
                 }
             }
 
