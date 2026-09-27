@@ -398,3 +398,403 @@ index 00000000..b87a9dcb
 +            ['article' => $article->id, 'locale' => $data['locale']],
 +        );
 +
++        return response()->json([
++            'preview_url' => $url,
++            'expires_at' => $expiresAt->toIso8601String(),
++        ]);
++    }
++
++    public function show(NewsArticle $article, string $locale): JsonResponse
++    {
++        abort_unless(in_array($locale, NewsArticle::LOCALES, true), 404);
++        $translation = $article->translationForLocale($locale);
++        abort_unless($translation, 404);
++
++        $mediaIds = $article->hero_media_asset_id ? [(int) $article->hero_media_asset_id] : [];
++        foreach (($translation->content_json ?? []) as $block) {
++            if (! is_array($block)) {
++                continue;
++            }
++
++            foreach (['media_id', 'poster_media_id', 'before_media_id', 'after_media_id'] as $key) {
++                if (! empty($block[$key])) {
++                    $mediaIds[] = (int) $block[$key];
++                }
++            }
++        }
++        $media = MediaAsset::query()
++            ->where('context', 'news')
++            ->where('visibility', 'private')
++            ->where('status', 'ready')
++            ->whereIn('id', array_values(array_unique($mediaIds)))
++            ->get()
++            ->mapWithKeys(fn (MediaAsset $asset): array => [
++                $asset->id => (new MediaAssetResource($asset))->toArray(request()),
++            ]);
++
++        return response()->json([
++            'data' => [
++                'id' => $article->id,
++                'status' => $article->status,
++                'category_key' => $article->category_key,
++                'tags' => $article->tags ?? [],
++                'featured' => (bool) $article->featured,
++                'comments_enabled' => (bool) $article->comments_enabled,
++                'hero_media' => $article->heroMedia ? (new MediaAssetResource($article->heroMedia))->toArray(request()) : null,
++                'translation' => (new NewsArticleTranslationResource($translation))->toArray(request()),
++                'media' => $media,
++            ],
++        ]);
++    }
++}
+diff --git a/app/Http/Middleware/EnsureNewsAdmin.php b/app/Http/Middleware/EnsureNewsAdmin.php
+new file mode 100644
+index 00000000..a787b5b7
+--- /dev/null
++++ b/app/Http/Middleware/EnsureNewsAdmin.php
+@@ -0,0 +1,20 @@
++<?php
++
++namespace App\Http\Middleware;
++
++use Closure;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\Request;
++use Symfony\Component\HttpFoundation\Response;
++
++class EnsureNewsAdmin
++{
++    public function handle(Request $request, Closure $next): Response
++    {
++        if (! $request->user()?->isAdmin()) {
++            return new JsonResponse(['message' => 'Forbidden.'], 403);
++        }
++
++        return $next($request);
++    }
++}
+diff --git a/app/Http/Resources/Api/NewsArticleResource.php b/app/Http/Resources/Api/NewsArticleResource.php
+new file mode 100644
+index 00000000..08edf302
+--- /dev/null
++++ b/app/Http/Resources/Api/NewsArticleResource.php
+@@ -0,0 +1,34 @@
++<?php
++
++namespace App\Http\Resources\Api;
++
++use Illuminate\Http\Request;
++use Illuminate\Http\Resources\Json\JsonResource;
++
++class NewsArticleResource extends JsonResource
++{
++    public function toArray(Request $request): array
++    {
++        $translations = $this->whenLoaded('translations', fn () => $this->translations
++            ->mapWithKeys(fn ($translation): array => [$translation->locale => (new NewsArticleTranslationResource($translation))->toArray($request)])
++            ->all());
++
++        return [
++            'id' => $this->id,
++            'status' => $this->status,
++            'category_key' => $this->category_key,
++            'tags' => $this->tags ?? [],
++            'hero_media' => $this->whenLoaded('heroMedia', fn () => $this->heroMedia ? (new MediaAssetResource($this->heroMedia))->toArray($request) : null),
++            'featured' => (bool) $this->featured,
++            'comments_enabled' => (bool) $this->comments_enabled,
++            'scheduled_at' => $this->scheduled_at?->toIso8601String(),
++            'published_at' => $this->published_at?->toIso8601String(),
++            'archived_at' => $this->archived_at?->toIso8601String(),
++            'lock_version' => (int) $this->lock_version,
++            'revision_count' => $this->whenCounted('revisions'),
++            'translations' => $translations,
++            'created_at' => $this->created_at?->toIso8601String(),
++            'updated_at' => $this->updated_at?->toIso8601String(),
++        ];
++    }
++}
+diff --git a/app/Http/Resources/Api/NewsArticleRevisionResource.php b/app/Http/Resources/Api/NewsArticleRevisionResource.php
+new file mode 100644
+index 00000000..7e326ce7
+--- /dev/null
++++ b/app/Http/Resources/Api/NewsArticleRevisionResource.php
+@@ -0,0 +1,25 @@
++<?php
++
++namespace App\Http\Resources\Api;
++
++use Illuminate\Http\Request;
++use Illuminate\Http\Resources\Json\JsonResource;
++
++class NewsArticleRevisionResource extends JsonResource
++{
++    public function toArray(Request $request): array
++    {
++        return [
++            'id' => $this->id,
++            'revision_number' => (int) $this->revision_number,
++            'lock_version' => (int) $this->lock_version,
++            'revision_type' => $this->revision_type,
++            'snapshot' => $this->snapshot_json,
++            'editor' => $this->whenLoaded('editor', fn () => $this->editor ? [
++                'id' => $this->editor->id,
++                'name' => $this->editor->name,
++            ] : null),
++            'created_at' => $this->created_at?->toIso8601String(),
++        ];
++    }
++}
+diff --git a/app/Http/Resources/Api/NewsArticleTranslationResource.php b/app/Http/Resources/Api/NewsArticleTranslationResource.php
+new file mode 100644
+index 00000000..18a49bd7
+--- /dev/null
++++ b/app/Http/Resources/Api/NewsArticleTranslationResource.php
+@@ -0,0 +1,24 @@
++<?php
++
++namespace App\Http\Resources\Api;
++
++use Illuminate\Http\Request;
++use Illuminate\Http\Resources\Json\JsonResource;
++
++class NewsArticleTranslationResource extends JsonResource
++{
++    public function toArray(Request $request): array
++    {
++        return [
++            'locale' => $this->locale,
++            'slug' => $this->slug,
++            'title' => $this->title,
++            'excerpt' => $this->excerpt,
++            'content_json' => $this->content_json ?? [],
++            'seo_title' => $this->seo_title,
++            'seo_description' => $this->seo_description,
++            'canonical_url' => $this->canonical_url,
++            'updated_at' => $this->updated_at?->toIso8601String(),
++        ];
++    }
++}
+diff --git a/app/Models/MediaAsset.php b/app/Models/MediaAsset.php
+index a15333f0..79697f45 100755
+--- a/app/Models/MediaAsset.php
++++ b/app/Models/MediaAsset.php
+@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
+ use Illuminate\Database\Eloquent\SoftDeletes;
+ use Illuminate\Support\Facades\Storage;
+ use Illuminate\Support\Facades\Route;
++use Illuminate\Support\Facades\URL;
+ 
+ class MediaAsset extends Model
+ {
+@@ -69,6 +70,10 @@ class MediaAsset extends Model
+             }
+         }
+ 
++        if ($this->isPrivateNewsMedia()) {
++            return $this->signedNewsMediaUrl('original');
++        }
++
+         return Storage::disk($this->disk)->url($this->path);
+     }
+ 
+@@ -78,6 +83,10 @@ class MediaAsset extends Model
+             return $this->url();
+         }
+ 
++        if ($this->isPrivateNewsMedia()) {
++            return $this->signedNewsMediaUrl($this->thumbnail_path ? 'thumbnail' : 'original');
++        }
++
+         if ($this->thumbnail_path) {
+             return Storage::disk($this->disk)->url($this->thumbnail_path);
+         }
+@@ -94,6 +103,24 @@ class MediaAsset extends Model
+             && filled($this->attachable_id);
+     }
+ 
++    public function isPrivateNewsMedia(): bool
++    {
++        return $this->context === 'news' && $this->visibility === 'private';
++    }
++
++    private function signedNewsMediaUrl(string $variant): string
++    {
++        if (! Route::has('api.v1.news.media.show')) {
++            return '';
++        }
++
++        return URL::temporarySignedRoute(
++            'api.v1.news.media.show',
++            now()->addMinutes(10),
++            ['asset' => $this->id, 'variant' => $variant],
++        );
++    }
++
+     public function isImage(): bool
+     {
+         return $this->type === 'image' || str_starts_with((string) $this->mime_type, 'image/');
+diff --git a/app/Models/NewsArticle.php b/app/Models/NewsArticle.php
+new file mode 100644
+index 00000000..78e39ad5
+--- /dev/null
++++ b/app/Models/NewsArticle.php
+@@ -0,0 +1,113 @@
++<?php
++
++namespace App\Models;
++
++use Illuminate\Database\Eloquent\Builder;
++use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Relations\BelongsTo;
++use Illuminate\Database\Eloquent\Relations\HasMany;
++use Illuminate\Database\Eloquent\Relations\MorphMany;
++
++class NewsArticle extends Model
++{
++    public const STATUS_DRAFT = 'draft';
++    public const STATUS_SCHEDULED = 'scheduled';
++    public const STATUS_PUBLISHED = 'published';
++    public const STATUS_ARCHIVED = 'archived';
++
++    public const LOCALES = ['de', 'en', 'es', 'ru'];
++
++    protected $fillable = [
++        'status',
++        'category_key',
++        'tags',
++        'hero_media_asset_id',
++        'featured',
++        'comments_enabled',
++        'scheduled_at',
++        'published_at',
++        'archived_at',
++        'lock_version',
++        'created_by_user_id',
++        'updated_by_user_id',
++        'published_by_user_id',
++    ];
++
++    protected function casts(): array
++    {
++        return [
++            'tags' => 'array',
++            'featured' => 'boolean',
++            'comments_enabled' => 'boolean',
++            'scheduled_at' => 'datetime',
++            'published_at' => 'datetime',
++            'archived_at' => 'datetime',
++            'lock_version' => 'integer',
++        ];
++    }
++
++    public function translations(): HasMany
++    {
++        return $this->hasMany(NewsArticleTranslation::class);
++    }
++
++    public function revisions(): HasMany
++    {
++        return $this->hasMany(NewsArticleRevision::class)->orderByDesc('revision_number');
++    }
++
++    public function heroMedia(): BelongsTo
++    {
++        return $this->belongsTo(MediaAsset::class, 'hero_media_asset_id');
++    }
++
++    public function createdBy(): BelongsTo
++    {
++        return $this->belongsTo(User::class, 'created_by_user_id');
++    }
++
++    public function updatedBy(): BelongsTo
++    {
++        return $this->belongsTo(User::class, 'updated_by_user_id');
++    }
++
++    public function publishedBy(): BelongsTo
++    {
++        return $this->belongsTo(User::class, 'published_by_user_id');
++    }
++
++    public function mediaAssets(): MorphMany
++    {
++        return $this->morphMany(MediaAsset::class, 'attachable');
++    }
++
++    public function scopePublished(Builder $query): Builder
++    {
++        return $query->where('status', self::STATUS_PUBLISHED)
++            ->whereNotNull('published_at')
++            ->where('published_at', '<=', now());
++    }
++
++    public function translationForLocale(string $locale): ?NewsArticleTranslation
++    {
++        if (! in_array($locale, self::LOCALES, true)) {
++            return null;
++        }
++
++        if ($this->relationLoaded('translations')) {
++            return $this->translations->firstWhere('locale', $locale);
++        }
++
++        return $this->translations()->where('locale', $locale)->first();
++    }
++
++    public static function statuses(): array
++    {
++        return [
++            self::STATUS_DRAFT,
++            self::STATUS_SCHEDULED,
++            self::STATUS_PUBLISHED,
++            self::STATUS_ARCHIVED,
++        ];
++    }
++}
+diff --git a/app/Models/NewsArticleRevision.php b/app/Models/NewsArticleRevision.php
+new file mode 100644
+index 00000000..64f620fd
+--- /dev/null
++++ b/app/Models/NewsArticleRevision.php
+@@ -0,0 +1,41 @@
++<?php
++
++namespace App\Models;
++
++use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Relations\BelongsTo;
++
++class NewsArticleRevision extends Model
++{
++    public $timestamps = false;
++
++    protected $fillable = [
++        'news_article_id',
++        'revision_number',
++        'lock_version',
++        'revision_type',
++        'snapshot_json',
++        'editor_user_id',
++        'created_at',
++    ];
++
++    protected function casts(): array
++    {
++        return [
++            'revision_number' => 'integer',
++            'lock_version' => 'integer',
++            'snapshot_json' => 'array',
++            'created_at' => 'datetime',
++        ];
++    }
++
++    public function article(): BelongsTo
++    {
++        return $this->belongsTo(NewsArticle::class, 'news_article_id');
++    }
++
++    public function editor(): BelongsTo
++    {
++        return $this->belongsTo(User::class, 'editor_user_id');
++    }
