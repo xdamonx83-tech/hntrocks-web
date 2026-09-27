@@ -4,12 +4,22 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 Artisan::command('hunthub:status', function (): void {
     $this->info('hnt.rocks Laravel foundation is ready.');
 })->purpose('Show hnt.rocks foundation status');
+
+Artisan::command('hnt:news:publish-scheduled', function (\App\Services\NewsArticleEditorService $editor): int {
+    $published = $editor->publishDue();
+    $this->info('Scheduled news articles published: '.$published);
+
+    return Command::SUCCESS;
+})->purpose('Publish due HNT.ROCKS news articles');
+
+Schedule::command('hnt:news:publish-scheduled')->everyMinute()->withoutOverlapping();
 
 Artisan::command('hunthub:health', function (): int {
     $ok = true;
@@ -819,4 +829,3 @@ Artisan::command('hnt:hunt-news:sync {--limit=16 : Maximale Anzahl geprüfter Ne
 
     return Command::SUCCESS;
 })->purpose('Import official Hunt: Showdown news and optionally publish new items as HuntNews feed posts');
-

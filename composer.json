@@ -37,5 +37,9 @@
   "extra": {"laravel": {"dont-discover": []}},
   "config": {"optimize-autoloader": true, "preferred-install": "dist", "sort-packages": true},
   "minimum-stability": "stable",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "mockery/mockery": "^1.6",
+    "phpunit/phpunit": "^11.5"
+  }
 }

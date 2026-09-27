@@ -217,5 +217,7 @@ return [
         'cup_submission_screenshot_kb' => $uploadMb('HH_UPLOAD_CUP_SUBMISSION_SCREENSHOT_MB', 10),
         'gamification_icon_kb' => $uploadMb('HH_UPLOAD_GAMIFICATION_ICON_MB', 2),
         'loadout_challenge_media_kb' => $uploadMb('HH_UPLOAD_LOADOUT_CHALLENGE_MEDIA_MB', 100),
+        'news_image_kb' => $uploadMb('HH_UPLOAD_NEWS_IMAGE_MB', 20),
+        'news_video_kb' => $uploadMb('HH_UPLOAD_NEWS_VIDEO_MB', 200),
     ],
 ];

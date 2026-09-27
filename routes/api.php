@@ -46,6 +46,9 @@ use App\Http\Controllers\Api\V1\Auth\ApiAuthController;
 use App\Http\Controllers\Api\V1\Auth\ApiPasswordResetLinkController;
 use App\Http\Controllers\Api\V1\MapCashSpotSubmissionApiController;
 use App\Http\Controllers\Api\V1\MapMarkerInteractionController;
+use App\Http\Controllers\Api\V1\NewsArticleAdminController;
+use App\Http\Controllers\Api\V1\NewsArticleMediaController;
+use App\Http\Controllers\Api\V1\NewsArticlePreviewController;
 use App\Http\Controllers\Feed\FeedBookmarkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Presence\PresenceHeartbeatController;
@@ -285,3 +288,31 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/notifications/{notification}/read', [ApiNotificationController::class, 'read'])->name('notifications.read');
     });
 });
+
+Route::middleware(['api.token', 'news.admin'])
+    ->prefix('v1/admin/news')
+    ->name('api.v1.admin.news.')
+    ->group(function (): void {
+        Route::get('/articles', [NewsArticleAdminController::class, 'index'])->name('articles.index');
+        Route::post('/articles', [NewsArticleAdminController::class, 'store'])->name('articles.store');
+        Route::get('/articles/{article}', [NewsArticleAdminController::class, 'show'])->name('articles.show');
+        Route::patch('/articles/{article}', [NewsArticleAdminController::class, 'update'])->name('articles.update');
+        Route::get('/articles/{article}/media', [NewsArticleMediaController::class, 'articleMedia'])->name('articles.media.index');
+        Route::post('/articles/{article}/workflow', [NewsArticleAdminController::class, 'workflow'])->name('articles.workflow');
+        Route::get('/articles/{article}/revisions', [NewsArticleAdminController::class, 'revisions'])->name('articles.revisions.index');
+        Route::get('/articles/{article}/revisions/{revision}', [NewsArticleAdminController::class, 'showRevision'])->name('articles.revisions.show');
+        Route::post('/articles/{article}/revisions/{revision}/restore', [NewsArticleAdminController::class, 'restoreRevision'])->name('articles.revisions.restore');
+        Route::post('/articles/{article}/preview', [NewsArticlePreviewController::class, 'issue'])->name('articles.preview.issue');
+        Route::post('/media', [NewsArticleMediaController::class, 'store'])->name('media.store');
+        Route::get('/media/{asset}', [NewsArticleMediaController::class, 'showAdmin'])->name('media.show');
+    });
+
+Route::get('/v1/news/preview/{article}/{locale}', [NewsArticlePreviewController::class, 'show'])
+    ->where('locale', 'de|en|es|ru')
+    ->middleware(['signed', 'throttle:30,1'])
+    ->name('api.v1.news.preview.show');
+
+Route::get('/v1/news/media/{asset}/{variant}', [NewsArticleMediaController::class, 'show'])
+    ->where('variant', 'original|thumbnail')
+    ->middleware(['signed', 'throttle:60,1'])
+    ->name('api.v1.news.media.show');

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
 class MediaAsset extends Model
 {
@@ -69,6 +70,10 @@ class MediaAsset extends Model
             }
         }
 
+        if ($this->isPrivateNewsMedia()) {
+            return $this->signedNewsMediaUrl('original');
+        }
+
         return Storage::disk($this->disk)->url($this->path);
     }
 
@@ -76,6 +81,10 @@ class MediaAsset extends Model
     {
         if ($this->isPrivateCupScreenshot()) {
             return $this->url();
+        }
+
+        if ($this->isPrivateNewsMedia()) {
+            return $this->signedNewsMediaUrl($this->thumbnail_path ? 'thumbnail' : 'original');
         }
 
         if ($this->thumbnail_path) {
@@ -92,6 +101,24 @@ class MediaAsset extends Model
             && $this->context === 'cups/screenshots'
             && $this->attachable_type === (new CupSubmission())->getMorphClass()
             && filled($this->attachable_id);
+    }
+
+    public function isPrivateNewsMedia(): bool
+    {
+        return $this->context === 'news' && $this->visibility === 'private';
+    }
+
+    private function signedNewsMediaUrl(string $variant): string
+    {
+        if (! Route::has('api.v1.news.media.show')) {
+            return '';
+        }
+
+        return URL::temporarySignedRoute(
+            'api.v1.news.media.show',
+            now()->addMinutes(10),
+            ['asset' => $this->id, 'variant' => $variant],
+        );
     }
 
     public function isImage(): bool
