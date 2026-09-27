@@ -13,6 +13,7 @@ use App\Models\TeamMember;
 use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\MediaService;
+use App\Services\ProfileModerationService;
 use App\Services\ReferralService;
 use App\Services\Auth\TwoFactorService;
 use App\Support\CrownCosmetics;
@@ -983,7 +984,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request, MediaService $mediaService, GamificationService $gamification, ReferralService $referrals): RedirectResponse|JsonResponse
+    public function update(Request $request, MediaService $mediaService, GamificationService $gamification, ReferralService $referrals, ProfileModerationService $profileModeration): RedirectResponse|JsonResponse
     {
         $user = $request->user();
 
@@ -1040,7 +1041,7 @@ class ProfileController extends Controller
 
         $user->save();
 
-        $user->profile()->updateOrCreate(
+        $profile = $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
             [
                 'headline' => $validated['headline'] ?? null,
@@ -1059,6 +1060,7 @@ class ProfileController extends Controller
             ]
         );
 
+        $profileModeration->scan($profile);
         $gamification->evaluateProfile($user);
         $freshUser = $user->fresh(['profile']) ?? $user;
         $referrals->syncProfileCompletion($freshUser);
