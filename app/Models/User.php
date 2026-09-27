@@ -408,6 +408,16 @@ class User extends Authenticatable
         return $this->hasMany(Report::class, 'reporter_id');
     }
 
+    public function profileModerationFlags(): HasMany
+    {
+        return $this->hasMany(ProfileModerationFlag::class);
+    }
+
+    public function profileModerationEvents(): HasMany
+    {
+        return $this->hasMany(ProfileModerationEvent::class);
+    }
+
     public function assignedReports(): HasMany
     {
         return $this->hasMany(Report::class, 'assigned_to');
