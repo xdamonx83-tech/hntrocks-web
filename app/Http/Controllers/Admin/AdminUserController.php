@@ -143,7 +143,7 @@ class AdminUserController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'headline' => ['nullable', 'string', 'max:120'],
-            'bio' => ['nullable', 'string', 'max:2000'],
+            'bio' => ['nullable', 'string', 'max:1200'],
             'platform' => ['nullable', 'string', 'max:40'],
             'playstyle' => ['nullable', 'string', 'max:60'],
             'region' => ['nullable', 'string', 'max:60'],
