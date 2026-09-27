@@ -21,6 +21,7 @@
     <div class="hh-admin-actions">
         <strong>Offen: {{ $counts['pending'] }}</strong>
         <span>Hohe Priorität: {{ $counts['high'] }}</span>
+        <span>Niedrige Priorität: {{ $counts['low'] }}</span>
         <span>Bestätigt: {{ $counts['confirmed'] }}</span>
         <span>Bearbeitet: {{ $counts['actioned'] }}</span>
         <form method="post" action="{{ route('admin.profile-moderation.backfill') }}" onsubmit="return confirm('Alle bestehenden Profile erneut prüfen?');">
