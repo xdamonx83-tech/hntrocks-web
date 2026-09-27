@@ -559,6 +559,8 @@ class UserDataExportService
             'api_access_tokens' => ['token_hash'],
             'user_push_devices' => ['token'],
             'user_two_factor_challenges' => ['token_hash', 'secret'],
+            'profile_moderation_flags' => ['admin_note', 'reviewed_by'],
+            'profile_moderation_events' => ['admin_id', 'note', 'metadata'],
         ];
 
         return array_values(array_unique(array_merge($global, $byTable[$table] ?? [])));
