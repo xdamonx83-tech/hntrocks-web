@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-EXPECTED_BRANCH="fix/ready-lobby-feedback-spa-route-2026-09-27"
+TARGET_BRANCH="fix/ready-lobby-feedback-spa-route-2026-09-27"
+EXPECTED_BASE_HEAD="555ec343559a682d5b245c40039e409823beb783"
 WORKDIR="/home/users/hunthub/www/hnt.rocks"
 
 cd "$WORKDIR"
 
 CURRENT_BRANCH="$(git branch --show-current)"
-if [ "$CURRENT_BRANCH" != "$EXPECTED_BRANCH" ]; then
-  echo "ABBRUCH: Falscher Branch: $CURRENT_BRANCH"
-  exit 1
-fi
+CURRENT_HEAD="$(git rev-parse HEAD)"
+
+echo "Current branch: $CURRENT_BRANCH"
+echo "Current HEAD: $CURRENT_HEAD"
 
 if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "ABBRUCH: Lokale TRACKED Änderungen vorhanden:"
@@ -18,14 +19,22 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   exit 1
 fi
 
-echo "Branch: $CURRENT_BRANCH"
-echo "HEAD: $(git rev-parse HEAD)"
-
-git diff --check
+if [ "$CURRENT_BRANCH" != "$TARGET_BRANCH" ] && [ "$CURRENT_HEAD" != "$EXPECTED_BASE_HEAD" ]; then
+  echo "ABBRUCH: Unerwarteter Backend-Stand."
+  echo "Erwartete Basis: $EXPECTED_BASE_HEAD"
+  exit 1
+fi
 
 BACKUP="/home/users/hunthub/backups/ready-feedback-route-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP"
 cp -a public/.htaccess "$BACKUP/.htaccess"
+
+if [ "$CURRENT_BRANCH" != "$TARGET_BRANCH" ]; then
+  git switch "$TARGET_BRANCH"
+fi
+
+git pull --ff-only origin "$TARGET_BRANCH"
+git diff --check
 
 grep -Fq 'RewriteRule ^ready-lobbies/[^/]+/feedback/?$ app/index.html [L]' public/.htaccess || {
   echo "ABBRUCH: Feedback-Rewrite fehlt."
