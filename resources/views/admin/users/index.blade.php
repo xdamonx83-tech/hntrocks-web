@@ -48,6 +48,7 @@
                     <th>E-Mail</th>
                     <th>Status</th>
                     <th>Rolle</th>
+                    <th>Moderation</th>
                     <th>Aktion</th>
                 </tr>
             </thead>
@@ -62,7 +63,15 @@
                         <td>{{ $user->status ?? 'active' }}</td>
                         <td>{{ $user->is_admin ? 'Admin' : 'Nutzer' }}</td>
                         <td>
+                            @if(($user->pending_profile_flags_count ?? 0) > 0)
+                                <strong>{{ $user->pending_profile_flags_count }} offen</strong>
+                            @else
+                                —
+                            @endif
+                        </td>
+                        <td>
                             <div class="hh-admin-actions">
+                                <a class="hh-secondary-button" href="{{ route('admin.users.edit', $user) }}">Bearbeiten</a>
                                 <form method="post" action="{{ route('admin.users.status', $user) }}">
                                     @csrf
                                     <input type="hidden" name="status" value="{{ ($user->status ?? 'active') === 'suspended' ? 'active' : 'suspended' }}">
@@ -77,7 +86,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">Keine Nutzer gefunden.</td>
+                        <td colspan="6">Keine Nutzer gefunden.</td>
                     </tr>
                 @endforelse
             </tbody>
