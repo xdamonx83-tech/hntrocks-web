@@ -21,7 +21,7 @@
     <div class="hh-admin-actions">
         <strong>Offen: {{ $counts['pending'] }}</strong>
         <span>Hohe Priorität: {{ $counts['high'] }}</span>
-        <span>Bestätigt: {{ $counts['approved'] }}</span>
+        <span>Bestätigt: {{ $counts['confirmed'] }}</span>
         <span>Bearbeitet: {{ $counts['actioned'] }}</span>
         <form method="post" action="{{ route('admin.profile-moderation.backfill') }}" onsubmit="return confirm('Alle bestehenden Profile erneut prüfen?');">
             @csrf
@@ -39,7 +39,7 @@
         <div>
             <label for="status">Status</label>
             <select id="status" name="status">
-                @foreach(['pending' => 'Zur Prüfung', 'approved' => 'Bestätigt', 'dismissed' => 'Fehlalarm', 'actioned' => 'Bearbeitet', 'superseded' => 'Veraltet'] as $value => $label)
+                @foreach(['pending' => 'Zur Prüfung', 'confirmed' => 'Bestätigt', 'dismissed' => 'Fehlalarm', 'actioned' => 'Bearbeitet', 'superseded' => 'Veraltet'] as $value => $label)
                     <option value="{{ $value }}" @selected(($filters['status'] ?? 'pending') === $value)>{{ $label }}</option>
                 @endforeach
             </select>
@@ -97,7 +97,7 @@
                                 @if($flag->status === 'pending')
                                     <form method="post" action="{{ route('admin.profile-moderation.review', $flag) }}">
                                         @csrf
-                                        <input type="hidden" name="decision" value="approved">
+                                        <input type="hidden" name="decision" value="confirmed">
                                         <button class="hh-secondary-button" type="submit">Verstoß bestätigen</button>
                                     </form>
                                     <form method="post" action="{{ route('admin.profile-moderation.review', $flag) }}">
