@@ -10,6 +10,7 @@ class NewsContentDocument
     private const ALIGNMENTS = ['left', 'center', 'right'];
     private const LAYOUTS = ['normal', 'wide', 'full', 'float'];
     private const RATIOS = ['33-67', '40-60', '50-50', '60-40', '67-33'];
+    private const FONT_SIZES = ['14px', '16px', '18px', '20px', '24px', '28px', '32px'];
 
     public static function isV2(mixed $value): bool
     {
@@ -52,7 +53,7 @@ class NewsContentDocument
         $walk = function (array $nodes) use (&$walk, &$ids): void {
             foreach ($nodes as $node) {
                 $attrs = $node['attrs'] ?? [];
-                foreach (['mediaAssetId', 'posterAssetId', 'beforeAssetId', 'afterAssetId'] as $key) {
+                foreach (['mediaAssetId', 'posterAssetId', 'beforeAssetId', 'afterAssetId', 'backgroundMediaAssetId'] as $key) {
                     if (! empty($attrs[$key])) $ids[] = (int) $attrs[$key];
                 }
                 foreach ($attrs['items'] ?? [] as $item) if (! empty($item['mediaAssetId'])) $ids[] = (int) $item['mediaAssetId'];
@@ -89,9 +90,9 @@ class NewsContentDocument
             foreach ($node['marks'] ?? [] as $mark) self::mark($mark);
             return;
         }
-        if (in_array($type, ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'listItem', 'hntMediaTextLayout'], true)
+        if (in_array($type, ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'listItem', 'hntMediaTextLayout', 'hntQuote'], true)
             && ! self::list($children, 0, 150)) throw new InvalidArgumentException('Invalid News children.');
-        if (! in_array($type, ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'listItem', 'horizontalRule', 'hardBreak', 'hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery', 'hntMediaTextLayout'], true)) throw new InvalidArgumentException('Unsupported News node.');
+        if (! in_array($type, ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'listItem', 'horizontalRule', 'hardBreak', 'hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery', 'hntMediaTextLayout', 'hntQuote'], true)) throw new InvalidArgumentException('Unsupported News node.');
         if (in_array($type, ['horizontalRule', 'hardBreak'], true)) { self::keys($node, ['type']); return; }
         if ($type === 'paragraph' || $type === 'heading') {
             self::keys($attrs, $type === 'heading' ? ['level', 'textAlign'] : ['textAlign']);
@@ -131,10 +132,16 @@ class NewsContentDocument
             if (! empty($attrs['posterAssetId'])) self::mediaAttr($attrs, 'posterAssetId', 'image', $assets);
             self::string($attrs['alt'] ?? '', 300);
             self::string($attrs['caption'] ?? '', 1000);
+        } elseif ($type === 'hntQuote') {
+            self::keys($attrs, ['author', 'backgroundMediaAssetId', 'backgroundPosition', 'overlay']);
+            self::string($attrs['author'] ?? '', 240);
+            if (! in_array($attrs['backgroundPosition'] ?? null, ['center', 'top', 'bottom'], true)
+                || ! in_array($attrs['overlay'] ?? null, [40, 60, 80], true)) throw new InvalidArgumentException('Invalid HNT quote appearance.');
+            if (($attrs['backgroundMediaAssetId'] ?? null) !== null) self::mediaAttr($attrs, 'backgroundMediaAssetId', 'image', $assets);
         } else self::keys($attrs, []);
 
         if (in_array($type, ['hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery'], true) && isset($node['content'])) throw new InvalidArgumentException('Media nodes cannot have children.');
-        if ($type === 'blockquote' || $type === 'bulletList' || $type === 'orderedList' || $type === 'listItem' || $type === 'hntMediaTextLayout') {
+        if ($type === 'blockquote' || $type === 'bulletList' || $type === 'orderedList' || $type === 'listItem' || $type === 'hntMediaTextLayout' || $type === 'hntQuote') {
             foreach ($children as $child) self::node($child, $depth + 1, $count, $assets);
         } elseif (in_array($type, ['paragraph', 'heading'], true)) {
             foreach ($children as $child) {
@@ -148,12 +155,15 @@ class NewsContentDocument
     {
         if (! is_array($mark)) throw new InvalidArgumentException('Invalid mark.');
         self::keys($mark, ['type', 'attrs']);
-        if (! in_array($mark['type'] ?? null, ['bold', 'italic', 'underline', 'strike', 'link', 'code'], true)) throw new InvalidArgumentException('Unsupported mark.');
+        if (! in_array($mark['type'] ?? null, ['bold', 'italic', 'underline', 'strike', 'link', 'code', 'hntFontSize'], true)) throw new InvalidArgumentException('Unsupported mark.');
         if (($mark['type'] ?? null) === 'link') {
             self::keys($mark['attrs'] ?? [], ['href', 'target', 'rel', 'class', 'title']);
             $href = $mark['attrs']['href'] ?? null;
             if (! is_string($href) || strlen($href) > 2048 || ! self::safeHref($href)) throw new InvalidArgumentException('Invalid link.');
             foreach (['target', 'rel', 'class', 'title'] as $key) if (isset($mark['attrs'][$key]) && (! is_string($mark['attrs'][$key]) || mb_strlen($mark['attrs'][$key]) > 300)) throw new InvalidArgumentException('Invalid link attribute.');
+        } elseif (($mark['type'] ?? null) === 'hntFontSize') {
+            self::keys($mark['attrs'] ?? [], ['size']);
+            if (! in_array($mark['attrs']['size'] ?? null, self::FONT_SIZES, true)) throw new InvalidArgumentException('Invalid News font size.');
         } else self::keys($mark['attrs'] ?? [], []);
     }
 
@@ -196,7 +206,10 @@ class NewsContentDocument
     private static function plainNode(array $node): string
     {
         if (($node['type'] ?? null) === 'text') return $node['text'] ?? '';
-        return implode(' ', array_map(self::plainNode(...), $node['content'] ?? []));
+        if (($node['type'] ?? null) === 'hardBreak') return "\n";
+        $separator = in_array($node['type'] ?? null, ['blockquote', 'hntQuote'], true) ? "\n"
+            : (in_array($node['type'] ?? null, ['paragraph', 'heading'], true) ? '' : ' ');
+        return implode($separator, array_map(self::plainNode(...), $node['content'] ?? []));
     }
 
     private static function renderNode(array $node, array $media): string
@@ -205,12 +218,13 @@ class NewsContentDocument
         $attrs = $node['attrs'] ?? [];
         $children = implode('', array_map(fn ($child) => self::renderNode($child, $media), $node['content'] ?? []));
         if ($type === 'text') {
-            $text = e($node['text'] ?? '');
+            $text = nl2br(e($node['text'] ?? ''), false);
             foreach ($node['marks'] ?? [] as $mark) {
                 $markType = $mark['type'] ?? '';
                 $tag = ['bold' => 'strong', 'italic' => 'em', 'underline' => 'u', 'strike' => 's', 'code' => 'code'][$markType] ?? null;
                 if ($tag) $text = "<{$tag}>{$text}</{$tag}>";
                 if ($markType === 'link' && self::safeHref($mark['attrs']['href'] ?? '')) $text = '<a href="'.e($mark['attrs']['href']).'" rel="noopener noreferrer">'.$text.'</a>';
+                if ($markType === 'hntFontSize' && in_array($mark['attrs']['size'] ?? null, self::FONT_SIZES, true)) $text = '<span style="font-size:'.e($mark['attrs']['size']).'">'.$text.'</span>';
             }
             return $text;
         }
@@ -231,6 +245,13 @@ class NewsContentDocument
             $position = $attrs['position'] ?? 'left';
             $ratio = $attrs['ratio'] ?? '50-50';
             return '<section class="news-media-text '.e($position).' ratio-'.e($ratio).'"><div class="news-media-text-media">'.$mediaHtml.'</div><div class="news-media-text-copy">'.$children.'</div></section>';
+        }
+        if ($type === 'hntQuote') {
+            $background = $media[$attrs['backgroundMediaAssetId'] ?? 0] ?? null;
+            $position = $attrs['backgroundPosition'] ?? 'center';
+            $image = $background ? '<img class="news-hnt-quote-bg" src="'.e($background['url']).'" alt="" style="object-position:'.e($position).'">' : '';
+            $author = ($attrs['author'] ?? '') !== '' ? '<cite>'.e($attrs['author']).'</cite>' : '';
+            return '<aside class="news-hnt-quote overlay-'.(int) ($attrs['overlay'] ?? 60).'">'.$image.'<blockquote>'.$children.'</blockquote>'.$author.'</aside>';
         }
         if ($type === 'hntGallery') {
             $items = '';

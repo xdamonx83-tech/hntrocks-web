@@ -104,6 +104,74 @@ class NewsContentBlocksTest extends TestCase
         $this->assertStringNotContainsString('<script>', $html);
     }
 
+    public function test_v2_normal_quotes_keep_paragraphs_and_hard_breaks(): void
+    {
+        $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [[
+            'type' => 'blockquote', 'content' => [
+                ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'First line']]],
+                ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Second line'], ['type' => 'hardBreak'], ['type' => 'text', 'text' => 'Third line']]],
+            ],
+        ]]];
+        $this->assertSame([], NewsContentDocument::validate($document));
+        $this->assertSame("First line\nSecond line\nThird line", NewsContentDocument::plainText($document));
+        $this->assertSame('<blockquote><p>First line</p><p>Second line<br>Third line</p></blockquote>', NewsContentDocument::render($document, []));
+    }
+
+    public function test_v2_font_sizes_accept_only_presets_and_reset_by_removing_the_mark(): void
+    {
+        foreach (['14px', '16px', '18px', '20px', '24px', '28px', '32px'] as $size) {
+            $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [
+                ['type' => 'text', 'text' => 'Sized', 'marks' => [['type' => 'hntFontSize', 'attrs' => ['size' => $size]]]],
+            ]]]];
+            $this->assertSame([], NewsContentDocument::validate($document));
+            $this->assertStringContainsString('font-size:'.$size, NewsContentDocument::render($document, []));
+        }
+        $reset = ['schema_version' => 2, 'type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Default']]]]];
+        $this->assertSame('<p>Default</p>', NewsContentDocument::render($reset, []));
+        foreach (['13px', '14px;color:red', 'calc(100px)', '1rem'] as $size) {
+            $invalid = ['schema_version' => 2, 'type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [
+                ['type' => 'text', 'text' => 'Unsafe', 'marks' => [['type' => 'hntFontSize', 'attrs' => ['size' => $size]]]],
+            ]]]];
+            $this->assertNotEmpty($this->validate($invalid));
+        }
+    }
+
+    public function test_v2_media_text_accepts_each_ratio_both_positions_video_and_rich_text(): void
+    {
+        foreach (['33-67', '40-60', '50-50', '60-40', '67-33'] as $ratio) foreach (['left', 'right'] as $position) {
+            $heading = ['type' => 'heading', 'attrs' => ['level' => 2], 'content' => [['type' => 'text', 'text' => 'Bayou']]];
+            $formatted = ['type' => 'text', 'text' => 'Hunt', 'marks' => [['type' => 'bold'], ['type' => 'hntFontSize', 'attrs' => ['size' => '20px']]]];
+            $paragraph = ['type' => 'paragraph', 'content' => [$formatted]];
+            $layout = ['type' => 'hntMediaTextLayout', 'attrs' => ['mediaAssetId' => 30, 'mediaType' => 'video', 'posterAssetId' => null, 'position' => $position, 'ratio' => $ratio, 'alt' => '', 'caption' => 'Trailer'], 'content' => [$heading, $paragraph]];
+            $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [$layout]];
+            $this->assertSame([30 => 'video'], NewsContentDocument::validate($document));
+            $this->assertStringContainsString('ratio-'.$ratio, NewsContentDocument::render($document, [30 => ['url' => '/media/video']]));
+            $this->assertStringContainsString('font-size:20px', NewsContentDocument::render($document, [30 => ['url' => '/media/video']]));
+        }
+    }
+
+    public function test_v2_hnt_quote_renders_multiline_text_with_optional_background_and_author(): void
+    {
+        $quote = ['type' => 'hntQuote', 'attrs' => ['author' => 'HNT Team', 'backgroundMediaAssetId' => null, 'backgroundPosition' => 'center', 'overlay' => 60], 'content' => [
+            ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'First']]],
+            ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Second'], ['type' => 'hardBreak'], ['type' => 'text', 'text' => 'Third']]],
+        ]];
+        $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [$quote]];
+        $this->assertSame([], NewsContentDocument::validate($document));
+        $this->assertStringContainsString('<blockquote><p>First</p><p>Second<br>Third</p></blockquote><cite>HNT Team</cite>', NewsContentDocument::render($document, []));
+        $quote['attrs']['backgroundMediaAssetId'] = 40;
+        $quote['attrs']['backgroundPosition'] = 'top';
+        $quote['attrs']['overlay'] = 80;
+        $document['content'] = [$quote];
+        $this->assertSame([40 => 'image'], NewsContentDocument::validate($document));
+        $this->assertSame([40], NewsContentDocument::mediaIds($document));
+        $this->assertStringContainsString('src="/media/quote"', NewsContentDocument::render($document, [40 => ['url' => '/media/quote']]));
+        foreach ([['overlay' => 75], ['backgroundPosition' => 'left; color:red'], ['backgroundMediaAssetId' => 0]] as $invalidAttrs) {
+            $document['content'][0]['attrs'] = array_merge($quote['attrs'], $invalidAttrs);
+            $this->assertNotEmpty($this->validate($document));
+        }
+    }
+
     public function test_news_articles_support_only_the_four_editor_locales_and_workflow_states(): void
     {
         $this->assertSame(['de', 'en', 'es', 'ru'], NewsArticle::LOCALES);

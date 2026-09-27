@@ -82,7 +82,7 @@
                 @elseif(($block['type'] ?? '') === 'image' && $asset)<figure><img src="{{ $asset['url'] }}" alt="{{ $block['alt'] ?? '' }}" style="max-width:100%">@if(!empty($block['caption']))<figcaption>{{ $block['caption'] }}</figcaption>@endif</figure>
                 @elseif(($block['type'] ?? '') === 'video' && $asset)<figure><video controls preload="metadata" src="{{ $asset['url'] }}">Your browser cannot play this video.</video>@if(!empty($block['caption']))<figcaption>{{ $block['caption'] }}</figcaption>@endif</figure>
                 @elseif(($block['type'] ?? '') === 'before_after')<figure>@if($before)<img src="{{ $before['url'] }}" alt="{{ $block['before_alt'] ?? '' }}" style="max-width:48%">@endif @if($after)<img src="{{ $after['url'] }}" alt="{{ $block['after_alt'] ?? '' }}" style="max-width:48%">@endif @if(!empty($block['caption']))<figcaption>{{ $block['caption'] }}</figcaption>@endif</figure>
-                @elseif(($block['type'] ?? '') === 'quote')<blockquote><p>{{ $block['text'] ?? '' }}</p>@if(!empty($block['attribution']))<cite>{{ $block['attribution'] }}</cite>@endif</blockquote>
+                @elseif(($block['type'] ?? '') === 'quote')<blockquote><p>{!! nl2br(e($block['text'] ?? ''), false) !!}</p>@if(!empty($block['attribution']))<cite>{{ $block['attribution'] }}</cite>@endif</blockquote>
                 @elseif(($block['type'] ?? '') === 'list')<{{ ($block['style'] ?? '') === 'ordered' ? 'ol' : 'ul' }}>@foreach(($block['items'] ?? []) as $item)<li>{{ $item }}</li>@endforeach</{{ ($block['style'] ?? '') === 'ordered' ? 'ol' : 'ul' }}>
                 @endif
             @endforeach
