@@ -209,6 +209,8 @@ class UserDataExportService
                 ]),
                 'reports_assigned_to_user' => $user->isAdmin() ? $this->rowsWhere('reports', 'assigned_to', $userId) : [],
                 'reports_resolved_by_user' => $user->isAdmin() ? $this->rowsWhere('reports', 'resolved_by', $userId) : [],
+                'profile_moderation_flags' => $this->rowsWhere('profile_moderation_flags', 'user_id', $userId),
+                'profile_moderation_events' => $this->rowsWhere('profile_moderation_events', 'user_id', $userId),
             ],
             'tracking_and_analytics' => [
                 'visitor_events_linked_to_user' => $this->rowsWhere('visitor_events', 'user_id', $userId),
