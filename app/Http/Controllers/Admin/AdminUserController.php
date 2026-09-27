@@ -86,11 +86,33 @@ class AdminUserController extends Controller
             ->limit(30)
             ->get();
 
+        $hiddenProfileFields = collect(['headline', 'bio'])
+            ->mapWithKeys(function (string $field) use ($user): array {
+                $lastStateEvent = ProfileModerationEvent::query()
+                    ->where('user_id', $user->id)
+                    ->where('field', $field)
+                    ->whereIn('action', [
+                        'profile_field_hidden',
+                        'profile_field_restored',
+                        'profile_field_cleared',
+                        'admin_profile_edit',
+                    ])
+                    ->latest('id')
+                    ->first();
+
+                if (! $lastStateEvent || $lastStateEvent->action !== 'profile_field_hidden') {
+                    return [];
+                }
+
+                return [$field => $lastStateEvent];
+            });
+
         return view('admin.users.edit', [
             'editedUser' => $user,
             'profile' => $profile,
             'openFlags' => $openFlags,
             'moderationEvents' => $moderationEvents,
+            'hiddenProfileFields' => $hiddenProfileFields,
         ]);
     }
 
