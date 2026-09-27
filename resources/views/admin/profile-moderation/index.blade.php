@@ -98,11 +98,13 @@
                                     <form method="post" action="{{ route('admin.profile-moderation.review', $flag) }}">
                                         @csrf
                                         <input type="hidden" name="decision" value="confirmed">
+                                        <input type="text" name="admin_note" maxlength="2000" placeholder="Notiz optional">
                                         <button class="hh-secondary-button" type="submit">Verstoß bestätigen</button>
                                     </form>
                                     <form method="post" action="{{ route('admin.profile-moderation.review', $flag) }}">
                                         @csrf
                                         <input type="hidden" name="decision" value="dismissed">
+                                        <input type="text" name="admin_note" maxlength="2000" placeholder="Notiz optional">
                                         <button class="hh-secondary-button" type="submit">Fehlalarm</button>
                                     </form>
                                 @endif
