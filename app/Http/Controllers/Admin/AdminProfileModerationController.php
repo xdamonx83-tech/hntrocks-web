@@ -279,7 +279,10 @@ class AdminProfileModerationController extends Controller
         ProfileModerationFlag::query()
             ->where('user_id', $user->id)
             ->where('field', $field)
-            ->where('status', ProfileModerationFlag::STATUS_PENDING)
+            ->whereIn('status', [
+                ProfileModerationFlag::STATUS_PENDING,
+                ProfileModerationFlag::STATUS_CONFIRMED,
+            ])
             ->update([
                 'status' => ProfileModerationFlag::STATUS_ACTIONED,
                 'reviewed_by' => $request->user()->id,
