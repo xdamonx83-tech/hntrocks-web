@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProfileModerationFlag extends Model
 {
     public const STATUS_PENDING = 'pending';
-    public const STATUS_APPROVED = 'approved';
+    public const STATUS_CONFIRMED = 'confirmed';
     public const STATUS_DISMISSED = 'dismissed';
     public const STATUS_ACTIONED = 'actioned';
     public const STATUS_SUPERSEDED = 'superseded';
