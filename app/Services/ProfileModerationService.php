@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class ProfileModerationService
 {
-    private const MIN_FLAG_SCORE = 40;
+    private const MIN_FLAG_SCORE = 15;
 
     /**
      * Re-check the public free-text profile fields and keep the review queue in sync.
@@ -97,7 +97,7 @@ class ProfileModerationService
     }
 
     /**
-     * Rules are intentionally conservative. A single ordinary swear word is not enough to create a flag.
+     * Rules are intentionally conservative. Mild profanity is queued only as a low-priority review hint.
      *
      * @return array<int, array{category:string, score:int, reason:string}>
      */
@@ -189,12 +189,12 @@ class ProfileModerationService
             }
         }
 
-        // Mild profanity can be normal in a gaming profile and intentionally remains below the queue threshold.
+        // Mild profanity can be normal in a gaming profile, so it is visible only as a low-priority review hint.
         if (preg_match('~\b(fuck|fucking|shit|schei(?:ß|ss)e|verdammt)\b~iu', $lower)) {
             $findings[] = [
                 'category' => 'profanity',
                 'score' => 15,
-                'reason' => 'Derbe Sprache erkannt.',
+                'reason' => 'Derbe Sprache erkannt · niedrige Priorität.',
             ];
         }
 
