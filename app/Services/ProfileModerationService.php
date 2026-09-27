@@ -134,6 +134,22 @@ class ProfileModerationService
             ];
         }
 
+        if (preg_match('~\b(i(?:\\'|’)ll\s+kill\s+you|i\s+will\s+kill\s+you|ich\s+(?:bring|mach)\s+dich\s+um|ich\s+töte\s+dich|te\s+voy\s+a\s+matar|я\s+тебя\s+убью)\b~iu', $content)) {
+            $findings[] = [
+                'category' => 'threats',
+                'score' => 90,
+                'reason' => 'Mögliche konkrete Drohung gegen andere Personen.',
+            ];
+        }
+
+        if (preg_match('~\b(sieg\s+heil|heil\s+hitler|white\s+power|wei(?:ß|ss)e\s+macht|blood\s+and\s+honou?r|blut\s+und\s+ehre)\b~iu', $content)) {
+            $findings[] = [
+                'category' => 'hate_extremism',
+                'score' => 95,
+                'reason' => 'Möglicherweise menschenfeindlicher oder extremistischer Profilinhalt.',
+            ];
+        }
+
         if (preg_match('~\b(porn|porno|nudes?|onlyfans|sex\s*chat|nacktbilder|nacktfotos)\b~iu', $content)) {
             $findings[] = [
                 'category' => 'sexual_content',
