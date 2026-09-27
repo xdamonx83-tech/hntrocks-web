@@ -71,7 +71,10 @@ class AdminUserController extends Controller
 
         $openFlags = ProfileModerationFlag::query()
             ->where('user_id', $user->id)
-            ->where('status', ProfileModerationFlag::STATUS_PENDING)
+            ->whereIn('status', [
+                ProfileModerationFlag::STATUS_PENDING,
+                ProfileModerationFlag::STATUS_CONFIRMED,
+            ])
             ->orderByDesc('score')
             ->orderByDesc('detected_at')
             ->get();
