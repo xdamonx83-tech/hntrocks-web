@@ -3,7 +3,7 @@
         'MAIN' => [
             ['label' => 'Dashboard', 'route' => 'admin.index', 'active' => 'admin.index', 'icon' => 'category'],
             ['label' => 'Nutzer', 'route' => 'admin.users.index', 'active' => 'admin.users.*', 'icon' => 'profile-2user'],
-            ['label' => 'Profilmoderation', 'route' => 'admin.profile-moderation.index', 'active' => 'admin.profile-moderation.*', 'icon' => 'shield-tick'],
+            ['label' => 'Profilmoderation', 'route' => 'admin.profile-moderation.index', 'active' => 'admin.profile-moderation.*', 'icon' => 'danger'],
             ['label' => 'Reports', 'route' => 'admin.reports.index', 'active' => 'admin.reports.*', 'icon' => 'danger'],
             ['label' => 'Feedback & Tickets', 'route' => 'admin.feedback-tickets.index', 'active' => 'admin.feedback-tickets.*', 'icon' => 'message-question'],
         ],
