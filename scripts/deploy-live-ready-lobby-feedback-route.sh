@@ -30,7 +30,11 @@ mkdir -p "$BACKUP"
 cp -a public/.htaccess "$BACKUP/.htaccess"
 
 if [ "$CURRENT_BRANCH" != "$TARGET_BRANCH" ]; then
-  git switch "$TARGET_BRANCH"
+  if git show-ref --verify --quiet "refs/heads/$TARGET_BRANCH"; then
+    git switch "$TARGET_BRANCH"
+  else
+    git switch --track -c "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+  fi
 fi
 
 git pull --ff-only origin "$TARGET_BRANCH"
