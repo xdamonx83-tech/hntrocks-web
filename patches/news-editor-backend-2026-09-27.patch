@@ -3598,7 +3598,7 @@ index 00000000..df6bb8a8
 +        $created = $this->withToken($token)->postJson('/api/v1/admin/news/articles', [
 +            'category_key' => 'updates',
 +            'tags' => ['update-2-0', 'winter'],
-++            'featured' => true,
++            'featured' => true,
 +            'comments_enabled' => true,
 +            'translations' => [
 +                'de' => [
@@ -3918,3 +3918,4 @@ index 00000000..7457d8a1
 +}
 -- 
 2.47.3
+
