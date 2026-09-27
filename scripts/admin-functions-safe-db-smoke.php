@@ -200,13 +200,15 @@ try {
     $moderation = $app->make(ProfileModerationService::class);
     $moderation->scan($profile);
 
-    $mildFlags = ProfileModerationFlag::query()
+    $mildFlag = ProfileModerationFlag::query()
         ->where('user_id', $qaUser->id)
+        ->where('field', 'bio')
+        ->where('category', 'profanity')
         ->where('status', ProfileModerationFlag::STATUS_PENDING)
-        ->count();
+        ->first();
 
-    if ($mildFlags !== 0) {
-        throw new RuntimeException('Milde Gaming-Sprache wurde unerwartet in die Moderationsqueue aufgenommen.');
+    if (! $mildFlag || (int) $mildFlag->score !== 15) {
+        throw new RuntimeException('Milde Gaming-Sprache wurde nicht als niedrige Priorität markiert.');
     }
 
     $profile->forceFill([
