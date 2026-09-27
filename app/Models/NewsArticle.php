@@ -81,6 +81,16 @@ class NewsArticle extends Model
         return $this->morphMany(MediaAsset::class, 'attachable');
     }
 
+    public function comments(): HasMany
+    {
+        return $this->hasMany(NewsArticleComment::class);
+    }
+
+    public function interactions(): HasMany
+    {
+        return $this->hasMany(NewsArticleInteraction::class);
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_PUBLISHED)

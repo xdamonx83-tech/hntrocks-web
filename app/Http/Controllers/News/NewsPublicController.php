@@ -65,9 +65,16 @@ class NewsPublicController extends Controller
             ->whereHas('translations', fn ($q) => $q->where('locale', $locale)->where('slug', $slug))
             ->with(['translations', 'heroMedia'])->firstOrFail();
         $relatedQuery = $this->publishedForLocale($locale)->where('news_articles.id', '!=', $article->id);
-        if ($article->category_key) $relatedQuery->orderByRaw('category_key = ? desc', [$article->category_key]);
         $related = $relatedQuery->with(['translations' => fn ($q) => $q->where('locale', $locale), 'heroMedia'])
-            ->orderByDesc('published_at')->limit(4)->get();
+            ->orderByDesc('published_at')->limit(50)->get()
+            ->sort(function (NewsArticle $left, NewsArticle $right) use ($article): int {
+                $category = (int) ($right->category_key === $article->category_key && $article->category_key !== null)
+                    <=> (int) ($left->category_key === $article->category_key && $article->category_key !== null);
+                if ($category !== 0) return $category;
+                $tags = count(array_intersect($right->tags ?? [], $article->tags ?? []))
+                    <=> count(array_intersect($left->tags ?? [], $article->tags ?? []));
+                return $tags !== 0 ? $tags : $right->published_at <=> $left->published_at;
+            })->take(4)->values();
 
         return response()->json([
             'data' => $this->publicArticle($article, $locale),
@@ -178,6 +185,7 @@ class NewsPublicController extends Controller
             'title' => $translation->title, 'excerpt' => $translation->excerpt,
             'content_json' => $translation->content_json ?? [], 'category_key' => $article->category_key,
             'tags' => $article->tags ?? [], 'featured' => (bool) $article->featured,
+            'comments_enabled' => (bool) $article->comments_enabled,
             'hero_media' => $media[(int) ($article->hero_media_asset_id ?? 0)] ?? null, 'media' => $media,
             'published_at' => $article->published_at?->toIso8601String(),
             'updated_at' => $translation->updated_at?->toIso8601String(),

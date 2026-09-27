@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class NewsArticleComment extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = ['user_id', 'parent_id', 'body'];
+
+    public function article(): BelongsTo
+    {
+        return $this->belongsTo(NewsArticle::class, 'news_article_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(NewsArticleCommentLike::class);
+    }
+}

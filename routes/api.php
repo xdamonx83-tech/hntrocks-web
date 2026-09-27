@@ -50,6 +50,7 @@ use App\Http\Controllers\Api\V1\NewsArticleAdminController;
 use App\Http\Controllers\Api\V1\NewsArticleMediaController;
 use App\Http\Controllers\Api\V1\NewsArticlePreviewController;
 use App\Http\Controllers\News\NewsPublicController;
+use App\Http\Controllers\News\NewsEngagementController;
 use App\Http\Controllers\Feed\FeedBookmarkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Presence\PresenceHeartbeatController;
@@ -67,6 +68,8 @@ Route::get('/v1/health', function (): array {
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/appearance', WebAppearanceController::class)->name('appearance.show');
     Route::get('/news', [NewsPublicController::class, 'apiIndex'])->name('news.index');
+    Route::get('/news/articles/{article}/engagement', [NewsEngagementController::class, 'index'])
+        ->whereNumber('article')->name('news.engagement.index');
     Route::get('/news/{locale}/{slug}', [NewsPublicController::class, 'apiShow'])
         ->where(['locale' => 'de|en|es|ru', 'slug' => '[a-z0-9-]+'])->name('news.show');
     Route::get('/news/{article}/media/{asset}/{variant}', [NewsPublicController::class, 'apiMedia'])
@@ -85,6 +88,11 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
 
     Route::middleware('api.token')->group(function (): void {
+        Route::get('/news/articles/{article}/engagement/viewer', [NewsEngagementController::class, 'viewer'])->whereNumber('article')->name('news.engagement.viewer');
+        Route::post('/news/articles/{article}/comments', [NewsEngagementController::class, 'store'])->whereNumber('article')->middleware('throttle:12,1')->name('news.comments.store');
+        Route::post('/news/articles/{article}/like', [NewsEngagementController::class, 'toggleLike'])->whereNumber('article')->middleware('throttle:30,1')->name('news.like');
+        Route::post('/news/articles/{article}/save', [NewsEngagementController::class, 'toggleSave'])->whereNumber('article')->middleware('throttle:30,1')->name('news.save');
+        Route::post('/news/articles/{article}/comments/{comment}/like', [NewsEngagementController::class, 'toggleCommentLike'])->whereNumber('article')->whereNumber('comment')->middleware('throttle:30,1')->name('news.comments.like');
         require __DIR__.'/api-guides.php';
 
         Route::get('/arcade/games', [ArcadeGameController::class, 'index'])->name('arcade.games.index');
