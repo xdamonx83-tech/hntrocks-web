@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * IMPORTANT:
  * - Uses the existing MySQL database ONLY as a container.
- * - Every QA table gets a unique hard-coded-safe prefix (hntqa_*).
+ * - Every QA table gets a unique hard-coded-safe prefix (qa?????_).
  * - No migrate:fresh, no DROP DATABASE and no unprefixed test tables.
  * - The script aborts unless Laravel confirms the dedicated prefixed connection.
  * - Cleanup removes only tables carrying this run's unique prefix.
@@ -51,9 +51,9 @@ if ($username === '' || $database === '') {
     exit(12);
 }
 
-$prefix = 'hntqa_'.date('Ymd_His').'_'.getmypid().'_';
+$prefix = 'qa'.substr(hash('sha256', (string) microtime(true).'|'.(string) getmypid()), 0, 5).'_';
 
-if (! preg_match('/^hntqa_[0-9]{8}_[0-9]{6}_[0-9]+_$/', $prefix)) {
+if (! preg_match('/^qa[a-f0-9]{5}_$/', $prefix)) {
     fwrite(STDERR, "ABBRUCH: Unerwarteter QA-Tabellenprefix.\n");
     exit(13);
 }
