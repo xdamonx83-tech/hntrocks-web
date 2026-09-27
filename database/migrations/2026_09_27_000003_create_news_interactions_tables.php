@@ -33,7 +33,7 @@ return new class extends Migration {
             $table->foreignId('news_article_comment_id')->constrained('news_article_comments')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
-            $table->unique(['news_article_comment_id', 'user_id']);
+            $table->unique(['news_article_comment_id', 'user_id'], 'news_comment_like_user_unique');
         });
     }
 
