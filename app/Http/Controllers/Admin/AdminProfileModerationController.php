@@ -22,7 +22,7 @@ class AdminProfileModerationController extends Controller
         $status = (string) $request->query('status', ProfileModerationFlag::STATUS_PENDING);
         $allowedStatuses = [
             ProfileModerationFlag::STATUS_PENDING,
-            ProfileModerationFlag::STATUS_APPROVED,
+            ProfileModerationFlag::STATUS_CONFIRMED,
             ProfileModerationFlag::STATUS_DISMISSED,
             ProfileModerationFlag::STATUS_ACTIONED,
             ProfileModerationFlag::STATUS_SUPERSEDED,
@@ -69,7 +69,7 @@ class AdminProfileModerationController extends Controller
                 ->where('status', ProfileModerationFlag::STATUS_PENDING)
                 ->where('score', '>=', 80)
                 ->count(),
-            'approved' => ProfileModerationFlag::query()->where('status', ProfileModerationFlag::STATUS_APPROVED)->count(),
+            'confirmed' => ProfileModerationFlag::query()->where('status', ProfileModerationFlag::STATUS_CONFIRMED)->count(),
             'actioned' => ProfileModerationFlag::query()->where('status', ProfileModerationFlag::STATUS_ACTIONED)->count(),
         ];
 
@@ -92,7 +92,7 @@ class AdminProfileModerationController extends Controller
 
         $validated = $request->validate([
             'decision' => ['required', Rule::in([
-                ProfileModerationFlag::STATUS_APPROVED,
+                ProfileModerationFlag::STATUS_CONFIRMED,
                 ProfileModerationFlag::STATUS_DISMISSED,
             ])],
             'admin_note' => ['nullable', 'string', 'max:2000'],
@@ -108,7 +108,7 @@ class AdminProfileModerationController extends Controller
         ProfileModerationEvent::query()->create([
             'user_id' => $flag->user_id,
             'admin_id' => $request->user()->id,
-            'action' => $validated['decision'] === ProfileModerationFlag::STATUS_APPROVED
+            'action' => $validated['decision'] === ProfileModerationFlag::STATUS_CONFIRMED
                 ? 'flag_confirmed'
                 : 'flag_dismissed',
             'field' => $flag->field,
