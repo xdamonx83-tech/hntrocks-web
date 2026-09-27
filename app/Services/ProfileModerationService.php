@@ -44,8 +44,14 @@ class ProfileModerationService
                     'fingerprint' => $fingerprint,
                 ]);
 
-                if (! $flag->exists) {
+                if (! $flag->exists || in_array($flag->status, [
+                    ProfileModerationFlag::STATUS_ACTIONED,
+                    ProfileModerationFlag::STATUS_SUPERSEDED,
+                ], true)) {
                     $flag->status = ProfileModerationFlag::STATUS_PENDING;
+                    $flag->reviewed_by = null;
+                    $flag->reviewed_at = null;
+                    $flag->admin_note = null;
                 }
 
                 $flag->fill([
