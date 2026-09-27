@@ -3,8 +3,10 @@
 namespace App\Rules;
 
 use App\Models\MediaAsset;
+use App\Support\NewsContentDocument;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use InvalidArgumentException;
 
 class NewsContentBlocks implements ValidationRule
 {
@@ -17,6 +19,17 @@ class NewsContentBlocks implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($value === null) {
+            return;
+        }
+
+        if (NewsContentDocument::isV2($value)) {
+            try {
+                $assetTypes = NewsContentDocument::validate($value);
+            } catch (InvalidArgumentException $exception) {
+                $fail($exception->getMessage());
+                return;
+            }
+            $this->validateAssets($assetTypes, $fail);
             return;
         }
 
@@ -192,6 +205,11 @@ class NewsContentBlocks implements ValidationRule
             }
         }
 
+        $this->validateAssets($assetTypes, $fail);
+    }
+
+    private function validateAssets(array $assetTypes, Closure $fail): void
+    {
         if ($assetTypes === []) {
             return;
         }

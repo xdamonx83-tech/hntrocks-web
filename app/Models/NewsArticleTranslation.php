@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\NewsContentDocument;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,6 +42,6 @@ class NewsArticleTranslation extends Model
         return trim((string) $this->title) !== ''
             && trim((string) $this->slug) !== ''
             && is_array($this->content_json)
-            && $this->content_json !== [];
+            && NewsContentDocument::hasContent($this->content_json);
     }
 }

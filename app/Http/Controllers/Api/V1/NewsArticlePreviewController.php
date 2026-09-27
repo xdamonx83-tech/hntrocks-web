@@ -8,6 +8,7 @@ use App\Http\Resources\Api\NewsArticleTranslationResource;
 use App\Models\MediaAsset;
 use App\Models\NewsArticle;
 use App\Models\User;
+use App\Support\NewsContentDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -41,17 +42,7 @@ class NewsArticlePreviewController extends Controller
         abort_unless($translation, 404);
 
         $mediaIds = $article->hero_media_asset_id ? [(int) $article->hero_media_asset_id] : [];
-        foreach (($translation->content_json ?? []) as $block) {
-            if (! is_array($block)) {
-                continue;
-            }
-
-            foreach (['media_id', 'poster_media_id', 'before_media_id', 'after_media_id'] as $key) {
-                if (! empty($block[$key])) {
-                    $mediaIds[] = (int) $block[$key];
-                }
-            }
-        }
+        $mediaIds = array_merge($mediaIds, NewsContentDocument::mediaIds($translation->content_json ?? []));
         $media = MediaAsset::query()
             ->where('context', 'news')
             ->where('visibility', 'private')

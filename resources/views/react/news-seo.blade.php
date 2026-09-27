@@ -46,6 +46,9 @@
         <time datetime="{{ $article['published_at'] }}">{{ $article['published_at'] }}</time>
         @if($article['hero_media'])<figure><img src="{{ $article['hero_media']['url'] }}" alt="{{ $article['hero_media']['alt_text'] ?? '' }}" style="width:100%;max-height:600px;object-fit:cover"></figure>@endif
         <article>
+            @if(\App\Support\NewsContentDocument::isV2($translation->content_json))
+                {!! \App\Support\NewsContentDocument::render($translation->content_json, $media) !!}
+            @else
             @foreach(($translation->content_json ?? []) as $block)
                 @php
                     $asset = $media[(int) ($block['media_id'] ?? 0)] ?? null;
@@ -83,6 +86,7 @@
                 @elseif(($block['type'] ?? '') === 'list')<{{ ($block['style'] ?? '') === 'ordered' ? 'ol' : 'ul' }}>@foreach(($block['items'] ?? []) as $item)<li>{{ $item }}</li>@endforeach</{{ ($block['style'] ?? '') === 'ordered' ? 'ol' : 'ul' }}>
                 @endif
             @endforeach
+            @endif
         </article>
     </main>
 @endif

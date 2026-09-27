@@ -8,6 +8,7 @@ use App\Models\MediaAsset;
 use App\Models\NewsArticle;
 use App\Models\User;
 use App\Services\MediaService;
+use App\Support\NewsContentDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -95,17 +96,7 @@ class NewsArticleMediaController extends Controller
         }
 
         foreach ($article->translations()->get(['content_json']) as $translation) {
-            foreach (($translation->content_json ?? []) as $block) {
-                if (! is_array($block)) {
-                    continue;
-                }
-
-                foreach (['media_id', 'poster_media_id', 'before_media_id', 'after_media_id'] as $key) {
-                    if (! empty($block[$key])) {
-                        $ids[] = (int) $block[$key];
-                    }
-                }
-            }
+            $ids = array_merge($ids, NewsContentDocument::mediaIds($translation->content_json ?? []));
         }
 
         $ids = array_merge($ids, $article->mediaAssets()

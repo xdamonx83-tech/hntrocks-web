@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MediaAsset;
 use App\Models\NewsArticle;
 use App\Models\NewsArticleTranslation;
+use App\Support\NewsContentDocument;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -195,12 +196,7 @@ class NewsPublicController extends Controller
     private function mediaForArticle(NewsArticle $article, NewsArticleTranslation $translation): array
     {
         $ids = $article->hero_media_asset_id ? [(int) $article->hero_media_asset_id] : [];
-        foreach (($translation->content_json ?? []) as $block) {
-            if (! is_array($block)) continue;
-            foreach (['media_id', 'poster_media_id', 'before_media_id', 'after_media_id'] as $key) {
-                if (! empty($block[$key])) $ids[] = (int) $block[$key];
-            }
-        }
+        $ids = array_merge($ids, NewsContentDocument::mediaIds($translation->content_json ?? []));
         return MediaAsset::query()->where('context', 'news')->where('visibility', 'private')->where('status', 'ready')
             ->whereIn('id', array_values(array_unique($ids)))->get()->mapWithKeys(fn (MediaAsset $asset) => [
                 (int) $asset->id => [
@@ -218,12 +214,7 @@ class NewsPublicController extends Controller
         if ((int) $article->hero_media_asset_id === $assetId) return true;
         foreach ($article->translations()->get() as $translation) {
             if (! $translation->isPublishable()) continue;
-            foreach (($translation->content_json ?? []) as $block) {
-                if (! is_array($block)) continue;
-                foreach (['media_id', 'poster_media_id', 'before_media_id', 'after_media_id'] as $key) {
-                    if ((int) ($block[$key] ?? 0) === $assetId) return true;
-                }
-            }
+            if (in_array($assetId, NewsContentDocument::mediaIds($translation->content_json ?? []), true)) return true;
         }
         return false;
     }
