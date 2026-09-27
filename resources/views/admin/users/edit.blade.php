@@ -87,7 +87,7 @@
 
         <div style="margin-top:16px;">
             <label for="bio">Über mich / Bio</label>
-            <textarea id="bio" name="bio" rows="8" maxlength="2000">{{ old('bio', $profile->bio) }}</textarea>
+            <textarea id="bio" name="bio" rows="8" maxlength="1200">{{ old('bio', $profile->bio) }}</textarea>
         </div>
 
         <div class="hh-admin-filter" style="margin-top:16px;">
