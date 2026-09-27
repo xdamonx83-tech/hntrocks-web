@@ -12,7 +12,7 @@ class ProfileModerationServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_mild_gaming_profanity_does_not_enter_review_queue(): void
+    public function test_mild_gaming_profanity_enters_review_queue_with_low_priority(): void
     {
         $user = User::factory()->create();
         $profile = $user->profile()->create([
@@ -22,7 +22,13 @@ class ProfileModerationServiceTest extends TestCase
 
         app(ProfileModerationService::class)->scan($profile);
 
-        $this->assertDatabaseCount('profile_moderation_flags', 0);
+        $this->assertDatabaseHas('profile_moderation_flags', [
+            'user_id' => $user->id,
+            'field' => 'bio',
+            'category' => 'profanity',
+            'status' => ProfileModerationFlag::STATUS_PENDING,
+            'score' => 15,
+        ]);
     }
 
     public function test_advertising_with_external_link_is_flagged(): void
