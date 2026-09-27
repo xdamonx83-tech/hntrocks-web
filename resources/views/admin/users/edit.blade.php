@@ -149,6 +149,68 @@
         </div>
     </section>
 
+    @php
+        $hunterDna = old('hunter_dna', $profile->hunter_dna ?? []);
+        $hunterGoals = (array) ($hunterDna['goals'] ?? []);
+    @endphp
+    <section class="hh-card hh-card-compact">
+        <h2>Hunter DNA</h2>
+        <input type="hidden" name="hunter_dna_present" value="1">
+        <div class="hh-admin-filter">
+            <div>
+                <label for="hunter_voice">Voice</label>
+                <select id="hunter_voice" name="hunter_dna[voice]">
+                    <option value="">—</option>
+                    @foreach(['yes' => 'Ja', 'no' => 'Nein', 'optional' => 'Optional'] as $value => $label)
+                        <option value="{{ $value }}" @selected(($hunterDna['voice'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="hunter_mode">Bevorzugter Modus</label>
+                <select id="hunter_mode" name="hunter_dna[preferred_mode]">
+                    <option value="">—</option>
+                    @foreach(['solo' => 'Solo', 'duo' => 'Duo', 'trio' => 'Trio', 'flexible' => 'Flexibel'] as $value => $label)
+                        <option value="{{ $value }}" @selected(($hunterDna['preferred_mode'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="hunter_experience">Erfahrung</label>
+                <select id="hunter_experience" name="hunter_dna[experience]">
+                    <option value="">—</option>
+                    @foreach(['new' => 'Neu', 'casual' => 'Casual', 'experienced' => 'Erfahren', 'veteran' => 'Veteran'] as $value => $label)
+                        <option value="{{ $value }}" @selected(($hunterDna['experience'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="hunter_temper">Spielstil / Temperament</label>
+                <select id="hunter_temper" name="hunter_dna[temper]">
+                    <option value="">—</option>
+                    @foreach(['chill' => 'Chill', 'focused' => 'Fokussiert', 'tryhard' => 'Tryhard', 'chaotic' => 'Chaotisch'] as $value => $label)
+                        <option value="{{ $value }}" @selected(($hunterDna['temper'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <p style="margin-top:16px;"><strong>Ziele</strong></p>
+        <div class="hh-admin-actions">
+            @foreach(['pvp' => 'PvP', 'bounty' => 'Bounty', 'boss' => 'Boss', 'extract' => 'Extract', 'events' => 'Events', 'quests' => 'Quests', 'teach' => 'Beibringen', 'learn' => 'Lernen', 'memes' => 'Memes'] as $value => $label)
+                <label class="hh-checkline hh-checkline-card">
+                    <input type="checkbox" name="hunter_dna[goals][]" value="{{ $value }}" @checked(in_array($value, $hunterGoals, true))>
+                    {{ $label }}
+                </label>
+            @endforeach
+        </div>
+
+        <label class="hh-checkline hh-checkline-card" style="margin-top:16px;">
+            <input type="checkbox" name="hunter_dna[mentor]" value="1" @checked((bool) ($hunterDna['mentor'] ?? false))>
+            Mentor
+        </label>
+    </section>
+
     <section class="hh-card hh-card-compact">
         <h2>Moderationsnotiz für diese Änderung</h2>
         <div class="hh-admin-filter">
@@ -229,10 +291,4 @@
     </div>
 </section>
 
-@if(! empty($profile->hunter_dna))
-<section class="hh-card hh-card-compact">
-    <h2>Hunter DNA (nur Ansicht)</h2>
-    <pre style="white-space:pre-wrap;">{{ json_encode($profile->hunter_dna, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-</section>
-@endif
 @endsection
