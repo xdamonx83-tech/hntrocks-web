@@ -27,7 +27,7 @@ BACKUP="/home/users/hunthub/backups/ready-feedback-route-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP"
 cp -a public/.htaccess "$BACKUP/.htaccess"
 
-grep -q 'ready-lobbies/\[^/\]\+/feedback' public/.htaccess || {
+grep -Fq 'RewriteRule ^ready-lobbies/[^/]+/feedback/?$ app/index.html [L]' public/.htaccess || {
   echo "ABBRUCH: Feedback-Rewrite fehlt."
   exit 1
 }
