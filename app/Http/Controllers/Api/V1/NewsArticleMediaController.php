@@ -108,6 +108,10 @@ class NewsArticleMediaController extends Controller
             }
         }
 
+        $ids = array_merge($ids, $article->mediaAssets()
+            ->where('context', 'news')->where('visibility', 'private')->where('status', 'ready')
+            ->pluck('media_assets.id')->map(fn ($id) => (int) $id)->all());
+
         $assets = MediaAsset::query()
             ->where('context', 'news')
             ->where('visibility', 'private')

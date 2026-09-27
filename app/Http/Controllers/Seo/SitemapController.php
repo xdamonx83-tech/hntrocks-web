@@ -8,6 +8,7 @@ use App\Models\CupIdea;
 use App\Models\HntMap;
 use App\Models\LoadoutChallenge;
 use App\Models\MomentSpotlight;
+use App\Models\NewsArticle;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Response;
@@ -40,6 +41,30 @@ class SitemapController extends Controller
             $this->url(route('legal.account_deletion'), now(), 'yearly', '0.3'),
             $this->url(route('legal.child_safety'), now(), 'yearly', '0.3'),
         ]);
+
+        foreach (['de', 'en', 'es', 'ru'] as $locale) {
+            $urls->push($this->url(route('news.overview.locale', ['locale' => $locale]), now(), 'daily', '0.8'));
+        }
+
+        if (Schema::hasTable('news_articles') && Schema::hasTable('news_article_translations')) {
+            NewsArticle::query()->published()->with('translations')->orderBy('id')->chunk(200, function ($articles) use ($urls): void {
+                foreach ($articles as $article) {
+                    foreach ($article->translations as $translation) {
+                        if (! in_array($translation->locale, NewsArticle::LOCALES, true) || ! is_string($translation->slug) || $translation->slug === '') {
+                            continue;
+                        }
+
+                        $loc = $translation->canonical_url ?: route('news.article', [
+                            'locale' => $translation->locale,
+                            'slug' => $translation->slug,
+                        ]);
+                        $lastModified = collect([$translation->updated_at, $article->updated_at, $article->published_at])
+                            ->filter()->map(fn ($date) => $date instanceof CarbonInterface ? $date : Carbon::parse($date))->max();
+                        $urls->push($this->url($loc, $lastModified, 'weekly', '0.7'));
+                    }
+                }
+            });
+        }
 
         $mapLastModified->each(function (?CarbonInterface $lastModified, string $slug) use ($urls): void {
             $urls->push($this->url(route('maps.show', $slug), $lastModified, 'weekly', '0.8'));

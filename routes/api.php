@@ -49,6 +49,7 @@ use App\Http\Controllers\Api\V1\MapMarkerInteractionController;
 use App\Http\Controllers\Api\V1\NewsArticleAdminController;
 use App\Http\Controllers\Api\V1\NewsArticleMediaController;
 use App\Http\Controllers\Api\V1\NewsArticlePreviewController;
+use App\Http\Controllers\News\NewsPublicController;
 use App\Http\Controllers\Feed\FeedBookmarkController;
 use App\Http\Controllers\Feed\FeedTranslationController;
 use App\Http\Controllers\Presence\PresenceHeartbeatController;
@@ -65,6 +66,11 @@ Route::get('/v1/health', function (): array {
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/appearance', WebAppearanceController::class)->name('appearance.show');
+    Route::get('/news', [NewsPublicController::class, 'apiIndex'])->name('news.index');
+    Route::get('/news/{locale}/{slug}', [NewsPublicController::class, 'apiShow'])
+        ->where(['locale' => 'de|en|es|ru', 'slug' => '[a-z0-9-]+'])->name('news.show');
+    Route::get('/news/{article}/media/{asset}/{variant}', [NewsPublicController::class, 'apiMedia'])
+        ->whereNumber('article')->whereNumber('asset')->where('variant', 'original|thumbnail')->name('news.media');
     Route::get('/maps', [ApiMapsController::class, 'index'])->name('maps.index');
     Route::get('/maps/{slug}', [ApiMapsController::class, 'show'])->name('maps.show');
     Route::post('/maps/{slug}/cash-spots', [MapCashSpotSubmissionApiController::class, 'store'])->name('maps.cash-spots.store');
@@ -293,6 +299,7 @@ Route::middleware(['api.token', 'news.admin'])
     ->prefix('v1/admin/news')
     ->name('api.v1.admin.news.')
     ->group(function (): void {
+        Route::get('/access', [NewsArticleAdminController::class, 'access'])->name('access');
         Route::get('/articles', [NewsArticleAdminController::class, 'index'])->name('articles.index');
         Route::post('/articles', [NewsArticleAdminController::class, 'store'])->name('articles.store');
         Route::get('/articles/{article}', [NewsArticleAdminController::class, 'show'])->name('articles.show');

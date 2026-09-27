@@ -19,6 +19,11 @@ use Illuminate\Validation\ValidationException;
 
 class NewsArticleAdminController extends Controller
 {
+    public function access(): JsonResponse
+    {
+        return response()->json(['data' => ['can_manage' => true]]);
+    }
+
     public function index(Request $request): JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $query = NewsArticle::query()

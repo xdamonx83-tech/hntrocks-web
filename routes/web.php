@@ -95,6 +95,7 @@ use App\Http\Controllers\Maps\MapController;
 use App\Http\Controllers\Maps\MapCashSpotSubmissionController;
 use App\Http\Controllers\Maps\MapMarkerCommentController;
 use App\Http\Controllers\Maps\MapMarkerVoteController;
+use App\Http\Controllers\News\NewsPublicController;
 use App\Models\FeedPost;
 use App\Models\Friendship;
 use App\Models\Team;
@@ -167,6 +168,19 @@ Route::post('/maps/markers/{marker}/vote', [MapMarkerVoteController::class, 'sto
 Route::get('/maps/markers/{marker}/comments', [MapMarkerCommentController::class, 'index'])
     ->middleware('throttle:60,1')
     ->name('maps.markers.comments.index');
+
+Route::get('/news', [NewsPublicController::class, 'overview'])->name('news.overview');
+Route::get('/news/{locale}', [NewsPublicController::class, 'overview'])
+    ->where('locale', 'de|en|es|ru')->name('news.overview.locale');
+Route::get('/news/{locale}/{slug}', [NewsPublicController::class, 'article'])
+    ->where(['locale' => 'de|en|es|ru', 'slug' => '[a-z0-9-]+'])->name('news.article');
+Route::get('/news/media/{article}/{asset}/{variant}', [NewsPublicController::class, 'apiMedia'])
+    ->whereNumber('article')->whereNumber('asset')->where('variant', 'original|thumbnail')->name('news.media');
+Route::get('/news/create', ReactAppController::class)->name('news.react.create');
+Route::get('/news/manage', ReactAppController::class)->name('news.react.manage');
+Route::get('/news/preview', ReactAppController::class)->name('news.react.preview');
+Route::get('/news/{articleId}/edit', ReactAppController::class)
+    ->whereNumber('articleId')->name('news.react.edit');
 
 Route::get('/impressum', [LegalPageController::class, 'show'])
     ->defaults('legalSlug', 'impressum')
