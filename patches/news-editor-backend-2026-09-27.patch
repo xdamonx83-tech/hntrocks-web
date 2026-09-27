@@ -1,0 +1,400 @@
+From c0aa28ca8ede49698ad6a70b3dde14cf997058bd Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Sun, 27 Sep 2026 15:28:24 +0200
+Subject: [PATCH] feat(news): add admin article editor backend
+
+---
+ .gitignore                                    |    1 +
+ .../Api/V1/NewsArticleAdminController.php     |  172 ++
+ .../Api/V1/NewsArticleMediaController.php     |  120 ++
+ .../Api/V1/NewsArticlePreviewController.php   |   79 +
+ app/Http/Middleware/EnsureNewsAdmin.php       |   20 +
+ .../Resources/Api/NewsArticleResource.php     |   34 +
+ .../Api/NewsArticleRevisionResource.php       |   25 +
+ .../Api/NewsArticleTranslationResource.php    |   24 +
+ app/Models/MediaAsset.php                     |   27 +
+ app/Models/NewsArticle.php                    |  113 +
+ app/Models/NewsArticleRevision.php            |   41 +
+ app/Models/NewsArticleTranslation.php         |   30 +
+ app/Rules/NewsContentBlocks.php               |  202 ++
+ app/Services/NewsArticleEditorService.php     |  410 ++++
+ bootstrap/app.php                             |    1 +
+ composer.json                                 |    6 +-
+ composer.lock                                 | 1849 ++++++++++++++++-
+ config/hunthub.php                            |    2 +
+ ...09_27_000002_create_news_editor_tables.php |   71 +
+ phpunit.xml                                   |   25 +
+ routes/api.php                                |   31 +
+ routes/console.php                            |   11 +-
+ tests/Feature/NewsArticleAdminApiTest.php     |  280 +++
+ tests/TestCase.php                            |    9 +
+ tests/Unit/NewsContentBlocksTest.php          |   57 +
+ 25 files changed, 3636 insertions(+), 4 deletions(-)
+ create mode 100644 app/Http/Controllers/Api/V1/NewsArticleAdminController.php
+ create mode 100644 app/Http/Controllers/Api/V1/NewsArticleMediaController.php
+ create mode 100644 app/Http/Controllers/Api/V1/NewsArticlePreviewController.php
+ create mode 100644 app/Http/Middleware/EnsureNewsAdmin.php
+ create mode 100644 app/Http/Resources/Api/NewsArticleResource.php
+ create mode 100644 app/Http/Resources/Api/NewsArticleRevisionResource.php
+ create mode 100644 app/Http/Resources/Api/NewsArticleTranslationResource.php
+ create mode 100644 app/Models/NewsArticle.php
+ create mode 100644 app/Models/NewsArticleRevision.php
+ create mode 100644 app/Models/NewsArticleTranslation.php
+ create mode 100644 app/Rules/NewsContentBlocks.php
+ create mode 100644 app/Services/NewsArticleEditorService.php
+ create mode 100644 database/migrations/2026_09_27_000002_create_news_editor_tables.php
+ create mode 100644 phpunit.xml
+ create mode 100644 tests/Feature/NewsArticleAdminApiTest.php
+ create mode 100644 tests/TestCase.php
+ create mode 100644 tests/Unit/NewsContentBlocksTest.php
+
+diff --git a/.gitignore b/.gitignore
+index be7c7e64..178ceffb 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,4 +1,5 @@
+ /vendor/
++/.phpunit.cache/
+ /node_modules/
+ 
+ /public/build/
+diff --git a/app/Http/Controllers/Api/V1/NewsArticleAdminController.php b/app/Http/Controllers/Api/V1/NewsArticleAdminController.php
+new file mode 100644
+index 00000000..58767fff
+--- /dev/null
++++ b/app/Http/Controllers/Api/V1/NewsArticleAdminController.php
+@@ -0,0 +1,172 @@
++<?php
++
++namespace App\Http\Controllers\Api\V1;
++
++use App\Http\Controllers\Controller;
++use App\Http\Resources\Api\NewsArticleResource;
++use App\Http\Resources\Api\NewsArticleRevisionResource;
++use App\Models\NewsArticle;
++use App\Models\NewsArticleRevision;
++use App\Models\User;
++use App\Rules\NewsContentBlocks;
++use App\Services\NewsArticleEditorService;
++use Illuminate\Database\Query\Builder as QueryBuilder;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Validator;
++use Illuminate\Validation\Rule;
++use Illuminate\Validation\ValidationException;
++
++class NewsArticleAdminController extends Controller
++{
++    public function index(Request $request): JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
++    {
++        $query = NewsArticle::query()
++            ->with(['translations', 'heroMedia'])
++            ->withCount('revisions');
++
++        $status = $request->query('status');
++        if (is_string($status) && in_array($status, NewsArticle::statuses(), true)) {
++            $query->where('status', $status);
++        }
++
++        $locale = $request->query('locale');
++        if (is_string($locale) && in_array($locale, NewsArticle::LOCALES, true)) {
++            $query->whereHas('translations', fn ($translationQuery) => $translationQuery->where('locale', $locale));
++        }
++
++        $search = trim((string) $request->query('q', ''));
++        if ($search !== '') {
++            $query->whereHas('translations', fn ($translationQuery) => $translationQuery
++                ->where(fn ($textQuery) => $textQuery
++                    ->where('title', 'like', '%'.$search.'%')
++                    ->orWhere('slug', 'like', '%'.$search.'%')));
++        }
++
++        return NewsArticleResource::collection($query->orderByDesc('updated_at')->paginate(25)->withQueryString());
++    }
++
++    public function store(Request $request, NewsArticleEditorService $editor): JsonResponse
++    {
++        $data = $this->validatedEditorData($request, null, false);
++        $article = $editor->create($this->adminUser($request), $data)->load(['translations', 'heroMedia'])->loadCount('revisions');
++
++        return NewsArticleResource::make($article)->response()->setStatusCode(201);
++    }
++
++    public function show(NewsArticle $article): NewsArticleResource
++    {
++        return NewsArticleResource::make($article->load(['translations', 'heroMedia'])->loadCount('revisions'));
++    }
++
++    public function update(Request $request, NewsArticle $article, NewsArticleEditorService $editor): NewsArticleResource
++    {
++        $data = $this->validatedEditorData($request, $article, true);
++        $version = (int) $data['lock_version'];
++        unset($data['lock_version']);
++
++        return NewsArticleResource::make($editor->autosave($article, $this->adminUser($request), $version, $data)->loadCount('revisions'));
++    }
++
++    public function workflow(Request $request, NewsArticle $article, NewsArticleEditorService $editor): NewsArticleResource
++    {
++        $data = $request->validate([
++            'action' => ['required', Rule::in(['draft', 'schedule', 'publish', 'archive'])],
++            'lock_version' => ['required', 'integer', 'min:1'],
++            'scheduled_at' => ['required_if:action,schedule', 'prohibited_unless:action,schedule', 'date', 'after:now'],
++        ]);
++
++        $updated = $editor->transition(
++            $article,
++            $this->adminUser($request),
++            (int) $data['lock_version'],
++            $data['action'],
++            $data['scheduled_at'] ?? null,
++        );
++
++        return NewsArticleResource::make($updated->load(['translations', 'heroMedia'])->loadCount('revisions'));
++    }
++
++    public function revisions(NewsArticle $article): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
++    {
++        $revisions = $article->revisions()->with('editor')->paginate(50);
++
++        return NewsArticleRevisionResource::collection($revisions);
++    }
++
++    public function showRevision(NewsArticle $article, NewsArticleRevision $revision): NewsArticleRevisionResource
++    {
++        $revision = $article->revisions()->with('editor')->whereKey($revision->id)->firstOrFail();
++
++        return NewsArticleRevisionResource::make($revision);
++    }
++
++    public function restoreRevision(Request $request, NewsArticle $article, NewsArticleRevision $revision, NewsArticleEditorService $editor): NewsArticleResource
++    {
++        $data = $request->validate(['lock_version' => ['required', 'integer', 'min:1']]);
++        $restored = $editor->restoreRevision($article, $revision, $this->adminUser($request), (int) $data['lock_version']);
++
++        return NewsArticleResource::make($restored->load(['translations', 'heroMedia'])->loadCount('revisions'));
++    }
++
++    private function validatedEditorData(Request $request, ?NewsArticle $article, bool $requireVersion): array
++    {
++        $translations = $request->input('translations', []);
++        if (is_array($translations)) {
++            $unsupported = array_diff(array_keys($translations), NewsArticle::LOCALES);
++            if ($unsupported !== []) {
++                throw ValidationException::withMessages(['translations' => 'Only de, en, es, and ru translations are supported.']);
++            }
++        }
++
++        $rules = [
++            'status' => ['prohibited'],
++            'scheduled_at' => ['prohibited'],
++            'published_at' => ['prohibited'],
++            'archived_at' => ['prohibited'],
++            'category_key' => ['sometimes', 'nullable', 'string', 'max:80', 'regex:/^[a-z0-9][a-z0-9_-]*$/'],
++            'tags' => ['sometimes', 'array', 'max:20'],
++            'tags.*' => ['required', 'string', 'max:40', 'regex:/^[a-z0-9][a-z0-9-]*$/'],
++            'hero_media_asset_id' => [
++                'sometimes', 'nullable', 'integer',
++                Rule::exists('media_assets', 'id')->where(fn (QueryBuilder $query) => $query->where('context', 'news')->whereIn('type', ['image', 'video'])),
++            ],
++            'featured' => ['sometimes', 'boolean'],
++            'comments_enabled' => ['sometimes', 'boolean'],
++            'translations' => ['sometimes', 'array', 'max:4'],
++            'translations.*' => ['array'],
++            'translations.*.title' => ['sometimes', 'nullable', 'string', 'max:240'],
++            'translations.*.excerpt' => ['sometimes', 'nullable', 'string', 'max:1200'],
++            'translations.*.content_json' => ['sometimes', 'nullable', new NewsContentBlocks()],
++            'translations.*.seo_title' => ['sometimes', 'nullable', 'string', 'max:240'],
++            'translations.*.seo_description' => ['sometimes', 'nullable', 'string', 'max:1000'],
++            'translations.*.canonical_url' => ['sometimes', 'nullable', 'url:https', 'max:2048'],
++        ];
++
++        foreach (array_keys(is_array($translations) ? $translations : []) as $locale) {
++            $existingId = $article?->translations()->where('locale', $locale)->value('id');
++            $rules["translations.{$locale}.slug"] = [
++                'sometimes', 'nullable', 'string', 'max:190', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
++                Rule::unique('news_article_translations', 'slug')
++                    ->where(fn (QueryBuilder $query) => $query->where('locale', $locale))
++                    ->ignore($existingId),
++            ];
++        }
++
++        if ($requireVersion) {
++            $rules['lock_version'] = ['required', 'integer', 'min:1'];
++        } else {
++            $rules['lock_version'] = ['prohibited'];
++        }
++
++        return Validator::make($request->all(), $rules)->validate();
++    }
++
++    private function adminUser(Request $request): User
++    {
++        $user = $request->user();
++        abort_unless($user instanceof User && $user->isAdmin(), 403);
++
++        return $user;
++    }
++}
+diff --git a/app/Http/Controllers/Api/V1/NewsArticleMediaController.php b/app/Http/Controllers/Api/V1/NewsArticleMediaController.php
+new file mode 100644
+index 00000000..44f31072
+--- /dev/null
++++ b/app/Http/Controllers/Api/V1/NewsArticleMediaController.php
+@@ -0,0 +1,120 @@
++<?php
++
++namespace App\Http\Controllers\Api\V1;
++
++use App\Http\Controllers\Controller;
++use App\Http\Resources\Api\MediaAssetResource;
++use App\Models\MediaAsset;
++use App\Models\NewsArticle;
++use App\Models\User;
++use App\Services\MediaService;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\Request;
++use Illuminate\Http\UploadedFile;
++use Illuminate\Support\Facades\Storage;
++use Illuminate\Validation\Rule;
++use Symfony\Component\HttpFoundation\Response;
++
++class NewsArticleMediaController extends Controller
++{
++    public function store(Request $request, MediaService $mediaService): JsonResponse
++    {
++        $kind = $request->input('kind');
++        $image = $kind === 'image';
++        $video = $kind === 'video';
++        $limit = $image
++            ? (int) config('hunthub.upload_limits.news_image_kb', 20 * 1024)
++            : (int) config('hunthub.upload_limits.news_video_kb', 200 * 1024);
++
++        $fileRules = ['required', 'file', 'max:'.$limit];
++        if ($image) {
++            $fileRules = [...$fileRules, 'image', 'mimetypes:image/jpeg,image/png,image/webp,image/avif', 'mimes:jpg,jpeg,png,webp,avif'];
++        } elseif ($video) {
++            $fileRules = [...$fileRules, 'mimetypes:video/mp4,video/quicktime,video/webm', 'mimes:mp4,mov,webm'];
++        }
++
++        $validated = $request->validate([
++            'kind' => ['required', Rule::in(['image', 'video'])],
++            'file' => $fileRules,
++            'alt_text' => ['nullable', 'string', 'max:300'],
++            'article_id' => ['nullable', 'integer', 'exists:news_articles,id'],
++        ]);
++
++        $user = $request->user();
++        abort_unless($user instanceof User && $user->isAdmin(), 403);
++
++        $options = [
++            'disk' => 'local',
++            'visibility' => 'private',
++            'alt_text' => $validated['alt_text'] ?? null,
++            'metadata' => ['purpose' => 'news-editor', 'media_kind' => $validated['kind']],
++        ];
++
++        if (! empty($validated['article_id'])) {
++            $options['attachable'] = NewsArticle::query()->findOrFail($validated['article_id']);
++        }
++
++        /** @var UploadedFile $file */
++        $file = $validated['file'];
++        $asset = $mediaService->store($file, $user, 'news', $options);
++
++        return MediaAssetResource::make($asset)->response()->setStatusCode(201);
++    }
++
++    public function showAdmin(MediaAsset $asset): MediaAssetResource
++    {
++        abort_unless($asset->context === 'news' && $asset->visibility === 'private' && $asset->status === 'ready', 404);
++
++        return MediaAssetResource::make($asset);
++    }
++
++    public function show(MediaAsset $asset, string $variant): Response
++    {
++        abort_unless($asset->context === 'news' && $asset->visibility === 'private' && $asset->status === 'ready', 404);
++
++        $path = match ($variant) {
++            'original' => $asset->path,
++            'thumbnail' => $asset->thumbnail_path,
++            default => null,
++        };
++        abort_unless(is_string($path) && $path !== '', 404);
++        abort_unless(Storage::disk($asset->disk)->exists($path), 404);
++
++        return Storage::disk($asset->disk)->response($path, $asset->original_name, [
++            'Content-Type' => (string) $asset->mime_type,
++            'X-Content-Type-Options' => 'nosniff',
++            'Cache-Control' => 'private, max-age=60',
++        ], 'inline');
++    }
++
++    public function articleMedia(NewsArticle $article): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
++    {
++        $ids = [];
++        if ($article->hero_media_asset_id) {
++            $ids[] = (int) $article->hero_media_asset_id;
++        }
++
++        foreach ($article->translations()->get(['content_json']) as $translation) {
++            foreach (($translation->content_json ?? []) as $block) {
++                if (! is_array($block)) {
++                    continue;
++                }
++
++                foreach (['media_id', 'poster_media_id', 'before_media_id', 'after_media_id'] as $key) {
++                    if (! empty($block[$key])) {
++                        $ids[] = (int) $block[$key];
++                    }
++                }
++            }
++        }
++
++        $assets = MediaAsset::query()
++            ->where('context', 'news')
++            ->where('visibility', 'private')
++            ->where('status', 'ready')
++            ->whereIn('id', array_values(array_unique($ids)))
++            ->get();
++
++        return MediaAssetResource::collection($assets);
++    }
++}
+diff --git a/app/Http/Controllers/Api/V1/NewsArticlePreviewController.php b/app/Http/Controllers/Api/V1/NewsArticlePreviewController.php
+new file mode 100644
+index 00000000..b87a9dcb
+--- /dev/null
++++ b/app/Http/Controllers/Api/V1/NewsArticlePreviewController.php
+@@ -0,0 +1,79 @@
++<?php
++
++namespace App\Http\Controllers\Api\V1;
++
++use App\Http\Controllers\Controller;
++use App\Http\Resources\Api\MediaAssetResource;
++use App\Http\Resources\Api\NewsArticleTranslationResource;
++use App\Models\MediaAsset;
++use App\Models\NewsArticle;
++use App\Models\User;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\URL;
++use Illuminate\Validation\Rule;
++
++class NewsArticlePreviewController extends Controller
++{
++    public function issue(Request $request, NewsArticle $article): JsonResponse
++    {
++        $data = $request->validate(['locale' => ['required', Rule::in(NewsArticle::LOCALES)]]);
++        $user = $request->user();
++        abort_unless($user instanceof User && $user->isAdmin(), 403);
++
++        $expiresAt = now()->addMinutes(10);
++        $url = URL::temporarySignedRoute(
++            'api.v1.news.preview.show',
++            $expiresAt,
++            ['article' => $article->id, 'locale' => $data['locale']],
++        );
++
