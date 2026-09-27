@@ -227,6 +227,23 @@
     </section>
 </form>
 
+@if($hiddenProfileFields->isNotEmpty())
+<section class="hh-card hh-card-compact">
+    <h2>Ausgeblendete Profilinhalte</h2>
+    @foreach($hiddenProfileFields as $field => $event)
+        <div style="margin-bottom:16px;">
+            <strong>{{ $field === 'bio' ? 'Bio' : 'Headline' }}</strong>
+            <p class="hh-muted">{{ $event->old_value }}</p>
+            <form method="post" action="{{ route('admin.profile-moderation.restore-field', $editedUser) }}">
+                @csrf
+                <input type="hidden" name="field" value="{{ $field }}">
+                <button class="hh-secondary-button" type="submit">Wiederherstellen</button>
+            </form>
+        </div>
+    @endforeach
+</section>
+@endif
+
 <section class="hh-card hh-card-compact">
     <h2>Schnellaktionen</h2>
     <div class="hh-admin-actions">
@@ -242,20 +259,32 @@
         </form>
 
         @if(filled($profile->headline))
-            <form method="post" action="{{ route('admin.profile-moderation.clear-field', $editedUser) }}" onsubmit="return confirm('Kurzbeschreibung wirklich entfernen?');">
+            <form method="post" action="{{ route('admin.profile-moderation.hide-field', $editedUser) }}" onsubmit="return confirm('Kurzbeschreibung ausblenden? Sie kann später wiederhergestellt werden.');">
                 @csrf
                 <input type="hidden" name="field" value="headline">
                 <input type="hidden" name="reason" value="Admin-Moderation">
-                <button class="hh-secondary-button" type="submit">Headline entfernen</button>
+                <button class="hh-secondary-button" type="submit">Headline ausblenden</button>
+            </form>
+            <form method="post" action="{{ route('admin.profile-moderation.clear-field', $editedUser) }}" onsubmit="return confirm('Kurzbeschreibung endgültig leeren?');">
+                @csrf
+                <input type="hidden" name="field" value="headline">
+                <input type="hidden" name="reason" value="Admin-Moderation">
+                <button class="hh-secondary-button" type="submit">Headline leeren</button>
             </form>
         @endif
 
         @if(filled($profile->bio))
-            <form method="post" action="{{ route('admin.profile-moderation.clear-field', $editedUser) }}" onsubmit="return confirm('Bio wirklich entfernen?');">
+            <form method="post" action="{{ route('admin.profile-moderation.hide-field', $editedUser) }}" onsubmit="return confirm('Bio ausblenden? Sie kann später wiederhergestellt werden.');">
                 @csrf
                 <input type="hidden" name="field" value="bio">
                 <input type="hidden" name="reason" value="Admin-Moderation">
-                <button class="hh-secondary-button" type="submit">Bio entfernen</button>
+                <button class="hh-secondary-button" type="submit">Bio ausblenden</button>
+            </form>
+            <form method="post" action="{{ route('admin.profile-moderation.clear-field', $editedUser) }}" onsubmit="return confirm('Bio endgültig leeren?');">
+                @csrf
+                <input type="hidden" name="field" value="bio">
+                <input type="hidden" name="reason" value="Admin-Moderation">
+                <button class="hh-secondary-button" type="submit">Bio leeren</button>
             </form>
         @endif
     </div>
