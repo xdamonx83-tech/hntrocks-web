@@ -25,6 +25,8 @@ Header always set X-Robots-Tag "noindex, nofollow" "expr=%{THE_REQUEST} =~ m#^[A
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^ready-lobbies/[^/]+/feedback/?$ app/index.html [L]
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
+    RewriteRule ^rocks(?:/(?:shop|inventory))?/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^moments/create/?$ app/index.html [L]
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^cups/create/?$ app/index.html [L]
