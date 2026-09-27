@@ -12,6 +12,7 @@ class NewsContentDocument
     private const LAYOUTS = ['normal', 'wide', 'full', 'float'];
     private const RATIOS = ['33-67', '40-60', '50-50', '60-40', '67-33'];
     private const FONT_SIZES = ['14px', '16px', '18px', '20px', '24px', '28px', '32px'];
+    private const DIVIDERS = ['large' => '/assets/news/dividers/divider-big.webp', 'small' => '/assets/news/dividers/divider-small.webp'];
 
     public static function isV2(mixed $value): bool
     {
@@ -27,7 +28,11 @@ class NewsContentDocument
         }
         $assets = [];
         $count = 0;
-        foreach ($document['content'] as $node) self::node($node, 0, $count, $assets);
+        $blockTypes = ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'horizontalRule', 'hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery', 'hntMediaTextLayout', 'hntQuote', 'hntDivider'];
+        foreach ($document['content'] as $node) {
+            if (! is_array($node) || ! in_array($node['type'] ?? null, $blockTypes, true)) throw new InvalidArgumentException('News document content must contain block nodes.');
+            self::node($node, 0, $count, $assets);
+        }
         return $assets;
     }
 
@@ -91,9 +96,10 @@ class NewsContentDocument
             foreach ($node['marks'] ?? [] as $mark) self::mark($mark);
             return;
         }
+        $childLimit = $type === 'hntMediaTextLayout' ? 1000 : 150;
         if (in_array($type, ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'listItem', 'hntMediaTextLayout', 'hntQuote'], true)
-            && ! self::list($children, 0, 150)) throw new InvalidArgumentException('Invalid News children.');
-        if (! in_array($type, ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'listItem', 'horizontalRule', 'hardBreak', 'hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery', 'hntMediaTextLayout', 'hntQuote'], true)) throw new InvalidArgumentException('Unsupported News node.');
+            && ! self::list($children, 0, $childLimit)) throw new InvalidArgumentException('Invalid News children.');
+        if (! in_array($type, ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'listItem', 'horizontalRule', 'hardBreak', 'hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery', 'hntMediaTextLayout', 'hntQuote', 'hntDivider'], true)) throw new InvalidArgumentException('Unsupported News node.');
         if (in_array($type, ['horizontalRule', 'hardBreak'], true)) { self::keys($node, ['type']); return; }
         if ($type === 'paragraph' || $type === 'heading') {
             self::keys($attrs, $type === 'heading' ? ['level', 'textAlign'] : ['textAlign']);
@@ -126,7 +132,7 @@ class NewsContentDocument
                 self::string($item['caption'] ?? '', 1000);
             }
         } elseif ($type === 'hntMediaTextLayout') {
-            self::keys($attrs, ['mediaAssetId', 'mediaType', 'posterAssetId', 'position', 'ratio', 'alt', 'caption', 'text']);
+            self::keys($attrs, ['mediaAssetId', 'mediaType', 'posterAssetId', 'position', 'ratio', 'alt', 'caption', 'text', 'textContent']);
             if (! in_array($attrs['mediaType'] ?? null, ['image', 'video'], true) || ! in_array($attrs['position'] ?? null, ['left', 'right'], true)
                 || ! in_array($attrs['ratio'] ?? null, self::RATIOS, true)) throw new InvalidArgumentException('Invalid media text layout.');
             self::mediaAttr($attrs, 'mediaAssetId', $attrs['mediaType'], $assets);
@@ -137,16 +143,38 @@ class NewsContentDocument
                 self::string($attrs['text'], 20000);
                 if (self::isEditorPlaceholder($attrs['text'])) throw new InvalidArgumentException('Editor placeholder cannot be saved.');
             }
+            if (array_key_exists('textContent', $attrs)) {
+                $legacy = $attrs['textContent'];
+                if (is_string($legacy)) self::string($legacy, 20000);
+                elseif (self::list($legacy, 0, 1000)) {
+                    foreach ($legacy as $entry) {
+                        if (is_string($entry)) self::string($entry, 20000);
+                        elseif (is_array($entry)) self::node($entry, $depth + 1, $count, $assets);
+                        else throw new InvalidArgumentException('Invalid legacy media text.');
+                    }
+                } else throw new InvalidArgumentException('Invalid legacy media text.');
+            }
         } elseif ($type === 'hntQuote') {
             self::keys($attrs, ['author', 'backgroundMediaAssetId', 'backgroundPosition', 'overlay']);
             self::string($attrs['author'] ?? '', 240);
             if (! in_array($attrs['backgroundPosition'] ?? null, ['center', 'top', 'bottom'], true)
                 || ! in_array($attrs['overlay'] ?? null, [40, 60, 80], true)) throw new InvalidArgumentException('Invalid HNT quote appearance.');
             if (($attrs['backgroundMediaAssetId'] ?? null) !== null) self::mediaAttr($attrs, 'backgroundMediaAssetId', 'image', $assets);
+        } elseif ($type === 'hntDivider') {
+            self::keys($attrs, ['variant']);
+            if (! in_array($attrs['variant'] ?? null, ['large', 'small'], true)) throw new InvalidArgumentException('Invalid HNT divider variant.');
         } else self::keys($attrs, []);
 
         if (in_array($type, ['hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery'], true) && isset($node['content'])) throw new InvalidArgumentException('Media nodes cannot have children.');
-        if ($type === 'blockquote' || $type === 'bulletList' || $type === 'orderedList' || $type === 'listItem' || $type === 'hntMediaTextLayout' || $type === 'hntQuote') {
+        if (in_array($type, ['blockquote', 'bulletList', 'orderedList', 'listItem', 'hntMediaTextLayout', 'hntQuote'], true)) {
+            $blockTypes = ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'horizontalRule', 'hntImage', 'hntVideo', 'hntBeforeAfter', 'hntGallery', 'hntMediaTextLayout', 'hntQuote', 'hntDivider'];
+            foreach ($children as $child) {
+                $childType = $child['type'] ?? null;
+                if (($type === 'bulletList' || $type === 'orderedList') ? $childType !== 'listItem'
+                    : ($type === 'listItem' ? ! in_array($childType, $blockTypes, true) : ! in_array($childType, $blockTypes, true))) {
+                    throw new InvalidArgumentException('Invalid News block nesting.');
+                }
+            }
             foreach ($children as $child) self::node($child, $depth + 1, $count, $assets);
         } elseif (in_array($type, ['paragraph', 'heading'], true)) {
             foreach ($children as $child) {
@@ -217,10 +245,12 @@ class NewsContentDocument
     {
         if (($node['type'] ?? null) === 'text') return self::isEditorPlaceholder($node['text'] ?? '') ? '' : ($node['text'] ?? '');
         if (($node['type'] ?? null) === 'hardBreak') return "\n";
-        if (($node['type'] ?? null) === 'hntMediaTextLayout' && empty($node['content']) && is_string($node['attrs']['text'] ?? null)) {
-            return self::isEditorPlaceholder($node['attrs']['text']) ? '' : $node['attrs']['text'];
+        if (($node['type'] ?? null) === 'hntMediaTextLayout' && empty($node['content'])) {
+            $legacy = $node['attrs']['textContent'] ?? $node['attrs']['text'] ?? null;
+            if (is_string($legacy)) return self::isEditorPlaceholder($legacy) ? '' : $legacy;
+            if (is_array($legacy)) return implode("\n", array_map(fn ($entry) => is_string($entry) ? $entry : (is_array($entry) ? self::plainNode($entry) : ''), $legacy));
         }
-        $separator = in_array($node['type'] ?? null, ['blockquote', 'hntQuote'], true) ? "\n"
+        $separator = in_array($node['type'] ?? null, ['blockquote', 'hntQuote', 'hntMediaTextLayout'], true) ? "\n"
             : (in_array($node['type'] ?? null, ['paragraph', 'heading'], true) ? '' : ' ');
         return implode($separator, array_map(self::plainNode(...), $node['content'] ?? []));
     }
@@ -248,6 +278,7 @@ class NewsContentDocument
         if (in_array($type, ['paragraph', 'heading'], true)) {
             $tag = $type === 'heading' ? 'h'.(int) ($attrs['level'] ?? 2) : 'p';
             $align = in_array($attrs['textAlign'] ?? null, self::ALIGNMENTS, true) ? ' style="text-align:'.e($attrs['textAlign']).'"' : '';
+            if ($type === 'paragraph' && $children === '') return '<p class="news-empty-paragraph"><br></p>';
             return "<{$tag}{$align}>{$children}</{$tag}>";
         }
         if (in_array($type, ['blockquote', 'bulletList', 'orderedList', 'listItem'], true)) {
@@ -259,16 +290,18 @@ class NewsContentDocument
             $mediaHtml = self::mediaFigure($attrs, $media, ($attrs['mediaType'] ?? '') === 'video');
             $position = $attrs['position'] ?? 'left';
             $ratio = $attrs['ratio'] ?? '50-50';
-            if ($children === '' && is_string($attrs['text'] ?? null) && $attrs['text'] !== '' && ! self::isEditorPlaceholder($attrs['text'])) {
-                $children = implode('', array_map(fn ($paragraph) => '<p>'.nl2br(e($paragraph), false).'</p>', preg_split('/\n{2,}/', $attrs['text']) ?: []));
-            }
+            if ($children === '') $children = self::renderLegacyMediaText($attrs['textContent'] ?? $attrs['text'] ?? null);
             return '<section class="news-media-text '.e($position).' ratio-'.e($ratio).'"><div class="news-media-text-media">'.$mediaHtml.'</div><div class="news-media-text-copy">'.$children.'</div></section>';
+        }
+        if ($type === 'hntDivider') {
+            $variant = ($attrs['variant'] ?? '') === 'small' ? 'small' : 'large';
+            return '<figure class="news-hnt-divider news-hnt-divider-'.$variant.'"><img src="'.e(self::DIVIDERS[$variant]).'" alt="" aria-hidden="true" loading="lazy"></figure>';
         }
         if ($type === 'hntQuote') {
             $background = $media[$attrs['backgroundMediaAssetId'] ?? 0] ?? null;
             $position = $attrs['backgroundPosition'] ?? 'center';
             $image = $background ? '<img class="news-hnt-quote-bg" src="'.e($background['url']).'" alt="" style="object-position:'.e($position).'">' : '';
-            $author = ($attrs['author'] ?? '') !== '' ? '<cite>'.e($attrs['author']).'</cite>' : '';
+            $author = '<cite>'.e(($attrs['author'] ?? '') !== '' ? $attrs['author'] : '— HNT.ROCKS').'</cite>';
             return '<aside class="news-hnt-quote overlay-'.(int) ($attrs['overlay'] ?? 60).'">'.$image.'<blockquote>'.$children.'</blockquote>'.$author.'</aside>';
         }
         if ($type === 'hntGallery') {
@@ -292,5 +325,20 @@ class NewsContentDocument
         $body = $video ? '<video controls preload="metadata" src="'.e($asset['url']).'"></video>'
             : '<img src="'.e($asset['url']).'" alt="'.e($attrs['alt'] ?? '').'">';
         return '<figure>'.$body.(! empty($attrs['caption']) ? '<figcaption>'.e($attrs['caption']).'</figcaption>' : '').'</figure>';
+    }
+
+    private static function renderLegacyMediaText(mixed $legacy): string
+    {
+        if (is_string($legacy)) {
+            if ($legacy === '' || self::isEditorPlaceholder($legacy)) return '';
+            return implode('', array_map(fn ($paragraph) => $paragraph === '' ? '<p class="news-empty-paragraph"><br></p>' : '<p>'.e($paragraph).'</p>', explode("\n", $legacy)));
+        }
+        if (! is_array($legacy)) return '';
+        $html = '';
+        foreach ($legacy as $entry) {
+            if (is_string($entry)) $html .= $entry === '' ? '<p class="news-empty-paragraph"><br></p>' : '<p>'.e($entry).'</p>';
+            elseif (is_array($entry)) $html .= self::renderNode($entry, []);
+        }
+        return $html;
     }
 }

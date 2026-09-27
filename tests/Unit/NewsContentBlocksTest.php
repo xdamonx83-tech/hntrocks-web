@@ -104,6 +104,73 @@ class NewsContentBlocksTest extends TestCase
         $this->assertStringNotContainsString('<script>', $html);
     }
 
+    public function test_empty_paragraphs_and_hard_breaks_survive_validation_and_server_rendering(): void
+    {
+        foreach ([0, 1, 4] as $emptyCount) {
+            $content = [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'A']]]];
+            for ($index = 0; $index < $emptyCount; $index++) $content[] = ['type' => 'paragraph'];
+            $content[] = ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'B']]];
+            $document = ['schema_version' => 2, 'type' => 'doc', 'content' => $content];
+            $this->assertSame([], NewsContentDocument::validate($document));
+            $html = NewsContentDocument::render($document, []);
+            $this->assertSame($emptyCount, substr_count($html, 'class="news-empty-paragraph"'));
+            $this->assertSame($emptyCount, substr_count($html, '<br>'));
+            $this->assertSame($content, $document['content']);
+            $expectedText = 'A'.str_repeat("\n", $emptyCount + 1).'B';
+            $this->assertSame($expectedText, NewsContentDocument::plainText($document));
+        }
+
+        $hardBreak = ['schema_version' => 2, 'type' => 'doc', 'content' => [[
+            'type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'First'], ['type' => 'hardBreak'], ['type' => 'text', 'text' => 'Second']],
+        ]]];
+        $this->assertSame([], NewsContentDocument::validate($hardBreak));
+        $this->assertSame('<p>First<br>Second</p>', NewsContentDocument::render($hardBreak, []));
+    }
+
+    public function test_media_text_keeps_repeated_empty_paragraphs_and_legacy_newlines(): void
+    {
+        $layout = ['type' => 'hntMediaTextLayout', 'attrs' => ['mediaAssetId' => 33, 'mediaType' => 'image', 'posterAssetId' => null, 'position' => 'left', 'ratio' => '50-50', 'alt' => '', 'caption' => ''], 'content' => [
+            ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'A']]],
+            ['type' => 'paragraph'], ['type' => 'paragraph'], ['type' => 'paragraph'],
+            ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'B']]],
+            ['type' => 'heading', 'attrs' => ['level' => 2], 'content' => [['type' => 'text', 'text' => 'Heading']]],
+            ['type' => 'bulletList', 'content' => [['type' => 'listItem', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'List item']]]]]]],
+        ]];
+        $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [$layout]];
+        $this->assertSame([33 => 'image'], NewsContentDocument::validate($document));
+        $html = NewsContentDocument::render($document, [33 => ['url' => '/media/image']]);
+        $this->assertSame(3, substr_count($html, 'class="news-empty-paragraph"'));
+        $this->assertStringContainsString('<h2>Heading</h2><ul><li><p>List item</p></li></ul>', $html);
+
+        $legacy = $document;
+        $legacy['content'][0] = ['type' => 'hntMediaTextLayout', 'attrs' => ['mediaAssetId' => 33, 'mediaType' => 'image', 'posterAssetId' => null, 'position' => 'left', 'ratio' => '50-50', 'alt' => '', 'caption' => '', 'text' => "A\n\n\nB"]];
+        $legacyHtml = NewsContentDocument::render($legacy, [33 => ['url' => '/media/image']]);
+        $this->assertSame([33 => 'image'], NewsContentDocument::validate($legacy));
+        $this->assertSame(2, substr_count($legacyHtml, 'class="news-empty-paragraph"'));
+
+        $textContent = $legacy;
+        $textContent['content'][0]['attrs']['textContent'] = ['A', '', 'B'];
+        unset($textContent['content'][0]['attrs']['text']);
+        $this->assertSame([33 => 'image'], NewsContentDocument::validate($textContent));
+        $this->assertSame(1, substr_count(NewsContentDocument::render($textContent, [33 => ['url' => '/media/image']]), 'class="news-empty-paragraph"'));
+    }
+
+    public function test_hnt_dividers_are_enum_backed_decorative_and_render_responsively(): void
+    {
+        foreach (['large', 'small'] as $variant) {
+            $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [['type' => 'hntDivider', 'attrs' => ['variant' => $variant]]]];
+            $this->assertSame([], NewsContentDocument::validate($document));
+            $html = NewsContentDocument::render($document, []);
+            $asset = $variant === 'large' ? 'divider-big.webp' : 'divider-small.webp';
+            $this->assertStringContainsString('news-hnt-divider-'.$variant, $html);
+            $this->assertStringContainsString('/assets/news/dividers/'.$asset, $html);
+            $this->assertStringContainsString('alt="" aria-hidden="true"', $html);
+            $this->assertStringNotContainsString($variant, NewsContentDocument::plainText($document));
+        }
+        $invalid = ['schema_version' => 2, 'type' => 'doc', 'content' => [['type' => 'hntDivider', 'attrs' => ['variant' => 'https://evil.test/image.png']]]];
+        $this->assertNotEmpty($this->validate($invalid));
+    }
+
     public function test_v2_normal_quotes_keep_paragraphs_and_hard_breaks(): void
     {
         $document = ['schema_version' => 2, 'type' => 'doc', 'content' => [[
@@ -173,7 +240,7 @@ class NewsContentBlocksTest extends TestCase
         ]]];
         $this->assertSame([32 => 'image'], NewsContentDocument::validate($legacy));
         $legacyHtml = NewsContentDocument::render($legacy, [32 => ['url' => '/media/image']]);
-        $this->assertStringContainsString('<div class="news-media-text-copy"><p>First paragraph.</p><p>Second paragraph.</p></div>', $legacyHtml);
+        $this->assertStringContainsString('<div class="news-media-text-copy"><p>First paragraph.</p><p class="news-empty-paragraph"><br></p><p>Second paragraph.</p></div>', $legacyHtml);
 
         foreach (["Click here and write your story...", "Click here and write your story…"] as $placeholder) {
             $legacy['content'][0]['attrs']['text'] = $placeholder;

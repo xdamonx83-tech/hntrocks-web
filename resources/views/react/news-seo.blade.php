@@ -39,6 +39,22 @@
         </section>
     </main>
 @else
+    <style>
+        article p.news-empty-paragraph{display:block;min-height:1.65em;margin:.45em 0}
+        article .news-media-text{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+        article .news-media-text.ratio-33-67{grid-template-columns:33fr 67fr}
+        article .news-media-text.ratio-40-60{grid-template-columns:40fr 60fr}
+        article .news-media-text.ratio-60-40{grid-template-columns:60fr 40fr}
+        article .news-media-text.ratio-67-33{grid-template-columns:67fr 33fr}
+        article .news-media-text.right .news-media-text-media{order:2}
+        article .news-media-text.right .news-media-text-copy{order:1}
+        article .news-media-text img,article .news-media-text video{display:block;max-width:100%;height:auto}
+        article .news-media-text-copy>p{margin:.65em 0;line-height:1.65}
+        article figure.news-hnt-divider{display:flex;justify-content:center;width:100%;margin:20px 0}
+        article figure.news-hnt-divider img{display:block;width:100%;max-width:1100px;height:auto;object-fit:contain;background:transparent}
+        article figure.news-hnt-divider-small img{max-width:860px}
+        @media(max-width:700px){article .news-media-text{grid-template-columns:1fr}article .news-media-text.right .news-media-text-media,article .news-media-text.right .news-media-text-copy{order:initial}}
+    </style>
     <main style="max-width:980px;margin:48px auto;padding:24px;color:#f2e8d8;background:#171714;font-family:Inter,Arial,sans-serif">
         <p><a href="{{ route('news.overview.locale', ['locale' => $locale]) }}">← News</a> · {{ $article['category_key'] }}</p>
         <h1>{{ $translation->title }}</h1>
