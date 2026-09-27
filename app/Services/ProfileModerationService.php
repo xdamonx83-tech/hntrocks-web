@@ -134,7 +134,7 @@ class ProfileModerationService
             ];
         }
 
-        if (preg_match('~\b(i(?:\\'|’)ll\s+kill\s+you|i\s+will\s+kill\s+you|ich\s+(?:bring|mach)\s+dich\s+um|ich\s+töte\s+dich|te\s+voy\s+a\s+matar|я\s+тебя\s+убью)\b~iu', $content)) {
+        if (preg_match('~\b(i(?:\'|’)ll\s+kill\s+you|i\s+will\s+kill\s+you|ich\s+(?:bring|mach)\s+dich\s+um|ich\s+töte\s+dich|te\s+voy\s+a\s+matar|я\s+тебя\s+убью)\b~iu', $content)) {
             $findings[] = [
                 'category' => 'threats',
                 'score' => 90,
