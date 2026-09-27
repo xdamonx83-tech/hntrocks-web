@@ -1198,3 +1198,403 @@ index 00000000..b46987fd
 +            $article->refresh()->load('translations', 'heroMedia');
 +            $this->recordRevision($article, $editor, $revisionType);
 +
++            return $article;
++        });
++    }
++
++    public function publishDue(int $limit = 100): int
++    {
++        $ids = NewsArticle::query()
++            ->where('status', NewsArticle::STATUS_SCHEDULED)
++            ->whereNotNull('scheduled_at')
++            ->where('scheduled_at', '<=', now())
++            ->orderBy('scheduled_at')
++            ->limit(max(1, min(500, $limit)))
++            ->pluck('id');
++
++        $published = 0;
++
++        foreach ($ids as $id) {
++            $didPublish = DB::transaction(function () use ($id): bool {
++                $article = NewsArticle::query()->lockForUpdate()->find($id);
++                if (! $article || $article->status !== NewsArticle::STATUS_SCHEDULED || ! $article->scheduled_at?->lte(now())) {
++                    return false;
++                }
++
++                try {
++                    $this->assertPublishable($article);
++                } catch (ValidationException) {
++                    report(new \RuntimeException('Scheduled news article '.$article->id.' is no longer publishable.'));
++
++                    return false;
++                }
++
++                $article->forceFill([
++                    'status' => NewsArticle::STATUS_PUBLISHED,
++                    'published_at' => $article->scheduled_at,
++                    'published_by_user_id' => null,
++                    'updated_by_user_id' => null,
++                    'scheduled_at' => null,
++                    'archived_at' => null,
++                    'lock_version' => $article->lock_version + 1,
++                ])->save();
++                $article->refresh()->load('translations');
++                $this->recordRevision($article, null, 'scheduled_publish');
++
++                return true;
++            });
++
++            $published += $didPublish ? 1 : 0;
++        }
++
++        return $published;
++    }
++
++    public function restoreRevision(NewsArticle $routeArticle, NewsArticleRevision $revision, User $editor, int $expectedVersion): NewsArticle
++    {
++        return DB::transaction(function () use ($routeArticle, $revision, $editor, $expectedVersion): NewsArticle {
++            $article = NewsArticle::query()->lockForUpdate()->findOrFail($routeArticle->id);
++            $this->assertVersion($article, $expectedVersion);
++
++            $revision = $article->revisions()->whereKey($revision->id)->firstOrFail();
++            $snapshot = $revision->snapshot_json;
++            $attributes = Arr::only($snapshot, self::EDITABLE_FIELDS);
++            if (! empty($attributes['hero_media_asset_id']) && ! MediaAsset::query()
++                ->whereKey($attributes['hero_media_asset_id'])
++                ->where('context', 'news')
++                ->where('visibility', 'private')
++                ->where('status', 'ready')
++                ->exists()) {
++                $attributes['hero_media_asset_id'] = null;
++            }
++            $article->forceFill($attributes);
++            $article->forceFill([
++                'updated_by_user_id' => $editor->id,
++                'lock_version' => $article->lock_version + 1,
++            ])->save();
++
++            $restoredLocales = [];
++            foreach (($snapshot['translations'] ?? []) as $locale => $translationData) {
++                if (! in_array($locale, NewsArticle::LOCALES, true) || ! is_array($translationData)) {
++                    continue;
++                }
++
++                $this->assertRevisionTranslationCanBeRestored($article, $locale, $translationData);
++
++                $restoredLocales[] = $locale;
++                $article->translations()->updateOrCreate(
++                    ['locale' => $locale],
++                    Arr::only($translationData, self::TRANSLATION_FIELDS),
++                );
++            }
++            $article->translations()->whereNotIn('locale', $restoredLocales)->delete();
++
++            $article->refresh()->load('translations', 'heroMedia');
++            $this->recordRevision($article, $editor, 'restore');
++
++            return $article;
++        });
++    }
++
++    public function snapshot(NewsArticle $article): array
++    {
++        $article->loadMissing('translations');
++
++        return [
++            'status' => $article->status,
++            'category_key' => $article->category_key,
++            'tags' => array_values($article->tags ?? []),
++            'hero_media_asset_id' => $article->hero_media_asset_id ? (int) $article->hero_media_asset_id : null,
++            'featured' => (bool) $article->featured,
++            'comments_enabled' => (bool) $article->comments_enabled,
++            'scheduled_at' => $article->scheduled_at?->toIso8601String(),
++            'published_at' => $article->published_at?->toIso8601String(),
++            'archived_at' => $article->archived_at?->toIso8601String(),
++            'translations' => $article->translations
++                ->sortBy('locale')
++                ->mapWithKeys(function (NewsArticleTranslation $translation): array {
++                    $fields = [];
++                    foreach (self::TRANSLATION_FIELDS as $field) {
++                        $fields[$field] = $translation->getAttribute($field);
++                    }
++
++                    return [$translation->locale => $fields];
++                })
++                ->all(),
++        ];
++    }
++
++    private function applyEditorData(NewsArticle $article, array $data): void
++    {
++        $attributes = Arr::only($data, self::EDITABLE_FIELDS);
++        if (array_key_exists('tags', $attributes)) {
++            $attributes['tags'] = array_values(array_unique(array_map('strval', $attributes['tags'] ?? [])));
++        }
++
++        if (array_key_exists('hero_media_asset_id', $attributes) && $attributes['hero_media_asset_id'] !== null) {
++            $asset = MediaAsset::query()
++                ->whereKey($attributes['hero_media_asset_id'])
++                ->where('context', 'news')
++                ->where('visibility', 'private')
++                ->where('status', 'ready')
++                ->whereIn('type', ['image', 'video'])
++                ->first();
++
++            if (! $asset) {
++                throw ValidationException::withMessages(['hero_media_asset_id' => 'Choose an uploaded news image or video.']);
++            }
++        }
++
++        $article->fill($attributes);
++
++        foreach (($data['translations'] ?? []) as $locale => $translationData) {
++            if (! in_array($locale, NewsArticle::LOCALES, true)) {
++                throw ValidationException::withMessages(['translations' => 'Only de, en, es, and ru translations are supported.']);
++            }
++
++            $values = Arr::only($translationData, self::TRANSLATION_FIELDS);
++            if (filled($values['slug'] ?? null)) {
++                $values['slug'] = Str::slug($values['slug']);
++            } elseif (isset($values['title']) && filled($values['title'])) {
++                $values['slug'] = Str::slug($values['title']);
++            } elseif (array_key_exists('slug', $values)) {
++                $values['slug'] = null;
++            }
++
++            if ($values === []) {
++                continue;
++            }
++
++            $existing = $article->translations()->where('locale', $locale)->first();
++            if (! empty($values['slug'])) {
++                $slugExists = NewsArticleTranslation::query()
++                    ->where('locale', $locale)
++                    ->where('slug', $values['slug'])
++                    ->when($existing, fn ($query) => $query->where('id', '!=', $existing->id))
++                    ->exists();
++
++                if ($slugExists) {
++                    throw ValidationException::withMessages(["translations.{$locale}.slug" => 'This slug is already used for the selected locale.']);
++                }
++            }
++
++            if ($existing) {
++                $existing->fill($values);
++                if ($existing->isDirty()) {
++                    $existing->save();
++                }
++            } else {
++                $article->translations()->create(['locale' => $locale] + $values);
++            }
++        }
++    }
++
++    private function assertVersion(NewsArticle $article, int $expectedVersion): void
++    {
++        abort_if($article->lock_version !== $expectedVersion, 409, 'This article changed since it was loaded. Refresh before saving.');
++    }
++
++    private function assertPublishable(NewsArticle $article): void
++    {
++        $translations = $article->translations()->get()->keyBy('locale');
++        $missing = [];
++
++        foreach (NewsArticle::LOCALES as $locale) {
++            $translation = $translations->get($locale);
++            if (! $translation
++                || trim((string) $translation->title) === ''
++                || trim((string) $translation->slug) === ''
++                || ! is_array($translation->content_json)
++                || $translation->content_json === []
++                || $this->hasInvalidContent($locale, $translation->content_json)) {
++                $missing[] = $locale;
++            }
++        }
++
++        if ($missing !== []) {
++            throw ValidationException::withMessages([
++                'translations' => 'Complete all locales and use valid news media before publishing: '.implode(', ', $missing).'.',
++            ]);
++        }
++    }
++
++    private function recordRevision(NewsArticle $article, ?User $editor, string $type): void
++    {
++        $number = ((int) $article->revisions()->max('revision_number')) + 1;
++
++        NewsArticleRevision::create([
++            'news_article_id' => $article->id,
++            'revision_number' => $number,
++            'lock_version' => $article->lock_version,
++            'revision_type' => $type,
++            'snapshot_json' => $this->snapshot($article),
++            'editor_user_id' => $editor?->id,
++            'created_at' => now(),
++        ]);
++    }
++
++    private function assertRevisionTranslationCanBeRestored(NewsArticle $article, string $locale, array $translationData): void
++    {
++        $slug = $translationData['slug'] ?? null;
++        if (filled($slug) && NewsArticleTranslation::query()
++            ->where('locale', $locale)
++            ->where('slug', $slug)
++            ->where('news_article_id', '!=', $article->id)
++            ->exists()) {
++            throw ValidationException::withMessages(["revision.translations.{$locale}.slug" => 'This revision slug is now used by another article.']);
++        }
++
++        if (array_key_exists('content_json', $translationData) && $this->hasInvalidContent($locale, $translationData['content_json'])) {
++            throw ValidationException::withMessages(["revision.translations.{$locale}.content_json" => 'This revision references missing or incompatible news media.']);
++        }
++    }
++
++    private function hasInvalidContent(string $locale, mixed $content): bool
++    {
++        $invalid = false;
++        (new NewsContentBlocks())->validate("translations.{$locale}.content_json", $content, function (string $message) use (&$invalid): void {
++            $invalid = true;
++        });
++
++        return $invalid;
++    }
++}
+diff --git a/bootstrap/app.php b/bootstrap/app.php
+index 3655cbb3..8252d02a 100644
+--- a/bootstrap/app.php
++++ b/bootstrap/app.php
+@@ -39,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
+ 
+         $middleware->alias([
+             'api.token' => \App\Http\Middleware\AuthenticateApiToken::class,
++            'news.admin' => \App\Http\Middleware\EnsureNewsAdmin::class,
+         ]);
+     })
+     ->withExceptions(function (Exceptions $exceptions): void {
+diff --git a/composer.json b/composer.json
+index 0c84f9e0..bb6c657d 100755
+--- a/composer.json
++++ b/composer.json
+@@ -37,5 +37,9 @@
+   "extra": {"laravel": {"dont-discover": []}},
+   "config": {"optimize-autoloader": true, "preferred-install": "dist", "sort-packages": true},
+   "minimum-stability": "stable",
+-  "prefer-stable": true
++  "prefer-stable": true,
++  "require-dev": {
++    "mockery/mockery": "^1.6",
++    "phpunit/phpunit": "^11.5"
++  }
+ }
+diff --git a/composer.lock b/composer.lock
+index 7e7c349d..360ea58e 100755
+--- a/composer.lock
++++ b/composer.lock
+@@ -4,7 +4,7 @@
+         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+         "This file is @generated automatically"
+     ],
+-    "content-hash": "720366ffcf9db5e2ccf351c2f6f75648",
++    "content-hash": "075490a33ba85ae868dd568f8792d081",
+     "packages": [
+         {
+             "name": "brick/math",
+@@ -6873,7 +6873,1852 @@
+             "time": "2026-04-26T05:33:54+00:00"
+         }
+     ],
+-    "packages-dev": [],
++    "packages-dev": [
++        {
++            "name": "hamcrest/hamcrest-php",
++            "version": "v3.0.0",
++            "source": {
++                "type": "git",
++                "url": "https://github.com/hamcrest/hamcrest-php.git",
++                "reference": "b61cd040da1a4925bc90a51c074f5297e7c0fa52"
++            },
++            "dist": {
++                "type": "zip",
++                "url": "https://api.github.com/repos/hamcrest/hamcrest-php/zipball/b61cd040da1a4925bc90a51c074f5297e7c0fa52",
++                "reference": "b61cd040da1a4925bc90a51c074f5297e7c0fa52",
++                "shasum": ""
++            },
++            "require": {
++                "ext-ctype": "*",
++                "ext-dom": "*",
++                "php": "^7.4|^8.0"
++            },
++            "replace": {
++                "cordoval/hamcrest-php": "*",
++                "davedevelopment/hamcrest-php": "*",
++                "kodova/hamcrest-php": "*"
++            },
++            "require-dev": {
++                "phpstan/phpstan": "^2.1",
++                "phpstan/phpstan-phpunit": "^2.0",
++                "phpunit/php-file-iterator": "^1.4 || ^2.0 || ^3.0",
++                "phpunit/phpunit": "^4.8.36 || ^5.7 || ^6.5 || ^7.0 || ^8.0 || ^9.0"
++            },
++            "type": "library",
++            "extra": {
++                "branch-alias": {
++                    "dev-master": "3.0-dev"
++                }
++            },
++            "autoload": {
++                "classmap": [
++                    "hamcrest"
++                ]
++            },
++            "notification-url": "https://packagist.org/downloads/",
++            "license": [
++                "BSD-3-Clause"
++            ],
++            "description": "This is the PHP port of Hamcrest Matchers",
++            "keywords": [
++                "test"
++            ],
++            "support": {
++                "issues": "https://github.com/hamcrest/hamcrest-php/issues",
++                "source": "https://github.com/hamcrest/hamcrest-php/tree/v3.0.0"
++            },
++            "time": "2026-03-17T11:56:53+00:00"
++        },
++        {
++            "name": "mockery/mockery",
++            "version": "1.6.15",
++            "source": {
++                "type": "git",
++                "url": "https://github.com/mockery/mockery.git",
++                "reference": "967a801bd188989a5669bd280f252d51c0fdc9ee"
++            },
++            "dist": {
++                "type": "zip",
++                "url": "https://api.github.com/repos/mockery/mockery/zipball/967a801bd188989a5669bd280f252d51c0fdc9ee",
++                "reference": "967a801bd188989a5669bd280f252d51c0fdc9ee",
++                "shasum": ""
++            },
++            "require": {
++                "hamcrest/hamcrest-php": "^2.0 || ^3.0",
++                "php": ">=7.3"
++            },
++            "conflict": {
++                "phpunit/phpunit": "<8.0"
++            },
++            "require-dev": {
++                "phpunit/phpunit": "^9.6.36",
++                "symplify/easy-coding-standard": "^13.2.17"
++            },
++            "type": "library",
++            "autoload": {
++                "files": [
++                    "library/helpers.php",
++                    "library/Mockery.php"
++                ],
++                "psr-4": {
++                    "Mockery\\": "library/Mockery"
++                }
++            },
++            "notification-url": "https://packagist.org/downloads/",
++            "license": [
++                "BSD-3-Clause"
