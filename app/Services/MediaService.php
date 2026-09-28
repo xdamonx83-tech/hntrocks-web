@@ -4,11 +4,14 @@ namespace App\Services;
 
 use App\Jobs\TranscodeFeedVideo;
 use App\Models\MediaAsset;
+use App\Models\Moment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
+use Throwable;
 
 class MediaService
 {
@@ -25,8 +28,8 @@ class MediaService
     {
         $this->assertAllowed($file, $user, $context);
 
-        $disk = $options['disk'] ?? 'public';
         $visibility = $options['visibility'] ?? 'registered';
+        $disk = $options['disk'] ?? $this->defaultDiskFor($context, (string) $visibility);
         $attachable = $options['attachable'] ?? null;
         $metadata = $options['metadata'] ?? [];
 
@@ -87,6 +90,96 @@ class MediaService
         return $asset->fresh() ?? $asset;
     }
 
+    public function syncMomentMediaVisibility(Moment $moment, string $visibility): void
+    {
+        if (! in_array($visibility, ['public', 'registered', 'private'], true)) {
+            throw new RuntimeException('Ungültige Moment-Sichtbarkeit.');
+        }
+
+        $moment->loadMissing(['media', 'cover']);
+        $targetDisk = $visibility === 'public' ? 'public' : 'local';
+
+        collect([$moment->media, $moment->cover])
+            ->filter()
+            ->unique(fn (MediaAsset $asset): int => (int) $asset->id)
+            ->each(function (MediaAsset $asset) use ($targetDisk, $visibility): void {
+                $this->relocateAsset($asset, $targetDisk);
+
+                if ($asset->visibility !== $visibility) {
+                    $asset->update(['visibility' => $visibility]);
+                }
+            });
+    }
+
+    public function relocateAsset(MediaAsset $asset, string $targetDisk): MediaAsset
+    {
+        if (! in_array($targetDisk, ['public', 'local'], true)) {
+            throw new RuntimeException('Ungültiger Ziel-Disk für MediaAsset.');
+        }
+
+        $sourceDisk = (string) $asset->disk;
+        if ($sourceDisk === $targetDisk) {
+            return $asset;
+        }
+
+        $source = Storage::disk($sourceDisk);
+        $target = Storage::disk($targetDisk);
+        $paths = array_values(array_unique(array_filter([$asset->path, $asset->thumbnail_path])));
+        $createdTargets = [];
+
+        try {
+            foreach ($paths as $path) {
+                if (! $source->exists($path)) {
+                    throw new RuntimeException("Quelldatei fehlt: {$sourceDisk}:{$path}");
+                }
+
+                $sourceSize = $source->size($path);
+                if ($target->exists($path)) {
+                    if ($target->size($path) !== $sourceSize) {
+                        throw new RuntimeException("Zieldatei existiert mit anderer Größe: {$targetDisk}:{$path}");
+                    }
+
+                    continue;
+                }
+
+                $stream = $source->readStream($path);
+                if ($stream === false) {
+                    throw new RuntimeException("Quelldatei konnte nicht gelesen werden: {$sourceDisk}:{$path}");
+                }
+
+                try {
+                    if (! $target->writeStream($path, $stream)) {
+                        throw new RuntimeException("Zieldatei konnte nicht geschrieben werden: {$targetDisk}:{$path}");
+                    }
+                } finally {
+                    if (is_resource($stream)) {
+                        fclose($stream);
+                    }
+                }
+
+                $createdTargets[] = $path;
+
+                if (! $target->exists($path) || $target->size($path) !== $sourceSize) {
+                    throw new RuntimeException("Zieldatei konnte nicht verifiziert werden: {$targetDisk}:{$path}");
+                }
+            }
+
+            $asset->update(['disk' => $targetDisk]);
+
+            if ($paths !== [] && ! $source->delete($paths)) {
+                throw new RuntimeException("Quelldateien konnten nach erfolgreichem Kopieren nicht gelöscht werden: {$sourceDisk}");
+            }
+        } catch (Throwable $exception) {
+            if ((string) $asset->disk === $sourceDisk && $createdTargets !== []) {
+                $target->delete($createdTargets);
+            }
+
+            throw $exception;
+        }
+
+        return $asset->fresh() ?? $asset;
+    }
+
     public function delete(MediaAsset $asset): void
     {
         $paths = array_values(array_filter([$asset->path, $asset->thumbnail_path]));
@@ -97,6 +190,18 @@ class MediaService
 
         $asset->update(['status' => 'deleted']);
         $asset->delete();
+    }
+
+    private function defaultDiskFor(string $context, string $visibility): string
+    {
+        if (
+            in_array($context, ['moments', 'moments_cover', 'moment_studio_source'], true)
+            && $visibility !== 'public'
+        ) {
+            return 'local';
+        }
+
+        return 'public';
     }
 
     private function queueVideoTranscoding(MediaAsset $asset): void
