@@ -70,6 +70,28 @@ class MomentVisibilityTest extends TestCase
         $this->get(route('moments.show', $future))->assertNotFound();
     }
 
+    public function test_legacy_moment_query_redirects_to_the_requested_visible_moment(): void
+    {
+        $owner = $this->user();
+        $viewer = $this->user();
+        $requested = $this->moment($owner, 'registered');
+
+        $this->actingAs($viewer)
+            ->get('/moments?moment='.$requested->id)
+            ->assertRedirect(route('moments.show', $requested));
+    }
+
+    public function test_legacy_moment_query_does_not_bypass_private_visibility(): void
+    {
+        $owner = $this->user();
+        $viewer = $this->user();
+        $private = $this->moment($owner, 'private');
+
+        $this->actingAs($viewer)
+            ->get('/moments?moment='.$private->id)
+            ->assertNotFound();
+    }
+
     public function test_sitemap_contains_only_public_published_moments(): void
     {
         $owner = $this->user();
