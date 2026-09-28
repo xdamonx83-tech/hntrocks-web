@@ -78,6 +78,15 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/maps/{slug}', [ApiMapsController::class, 'show'])->name('maps.show');
     Route::post('/maps/{slug}/cash-spots', [MapCashSpotSubmissionApiController::class, 'store'])->name('maps.cash-spots.store');
     Route::get('/maps/markers/{marker}/comments', [MapMarkerInteractionController::class, 'comments'])->name('maps.markers.comments.index');
+
+    // Public Moment permalinks use these read-only endpoints so shared links can
+    // render the current React design without requiring an API token.
+    Route::get('/public/moments/{moment}', [ApiMomentsController::class, 'publicShow'])
+        ->whereNumber('moment')
+        ->name('moments.public.show');
+    Route::get('/public/moments/{moment}/comments', [ApiMomentsController::class, 'publicComments'])
+        ->whereNumber('moment')
+        ->name('moments.public.comments.index');
     Route::post('/maps/markers/{marker}/vote', [MapMarkerInteractionController::class, 'vote'])->name('maps.markers.vote');
 
     Route::post('/auth/register', [ApiAuthController::class, 'register'])->name('auth.register');
