@@ -10,9 +10,22 @@
     $videoUrl = $moment->mediaUrl();
     $videoMime = $moment->media?->mime_type ?: 'video/mp4';
     $videoPoster = $moment->cover?->thumbnailUrl() ?: ($moment->media?->thumbnail_path ? $moment->media->thumbnailUrl() : null);
+    $canonicalUrl = route('moments.show', $moment);
+    $seoDescription = \Illuminate\Support\Str::limit(
+        trim((string) ($moment->description ?: $caption)),
+        165,
+        ''
+    );
+    $seoImage = $moment->coverUrl();
+    $isPublicSeo = $moment->visibility === 'public' && $moment->isPublishedNow();
 @endphp
 
-@section('title', $caption.' · hnt.rocks')
+@section('title', $caption.' · HNT.rocks')
+@section('meta_description', $seoDescription)
+@section('canonical_url', $canonicalUrl)
+@section('robots', $isPublicSeo ? 'index,follow,max-image-preview:large' : 'noindex,nofollow,noarchive')
+@section('og_type', 'video.other')
+@section('og_image', $seoImage)
 
 @section('content')
 @if (session('status'))
