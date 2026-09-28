@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Arcade;
 
 use App\Enums\Arcade\ArcadeMatchMode;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\UserResource;
 use App\Models\Arcade\ArcadeGame;
 use App\Models\Arcade\ArcadeUserStat;
 use App\Services\Arcade\ArcadeGameCatalogService;
@@ -37,9 +38,10 @@ class ArcadeStatsController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $stats->values()->map(function (ArcadeUserStat $stat, int $index): array {
+            'data' => $stats->values()->map(function (ArcadeUserStat $stat, int $index) use ($request): array {
                 $user = $stat->user;
                 $avatar = $user->avatarUrl();
+                $userPayload = (new UserResource($user))->resolve($request);
 
                 return [
                     'rank' => $index + 1,
@@ -47,7 +49,8 @@ class ArcadeStatsController extends Controller
                         'id' => $user->id,
                         'username' => $user->username,
                         'name' => $user->name,
-                        'avatar_url' => $avatar,
+                        'avatar_url' => $userPayload['avatar_url'] ?? $avatar,
+                        'crown_cosmetics' => $userPayload['crown_cosmetics'] ?? null,
                     ],
                     'avatar' => $avatar,
                     'matches_played' => $stat->matches_played,
