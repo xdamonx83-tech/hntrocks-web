@@ -70,6 +70,30 @@ class MomentVisibilityTest extends TestCase
         $this->get(route('moments.show', $future))->assertNotFound();
     }
 
+    public function test_public_permalink_api_allows_guest_for_public_moment(): void
+    {
+        $owner = $this->user();
+        $public = $this->moment($owner, 'public');
+
+        $this->getJson(route('api.v1.moments.public.show', $public))
+            ->assertOk()
+            ->assertJsonPath('data.id', $public->id)
+            ->assertJsonPath('data.visibility', 'public');
+    }
+
+    public function test_public_permalink_api_hides_registered_and_private_moments_from_guest(): void
+    {
+        $owner = $this->user();
+        $registered = $this->moment($owner, 'registered');
+        $private = $this->moment($owner, 'private');
+
+        $this->getJson(route('api.v1.moments.public.show', $registered))
+            ->assertNotFound();
+
+        $this->getJson(route('api.v1.moments.public.show', $private))
+            ->assertNotFound();
+    }
+
     public function test_legacy_moment_query_redirects_to_the_requested_visible_moment(): void
     {
         $owner = $this->user();
