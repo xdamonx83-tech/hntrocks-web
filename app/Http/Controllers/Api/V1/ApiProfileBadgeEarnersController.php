@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\UserResource;
 use App\Models\Badge;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -29,7 +30,7 @@ class ApiProfileBadgeEarnersController extends Controller
             ->whereIn('id', $badgeIds)
             ->orderBy('sort_order')
             ->get()
-            ->mapWithKeys(function (Badge $badge): array {
+            ->mapWithKeys(function (Badge $badge) use ($request): array {
                 $earnersQuery = $badge->users()
                     ->where('users.status', 'active')
                     ->orderByPivot('awarded_at', 'desc');
@@ -38,14 +39,17 @@ class ApiProfileBadgeEarnersController extends Controller
                 $earners = $earnersQuery
                     ->limit(5)
                     ->get(['users.id', 'users.name', 'users.username', 'users.avatar_path'])
-                    ->map(fn (User $earner): array => [
-                        'id' => (int) $earner->id,
-                        'name' => (string) $earner->name,
-                        'username' => (string) $earner->username,
-                        'avatar_url' => $earner->avatar_path
-                            ? Storage::disk('public')->url($earner->avatar_path)
-                            : asset('assets/vikinger/img/default-avatar.svg'),
-                    ])
+                    ->map(function (User $earner) use ($request): array {
+                        $payload = (new UserResource($earner))->resolve($request);
+
+                        return [
+                            'id' => (int) $earner->id,
+                            'name' => (string) $earner->name,
+                            'username' => (string) $earner->username,
+                            'avatar_url' => $payload['avatar_url'] ?? $earner->avatarUrl(),
+                            'crown_cosmetics' => $payload['crown_cosmetics'] ?? null,
+                        ];
+                    })
                     ->values();
 
                 return [(string) $badge->id => [
