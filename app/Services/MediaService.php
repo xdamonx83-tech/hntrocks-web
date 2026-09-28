@@ -195,7 +195,7 @@ class MediaService
     private function defaultDiskFor(string $context, string $visibility): string
     {
         if (
-            in_array($context, ['moments', 'moments_cover', 'moment_studio_source'], true)
+            in_array($context, ['moments', 'moments_cover', 'moment_studio_source', 'moment_studio_cover'], true)
             && $visibility !== 'public'
         ) {
             return 'local';
