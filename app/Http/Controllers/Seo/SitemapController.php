@@ -7,6 +7,7 @@ use App\Models\Cup;
 use App\Models\CupIdea;
 use App\Models\HntMap;
 use App\Models\LoadoutChallenge;
+use App\Models\Moment;
 use App\Models\MomentSpotlight;
 use App\Models\NewsArticle;
 use App\Models\User;
@@ -102,6 +103,23 @@ class SitemapController extends Controller
             if ($lastCupIdea) {
                 $urls->push($this->url(route('cup-ideas.index'), ($lastCupIdea->updated_at ?: $lastCupIdea->created_at) ?: now(), 'weekly', '0.7'));
             }
+        }
+
+        if (Schema::hasTable('moments')) {
+            Moment::query()
+                ->publiclyVisible()
+                ->select(['id', 'updated_at', 'created_at', 'published_at'])
+                ->orderBy('id')
+                ->lazyById(200)
+                ->take(1000)
+                ->each(function (Moment $moment) use ($urls): void {
+                    $lastModified = collect([$moment->updated_at, $moment->published_at, $moment->created_at])
+                        ->filter()
+                        ->map(fn ($date) => $date instanceof CarbonInterface ? $date : Carbon::parse($date))
+                        ->max();
+
+                    $urls->push($this->url(route('moments.show', $moment), $lastModified ?: now(), 'weekly', '0.6'));
+                });
         }
 
         if (Schema::hasTable('moment_spotlights')) {
