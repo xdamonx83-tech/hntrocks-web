@@ -575,16 +575,30 @@ class ApiMomentsController extends Controller
             'studio_videos' => ['required', 'array', 'min:1', 'max:5'],
             'studio_videos.*' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime,video/webm', 'max:'.config('hunthub.upload_limits.moment_video_kb', 204800)],
             'studio_payload' => ['required', 'string', 'max:20000'],
+            'cover' => ['nullable', 'image', 'max:'.config('hunthub.upload_limits.moment_cover_kb', 8192)],
             'caption' => ['nullable', 'string', 'max:220'],
             'description' => ['nullable', 'string', 'max:2000'],
             'visibility' => ['nullable', 'in:public,registered,private'],
         ]);
 
-        $project = $studioProjects->createQueuedProject($user, array_values(Arr::wrap($request->file('studio_videos'))), (string) $validated['studio_payload'], [
-            'visibility' => (string) ($validated['visibility'] ?? 'public'),
-            'caption' => $validated['caption'] ?? null,
-            'description' => $validated['description'] ?? null,
-        ], $mediaService);
+        $coverFile = $request->hasFile('cover') ? $request->file('cover') : null;
+
+        if ($coverFile) {
+            $mediaService->assertAllowed($coverFile, $user, 'moments_cover');
+        }
+
+        $project = $studioProjects->createQueuedProject(
+            $user,
+            array_values(Arr::wrap($request->file('studio_videos'))),
+            (string) $validated['studio_payload'],
+            [
+                'visibility' => (string) ($validated['visibility'] ?? 'public'),
+                'caption' => $validated['caption'] ?? null,
+                'description' => $validated['description'] ?? null,
+            ],
+            $mediaService,
+            $coverFile,
+        );
 
         RenderMomentStudioProject::dispatchAfterResponse($project->id);
 
