@@ -19,6 +19,7 @@ class NotificationResource extends JsonResource
         $actorName = method_exists($this->resource, 'displayActorName')
             ? $this->resource->displayActorName()
             : ($actor?->name ?: $actor?->username ?: null);
+        $actorPayload = $actor ? (new UserResource($actor))->resolve($request) : null;
 
         return [
             'id' => $this->id,
@@ -36,6 +37,7 @@ class NotificationResource extends JsonResource
                 'name' => $actor->name,
                 'username' => $actor->username,
                 'avatar_url' => $actorAvatarUrl,
+                'crown_cosmetics' => $actorPayload['crown_cosmetics'] ?? null,
             ] : null,
             'read_at' => $this->read_at?->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
