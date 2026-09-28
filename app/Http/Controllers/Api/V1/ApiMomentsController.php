@@ -207,7 +207,7 @@ class ApiMomentsController extends Controller
         return response()->json($payload);
     }
 
-    public function update(Request $request, Moment $moment): JsonResponse
+    public function update(Request $request, Moment $moment, MediaService $mediaService): JsonResponse
     {
         abort_unless($moment->canBeManagedBy($request->user()), 403);
 
@@ -222,6 +222,10 @@ class ApiMomentsController extends Controller
             if ($request->exists($field)) {
                 $updates[$field] = $validated[$field] ?? null;
             }
+        }
+
+        if (isset($updates['visibility']) && $updates['visibility'] !== $moment->visibility) {
+            $mediaService->syncMomentMediaVisibility($moment, (string) $updates['visibility']);
         }
 
         if ($updates !== []) {
@@ -552,11 +556,7 @@ class ApiMomentsController extends Controller
 
     private function authorizeMomentVisible(Request $request, Moment $moment): void
     {
-        abort_unless(
-            ($moment->status === 'published' && $moment->visibility !== 'private')
-            || $moment->canBeManagedBy($request->user()),
-            404
-        );
+        abort_unless($moment->isVisibleTo($request->user()), 404);
     }
 
     private function isStudioMultiClipRequest(Request $request): bool
