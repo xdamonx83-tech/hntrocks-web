@@ -29,8 +29,12 @@ use Illuminate\View\View;
 
 class MomentController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request): View|RedirectResponse|Response
     {
+        if ($request->filled('moment') && File::isFile(public_path('app/index.html'))) {
+            return app(ReactAppController::class)();
+        }
+
         if ($request->filled('moment')) {
             $requestedMomentId = (int) $request->query('moment');
             $requestedMoment = $requestedMomentId > 0
@@ -780,14 +784,18 @@ class MomentController extends Controller
 
     public function show(Request $request, Moment $moment): View|Response
     {
-        $viewer = $request->user();
-        abort_unless($moment->isVisibleTo($viewer), 404);
-
-        if ($viewer && File::isFile(public_path('app/index.html'))) {
+        // The browser login lives in the React/API-token layer, so a normal
+        // document request cannot reliably tell whether the visitor is signed in.
+        // Always hand permalink rendering to React when the bundle exists; the
+        // API endpoints enforce public/registered/private visibility.
+        if (File::isFile(public_path('app/index.html'))) {
             return app(ReactAppController::class)();
         }
 
-        $viewerId = null;
+        $viewer = $request->user();
+        abort_unless($moment->isVisibleTo($viewer), 404);
+
+        $viewerId = $viewer?->id;
         $viewerLikeFilter = static function ($query) use ($viewerId): void {
             if ($viewerId) {
                 $query->where('user_id', $viewerId)->where('type', 'like');
