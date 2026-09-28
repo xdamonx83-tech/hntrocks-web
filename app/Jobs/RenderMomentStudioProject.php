@@ -6,6 +6,7 @@ use App\Models\MediaAsset;
 use App\Models\Moment;
 use App\Models\MomentStudioProject;
 use App\Services\GamificationService;
+use App\Services\MediaService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -32,7 +33,7 @@ class RenderMomentStudioProject implements ShouldQueue
         $this->timeout = max(120, (int) config('hunthub.moment_video_transcoding.timeout', 900));
     }
 
-    public function handle(GamificationService $gamification): void
+    public function handle(GamificationService $gamification, MediaService $mediaService): void
     {
         $project = null;
 
@@ -60,6 +61,14 @@ class RenderMomentStudioProject implements ShouldQueue
         $clips = array_values((array) ($timeline['clips'] ?? []));
         $textLayers = array_values((array) ($timeline['text_layers'] ?? []));
         $format = $this->normalizeFormat($timeline['format'] ?? null);
+        $coverAssetId = (int) ($timeline['cover_media_asset_id'] ?? 0);
+        $coverAsset = $coverAssetId > 0
+            ? MediaAsset::query()->find($coverAssetId)
+            : null;
+
+        if ($coverAsset && (! $coverAsset->isImage() || (int) $coverAsset->user_id !== (int) $project->user_id)) {
+            $coverAsset = null;
+        }
 
         if (count($sourceIds) < 1 || count($clips) !== count($sourceIds)) {
             $this->markFailed($project, 'Studio-Projekt hat keine gültige Clip-Liste.');
@@ -148,6 +157,7 @@ class RenderMomentStudioProject implements ShouldQueue
         $moment = Moment::create([
             'user_id' => $project->user_id,
             'media_asset_id' => $outputAsset->id,
+            'cover_media_asset_id' => $coverAsset?->id,
             'caption' => $project->caption,
             'description' => $project->description,
             'visibility' => $project->visibility,
@@ -161,6 +171,17 @@ class RenderMomentStudioProject implements ShouldQueue
             'attachable_type' => $moment->getMorphClass(),
             'attachable_id' => $moment->getKey(),
         ]);
+
+        if ($coverAsset) {
+            $targetDisk = $project->visibility === 'public' ? 'public' : 'local';
+            $mediaService->relocateAsset($coverAsset, $targetDisk);
+            $coverAsset->update([
+                'context' => 'moments_cover',
+                'visibility' => $project->visibility,
+                'attachable_type' => $moment->getMorphClass(),
+                'attachable_id' => $moment->getKey(),
+            ]);
+        }
 
         $project->update([
             'moment_id' => $moment->id,
