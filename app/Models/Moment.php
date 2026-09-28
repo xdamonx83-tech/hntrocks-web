@@ -86,6 +86,35 @@ class Moment extends Model
             });
     }
 
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->where('status', 'published')
+            ->where('visibility', 'public')
+            ->where(function (Builder $subQuery): void {
+                $subQuery->whereNull('published_at')->orWhere('published_at', '<=', now());
+            });
+    }
+
+    public function isPublishedNow(): bool
+    {
+        return $this->status === 'published'
+            && ($this->published_at === null || $this->published_at->lte(now()));
+    }
+
+    public function isVisibleTo(?User $user): bool
+    {
+        if ($this->canBeManagedBy($user)) {
+            return true;
+        }
+
+        if (! $this->isPublishedNow()) {
+            return false;
+        }
+
+        return $this->visibility === 'public'
+            || ($this->visibility === 'registered' && $user !== null);
+    }
+
     public function isLikedBy(?User $user): bool
     {
         if (! $user) {
