@@ -431,12 +431,13 @@ class ApiMembersController extends Controller
     {
         $section = strtolower(str_replace('_', '-', trim($section)));
         $limit = max(1, min(100, (int) $request->integer('limit', 100)));
+        $offset = max(0, (int) $request->integer('offset', 0));
 
         return match ($section) {
             'badges' => $this->profileBadgesPayload($request, $user, $limit),
             'friends' => $this->profileFriendsPayload($request, $user, $limit),
             'quests' => $this->profileQuestsPayload($request, $user, $limit),
-            'posts' => $this->profilePostsPayload($request, $user, $isOwnProfile, $limit),
+            'posts' => $this->profilePostsPayload($request, $user, $isOwnProfile, $limit, $offset),
             'moments' => $this->profileMomentsPayload($request, $user, $isOwnProfile, $limit),
             'teams' => $this->profileTeamsPayload($request, $user, $isOwnProfile, $limit),
             'lfg' => $this->profileLfgPayload($request, $user, $isOwnProfile, $limit),
@@ -536,7 +537,7 @@ class ApiMembersController extends Controller
         return $this->sectionResponse('quests', $items, $total, $limit);
     }
 
-    private function profilePostsPayload(Request $request, User $user, bool $isOwnProfile, int $limit): array
+    private function profilePostsPayload(Request $request, User $user, bool $isOwnProfile, int $limit, int $offset = 0): array
     {
         $postsQuery = $user->feedPosts()
             ->with([
@@ -575,14 +576,16 @@ class ApiMembersController extends Controller
         $commentsTotal = (clone $commentsQuery)->count();
 
         $items = $postsQuery
+            ->skip($offset)
             ->limit($limit)
             ->get()
             ->map(fn ($post): array => $this->profilePostActivityItem($request, $post))
             ->values();
 
-        $comments = $commentsQuery
-            ->limit($limit)
-            ->get()
+        $comments = $offset === 0
+            ? $commentsQuery
+                ->limit($limit)
+                ->get()
             ->map(fn ($comment): array => [
                 'id' => (int) $comment->id,
                 'post_id' => (int) $comment->feed_post_id,
@@ -595,7 +598,8 @@ class ApiMembersController extends Controller
                 ] : null,
                 'created_at' => $comment->created_at?->toISOString(),
             ])
-            ->values();
+            ->values()
+            : collect();
 
         return [
             'section' => 'posts',
@@ -605,7 +609,10 @@ class ApiMembersController extends Controller
                 'total' => $postsTotal,
                 'comments_total' => $commentsTotal,
                 'limit' => $limit,
-                'truncated' => $postsTotal > $items->count() || $commentsTotal > $comments->count(),
+                'offset' => $offset,
+                'next_offset' => $offset + $items->count(),
+                'has_more' => ($offset + $items->count()) < $postsTotal,
+                'truncated' => ($offset + $items->count()) < $postsTotal || ($offset === 0 && $commentsTotal > $comments->count()),
             ],
         ];
     }
