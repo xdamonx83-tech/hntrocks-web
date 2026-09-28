@@ -70,6 +70,10 @@ class MediaAsset extends Model
             }
         }
 
+        if ($this->isProtectedMomentMedia()) {
+            return $this->signedMomentMediaUrl('original');
+        }
+
         if ($this->isPrivateNewsMedia()) {
             return $this->signedNewsMediaUrl('original');
         }
@@ -81,6 +85,10 @@ class MediaAsset extends Model
     {
         if ($this->isPrivateCupScreenshot()) {
             return $this->url();
+        }
+
+        if ($this->isProtectedMomentMedia()) {
+            return $this->signedMomentMediaUrl($this->thumbnail_path ? 'thumbnail' : 'original');
         }
 
         if ($this->isPrivateNewsMedia()) {
@@ -106,6 +114,31 @@ class MediaAsset extends Model
     public function isPrivateNewsMedia(): bool
     {
         return $this->context === 'news' && $this->visibility === 'private';
+    }
+
+    public function isProtectedMomentMedia(): bool
+    {
+        return in_array($this->context, ['moments', 'moments_cover'], true)
+            && $this->visibility !== 'public'
+            && $this->attachable_type === (new Moment())->getMorphClass()
+            && filled($this->attachable_id);
+    }
+
+    private function signedMomentMediaUrl(string $variant): string
+    {
+        if (! Route::has('moments.media.show')) {
+            return '';
+        }
+
+        return URL::temporarySignedRoute(
+            'moments.media.show',
+            now()->addMinutes(10),
+            [
+                'moment' => $this->attachable_id,
+                'asset' => $this->id,
+                'variant' => $variant,
+            ],
+        );
     }
 
     private function signedNewsMediaUrl(string $variant): string
