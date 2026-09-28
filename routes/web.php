@@ -426,6 +426,10 @@ Route::get('/u/{user:username}/trophies', [ProfileController::class, 'trophies']
 Route::get('/u/{user:username}/teams', [ProfileController::class, 'teams'])->name('profile.teams.public');
 Route::get('/u/{user:username}', \App\Http\Controllers\React\ReactAppController::class)->name('profile.public');
 
+// Public Moments are readable outside HNT.ROCKS only when the Moment itself is
+// explicitly marked public. The controller keeps registered/private Moments gated.
+Route::get('/moments/r/{moment}', [MomentController::class, 'show'])->name('moments.show');
+
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::post('/maps/markers/{marker}/comments', [MapMarkerCommentController::class, 'store'])
@@ -573,7 +577,6 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/moments/studio/features/{feature}/unlock', [MomentController::class, 'unlockStudioFeature'])->middleware('throttle:12,1')->name('moments.studio.unlock');
     Route::get('/moments/studio/{project}/processing', [MomentController::class, 'processing'])->name('moments.studio.processing');
     Route::get('/moments/studio/{project}/status', [MomentController::class, 'studioStatus'])->name('moments.studio.status');
-    Route::get('/moments/r/{moment}', [MomentController::class, 'show'])->name('moments.show');
     Route::patch('/moments/r/{moment}', [MomentController::class, 'update'])->name('moments.update');
     Route::delete('/moments/r/{moment}', [MomentController::class, 'destroy'])->name('moments.destroy');
     Route::post('/moments/r/{moment}/reaction', [MomentReactionController::class, 'toggle'])->name('moments.reactions.toggle');
