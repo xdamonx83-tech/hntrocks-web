@@ -764,13 +764,12 @@ class MomentController extends Controller
         $asset->delete();
     }
 
-    public function show(Moment $moment): View
+    public function show(Request $request, Moment $moment): View
     {
-        abort_unless(($moment->status === 'published' && $moment->visibility !== 'private') || $moment->canBeManagedBy(auth()->user()), 404);
+        $viewer = $request->user();
+        abort_unless($moment->isVisibleTo($viewer), 404);
 
-        $viewer = auth()->user();
         $viewerId = $viewer?->id;
-
         $viewerLikeFilter = static function ($query) use ($viewerId): void {
             if ($viewerId) {
                 $query->where('user_id', $viewerId)->where('type', 'like');
@@ -805,28 +804,28 @@ class MomentController extends Controller
         $moment->increment('views_count');
 
         $friendship = null;
-
         if ($viewer && (int) $viewer->id !== (int) $moment->user_id) {
             $friendship = Friendship::query()->between($viewer, $moment->user)->first();
         }
 
-        $nextMoment = Moment::query()
-            ->published()
+        $visibleMoments = static fn () => $viewer
+            ? Moment::query()->published()
+            : Moment::query()->publiclyVisible();
+
+        $nextMoment = $visibleMoments()
             ->whereKeyNot($moment->id)
             ->where('id', '<', $moment->id)
             ->latest('id')
             ->first();
 
-        $previousMoment = Moment::query()
-            ->published()
+        $previousMoment = $visibleMoments()
             ->whereKeyNot($moment->id)
             ->where('id', '>', $moment->id)
             ->oldest('id')
             ->first();
 
-        $moreMoments = Moment::query()
+        $moreMoments = $visibleMoments()
             ->with(['user.profile', 'media', 'cover'])
-            ->published()
             ->whereKeyNot($moment->id)
             ->latest('published_at')
             ->latest('id')
