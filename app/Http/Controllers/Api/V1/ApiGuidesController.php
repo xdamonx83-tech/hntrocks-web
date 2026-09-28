@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\GuideOverviewResource;
+use App\Http\Resources\Api\UserResource;
 use App\Models\Guide;
 use App\Models\GuideComment;
 use App\Models\GuideMedia;
@@ -199,6 +200,7 @@ class ApiGuidesController extends Controller
 
         $viewer = $request->user();
         $author = $guide->author;
+        $authorPayload = $author ? (new UserResource($author))->resolve($request) : null;
         $canViewGamification = $author
             ? $privacy->canViewGamification($viewer, $author)
             : false;
@@ -255,7 +257,8 @@ class ApiGuidesController extends Controller
                     'id' => (int) $author->id,
                     'username' => (string) $author->username,
                     'display_name' => (string) ($author->name ?: $author->username),
-                    'avatar_url' => $author->avatarUrl(),
+                    'avatar_url' => $authorPayload['avatar_url'] ?? $author->avatarUrl(),
+                    'crown_cosmetics' => $authorPayload['crown_cosmetics'] ?? null,
                     'published_guides_count' => Guide::query()
                         ->published()
                         ->where('author_id', $author->id)
@@ -404,6 +407,9 @@ class ApiGuidesController extends Controller
     {
         $deleted = $comment->trashed();
         $viewer = $request->user();
+        $authorPayload = $comment->user
+            ? (new UserResource($comment->user))->resolve($request)
+            : null;
 
         return [
             'id' => (int) $comment->id,
@@ -416,7 +422,8 @@ class ApiGuidesController extends Controller
                 'id' => (int) $comment->user->id,
                 'display_name' => (string) ($comment->user->name ?: $comment->user->username),
                 'username' => (string) $comment->user->username,
-                'avatar_url' => $comment->user->avatarUrl(),
+                'avatar_url' => $authorPayload['avatar_url'] ?? $comment->user->avatarUrl(),
+                'crown_cosmetics' => $authorPayload['crown_cosmetics'] ?? null,
             ] : null,
             'actions' => [
                 'can_reply' => ! $deleted && $comment->parent_id === null,
