@@ -63,7 +63,7 @@ class NewsEngagementController extends Controller
         $comment->load('user')->loadCount('likes');
 
         return response()->json(['data' => [
-            'comment' => $this->commentPayload($comment),
+            'comment' => $this->commentPayload($request, $comment),
             'comments_count' => $article->comments()->count(),
         ]], 201);
     }
