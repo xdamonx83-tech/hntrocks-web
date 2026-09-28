@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\News;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\UserResource;
 use App\Models\NewsArticle;
 use App\Models\NewsArticleComment;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class NewsEngagementController extends Controller
 {
-    public function index(NewsArticle $article): JsonResponse
+    public function index(Request $request, NewsArticle $article): JsonResponse
     {
         $this->assertPublished($article);
         $comments = $article->comments()->with('user')->withCount('likes')
@@ -22,7 +23,7 @@ class NewsEngagementController extends Controller
             'comments_enabled' => (bool) $article->comments_enabled,
             'comments_count' => $article->comments()->count(),
             'likes_count' => $article->interactions()->where('liked', true)->count(),
-            'comments' => $comments->map(fn (NewsArticleComment $comment) => $this->commentPayload($comment))->values(),
+            'comments' => $comments->map(fn (NewsArticleComment $comment) => $this->commentPayload($request, $comment))->values(),
         ]]);
     }
 
@@ -113,9 +114,11 @@ class NewsEngagementController extends Controller
             && $article->translations()->publishable()->exists(), 404);
     }
 
-    private function commentPayload(NewsArticleComment $comment): array
+    private function commentPayload(Request $request, NewsArticleComment $comment): array
     {
         $user = $comment->user;
+        $userPayload = $user ? (new UserResource($user))->resolve($request) : null;
+
         return [
             'id' => (int) $comment->id,
             'parent_id' => $comment->parent_id ? (int) $comment->parent_id : null,
@@ -125,7 +128,8 @@ class NewsEngagementController extends Controller
             'user' => [
                 'id' => (int) $user?->id,
                 'name' => $user?->name ?? 'User',
-                'avatar_url' => $user?->avatarUrl() ?? asset('assets/vikinger/img/default-avatar.svg'),
+                'avatar_url' => $userPayload['avatar_url'] ?? ($user?->avatarUrl() ?? asset('assets/vikinger/img/default-avatar.svg')),
+                'crown_cosmetics' => $userPayload['crown_cosmetics'] ?? null,
             ],
         ];
     }
