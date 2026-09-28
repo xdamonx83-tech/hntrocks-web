@@ -71,6 +71,7 @@ use App\Http\Controllers\Mentions\MentionController;
 use App\Http\Controllers\Moments\MomentBookmarkController;
 use App\Http\Controllers\Moments\MomentCommentController;
 use App\Http\Controllers\Moments\MomentController;
+use App\Http\Controllers\Moments\MomentMediaController;
 use App\Http\Controllers\Moments\MomentOfWeekController;
 use App\Http\Controllers\Moments\MomentReactionController;
 use App\Http\Controllers\Notifications\NotificationController;
@@ -429,6 +430,12 @@ Route::get('/u/{user:username}', \App\Http\Controllers\React\ReactAppController:
 // Public Moments are readable outside HNT.ROCKS only when the Moment itself is
 // explicitly marked public. The controller keeps registered/private Moments gated.
 Route::get('/moments/r/{moment}', [MomentController::class, 'show'])->name('moments.show');
+Route::get('/moments/r/{moment}/media/{asset}/{variant}', MomentMediaController::class)
+    ->whereNumber('moment')
+    ->whereNumber('asset')
+    ->where('variant', 'original|thumbnail')
+    ->middleware('signed')
+    ->name('moments.media.show');
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
