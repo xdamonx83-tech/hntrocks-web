@@ -84,6 +84,41 @@ class ApiMomentsController extends Controller
         return new MomentResource($moment);
     }
 
+    public function publicShow(Request $request, Moment $moment): MomentResource
+    {
+        abort_unless($moment->isVisibleTo(null), 404);
+
+        $moment->increment('views_count');
+
+        $moment->load([
+            'user.profile',
+            'media',
+            'cover',
+        ]);
+
+        return new MomentResource($moment);
+    }
+
+    public function publicComments(Request $request, Moment $moment): AnonymousResourceCollection
+    {
+        abort_unless($moment->isVisibleTo(null), 404);
+
+        $comments = $moment->comments()
+            ->whereNull('parent_id')
+            ->reorder()
+            ->with([
+                'moment',
+                'user.profile',
+                'replies' => fn ($query) => $query->oldest(),
+                'replies.moment',
+                'replies.user.profile',
+            ])
+            ->oldest()
+            ->paginate(30);
+
+        return MomentCommentResource::collection($comments);
+    }
+
     public function store(Request $request, MediaService $mediaService, GamificationService $gamification, MomentStudioProjectService $studioProjects): JsonResponse
     {
         if ($this->isStudioMultiClipRequest($request)) {
