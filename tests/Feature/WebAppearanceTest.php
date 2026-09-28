@@ -14,7 +14,7 @@ class WebAppearanceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_public_endpoint_needs_no_auth_and_returns_only_five_null_slots(): void
+    public function test_public_endpoint_needs_no_auth_and_returns_all_null_slots(): void
     {
         $this->getJson('/api/v1/appearance')->assertOk()->assertExactJson([
             'backgrounds' => [
@@ -23,6 +23,9 @@ class WebAppearanceTest extends TestCase
                 'app' => null,
                 'topbar' => null,
                 'sidebar' => null,
+                'feed_hero' => null,
+                'feed_promo' => null,
+                'sidebar_bottom' => null,
             ],
         ]);
     }
@@ -140,7 +143,7 @@ class WebAppearanceTest extends TestCase
 
         $public = $this->getJson('/api/v1/appearance')->assertOk()->json();
         $this->assertSame(['backgrounds'], array_keys($public));
-        $this->assertSame(['auth', 'landing', 'app', 'topbar', 'sidebar'], array_keys($public['backgrounds']));
+        $this->assertSame(['auth', 'landing', 'app', 'topbar', 'sidebar', 'feed_hero', 'feed_promo', 'sidebar_bottom'], array_keys($public['backgrounds']));
         $this->assertArrayNotHasKey('android', $public);
         $this->assertArrayNotHasKey('features', $public);
         $this->assertArrayNotHasKey('version', $public['backgrounds']);

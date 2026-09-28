@@ -9,7 +9,7 @@ class WebAppearanceService
 {
     public const KEY = 'web_appearance';
 
-    public const SLOTS = ['auth', 'landing', 'app', 'topbar', 'sidebar'];
+    public const SLOTS = ['auth', 'landing', 'app', 'topbar', 'sidebar', 'feed_hero', 'feed_promo', 'sidebar_bottom'];
 
     private const CACHE_KEY = 'app_remote_config:active:web_appearance';
 

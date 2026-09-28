@@ -28,6 +28,9 @@ class AdminWebAppearanceController extends Controller
                 'app' => ['App Background', 'Community und App-Bereiche'],
                 'topbar' => ['Topbar Background', 'Obere Navigationsleiste'],
                 'sidebar' => ['Sidebar Background', 'Seitliche Navigation'],
+                'feed_hero' => ['Feed Hero Graphic', 'Große Grafik im Feed-Kopfbereich'],
+                'feed_promo' => ['Feed Promo Graphic', 'Promo-Grafik unten in der rechten Feed-Spalte'],
+                'sidebar_bottom' => ['Sidebar Bottom Graphic', 'Grafik am unteren Ende der Sidebar'],
             ],
         ]);
     }
@@ -36,7 +39,7 @@ class AdminWebAppearanceController extends Controller
     {
         $this->guardAdmin($request);
 
-        $rules = ['backgrounds' => ['required', 'array:auth,landing,app,topbar,sidebar']];
+        $rules = ['backgrounds' => ['required', 'array:'.implode(',', WebAppearanceService::SLOTS)]];
         foreach (WebAppearanceService::SLOTS as $slot) {
             $rules['backgrounds.'.$slot] = ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'];
         }
