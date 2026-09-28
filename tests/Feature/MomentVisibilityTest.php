@@ -94,6 +94,28 @@ class MomentVisibilityTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_public_guest_preview_feed_counts_and_returns_only_public_moments(): void
+    {
+        $owner = $this->user();
+
+        $publicOne = $this->moment($owner, 'public');
+        $publicTwo = $this->moment($owner, 'public');
+        $this->moment($owner, 'registered');
+        $this->moment($owner, 'private');
+        $this->moment($owner, 'public', ['published_at' => now()->addHour()]);
+
+        $response = $this->getJson(route('api.v1.moments.public.index'))
+            ->assertOk()
+            ->assertJsonPath('meta.total', 2);
+
+        $ids = collect($response->json('data'))->pluck('id')->all();
+
+        $this->assertEqualsCanonicalizing(
+            [$publicOne->id, $publicTwo->id],
+            $ids,
+        );
+    }
+
     public function test_legacy_moment_query_redirects_to_the_requested_visible_moment(): void
     {
         $owner = $this->user();
