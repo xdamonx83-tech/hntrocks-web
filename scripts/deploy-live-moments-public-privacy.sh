@@ -46,7 +46,14 @@ while IFS= read -r file; do
 done < <(git diff --name-only "$BASE_HEAD..HEAD" -- '*.php')
 
 php artisan route:list --name=moments.media.show >/dev/null
-php vendor/bin/phpunit tests/Feature/MomentVisibilityTest.php
+php artisan about >/dev/null
+
+if [ -x vendor/bin/phpunit ]; then
+  php vendor/bin/phpunit tests/Feature/MomentVisibilityTest.php
+else
+  echo "INFO: PHPUnit ist auf Produktion nicht installiert (Composer --no-dev)."
+  echo "INFO: Feature-Test bleibt im Repository; Production-Deploy nutzt Syntax-, Bootstrap-, Route- und Media-Preflight."
+fi
 
 echo "Moment-Medien Preflight:"
 php artisan hnt:moments-secure-media
