@@ -78,7 +78,8 @@ class RenderMomentStudioProject implements ShouldQueue
             $orderedAssets[] = $asset;
         }
 
-        $disk = Storage::disk('public');
+        $outputDisk = $project->visibility === 'public' ? 'public' : 'local';
+        $disk = Storage::disk($outputDisk);
         $outputPath = 'moments/rendered/'.date('Y/m').'/'.Str::uuid().'.mp4';
         $outputFullPath = $disk->path($outputPath);
         $outputDirectory = dirname($outputFullPath);
@@ -103,13 +104,13 @@ class RenderMomentStudioProject implements ShouldQueue
 
         $profile = $this->profile($format);
         $probe = $this->probeVideo($outputFullPath, $profile);
-        $thumbnailPath = $this->generateThumbnail($outputPath, $outputFullPath, $profile);
+        $thumbnailPath = $this->generateThumbnail($outputDisk, $outputPath, $outputFullPath, $profile);
 
         $outputAsset = MediaAsset::create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $project->user_id,
             'context' => 'moments',
-            'disk' => 'public',
+            'disk' => $outputDisk,
             'path' => $outputPath,
             'thumbnail_path' => $thumbnailPath,
             'type' => 'video',
@@ -748,13 +749,13 @@ class RenderMomentStudioProject implements ShouldQueue
         return $exitCode === 0 && trim(implode('', $output)) !== '';
     }
 
-    private function generateThumbnail(string $outputPath, string $outputFullPath, array $profile): ?string
+    private function generateThumbnail(string $diskName, string $outputPath, string $outputFullPath, array $profile): ?string
     {
         if (! (bool) ($profile['generate_thumbnail'] ?? true)) {
             return null;
         }
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk($diskName);
         $directory = trim(dirname($outputPath), '.');
         $basename = pathinfo($outputPath, PATHINFO_FILENAME);
         $thumbnailPath = trim($directory, '/').'/'.$basename.'-thumb.jpg';
