@@ -81,6 +81,9 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
 
     // Public Moment permalinks use these read-only endpoints so shared links can
     // render the current React design without requiring an API token.
+    Route::get('/public/moments', [ApiMomentsController::class, 'publicIndex'])
+        ->middleware('throttle:60,1')
+        ->name('moments.public.index');
     Route::get('/public/moments/{moment}', [ApiMomentsController::class, 'publicShow'])
         ->whereNumber('moment')
         ->name('moments.public.show');
