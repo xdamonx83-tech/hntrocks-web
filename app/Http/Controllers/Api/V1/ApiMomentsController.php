@@ -84,6 +84,22 @@ class ApiMomentsController extends Controller
         return new MomentResource($moment);
     }
 
+    public function publicIndex(Request $request): AnonymousResourceCollection
+    {
+        $moments = Moment::query()
+            ->with([
+                'user.profile',
+                'media',
+                'cover',
+            ])
+            ->publiclyVisible()
+            ->latest('published_at')
+            ->latest('id')
+            ->paginate(20);
+
+        return MomentResource::collection($moments);
+    }
+
     public function publicShow(Request $request, Moment $moment): MomentResource
     {
         abort_unless($moment->isVisibleTo(null), 404);
