@@ -17,7 +17,7 @@ class MomentStudioProjectService
      * @param array<int, UploadedFile> $files
      * @param array{visibility:string,caption?:string|null,description?:string|null} $attributes
      */
-    public function createQueuedProject(User $user, array $files, string $encodedPayload, array $attributes, MediaService $mediaService): MomentStudioProject
+    public function createQueuedProject(User $user, array $files, string $encodedPayload, array $attributes, MediaService $mediaService, ?UploadedFile $coverFile = null): MomentStudioProject
     {
         $payload = json_decode($encodedPayload, true);
         if (! is_array($payload)) {
@@ -42,9 +42,10 @@ class MomentStudioProjectService
 
         $project = null;
         $sourceAssets = [];
+        $coverAsset = null;
 
         try {
-            DB::transaction(function () use (&$project, &$sourceAssets, $user, $attributes, $files, $clips, $textLayers, $format, $mediaService): void {
+            DB::transaction(function () use (&$project, &$sourceAssets, &$coverAsset, $user, $attributes, $files, $clips, $textLayers, $format, $mediaService, $coverFile): void {
                 $project = MomentStudioProject::create([
                     'user_id' => $user->id,
                     'status' => 'uploading',
@@ -74,8 +75,25 @@ class MomentStudioProjectService
                     $sourceAssets[] = $asset;
                 }
 
+                if ($coverFile) {
+                    $coverAsset = $mediaService->store($coverFile, $user, 'moment_studio_cover', [
+                        'visibility' => 'private',
+                        'attachable' => $project,
+                        'metadata' => [
+                            'source' => 'moment_studio_cover',
+                            'studio_project_id' => $project->id,
+                        ],
+                    ]);
+                }
+
+                $timeline = is_array($project->timeline) ? $project->timeline : [];
+                if ($coverAsset) {
+                    $timeline['cover_media_asset_id'] = (int) $coverAsset->id;
+                }
+
                 $project->update([
                     'status' => 'queued',
+                    'timeline' => $timeline,
                     'source_media_asset_ids' => array_map(static fn (MediaAsset $asset): int => (int) $asset->id, $sourceAssets),
                     'queued_at' => now(),
                 ]);
@@ -85,6 +103,9 @@ class MomentStudioProjectService
         } catch (\Throwable $exception) {
             foreach ($sourceAssets as $asset) {
                 $this->deleteStudioSourceAsset($asset);
+            }
+            if ($coverAsset) {
+                $this->deleteStudioSourceAsset($coverAsset);
             }
 
             throw $exception;
