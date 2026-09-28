@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -782,7 +783,7 @@ class MomentController extends Controller
         $viewer = $request->user();
         abort_unless($moment->isVisibleTo($viewer), 404);
 
-        if ($viewer) {
+        if ($viewer && File::isFile(public_path('app/index.html'))) {
             return app(ReactAppController::class)();
         }
 
