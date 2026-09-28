@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Moments;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\React\ReactAppController;
 use App\Jobs\RenderMomentStudioProject;
 use App\Models\CrownInventoryItem;
 use App\Models\CrownShopItem;
@@ -18,6 +19,7 @@ use App\Support\HntTheme;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +30,17 @@ class MomentController extends Controller
 {
     public function index(Request $request): View|RedirectResponse
     {
+        if ($request->filled('moment')) {
+            $requestedMomentId = (int) $request->query('moment');
+            $requestedMoment = $requestedMomentId > 0
+                ? Moment::query()->find($requestedMomentId)
+                : null;
+
+            abort_unless($requestedMoment && $requestedMoment->isVisibleTo($request->user()), 404);
+
+            return redirect()->route('moments.show', $requestedMoment);
+        }
+
         if (HntTheme::enabled() && HntTheme::hasResolvedOverride('moments.show') && ! $request->boolean('mine') && ! $request->boolean('saved')) {
             $studioProject = $request->boolean('upload_shell') ? null : $this->resolveStudioFeedProject($request);
             if ($studioProject) {
@@ -764,12 +777,16 @@ class MomentController extends Controller
         $asset->delete();
     }
 
-    public function show(Request $request, Moment $moment): View
+    public function show(Request $request, Moment $moment): View|Response
     {
         $viewer = $request->user();
         abort_unless($moment->isVisibleTo($viewer), 404);
 
-        $viewerId = $viewer?->id;
+        if ($viewer) {
+            return app(ReactAppController::class)();
+        }
+
+        $viewerId = null;
         $viewerLikeFilter = static function ($query) use ($viewerId): void {
             if ($viewerId) {
                 $query->where('user_id', $viewerId)->where('type', 'like');
