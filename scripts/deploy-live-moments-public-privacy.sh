@@ -46,7 +46,7 @@ while IFS= read -r file; do
 done < <(git diff --name-only "$BASE_HEAD..HEAD" -- '*.php')
 
 php artisan route:list --name=moments.media.show >/dev/null
-php artisan test --filter=MomentVisibilityTest
+php vendor/bin/phpunit tests/Feature/MomentVisibilityTest.php
 
 echo "Moment-Medien Preflight:"
 php artisan hnt:moments-secure-media
