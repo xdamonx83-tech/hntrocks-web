@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\FeedCommentResource;
 use App\Http\Resources\Api\FeedPostResource;
+use App\Http\Resources\Api\UserResource;
 use App\Models\FeedComment;
 use App\Models\FeedPost;
 use App\Models\FeedReaction;
@@ -34,14 +35,16 @@ class ApiFeedEngagementController extends Controller
 
         return response()->json([
             'total' => $reactions->count(),
-            'users' => $reactions->map(function (FeedReaction $reaction): array {
+            'users' => $reactions->map(function (FeedReaction $reaction) use ($request): array {
                 $user = $reaction->user;
+                $payload = (new UserResource($user))->resolve($request);
 
                 return [
                     'id' => (int) $user->id,
                     'name' => (string) ($user->name ?: $user->username ?: 'Hunter'),
                     'username' => (string) ($user->username ?: ''),
-                    'avatar_url' => $user->avatarUrl(),
+                    'avatar_url' => $payload['avatar_url'] ?? $user->avatarUrl(),
+                    'crown_cosmetics' => $payload['crown_cosmetics'] ?? null,
                     'type' => (string) ($reaction->type ?: 'like'),
                     'reacted_at' => optional($reaction->created_at)->diffForHumans(),
                 ];
