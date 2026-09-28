@@ -9,6 +9,10 @@ class LiveLobbyFeedbackRequestResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $targetPayload = $this->targetUser
+            ? (new UserResource($this->targetUser))->resolve($request)
+            : null;
+
         return [
             'id' => $this->public_id,
             'public_id' => $this->public_id,
@@ -23,6 +27,7 @@ class LiveLobbyFeedbackRequestResource extends JsonResource
                 'username' => $this->targetUser->username,
                 'display_name' => $this->targetUser->name,
                 'avatar_url' => $this->targetUser->avatarUrl(),
+                'crown_cosmetics' => $targetPayload['crown_cosmetics'] ?? null,
             ] : null,
             'available_at' => $this->available_at?->toISOString(),
             'expires_at' => $this->expires_at?->toISOString(),
