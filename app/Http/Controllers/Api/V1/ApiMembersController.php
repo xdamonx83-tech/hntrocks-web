@@ -489,7 +489,7 @@ class ApiMembersController extends Controller
         $items = $query
             ->limit($limit)
             ->get()
-            ->map(function (Friendship $friendship) use ($user, $viewerFriendIds): ?array {
+            ->map(function (Friendship $friendship) use ($request, $user, $viewerFriendIds): ?array {
                 $friend = $friendship->otherUser($user);
 
                 if (! $friend || $friend->status !== 'active') {
@@ -499,12 +499,14 @@ class ApiMembersController extends Controller
                 $commonCount = $viewerFriendIds->isEmpty()
                     ? 0
                     : $viewerFriendIds->intersect($this->acceptedFriendIdsFor($friend))->count();
+                $friendPayload = (new UserResource($friend))->resolve($request);
 
                 return [
                     'id' => (int) $friend->id,
                     'name' => (string) $friend->name,
                     'username' => (string) $friend->username,
-                    'avatar_url' => $friend->avatar_path ? Storage::disk('public')->url($friend->avatar_path) : asset('assets/vikinger/img/default-avatar.svg'),
+                    'avatar_url' => $friendPayload['avatar_url'] ?? ($friend->avatar_path ? Storage::disk('public')->url($friend->avatar_path) : asset('assets/vikinger/img/default-avatar.svg')),
+                    'crown_cosmetics' => $friendPayload['crown_cosmetics'] ?? null,
                     'headline' => (string) ($friend->profile?->headline ?? ''),
                     'level' => (int) ($friend->level ?? 1),
                     'common_friends_count' => $commonCount,
@@ -882,7 +884,7 @@ class ApiMembersController extends Controller
             ->latest('accepted_at')
             ->limit(6)
             ->get()
-            ->map(function (Friendship $friendship) use ($user, $viewerFriendIds, $acceptedFriendIdsFor): ?array {
+            ->map(function (Friendship $friendship) use ($request, $user, $viewerFriendIds, $acceptedFriendIdsFor): ?array {
                 $friend = $friendship->otherUser($user);
 
                 if (! $friend) {
@@ -892,12 +894,14 @@ class ApiMembersController extends Controller
                 $commonCount = $viewerFriendIds->isEmpty()
                     ? 0
                     : $viewerFriendIds->intersect($acceptedFriendIdsFor($friend))->count();
+                $friendPayload = (new UserResource($friend))->resolve($request);
 
                 return [
                     'id' => (int) $friend->id,
                     'name' => (string) $friend->name,
                     'username' => (string) $friend->username,
-                    'avatar_url' => $friend->avatar_path ? Storage::disk('public')->url($friend->avatar_path) : asset('assets/vikinger/img/default-avatar.svg'),
+                    'avatar_url' => $friendPayload['avatar_url'] ?? ($friend->avatar_path ? Storage::disk('public')->url($friend->avatar_path) : asset('assets/vikinger/img/default-avatar.svg')),
+                    'crown_cosmetics' => $friendPayload['crown_cosmetics'] ?? null,
                     'headline' => (string) ($friend->profile?->headline ?? ''),
                     'level' => (int) ($friend->level ?? 1),
                     'common_friends_count' => $commonCount,
