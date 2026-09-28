@@ -38,7 +38,7 @@ class LiveLobbyResource extends JsonResource
             'mood' => $this->mood,
             'note' => $this->note,
             'creator' => $this->creator ? [
-                ...$this->userSummary($this->creator),
+                ...$this->userSummary($this->creator, $request),
                 'mentor_hunter' => $mentorHunter,
             ] : null,
             'common_ground' => $viewer ? HunterCommonGround::between(
@@ -48,7 +48,7 @@ class LiveLobbyResource extends JsonResource
                 (bool) $isCreator,
             ) : null,
             'members' => $this->activeMembers->map(fn ($member): array => [
-                ...$this->userSummary($member->user),
+                ...$this->userSummary($member->user, $request),
                 'role' => $member->role,
                 'platform' => $member->platform,
                 'mmr_stars' => $member->mmr_stars,
@@ -75,17 +75,20 @@ class LiveLobbyResource extends JsonResource
         ];
     }
 
-    private function userSummary($user): ?array
+    private function userSummary($user, Request $request): ?array
     {
         if (! $user) {
             return null;
         }
 
+        $payload = (new UserResource($user))->resolve($request);
+
         return [
-            'id' => $user->id,
-            'username' => $user->username,
-            'display_name' => $user->name,
-            'avatar_url' => $user->avatarUrl(),
+            'id' => $payload['id'],
+            'username' => $payload['username'],
+            'display_name' => $payload['name'],
+            'avatar_url' => $payload['avatar_url'],
+            'crown_cosmetics' => $payload['crown_cosmetics'] ?? null,
         ];
     }
 }
