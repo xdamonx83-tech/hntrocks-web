@@ -13,6 +13,7 @@ class GuideOverviewResource extends JsonResource
         $revision = $this->publishedRevision;
         $category = $revision?->category;
         $locale = app()->getLocale() === 'en' ? 'en' : 'de';
+        $authorPayload = $this->author ? (new UserResource($this->author))->resolve($request) : null;
 
         return [
             'id' => (int) $this->id,
@@ -40,7 +41,8 @@ class GuideOverviewResource extends JsonResource
                 'id' => (int) $this->author->id,
                 'username' => (string) $this->author->username,
                 'display_name' => (string) $this->author->name,
-                'avatar_url' => $this->author->avatarUrl(),
+                'avatar_url' => $authorPayload['avatar_url'] ?? $this->author->avatarUrl(),
+                'crown_cosmetics' => $authorPayload['crown_cosmetics'] ?? null,
             ] : null,
         ];
     }
