@@ -250,6 +250,90 @@ class FeedTranslationService
         }
     }
 
+    /**
+     * Translate a keyed set of strings in one API request while preserving all keys.
+     * This is used by the News editor so one target locale costs one translation call,
+     * instead of one call per paragraph or metadata field.
+     *
+     * @param array<string, string> $texts
+     * @return array<string, string>
+     */
+    public function translateMap(array $texts, string $sourceLocale, string $targetLocale): array
+    {
+        $source = $this->supportedLocale($sourceLocale);
+        $target = $this->supportedLocale($targetLocale);
+
+        if (! $source || ! $target || $source === $target) {
+            throw new RuntimeException('Unsupported translation locale pair.');
+        }
+
+        $texts = collect($texts)
+            ->map(fn ($value) => is_string($value) ? trim($value) : '')
+            ->filter(fn ($value) => $value !== '')
+            ->all();
+
+        if ($texts === []) {
+            return [];
+        }
+
+        $apiKey = $this->apiKey();
+        if ($apiKey === '') {
+            throw new RuntimeException('No translation API key configured.');
+        }
+
+        try {
+            $response = Http::withToken($apiKey)
+                ->timeout($this->timeoutSeconds())
+                ->asJson()
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => $this->model(),
+                    'temperature' => 0.1,
+                    'response_format' => ['type' => 'json_object'],
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You translate HNT.ROCKS Hunt: Showdown editorial content. The user provides a JSON object whose keys are stable IDs and whose values are text fragments. Return one JSON object with exactly the same keys and translated string values only. Do not add, remove, rename or reorder semantic content. Preserve URLs, usernames, @mentions, emojis, game terms, weapon/boss/map names, HTML-like tokens and intentional punctuation. Keep tone natural for gaming/editorial copy. No explanation.',
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => "Translate from {$source} to {$target}. Return JSON only:\n".json_encode($texts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                        ],
+                    ],
+                ]);
+
+            if (! $response->successful()) {
+                Log::warning('Batch translation API returned an error.', [
+                    'status' => $response->status(),
+                    'body' => substr((string) $response->body(), 0, 500),
+                ]);
+                throw new RuntimeException('Translation API error.');
+            }
+
+            $raw = trim((string) data_get($response->json(), 'choices.0.message.content', ''));
+            $decoded = json_decode($raw, true);
+
+            if (! is_array($decoded) || array_keys($decoded) !== array_keys($texts)) {
+                throw new RuntimeException('Translation API returned an invalid JSON shape.');
+            }
+
+            $result = [];
+            foreach ($texts as $key => $original) {
+                $value = $decoded[$key] ?? null;
+                if (! is_string($value) || trim($value) === '') {
+                    throw new RuntimeException('Translation API returned an empty value.');
+                }
+                $result[$key] = trim($value);
+            }
+
+            return $result;
+        } catch (RuntimeException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            report($exception);
+            throw new RuntimeException('Translation failed.');
+        }
+    }
+
     private function apiKey(): string
     {
         return trim((string) (env('HH_TRANSLATION_OPENAI_API_KEY')
