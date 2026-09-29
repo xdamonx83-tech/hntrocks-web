@@ -73,6 +73,14 @@ return [
         'timeout' => (int) env('HH_HUNT_NEWS_TIMEOUT', 15),
     ],
 
+    'news_translation' => [
+        // Dedicated OpenAI configuration for News only. Never fall back to generic,
+        // media, cup or legacy HuntHub keys.
+        'openai_api_key' => env('HH_TRANSLATION_OPENAI_API_KEY'),
+        'model' => env('HH_TRANSLATION_OPENAI_MODEL', 'gpt-4o-mini'),
+        'timeout' => max(5, min(60, (int) env('HH_TRANSLATION_OPENAI_TIMEOUT', 20))),
+    ],
+
     'visitor_tracking' => [
         'enabled' => (bool) env('HH_VISITOR_TRACKING_ENABLED', true),
         'require_consent' => (bool) env('HH_VISITOR_TRACKING_REQUIRE_CONSENT', true),
