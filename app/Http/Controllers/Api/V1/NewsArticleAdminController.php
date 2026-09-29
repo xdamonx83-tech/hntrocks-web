@@ -10,6 +10,7 @@ use App\Models\NewsArticleRevision;
 use App\Models\User;
 use App\Rules\NewsContentBlocks;
 use App\Services\NewsArticleEditorService;
+use App\Services\Translation\NewsArticleTranslationService;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -90,6 +91,37 @@ class NewsArticleAdminController extends Controller
         );
 
         return NewsArticleResource::make($updated->load(['translations', 'heroMedia'])->loadCount('revisions'));
+    }
+
+    public function translate(
+        Request $request,
+        NewsArticle $article,
+        NewsArticleTranslationService $translationService,
+    ): JsonResponse {
+        $data = $request->validate([
+            'lock_version' => ['required', 'integer', 'min:1'],
+            'source_locale' => ['required', Rule::in(NewsArticle::LOCALES)],
+            'target_locales' => ['required', 'array', 'min:1', 'max:3'],
+            'target_locales.*' => ['required', 'string', 'distinct', Rule::in(NewsArticle::LOCALES)],
+            'overwrite' => ['sometimes', 'boolean'],
+        ]);
+
+        $result = $translationService->translateArticle(
+            $article,
+            $this->adminUser($request),
+            (int) $data['lock_version'],
+            (string) $data['source_locale'],
+            $data['target_locales'],
+            (bool) ($data['overwrite'] ?? false),
+        );
+
+        return response()->json([
+            'data' => [
+                'article' => (new NewsArticleResource($result['article']))->resolve($request),
+                'translated_locales' => $result['translated_locales'],
+                'skipped_locales' => $result['skipped_locales'],
+            ],
+        ]);
     }
 
     public function revisions(NewsArticle $article): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
