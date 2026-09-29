@@ -287,16 +287,16 @@ class FeedTranslationService
 
     private function newsApiKey(): string
     {
-        return trim((string) env('HH_TRANSLATION_OPENAI_API_KEY', ''));
+        return trim((string) config('hunthub.news_translation.openai_api_key', ''));
     }
 
     private function model(): string
     {
-        return trim((string) (env('HH_TRANSLATION_OPENAI_MODEL') ?: 'gpt-4o-mini'));
+        return trim((string) config('hunthub.news_translation.model', 'gpt-4o-mini'));
     }
 
     private function timeoutSeconds(): int
     {
-        return max(5, min(60, (int) (env('HH_TRANSLATION_OPENAI_TIMEOUT') ?: 20)));
+        return max(5, min(60, (int) config('hunthub.news_translation.timeout', 20)));
     }
 }
