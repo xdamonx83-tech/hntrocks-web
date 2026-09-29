@@ -102,7 +102,7 @@ return [
     ],
 
     'ai_content_disclosure' => [
-        'enabled' => (bool) env('HH_AI_CONTENT_DISCLOSURE_ENABLED', true),
+        'enabled' => (bool) env('HH_AI_CONTENT_DISCLOSURE_ENABLED', false),
         'images' => (bool) env('HH_AI_CONTENT_DISCLOSURE_IMAGES', true),
         'videos' => (bool) env('HH_AI_CONTENT_DISCLOSURE_VIDEOS', true),
         'possible_threshold' => (float) env('HH_AI_CONTENT_DISCLOSURE_THRESHOLD', 0.72),
@@ -117,12 +117,7 @@ return [
             static fn ($value): int => max(0, (int) trim($value)),
             explode(',', (string) env('HH_AI_CONTENT_DISCLOSURE_VIDEO_SAMPLE_SECONDS', '1,4,8'))
         ))) ?: [1, 4, 8]),
-        'openai_api_key' => env('HH_AI_DISCLOSURE_OPENAI_API_KEY')
-            ?: (env('HH_TRANSLATION_OPENAI_API_KEY')
-            ?: (env('HH_OPENAI_API_KEY')
-            ?: (env('OPENAI_API_KEY')
-            ?: (env('HH_MEDIA_OPENAI_API_KEY')
-            ?: env('HH_CUP_OPENAI_API_KEY'))))),
+        'openai_api_key' => env('HH_AI_DISCLOSURE_OPENAI_API_KEY'),
     ],
 
     'feed_video_transcoding' => [
@@ -190,10 +185,7 @@ return [
             static fn ($value): int => max(0, (int) trim($value)),
             explode(',', (string) env('HH_MEDIA_MODERATION_VIDEO_SAMPLE_SECONDS', '1,3,7'))
         ))) ?: [1, 3, 7]),
-        'openai_api_key' => env('HH_MEDIA_OPENAI_API_KEY')
-            ?: (env('HH_OPENAI_API_KEY')
-            ?: (env('OPENAI_API_KEY')
-            ?: env('HH_CUP_OPENAI_API_KEY'))),
+        'openai_api_key' => env('HH_MEDIA_OPENAI_API_KEY'),
     ],
 
     'upload_limits' => [
