@@ -326,6 +326,9 @@ Route::middleware(['api.token', 'news.admin'])
         Route::patch('/articles/{article}', [NewsArticleAdminController::class, 'update'])->name('articles.update');
         Route::get('/articles/{article}/media', [NewsArticleMediaController::class, 'articleMedia'])->name('articles.media.index');
         Route::post('/articles/{article}/workflow', [NewsArticleAdminController::class, 'workflow'])->name('articles.workflow');
+        Route::post('/articles/{article}/translate', [NewsArticleAdminController::class, 'translate'])
+            ->middleware('throttle:6,1')
+            ->name('articles.translate');
         Route::get('/articles/{article}/revisions', [NewsArticleAdminController::class, 'revisions'])->name('articles.revisions.index');
         Route::get('/articles/{article}/revisions/{revision}', [NewsArticleAdminController::class, 'showRevision'])->name('articles.revisions.show');
         Route::post('/articles/{article}/revisions/{revision}/restore', [NewsArticleAdminController::class, 'restoreRevision'])->name('articles.revisions.restore');
