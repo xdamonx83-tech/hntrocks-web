@@ -312,7 +312,10 @@ class FeedTranslationService
             $raw = trim((string) data_get($response->json(), 'choices.0.message.content', ''));
             $decoded = json_decode($raw, true);
 
-            if (! is_array($decoded) || array_keys($decoded) !== array_keys($texts)) {
+            if (! is_array($decoded)
+                || count($decoded) !== count($texts)
+                || array_diff(array_keys($texts), array_keys($decoded)) !== []
+                || array_diff(array_keys($decoded), array_keys($texts)) !== []) {
                 throw new RuntimeException('Translation API returned an invalid JSON shape.');
             }
 
