@@ -195,59 +195,7 @@ class FeedTranslationService
 
     public function translateText(string $text, string $sourceLocale, string $targetLocale): string
     {
-        $text = trim($text);
-
-        if ($text === '') {
-            throw new RuntimeException('No text to translate.');
-        }
-
-        $apiKey = $this->apiKey();
-
-        if ($apiKey === '') {
-            throw new RuntimeException('No translation API key configured.');
-        }
-
-        try {
-            $response = Http::withToken($apiKey)
-                ->timeout($this->timeoutSeconds())
-                ->asJson()
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => $this->model(),
-                    'temperature' => 0.1,
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'You translate user-generated community posts for hnt.rocks between German, English, Spanish and Russian. The source and target language codes are provided by the user message. Preserve usernames, @mentions, URLs, emojis, line breaks, Hunt: Showdown terms, platform names and profanity tone. Return only the translated text, no explanation.',
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => "Translate from {$sourceLocale} to {$targetLocale}:\n\n" . $text,
-                        ],
-                    ],
-                ]);
-
-            if (! $response->successful()) {
-                Log::warning('Feed translation API returned an error.', [
-                    'status' => $response->status(),
-                    'body' => substr((string) $response->body(), 0, 500),
-                ]);
-
-                throw new RuntimeException('Translation API error.');
-            }
-
-            $translated = trim((string) data_get($response->json(), 'choices.0.message.content', ''));
-
-            if ($translated === '') {
-                throw new RuntimeException('Translation API returned an empty response.');
-            }
-
-            return $translated;
-        } catch (RuntimeException $exception) {
-            throw $exception;
-        } catch (\Throwable $exception) {
-            report($exception);
-            throw new RuntimeException('Translation failed.');
-        }
+        throw new RuntimeException('Feed and comment translation is disabled. News translation uses the dedicated news translation path.');
     }
 
     /**
@@ -276,7 +224,7 @@ class FeedTranslationService
             return [];
         }
 
-        $apiKey = $this->apiKey();
+        $apiKey = $this->newsApiKey();
         if ($apiKey === '') {
             throw new RuntimeException('No translation API key configured.');
         }
@@ -337,14 +285,9 @@ class FeedTranslationService
         }
     }
 
-    private function apiKey(): string
+    private function newsApiKey(): string
     {
-        return trim((string) (env('HH_TRANSLATION_OPENAI_API_KEY')
-            ?: env('HH_OPENAI_API_KEY')
-            ?: env('OPENAI_API_KEY')
-            ?: env('HH_MEDIA_OPENAI_API_KEY')
-            ?: env('HH_CUP_OPENAI_API_KEY')
-            ?: ''));
+        return trim((string) env('HH_TRANSLATION_OPENAI_API_KEY', ''));
     }
 
     private function model(): string
