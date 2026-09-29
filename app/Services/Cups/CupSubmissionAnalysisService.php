@@ -941,13 +941,13 @@ class CupSubmissionAnalysisService
         return $png;
     }
 
-    private function aiApiKey(): string { return trim((string) (env('HH_CUP_OPENAI_API_KEY') ?: env('HH_OPENAI_API_KEY') ?: env('OPENAI_API_KEY') ?: '')); }
+    private function aiApiKey(): string { return trim((string) env('HH_CUP_OPENAI_API_KEY', '')); }
     private function aiModel(): string { return trim((string) (env('HH_CUP_OPENAI_MODEL') ?: 'gpt-5-mini')); }
     private function aiEndpoint(): string { return trim((string) (env('HH_CUP_OPENAI_ENDPOINT') ?: 'https://api.openai.com/v1/responses')); }
     private function aiTimeoutSeconds(): int { return max(5, min(120, (int) (env('HH_CUP_OPENAI_TIMEOUT') ?: 45))); }
     private function aiEnabled(): bool
     {
-        $value = env('HH_CUP_AI_ENABLED', true);
+        $value = env('HH_CUP_AI_ENABLED', false);
         return is_bool($value) ? $value : in_array(strtolower(trim((string) $value)), ['1', 'true', 'yes', 'on'], true);
     }
 }
