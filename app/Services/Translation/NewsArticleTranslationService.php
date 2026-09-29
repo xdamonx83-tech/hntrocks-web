@@ -26,6 +26,7 @@ class NewsArticleTranslationService
         'afterLabel',
         'author',
         'title',
+        'textContent',
     ];
 
     public function __construct(
