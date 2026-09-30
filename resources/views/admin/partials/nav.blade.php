@@ -20,6 +20,7 @@
             ['label' => 'Kassenspots', 'route' => 'admin.maps.cash-spots.index', 'active' => 'admin.maps.cash-spots.*', 'icon' => 'map-1'],
             ['label' => 'HNT-Aufträge', 'route' => 'admin.contracts.index', 'active' => 'admin.contracts.*', 'icon' => 'document-text'],
             ['label' => 'Loadout-Challenges', 'route' => 'admin.loadout-challenges.index', 'active' => 'admin.loadout-challenges.*', 'icon' => 'game'],
+            ['label' => 'Arsenal QA', 'route' => 'admin.arsenal.index', 'active' => 'admin.arsenal.*', 'icon' => 'document-text'],
             ['label' => 'Badges & Quests', 'route' => 'admin.gamification.index', 'active' => 'admin.gamification.*', 'icon' => 'award'],
         ],
         'SYSTEM' => [
