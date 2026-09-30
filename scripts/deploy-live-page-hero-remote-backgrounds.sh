@@ -98,7 +98,7 @@ php -l tests/Feature/AppRemoteHeroBackgroundsTest.php
 git diff --check
 
 echo "Feature-Test ..."
-php artisan test --filter=AppRemoteHeroBackgroundsTest
+vendor/bin/phpunit --filter AppRemoteHeroBackgroundsTest
 
 echo "Route prüfen ..."
 php artisan route:list --path=api/v1/appearance
