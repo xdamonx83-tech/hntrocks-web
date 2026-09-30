@@ -73,6 +73,8 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('/auth/social/exchange', [ApiAuthController::class, 'exchangeSocialLoginCode'])->name('auth.social.exchange');
     Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
 
+    Route::get('/appearance', [AppRemoteConfigController::class, 'appearance'])->name('appearance.show');
+
     Route::middleware('api.token')->group(function (): void {
         require __DIR__.'/api-guides.php';
 
