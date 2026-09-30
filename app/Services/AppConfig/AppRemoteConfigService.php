@@ -37,6 +37,8 @@ class AppRemoteConfigService
         'hero_notifications',
         'hero_news',
         'hero_rocks',
+        'hero_rocks_shop',
+        'hero_rocks_inventory',
         'hero_loadout_challenges',
         'hero_loadout_challenge_detail',
     ];
@@ -298,6 +300,8 @@ class AppRemoteConfigService
             'hero_notifications' => $url('hero_notifications'),
             'hero_news' => $url('hero_news'),
             'hero_rocks' => $url('hero_rocks'),
+            'hero_rocks_shop' => $url('hero_rocks_shop'),
+            'hero_rocks_inventory' => $url('hero_rocks_inventory'),
             'hero_loadout_challenges' => $url('hero_loadout_challenges'),
             'hero_loadout_challenge_detail' => $url('hero_loadout_challenge_detail'),
         ];
