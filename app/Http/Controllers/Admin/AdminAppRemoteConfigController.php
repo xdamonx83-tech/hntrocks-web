@@ -52,10 +52,10 @@ class AdminAppRemoteConfigController extends Controller
     {
         $this->guardAdmin($request);
 
-        $data = $request->validate([
+        $rules = [
             'is_active' => ['nullable', 'boolean'],
             'publish_now' => ['nullable', 'boolean'],
-            'config_json' => ['required', 'string', 'max:30000'],
+            'config_json' => ['required', 'string', 'max:50000'],
             'theme_palette' => ['nullable', 'array'],
             'theme_palette.*' => ['nullable', 'string', 'max:20'],
             'palette_enabled' => ['nullable', 'boolean'],
@@ -63,11 +63,14 @@ class AdminAppRemoteConfigController extends Controller
             'logo_file' => ['nullable', 'file', 'mimes:svg,png,webp', 'max:1024'],
             'logo_dark_file' => ['nullable', 'file', 'mimes:svg,png,webp', 'max:1024'],
             'remote_appearance_form' => ['nullable', 'boolean'],
-            'auth_background_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
-            'feed_background_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
-            'auth_background_clear' => ['nullable', 'boolean'],
-            'feed_background_clear' => ['nullable', 'boolean'],
-        ]);
+        ];
+
+        foreach (AppRemoteConfigService::APPEARANCE_BACKGROUND_SLOTS as $slot) {
+            $rules[$slot.'_file'] = ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'];
+            $rules[$slot.'_clear'] = ['nullable', 'boolean'];
+        }
+
+        $data = $request->validate($rules);
 
         try {
             $decoded = json_decode($data['config_json'], true, 512, JSON_THROW_ON_ERROR);
@@ -123,11 +126,17 @@ class AdminAppRemoteConfigController extends Controller
 
     private function hasAppearanceFormFields(Request $request): bool
     {
-        return $request->boolean('remote_appearance_form')
-            || $request->hasFile('auth_background_file')
-            || $request->hasFile('feed_background_file')
-            || $request->boolean('auth_background_clear')
-            || $request->boolean('feed_background_clear');
+        if ($request->boolean('remote_appearance_form')) {
+            return true;
+        }
+
+        foreach (AppRemoteConfigService::APPEARANCE_BACKGROUND_SLOTS as $slot) {
+            if ($request->hasFile($slot.'_file') || $request->boolean($slot.'_clear')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function mergeBrandingFields(array $decoded, Request $request, AppRemoteConfigService $remoteConfig): array
@@ -154,19 +163,18 @@ class AdminAppRemoteConfigController extends Controller
 
     private function mergeAppearanceFields(array $decoded, Request $request): array
     {
-        foreach ([
-            'auth_background' => 'auth_background_file',
-            'feed_background' => 'feed_background_file',
-        ] as $configKey => $requestKey) {
-            if ($request->boolean(str_replace('_file', '_clear', $requestKey))) {
-                data_set($decoded, 'appearance.'.$configKey.'.url', null);
+        foreach (AppRemoteConfigService::APPEARANCE_BACKGROUND_SLOTS as $slot) {
+            $fileKey = $slot.'_file';
+
+            if ($request->boolean($slot.'_clear')) {
+                data_set($decoded, 'appearance.'.$slot.'.url', null);
                 continue;
             }
 
-            $uploadedUrl = $this->uploadedBackgroundUrl($request, $requestKey);
+            $uploadedUrl = $this->uploadedBackgroundUrl($request, $fileKey);
 
             if ($uploadedUrl !== null) {
-                data_set($decoded, 'appearance.'.$configKey.'.url', $uploadedUrl);
+                data_set($decoded, 'appearance.'.$slot.'.url', $uploadedUrl);
             }
         }
 
@@ -196,7 +204,7 @@ class AdminAppRemoteConfigController extends Controller
 
         $file = $request->file($key);
         $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
-        $prefix = $key === 'auth_background_file' ? 'auth-background' : 'feed-background';
+        $prefix = Str::kebab(Str::replaceEnd('_file', '', $key));
         $filename = $prefix.'-'.now()->format('Ymd-His').'-'.Str::lower(Str::random(8)).'.'.$extension;
         $path = $file->storeAs('app-backgrounds', $filename, 'public');
 
