@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\ApiBootstrapController;
+use App\Http\Controllers\Api\V1\ArsenalController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeGameController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeInvitationController;
 use App\Http\Controllers\Api\V1\Arcade\ArcadeMatchController;
@@ -66,6 +67,12 @@ Route::get('/v1/health', function (): array {
 })->name('api.health');
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    Route::get('/arsenal', [ArsenalController::class, 'index'])->name('arsenal.index');
+    Route::get('/arsenal/categories', [ArsenalController::class, 'categories'])->name('arsenal.categories');
+    Route::get('/arsenal/classes', [ArsenalController::class, 'classes'])->name('arsenal.classes');
+    Route::get('/arsenal/compare', [ArsenalController::class, 'compare'])->name('arsenal.compare');
+    Route::get('/arsenal/{slug}/related', [ArsenalController::class, 'related'])->name('arsenal.related');
+    Route::get('/arsenal/{slug}', [ArsenalController::class, 'show'])->name('arsenal.show');
     Route::get('/appearance', WebAppearanceController::class)->name('appearance.show');
     Route::get('/news', [NewsPublicController::class, 'apiIndex'])->name('news.index');
     Route::get('/news/articles/{article}/engagement', [NewsEngagementController::class, 'index'])
