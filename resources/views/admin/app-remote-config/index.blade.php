@@ -42,6 +42,36 @@
         'success' => 'Success',
         'warning' => 'Warning',
     ];
+
+    $globalBackgroundSlots = [
+        'auth_background' => 'Auth-Hintergrund',
+        'feed_background' => 'Feed/App Fallback',
+        'landing_background' => 'Landing',
+        'app_background' => 'App-Hintergrund',
+        'topbar_background' => 'Topbar',
+        'sidebar_background' => 'Sidebar',
+        'feed_hero_background' => 'Feed Hero',
+        'feed_promo_background' => 'Feed Promo',
+        'sidebar_bottom_background' => 'Sidebar Bottom',
+    ];
+
+    $heroBackgroundSlots = [
+        'hero_cups' => 'Cups Übersicht',
+        'hero_cups_create' => 'Cups Erstellen / Bearbeiten',
+        'hero_guides' => 'Guides Übersicht',
+        'hero_guides_create' => 'Guides Erstellen / Bearbeiten',
+        'hero_ready' => 'Ready Lobbies Übersicht',
+        'hero_ready_detail' => 'Ready Lobby Detail',
+        'hero_teams' => 'Teams Übersicht',
+        'hero_team_form' => 'Team Erstellen / Bearbeiten',
+        'hero_members' => 'Mitglieder',
+        'hero_maps' => 'Maps Übersicht',
+        'hero_notifications' => 'Benachrichtigungen',
+        'hero_news' => 'News Übersicht',
+        'hero_rocks' => 'Rocks',
+        'hero_loadout_challenges' => 'Loadout Challenges Übersicht',
+        'hero_loadout_challenge_detail' => 'Loadout Challenge Detail',
+    ];
 @endphp
 
 <section class="hh-card hh-card-compact">
@@ -145,46 +175,61 @@
             <div class="hh-card-title-row">
                 <div>
                     <h2 id="remote-backgrounds-heading">Remote App Hintergründe</h2>
-                    <p class="hh-muted">Auth und Feed können ohne App-Release ausgetauscht werden. JPG, PNG oder WebP, maximal 8 MB.</p>
+                    <p class="hh-muted">Globale App-Bilder ohne Deploy austauschen. JPG, PNG oder WebP, maximal 8 MB.</p>
                 </div>
             </div>
 
             <div class="hh-remote-upload-grid">
-                <div>
-                    <label class="hh-admin-menu-field">
-                        <span>Auth-Hintergrund</span>
-                        <input type="file" name="auth_background_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                    </label>
-                    <p class="hh-muted">Version: {{ data_get($appearance, 'auth_background.version', 0) }}</p>
-                    @if(! empty(data_get($appearance, 'auth_background.url')))
-                        <div class="hh-remote-current-logo">
-                            <span>Aktueller Auth-Hintergrund</span>
-                            <img src="{{ data_get($appearance, 'auth_background.url') }}" alt="Aktueller Remote Auth Hintergrund">
-                        </div>
-                        <label class="hh-admin-menu-check hh-admin-menu-create-check">
-                            <input type="checkbox" name="auth_background_clear" value="1">
-                            <span>Remote Auth-Hintergrund entfernen</span>
+                @foreach($globalBackgroundSlots as $slot => $label)
+                    <div>
+                        <label class="hh-admin-menu-field">
+                            <span>{{ $label }}</span>
+                            <input type="file" name="{{ $slot }}_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
                         </label>
-                    @endif
-                </div>
+                        <p class="hh-muted">Version: {{ data_get($appearance, $slot.'.version', 0) }}</p>
+                        @if(! empty(data_get($appearance, $slot.'.url')))
+                            <div class="hh-remote-current-logo">
+                                <span>Aktuell</span>
+                                <img src="{{ data_get($appearance, $slot.'.url') }}" alt="{{ $label }}">
+                            </div>
+                            <label class="hh-admin-menu-check hh-admin-menu-create-check">
+                                <input type="checkbox" name="{{ $slot }}_clear" value="1">
+                                <span>Remote-Bild entfernen</span>
+                            </label>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </section>
 
+        <section class="hh-remote-branding-panel" aria-labelledby="remote-hero-backgrounds-heading">
+            <div class="hh-card-title-row">
                 <div>
-                    <label class="hh-admin-menu-field">
-                        <span>Feed-Hintergrund</span>
-                        <input type="file" name="feed_background_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                    </label>
-                    <p class="hh-muted">Version: {{ data_get($appearance, 'feed_background.version', 0) }}</p>
-                    @if(! empty(data_get($appearance, 'feed_background.url')))
-                        <div class="hh-remote-current-logo">
-                            <span>Aktueller Feed-Hintergrund</span>
-                            <img src="{{ data_get($appearance, 'feed_background.url') }}" alt="Aktueller Remote Feed Hintergrund">
-                        </div>
-                        <label class="hh-admin-menu-check hh-admin-menu-create-check">
-                            <input type="checkbox" name="feed_background_clear" value="1">
-                            <span>Remote Feed-Hintergrund entfernen</span>
-                        </label>
-                    @endif
+                    <h2 id="remote-hero-backgrounds-heading">Seiten-Hero-Bilder</h2>
+                    <p class="hh-muted">Für jede feste Unterseiten-Hero-Fläche kann ein eigenes Bild gesetzt werden. Ohne Upload bleibt das bisherige lokale Bild bzw. Content-Cover aktiv.</p>
                 </div>
+            </div>
+
+            <div class="hh-remote-upload-grid">
+                @foreach($heroBackgroundSlots as $slot => $label)
+                    <div>
+                        <label class="hh-admin-menu-field">
+                            <span>{{ $label }}</span>
+                            <input type="file" name="{{ $slot }}_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                        </label>
+                        <p class="hh-muted">Version: {{ data_get($appearance, $slot.'.version', 0) }}</p>
+                        @if(! empty(data_get($appearance, $slot.'.url')))
+                            <div class="hh-remote-current-logo">
+                                <span>Aktuelles Hero-Bild</span>
+                                <img src="{{ data_get($appearance, $slot.'.url') }}" alt="{{ $label }}">
+                            </div>
+                            <label class="hh-admin-menu-check hh-admin-menu-create-check">
+                                <input type="checkbox" name="{{ $slot }}_clear" value="1">
+                                <span>Hero-Bild zurücksetzen</span>
+                            </label>
+                        @endif
+                    </div>
+                @endforeach
             </div>
         </section>
 
