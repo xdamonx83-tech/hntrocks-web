@@ -11,6 +11,13 @@ use Illuminate\Http\Request;
 
 class AppRemoteConfigController extends Controller
 {
+    public function appearance(AppRemoteConfigService $remoteConfig): JsonResponse
+    {
+        return response()->json([
+            'backgrounds' => $remoteConfig->appearanceBackgrounds(),
+        ]);
+    }
+
     public function show(Request $request, AppRemoteConfigService $remoteConfig): JsonResponse
     {
         $locale = strtolower((string) $request->query('locale', app()->getLocale()));
