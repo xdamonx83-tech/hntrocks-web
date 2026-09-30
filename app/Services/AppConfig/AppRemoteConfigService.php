@@ -14,6 +14,33 @@ class AppRemoteConfigService
 {
     public const DEFAULT_KEY = 'default';
 
+    public const APPEARANCE_BACKGROUND_SLOTS = [
+        'auth_background',
+        'feed_background',
+        'landing_background',
+        'app_background',
+        'topbar_background',
+        'sidebar_background',
+        'feed_hero_background',
+        'feed_promo_background',
+        'sidebar_bottom_background',
+        'hero_cups',
+        'hero_cups_create',
+        'hero_guides',
+        'hero_guides_create',
+        'hero_ready',
+        'hero_ready_detail',
+        'hero_teams',
+        'hero_team_form',
+        'hero_members',
+        'hero_maps',
+        'hero_notifications',
+        'hero_news',
+        'hero_rocks',
+        'hero_loadout_challenges',
+        'hero_loadout_challenge_detail',
+    ];
+
     private const ACTIVE_CONFIG_CACHE_KEY = 'app_remote_config:active:default';
 
     private const ALLOWED_THEME_VARIANTS = [
@@ -122,16 +149,13 @@ class AppRemoteConfigService
                 'logo_dark_url' => null,
                 'logo_updated_at' => null,
             ],
-            'appearance' => [
-                'auth_background' => [
+            'appearance' => array_fill_keys(
+                self::APPEARANCE_BACKGROUND_SLOTS,
+                [
                     'url' => null,
                     'version' => 0,
-                ],
-                'feed_background' => [
-                    'url' => null,
-                    'version' => 0,
-                ],
-            ],
+                ]
+            ),
             'limits' => [
                 'moment_upload_max_mb' => 250,
                 'feed_video_upload_max_mb' => 250,
@@ -209,7 +233,7 @@ class AppRemoteConfigService
         $config['branding']['logo_dark_url'] = $this->normalizeBrandingUrl($config['branding']['logo_dark_url'] ?? null);
         $config['branding']['logo_updated_at'] = $this->normalizeNullableString($config['branding']['logo_updated_at'] ?? null, 80);
 
-        foreach (['auth_background', 'feed_background'] as $background) {
+        foreach (self::APPEARANCE_BACKGROUND_SLOTS as $background) {
             $config['appearance'][$background]['url'] = $this->normalizeAppearanceUrl(
                 $config['appearance'][$background]['url'] ?? null
             );
@@ -230,7 +254,7 @@ class AppRemoteConfigService
         $previous = $this->normalizeConfig($previousConfig);
         $next = $this->normalizeConfig($nextConfig);
 
-        foreach (['auth_background', 'feed_background'] as $background) {
+        foreach (self::APPEARANCE_BACKGROUND_SLOTS as $background) {
             $previousUrl = $previous['appearance'][$background]['url'];
             $nextUrl = $next['appearance'][$background]['url'];
             $previousVersion = (int) $previous['appearance'][$background]['version'];
@@ -242,6 +266,41 @@ class AppRemoteConfigService
         }
 
         return $next;
+    }
+
+    public function appearanceBackgrounds(): array
+    {
+        $appearance = $this->activeConfig()['appearance'];
+
+        $url = static fn (string $key): ?string => is_string($appearance[$key]['url'] ?? null)
+            ? $appearance[$key]['url']
+            : null;
+
+        return [
+            'auth' => $url('auth_background'),
+            'landing' => $url('landing_background'),
+            'app' => $url('app_background') ?? $url('feed_background'),
+            'topbar' => $url('topbar_background'),
+            'sidebar' => $url('sidebar_background'),
+            'feed_hero' => $url('feed_hero_background'),
+            'feed_promo' => $url('feed_promo_background'),
+            'sidebar_bottom' => $url('sidebar_bottom_background'),
+            'hero_cups' => $url('hero_cups'),
+            'hero_cups_create' => $url('hero_cups_create'),
+            'hero_guides' => $url('hero_guides'),
+            'hero_guides_create' => $url('hero_guides_create'),
+            'hero_ready' => $url('hero_ready'),
+            'hero_ready_detail' => $url('hero_ready_detail'),
+            'hero_teams' => $url('hero_teams'),
+            'hero_team_form' => $url('hero_team_form'),
+            'hero_members' => $url('hero_members'),
+            'hero_maps' => $url('hero_maps'),
+            'hero_notifications' => $url('hero_notifications'),
+            'hero_news' => $url('hero_news'),
+            'hero_rocks' => $url('hero_rocks'),
+            'hero_loadout_challenges' => $url('hero_loadout_challenges'),
+            'hero_loadout_challenge_detail' => $url('hero_loadout_challenge_detail'),
+        ];
     }
 
     public function validateActionUrl(?string $url): ?string
