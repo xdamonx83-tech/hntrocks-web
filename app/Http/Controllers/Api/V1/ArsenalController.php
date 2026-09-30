@@ -98,7 +98,7 @@ class ArsenalController extends Controller
         return ['id'=>$item->id,'slug'=>$item->slug,'name'=>$translation?->name ?? $item->name,'description'=>$translation?->description,
             'item_type'=>$item->item_type,'category'=>$item->category,'class'=>$item->equipment_class,
             'comparison_group'=>$item->comparison_group,'ammo_type'=>$item->ammo_type,'slot_size'=>$item->slot_size,
-            'price'=>$item->price,'unlock_rank'=>$item->unlock_rank,'image_url'=>null];
+            'price'=>$item->price,'unlock_rank'=>$item->unlock_rank,'image_url'=>$item->imageUrl()];
     }
 
     private function detail(EquipmentItem $item, Request $request): array
@@ -112,7 +112,7 @@ class ArsenalController extends Controller
             'ammo'=>$this->ammoPayload($item),
             'variants'=>$variants,
             'traits'=>$item->traits->map(fn($trait)=>['id'=>$trait->external_id,'name'=>$trait->name])->values(),
-            'skins'=>$item->skins->map(fn($skin)=>['id'=>$skin->external_id,'name'=>$skin->name,'rarity'=>$skin->rarity,'image_url'=>null])->values(),
+            'skins'=>$item->skins->map(fn($skin)=>['id'=>$skin->external_id,'name'=>$skin->name,'rarity'=>$skin->rarity,'image_url'=>$skin->imageUrl()])->values(),
             'patch_history'=>$item->patchHistory->map(fn($entry)=>['patch'=>$entry->patch,'field'=>$entry->field,
                 'old_value'=>$entry->old_value,'new_value'=>$entry->new_value,'note'=>$entry->note])->values(),
             'source'=>['name'=>$item->source?->name,'url'=>$item->source_url,'last_synced_at'=>$item->last_synced_at]];
