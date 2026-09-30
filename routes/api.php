@@ -99,6 +99,8 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('/auth/social/exchange', [ApiAuthController::class, 'exchangeSocialLoginCode'])->name('auth.social.exchange');
     Route::post('/auth/google/native', [ApiAuthController::class, 'nativeGoogleLogin'])->name('auth.google.native');
 
+    Route::get('/appearance', [AppRemoteConfigController::class, 'appearance'])->name('appearance.show');
+
     Route::middleware('api.token')->group(function (): void {
         Route::get('/news/articles/{article}/engagement/viewer', [NewsEngagementController::class, 'viewer'])->whereNumber('article')->name('news.engagement.viewer');
         Route::post('/news/articles/{article}/comments', [NewsEngagementController::class, 'store'])->whereNumber('article')->middleware('throttle:12,1')->name('news.comments.store');
