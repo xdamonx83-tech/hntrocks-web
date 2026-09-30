@@ -36,7 +36,9 @@ HEAD="$(git rev-parse HEAD)"
 git merge-base --is-ancestor "$BASE_HEAD" HEAD || { echo "ABORT: expected Arsenal asset pipeline base is absent"; exit 1; }
 
 php -l routes/web.php
-php artisan route:list --path=arsenal
+ROUTES_OUTPUT="$(php artisan route:list --path=arsenal)"
+printf '%s\n' "$ROUTES_OUTPUT"
+printf '%s\n' "$ROUTES_OUTPUT" | grep -q 'arsenal.react.index' || { echo "ABORT: public Arsenal React route is not registered."; exit 1; }
 
 echo "ARSENAL REACT ROUTE LIVE"
 echo "Backup: $BACKUP"
