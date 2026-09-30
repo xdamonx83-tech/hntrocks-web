@@ -144,6 +144,7 @@ Route::get('/design-preview/{path?}', ReactPreviewAppController::class)
     ->where('path', '.*')
     ->name('react.design-preview');
 
+Route::get('/arsenal', ReactAppController::class)->name('arsenal.react.index');
 Route::get('/rocks', ReactAppController::class)->name('rocks.index');
 Route::get('/rocks/{path}', ReactAppController::class)->where('path', '.*')->name('rocks.react');
 Route::get('/arcade', ReactAppController::class)->name('arcade.react.index');
