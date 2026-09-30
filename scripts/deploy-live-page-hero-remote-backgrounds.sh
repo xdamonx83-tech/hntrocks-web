@@ -26,6 +26,9 @@ fi
 
 git diff --cached --quiet || die "Gestagte Änderungen im Backend-Checkout vorhanden."
 
+[[ -r .env ]] || die ".env ist für den ausführenden Benutzer nicht lesbar."
+runuser -u www-data -- test -r .env || die ".env ist für www-data nicht lesbar. Deploy wird vor Cache-Änderungen gestoppt."
+
 HTACCESS_HASH_BEFORE=""
 if [[ -f public/.htaccess ]]; then
   HTACCESS_HASH_BEFORE="$(sha256sum public/.htaccess | cut -d' ' -f1)"
@@ -124,8 +127,12 @@ if [[ -n "$HTACCESS_HASH_BEFORE" ]]; then
   [[ "$HTACCESS_HASH_BEFORE" == "$HTACCESS_HASH_AFTER" ]] || die "public/.htaccess wurde unerwartet verändert."
 fi
 
-echo "Laravel-Caches leeren ..."
+echo "Laravel-Caches sauber neu aufbauen ..."
 php artisan optimize:clear
+php artisan config:cache
+
+CONFIG_DB="$(php artisan tinker --execute="echo config('database.connections.mysql.database');" 2>/dev/null | tail -n 1 | tr -d '\r')"
+[[ -n "$CONFIG_DB" && "$CONFIG_DB" != "laravel" ]] || die "Config-Cache enthält keine gültige Produktionsdatenbank."
 
 echo "Deploy-Branch pushen ..."
 git push -u origin "$DEPLOY_BRANCH"
