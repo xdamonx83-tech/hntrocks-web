@@ -8,6 +8,7 @@ use App\Http\Resources\Api\UserResource;
 use App\Models\Guide;
 use App\Models\GuideComment;
 use App\Models\GuideMedia;
+use App\Services\Guides\GuideDeletionService;
 use App\Services\Guides\GuideReputationService;
 use App\Services\UserPrivacyService;
 use Illuminate\Database\Eloquent\Builder;
@@ -271,6 +272,7 @@ class ApiGuidesController extends Controller
                     'bookmarked' => $guide->isBookmarkedBy($viewer),
                     'owns_guide' => $guide->isOwnedBy($viewer),
                     'can_edit' => $viewer?->can('update', $guide) ?? false,
+                    'can_delete' => $viewer?->isAdmin() ?? false,
                 ],
                 'counts' => [
                     'helpful' => (int) $guide->helpful_count,
@@ -279,6 +281,18 @@ class ApiGuidesController extends Controller
                 ],
                 'related_guides' => $relatedGuides,
             ],
+        ]);
+    }
+
+    public function destroy(Request $request, Guide $guide, GuideDeletionService $deletion): JsonResponse
+    {
+        $admin = $request->user();
+        abort_unless($admin?->isAdmin(), 403);
+
+        $deletion->deleteAsAdmin($guide, $admin);
+
+        return response()->json([
+            'message' => 'Guide wurde gelöscht.',
         ]);
     }
 
