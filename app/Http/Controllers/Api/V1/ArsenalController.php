@@ -1,0 +1,132 @@
+<?php
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use App\Models\{EquipmentItem,EquipmentStatDefinition};
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class ArsenalController extends Controller
+{
+    public function index(Request $request): JsonResponse
+    {
+        $v = $request->validate([
+            'search'=>'nullable|string|max:100','category'=>'nullable|string|max:80','class'=>'nullable|string|max:80',
+            'type'=>'nullable|in:weapon,tool,consumable,ammo',
+            'ammo'=>'nullable|string|max:80','family'=>'nullable|string|max:100','comparison_group'=>'nullable|string|max:80',
+            'sort'=>'nullable|in:name,price,damage,velocity','page'=>'nullable|integer|min:1','per_page'=>'nullable|integer|min:1|max:100',
+        ]);
+        $q = EquipmentItem::query()->where('source_status','active');
+        if (isset($v['type'])) $q->where('item_type',$v['type']);
+        if (isset($v['search'])) $q->where('name','like','%'.addcslashes($v['search'],'%_\\').'%');
+        foreach (['category'=>'category','class'=>'equipment_class','ammo'=>'ammo_type','comparison_group'=>'comparison_group'] as $input=>$column)
+            if (isset($v[$input])) $q->where($column,$v[$input]);
+        if (isset($v['family'])) $q->whereHas('family',fn($f)=>$f->where('key',$v['family']));
+        $sort = $v['sort'] ?? 'name';
+        if ($sort === 'name') $q->orderBy('name');
+        elseif ($sort === 'price') $q->orderBy('price')->orderBy('name');
+        else $q->orderBy(EquipmentItem::query()->select('value')->from('equipment_stats')
+            ->join('equipment_stat_definitions','equipment_stat_definitions.id','=','equipment_stats.stat_definition_id')
+            ->whereColumn('equipment_stats.equipment_item_id','equipment_items.id')
+            ->where('equipment_stat_definitions.key',$sort === 'velocity' ? 'muzzleVelocity' : 'damage')->limit(1),'desc')->orderBy('name');
+        $page = $q->with('translations')->paginate($v['per_page'] ?? 24);
+        return response()->json($page->through(fn($item)=>$this->compact($item,$request)));
+    }
+
+    public function categories(Request $request): JsonResponse
+    {
+        $v = $request->validate(['type'=>'nullable|in:weapon,tool,consumable,ammo']);
+        $q = EquipmentItem::where('source_status','active')->whereNotNull('category');
+        if (isset($v['type'])) $q->where('item_type',$v['type']);
+        return response()->json($q->distinct()->orderBy('category')->pluck('category'));
+    }
+
+    public function classes(Request $request): JsonResponse
+    {
+        $v = $request->validate(['type'=>'nullable|in:weapon,tool,consumable,ammo']);
+        $q = EquipmentItem::where('source_status','active')->whereNotNull('equipment_class');
+        if (isset($v['type'])) $q->where('item_type',$v['type']);
+        return response()->json($q->distinct()->orderBy('equipment_class')->pluck('equipment_class'));
+    }
+
+    public function show(string $slug, Request $request): JsonResponse
+    {
+        $item = EquipmentItem::where('slug',$slug)->where('source_status','active')->with(['source','translations','family','stats.definition','ammo.falloffPoints','traits','skins','patchHistory'])->firstOrFail();
+        return response()->json($this->detail($item,$request));
+    }
+
+    public function related(string $slug, Request $request): JsonResponse
+    {
+        $item = EquipmentItem::where('slug',$slug)->where('source_status','active')->firstOrFail();
+        $items = EquipmentItem::where('source_status','active')->where('comparison_group',$item->comparison_group)->whereKeyNot($item->id)
+            ->orderByRaw('CASE WHEN family_id = ? THEN 0 ELSE 1 END',[$item->family_id ?? 0])
+            ->orderBy('name')->limit(12)->with('translations')->get();
+        return response()->json(['items'=>$items->map(fn($i)=>$this->compact($i,$request))]);
+    }
+
+    public function compare(Request $request): JsonResponse
+    {
+        $request->validate(['items'=>'required|string|max:300']);
+        $slugs = explode(',',(string)$request->query('items'));
+        if (count($slugs) < 2 || count($slugs) > 3 || count(array_unique($slugs)) !== count($slugs))
+            throw ValidationException::withMessages(['items'=>'Choose two or three distinct items.']);
+        $found = EquipmentItem::whereIn('slug',$slugs)->where('source_status','active')->with(['translations','stats.definition','ammo.falloffPoints'])->get()->keyBy('slug');
+        if ($found->count() !== count($slugs)) throw ValidationException::withMessages(['items'=>'One or more items were not found.']);
+        $items = collect($slugs)->map(fn($slug)=>$found[$slug]);
+        if ($items->pluck('comparison_group')->unique()->count() !== 1)
+            throw ValidationException::withMessages(['items'=>'Items must share a comparison group.']);
+        $definitions = EquipmentStatDefinition::orderBy('sort_order')->get();
+        $stats = $definitions->map(function ($def) use ($items) {
+            $values = $items->mapWithKeys(fn($i)=>[$i->slug => $i->stats->firstWhere('stat_definition_id',$def->id)?->value]);
+            return ['key'=>$def->key,'label'=>$def->label,'unit'=>$def->unit,'group'=>$def->group,
+                'comparison_direction'=>$def->comparison_direction,'values'=>$values];
+        })->filter(fn($s)=>$s['values']->filter(fn($v)=>$v !== null)->isNotEmpty())->values();
+        return response()->json(['items'=>$items->map(fn($i)=>$this->compact($i,$request)),'compatible'=>true,
+            'comparison_group'=>$items->first()->comparison_group,'stats'=>$stats,
+            'stat_definitions'=>$definitions->map(fn($d)=>['key'=>$d->key,'label'=>$d->label,'unit'=>$d->unit,
+                'comparison_direction'=>$d->comparison_direction,'group'=>$d->group,'sort_order'=>$d->sort_order])->values(),
+            'ammo'=>$items->mapWithKeys(fn($i)=>[$i->slug=>$this->ammoPayload($i)]),
+            'falloff_curves'=>$items->mapWithKeys(fn($i)=>[$i->slug=>$i->ammo->mapWithKeys(fn($a)=>[$a->key=>$a->falloffPoints->map(fn($p)=>$this->pointPayload($p))->values()])]),
+            'differences'=>$stats->filter(fn($s)=>$s['values']->filter(fn($v)=>$v !== null)->unique()->count()>1)->pluck('key')->values()]);
+    }
+
+    private function compact(EquipmentItem $item, Request $request): array
+    {
+        $locale = in_array($request->query('locale'),['de','en','es','ru'],true) ? $request->query('locale') : 'en';
+        $translation = $item->translations->firstWhere('locale',$locale) ?? $item->translations->firstWhere('locale','en');
+        return ['id'=>$item->id,'slug'=>$item->slug,'name'=>$translation?->name ?? $item->name,'description'=>$translation?->description,
+            'item_type'=>$item->item_type,'category'=>$item->category,'class'=>$item->equipment_class,
+            'comparison_group'=>$item->comparison_group,'ammo_type'=>$item->ammo_type,'slot_size'=>$item->slot_size,
+            'price'=>$item->price,'unlock_rank'=>$item->unlock_rank,'image_url'=>null];
+    }
+
+    private function detail(EquipmentItem $item, Request $request): array
+    {
+        $variants = $item->family_id ? EquipmentItem::where('family_id',$item->family_id)->where('source_status','active')
+            ->whereKeyNot($item->id)->orderBy('name')->with('translations')->get()->map(fn($variant)=>$this->compact($variant,$request)) : [];
+        return $this->compact($item,$request) + [
+            'family'=>$item->family ? ['key'=>$item->family->key,'name'=>$item->family->name] : null,
+            'stats'=>$item->stats->map(fn($s)=>['key'=>$s->definition?->key,'label'=>$s->definition?->label,
+                'unit'=>$s->definition?->unit,'comparison_direction'=>$s->definition?->comparison_direction,'value'=>$s->value])->values(),
+            'ammo'=>$this->ammoPayload($item),
+            'variants'=>$variants,
+            'traits'=>$item->traits->map(fn($trait)=>['id'=>$trait->external_id,'name'=>$trait->name])->values(),
+            'skins'=>$item->skins->map(fn($skin)=>['id'=>$skin->external_id,'name'=>$skin->name,'rarity'=>$skin->rarity,'image_url'=>null])->values(),
+            'patch_history'=>$item->patchHistory->map(fn($entry)=>['patch'=>$entry->patch,'field'=>$entry->field,
+                'old_value'=>$entry->old_value,'new_value'=>$entry->new_value,'note'=>$entry->note])->values(),
+            'source'=>['name'=>$item->source?->name,'url'=>$item->source_url,'last_synced_at'=>$item->last_synced_at]];
+    }
+
+    private function ammoPayload(EquipmentItem $item): array
+    {
+        return $item->ammo->map(fn($ammo)=>['key'=>$ammo->key,'name'=>$ammo->name,'ammo_type'=>$ammo->ammo_type,
+            'damage'=>$ammo->damage,'velocity'=>$ammo->velocity,'loaded'=>$ammo->loaded,'reserve'=>$ammo->reserve,
+            'facts'=>$ammo->facts,'falloff_points'=>$ammo->falloffPoints->map(fn($p)=>$this->pointPayload($p))->values()])->values()->all();
+    }
+
+    private function pointPayload($point): array
+    {
+        return ['distance'=>$point->distance,'damage'=>$point->damage];
+    }
+}
