@@ -107,15 +107,28 @@ class ArsenalController extends Controller
             ->whereKeyNot($item->id)->orderBy('name')->with('translations')->get()->map(fn($variant)=>$this->compact($variant,$request)) : [];
         return $this->compact($item,$request) + [
             'family'=>$item->family ? ['key'=>$item->family->key,'name'=>$item->family->name] : null,
-            'stats'=>$item->stats->map(fn($s)=>['key'=>$s->definition?->key,'label'=>$s->definition?->label,
-                'unit'=>$s->definition?->unit,'comparison_direction'=>$s->definition?->comparison_direction,'value'=>$s->value])->values(),
+            'stats'=>$item->stats->sortBy(fn($s)=>$s->definition?->sort_order ?? 9999)->map(fn($s)=>[
+                'key'=>$s->definition?->key,
+                'label'=>$s->definition?->label,
+                'unit'=>$s->definition?->unit,
+                'group'=>$s->definition?->group,
+                'sort_order'=>$s->definition?->sort_order,
+                'comparison_direction'=>$s->definition?->comparison_direction,
+                'value'=>$s->value,
+            ])->values(),
             'ammo'=>$this->ammoPayload($item),
             'variants'=>$variants,
             'traits'=>$item->traits->map(fn($trait)=>['id'=>$trait->external_id,'name'=>$trait->name])->values(),
             'skins'=>$item->skins->map(fn($skin)=>['id'=>$skin->external_id,'name'=>$skin->name,'rarity'=>$skin->rarity,'image_url'=>$skin->imageUrl()])->values(),
+            'details'=>[
+                'chamber'=>$item->facts['chamber'] ?? null,
+                'cylinder'=>$item->facts['cylinder'] ?? null,
+                'release_pack'=>$item->facts['release_pack'] ?? null,
+                'rarity'=>$item->facts['rarity'] ?? null,
+                'min_rank'=>$item->facts['min_rank'] ?? null,
+            ],
             'patch_history'=>$item->patchHistory->map(fn($entry)=>['patch'=>$entry->patch,'field'=>$entry->field,
-                'old_value'=>$entry->old_value,'new_value'=>$entry->new_value,'note'=>$entry->note])->values(),
-            'source'=>['name'=>$item->source?->name,'url'=>$item->source_url,'last_synced_at'=>$item->last_synced_at]];
+                'old_value'=>$entry->old_value,'new_value'=>$entry->new_value,'note'=>$entry->note])->values()];
     }
 
     private function ammoPayload(EquipmentItem $item): array
