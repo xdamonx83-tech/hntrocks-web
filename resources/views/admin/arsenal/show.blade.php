@@ -7,6 +7,7 @@
 <style>
 .hnt-arsenal-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:16px}
 .hnt-arsenal-detail-head h1{margin:0}.hnt-arsenal-detail-head p{margin:6px 0;color:#8d9a9e}
+.hnt-arsenal-hero-image{width:220px;max-height:120px;object-fit:contain;padding:10px;border:1px solid #283239;border-radius:12px;background:#0b1012}
 .hnt-arsenal-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
 .hnt-arsenal-box{padding:14px;border:1px solid #263037;border-radius:12px;background:#101518}
 .hnt-arsenal-box span{display:block;font-size:9px;color:#7f8c91;text-transform:uppercase;letter-spacing:.08em}
@@ -31,7 +32,10 @@
         <h1>{{ $de?->name ?: $item->name }}</h1>
         <p>{{ $item->slug }} · {{ $item->external_id }}</p>
     </div>
-    <a class="hh-primary-button" href="{{ route('admin.arsenal.index') }}">Zur Übersicht</a>
+    <div style="display:flex;align-items:center;gap:10px">
+        @if($item->imageUrl())<img class="hnt-arsenal-hero-image" src="{{ $item->imageUrl() }}" alt="" loading="lazy">@endif
+        <a class="hh-primary-button" href="{{ route('admin.arsenal.index') }}">Zur Übersicht</a>
+    </div>
 </div>
 
 <div class="hnt-arsenal-detail-grid">
