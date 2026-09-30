@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\AdminRemoteMapController;
 use App\Http\Controllers\Admin\AdminWeeklyContractController;
 use App\Http\Controllers\Admin\AdminApprovedOutboundLinkController;
 use App\Http\Controllers\Admin\AdminAppPushController;
+use App\Http\Controllers\Admin\AdminArsenalController;
 use App\Http\Controllers\Admin\AdminAppRemoteConfigController;
 use App\Http\Controllers\Admin\AdminWebAppearanceController;
 use App\Http\Controllers\Admin\AdminAppRemoteFeedCardController;
@@ -673,6 +674,8 @@ Route::middleware('auth')->group(function (): void {
         Route::delete('/moment-of-week/{spotlight}', [AdminMomentOfWeekController::class, 'destroy'])->name('moment-of-week.destroy');
         require __DIR__.'/admin-guides.php';
 
+        Route::get('/arsenal', [AdminArsenalController::class, 'index'])->name('arsenal.index');
+        Route::get('/arsenal/{slug}', [AdminArsenalController::class, 'show'])->where('slug', '[a-z0-9-]+')->name('arsenal.show');
         Route::get('/content', [AdminContentController::class, 'index'])->name('content.index');
         Route::get('/cup-submissions', [AdminCupSubmissionController::class, 'index'])->name('cup-submissions.index');
         Route::get('/contracts', [AdminWeeklyContractController::class, 'index'])->name('contracts.index');
