@@ -21,13 +21,29 @@ class GuideDeletionService
 
     public function deleteDraft(Guide $guide, User $author): void
     {
-        $assetIds = DB::transaction(function () use ($guide, $author): array {
-            $locked = Guide::query()->lockForUpdate()->findOrFail($guide->id);
-
+        $this->deleteGuide($guide, function (Guide $locked) use ($author): void {
             if (! $locked->isOwnedBy($author) || ! $locked->canBeDeletedByAuthor()) {
                 throw ValidationException::withMessages([
                     'guide' => __('guides_mine.delete_forbidden'),
                 ]);
+            }
+        });
+    }
+
+    public function deleteAsAdmin(Guide $guide, User $admin): void
+    {
+        abort_unless($admin->isAdmin(), 403);
+
+        $this->deleteGuide($guide);
+    }
+
+    private function deleteGuide(Guide $guide, ?callable $guard = null): void
+    {
+        $assetIds = DB::transaction(function () use ($guide, $guard): array {
+            $locked = Guide::query()->lockForUpdate()->findOrFail($guide->id);
+
+            if ($guard !== null) {
+                $guard($locked);
             }
 
             $assetIds = GuideMedia::query()
