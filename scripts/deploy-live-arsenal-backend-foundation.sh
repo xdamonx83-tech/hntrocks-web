@@ -8,12 +8,28 @@ WORKDIR='/home/users/hunthub/www/hnt.rocks'
 [[ "$ARSENAL_REVIEWED_HEAD" =~ ^[0-9a-f]{40}$ ]] || { echo 'ABORT: invalid reviewed HEAD'; exit 1; }
 cd "$WORKDIR"
 
+mapfile -t tracked_changes < <({ git diff --name-only; git diff --cached --name-only; } | sort -u)
+unexpected_changes=()
+for changed in "${tracked_changes[@]}"; do
+  [[ "$changed" == "public/.htaccess" ]] || unexpected_changes+=("$changed")
+done
+if (( ${#unexpected_changes[@]} )); then
+  echo 'ABORT: unexpected tracked changes present:'
+  printf '  %s\n' "${unexpected_changes[@]}"
+  exit 1
+fi
+if printf '%s\n' "${tracked_changes[@]}" | grep -qx 'public/.htaccess'; then
+  echo 'Preserving known local public/.htaccess change.'
+fi
+
+git fetch origin "$EXPECTED_BRANCH"
+git switch "$EXPECTED_BRANCH"
+git merge --ff-only "origin/$EXPECTED_BRANCH"
+
 branch="$(git branch --show-current)"
 head="$(git rev-parse HEAD)"
-[[ "$branch" == "$EXPECTED_BRANCH" ]] || { echo "ABORT: unexpected branch: $branch"; exit 1; }
-git diff --quiet && git diff --cached --quiet || { echo 'ABORT: tracked changes present'; git status --short; exit 1; }
-git fetch origin "$EXPECTED_BRANCH"
 remote_head="$(git rev-parse "origin/$EXPECTED_BRANCH")"
+[[ "$branch" == "$EXPECTED_BRANCH" ]] || { echo "ABORT: unexpected branch: $branch"; exit 1; }
 [[ "$head" == "$remote_head" ]] || { echo "ABORT: HEAD differs from reviewed remote branch ($head vs $remote_head)"; exit 1; }
 [[ "$head" == "$ARSENAL_REVIEWED_HEAD" ]] || { echo "ABORT: HEAD differs from approved commit ($head vs $ARSENAL_REVIEWED_HEAD)"; exit 1; }
 git merge-base --is-ancestor "$BASE_HEAD" HEAD || { echo 'ABORT: expected backend base is absent'; exit 1; }
