@@ -14,6 +14,7 @@
 .hnt-arsenal-toolbar input,.hnt-arsenal-toolbar select{min-height:40px;padding:0 11px;border:1px solid #29333a;border-radius:8px;background:#0d1215;color:#e8eded}
 .hnt-arsenal-table{width:100%;border-collapse:collapse}
 .hnt-arsenal-table th,.hnt-arsenal-table td{padding:11px 10px;border-bottom:1px solid #222a2f;text-align:left;vertical-align:top}
+.hnt-arsenal-item-cell{display:flex;align-items:center;gap:10px}.hnt-arsenal-thumb{width:64px;height:42px;object-fit:contain;border:1px solid #283239;border-radius:7px;background:#0b1012;padding:4px}
 .hnt-arsenal-table th{font-size:10px;color:#7f8c91;text-transform:uppercase;letter-spacing:.08em}
 .hnt-arsenal-table td{font-size:12px;color:#c7d0d2}
 .hnt-arsenal-name{color:#fff;font-weight:700;text-decoration:none}
@@ -106,8 +107,13 @@
                 @php($de = $item->translations->firstWhere('locale', 'de'))
                 <tr>
                     <td>
-                        <a class="hnt-arsenal-name" href="{{ route('admin.arsenal.show', $item->slug) }}">{{ $de?->name ?: $item->name }}</a>
-                        <span class="hnt-arsenal-meta">{{ $item->slug }}</span>
+                        <div class="hnt-arsenal-item-cell">
+                            @if($item->imageUrl())<img class="hnt-arsenal-thumb" src="{{ $item->imageUrl() }}" alt="" loading="lazy">@endif
+                            <span>
+                                <a class="hnt-arsenal-name" href="{{ route('admin.arsenal.show', $item->slug) }}">{{ $de?->name ?: $item->name }}</a>
+                                <span class="hnt-arsenal-meta">{{ $item->slug }}</span>
+                            </span>
+                        </div>
                     </td>
                     <td>{{ $item->item_type }}<span class="hnt-arsenal-meta">{{ $item->equipment_class ?: '—' }}</span></td>
                     <td><span class="hnt-arsenal-badge">{{ $item->comparison_group }}</span></td>
