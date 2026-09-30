@@ -50,3 +50,24 @@ No external source is stable by contract. No image license has been confirmed. F
 The deploy script requires `ARSENAL_REVIEWED_HEAD` set to the exact reviewed commit. It checks branch, remote HEAD, tracked changes, `.env` ownership/mode, syntax, and tests before running the additive migration. It never pulls, clears caches, deletes untracked files, edits `.env`, or starts a sync. If SQLite tests cannot run on the server, `ARSENAL_TESTS_VERIFIED_HEAD` must match the same HEAD after external tests passed. Arrange a database backup and confirm the deployment environment before running it; no deployment was performed in this phase.
 
 The Arsenal feature tests use only the new migration on an in-memory SQLite database. An unrelated older project migration drops a named foreign key, which SQLite cannot execute. On the development host, the matching SQLite PHP extension was loaded temporarily from `/tmp`; no system PHP configuration was changed. A production MySQL migration has not been executed or verified.
+
+
+## Asset pipeline
+
+Public Arsenal APIs expose images only from HNT's local public storage. Imported source URLs remain metadata and are never hotlinked.
+
+Officially approved bulk assets can be staged locally and matched automatically:
+
+```bash
+php artisan arsenal:assets:import-fankit /path/to/unpacked/fankit --dry-run
+php artisan arsenal:assets:import-fankit /path/to/unpacked/fankit
+```
+
+The importer accepts PNG, JPEG and WebP up to 20 MB, validates the actual image MIME type, matches exact normalized filenames against the item's slug/name/external ID and the basename of `original_asset_url`, writes matched files to `storage/app/public/arsenal/items`, and records the Crytek Fan Kit license/source note. Ambiguous or unmatched files are skipped rather than guessed.
+
+The public API returns `image_url` only when `local_asset_path` exists on the public disk. Huntify URLs stay internal as source metadata.
+
+Crytek's official Fan Kit page explicitly lists weapon images for website/fan use:
+https://www.huntshowdown.com/news/download-the-hunt-fan-kit
+
+The 2018 kit may not cover every current Hunt item, so missing assets remain intentionally null until an approved source is available.
