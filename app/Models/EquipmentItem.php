@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class EquipmentItem extends Model
 {
@@ -21,4 +22,13 @@ class EquipmentItem extends Model
     public function skins(): HasMany { return $this->hasMany(EquipmentSkin::class); }
     public function patchHistory(): HasMany { return $this->hasMany(EquipmentPatchHistory::class); }
     public function traits(): BelongsToMany { return $this->belongsToMany(EquipmentTrait::class, 'equipment_item_traits'); }
+
+    public function imageUrl(): ?string
+    {
+        if (! $this->local_asset_path || ! Storage::disk('public')->exists($this->local_asset_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->local_asset_path);
+    }
 }
