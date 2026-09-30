@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP="/home/users/hunthub/www/hnt.rocks"
 SOURCE_BRANCH="feature/page-hero-remote-backgrounds-current-2026-09-30"
-DEPLOY_BRANCH="feature/page-hero-remote-backgrounds-live-2026-09-30"
+DEPLOY_BRANCH="feature/page-hero-remote-backgrounds-live-$(date +%Y%m%d-%H%M%S)"
 
 die() {
   echo "ABBRUCH: $*" >&2
