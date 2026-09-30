@@ -98,7 +98,13 @@ php -l tests/Feature/AppRemoteHeroBackgroundsTest.php
 git diff --check
 
 echo "Feature-Test ..."
-vendor/bin/phpunit --filter AppRemoteHeroBackgroundsTest
+if php artisan list --raw 2>/dev/null | grep -qx 'test'; then
+  php artisan test --filter=AppRemoteHeroBackgroundsTest
+elif [[ -x vendor/bin/phpunit ]]; then
+  vendor/bin/phpunit --filter AppRemoteHeroBackgroundsTest
+else
+  echo "HINWEIS: PHPUnit/Test-Runner ist im Production-Install nicht vorhanden. Feature-Test wird übersprungen."
+fi
 
 echo "Route prüfen ..."
 php artisan route:list --path=api/v1/appearance
