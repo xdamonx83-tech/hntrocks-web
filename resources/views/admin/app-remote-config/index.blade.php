@@ -68,7 +68,9 @@
         'hero_maps' => 'Maps Übersicht',
         'hero_notifications' => 'Benachrichtigungen',
         'hero_news' => 'News Übersicht',
-        'hero_rocks' => 'Rocks',
+        'hero_rocks' => 'Rocks Übersicht',
+        'hero_rocks_shop' => 'Rocks Shop',
+        'hero_rocks_inventory' => 'Rocks Inventar',
         'hero_loadout_challenges' => 'Loadout Challenges Übersicht',
         'hero_loadout_challenge_detail' => 'Loadout Challenge Detail',
     ];
