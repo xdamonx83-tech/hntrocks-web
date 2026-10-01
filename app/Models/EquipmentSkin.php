@@ -9,6 +9,7 @@ class EquipmentSkin extends Model
 {
     public $timestamps = false;
     protected $guarded = [];
+    protected $casts = ['facts' => 'array'];
 
     public function imageUrl(): ?string
     {
