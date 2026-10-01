@@ -827,6 +827,7 @@ class WikiGgEquipmentSource
             return null;
         }
 
+        $subjectTokens = $this->searchTokens($subject);
         $best = null;
         $bestScore = PHP_INT_MIN;
 
@@ -835,11 +836,24 @@ class WikiGgEquipmentSource
             $base = pathinfo($file, PATHINFO_FILENAME);
             $key = $this->normalizeSearch($base);
 
-            if ($key === '' || ! str_contains($key, $subjectKey)) {
+            if ($key === '') {
                 continue;
             }
 
-            $score = 20;
+            $score = 0;
+            if (str_contains($key, $subjectKey)) {
+                $score += 28;
+            } else {
+                $candidateTokens = $this->searchTokens($base);
+                $intersection = array_intersect($subjectTokens, $candidateTokens);
+                $coverage = $subjectTokens ? count($intersection) / count($subjectTokens) : 0;
+
+                if ($coverage < 0.75) {
+                    continue;
+                }
+
+                $score += (int) round($coverage * 22);
+            }
             $lower = strtolower($base);
             $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
