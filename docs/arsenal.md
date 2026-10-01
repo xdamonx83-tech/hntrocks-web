@@ -71,3 +71,25 @@ Crytek's official Fan Kit page explicitly lists weapon images for website/fan us
 https://www.huntshowdown.com/news/download-the-hunt-fan-kit
 
 The 2018 kit may not cover every current Hunt item, so missing assets remain intentionally null until an approved source is available.
+
+
+## wiki.gg source prototype
+
+The long-term source direction is to prefer the Hunt: Showdown 1896 wiki on wiki.gg for structured equipment details and use Huntify only as a temporary fallback/control source.
+
+The prototype is deliberately read-only and works through the MediaWiki API rather than bulk HTML scraping:
+
+```bash
+php artisan arsenal:wiki-sync --item=1865-carbine --dry-run
+```
+
+It resolves HNT items to wiki page titles such as:
+
+- `Weapons/1865_Carbine`
+- `Weapons/1865_Carbine/Aperture`
+- `Tools/Throwing_Spear`
+- `Consumables/Frag_Bomb`
+
+The parser currently reads structured infobox values, recommended Traits, detected ammo types, skin infobox titles and Update History rows. The command compares these values with the current HNT database and performs no writes.
+
+This prototype must be verified against live wiki.gg pages before any bulk migration or source switch. Source prose/descriptions are not imported. The future production sync should keep HNT-generated descriptions, preserve manual overrides, rate-limit API requests and record source attribution/revision metadata.
