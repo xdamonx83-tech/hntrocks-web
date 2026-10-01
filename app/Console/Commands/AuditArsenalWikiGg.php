@@ -50,6 +50,9 @@ class AuditArsenalWikiGg extends Command
             'total' => $items->count(),
             'resolved' => 0,
             'failed' => 0,
+            'resolved_direct' => 0,
+            'resolved_search' => 0,
+            'low_confidence' => 0,
             'family_match' => 0,
             'family_change' => 0,
             'base_image' => 0,
@@ -75,6 +78,22 @@ class AuditArsenalWikiGg extends Command
                 // One MediaWiki parse request per item: enough to audit page/family/stats/media filenames.
                 $wiki = $source->preview($item, false, false);
                 $counts['resolved']++;
+                if (($wiki['resolution_method'] ?? 'direct') === 'search') {
+                    $counts['resolved_search']++;
+                    if ((int) ($wiki['resolution_score'] ?? 0) < 70) {
+                        $counts['low_confidence']++;
+                        if (count($issues) < $show) {
+                            $issues[] = [
+                                $item->slug,
+                                'SEARCH MATCH',
+                                (string) ($item->name ?? '—'),
+                                ($wiki['page_title'] ?? '—').' · score '.($wiki['resolution_score'] ?? 0),
+                            ];
+                        }
+                    }
+                } else {
+                    $counts['resolved_direct']++;
+                }
                 $counts['stats'] += count($wiki['stats'] ?? []);
                 $counts['traits'] += count($wiki['recommended_traits'] ?? []);
                 $counts['ammo_types'] += count($wiki['ammo_types'] ?? []);
@@ -147,6 +166,9 @@ class AuditArsenalWikiGg extends Command
         $this->table(['Metric', 'Count'], [
             ['Total', $counts['total']],
             ['Resolved wiki pages', $counts['resolved']],
+            ['Resolved direct', $counts['resolved_direct']],
+            ['Resolved by search', $counts['resolved_search']],
+            ['Low-confidence search matches', $counts['low_confidence']],
             ['Failed', $counts['failed']],
             ['Family matches', $counts['family_match']],
             ['Family changes', $counts['family_change']],
