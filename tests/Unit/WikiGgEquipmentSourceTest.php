@@ -79,7 +79,7 @@ WIKI,
             'item_type' => 'weapon',
         ]);
 
-        $data = (new WikiGgEquipmentSource)->preview($item);
+        $data = (new WikiGgEquipmentSource)->preview($item, false, false);
 
         $this->assertSame('Weapons/1865_Carbine', $data['page_title']);
         $this->assertSame(70, $data['price']);
@@ -113,6 +113,56 @@ WIKI,
             'Weapons/1865_Carbine/Aperture',
             (new WikiGgEquipmentSource)->pageTitle($item)
         );
+    }
+
+    public function test_world_item_weapon_can_be_resolved_and_parsed(): void
+    {
+        Http::fake(function ($request) {
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+            if (($query['action'] ?? null) === 'parse' && ($query['page'] ?? null) === 'World_Items/Sledgehammer') {
+                return Http::response([
+                    'parse' => [
+                        'wikitext' => <<<'WIKI'
+{{World Item
+|Title=Sledgehammer
+|Update=Early Access 0.1
+|Melee Damage=156
+|Heavy Melee Damage=300
+}}
+== Update History ==
+{| class="wikitable"
+! Update !! Patch Notes
+|-
+| Update 2.5 || Sledgehammers can now be thrown without an extra Trait
+|}
+WIKI,
+                        'text' => '',
+                        'images' => ['World Item Sledgehammer.png'],
+                    ],
+                ], 200);
+            }
+
+            return Http::response([
+                'error' => ['info' => 'The page you specified doesn\'t exist.'],
+            ], 200);
+        });
+
+        $item = new EquipmentItem;
+        $item->forceFill([
+            'slug' => 'sledgehammer',
+            'external_id' => 'test-sledgehammer',
+            'name' => 'Sledgehammer',
+            'item_type' => 'weapon',
+        ]);
+
+        $data = (new WikiGgEquipmentSource)->preview($item, false, false);
+
+        $this->assertSame('World_Items/Sledgehammer', $data['page_title']);
+        $this->assertSame('Sledgehammer', $data['family']);
+        $this->assertSame(156, $data['stats']['melee']);
+        $this->assertSame(300, $data['stats']['heavyMelee']);
+        $this->assertSame('World Item Sledgehammer.png', $data['base_image_file']);
     }
 
     public function test_tool_and_consumable_use_their_wiki_namespaces(): void
