@@ -3,6 +3,9 @@
 namespace App\Services\Equipment;
 
 use App\Models\EquipmentItem;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -26,7 +29,7 @@ class WikiGgEquipmentSource
             'weapon' => 'Weapons',
             'tool' => 'Tools',
             'consumable' => 'Consumables',
-            default => throw new RuntimeException('wiki.gg prototype supports weapons, tools and consumables only.'),
+            default => throw new RuntimeException('wiki.gg supports weapons, tools and consumables only.'),
         };
 
         if ($item->item_type === 'weapon' && $item->family && $item->family->name) {
@@ -48,7 +51,9 @@ class WikiGgEquipmentSource
     public function preview(EquipmentItem $item): array
     {
         $pageTitle = $this->pageTitle($item);
-        $wikitext = $this->fetchWikitext($pageTitle);
+        $page = $this->fetchPage($pageTitle);
+        $wikitext = $page['wikitext'];
+
         $templateName = match ($item->item_type) {
             'weapon' => 'Infobox Weapon',
             'tool' => 'Infobox Tool',
@@ -63,12 +68,47 @@ class WikiGgEquipmentSource
 
         $params = $this->parseTemplateParameters($template);
         $stats = $this->statsFromParams($params);
+        $skinRows = $this->skinRows($wikitext, $item->item_type);
+
+        $candidateFiles = array_values(array_unique(array_filter(array_merge(
+            $page['images'],
+            [$this->fileNameFromParam($params['image'] ?? $params['Image'] ?? null)],
+            array_map(fn (array $skin) => $skin['image_file'] ?? null, $skinRows),
+        ))));
+
+        $imageInfo = $this->resolveImageInfo($candidateFiles);
+        $baseFile = $this->bestImageFile(
+            explicit: $this->fileNameFromParam($params['image'] ?? $params['Image'] ?? null),
+            candidates: $page['images'],
+            subject: (string) ($this->cleanWikiText($params['Title'] ?? $item->name) ?? $item->name),
+            mode: 'base',
+        );
+
+        $skins = array_map(function (array $skin) use ($page, $imageInfo): array {
+            $file = $this->bestImageFile(
+                explicit: $skin['image_file'] ?? null,
+                candidates: $page['images'],
+                subject: (string) ($skin['name'] ?? ''),
+                mode: 'skin',
+            );
+
+            return $skin + [
+                'image_file' => $file,
+                'image' => $file ? ($imageInfo[$file] ?? null) : null,
+            ];
+        }, $skinRows);
+
+        $history = $this->patchHistory($wikitext);
+        if (! $history && is_string($page['html']) && $page['html'] !== '') {
+            $history = $this->patchHistoryFromHtml($page['html']);
+        }
 
         return [
             'source_key' => $this->key(),
             'source_name' => $this->name(),
+            'revision_id' => $page['revision_id'],
             'page_title' => $pageTitle,
-            'page_url' => self::BASE_URL.'/wiki/'.str_replace('%2F', '/', rawurlencode($pageTitle)),
+            'page_url' => $this->wikiPageUrl($pageTitle),
             'name' => $this->cleanWikiText($params['Title'] ?? $item->name),
             'price' => $this->number($params['Price'] ?? null),
             'slot_size' => $this->number($params['Size'] ?? null),
@@ -81,28 +121,24 @@ class WikiGgEquipmentSource
             'rarity' => $this->cleanWikiText($params['Rarity'] ?? null),
             'stats' => $stats,
             'recommended_traits' => $this->recommendedTraits($wikitext),
-            'skins' => $this->skinTitles($wikitext, $item->item_type),
+            'skins' => $skins,
             'ammo_types' => $this->ammoTypes($wikitext),
-            'patch_history' => $this->patchHistory($wikitext),
+            'patch_history' => $history,
+            'base_image_file' => $baseFile,
+            'base_image' => $baseFile ? ($imageInfo[$baseFile] ?? null) : null,
+            'image_candidates' => count($page['images']),
         ];
     }
 
-    public function fetchWikitext(string $pageTitle): string
+    public function fetchPage(string $pageTitle): array
     {
-        $response = Http::acceptJson()
-            ->withHeaders([
-                'User-Agent' => 'HNT.ROCKS Arsenal Wiki Sync/1.0 (+https://hnt.rocks)',
-            ])
-            ->connectTimeout(8)
-            ->timeout(20)
-            ->retry(2, 400, throw: false)
-            ->get(self::BASE_URL.'/api.php', [
-                'action' => 'parse',
-                'page' => $pageTitle,
-                'prop' => 'wikitext',
-                'format' => 'json',
-                'formatversion' => 2,
-            ]);
+        $response = $this->http()->get(self::BASE_URL.'/api.php', [
+            'action' => 'parse',
+            'page' => $pageTitle,
+            'prop' => 'wikitext|text|images',
+            'format' => 'json',
+            'formatversion' => 2,
+        ]);
 
         if (! $response->successful()) {
             throw new RuntimeException("wiki.gg API unavailable: HTTP {$response->status()}");
@@ -118,7 +154,12 @@ class WikiGgEquipmentSource
             throw new RuntimeException("wiki.gg API error for {$pageTitle}: {$message}");
         }
 
-        $wikitext = $payload['parse']['wikitext'] ?? null;
+        $parse = $payload['parse'] ?? null;
+        if (! is_array($parse)) {
+            throw new RuntimeException("wiki.gg returned no parse payload for {$pageTitle}.");
+        }
+
+        $wikitext = $parse['wikitext'] ?? null;
         if (! is_string($wikitext) || $wikitext === '') {
             throw new RuntimeException("wiki.gg returned no wikitext for {$pageTitle}.");
         }
@@ -127,7 +168,87 @@ class WikiGgEquipmentSource
             throw new RuntimeException("wiki.gg page is unexpectedly large: {$pageTitle}");
         }
 
-        return $wikitext;
+        return [
+            'wikitext' => $wikitext,
+            'html' => is_string($parse['text'] ?? null) ? $parse['text'] : '',
+            'images' => array_values(array_filter(array_map('strval', is_array($parse['images'] ?? null) ? $parse['images'] : []))),
+            'revision_id' => isset($parse['revid']) && is_numeric($parse['revid']) ? (int) $parse['revid'] : null,
+        ];
+    }
+
+    public function fetchWikitext(string $pageTitle): string
+    {
+        return $this->fetchPage($pageTitle)['wikitext'];
+    }
+
+    public function resolveImageInfo(array $fileNames): array
+    {
+        $fileNames = array_values(array_unique(array_filter(array_map(
+            fn ($name) => $this->normalizeFileTitle((string) $name),
+            $fileNames
+        ))));
+
+        if (! $fileNames) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach (array_chunk($fileNames, 25) as $chunk) {
+            $titles = implode('|', array_map(fn ($name) => 'File:'.$name, $chunk));
+            $response = $this->http()->get(self::BASE_URL.'/api.php', [
+                'action' => 'query',
+                'prop' => 'imageinfo',
+                'titles' => $titles,
+                'iiprop' => 'url|mime|size|sha1|extmetadata',
+                'format' => 'json',
+                'formatversion' => 2,
+            ]);
+
+            if (! $response->successful()) {
+                continue;
+            }
+
+            $payload = $response->json();
+            $pages = is_array($payload['query']['pages'] ?? null) ? $payload['query']['pages'] : [];
+
+            foreach ($pages as $page) {
+                if (! is_array($page) || ! empty($page['missing'])) {
+                    continue;
+                }
+
+                $title = (string) ($page['title'] ?? '');
+                $file = preg_replace('/^File:/i', '', $title) ?? $title;
+                $info = $page['imageinfo'][0] ?? null;
+                if (! is_array($info) || empty($info['url'])) {
+                    continue;
+                }
+
+                $metadata = [];
+                foreach ((array) ($info['extmetadata'] ?? []) as $key => $value) {
+                    if (is_array($value) && array_key_exists('value', $value)) {
+                        $metadata[$key] = $this->cleanHtmlText((string) $value['value']);
+                    }
+                }
+
+                $result[$file] = [
+                    'file' => $file,
+                    'url' => (string) $info['url'],
+                    'description_url' => (string) ($info['descriptionurl'] ?? ''),
+                    'mime' => (string) ($info['mime'] ?? ''),
+                    'width' => isset($info['width']) ? (int) $info['width'] : null,
+                    'height' => isset($info['height']) ? (int) $info['height'] : null,
+                    'size' => isset($info['size']) ? (int) $info['size'] : null,
+                    'sha1' => (string) ($info['sha1'] ?? ''),
+                    'license' => $metadata['LicenseShortName'] ?? $metadata['UsageTerms'] ?? null,
+                    'artist' => $metadata['Artist'] ?? null,
+                    'credit' => $metadata['Credit'] ?? null,
+                    'copyrighted' => $metadata['Copyrighted'] ?? null,
+                ];
+            }
+        }
+
+        return $result;
     }
 
     private function statsFromParams(array $params): array
@@ -206,10 +327,19 @@ class WikiGgEquipmentSource
             }
         }
 
+        if (! $values && preg_match_all('/^\s*\*\s*([^\n—-]+?)\s*(?:—|-)\s*(?:\d+|Scarce)/mi', $section, $matches)) {
+            foreach ($matches[1] as $match) {
+                $value = $this->cleanWikiText($match);
+                if ($value) {
+                    $values[] = $value;
+                }
+            }
+        }
+
         return array_values(array_unique($values));
     }
 
-    private function skinTitles(string $wikitext, string $itemType): array
+    private function skinRows(string $wikitext, string $itemType): array
     {
         $templateName = match ($itemType) {
             'weapon' => 'Infobox Weapon Skin',
@@ -222,16 +352,27 @@ class WikiGgEquipmentSource
             return [];
         }
 
-        $titles = [];
+        $rows = [];
         foreach ($this->extractAllTemplates($wikitext, $templateName) as $template) {
             $params = $this->parseTemplateParameters($template);
             $title = $this->cleanWikiText($params['Title'] ?? null);
-            if ($title) {
-                $titles[] = $title;
+            if (! $title) {
+                continue;
             }
+
+            $rows[] = [
+                'name' => $title,
+                'rarity' => $this->cleanWikiText($params['Rarity'] ?? null),
+                'price' => $this->number($params['Price'] ?? null),
+                'source' => $this->cleanWikiText($params['Source'] ?? null),
+                'update' => $this->cleanWikiText($params['Update'] ?? null),
+                'image_file' => $this->fileNameFromParam(
+                    $params['image'] ?? $params['Image'] ?? $params['Model'] ?? $params['model'] ?? null
+                ),
+            ];
         }
 
-        return array_values(array_unique($titles));
+        return $rows;
     }
 
     private function patchHistory(string $wikitext): array
@@ -242,38 +383,140 @@ class WikiGgEquipmentSource
         }
 
         $history = [];
-        $lines = preg_split('/\R/', $section) ?: [];
-        $current = null;
 
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line === '' || str_starts_with($line, '{|') || str_starts_with($line, '|-') || str_starts_with($line, '!') || $line === '|}') {
-                continue;
-            }
-
-            if (str_starts_with($line, '|')) {
-                $cells = preg_split('/\|\|/', ltrim($line, '| '), 2);
-                if (count($cells) === 2) {
-                    $patch = $this->cleanWikiText($cells[0]);
-                    $note = $this->cleanWikiText($cells[1]);
-                    if ($patch || $note) {
-                        $current = ['patch' => $patch, 'note' => $note];
-                        $history[] = $current;
-                    }
-                    continue;
-                }
-
-                if ($history) {
-                    $extra = $this->cleanWikiText(ltrim($line, '| '));
-                    if ($extra) {
-                        $index = array_key_last($history);
-                        $history[$index]['note'] = trim(($history[$index]['note'] ?? '').' '.$extra);
-                    }
+        if (preg_match_all('/^\|\s*([^\n|]+?)\s*\|\|\s*(.+?)\s*$/mi', $section, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $patch = $this->cleanWikiText($match[1]);
+                $note = $this->cleanWikiText($match[2]);
+                if ($patch || $note) {
+                    $history[] = ['patch' => $patch, 'note' => $note];
                 }
             }
         }
 
         return array_values($history);
+    }
+
+    private function patchHistoryFromHtml(string $html): array
+    {
+        if (! class_exists(DOMDocument::class)) {
+            return [];
+        }
+
+        $previous = libxml_use_internal_errors(true);
+        $dom = new DOMDocument;
+        $loaded = $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html, LIBXML_NOWARNING | LIBXML_NOERROR);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        if (! $loaded) {
+            return [];
+        }
+
+        $xpath = new DOMXPath($dom);
+        $heading = $xpath->query('//*[@id="Update_History"]')->item(0);
+        if (! $heading instanceof DOMElement) {
+            return [];
+        }
+
+        $container = $heading;
+        while ($container->parentNode instanceof DOMElement && ! preg_match('/^H[1-6]$/i', $container->parentNode->tagName)) {
+            $container = $container->parentNode;
+        }
+        if ($container->parentNode instanceof DOMElement && preg_match('/^H[1-6]$/i', $container->parentNode->tagName)) {
+            $container = $container->parentNode;
+        }
+
+        $table = $container->nextSibling;
+        while ($table && (! $table instanceof DOMElement || strtolower($table->tagName) !== 'table')) {
+            $table = $table->nextSibling;
+        }
+
+        if (! $table instanceof DOMElement) {
+            return [];
+        }
+
+        $rows = [];
+        foreach ($xpath->query('.//tr', $table) as $row) {
+            $cells = $xpath->query('./td', $row);
+            if ($cells->length < 2) {
+                continue;
+            }
+
+            $patch = $this->cleanDomText((string) $cells->item(0)?->textContent);
+            $note = $this->cleanDomText((string) $cells->item(1)?->textContent);
+            if ($patch || $note) {
+                $rows[] = ['patch' => $patch, 'note' => $note];
+            }
+        }
+
+        return $rows;
+    }
+
+    private function bestImageFile(?string $explicit, array $candidates, string $subject, string $mode): ?string
+    {
+        if ($explicit) {
+            $explicit = $this->normalizeFileTitle($explicit);
+            foreach ($candidates as $candidate) {
+                if (strcasecmp($this->normalizeFileTitle((string) $candidate), $explicit) === 0) {
+                    return $this->normalizeFileTitle((string) $candidate);
+                }
+            }
+
+            return $explicit;
+        }
+
+        $subjectKey = $this->normalizeSearch($subject);
+        if ($subjectKey === '') {
+            return null;
+        }
+
+        $best = null;
+        $bestScore = 0;
+
+        foreach ($candidates as $candidate) {
+            $file = $this->normalizeFileTitle((string) $candidate);
+            $key = $this->normalizeSearch(pathinfo($file, PATHINFO_FILENAME));
+            if ($key === '' || ! str_contains($key, $subjectKey)) {
+                continue;
+            }
+
+            $score = 10;
+            if (str_contains($key, '3d') || str_contains($key, 'model')) $score += 8;
+            if ($mode === 'base' && (str_contains($key, 'weapon') || str_contains($key, 'tool') || str_contains($key, 'consumable'))) $score += 5;
+            if ($mode === 'base' && (str_contains($key, 'promo') || str_contains($key, 'concept') || str_contains($key, 'dlc'))) $score -= 8;
+            if ($mode === 'skin' && str_contains($key, 'promo')) $score -= 4;
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = $file;
+            }
+        }
+
+        return $best;
+    }
+
+    private function fileNameFromParam(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $raw = trim((string) $value);
+        if ($raw === '') {
+            return null;
+        }
+
+        if (preg_match('/\[\[(?:File|Image):([^\]|]+)(?:\|[^\]]*)?\]\]/i', $raw, $match)) {
+            return $this->normalizeFileTitle($match[1]);
+        }
+
+        $clean = $this->cleanWikiText($raw);
+        if ($clean && preg_match('/\.(?:png|jpe?g|webp|avif)$/i', $clean)) {
+            return $this->normalizeFileTitle($clean);
+        }
+
+        return null;
     }
 
     private function section(string $wikitext, string $heading): ?string
@@ -288,9 +531,7 @@ class WikiGgEquipmentSource
 
     private function extractFirstTemplate(string $wikitext, string $templateName): ?string
     {
-        $templates = $this->extractAllTemplates($wikitext, $templateName);
-
-        return $templates[0] ?? null;
+        return $this->extractAllTemplates($wikitext, $templateName)[0] ?? null;
     }
 
     private function extractAllTemplates(string $wikitext, string $templateName): array
@@ -420,9 +661,26 @@ class WikiGgEquipmentSource
         $text = preg_replace_callback('/\[\[([^\]|]+)\|([^\]]+)\]\]/', fn ($m) => $m[2], $text) ?? $text;
         $text = preg_replace_callback('/\[\[([^\]]+)\]\]/', fn ($m) => $m[1], $text) ?? $text;
         $text = preg_replace_callback('/\{\{\s*Rarity\s*\|\s*([^|}]+).*?\}\}/i', fn ($m) => $m[1], $text) ?? $text;
+        $text = preg_replace_callback('/\{\{\s*(?:Hunt Dollars|Blood Bonds)\s*\}\}/i', fn () => '', $text) ?? $text;
         $text = preg_replace('/\{\{[^{}]*\}\}/', '', $text) ?? $text;
         $text = preg_replace('/<[^>]+>/', '', $text) ?? $text;
         $text = str_replace(["'''", "''"], '', $text);
+        $text = preg_replace('/\s+/', ' ', $text) ?? $text;
+
+        return ($text = trim($text)) !== '' ? $text : null;
+    }
+
+    private function cleanHtmlText(string $value): ?string
+    {
+        $text = html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/\s+/', ' ', $text) ?? $text;
+
+        return ($text = trim($text)) !== '' ? $text : null;
+    }
+
+    private function cleanDomText(string $value): ?string
+    {
+        $text = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = preg_replace('/\s+/', ' ', $text) ?? $text;
 
         return ($text = trim($text)) !== '' ? $text : null;
@@ -457,8 +715,37 @@ class WikiGgEquipmentSource
         return $clean;
     }
 
+    private function normalizeFileTitle(string $value): string
+    {
+        return trim(preg_replace('/^(?:File|Image):/i', '', str_replace('_', ' ', $value)) ?? $value);
+    }
+
+    private function normalizeSearch(string $value): string
+    {
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        $ascii = is_string($ascii) ? strtolower($ascii) : strtolower($value);
+
+        return preg_replace('/[^a-z0-9]+/', '', $ascii) ?? '';
+    }
+
     private function wikiPath(string $value): string
     {
         return str_replace(' ', '_', trim($value));
+    }
+
+    private function wikiPageUrl(string $pageTitle): string
+    {
+        return self::BASE_URL.'/wiki/'.str_replace('%2F', '/', rawurlencode($pageTitle));
+    }
+
+    private function http()
+    {
+        return Http::acceptJson()
+            ->withHeaders([
+                'User-Agent' => 'HNT.ROCKS Arsenal Wiki Sync/1.0 (+https://hnt.rocks)',
+            ])
+            ->connectTimeout(8)
+            ->timeout(20)
+            ->retry(2, 400, throw: false);
     }
 }
