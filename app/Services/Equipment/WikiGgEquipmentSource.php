@@ -50,8 +50,7 @@ class WikiGgEquipmentSource
 
     public function preview(EquipmentItem $item): array
     {
-        $pageTitle = $this->pageTitle($item);
-        $page = $this->fetchPage($pageTitle);
+        [$pageTitle, $page] = $this->fetchPageForItem($item);
         $wikitext = $page['wikitext'];
 
         $templateName = match ($item->item_type) {
@@ -82,6 +81,7 @@ class WikiGgEquipmentSource
             candidates: $page['images'],
             subject: (string) ($this->cleanWikiText($params['Title'] ?? $item->name) ?? $item->name),
             mode: 'base',
+            imageInfo: $imageInfo,
         );
 
         $skins = array_map(function (array $skin) use ($page, $imageInfo): array {
@@ -90,12 +90,13 @@ class WikiGgEquipmentSource
                 candidates: $page['images'],
                 subject: (string) ($skin['name'] ?? ''),
                 mode: 'skin',
+                imageInfo: $imageInfo,
             );
 
-            return $skin + [
+            return array_merge($skin, [
                 'image_file' => $file,
                 'image' => $file ? ($imageInfo[$file] ?? null) : null,
-            ];
+            ]);
         }, $skinRows);
 
         $history = $this->patchHistory($wikitext);
@@ -109,6 +110,7 @@ class WikiGgEquipmentSource
             'revision_id' => $page['revision_id'],
             'page_title' => $pageTitle,
             'page_url' => $this->wikiPageUrl($pageTitle),
+            'family' => $this->familyNameFromPageTitle($pageTitle, $item->item_type),
             'name' => $this->cleanWikiText($params['Title'] ?? $item->name),
             'price' => $this->number($params['Price'] ?? null),
             'slot_size' => $this->number($params['Size'] ?? null),
@@ -128,6 +130,59 @@ class WikiGgEquipmentSource
             'base_image' => $baseFile ? ($imageInfo[$baseFile] ?? null) : null,
             'image_candidates' => count($page['images']),
         ];
+    }
+
+    private function fetchPageForItem(EquipmentItem $item): array
+    {
+        $candidates = [$this->pageTitle($item)];
+
+        $prefix = match ($item->item_type) {
+            'weapon' => 'Weapons',
+            'tool' => 'Tools',
+            'consumable' => 'Consumables',
+            default => null,
+        };
+
+        if ($prefix !== null) {
+            $direct = $prefix.'/'.$this->wikiPath((string) $item->name);
+            array_unshift($candidates, $direct);
+
+            if ($item->item_type === 'weapon') {
+                $parts = preg_split('/\s+/', trim((string) $item->name)) ?: [];
+                for ($split = count($parts) - 1; $split >= 1; $split--) {
+                    $family = implode(' ', array_slice($parts, 0, $split));
+                    $variant = implode(' ', array_slice($parts, $split));
+                    if ($family !== '' && $variant !== '') {
+                        $candidates[] = 'Weapons/'.$this->wikiPath($family).'/'.$this->wikiPath($variant);
+                    }
+                }
+            }
+        }
+
+        $candidates = array_values(array_unique(array_filter($candidates)));
+        $lastError = null;
+
+        foreach ($candidates as $candidate) {
+            try {
+                return [$candidate, $this->fetchPage($candidate)];
+            } catch (RuntimeException $e) {
+                $lastError = $e;
+            }
+        }
+
+        throw $lastError ?? new RuntimeException('No matching wiki.gg page could be resolved for '.$item->name);
+    }
+
+    private function familyNameFromPageTitle(string $pageTitle, string $itemType): ?string
+    {
+        if ($itemType !== 'weapon' || ! str_starts_with($pageTitle, 'Weapons/')) {
+            return null;
+        }
+
+        $relative = substr($pageTitle, strlen('Weapons/'));
+        $first = explode('/', $relative, 2)[0] ?? '';
+
+        return $first !== '' ? str_replace('_', ' ', $first) : null;
     }
 
     public function fetchPage(string $pageTitle): array
@@ -453,7 +508,7 @@ class WikiGgEquipmentSource
         return $rows;
     }
 
-    private function bestImageFile(?string $explicit, array $candidates, string $subject, string $mode): ?string
+    private function bestImageFile(?string $explicit, array $candidates, string $subject, string $mode, array $imageInfo = []): ?string
     {
         if ($explicit) {
             $explicit = $this->normalizeFileTitle($explicit);
@@ -472,20 +527,48 @@ class WikiGgEquipmentSource
         }
 
         $best = null;
-        $bestScore = 0;
+        $bestScore = PHP_INT_MIN;
 
         foreach ($candidates as $candidate) {
             $file = $this->normalizeFileTitle((string) $candidate);
-            $key = $this->normalizeSearch(pathinfo($file, PATHINFO_FILENAME));
+            $base = pathinfo($file, PATHINFO_FILENAME);
+            $key = $this->normalizeSearch($base);
+
             if ($key === '' || ! str_contains($key, $subjectKey)) {
                 continue;
             }
 
-            $score = 10;
-            if (str_contains($key, '3d') || str_contains($key, 'model')) $score += 8;
-            if ($mode === 'base' && (str_contains($key, 'weapon') || str_contains($key, 'tool') || str_contains($key, 'consumable'))) $score += 5;
-            if ($mode === 'base' && (str_contains($key, 'promo') || str_contains($key, 'concept') || str_contains($key, 'dlc'))) $score -= 8;
-            if ($mode === 'skin' && str_contains($key, 'promo')) $score -= 4;
+            $score = 20;
+            $lower = strtolower($base);
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+            if (str_contains($lower, 'model')) $score += 50;
+            if (str_contains($lower, '3d')) $score += 45;
+            if (str_contains($lower, 'weapon')) $score += 12;
+
+            foreach (['promo', 'concept', 'graphics', 'wallpaper', 'banner', 'keyart', 'key art', 'skin set', 'showcase', 'store'] as $badToken) {
+                if (str_contains($lower, $badToken)) $score -= 45;
+            }
+
+            if ($extension === 'png') $score += 18;
+            elseif ($extension === 'webp') $score += 10;
+            elseif (in_array($extension, ['jpg', 'jpeg'], true)) $score -= 8;
+
+            $info = $imageInfo[$file] ?? null;
+            if (is_array($info)) {
+                $width = (int) ($info['width'] ?? 0);
+                $height = (int) ($info['height'] ?? 0);
+                if ($width > 0 && $height > 0) {
+                    $ratio = $width / $height;
+                    if ($mode === 'skin') {
+                        if ($ratio >= 2.4) $score += 28;
+                        elseif ($ratio >= 2.0) $score += 12;
+                        elseif ($ratio < 1.8) $score -= 16;
+                    } elseif ($mode === 'base' && $ratio >= 2.0) {
+                        $score += 12;
+                    }
+                }
+            }
 
             if ($score > $bestScore) {
                 $bestScore = $score;
