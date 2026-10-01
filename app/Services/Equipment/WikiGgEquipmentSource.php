@@ -90,7 +90,7 @@ class WikiGgEquipmentSource
             imageInfo: $imageInfo,
         );
 
-        $skins = array_map(function (array $skin) use ($page, $imageInfo): array {
+        $skins = array_map(function (array $skin) use ($page, $imageInfo, $item, $pageTitle): array {
             $file = $this->bestImageFile(
                 explicit: $skin['image_file'] ?? null,
                 candidates: $page['images'],
@@ -102,7 +102,13 @@ class WikiGgEquipmentSource
             return array_merge($skin, [
                 'image_file' => $file,
                 'image' => $file ? ($imageInfo[$file] ?? null) : null,
-                'image_confidence' => ! $file ? 0 : (strcasecmp($file, (string) ($skin['image_file'] ?? '')) === 0 ? 100 : 65),
+                'image_confidence' => $this->skinImageConfidence(
+                    $file,
+                    (string) ($skin['name'] ?? ''),
+                    $item,
+                    $this->familyNameFromPageTitle($pageTitle, $item->item_type),
+                    $page['images'],
+                ),
             ]);
         }, $skinRows);
 
@@ -927,6 +933,82 @@ class WikiGgEquipmentSource
         }
 
         return $best;
+    }
+
+    private function skinImageConfidence(?string $file, string $skinName, EquipmentItem $item, ?string $wikiFamily, array $candidates): int
+    {
+        if (! $file) return 0;
+
+        $contexts = array_values(array_unique(array_filter([
+            $this->imageNameTokens((string) $item->name),
+            $this->imageNameTokens((string) ($item->family?->name ?? '')),
+            $this->imageNameTokens((string) $wikiFamily),
+        ])));
+
+        if (! $this->isStrongSkinImageMatch($file, $skinName, $contexts)) return 65;
+
+        $matching = [];
+        foreach (array_merge($candidates, [$file]) as $candidate) {
+            $candidate = $this->normalizeFileTitle((string) $candidate);
+            if ($this->isStrongSkinImageMatch($candidate, $skinName, $contexts)) {
+                $matching[strtolower($candidate)] = $this->skinImageRank($candidate);
+            }
+        }
+
+        $bestRank = max($matching);
+        $equallyGood = count(array_filter($matching, fn (int $rank) => $rank === $bestRank));
+
+        return $equallyGood === 1 && $this->skinImageRank($file) === $bestRank ? 100 : 65;
+    }
+
+    private function skinImageRank(string $file): int
+    {
+        $name = $this->imageNameTokens(pathinfo($this->normalizeFileTitle($file), PATHINFO_FILENAME));
+
+        if (str_starts_with($name, 'weapon 3d ')) return 3;
+        if (str_starts_with($name, 'model ')) return 2;
+
+        return 1;
+    }
+
+    private function isStrongSkinImageMatch(string $file, string $skinName, array $contexts): bool
+    {
+        $tokens = explode(' ', $this->imageNameTokens(pathinfo($this->normalizeFileTitle($file), PATHINFO_FILENAME)));
+        $skin = $this->imageNameTokens($skinName);
+        if ($skin === '' || $tokens === ['']) return false;
+
+        foreach (['thumb', 'thumbnail', 'icon', 'ui', 'interface', 'generic', 'placeholder',
+            'promo', 'concept', 'wallpaper', 'banner', 'keyart', 'gallery', 'store'] as $excluded) {
+            if (in_array($excluded, $tokens, true)) return false;
+        }
+
+        while ($tokens && in_array($tokens[0], ['weapon', 'tool', 'consumable', '3d', 'model'], true)) {
+            array_shift($tokens);
+        }
+
+        $skinTokens = explode(' ', $skin);
+        $positions = [];
+        for ($index = 0; $index <= count($tokens) - count($skinTokens); $index++) {
+            if (array_slice($tokens, $index, count($skinTokens)) === $skinTokens) $positions[] = $index;
+        }
+        if (count($positions) !== 1) return false;
+
+        $remaining = array_merge(
+            array_slice($tokens, 0, $positions[0]),
+            array_slice($tokens, $positions[0] + count($skinTokens)),
+        );
+        if (! $remaining) return true;
+
+        return in_array(implode(' ', $remaining), $contexts, true);
+    }
+
+    private function imageNameTokens(string $value): string
+    {
+        $value = str_replace(["’", "‘", "ʼ", "ʻ", "`", "´", "'"], '', $value);
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        $value = strtolower(is_string($ascii) ? $ascii : $value);
+
+        return trim(preg_replace('/[^a-z0-9]+/', ' ', $value) ?? '');
     }
 
     private function fileNameFromParam(mixed $value): ?string

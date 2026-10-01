@@ -16,6 +16,7 @@ use App\Services\Equipment\EquipmentStatCatalog;
 use App\Services\Equipment\EquipmentSourceInterface;
 use App\Services\Equipment\EquipmentSyncService;
 use App\Services\Equipment\WikiGgImportService;
+use App\Services\Equipment\WikiGgEquipmentSource;
 use App\Services\Equipment\WikiGgMediaImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -195,9 +196,82 @@ class ArsenalCanonicalFoundationTest extends TestCase
         $this->assertSame(100, $plan['skins'][0]['match_confidence']);
         $this->assertSame('REVIEW_REQUIRED', $plan['skins'][0]['image_action']);
         $wiki['base_image']['sha1'] = 'changed';
-        $this->assertSame('REVIEW_REQUIRED', app(WikiGgMediaImportService::class)->plan($item, $wiki)['base']['action']);
+        $base = app(WikiGgMediaImportService::class)->plan($item, $wiki)['base'];
+        $this->assertSame('REVIEW_REQUIRED', $base['action']);
+        $this->assertSame('Existing local image must be reviewed before replacement', $base['reason']);
         $wiki['skins'][0]['image_confidence'] = 65;
         $this->assertSame('REVIEW_REQUIRED', app(WikiGgMediaImportService::class)->plan($item, $wiki)['skins'][0]['image_action']);
+    }
+
+    public function test_drilling_exact_skin_filenames_are_confident_but_near_matches_and_duplicates_require_review(): void
+    {
+        $item = $this->item();
+        $item->update(['name' => 'Drilling', 'slug' => 'drilling', 'local_asset_path' => 'arsenal/items/drilling.webp']);
+        foreach (['Corrosion', "Soldier's Brother", 'Tomb Reign', 'Celestial Scream'] as $index => $name) {
+            EquipmentSkin::create(['equipment_item_id' => $item->id, 'external_id' => 'drilling-skin-'.$index, 'name' => $name]);
+        }
+
+        $files = [
+            'Model Drilling Corrosion.jpg',
+            'Weapon 3D Drilling Corrosion.jpg',
+            "Weapon 3D Drilling Soldier's Brother.jpg",
+            'Weapon 3D Drilling Tomb Reign.jpg',
+            'Model Drilling Celestial Scream.jpg',
+            'Artwork Drilling Celestial Scream Skin Set.jpg',
+            'Weapon 3D Drilling Celestial Scream.jpg',
+        ];
+        $wiki = $this->drillingImagePreview($item, $files);
+        $this->assertSame([100, 100, 100, 100], array_column($wiki['skins'], 'image_confidence'));
+        $plan = app(WikiGgMediaImportService::class)->plan($item, $wiki);
+        $this->assertSame([100, 100, 100, 100], array_column($plan['skins'], 'match_confidence'));
+        $this->assertSame(['IMPORT', 'IMPORT', 'IMPORT', 'IMPORT'], array_column($plan['skins'], 'image_action'));
+        $this->assertSame('REVIEW_REQUIRED', $plan['base']['action']);
+        $this->assertSame('Existing local image must be reviewed before replacement', $plan['base']['reason']);
+
+        $near = $this->drillingImagePreview($item, ['Weapon 3D Drilling Corrosion Gold.jpg']);
+        $this->assertLessThan(85, $near['skins'][0]['image_confidence']);
+        $this->assertSame('REVIEW_REQUIRED', app(WikiGgMediaImportService::class)->plan($item, $near)['skins'][0]['image_action']);
+
+        $duplicates = $this->drillingImagePreview($item, [
+            'Weapon 3D Drilling Corrosion.jpg', 'Weapon_3D_Drilling_Corrosion.png',
+        ]);
+        $this->assertLessThan(85, $duplicates['skins'][0]['image_confidence']);
+        $this->assertSame('REVIEW_REQUIRED', app(WikiGgMediaImportService::class)->plan($item, $duplicates)['skins'][0]['image_action']);
+
+        foreach (['Weapon 3D Romero Corrosion.jpg', 'Weapon 3D Drilling Corrosion Icon.jpg'] as $unsafe) {
+            $preview = $this->drillingImagePreview($item, [$unsafe]);
+            $this->assertLessThan(85, $preview['skins'][0]['image_confidence']);
+        }
+    }
+
+    private function drillingImagePreview(EquipmentItem $item, array $skinFiles): array
+    {
+        Http::swap(new \Illuminate\Http\Client\Factory);
+        $skins = implode("\n", array_map(
+            fn (string $name) => "{{Infobox Weapon Skin\n|Title={$name}\n}}",
+            ['Corrosion', "Soldier's Brother", 'Tomb Reign', 'Celestial Scream'],
+        ));
+        Http::fake(function ($request) use ($skinFiles, $skins) {
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+            if (($query['action'] ?? null) === 'parse') {
+                return Http::response(['parse' => [
+                    'wikitext' => "{{Infobox Weapon\n|Title=Drilling\n|image=Weapon Drilling.png\n}}\n".$skins,
+                    'text' => '',
+                    'images' => array_merge(['Weapon Drilling.png'], $skinFiles),
+                ]]);
+            }
+            $titles = explode('|', (string) ($query['titles'] ?? ''));
+            return Http::response(['query' => ['pages' => array_map(fn (string $title) => [
+                'title' => $title,
+                'imageinfo' => [[
+                    'url' => 'https://huntshowdown.wiki.gg/images/'.rawurlencode($title),
+                    'mime' => 'image/jpeg', 'width' => 1200, 'height' => 400,
+                    'sha1' => sha1($title),
+                ]],
+            ], $titles)]]);
+        });
+
+        return app(WikiGgEquipmentSource::class)->preview($item, true, false);
     }
 
     public function test_huntify_resync_preserves_manual_and_other_source_values(): void
