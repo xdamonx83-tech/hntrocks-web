@@ -12,6 +12,8 @@ use RuntimeException;
 class WikiGgEquipmentSource
 {
     public const BASE_URL = 'https://huntshowdown.wiki.gg';
+    private const MIN_REQUEST_INTERVAL_MS = 800;
+    private float $lastRequestAt = 0.0;
 
     public function key(): string
     {
@@ -53,16 +55,19 @@ class WikiGgEquipmentSource
         [$pageTitle, $page] = $this->fetchPageForItem($item, $withRevision);
         $wikitext = $page['wikitext'];
 
-        $templateName = match ($item->item_type) {
-            'weapon' => 'Infobox Weapon',
-            'tool' => 'Infobox Tool',
-            'consumable' => 'Infobox Consumable',
-            default => throw new RuntimeException('Unsupported item type.'),
-        };
+        $templateName = null;
+        $template = null;
+        foreach ($this->templateNamesFor($item->item_type, $pageTitle) as $candidateTemplate) {
+            $candidate = $this->extractFirstTemplate($wikitext, $candidateTemplate);
+            if ($candidate !== null) {
+                $templateName = $candidateTemplate;
+                $template = $candidate;
+                break;
+            }
+        }
 
-        $template = $this->extractFirstTemplate($wikitext, $templateName);
         if ($template === null) {
-            throw new RuntimeException("wiki.gg page found, but {$templateName} was not found: {$pageTitle}");
+            throw new RuntimeException("wiki.gg page found, but no supported equipment template was found: {$pageTitle}");
         }
 
         $params = $this->parseTemplateParameters($template);
@@ -139,16 +144,21 @@ class WikiGgEquipmentSource
     {
         $candidates = [$this->pageTitle($item)];
 
-        $prefix = match ($item->item_type) {
-            'weapon' => 'Weapons',
-            'tool' => 'Tools',
-            'consumable' => 'Consumables',
-            default => null,
+        $prefixes = match ($item->item_type) {
+            'weapon' => ['Weapons', 'World_Items'],
+            'tool' => ['Tools'],
+            'consumable' => ['Consumables'],
+            default => [],
         };
+        $prefix = $prefixes[0] ?? null;
 
         if ($prefix !== null) {
             $direct = $prefix.'/'.$this->wikiPath((string) $item->name);
             array_unshift($candidates, $direct);
+
+            if ($item->item_type === 'weapon') {
+                $candidates[] = 'World_Items/'.$this->wikiPath((string) $item->name);
+            }
 
             if ($item->item_type === 'weapon') {
                 $parts = preg_split('/\s+/', trim((string) $item->name)) ?: [];
@@ -168,7 +178,7 @@ class WikiGgEquipmentSource
         foreach ($candidates as $candidate) {
             try {
                 $page = $this->fetchPage($candidate, $withRevision);
-                if (! $this->pageMatchesItemType($page['wikitext'], $item->item_type)) {
+                if (! $this->pageMatchesItemType($page['wikitext'], $item->item_type, $candidate)) {
                     continue;
                 }
 
@@ -181,11 +191,11 @@ class WikiGgEquipmentSource
             }
         }
 
-        if ($prefix !== null) {
-            foreach ($this->searchWikiCandidates($item, $prefix) as $match) {
+        foreach ($prefixes as $searchPrefix) {
+            foreach ($this->searchWikiCandidates($item, $searchPrefix) as $match) {
                 try {
                     $page = $this->fetchPage($match['title'], $withRevision);
-                    if (! $this->pageMatchesItemType($page['wikitext'], $item->item_type)) {
+                    if (! $this->pageMatchesItemType($page['wikitext'], $item->item_type, $match['title'])) {
                         continue;
                     }
 
@@ -213,7 +223,7 @@ class WikiGgEquipmentSource
         $matches = [];
 
         foreach ($queries as $query) {
-            $response = $this->http()->get(self::BASE_URL.'/api.php', [
+            $response = $this->apiGet([
                 'action' => 'query',
                 'list' => 'search',
                 'srsearch' => $query,
@@ -307,21 +317,42 @@ class WikiGgEquipmentSource
         return array_values(array_unique(array_filter($tokens, fn ($token) => strlen($token) >= 2)));
     }
 
-    private function pageMatchesItemType(string $wikitext, string $itemType): bool
+    private function pageMatchesItemType(string $wikitext, string $itemType, string $pageTitle = ''): bool
     {
-        $template = match ($itemType) {
-            'weapon' => 'Infobox Weapon',
-            'tool' => 'Infobox Tool',
-            'consumable' => 'Infobox Consumable',
-            default => null,
-        };
+        foreach ($this->templateNamesFor($itemType, $pageTitle) as $template) {
+            if (stripos($wikitext, '{{'.$template) !== false) {
+                return true;
+            }
+        }
 
-        return $template !== null && stripos($wikitext, '{{'.$template) !== false;
+        return false;
+    }
+
+    private function templateNamesFor(string $itemType, string $pageTitle = ''): array
+    {
+        return match ($itemType) {
+            'weapon' => str_starts_with($pageTitle, 'World_Items/')
+                ? ['World Item', 'Infobox World Item', 'Infobox Weapon']
+                : ['Infobox Weapon', 'World Item'],
+            'tool' => ['Infobox Tool'],
+            'consumable' => ['Infobox Consumable'],
+            default => [],
+        };
     }
 
     private function familyNameFromPageTitle(string $pageTitle, string $itemType): ?string
     {
-        if ($itemType !== 'weapon' || ! str_starts_with($pageTitle, 'Weapons/')) {
+        if ($itemType !== 'weapon') {
+            return null;
+        }
+
+        if (str_starts_with($pageTitle, 'World_Items/')) {
+            $relative = substr($pageTitle, strlen('World_Items/'));
+
+            return $relative !== '' ? str_replace('_', ' ', explode('/', $relative, 2)[0]) : null;
+        }
+
+        if (! str_starts_with($pageTitle, 'Weapons/')) {
             return null;
         }
 
@@ -333,7 +364,7 @@ class WikiGgEquipmentSource
 
     public function fetchPage(string $pageTitle, bool $withRevision = true): array
     {
-        $response = $this->http()->get(self::BASE_URL.'/api.php', [
+        $response = $this->apiGet([
             'action' => 'parse',
             'page' => $pageTitle,
             'prop' => 'wikitext|text|images',
@@ -407,7 +438,7 @@ class WikiGgEquipmentSource
             $query['redirects'] = 1;
         }
 
-        $response = $this->http()->get(self::BASE_URL.'/api.php', $query);
+        $response = $this->apiGet($query);
         if (! $response->successful()) {
             return ['id' => null, 'timestamp' => null];
         }
@@ -438,7 +469,7 @@ class WikiGgEquipmentSource
 
         foreach (array_chunk($fileNames, 25) as $chunk) {
             $titles = implode('|', array_map(fn ($name) => 'File:'.$name, $chunk));
-            $response = $this->http()->get(self::BASE_URL.'/api.php', [
+            $response = $this->apiGet([
                 'action' => 'query',
                 'prop' => 'imageinfo',
                 'titles' => $titles,
@@ -1136,6 +1167,64 @@ class WikiGgEquipmentSource
         return self::BASE_URL.'/wiki/'.str_replace('%2F', '/', rawurlencode($pageTitle));
     }
 
+    private function apiGet(array $query)
+    {
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= 6; $attempt++) {
+            $this->throttle();
+
+            try {
+                $response = $this->http()->get(self::BASE_URL.'/api.php', $query);
+            } catch (\Throwable $e) {
+                $lastException = $e;
+                if ($attempt >= 6) {
+                    throw $e;
+                }
+
+                usleep(min(5_000_000, $attempt * 750_000));
+                continue;
+            }
+
+            if ($response->status() === 429) {
+                $retryAfter = (int) ($response->header('Retry-After') ?: 0);
+                $waitSeconds = $retryAfter > 0
+                    ? min(30, max(2, $retryAfter))
+                    : min(20, max(2, $attempt * 3));
+
+                sleep($waitSeconds);
+                continue;
+            }
+
+            if ($response->serverError() && $attempt < 6) {
+                usleep(min(5_000_000, $attempt * 750_000));
+                continue;
+            }
+
+            return $response;
+        }
+
+        if ($lastException) {
+            throw $lastException;
+        }
+
+        throw new RuntimeException('wiki.gg API remained rate-limited after retries.');
+    }
+
+    private function throttle(): void
+    {
+        if ($this->lastRequestAt > 0) {
+            $elapsedMs = (microtime(true) - $this->lastRequestAt) * 1000;
+            $remainingMs = self::MIN_REQUEST_INTERVAL_MS - $elapsedMs;
+
+            if ($remainingMs > 0) {
+                usleep((int) ceil($remainingMs * 1000));
+            }
+        }
+
+        $this->lastRequestAt = microtime(true);
+    }
+
     private function http()
     {
         return Http::acceptJson()
@@ -1143,7 +1232,6 @@ class WikiGgEquipmentSource
                 'User-Agent' => 'HNT.ROCKS Arsenal Wiki Sync/1.0 (+https://hnt.rocks)',
             ])
             ->connectTimeout(8)
-            ->timeout(20)
-            ->retry(2, 400, throw: false);
+            ->timeout(20);
     }
 }
