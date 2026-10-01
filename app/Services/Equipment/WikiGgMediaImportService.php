@@ -37,6 +37,7 @@ class WikiGgMediaImportService
                 'page_title' => $wiki['page_title'] ?? null,
                 'page_url' => $wiki['page_url'] ?? null,
                 'revision_id' => $wiki['revision_id'] ?? null,
+                'revision_timestamp' => $wiki['revision_timestamp'] ?? null,
                 'family' => $wiki['family'] ?? null,
                 'update' => $wiki['update'] ?? null,
                 'unlock' => $wiki['unlock'] ?? null,
