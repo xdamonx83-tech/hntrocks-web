@@ -15,8 +15,9 @@ class EquipmentStatCatalog
         ['heavyMelee','Heavy Melee Damage',null,'higher','melee'], ['stamina','Stamina Cost',null,'lower','melee'],
         ['heavyStamina','Heavy Stamina Cost',null,'lower','melee'], ['throwDamage','Throw Damage',null,'higher','combat'],
         ['throwRange','Throw Range','m','higher','handling'], ['fuseTimer','Fuse Timer','s','neutral','handling'],
-        ['radius','Radius','m','higher','combat'], ['price','Price',null,'neutral','economy'],
-        ['slotSize','Slot Size',null,'neutral','economy'],
+        ['radius','Radius','m','higher','combat'], ['effectDuration','Effect Duration','s','higher','combat'],
+        ['swapSpeed','Swap Speed','s','lower','handling'], ['throwStamina','Throw Stamina Cost',null,'lower','melee'],
+        ['price','Price',null,'neutral','economy'], ['slotSize','Slot Size',null,'neutral','economy'],
     ];
 
     public function ensure(): void
