@@ -92,7 +92,7 @@ WIKI,
         $this->assertSame(340, $data['stats']['muzzleVelocity']);
         $this->assertSame(['Iron Eye'], $data['recommended_traits']);
         $this->assertSame(['FMJ Ammo', 'Subsonic Ammo'], $data['ammo_types']);
-        $this->assertSame(['Tree Feeder', 'Spirit Caller'], $data['skins']);
+        $this->assertSame(['Tree Feeder', 'Spirit Caller'], array_column($data['skins'], 'name'));
         $this->assertCount(2, $data['patch_history']);
         $this->assertSame('Update 2.8', $data['patch_history'][0]['patch']);
     }
