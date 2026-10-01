@@ -57,7 +57,7 @@ class SyncArsenalWikiGgMedia extends Command
         $this->line('Item: '.$item->name);
         $this->line('Page: '.$wiki['page_url']);
         $this->line('Family: '.($wiki['family'] ?? '—'));
-        $this->line('Revision: '.($wiki['revision_id'] ?? '—'));
+        $this->line('Revision: '.($wiki['revision_id'] ?? '—').' · '.($wiki['revision_timestamp'] ?? '—'));
         $this->line('Page images: '.$wiki['image_candidates']);
         $this->line('Base image: '.($wiki['base_image_file'] ?? 'NOT FOUND'));
         $this->line('Base URL: '.($wiki['base_image']['url'] ?? '—'));
