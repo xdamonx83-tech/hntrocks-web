@@ -64,7 +64,10 @@ class AuditArsenalWikiGg extends Command
             'patch_rows' => 0,
         ];
 
-        $issues = [];
+        $errors = [];
+        $searchMatches = [];
+        $familyChanges = [];
+        $imageIssues = [];
 
         $this->info('wiki.gg Arsenal coverage audit');
         $this->line('Type: '.$type);
@@ -80,16 +83,18 @@ class AuditArsenalWikiGg extends Command
                 $counts['resolved']++;
                 if (($wiki['resolution_method'] ?? 'direct') === 'search') {
                     $counts['resolved_search']++;
-                    if ((int) ($wiki['resolution_score'] ?? 0) < 70) {
+                    $score = (int) ($wiki['resolution_score'] ?? 0);
+                    if ($score < 70) {
                         $counts['low_confidence']++;
-                        if (count($issues) < $show) {
-                            $issues[] = [
-                                $item->slug,
-                                'SEARCH MATCH',
-                                (string) ($item->name ?? '—'),
-                                ($wiki['page_title'] ?? '—').' · score '.($wiki['resolution_score'] ?? 0),
-                            ];
-                        }
+                    }
+                    if (count($searchMatches) < $show) {
+                        $searchMatches[] = [
+                            $item->slug,
+                            (string) ($item->name ?? '—'),
+                            (string) ($wiki['page_title'] ?? '—'),
+                            (string) $score,
+                            $score >= 70 ? 'OK' : 'REVIEW',
+                        ];
                     }
                 } else {
                     $counts['resolved_direct']++;
@@ -116,28 +121,36 @@ class AuditArsenalWikiGg extends Command
                     } elseif ($wikiFamily !== '') {
                         $counts['family_change']++;
 
-                        if (count($issues) < $show) {
-                            $issues[] = [
+                        if (count($familyChanges) < $show) {
+                            $familyChanges[] = [
                                 $item->slug,
-                                'FAMILY',
                                 $currentFamily !== '' ? $currentFamily : '—',
                                 $wikiFamily,
+                                (string) ($wiki['page_title'] ?? '—'),
                             ];
                         }
                     }
                 }
 
-                if (empty($wiki['base_image_file']) && count($issues) < $show) {
-                    $issues[] = [$item->slug, 'IMAGE', '—', 'No base image candidate'];
+                if (empty($wiki['base_image_file']) && count($imageIssues) < $show) {
+                    $imageIssues[] = [
+                        $item->slug,
+                        'BASE',
+                        'No base image candidate',
+                        (string) ($wiki['page_title'] ?? '—'),
+                    ];
                 }
 
                 $missingSkinImages = array_filter($skins, fn (array $skin) => empty($skin['image_file']));
-                if ($missingSkinImages && count($issues) < $show) {
-                    $issues[] = [
+                if ($missingSkinImages && count($imageIssues) < $show) {
+                    $imageIssues[] = [
                         $item->slug,
-                        'SKIN IMAGE',
-                        (string) count($missingSkinImages).' missing',
-                        (string) count($skins).' skins detected',
+                        'SKIN',
+                        (string) count($missingSkinImages).' missing of '.count($skins),
+                        implode(', ', array_slice(array_values(array_filter(array_map(
+                            fn (array $skin) => empty($skin['image_file']) ? (string) ($skin['name'] ?? 'unnamed') : null,
+                            $skins
+                        ))), 0, 5)),
                     ];
                 }
             } catch (\Throwable $e) {
@@ -181,10 +194,28 @@ class AuditArsenalWikiGg extends Command
             ['Patch history rows', $counts['patch_rows']],
         ]);
 
-        if ($issues) {
+        if ($errors) {
             $this->newLine();
-            $this->warn('First audit issues / planned family corrections:');
-            $this->table(['Item', 'Type', 'Current', 'wiki.gg'], $issues);
+            $this->error('Unresolved wiki.gg items:');
+            $this->table(['Item', 'Name', 'Current family', 'Error'], $errors);
+        }
+
+        if ($searchMatches) {
+            $this->newLine();
+            $this->warn('Items resolved by wiki search:');
+            $this->table(['Item', 'Name', 'wiki.gg page', 'Score', 'Status'], $searchMatches);
+        }
+
+        if ($familyChanges) {
+            $this->newLine();
+            $this->warn('Planned family corrections:');
+            $this->table(['Item', 'Current family', 'wiki.gg family', 'wiki.gg page'], $familyChanges);
+        }
+
+        if ($imageIssues) {
+            $this->newLine();
+            $this->warn('Image issues:');
+            $this->table(['Item', 'Type', 'Problem', 'Details'], $imageIssues);
         }
 
         $this->newLine();
