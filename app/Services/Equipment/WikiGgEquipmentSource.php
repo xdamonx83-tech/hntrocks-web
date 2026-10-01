@@ -48,9 +48,9 @@ class WikiGgEquipmentSource
         return $prefix.'/'.$this->wikiPath((string) $item->name);
     }
 
-    public function preview(EquipmentItem $item): array
+    public function preview(EquipmentItem $item, bool $withMedia = true, bool $withRevision = true): array
     {
-        [$pageTitle, $page] = $this->fetchPageForItem($item);
+        [$pageTitle, $page] = $this->fetchPageForItem($item, $withRevision);
         $wikitext = $page['wikitext'];
 
         $templateName = match ($item->item_type) {
@@ -67,7 +67,7 @@ class WikiGgEquipmentSource
 
         $params = $this->parseTemplateParameters($template);
         $stats = $this->statsFromParams($params);
-        $skinRows = $this->skinRows($wikitext, $item->item_type);
+        $skinRows = $this->skinRows($wikitext, $item->item_type, is_string($page['html']) ? $page['html'] : '');
 
         $candidateFiles = array_values(array_unique(array_filter(array_merge(
             $page['images'],
@@ -75,7 +75,7 @@ class WikiGgEquipmentSource
             array_map(fn (array $skin) => $skin['image_file'] ?? null, $skinRows),
         ))));
 
-        $imageInfo = $this->resolveImageInfo($candidateFiles);
+        $imageInfo = $withMedia ? $this->resolveImageInfo($candidateFiles) : [];
         $baseFile = $this->bestImageFile(
             explicit: $this->fileNameFromParam($params['image'] ?? $params['Image'] ?? null),
             candidates: $page['images'],
@@ -108,6 +108,7 @@ class WikiGgEquipmentSource
             'source_key' => $this->key(),
             'source_name' => $this->name(),
             'revision_id' => $page['revision_id'],
+            'revision_timestamp' => $page['revision_timestamp'] ?? null,
             'page_title' => $pageTitle,
             'page_url' => $this->wikiPageUrl($pageTitle),
             'family' => $this->familyNameFromPageTitle($pageTitle, $item->item_type),
@@ -132,7 +133,7 @@ class WikiGgEquipmentSource
         ];
     }
 
-    private function fetchPageForItem(EquipmentItem $item): array
+    private function fetchPageForItem(EquipmentItem $item, bool $withRevision = true): array
     {
         $candidates = [$this->pageTitle($item)];
 
@@ -164,7 +165,7 @@ class WikiGgEquipmentSource
 
         foreach ($candidates as $candidate) {
             try {
-                return [$candidate, $this->fetchPage($candidate)];
+                return [$candidate, $this->fetchPage($candidate, $withRevision)];
             } catch (RuntimeException $e) {
                 $lastError = $e;
             }
@@ -185,7 +186,7 @@ class WikiGgEquipmentSource
         return $first !== '' ? str_replace('_', ' ', $first) : null;
     }
 
-    public function fetchPage(string $pageTitle): array
+    public function fetchPage(string $pageTitle, bool $withRevision = true): array
     {
         $response = $this->http()->get(self::BASE_URL.'/api.php', [
             'action' => 'parse',
@@ -223,17 +224,58 @@ class WikiGgEquipmentSource
             throw new RuntimeException("wiki.gg page is unexpectedly large: {$pageTitle}");
         }
 
+        $revision = ['id' => null, 'timestamp' => null];
+        if ($withRevision) {
+            $pageId = isset($parse['pageid']) && is_numeric($parse['pageid']) ? (int) $parse['pageid'] : null;
+            $revision = $this->resolveRevision($pageTitle, $pageId);
+        }
+
         return [
             'wikitext' => $wikitext,
             'html' => is_string($parse['text'] ?? null) ? $parse['text'] : '',
             'images' => array_values(array_filter(array_map('strval', is_array($parse['images'] ?? null) ? $parse['images'] : []))),
-            'revision_id' => isset($parse['revid']) && is_numeric($parse['revid']) ? (int) $parse['revid'] : null,
+            'revision_id' => $revision['id'],
+            'revision_timestamp' => $revision['timestamp'],
         ];
     }
 
     public function fetchWikitext(string $pageTitle): string
     {
-        return $this->fetchPage($pageTitle)['wikitext'];
+        return $this->fetchPage($pageTitle, false)['wikitext'];
+    }
+
+    private function resolveRevision(string $pageTitle, ?int $pageId): array
+    {
+        $query = [
+            'action' => 'query',
+            'prop' => 'revisions',
+            'rvprop' => 'ids|timestamp',
+            'rvlimit' => 1,
+            'format' => 'json',
+            'formatversion' => 2,
+        ];
+
+        if ($pageId !== null) {
+            $query['pageids'] = $pageId;
+        } else {
+            $query['titles'] = $pageTitle;
+            $query['redirects'] = 1;
+        }
+
+        $response = $this->http()->get(self::BASE_URL.'/api.php', $query);
+        if (! $response->successful()) {
+            return ['id' => null, 'timestamp' => null];
+        }
+
+        $payload = $response->json();
+        $pages = is_array($payload['query']['pages'] ?? null) ? $payload['query']['pages'] : [];
+        $page = $pages[0] ?? null;
+        $revision = is_array($page) && is_array($page['revisions'][0] ?? null) ? $page['revisions'][0] : null;
+
+        return [
+            'id' => is_array($revision) && isset($revision['revid']) && is_numeric($revision['revid']) ? (int) $revision['revid'] : null,
+            'timestamp' => is_array($revision) && is_string($revision['timestamp'] ?? null) ? $revision['timestamp'] : null,
+        ];
     }
 
     public function resolveImageInfo(array $fileNames): array
@@ -394,7 +436,7 @@ class WikiGgEquipmentSource
         return array_values(array_unique($values));
     }
 
-    private function skinRows(string $wikitext, string $itemType): array
+    private function skinRows(string $wikitext, string $itemType, string $html = ''): array
     {
         $templateName = match ($itemType) {
             'weapon' => 'Infobox Weapon Skin',
@@ -410,24 +452,138 @@ class WikiGgEquipmentSource
         $rows = [];
         foreach ($this->extractAllTemplates($wikitext, $templateName) as $template) {
             $params = $this->parseTemplateParameters($template);
-            $title = $this->cleanWikiText($params['Title'] ?? null);
+            $title = $this->cleanWikiText($this->param($params, ['Title', 'Name']));
             if (! $title) {
                 continue;
             }
 
             $rows[] = [
                 'name' => $title,
-                'rarity' => $this->cleanWikiText($params['Rarity'] ?? null),
-                'price' => $this->number($params['Price'] ?? null),
-                'source' => $this->cleanWikiText($params['Source'] ?? null),
-                'update' => $this->cleanWikiText($params['Update'] ?? null),
+                'rarity' => $this->cleanWikiText($this->param($params, ['Rarity', 'Tier', 'Quality'])),
+                'price' => $this->number($this->param($params, ['Price', 'Cost'])),
+                'source' => $this->cleanWikiText($this->param($params, ['Source', 'Acquisition', 'Availability', 'Unlock'])),
+                'update' => $this->cleanWikiText($this->param($params, ['Update', 'Added', 'Release'])),
                 'image_file' => $this->fileNameFromParam(
-                    $params['image'] ?? $params['Image'] ?? $params['Model'] ?? $params['model'] ?? null
+                    $this->param($params, ['image', 'Image', 'Model', 'model', 'Weapon Image', 'Skin Image'])
                 ),
             ];
         }
 
+        if ($html !== '' && $rows) {
+            $htmlRows = $this->skinMetadataFromHtml($html);
+            foreach ($rows as &$row) {
+                $key = $this->normalizeSearch((string) $row['name']);
+                if ($key === '' || ! isset($htmlRows[$key])) {
+                    continue;
+                }
+
+                foreach (['rarity', 'source', 'update'] as $field) {
+                    if (empty($row[$field]) && ! empty($htmlRows[$key][$field])) {
+                        $row[$field] = $htmlRows[$key][$field];
+                    }
+                }
+                if (($row['price'] ?? null) === null && isset($htmlRows[$key]['price'])) {
+                    $row['price'] = $htmlRows[$key]['price'];
+                }
+            }
+            unset($row);
+        }
+
         return $rows;
+    }
+
+    private function skinMetadataFromHtml(string $html): array
+    {
+        if (! class_exists(DOMDocument::class)) {
+            return [];
+        }
+
+        $previous = libxml_use_internal_errors(true);
+        $dom = new DOMDocument;
+        $loaded = $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html, LIBXML_NOWARNING | LIBXML_NOERROR);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        if (! $loaded) {
+            return [];
+        }
+
+        $xpath = new DOMXPath($dom);
+        $tables = $xpath->query('//table');
+        $result = [];
+
+        foreach ($tables as $table) {
+            if (! $table instanceof DOMElement) {
+                continue;
+            }
+
+            $headers = [];
+            $headerNodes = $xpath->query('.//tr[1]/*[self::th or self::td]', $table);
+            foreach ($headerNodes as $index => $cell) {
+                $headers[$index] = strtolower((string) $this->cleanDomText((string) $cell->textContent));
+            }
+
+            $hasSkinHeader = false;
+            foreach ($headers as $header) {
+                if (str_contains($header, 'skin') || str_contains($header, 'name')) {
+                    $hasSkinHeader = true;
+                    break;
+                }
+            }
+            if (! $hasSkinHeader) {
+                continue;
+            }
+
+            foreach ($xpath->query('.//tr[position()>1]', $table) as $row) {
+                $cells = $xpath->query('./td|./th', $row);
+                if ($cells->length < 2) {
+                    continue;
+                }
+
+                $values = [];
+                foreach ($cells as $index => $cell) {
+                    $values[$headers[$index] ?? ('col'.$index)] = $this->cleanDomText((string) $cell->textContent);
+                }
+
+                $name = $values['skin'] ?? $values['name'] ?? $values['legendary'] ?? reset($values);
+                $name = is_string($name) ? trim($name) : '';
+                $key = $this->normalizeSearch($name);
+                if ($key === '') {
+                    continue;
+                }
+
+                $rarity = $values['rarity'] ?? $values['tier'] ?? null;
+                $source = $values['source'] ?? $values['availability'] ?? $values['acquisition'] ?? null;
+                $update = $values['update'] ?? $values['added'] ?? null;
+                $priceRaw = $values['price'] ?? $values['cost'] ?? null;
+
+                $result[$key] = [
+                    'rarity' => $rarity,
+                    'source' => $source,
+                    'update' => $update,
+                    'price' => $this->number($priceRaw),
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    private function param(array $params, array $aliases): mixed
+    {
+        $lookup = [];
+        foreach ($params as $key => $value) {
+            $lookup[strtolower(trim((string) $key))] = $value;
+        }
+
+        foreach ($aliases as $alias) {
+            $key = strtolower(trim((string) $alias));
+            if (array_key_exists($key, $lookup)) {
+                return $lookup[$key];
+            }
+        }
+
+        return null;
     }
 
     private function patchHistory(string $wikitext): array
