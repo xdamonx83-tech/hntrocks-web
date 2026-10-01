@@ -2,6 +2,7 @@
 
 namespace App\Services\Equipment;
 
+use App\Models\EquipmentFamily;
 use App\Models\EquipmentItem;
 use App\Models\EquipmentSkin;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,7 @@ class WikiGgMediaImportService
                 'page_title' => $wiki['page_title'] ?? null,
                 'page_url' => $wiki['page_url'] ?? null,
                 'revision_id' => $wiki['revision_id'] ?? null,
+                'family' => $wiki['family'] ?? null,
                 'update' => $wiki['update'] ?? null,
                 'unlock' => $wiki['unlock'] ?? null,
                 'loaded_raw' => $wiki['loaded'] ?? null,
@@ -46,6 +48,15 @@ class WikiGgMediaImportService
             $itemUpdate = [
                 'facts' => $itemFacts,
             ];
+
+            if ($item->item_type === 'weapon' && ! empty($wiki['family'])) {
+                $familyName = trim((string) $wiki['family']);
+                $family = EquipmentFamily::updateOrCreate(
+                    ['key' => Str::slug($familyName)],
+                    ['name' => $familyName]
+                );
+                $itemUpdate['family_id'] = $family->id;
+            }
 
             if (! empty($wiki['base_image']['url'])) {
                 $cached = $this->cacheImage(
