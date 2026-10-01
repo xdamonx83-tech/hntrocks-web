@@ -155,8 +155,13 @@ class AuditArsenalWikiGg extends Command
                 }
             } catch (\Throwable $e) {
                 $counts['failed']++;
-                if (count($issues) < $show) {
-                    $issues[] = [$item->slug, 'ERROR', '—', $this->short($e->getMessage())];
+                if (count($errors) < $show) {
+                    $errors[] = [
+                        $item->slug,
+                        (string) ($item->name ?? '—'),
+                        (string) ($item->family?->name ?? '—'),
+                        $this->short($e->getMessage()),
+                    ];
                 }
             }
 
