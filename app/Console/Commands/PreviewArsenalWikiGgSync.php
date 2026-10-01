@@ -69,7 +69,7 @@ class PreviewArsenalWikiGgSync extends Command
             $this->row('Price', $item->price, $wiki['price']),
             $this->row('Slots', $item->slot_size, $wiki['slot_size']),
             $this->row('Ammo Type', $item->ammo_type, $wiki['ammo_type']),
-            $this->row('Update', $item->facts['release_pack'] ?? null, $wiki['update']),
+            $this->row('Update', data_get($item->facts, 'release_pack'), $wiki['update']),
             $this->row('Loaded', $primaryAmmo?->loaded, $wiki['loaded']),
             $this->row('Reserve', $primaryAmmo?->reserve, $wiki['reserve']),
         ];
