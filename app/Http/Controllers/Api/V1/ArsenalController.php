@@ -119,7 +119,15 @@ class ArsenalController extends Controller
             'ammo'=>$this->ammoPayload($item),
             'variants'=>$variants,
             'traits'=>$item->traits->map(fn($trait)=>['id'=>$trait->external_id,'name'=>$trait->name])->values(),
-            'skins'=>$item->skins->map(fn($skin)=>['id'=>$skin->external_id,'name'=>$skin->name,'rarity'=>$skin->rarity,'image_url'=>$skin->imageUrl()])->values(),
+            'skins'=>$item->skins->map(fn($skin)=>[
+                'id'=>$skin->external_id,
+                'name'=>$skin->name,
+                'rarity'=>$skin->rarity,
+                'image_url'=>$skin->imageUrl(),
+                'price'=>data_get($skin->facts, 'wiki_gg.price'),
+                'acquisition_source'=>data_get($skin->facts, 'wiki_gg.source'),
+                'update'=>data_get($skin->facts, 'wiki_gg.update'),
+            ])->values(),
             'details'=>[
                 'chamber'=>$item->facts['chamber'] ?? null,
                 'cylinder'=>$item->facts['cylinder'] ?? null,
