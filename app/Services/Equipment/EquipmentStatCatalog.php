@@ -9,6 +9,7 @@ class EquipmentStatCatalog
         ['damage','Damage',null,'higher','combat'], ['rateOfFire','Rate of Fire',null,'higher','combat'],
         ['magazine','Loaded',null,'higher','combat'], ['reserve','Reserve Ammo',null,'higher','combat'],
         ['cycleTime','Cycle Time','s','lower','combat'], ['muzzleVelocity','Muzzle Velocity','m/s','higher','ballistics'],
+        ['dropRange','Drop Range','m','higher','ballistics'],
         ['effectiveRange','Effective Range','m','higher','ballistics'], ['reload','Reload','s','lower','handling'],
         ['spread','Spread',null,'lower','handling'], ['sway','Sway',null,'lower','handling'],
         ['recoil','Recoil',null,'lower','handling'], ['melee','Melee Damage',null,'higher','melee'],

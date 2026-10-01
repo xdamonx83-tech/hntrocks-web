@@ -81,8 +81,9 @@ class WikiGgEquipmentSource
         ))));
 
         $imageInfo = $withMedia ? $this->resolveImageInfo($candidateFiles) : [];
+        $explicitBaseFile = $this->fileNameFromParam($params['image'] ?? $params['Image'] ?? null);
         $baseFile = $this->bestImageFile(
-            explicit: $this->fileNameFromParam($params['image'] ?? $params['Image'] ?? null),
+            explicit: $explicitBaseFile,
             candidates: $page['images'],
             subject: (string) ($this->cleanWikiText($params['Title'] ?? $item->name) ?? $item->name),
             mode: 'base',
@@ -101,6 +102,7 @@ class WikiGgEquipmentSource
             return array_merge($skin, [
                 'image_file' => $file,
                 'image' => $file ? ($imageInfo[$file] ?? null) : null,
+                'image_confidence' => ! $file ? 0 : (strcasecmp($file, (string) ($skin['image_file'] ?? '')) === 0 ? 100 : 65),
             ]);
         }, $skinRows);
 
@@ -133,6 +135,7 @@ class WikiGgEquipmentSource
             'ammo_types' => $this->ammoTypes($wikitext),
             'patch_history' => $history,
             'base_image_file' => $baseFile,
+            'base_image_confidence' => ! $baseFile ? 0 : (strcasecmp($baseFile, (string) $explicitBaseFile) === 0 ? 100 : 65),
             'base_image' => $baseFile ? ($imageInfo[$baseFile] ?? null) : null,
             'image_candidates' => count($page['images']),
             'resolution_method' => $page['resolution_method'] ?? 'direct',
@@ -771,13 +774,14 @@ class WikiGgEquipmentSource
 
         $history = [];
 
-        if (preg_match_all('/^\|\s*([^\n|]+?)\s*\|\|\s*(.+?)\s*$/mi', $section, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $patch = $this->cleanWikiText($match[1]);
-                $note = $this->cleanWikiText($match[2]);
-                if ($patch || $note) {
-                    $history[] = ['patch' => $patch, 'note' => $note];
-                }
+        foreach (preg_split('/\R/', $section) ?: [] as $line) {
+            $line = trim($line);
+            if (! str_starts_with($line, '|') || str_starts_with($line, '|-') || ! str_contains($line, '||')) continue;
+            [$patchRaw, $noteRaw] = explode('||', substr($line, 1), 2);
+            $patch = $this->cleanWikiText($patchRaw);
+            $note = $this->cleanWikiText($noteRaw);
+            if ($patch || $note) {
+                $history[] = ['patch' => $patch, 'note' => $note];
             }
         }
 

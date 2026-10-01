@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\EquipmentItem;
 use App\Services\Equipment\WikiGgEquipmentSource;
 use App\Services\Equipment\WikiGgImportService;
+use App\Services\Equipment\WikiGgMediaImportService;
 use Illuminate\Console\Command;
 
 class ImportArsenalWikiGg extends Command
@@ -15,12 +16,13 @@ class ImportArsenalWikiGg extends Command
         {--limit=0 : Limit number of items; 0 means all}
         {--dry-run : Build and display the import plan without writes}
         {--apply : Apply wiki.gg data}
-        {--media : During --apply also resolve/cache base and skin images}
-        {--show=50 : Maximum detail rows to print}';
+        {--media : Include image and skin decisions in --dry-run}
+        {--reviewed-revision= : Required wiki.gg revision ID for --apply}
+        {--show=0 : Maximum plan rows to print; 0 prints all}';
 
     protected $description = 'Plan or apply structured Arsenal data from wiki.gg.';
 
-    public function handle(WikiGgEquipmentSource $source, WikiGgImportService $import): int
+    public function handle(WikiGgEquipmentSource $source, WikiGgImportService $import, WikiGgMediaImportService $media): int
     {
         $dryRun = (bool) $this->option('dry-run');
         $apply = (bool) $this->option('apply');
@@ -45,6 +47,18 @@ class ImportArsenalWikiGg extends Command
             ->orderBy('id');
 
         $itemKey = trim((string) $this->option('item'));
+        if ($apply && $itemKey === '') {
+            $this->error('--apply requires --item. Bulk apply is disabled.');
+            return self::FAILURE;
+        }
+        if ($apply && trim((string) $this->option('reviewed-revision')) === '') {
+            $this->error('--apply requires --reviewed-revision from a prior dry-run.');
+            return self::FAILURE;
+        }
+        if ($apply && (bool) $this->option('media')) {
+            $this->error('Media apply is separate. Run arsenal:wiki-media after canonical review.');
+            return self::FAILURE;
+        }
         if ($itemKey !== '') {
             $query->where(function ($builder) use ($itemKey): void {
                 $builder->where('slug', $itemKey)->orWhere('external_id', $itemKey);
@@ -63,8 +77,8 @@ class ImportArsenalWikiGg extends Command
             return self::SUCCESS;
         }
 
-        $show = max(0, min(200, (int) $this->option('show')));
-        $withMedia = $apply && (bool) $this->option('media');
+        $show = max(0, (int) $this->option('show'));
+        $withMedia = (bool) $this->option('media');
 
         $counts = [
             'total' => $items->count(),
@@ -98,8 +112,23 @@ class ImportArsenalWikiGg extends Command
 
         foreach ($items as $index => $item) {
             try {
-                $wiki = $source->preview($item, $withMedia, $apply);
+                $wiki = $source->preview($item, $withMedia, true);
+                if ($apply && (string) ($wiki['revision_id'] ?? '') !== trim((string) $this->option('reviewed-revision'))) {
+                    throw new \RuntimeException('Wiki revision changed since review; run --dry-run again.');
+                }
                 $plan = $import->plan($item, $wiki);
+                if ($withMedia) {
+                    $mediaPlan = $media->plan($item, $wiki);
+                    $this->line($item->slug.' base image: '.$mediaPlan['base']['action'].' · '.($mediaPlan['base']['reason'] ?? 'ready'));
+                    $this->table(
+                        ['Skin', 'Match action', 'Match score', 'Image action', 'Image score', 'Reason'],
+                        array_map(fn (array $row) => [
+                            $row['name'], $row['action'], $row['match_confidence'],
+                            $row['image_action'], $row['image_confidence'],
+                            $row['reason'] ?? $row['image_reason'] ?? '—',
+                        ], $mediaPlan['skins'])
+                    );
+                }
                 $counts['resolved']++;
 
                 $fieldChanges = $plan['field_changes'];
@@ -124,31 +153,21 @@ class ImportArsenalWikiGg extends Command
                 $hasChanges = $fieldChanges !== [] || $plan['stat_changes'] !== [] || $plan['traits_changed'];
                 if ($hasChanges) $counts['items_with_changes']++;
 
-                if (count($details) < $show && $hasChanges) {
-                    $changes = [];
-
-                    foreach ($fieldChanges as $field => $change) {
-                        $changes[] = $field.': '.$this->value($change['from']).' → '.$this->value($change['to']);
-                    }
-
-                    if ($plan['stat_changes']) {
-                        $changes[] = 'stats: '.count($plan['stat_changes']);
-                    }
-
-                    if ($plan['traits_changed']) {
-                        $changes[] = 'traits';
-                    }
-
+                foreach ($plan['rows'] as $row) {
+                    if ($show > 0 && count($details) >= $show) break;
                     $details[] = [
-                        $item->slug,
-                        (string) ($wiki['page_title'] ?? '—'),
-                        implode(' · ', $changes),
+                        $row['item'], $row['field'], $this->value($row['current_value']),
+                        $this->value($row['source_value']), $row['source'],
+                        $this->value($row['revision']), $row['action'],
+                        (string) $row['confidence'], $this->value($row['blocked_reason']),
                     ];
                 }
 
                 if ($apply) {
-                    $import->apply($item, $wiki, $withMedia);
-                    $counts['applied']++;
+                    $result = $import->apply($item, $wiki, $withMedia);
+                    if ($result['fields_written'] + $result['stats_written'] > 0) {
+                        $counts['applied']++;
+                    }
                 }
             } catch (\Throwable $e) {
                 $counts['failed']++;
@@ -196,8 +215,8 @@ class ImportArsenalWikiGg extends Command
 
         if ($details) {
             $this->newLine();
-            $this->warn('First planned changes:');
-            $this->table(['Item', 'wiki.gg page', 'Changes'], $details);
+            $this->warn('Field import plan:');
+            $this->table(['Item', 'Field', 'Current', 'Source value', 'Source', 'Revision', 'Action', 'Confidence', 'Blocked reason'], $details);
         }
 
         if ($errors) {

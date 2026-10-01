@@ -93,3 +93,55 @@ It resolves HNT items to wiki page titles such as:
 The parser currently reads structured infobox values, recommended Traits, detected ammo types, skin infobox titles and Update History rows. The command compares these values with the current HNT database and performs no writes.
 
 This prototype must be verified against live wiki.gg pages before any bulk migration or source switch. Source prose/descriptions are not imported. The future production sync should keep HNT-generated descriptions, preserve manual overrides, rate-limit API requests and record source attribution/revision metadata.
+
+## Phase 2 canonical data foundation (development branch, 1 October 2026)
+
+This section describes code in `feature/arsenal-canonical-foundation-20261001`. No live migration, wiki import, media download or deployment has been performed.
+
+### Canonical data and source priority
+
+HNT tables and the existing API are the contract for React and Flutter. Huntify and wiki.gg remain independent source adapters. A source payload is normalized and stored as an immutable snapshot before an explicitly reviewed merge can update canonical item or stat values. Source prose, raw page HTML and full wikitext are excluded from snapshots. Existing translation descriptions remain under `description_is_manual`; wiki import never edits translations.
+
+Manual overrides always win. A changed existing value with no provenance for the incoming source requires review. A changed value owned by the same source can update; a missing canonical value can be created. A different source cannot replace a value merely because its page resolves. Provenance is keyed by item and field, initially for item columns and `stat.<key>`. Relations need their own reviewed policy before automated replacement. Huntify resync preserves manual and other-source item/stat values and retains wiki.gg metadata in item facts.
+
+Existing production Huntify rows predate field provenance. A non-dry-run Huntify resync of such a row is blocked until its baseline is reviewed and marked; the new sync records `__baseline` only when it creates an item itself. This conservative gate prevents a legacy/manual canonical value from being silently claimed as Huntify-owned. A dry-run remains available for review. Any later backfill of legacy provenance requires a separate approved plan.
+
+`effectiveRange` keeps its current meaning and existing values. wiki.gg `Drop Range` maps only to the new `dropRange` definition. `recoil` remains the public key for the wiki.gg Vertical Recoil field. No horizontal recoil value or unit is invented. The additive migration also inserts the three definitions already present in the code catalog: `effectDuration`, `swapSpeed` and `throwStamina`.
+
+### Snapshots, provenance and history
+
+`equipment_source_snapshots` stores a normalized JSON payload, source identity, revision, URL, content hash and fetch time. `identity_hash` deduplicates equal payloads for the same source and item. Application-level model guards reject update and delete operations. `equipment_field_provenance` records source, snapshot, revision, manual override and verification time for each canonical field. The existing `equipment_sync_changes` remains an import activity log.
+
+`equipment_patch_history` remains a game-history presentation table. wiki.gg textual update notes are not treated as numeric changes and Phase 2 does not import those notes. `EquipmentSnapshotDiffService` derives structured old/new values from two same-item, same-source snapshots; later publication into patch history requires a separate review.
+
+### Import plan and apply
+
+`php artisan arsenal:wiki-import --type=weapon --item=drilling --dry-run` emits item, field, current value, source value, source, revision, action, confidence and blocked reason. Actions are `UNCHANGED`, `CREATE`, `UPDATE`, `SKIP`, `BLOCKED_MANUAL`, `BLOCKED_AMBIGUOUS` and `REVIEW_REQUIRED`. A field marked for review is never applied. Unknown or unmigrated stats are skipped. Ammo relation values remain review-only in this foundation. Trait sets and wiki.gg history notes are observed but not written. The command disallows bulk `--apply` and requires one `--item` plus `--reviewed-revision=<ID>` from a preceding dry-run; a changed revision aborts.
+
+Canonical apply and media apply are separate commands. `--media` on `arsenal:wiki-import --dry-run` displays the media plan; `--media --apply` is rejected. Reviewed downloads use `arsenal:wiki-media --item=<slug> --apply --reviewed-revision=<ID>`.
+
+Every search-resolved page requires mapping review even when its score is above 70; scores below 70 are blocked as ambiguous. This is stricter than the earlier bulk coverage audit.
+
+No family mismatch is auto-applied. `equipment_family_aliases` supports a reviewed source alias to an existing HNT family, with a unique normalized alias per source. No aliases are seeded automatically. For example, a reviewed `Mosin-Nagant` wiki.gg alias may point to the existing `Mosin-Nagant M1891` HNT family without renaming it.
+
+Representative cases for human review from the 95 audit differences are `Bornheim Nr3` / `Bornheim No. 3`, `Caldwell Conversion` / `Conversion`, `Caldwell Pax` / `Pax`, `Mosin Nagant M1891` / `Mosin-Nagant`, `Winfield M1873` / `Ranger 73`, `Winfield 1887` / `Terminus`, `Specter Cavalry` / `1865 Carbine` on two variants, and the opaque Huntify family ID on `wood-axe` / wiki `Wood Axe`. Punctuation-only aliases and apparent renames need different evidence; the mechanism does not infer either.
+
+### Resolver and world items
+
+`fists` remains active until its product role is decided; it may be a system/base combat item rather than normal selectable equipment. `choke-cowboy-beetle`, `fire-cowboy-beetle` and `stalker-cowboy-beetle` remain active pending manual verification as standalone consumables versus beetle skins, aliases or variants. Their failed wiki resolution never deletes or deactivates canonical records.
+
+The current HNT rows classify `fists` as a zero-price, zero-slot melee weapon, supporting the base-item hypothesis but not proving intended UI behavior. The three Cowboy Beetles are active `consumable:recon` rows with prices 22, 57 and 45. wiki.gg's Choke Beetle page lists Cowboy Choke Beetle in its gallery; corresponding Fire and Stalker mapping still needs a source check. Do not collapse or remove these rows from that observation alone.
+
+`maxim-m1895`, `sledgehammer`, `wood-axe`, `shovel` and `pitchfork` retain `item_type=weapon` for API compatibility. Their wiki pages are under `World_Items/`. A reviewed subtype/category is preferred over a new top-level `world_item` type, because clients already filter the three established top-level types. No subtype has been populated automatically.
+
+The current HNT rows already have `category=World` for all five. Existing user loadouts store weapon labels as strings rather than foreign keys to `equipment_items`, while the Arsenal API and React types enumerate weapon/tool/consumable. The current `weapon:rifle` comparison group for Maxim may need an explicit world-item comparison rule later; no group is changed in this phase.
+
+### wiki.gg media policy
+
+The public API continues to expose local HNT storage paths only; original wiki URLs remain private metadata. Media dry-run reports base and skin actions with match and image confidence. Exact skin-name matching is preferred; unique high-confidence token matching can follow. Ambiguous matches and inferred image files need review. Existing local images are skipped when the source hash is unchanged; changed or unknown hashes require review before replacement. The media pipeline stores source page, file name and URL, description URL, revision, MIME, SHA1, import time and available rights metadata in namespaced image facts. No image is automatically deleted or overwritten. The apply command requires the reviewed wiki revision.
+
+### Controlled test set and bulk prerequisites
+
+The proposed maximum-five server test set is `drilling` (base weapon), `drilling-hatchet` (variant), `throwing-spear` (tool), `frag-bomb` (consumable) and `1865-carbine` (skin-rich weapon). All five resolved directly in the audit without a family mismatch. The Drilling family has a base weapon, variant and at least three existing skins, making it suitable for a separate media dry-run. Each write must follow a record-level backup, revision-pinned plan review, single-item apply, DB verification and API verification.
+
+A bulk import requires reviewed family aliases, a documented provenance policy for relations, verified image matching and rights metadata, successful small-item tests, an approved DB backup and an explicit deployment decision. The new migration is required before any Phase 2 import command can write on the server.

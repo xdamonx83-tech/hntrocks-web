@@ -12,7 +12,8 @@ class SyncArsenalWikiGgMedia extends Command
     protected $signature = 'arsenal:wiki-media
         {--item= : HNT item slug or external ID}
         {--dry-run : Preview wiki.gg media and skin metadata without writes}
-        {--apply : Cache media and persist skin metadata for this one item}';
+        {--apply : Cache media and persist skin metadata for this one item}
+        {--reviewed-revision= : Required wiki.gg revision ID for --apply}';
 
     protected $description = 'Preview or import wiki.gg Arsenal images and skin metadata for one HNT item.';
 
@@ -62,10 +63,13 @@ class SyncArsenalWikiGgMedia extends Command
         $this->line('Base image: '.($wiki['base_image_file'] ?? 'NOT FOUND'));
         $this->line('Base URL: '.($wiki['base_image']['url'] ?? '—'));
         $this->line('Base license metadata: '.($wiki['base_image']['license'] ?? '—'));
+        $mediaPlan = $media->plan($item, $wiki);
+        $this->line('Base action: '.$mediaPlan['base']['action'].' · '.($mediaPlan['base']['reason'] ?? 'ready'));
         $this->newLine();
 
         $skinRows = [];
-        foreach ($wiki['skins'] as $skin) {
+        foreach ($wiki['skins'] as $index => $skin) {
+            $decision = $mediaPlan['skins'][$index] ?? null;
             $skinRows[] = [
                 $skin['name'] ?? '—',
                 $skin['rarity'] ?? '—',
@@ -74,11 +78,16 @@ class SyncArsenalWikiGgMedia extends Command
                 $skin['update'] ?? '—',
                 $skin['image_file'] ?? 'NOT FOUND',
                 ! empty($skin['image']['url']) ? 'YES' : 'NO',
+                $decision['match_confidence'] ?? 0,
+                $decision['action'] ?? 'SKIP',
+                $decision['image_confidence'] ?? 0,
+                $decision['image_action'] ?? 'SKIP',
+                $decision['reason'] ?? $decision['image_reason'] ?? '—',
             ];
         }
 
         if ($skinRows) {
-            $this->table(['Skin', 'Rarity', 'Price', 'Source', 'Update', 'Image file', 'Resolved'], $skinRows);
+            $this->table(['Skin', 'Rarity', 'Price', 'Source', 'Update', 'Image file', 'Resolved', 'Match score', 'Match action', 'Image score', 'Image action', 'Reason'], $skinRows);
         } else {
             $this->warn('No skin infoboxes detected.');
         }
@@ -91,6 +100,12 @@ class SyncArsenalWikiGgMedia extends Command
             $this->info('READ-ONLY: no files or database rows changed.');
 
             return self::SUCCESS;
+        }
+
+        if (trim((string) $this->option('reviewed-revision')) === '' ||
+            trim((string) $this->option('reviewed-revision')) !== (string) ($wiki['revision_id'] ?? '')) {
+            $this->error('--apply requires the exact revision from the reviewed dry-run.');
+            return self::FAILURE;
         }
 
         try {

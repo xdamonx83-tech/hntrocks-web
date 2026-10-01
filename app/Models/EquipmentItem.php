@@ -21,6 +21,8 @@ class EquipmentItem extends Model
     public function ammo(): HasMany { return $this->hasMany(EquipmentAmmo::class); }
     public function skins(): HasMany { return $this->hasMany(EquipmentSkin::class); }
     public function patchHistory(): HasMany { return $this->hasMany(EquipmentPatchHistory::class); }
+    public function provenance(): HasMany { return $this->hasMany(EquipmentFieldProvenance::class); }
+    public function sourceSnapshots(): HasMany { return $this->hasMany(EquipmentSourceSnapshot::class); }
     public function traits(): BelongsToMany { return $this->belongsToMany(EquipmentTrait::class, 'equipment_item_traits'); }
 
     public function imageUrl(): ?string

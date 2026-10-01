@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Feature;
 
-use App\Models\{EquipmentItem,EquipmentSyncChange,EquipmentSyncRun};
+use App\Models\{EquipmentItem,EquipmentSourceSnapshot,EquipmentSyncChange,EquipmentSyncRun};
 use App\Services\Equipment\{EquipmentSourceInterface,EquipmentSyncService};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +13,10 @@ class ArsenalFoundationTest extends TestCase
     protected function migrateFreshUsing(): array
     {
         // An unrelated legacy migration drops a foreign key by name, which SQLite cannot do.
-        return ['--path'=>['database/migrations/2026_09_30_120000_create_equipment_tables.php']];
+        return ['--path'=>[
+            'database/migrations/2026_09_30_120000_create_equipment_tables.php',
+            'database/migrations/2026_10_01_200000_create_equipment_canonical_foundation.php',
+        ]];
     }
 
     private function fixture(array $rows): EquipmentSourceInterface
@@ -60,6 +63,7 @@ class ArsenalFoundationTest extends TestCase
         $slug = EquipmentItem::where('external_id','carbine-1')->value('slug');
         $this->assertSame(9,$this->sync($this->rows())['unchanged']);
         $this->assertSame(9,EquipmentItem::count());
+        $this->assertSame(9,EquipmentSourceSnapshot::count());
         $this->assertSame($slug,EquipmentItem::where('external_id','carbine-1')->value('slug'));
     }
 

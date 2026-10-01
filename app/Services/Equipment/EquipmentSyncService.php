@@ -1,15 +1,21 @@
 <?php
 namespace App\Services\Equipment;
 
-use App\Models\{EquipmentFamily,EquipmentItem,EquipmentSource,EquipmentStatDefinition,EquipmentSyncChange,EquipmentSyncRun,EquipmentTrait};
+use App\Models\{EquipmentFamily,EquipmentFieldProvenance,EquipmentItem,EquipmentSource,EquipmentSourceSnapshot,EquipmentStatDefinition,EquipmentSyncChange,EquipmentSyncRun,EquipmentTrait};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 class EquipmentSyncService
 {
-    public function __construct(private EquipmentStatCatalog $catalog, private EquipmentDescriptionGenerator $descriptions) {}
+    public function __construct(
+        private EquipmentStatCatalog $catalog,
+        private EquipmentDescriptionGenerator $descriptions,
+        private EquipmentSourceSnapshotService $snapshots,
+        private EquipmentMergePolicy $policy,
+    ) {}
 
     public function sync(EquipmentSourceInterface $adapter, bool $dryRun = false, ?string $item = null): array
     {
@@ -35,17 +41,22 @@ class EquipmentSyncService
                     $facts = $this->facts($raw);
                     $hash = hash('sha256', json_encode($facts, JSON_THROW_ON_ERROR));
                     $existing = $source ? EquipmentItem::where('source_id',$source->id)->where('external_id',$id)->first() : null;
+                    if (! $dryRun && $existing &&
+                        ! EquipmentFieldProvenance::query()->where('equipment_item_id',$existing->id)
+                            ->where('field_key','__baseline')->where('source_key',$adapter->key())->exists()) {
+                        throw new RuntimeException('Legacy item has no reviewed source baseline; canonical sync is blocked.');
+                    }
                     $kind = ! $existing ? 'new' : ($existing->source_hash !== $hash || $existing->source_status !== 'active' ? 'changed' : 'unchanged');
                     $counts[$kind]++;
                     if ($dryRun) continue;
-                    DB::transaction(function () use ($raw,$facts,$hash,$existing,$source,$run,$id,$kind) {
+                    DB::transaction(function () use ($raw,$facts,$hash,$existing,$source,$run,$id,$kind,$adapter) {
                         $familyId = null;
                         if (! empty($facts['family'])) {
                             $family = EquipmentFamily::firstOrCreate(['key'=>$facts['family']], ['name'=>Str::headline($facts['family'])]);
                             $familyId = $family->id;
                         }
                         $slug = $existing?->slug ?? $this->uniqueSlug((string)$raw['name'], $id);
-                        $item = EquipmentItem::updateOrCreate(['source_id'=>$source->id,'external_id'=>$id], [
+                        $attributes = [
                             'slug'=>$slug,'name'=>$facts['name'],'item_type'=>$facts['item_type'],
                             'category'=>$facts['category'],'equipment_class'=>$facts['equipment_class'],
                             'comparison_group'=>$facts['comparison_group'],'family_id'=>$familyId,
@@ -53,14 +64,35 @@ class EquipmentSyncService
                             'unlock_rank'=>$facts['unlock_rank'],
                             'original_asset_url'=>$facts['icon_source_url'],
                             'source_status'=>'active','source_url'=>$facts['source_url'],'source_hash'=>$hash,
-                            'last_synced_at'=>now(),'facts'=>$facts,
-                        ]);
+                            'last_synced_at'=>now(),'facts'=>array_replace($existing?->facts ?? [], $facts),
+                        ];
+                        $protected = [];
+                        if ($existing) {
+                            $protected = EquipmentFieldProvenance::query()->where('equipment_item_id',$existing->id)
+                                ->get()->filter(fn ($row) => $this->policy->isProtected($row,$adapter->key()))
+                                ->pluck('field_key')->all();
+                            foreach ($protected as $field) {
+                                $column = $field === 'family' ? 'family_id' : $field;
+                                if (array_key_exists($column,$attributes)) $attributes[$column] = $existing->getAttribute($column);
+                            }
+                            if ($existing->local_asset_path) {
+                                $attributes['original_asset_url'] = $existing->original_asset_url;
+                            }
+                        }
+                        $item = EquipmentItem::updateOrCreate(['source_id'=>$source->id,'external_id'=>$id], $attributes);
                         foreach (['en','de'] as $locale) {
                             $translation = $item->translations()->firstOrNew(['locale'=>$locale]);
-                            if (! $translation->description_is_manual) $translation->description = $this->descriptions->generate($raw,$locale);
-                            $translation->name = $facts['name']; $translation->save();
+                            if (! $translation->description_is_manual && ! in_array('description.'.$locale,$protected,true)) {
+                                $translation->description = $this->descriptions->generate($raw,$locale);
+                            }
+                            if (! in_array('name',$protected,true) && ! in_array('name.'.$locale,$protected,true)) {
+                                $translation->name = $facts['name'];
+                            }
+                            $translation->save();
                         }
-                        $this->syncRelations($item,$raw);
+                        $this->syncRelations($item,$raw,$adapter->key());
+                        $snapshot = $this->snapshots->recordHuntify($item,$source,$facts);
+                        $this->recordProvenance($item,$snapshot,$facts,$protected);
                         if ($kind !== 'unchanged') {
                             $before = $existing?->facts ?? [];
                             foreach ($facts as $field => $value) {
@@ -160,45 +192,97 @@ class EquipmentSyncService
         return $base.'-'.substr(hash('sha256',$externalId),0,8);
     }
 
-    private function syncRelations(EquipmentItem $item, array $raw): void
+    private function syncRelations(EquipmentItem $item, array $raw, string $sourceKey): void
     {
         $values = $this->catalog->values($raw);
         $ids = EquipmentStatDefinition::whereIn('key',array_keys($values))->pluck('id','key');
-        foreach ($values as $key=>$value) if (isset($ids[$key])) $item->stats()->updateOrCreate(['stat_definition_id'=>$ids[$key]],['value'=>$value]);
-        $item->stats()->whereNotIn('stat_definition_id',$ids->values())->delete();
-        $ammoKeys = [];
+        $protectedFields = EquipmentFieldProvenance::query()->where('equipment_item_id',$item->id)
+            ->get()->filter(fn ($row) => $this->policy->isProtected($row,$sourceKey))->pluck('field_key')->all();
+        $protected = array_map(fn ($key)=>substr($key,5),array_values(array_filter(
+            $protectedFields,fn ($key)=>str_starts_with($key,'stat.')
+        )));
+        $protectedColumns = array_values(array_intersect($protectedFields,['price','slot_size']));
+        if (in_array('price',$protectedColumns,true)) $protected[] = 'price';
+        if (in_array('slot_size',$protectedColumns,true)) $protected[] = 'slotSize';
+        foreach ($values as $key=>$value) if (isset($ids[$key]) && ! in_array($key,$protected,true)) {
+            $item->stats()->updateOrCreate(['stat_definition_id'=>$ids[$key]],['value'=>$value]);
+        }
+        // Source omissions need a reviewed retirement policy; they never delete canonical stats here.
         foreach ($this->ammoFacts($raw['ammo'] ?? []) as $index=>$data) {
             $key = Str::slug(($data['name'] ?? 'basic').'-'.($data['ammo_type'] ?? 'unknown').'-'.$index);
-            $ammoKeys[] = $key;
-            $record = $item->ammo()->updateOrCreate(['key'=>$key],[
+            $record = $item->ammo()->firstOrNew(['key'=>$key]);
+            $ammoAttributes = [
                 'name'=>$data['name'],'ammo_type'=>$data['ammo_type'],'damage'=>$data['damage'],
                 'velocity'=>$data['velocity'],'loaded'=>$data['loaded'],'reserve'=>$data['reserve'],
-                'facts'=>['max_distance'=>$data['max_distance'],'stats'=>$data['stats'],
-                    'damage_types'=>$data['damage_types'],'hits'=>$data['hits']],
-            ]);
-            $record->falloffPoints()->delete();
+                'facts'=>array_replace($record->facts ?? [],[
+                    'max_distance'=>$data['max_distance'],'stats'=>$data['stats'],
+                    'damage_types'=>$data['damage_types'],'hits'=>$data['hits']]),
+            ];
+            foreach ($ammoAttributes as $field=>$value) {
+                if ($record->exists && in_array('ammo.'.$key.'.'.$field,$protectedFields,true)) continue;
+                $record->setAttribute($field,$value);
+            }
+            $record->save();
             foreach ($data['envelope'] as $point) if (count($point) >= 2 && is_numeric($point[0]) && is_numeric($point[1])) {
-                $record->falloffPoints()->create(['distance'=>$point[0],'damage'=>($data['damage'] ?? 0)*$point[1]]);
+                if (in_array('ammo.'.$key.'.damage',$protectedFields,true) ||
+                    in_array('ammo.'.$key.'.falloff.'.(string)$point[0],$protectedFields,true)) continue;
+                $record->falloffPoints()->updateOrCreate(
+                    ['distance'=>$point[0]],
+                    ['damage'=>($data['damage'] ?? 0)*$point[1]]
+                );
             }
         }
-        $item->ammo()->whereNotIn('key',$ammoKeys)->delete();
         $traitIds = [];
         foreach ($raw['recommendedTraits'] ?? [] as $trait) if (! empty($trait['id'])) {
-            $traitIds[] = EquipmentTrait::updateOrCreate(['external_id'=>$trait['id']],['name'=>$trait['name'] ?? $trait['id']])->id;
+            $traitIds[] = EquipmentTrait::firstOrCreate(['external_id'=>$trait['id']],['name'=>$trait['name'] ?? $trait['id']])->id;
         }
-        $item->traits()->sync($traitIds);
-        $skinIds = [];
+        $item->traits()->syncWithoutDetaching($traitIds);
         $skins = collect($raw['_skins'] ?? [])->keyBy('id');
         foreach ($raw['skinIds'] ?? [] as $skinId) {
-            $skinIds[] = $skinId;
             $skin = $skins->get($skinId,[]);
-            $item->skins()->updateOrCreate(['external_id'=>$skinId],[
-                'name'=>$skin['name'] ?? null,'rarity'=>$skin['rarity'] ?? null,
-                'source_url'=>'https://wiki.huntify.win/Hunt/modules/Skins/data.js',
-                'original_asset_url'=>$this->assetUrl($skin['icon'] ?? null),
-            ]);
+            $record = $item->skins()->firstOrNew(['external_id'=>$skinId]);
+            if (! $record->local_asset_path && ! data_get($record->facts, 'wiki_gg')) {
+                $record->name = $skin['name'] ?? $record->name;
+                $record->rarity = $skin['rarity'] ?? $record->rarity;
+                $record->original_asset_url = $this->assetUrl($skin['icon'] ?? null);
+            }
+            $record->source_url = $record->source_url ?: 'https://wiki.huntify.win/Hunt/modules/Skins/data.js';
+            $record->save();
         }
-        $item->skins()->whereNotIn('external_id',$skinIds)->delete();
+    }
+
+    private function recordProvenance(EquipmentItem $item, EquipmentSourceSnapshot $snapshot, array $facts, array $protected): void
+    {
+        EquipmentFieldProvenance::query()->firstOrCreate(
+            ['equipment_item_id'=>$item->id,'field_key'=>'__baseline'],
+            ['source_key'=>$snapshot->source_key,'source_snapshot_id'=>$snapshot->id,
+                'is_manual_override'=>false,'verified_at'=>now()]
+        );
+        if (in_array('price',$protected,true)) $protected[] = 'stat.price';
+        if (in_array('slot_size',$protected,true)) $protected[] = 'stat.slotSize';
+        $fields = [];
+        foreach (['name','item_type','category','equipment_class','comparison_group','family',
+            'ammo_type','slot_size','price','unlock_rank'] as $key) {
+            if (($facts[$key] ?? null) !== null) $fields[] = $key;
+        }
+        foreach ($facts['stats'] ?? [] as $key=>$value) {
+            if (is_numeric($value)) $fields[] = 'stat.'.$key;
+        }
+        foreach ($fields as $field) {
+            if (in_array($field,$protected,true)) continue;
+            $existing = EquipmentFieldProvenance::query()->where('equipment_item_id',$item->id)
+                ->where('field_key',$field)->first();
+            if ($existing && $this->policy->isProtected($existing,$snapshot->source_key)) continue;
+            EquipmentFieldProvenance::query()->updateOrCreate(
+                ['equipment_item_id'=>$item->id,'field_key'=>$field],
+                [
+                    'source_key'=>$snapshot->source_key,
+                    'source_snapshot_id'=>$snapshot->id,
+                    'source_revision_id'=>null,
+                    'is_manual_override'=>false,
+                ]
+            );
+        }
     }
 
     private function change(EquipmentSyncRun $run, ?EquipmentItem $item, string $id, string $type, string $field, mixed $old, mixed $new): void

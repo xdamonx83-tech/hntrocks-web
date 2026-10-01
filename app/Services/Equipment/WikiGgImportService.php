@@ -2,23 +2,21 @@
 
 namespace App\Services\Equipment;
 
-use App\Models\EquipmentFamily;
+use App\Models\EquipmentFieldProvenance;
 use App\Models\EquipmentItem;
-use App\Models\EquipmentPatchHistory;
 use App\Models\EquipmentStatDefinition;
-use App\Models\EquipmentTrait;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class WikiGgImportService
 {
     public function __construct(
-        private EquipmentStatCatalog $catalog,
-        private WikiGgMediaImportService $media,
+        private EquipmentMergePolicy $policy,
+        private EquipmentSourceSnapshotService $snapshots,
     ) {}
 
     public function plan(EquipmentItem $item, array $wiki): array
     {
+        $item->loadMissing(['family', 'stats.definition', 'ammo', 'traits', 'provenance']);
         $currentStats = $item->stats
             ->filter(fn ($stat) => $stat->definition?->key)
             ->mapWithKeys(fn ($stat) => [$stat->definition->key => (float) $stat->value])
@@ -58,6 +56,79 @@ class WikiGgImportService
             $this->fieldChange($fieldChanges, 'reserve', $currentBaseAmmo->reserve, $reserve);
         }
 
+        $confidence = (int) ($wiki['resolution_score'] ?? 100);
+        $revision = isset($wiki['revision_id']) ? (string) $wiki['revision_id'] : null;
+        $provenance = $item->provenance->keyBy('field_key');
+        $definitions = EquipmentStatDefinition::query()->pluck('id', 'key');
+        $rows = [];
+        foreach ([
+            'family' => [$currentFamily ?: null, $wikiFamily ?: null],
+            'price' => [$item->price, $wiki['price'] ?? null],
+            'slot_size' => [$item->slot_size, $wiki['slot_size'] ?? null],
+            'ammo_type' => [$item->ammo_type, $wiki['ammo_type'] ?? null],
+        ] as $field => [$current, $source]) {
+            $rows[] = $this->planRow($item, $field, $current, $source, $confidence, $revision, $provenance->get($field));
+        }
+        foreach ($wikiStats as $key => $value) {
+            $field = 'stat.'.$key;
+            $row = $this->planRow($item, $field, $currentStats[$key] ?? null, $value, $confidence, $revision, $provenance->get($field));
+            if (! isset($definitions[$key])) {
+                $row['action'] = 'SKIP';
+                $row['blocked_reason'] = 'Unknown or not migrated stat definition';
+            }
+            $rows[] = $row;
+        }
+        foreach ((array) ($wiki['stats'] ?? []) as $key => $value) {
+            if (array_key_exists($key, $wikiStats)) continue;
+            $rows[] = [
+                'item' => $item->slug,
+                'field' => 'source_stat.'.$key,
+                'current_value' => null,
+                'source_value' => $value,
+                'source' => 'wiki_gg',
+                'revision' => $revision,
+                'action' => 'SKIP',
+                'confidence' => $confidence,
+                'blocked_reason' => 'No approved canonical stat mapping',
+            ];
+        }
+        foreach ([
+            'ammo.loaded' => [$currentBaseAmmo?->loaded, $loaded],
+            'ammo.reserve' => [$currentBaseAmmo?->reserve, $reserve],
+        ] as $field => [$current, $source]) {
+            $row = $this->planRow($item, $field, $current, $source, $confidence, $revision, $provenance->get($field));
+            if (in_array($row['action'], ['CREATE', 'UPDATE'], true)) {
+                $row['action'] = 'REVIEW_REQUIRED';
+                $row['blocked_reason'] = 'Ammo relation import needs explicit review';
+            }
+            $rows[] = $row;
+        }
+        foreach (['price' => 'stat.price', 'slot_size' => 'stat.slotSize'] as $column => $statField) {
+            $columnIndex = array_search($column, array_column($rows, 'field'), true);
+            $statIndex = array_search($statField, array_column($rows, 'field'), true);
+            if ($columnIndex === false || $statIndex === false) continue;
+            $columnAction = $rows[$columnIndex]['action'];
+            $statAction = $rows[$statIndex]['action'];
+            if (in_array($columnAction, ['REVIEW_REQUIRED', 'BLOCKED_MANUAL', 'BLOCKED_AMBIGUOUS'], true) &&
+                in_array($statAction, ['CREATE', 'UPDATE'], true)) {
+                $rows[$statIndex]['action'] = 'REVIEW_REQUIRED';
+                $rows[$statIndex]['blocked_reason'] = 'Canonical item field is blocked';
+            }
+            if (in_array($statAction, ['REVIEW_REQUIRED', 'BLOCKED_MANUAL', 'BLOCKED_AMBIGUOUS'], true) &&
+                in_array($columnAction, ['CREATE', 'UPDATE'], true)) {
+                $rows[$columnIndex]['action'] = 'REVIEW_REQUIRED';
+                $rows[$columnIndex]['blocked_reason'] = 'Canonical stat counterpart is blocked';
+            }
+        }
+        if (($wiki['resolution_method'] ?? 'direct') !== 'direct') {
+            foreach ($rows as &$row) {
+                if (! in_array($row['action'], ['CREATE', 'UPDATE'], true)) continue;
+                $row['action'] = 'REVIEW_REQUIRED';
+                $row['blocked_reason'] = 'Search-resolved page needs an explicit mapping review';
+            }
+            unset($row);
+        }
+
         return [
             'slug' => $item->slug,
             'name' => $item->name,
@@ -65,6 +136,10 @@ class WikiGgImportService
             'page_url' => $wiki['page_url'] ?? null,
             'resolution_method' => $wiki['resolution_method'] ?? 'direct',
             'resolution_score' => $wiki['resolution_score'] ?? 100,
+            'source' => 'wiki_gg',
+            'revision' => $revision,
+            'payload_hash' => $this->snapshots->hash($this->snapshots->normalizeWiki($wiki)),
+            'rows' => $rows,
             'field_changes' => $fieldChanges,
             'stat_changes' => $statChanges,
             'traits_changed' => $wikiTraits !== [] && $wikiTraits !== $currentTraits,
@@ -77,134 +152,81 @@ class WikiGgImportService
         ];
     }
 
-    public function apply(EquipmentItem $item, array $wiki, bool $withMedia = true): array
+    public function apply(EquipmentItem $item, array $wiki, bool $withMedia = false): array
     {
-        $this->catalog->ensure();
-
+        if ($withMedia) {
+            throw new \InvalidArgumentException('Apply media separately after canonical import review.');
+        }
         $result = DB::transaction(function () use ($item, $wiki): array {
-            $item->loadMissing(['family', 'stats.definition', 'ammo', 'traits']);
+            $item->refresh();
+            $plan = $this->plan($item, $wiki);
+            $snapshot = $this->snapshots->recordWiki($item, $wiki);
+            $definitions = EquipmentStatDefinition::query()->pluck('id', 'key');
+            $fieldsWritten = 0;
+            $statsWritten = 0;
 
-            $updates = [];
-            if (! empty($wiki['family']) && $item->item_type === 'weapon') {
-                $familyName = trim((string) $wiki['family']);
-                $family = EquipmentFamily::updateOrCreate(
-                    ['key' => Str::slug($familyName)],
-                    ['name' => $familyName],
-                );
-                $updates['family_id'] = $family->id;
-            }
-
-            foreach (['price' => 'price', 'slot_size' => 'slot_size', 'ammo_type' => 'ammo_type'] as $wikiKey => $column) {
-                if (($wiki[$wikiKey] ?? null) !== null && $wiki[$wikiKey] !== '') {
-                    $updates[$column] = $wiki[$wikiKey];
-                }
-            }
-
-            $facts = is_array($item->facts) ? $item->facts : [];
-            $facts['wiki_gg'] = array_merge($facts['wiki_gg'] ?? [], [
-                'page_title' => $wiki['page_title'] ?? null,
-                'page_url' => $wiki['page_url'] ?? null,
-                'revision_id' => $wiki['revision_id'] ?? null,
-                'revision_timestamp' => $wiki['revision_timestamp'] ?? null,
-                'family' => $wiki['family'] ?? null,
-                'canonical_name' => $wiki['name'] ?? null,
-                'update' => $wiki['update'] ?? null,
-                'unlock' => $wiki['unlock'] ?? null,
-                'loaded_raw' => $wiki['loaded'] ?? null,
-                'reserve_raw' => $wiki['reserve'] ?? null,
-                'rarity' => $wiki['rarity'] ?? null,
-                'quantity' => $wiki['quantity'] ?? null,
-                'ammo_types' => array_values($wiki['ammo_types'] ?? []),
-                'resolution_method' => $wiki['resolution_method'] ?? 'direct',
-                'resolution_score' => $wiki['resolution_score'] ?? 100,
-            ]);
-            $updates['facts'] = $facts;
-            $updates['last_synced_at'] = now();
-
-            $item->forceFill($updates)->save();
-
-            $definitions = EquipmentStatDefinition::query()
-                ->whereIn('key', array_keys($this->mappedStats($wiki)))
-                ->pluck('id', 'key');
-
-            $statWrites = 0;
-            foreach ($this->mappedStats($wiki) as $key => $value) {
-                if (! is_numeric($value) || ! isset($definitions[$key])) {
+            foreach ($plan['rows'] as $row) {
+                if (! in_array($row['action'], ['CREATE', 'UPDATE'], true)) continue;
+                $field = $row['field'];
+                if (str_starts_with($field, 'stat.')) {
+                    $key = substr($field, 5);
+                    if (! isset($definitions[$key])) continue;
+                    $item->stats()->updateOrCreate(
+                        ['stat_definition_id' => $definitions[$key]],
+                        ['value' => $row['source_value']]
+                    );
+                    $statsWritten++;
+                } elseif (in_array($field, ['price', 'slot_size', 'ammo_type'], true)) {
+                    $item->setAttribute($field, $row['source_value']);
+                    $fieldsWritten++;
+                } else {
                     continue;
                 }
-                $item->stats()->updateOrCreate(
-                    ['stat_definition_id' => $definitions[$key]],
-                    ['value' => $value],
+
+                EquipmentFieldProvenance::query()->updateOrCreate(
+                    ['equipment_item_id' => $item->id, 'field_key' => $field],
+                    [
+                        'source_key' => 'wiki_gg',
+                        'source_snapshot_id' => $snapshot->id,
+                        'source_revision_id' => $plan['revision'],
+                        'is_manual_override' => false,
+                        'verified_at' => null,
+                    ]
                 );
-                $statWrites++;
             }
 
-            $ammo = $item->ammo()->orderBy('id')->first();
-            if ($ammo) {
-                $ammoUpdates = [];
-                $loaded = $this->loadedNumber($wiki['loaded'] ?? null);
-                $reserve = $this->integerOrNull($wiki['reserve'] ?? null);
-                if ($loaded !== null) $ammoUpdates['loaded'] = $loaded;
-                if ($reserve !== null) $ammoUpdates['reserve'] = $reserve;
-                if (is_numeric($wiki['stats']['damage'] ?? null)) $ammoUpdates['damage'] = $wiki['stats']['damage'];
-                if (is_numeric($wiki['stats']['muzzleVelocity'] ?? null)) $ammoUpdates['velocity'] = $wiki['stats']['muzzleVelocity'];
-                if ($ammoUpdates) $ammo->update($ammoUpdates);
-            }
-
-            $traitNames = collect($wiki['recommended_traits'] ?? [])
-                ->filter()
-                ->map(fn ($name) => trim((string) $name))
-                ->filter()
-                ->unique()
-                ->values();
-
-            if ($traitNames->isNotEmpty()) {
-                $traitIds = [];
-                foreach ($traitNames as $name) {
-                    $trait = EquipmentTrait::query()->where('name', $name)->first();
-                    if (! $trait) {
-                        $trait = EquipmentTrait::create([
-                            'external_id' => 'wikigg-'.Str::slug($name),
-                            'name' => $name,
-                        ]);
-                    }
-                    $traitIds[] = $trait->id;
-                }
-                $item->traits()->sync($traitIds);
-            }
-
-            if (! empty($wiki['patch_history'])) {
-                EquipmentPatchHistory::query()
-                    ->where('equipment_item_id', $item->id)
-                    ->where('source_url', $wiki['page_url'])
-                    ->delete();
-
-                foreach ($wiki['patch_history'] as $row) {
-                    $patch = trim((string) ($row['patch'] ?? ''));
-                    $note = trim((string) ($row['note'] ?? ''));
-                    if ($patch === '' && $note === '') continue;
-
-                    EquipmentPatchHistory::create([
-                        'equipment_item_id' => $item->id,
-                        'patch' => $patch !== '' ? $patch : 'wiki.gg',
-                        'source_url' => $wiki['page_url'],
-                        'note' => $note !== '' ? $note : null,
-                    ]);
-                }
+            if ($fieldsWritten || $statsWritten) {
+                $item->last_synced_at = now();
+                $item->save();
             }
 
             return [
-                'stats_written' => $statWrites,
-                'traits_written' => $traitNames->count(),
-                'patch_rows_written' => count($wiki['patch_history'] ?? []),
+                'snapshot_id' => $snapshot->id,
+                'fields_written' => $fieldsWritten,
+                'stats_written' => $statsWritten,
+                'review_required' => count(array_filter($plan['rows'], fn (array $row) => $row['action'] === 'REVIEW_REQUIRED')),
+                'traits_written' => 0,
+                'patch_rows_written' => 0,
             ];
         });
 
-        if ($withMedia) {
-            $result['media'] = $this->media->apply($item->fresh(['family', 'skins']), $wiki);
-        }
-
         return $result;
+    }
+
+    private function planRow(EquipmentItem $item, string $field, mixed $current, mixed $source, int $confidence, ?string $revision, ?EquipmentFieldProvenance $provenance): array
+    {
+        $decision = $this->policy->decide($item, $field, $current, $source, 'wiki_gg', $confidence, $provenance);
+        return [
+            'item' => $item->slug,
+            'field' => $field,
+            'current_value' => $current,
+            'source_value' => $source,
+            'source' => 'wiki_gg',
+            'revision' => $revision,
+            'action' => $decision['action'],
+            'confidence' => $confidence,
+            'blocked_reason' => $decision['reason'],
+        ];
     }
 
     private function mappedStats(array $wiki): array
@@ -213,12 +235,12 @@ class WikiGgImportService
 
         return array_filter([
             'damage' => $stats['damage'] ?? null,
-            'effectiveRange' => $stats['dropRange'] ?? null,
+            'dropRange' => $stats['dropRange'] ?? null,
             'rateOfFire' => $stats['rateOfFire'] ?? null,
             'cycleTime' => $stats['cycleTime'] ?? null,
             'spread' => $stats['spread'] ?? null,
             'sway' => $stats['sway'] ?? null,
-            'recoil' => $stats['recoil'] ?? null,
+            'recoil' => $stats['recoil'] ?? null, // wiki.gg Vertical Recoil; public API key stays stable.
             'reload' => $stats['reload'] ?? null,
             'muzzleVelocity' => $stats['muzzleVelocity'] ?? null,
             'swapSpeed' => $stats['swapSpeed'] ?? null,
@@ -233,8 +255,6 @@ class WikiGgImportService
             'effectDuration' => $stats['effectDuration'] ?? null,
             'price' => $wiki['price'] ?? null,
             'slotSize' => $wiki['slot_size'] ?? null,
-            'magazine' => $this->loadedNumber($wiki['loaded'] ?? null),
-            'reserve' => $this->integerOrNull($wiki['reserve'] ?? null),
         ], fn ($value) => is_numeric($value));
     }
 

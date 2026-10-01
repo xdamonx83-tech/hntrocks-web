@@ -13,6 +13,14 @@ class ArsenalAssetImportTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function migrateFreshUsing(): array
+    {
+        return ['--path'=>[
+            'database/migrations/2026_09_30_120000_create_equipment_tables.php',
+            'database/migrations/2026_10_01_200000_create_equipment_canonical_foundation.php',
+        ]];
+    }
+
     public function test_fan_kit_import_matches_original_asset_filename_and_publishes_only_local_asset(): void
     {
         Storage::fake('public');
