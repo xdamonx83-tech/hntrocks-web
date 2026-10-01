@@ -130,6 +130,8 @@ class WikiGgEquipmentSource
             'base_image_file' => $baseFile,
             'base_image' => $baseFile ? ($imageInfo[$baseFile] ?? null) : null,
             'image_candidates' => count($page['images']),
+            'resolution_method' => $page['resolution_method'] ?? 'direct',
+            'resolution_score' => $page['resolution_score'] ?? 100,
         ];
     }
 
@@ -165,13 +167,156 @@ class WikiGgEquipmentSource
 
         foreach ($candidates as $candidate) {
             try {
-                return [$candidate, $this->fetchPage($candidate, $withRevision)];
+                $page = $this->fetchPage($candidate, $withRevision);
+                if (! $this->pageMatchesItemType($page['wikitext'], $item->item_type)) {
+                    continue;
+                }
+
+                $page['resolution_method'] = 'direct';
+                $page['resolution_score'] = 100;
+
+                return [$candidate, $page];
             } catch (RuntimeException $e) {
                 $lastError = $e;
             }
         }
 
+        if ($prefix !== null) {
+            foreach ($this->searchWikiCandidates($item, $prefix) as $match) {
+                try {
+                    $page = $this->fetchPage($match['title'], $withRevision);
+                    if (! $this->pageMatchesItemType($page['wikitext'], $item->item_type)) {
+                        continue;
+                    }
+
+                    $page['resolution_method'] = 'search';
+                    $page['resolution_score'] = $match['score'];
+
+                    return [$match['title'], $page];
+                } catch (RuntimeException $e) {
+                    $lastError = $e;
+                }
+            }
+        }
+
         throw $lastError ?? new RuntimeException('No matching wiki.gg page could be resolved for '.$item->name);
+    }
+
+    private function searchWikiCandidates(EquipmentItem $item, string $prefix): array
+    {
+        $queries = array_values(array_unique(array_filter([
+            trim((string) $item->name),
+            trim((string) ($item->family?->name ?? '')).' '.trim((string) $item->name),
+            str_replace(['No. ', 'Nr. ', 'Nr '], ['No ', 'No ', 'No '], trim((string) $item->name)),
+        ])));
+
+        $matches = [];
+
+        foreach ($queries as $query) {
+            $response = $this->http()->get(self::BASE_URL.'/api.php', [
+                'action' => 'query',
+                'list' => 'search',
+                'srsearch' => $query,
+                'srnamespace' => 0,
+                'srlimit' => 10,
+                'srprop' => '',
+                'format' => 'json',
+                'formatversion' => 2,
+            ]);
+
+            if (! $response->successful()) {
+                continue;
+            }
+
+            $payload = $response->json();
+            $results = is_array($payload['query']['search'] ?? null) ? $payload['query']['search'] : [];
+
+            foreach ($results as $result) {
+                if (! is_array($result) || ! is_string($result['title'] ?? null)) {
+                    continue;
+                }
+
+                $title = (string) $result['title'];
+                if (! str_starts_with($title, $prefix.'/')) {
+                    continue;
+                }
+
+                $score = $this->candidateScore($item, $title, $prefix);
+                if ($score < 45) {
+                    continue;
+                }
+
+                $matches[$title] = max($matches[$title] ?? 0, $score);
+            }
+        }
+
+        arsort($matches);
+
+        return array_map(
+            fn ($title, $score) => ['title' => (string) $title, 'score' => (int) $score],
+            array_keys($matches),
+            array_values($matches),
+        );
+    }
+
+    private function candidateScore(EquipmentItem $item, string $title, string $prefix): int
+    {
+        $relative = trim(substr($title, strlen($prefix) + 1), '/');
+        $candidate = $this->normalizeSearch(str_replace(['/', '_'], ' ', $relative));
+        $name = $this->normalizeSearch((string) $item->name);
+
+        if ($candidate === '' || $name === '') {
+            return 0;
+        }
+
+        if ($candidate === $name) {
+            return 100;
+        }
+
+        $score = 0;
+        if (str_contains($candidate, $name) || str_contains($name, $candidate)) {
+            $score += 75;
+        }
+
+        $nameTokens = $this->searchTokens((string) $item->name);
+        $candidateTokens = $this->searchTokens(str_replace(['/', '_'], ' ', $relative));
+        $intersection = array_intersect($nameTokens, $candidateTokens);
+        $union = array_unique(array_merge($nameTokens, $candidateTokens));
+
+        if ($union) {
+            $score += (int) round((count($intersection) / count($union)) * 45);
+        }
+
+        $family = trim((string) ($item->family?->name ?? ''));
+        if ($family !== '') {
+            $familyKey = $this->normalizeSearch($family);
+            if ($familyKey !== '' && str_contains($candidate, $familyKey)) {
+                $score += 10;
+            }
+        }
+
+        return min(100, $score);
+    }
+
+    private function searchTokens(string $value): array
+    {
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        $text = strtolower(is_string($ascii) ? $ascii : $value);
+        $tokens = preg_split('/[^a-z0-9]+/', $text) ?: [];
+
+        return array_values(array_unique(array_filter($tokens, fn ($token) => strlen($token) >= 2)));
+    }
+
+    private function pageMatchesItemType(string $wikitext, string $itemType): bool
+    {
+        $template = match ($itemType) {
+            'weapon' => 'Infobox Weapon',
+            'tool' => 'Infobox Tool',
+            'consumable' => 'Infobox Consumable',
+            default => null,
+        };
+
+        return $template !== null && stripos($wikitext, '{{'.$template) !== false;
     }
 
     private function familyNameFromPageTitle(string $pageTitle, string $itemType): ?string
