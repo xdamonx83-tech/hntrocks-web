@@ -153,6 +153,83 @@ class WikiGgMediaImportService
         });
     }
 
+    public function applySafeSkinBatch(EquipmentItem $item, array $wiki, array $batchPlan): array
+    {
+        if (empty($wiki['revision_id']) || (string) $wiki['revision_id'] !== (string) ($batchPlan['revision'] ?? '')) {
+            throw new RuntimeException('Wiki revision is missing or changed.');
+        }
+
+        $counts = ['images_downloaded' => 0, 'skins_updated' => 0, 'skins_created' => 0,
+            'images_skipped' => 0, 'review_required' => 0];
+
+        foreach ($batchPlan['rows'] as $index => $row) {
+            if ($row['action'] !== 'IMPORT') continue;
+            if (empty($row['existing_skin_id'])) { $counts['review_required']++; continue; }
+
+            $checked = $this->plan($item, $wiki)['skins'][$index] ?? [];
+            if (($wiki['resolution_method'] ?? 'direct') !== 'direct' ||
+                (int) ($row['match_score'] ?? 0) !== 100 || (int) ($row['image_score'] ?? 0) !== 100 ||
+                ($checked['action'] ?? null) !== 'MATCH' ||
+                (int) ($checked['match_confidence'] ?? 0) !== 100 ||
+                (int) ($checked['image_confidence'] ?? 0) !== 100 ||
+                ($checked['image_action'] ?? null) !== 'IMPORT' ||
+                ($checked['existing_skin_id'] ?? null) !== $row['existing_skin_id']) {
+                $counts['review_required']++;
+                continue;
+            }
+
+            $skinData = $wiki['skins'][$index] ?? [];
+            $image = $skinData['image'] ?? null;
+            if (! is_array($image) || empty($image['url']) ||
+                $image['url'] !== $row['image_url'] || ($image['sha1'] ?? null) !== $row['image_sha1'] ||
+                (int) ($skinData['image_confidence'] ?? 0) !== 100 || ! empty($skinData['image_ambiguous'])) {
+                $counts['review_required']++;
+                continue;
+            }
+
+            $createdPath = null;
+            try {
+                $result = DB::transaction(function () use ($item, $wiki, $row, $skinData, $image, &$createdPath): string {
+                    $skin = EquipmentSkin::query()->whereKey($row['existing_skin_id'])
+                        ->where('equipment_item_id', $item->id)->lockForUpdate()->first();
+                    if (! $skin || $skin->local_asset_path) return 'SKIP';
+                    if (Str::slug((string) $skin->name) !== Str::slug((string) $row['skin_name'])) return 'REVIEW_REQUIRED';
+
+                    $prefix = 'arsenal/wiki/skins/'.$item->slug.'/'.Str::slug((string) $row['skin_name'])
+                        .'-'.substr(hash('sha256', (string) $image['url']), 0, 12);
+                    $cached = $this->cacheImage((string) $image['url'], $prefix, true);
+                    if (! $cached) return 'SKIP';
+                    $createdPath = $cached['path'];
+                    $snapshot = $this->snapshots->recordWiki($item, $wiki);
+                    $facts = is_array($skin->facts) ? $skin->facts : [];
+                    $facts['wiki_gg'] = array_merge($facts['wiki_gg'] ?? [], [
+                        'image_file' => $skinData['image_file'] ?? null,
+                        'image' => $this->imageMetadata($wiki, $image, $cached, $snapshot->id),
+                    ]);
+                    $skin->facts = $facts;
+                    $skin->local_asset_path = $cached['path'];
+                    $skin->source_url = $skin->source_url ?: ($wiki['page_url'] ?? null);
+                    $skin->original_asset_url = $skin->original_asset_url ?: $image['url'];
+                    $skin->license_note = $skin->license_note ?: $this->licenseNote($image);
+                    $skin->save();
+
+                    return 'IMPORTED';
+                });
+            } catch (\Throwable $exception) {
+                if ($createdPath !== null) Storage::disk('public')->delete($createdPath);
+                throw $exception;
+            }
+
+            if ($result === 'IMPORTED') {
+                $counts['images_downloaded']++;
+                $counts['skins_updated']++;
+            } elseif ($result === 'SKIP') $counts['images_skipped']++;
+            else $counts['review_required']++;
+        }
+
+        return $counts;
+    }
+
     private function imageDecision(?string $localPath, ?string $oldSha1, ?array $image, int $imageConfidence, int $resolverConfidence): array
     {
         if (empty($image['url'])) return ['action' => 'SKIP', 'reason' => 'No resolved image URL'];
@@ -214,10 +291,16 @@ class WikiGgMediaImportService
         ];
     }
 
-    private function cacheImage(string $url, string $pathWithoutExtension): ?array
+    private function cacheImage(string $url, string $pathWithoutExtension, bool $exclusive = false): ?array
     {
         if (! $this->allowedMediaUrl($url)) {
             return null;
+        }
+
+        if ($exclusive) {
+            foreach (['png', 'jpg', 'webp', 'avif'] as $extension) {
+                if (Storage::disk('public')->exists($pathWithoutExtension.'.'.$extension)) return null;
+            }
         }
 
         $response = Http::withHeaders([
@@ -256,7 +339,28 @@ class WikiGgMediaImportService
         }
 
         $path = $pathWithoutExtension.'.'.$extension;
-        if (! Storage::disk('public')->put($path, $body)) {
+        if ($exclusive) {
+            $absolute = Storage::disk('public')->path($path);
+            $directory = dirname($absolute);
+            if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+                throw new RuntimeException('wiki.gg image directory could not be created.');
+            }
+            $stream = @fopen($absolute, 'x');
+            if ($stream === false) return null;
+            try {
+                $remaining = $body;
+                while ($remaining !== '') {
+                    $written = fwrite($stream, $remaining);
+                    if ($written === false || $written === 0) throw new RuntimeException('wiki.gg image could not be written.');
+                    $remaining = substr($remaining, $written);
+                }
+            } catch (\Throwable $exception) {
+                fclose($stream);
+                unlink($absolute);
+                throw $exception;
+            }
+            fclose($stream);
+        } elseif (! Storage::disk('public')->put($path, $body)) {
             throw new RuntimeException('wiki.gg image could not be written to public storage.');
         }
 
