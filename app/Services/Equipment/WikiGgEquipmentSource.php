@@ -98,17 +98,19 @@ class WikiGgEquipmentSource
                 mode: 'skin',
                 imageInfo: $imageInfo,
             );
+            $assessment = $this->skinImageConfidence(
+                $file,
+                (string) ($skin['name'] ?? ''),
+                $item,
+                $this->familyNameFromPageTitle($pageTitle, $item->item_type),
+                $page['images'],
+            );
 
             return array_merge($skin, [
                 'image_file' => $file,
                 'image' => $file ? ($imageInfo[$file] ?? null) : null,
-                'image_confidence' => $this->skinImageConfidence(
-                    $file,
-                    (string) ($skin['name'] ?? ''),
-                    $item,
-                    $this->familyNameFromPageTitle($pageTitle, $item->item_type),
-                    $page['images'],
-                ),
+                'image_confidence' => $assessment['score'],
+                'image_ambiguous' => $assessment['ambiguous'],
             ]);
         }, $skinRows);
 
@@ -935,9 +937,9 @@ class WikiGgEquipmentSource
         return $best;
     }
 
-    private function skinImageConfidence(?string $file, string $skinName, EquipmentItem $item, ?string $wikiFamily, array $candidates): int
+    private function skinImageConfidence(?string $file, string $skinName, EquipmentItem $item, ?string $wikiFamily, array $candidates): array
     {
-        if (! $file) return 0;
+        if (! $file) return ['score' => 0, 'ambiguous' => false];
 
         $contexts = array_values(array_unique(array_filter([
             $this->imageNameTokens((string) $item->name),
@@ -945,7 +947,9 @@ class WikiGgEquipmentSource
             $this->imageNameTokens((string) $wikiFamily),
         ])));
 
-        if (! $this->isStrongSkinImageMatch($file, $skinName, $contexts)) return 65;
+        if (! $this->isStrongSkinImageMatch($file, $skinName, $contexts)) {
+            return ['score' => 65, 'ambiguous' => false];
+        }
 
         $matching = [];
         foreach (array_merge($candidates, [$file]) as $candidate) {
@@ -958,7 +962,10 @@ class WikiGgEquipmentSource
         $bestRank = max($matching);
         $equallyGood = count(array_filter($matching, fn (int $rank) => $rank === $bestRank));
 
-        return $equallyGood === 1 && $this->skinImageRank($file) === $bestRank ? 100 : 65;
+        return [
+            'score' => $equallyGood === 1 && $this->skinImageRank($file) === $bestRank ? 100 : 65,
+            'ambiguous' => $equallyGood > 1,
+        ];
     }
 
     private function skinImageRank(string $file): int

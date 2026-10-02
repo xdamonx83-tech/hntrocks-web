@@ -236,12 +236,69 @@ class ArsenalCanonicalFoundationTest extends TestCase
             'Weapon 3D Drilling Corrosion.jpg', 'Weapon_3D_Drilling_Corrosion.png',
         ]);
         $this->assertLessThan(85, $duplicates['skins'][0]['image_confidence']);
+        $this->assertTrue($duplicates['skins'][0]['image_ambiguous']);
         $this->assertSame('REVIEW_REQUIRED', app(WikiGgMediaImportService::class)->plan($item, $duplicates)['skins'][0]['image_action']);
 
         foreach (['Weapon 3D Romero Corrosion.jpg', 'Weapon 3D Drilling Corrosion Icon.jpg'] as $unsafe) {
             $preview = $this->drillingImagePreview($item, [$unsafe]);
             $this->assertLessThan(85, $preview['skins'][0]['image_confidence']);
         }
+    }
+
+    public function test_wiki_audit_keeps_fast_parse_only_mode_without_media_flag(): void
+    {
+        $this->item();
+        Http::fake(function ($request) {
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+            if (($query['action'] ?? null) === 'parse') {
+                return Http::response(['parse' => [
+                    'wikitext' => "{{Infobox Weapon\n|Title=Mosin-Nagant\n}}",
+                    'text' => '', 'images' => ['Weapon 3D Mosin-Nagant Test.jpg'],
+                ]]);
+            }
+
+            return Http::response(['query' => ['pages' => [[
+                'title' => 'File:Weapon 3D Mosin-Nagant Test.jpg',
+                'imageinfo' => [['url' => 'https://huntshowdown.wiki.gg/images/test.jpg']],
+            ]]]]);
+        });
+
+        $this->artisan('arsenal:wiki-audit', [
+            '--type' => 'weapon', '--limit' => 1, '--sleep-ms' => 0, '--show' => 0,
+        ])->assertExitCode(0);
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'action=parse'));
+    }
+
+    public function test_wiki_audit_media_confidence_flag_reads_imageinfo_and_prints_summary(): void
+    {
+        $item = $this->item();
+        EquipmentSkin::create([
+            'equipment_item_id' => $item->id,
+            'external_id' => 'skin-1',
+            'name' => 'Spirit Caller',
+        ]);
+        Http::fake(function ($request) {
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+            if (($query['action'] ?? null) === 'parse') {
+                return Http::response(['parse' => [
+                    'wikitext' => "{{Infobox Weapon\n|Title=Mosin-Nagant\n}}\n{{Infobox Weapon Skin\n|Title=Spirit Caller\n}}",
+                    'text' => '', 'images' => ['Weapon 3D Mosin-Nagant Spirit Caller.jpg'],
+                ]]);
+            }
+
+            return Http::response(['query' => ['pages' => [[
+                'title' => 'File:Weapon 3D Mosin-Nagant Spirit Caller.jpg',
+                'imageinfo' => [['url' => 'https://huntshowdown.wiki.gg/images/skin.jpg']],
+            ]]]]);
+        });
+
+        $this->artisan('arsenal:wiki-audit', [
+            '--type' => 'weapon', '--limit' => 1, '--sleep-ms' => 0, '--show' => 1,
+            '--media-confidence' => true,
+        ])->assertExitCode(0);
+        Http::assertSentCount(2);
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'prop=imageinfo'));
     }
 
     private function drillingImagePreview(EquipmentItem $item, array $skinFiles): array

@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\EquipmentItem;
 use App\Services\Equipment\WikiGgEquipmentSource;
+use App\Services\Equipment\WikiGgMediaConfidenceAudit;
+use App\Services\Equipment\WikiGgMediaImportService;
 use Illuminate\Console\Command;
 
 class AuditArsenalWikiGg extends Command
@@ -12,11 +14,16 @@ class AuditArsenalWikiGg extends Command
         {--type=weapon : Item type to audit: weapon, tool or consumable}
         {--limit=0 : Maximum number of items; 0 means all}
         {--sleep-ms=250 : Delay between wiki.gg requests}
-        {--show=25 : Maximum number of mismatch/error rows to print}';
+        {--show=25 : Maximum number of mismatch/error rows to print}
+        {--media-confidence : Resolve image metadata and audit safe skin image imports}';
 
     protected $description = 'Read-only coverage audit of HNT Arsenal items against wiki.gg.';
 
-    public function handle(WikiGgEquipmentSource $source): int
+    public function handle(
+        WikiGgEquipmentSource $source,
+        WikiGgMediaImportService $media,
+        WikiGgMediaConfidenceAudit $mediaAudit,
+    ): int
     {
         $type = strtolower(trim((string) $this->option('type')));
         if (! in_array($type, ['weapon', 'tool', 'consumable'], true)) {
@@ -28,9 +35,10 @@ class AuditArsenalWikiGg extends Command
         $limit = max(0, (int) $this->option('limit'));
         $sleepMs = max(0, min(5000, (int) $this->option('sleep-ms')));
         $show = max(0, min(100, (int) $this->option('show')));
+        $mediaConfidence = (bool) $this->option('media-confidence');
 
         $query = EquipmentItem::query()
-            ->with('family')
+            ->with($mediaConfidence ? ['family', 'skins'] : ['family'])
             ->where('source_status', 'active')
             ->where('item_type', $type)
             ->orderBy('id');
@@ -73,13 +81,18 @@ class AuditArsenalWikiGg extends Command
         $this->line('Type: '.$type);
         $this->line('Items: '.$items->count());
         $this->line('Mode: READ-ONLY');
-        $this->line('Media URLs and revision metadata are skipped in this bulk audit.');
+        $this->line($mediaConfidence
+            ? 'Media imageinfo is read for resolved pages; no image bytes are downloaded.'
+            : 'Media URLs and revision metadata are skipped in this bulk audit.');
         $this->newLine();
 
         foreach ($items as $index => $item) {
             try {
-                // One MediaWiki parse request per item: enough to audit page/family/stats/media filenames.
-                $wiki = $source->preview($item, false, false);
+                // The default mode remains one MediaWiki parse request per item.
+                $wiki = $source->preview($item, $mediaConfidence, false);
+                if ($mediaConfidence) {
+                    $mediaAudit->add($item, $wiki, $media->plan($item, $wiki), $show);
+                }
                 $counts['resolved']++;
                 if (($wiki['resolution_method'] ?? 'direct') === 'search') {
                     $counts['resolved_search']++;
@@ -198,6 +211,52 @@ class AuditArsenalWikiGg extends Command
             ['Ammo types', $counts['ammo_types']],
             ['Patch history rows', $counts['patch_rows']],
         ]);
+
+        if ($mediaConfidence) {
+            $mediaCounts = $mediaAudit->counts();
+            $this->newLine();
+            $this->warn('Skin media confidence:');
+            $this->table(['Metric', 'Count'], [
+                ['Items total', $counts['total']],
+                ['Items resolved', $counts['resolved']],
+                ['Skins detected', $mediaCounts['skins_detected']],
+                ['Skin images resolved', $mediaCounts['skin_images_resolved']],
+                ['Image Score 100', $mediaCounts['image_score_100']],
+                ['Image Score 80-99', $mediaCounts['image_score_80_99']],
+                ['Image Score 65-79', $mediaCounts['image_score_65_79']],
+                ['Image Score <65', $mediaCounts['image_score_below_65']],
+                ['Ambiguous image matches', $mediaCounts['ambiguous_image_matches']],
+                ['Missing image', $mediaCounts['missing_image']],
+                ['Auto-importable', $mediaCounts['auto_importable']],
+                ['Review required', $mediaCounts['review_required']],
+                ['Score 100 but blocked', $mediaCounts['score_100_but_blocked']],
+            ]);
+            if ($mediaCounts['score_100_but_blocked'] > 0) {
+                $this->newLine();
+                $this->warn('Score 100 but blocked by reason:');
+                $this->table(
+                    ['Block reason', 'Count'],
+                    collect($mediaAudit->blockedScore100Reasons())
+                        ->map(fn (int $count, string $reason) => [$reason, $count])->values()->all(),
+                );
+                $this->table(
+                    ['Item', 'Item name', 'Skin', 'Image file', 'Match', 'Image', 'Local path', 'Action', 'Blocked reason'],
+                    array_map(fn (array $row) => [
+                        $row['item_slug'], $row['item_name'], $row['skin_name'], $row['image_file'],
+                        $row['match_score'], $row['image_score'], $row['local_asset_path'] ?? '—',
+                        $row['action'], $row['blocked_reason'],
+                    ], array_slice($mediaAudit->blockedScore100(), 0, $show)),
+                );
+            }
+            if ($mediaAudit->problems()) {
+                $this->newLine();
+                $this->warn('Skin media problems (maximum '.$show.'):');
+                $this->table(
+                    ['Item', 'Skin', 'Image file', 'Match score', 'Image score', 'Action', 'Reason'],
+                    $mediaAudit->problems(),
+                );
+            }
+        }
 
         if ($errors) {
             $this->newLine();
