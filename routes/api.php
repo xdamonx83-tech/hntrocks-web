@@ -73,6 +73,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/arsenal/compare', [ArsenalController::class, 'compare'])->name('arsenal.compare');
     Route::get('/arsenal/stat-ranges', [ArsenalController::class, 'statRanges'])->name('arsenal.stat-ranges');
     Route::get('/arsenal/{slug}/related', [ArsenalController::class, 'related'])->name('arsenal.related');
+    Route::get('/arsenal/{slug}/ballistics', [ArsenalController::class, 'ballistics'])->name('arsenal.ballistics');
     Route::get('/arsenal/{slug}', [ArsenalController::class, 'show'])->name('arsenal.show');
     Route::get('/appearance', WebAppearanceController::class)->name('appearance.show');
     Route::get('/news', [NewsPublicController::class, 'apiIndex'])->name('news.index');

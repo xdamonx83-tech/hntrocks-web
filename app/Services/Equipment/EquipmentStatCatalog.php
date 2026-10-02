@@ -19,6 +19,12 @@ class EquipmentStatCatalog
         ['radius','Radius','m','higher','combat'], ['effectDuration','Effect Duration','s','higher','combat'],
         ['swapSpeed','Swap Speed','s','lower','handling'], ['throwStamina','Throw Stamina Cost',null,'lower','melee'],
         ['price','Price',null,'neutral','economy'], ['slotSize','Slot Size',null,'neutral','economy'],
+        ['baseDamage','Base Damage',null,'neutral','ballistics'], ['zoom','Zoom','×','neutral','handling'],
+        ['headMultiplier','Head Multiplier','×','neutral','ballistics'],
+        ['upperTorsoMultiplier','Upper Torso Multiplier','×','neutral','ballistics'],
+        ['torsoMultiplier','Torso Multiplier','×','neutral','ballistics'],
+        ['armMultiplier','Arm Multiplier','×','neutral','ballistics'],
+        ['legMultiplier','Leg Multiplier','×','neutral','ballistics'],
     ];
 
     public function ensure(): void

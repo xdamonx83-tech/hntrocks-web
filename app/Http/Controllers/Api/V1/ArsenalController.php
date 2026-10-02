@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\{EquipmentItem,EquipmentStatDefinition};
+use App\Services\Equipment\WeaponBallisticsPresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -12,6 +13,8 @@ class ArsenalController extends Controller
     private const MODE_SENSITIVE_STATS = [
         'damage', 'dropRange', 'effectiveRange', 'rateOfFire', 'cycleTime', 'reload',
         'muzzleVelocity', 'spread', 'sway', 'recoil', 'magazine', 'reserve',
+        'baseDamage', 'headMultiplier', 'upperTorsoMultiplier', 'torsoMultiplier',
+        'armMultiplier', 'legMultiplier',
     ];
 
     public function index(Request $request): JsonResponse
@@ -55,10 +58,26 @@ class ArsenalController extends Controller
         return response()->json($q->distinct()->orderBy('equipment_class')->pluck('equipment_class'));
     }
 
-    public function show(string $slug, Request $request): JsonResponse
+    public function show(string $slug, Request $request, WeaponBallisticsPresenter $ballistics): JsonResponse
     {
         $item = EquipmentItem::where('slug',$slug)->where('source_status','active')->with(['source','translations','family','stats.definition','ammo.falloffPoints','traits','skins','patchHistory'])->firstOrFail();
-        return response()->json($this->detail($item,$request));
+        return response()->json($this->detail($item,$request,$ballistics));
+    }
+
+    public function ballistics(string $slug, Request $request, WeaponBallisticsPresenter $ballistics): JsonResponse
+    {
+        $validated = $request->validate([
+            'ammo_key' => 'required|string|max:160',
+            'distance' => 'required|numeric|min:0|max:1000',
+            'hp' => 'required|integer|in:150,125,100,75,50',
+        ]);
+        $item = EquipmentItem::where('slug',$slug)->where('source_status','active')
+            ->where('item_type','weapon')->with(['stats.definition','ammo.falloffPoints'])->firstOrFail();
+        $result = $ballistics->atDistance($item, $validated['ammo_key'],
+            (float) $validated['distance'], (int) $validated['hp']);
+        abort_if($result === null, 404);
+
+        return response()->json($result);
     }
 
     public function related(string $slug, Request $request): JsonResponse
@@ -139,7 +158,7 @@ class ArsenalController extends Controller
             'price'=>$item->price,'unlock_rank'=>$item->unlock_rank,'image_url'=>$item->imageUrl()];
     }
 
-    private function detail(EquipmentItem $item, Request $request): array
+    private function detail(EquipmentItem $item, Request $request, WeaponBallisticsPresenter $ballistics): array
     {
         $variants = $item->family_id ? EquipmentItem::where('family_id',$item->family_id)->where('source_status','active')
             ->whereKeyNot($item->id)->orderBy('name')->with('translations')->get()->map(fn($variant)=>$this->compact($variant,$request)) : [];
@@ -176,7 +195,8 @@ class ArsenalController extends Controller
                 'min_rank'=>$item->facts['min_rank'] ?? null,
             ],
             'patch_history'=>$item->patchHistory->map(fn($entry)=>['patch'=>$entry->patch,'field'=>$entry->field,
-                'old_value'=>$entry->old_value,'new_value'=>$entry->new_value,'note'=>$entry->note])->values()];
+                'old_value'=>$entry->old_value,'new_value'=>$entry->new_value,'note'=>$entry->note])->values(),
+            'ballistics'=>$item->item_type === 'weapon' ? $ballistics->summary($item) : null];
     }
 
     private function ammoPayload(EquipmentItem $item): array
