@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\EquipmentItem;
+use App\Services\Equipment\BayouBallisticsApplyService;
 use App\Services\Equipment\BayouBallisticsPlanner;
 use App\Services\Equipment\BayouIndexBallisticsSource;
 use App\Services\Equipment\BayouWeaponMatcher;
@@ -11,44 +12,61 @@ use Throwable;
 
 class PreviewArsenalBayouBallistics extends Command
 {
-    private const SLUGS = [
-        '1865-carbine', 'drilling', 'berthier-1892-deadeye',
-        'mosin-nagant-sniper', 'sparks',
-    ];
-
     protected $signature = 'arsenal:bayou-ballistics
-        {--dry-run : Required read-only plan mode}
+        {--dry-run : Read-only plan mode}
+        {--apply : Apply approved CREATE fields for the five audited weapons}
         {--item= : One of the five audited weapon slugs}';
 
-    protected $description = 'Read-only Bayou ballistics plan for the five audited weapons; no apply mode.';
+    protected $description = 'Preview or safely apply additive Bayou ballistics for five audited weapons.';
 
     public function handle(
         BayouIndexBallisticsSource $source,
         BayouWeaponMatcher $matcher,
         BayouBallisticsPlanner $planner,
+        BayouBallisticsApplyService $applyService,
     ): int {
-        if (! $this->option('dry-run')) {
-            $this->error('This command only supports --dry-run.');
+        $apply = (bool) $this->option('apply');
+        if ($apply === (bool) $this->option('dry-run')) {
+            $this->error('Choose exactly one of --dry-run or --apply.');
             return self::FAILURE;
         }
         $only = trim((string) $this->option('item'));
-        if ($only !== '' && ! in_array($only, self::SLUGS, true)) {
+        if ($only !== '' && ! in_array($only, BayouBallisticsApplyService::AUDIT_SLUGS, true)) {
             $this->error('--item must be one of the five audited weapon slugs.');
             return self::FAILURE;
         }
-        $slugs = $only === '' ? self::SLUGS : [$only];
+        $slugs = $only === '' ? BayouBallisticsApplyService::AUDIT_SLUGS : [$only];
         $items = EquipmentItem::query()->where('source_status','active')->where('item_type','weapon')
             ->with(['family', 'stats.definition', 'ammo'])->get();
         $rows = [];
+        $applyRows = [];
         $failed = 0;
+        $written = 0;
         foreach ($slugs as $index => $slug) {
             if ($index > 0) usleep(750_000);
             try {
                 $page = $source->preview($slug);
                 $match = $matcher->match($page, $items);
                 if ($match['item'] === null) {
-                    $rows[] = [$slug, $page['source_url'], 'identity', '—', $page['name'],
-                        'REVIEW_REQUIRED', '0', $match['reason']];
+                    if ($apply) {
+                        $applyRows[] = [$slug, 'identity', '—', $page['name'], $page['source_url'],
+                            '0', 'REVIEW_REQUIRED', $match['reason']];
+                    } else {
+                        $rows[] = [$slug, $page['source_url'], 'identity', '—', $page['name'],
+                            'REVIEW_REQUIRED', '0', $match['reason']];
+                    }
+                    continue;
+                }
+                if ($apply) {
+                    $result = $applyService->apply($match['item'], $page);
+                    $written += $result['written'];
+                    foreach ($result['rows'] as $row) {
+                        $applyRows[] = [
+                            $row['item'], $row['field'], $this->format($row['current_hnt']),
+                            $this->format($row['bayou']), $row['source_page'],
+                            (string) $row['confidence'], $row['result'], $row['reason'] ?? '—',
+                        ];
+                    }
                     continue;
                 }
                 $plan = $planner->plan($match['item'], $page, $match['confidence']);
@@ -61,8 +79,20 @@ class PreviewArsenalBayouBallistics extends Command
                 }
             } catch (Throwable $exception) {
                 $failed++;
-                $rows[] = [$slug, '—', 'source', '—', '—', 'REVIEW_REQUIRED', '0', $exception->getMessage()];
+                if ($apply) {
+                    $applyRows[] = [$slug, 'source/apply', '—', '—', 'bayou_index', '0',
+                        'REVIEW_REQUIRED', $exception->getMessage()];
+                } else {
+                    $rows[] = [$slug, '—', 'source', '—', '—', 'REVIEW_REQUIRED', '0', $exception->getMessage()];
+                }
             }
+        }
+
+        if ($apply) {
+            $this->info('Bayou ballistics apply: CREATE only; source bayou_index.');
+            $this->table(['Item', 'Field', 'Old value', 'New value', 'Source', 'Confidence', 'Result', 'Reason'], $applyRows);
+            $this->line('Pages: '.count($slugs).'; errors: '.$failed.'; canonical values written: '.$written.'.');
+            return $failed === 0 ? self::SUCCESS : self::FAILURE;
         }
 
         $this->info('Bayou ballistics plan: READ-ONLY; source bayou_index; no apply mode.');

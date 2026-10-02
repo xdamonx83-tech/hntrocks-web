@@ -66,6 +66,24 @@ class EquipmentSourceSnapshotService
         );
     }
 
+    public function recordBayouBallistics(EquipmentItem $item, array $source): EquipmentSourceSnapshot
+    {
+        // Persist only the parsed numeric preview and identity, never page HTML or assets.
+        $payload = [
+            'name' => $source['name'],
+            'ammo_type' => $source['ammo_type'],
+            'observed_at' => $source['observed_at'],
+            'fields' => $source['fields'],
+            'checks' => $source['checks'],
+            'source_payload_hash' => $source['payload_hash'],
+        ];
+
+        return $this->record(
+            $item, 'bayou_index', $payload, null, $source['source_page_slug'],
+            null, null, $source['source_url']
+        );
+    }
+
     private function record(
         EquipmentItem $item,
         string $sourceKey,

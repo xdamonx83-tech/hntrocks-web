@@ -8,6 +8,7 @@ use App\Models\EquipmentItem;
 use App\Models\EquipmentSource;
 use App\Models\EquipmentSourceSnapshot;
 use App\Models\EquipmentStatDefinition;
+use App\Services\Equipment\BayouBallisticsApplyService;
 use App\Services\Equipment\BayouBallisticsPlanner;
 use App\Services\Equipment\BayouIndexBallisticsSource;
 use App\Services\Equipment\BayouWeaponMatcher;
@@ -71,6 +72,12 @@ class ArsenalBayouBallisticsTest extends TestCase
             .'<div class="rowhead">Torso <b>×1.2</b> mult</div>'
             .'<div class="rowhead">Arm <b>×0.9</b> mult</div>'
             .'<div class="rowhead">Leg <b>×0.8</b> mult</div></section></body></html>';
+    }
+
+    private function page(string $slug = '1865-carbine', string $name = '1865 Carbine', ?string $html = null): array
+    {
+        return app(BayouIndexBallisticsSource::class)->parse(
+            $html ?? $this->html($name), $slug, '2026-10-02T12:00:00+00:00');
     }
 
     public function test_source_reads_only_public_numeric_html_and_does_not_fetch_assets(): void
@@ -167,7 +174,7 @@ class ArsenalBayouBallisticsTest extends TestCase
             ->assertJsonPath('ballistics.ammo_modes.0.base_damage', null);
     }
 
-    public function test_one_item_command_is_read_only_and_has_no_apply_mode(): void
+    public function test_one_item_dry_run_remains_read_only(): void
     {
         $item = $this->weapon();
         Http::fake(['https://bayouindex.com/*' => Http::response($this->html(), 200, ['Content-Type' => 'text/html'])]);
@@ -178,7 +185,180 @@ class ArsenalBayouBallisticsTest extends TestCase
         $this->assertStringContainsString('CREATE', $output);
         $this->assertSame($before, $item->stats()->count());
         $this->assertSame(0, EquipmentSourceSnapshot::count());
+        $this->assertSame(0, EquipmentFieldProvenance::count());
         $this->assertNotSame(0, Artisan::call('arsenal:bayou-ballistics', ['--item' => '1865-carbine']));
         Http::assertSentCount(1);
+    }
+
+    public function test_apply_creates_only_six_missing_fields_and_records_numeric_snapshot_and_provenance(): void
+    {
+        $item = $this->weapon();
+        $this->stat($item, 'damage', 145);
+        $this->stat($item, 'cycleTime', 1.8);
+        $this->stat($item, 'dropRange', 115);
+        $result = app(BayouBallisticsApplyService::class)->apply($item, $this->page());
+
+        $this->assertSame(6, $result['written']);
+        $this->assertEquals(93, $item->ammo()->first()->facts['stats']['baseDamage']);
+        $this->assertSame(1.3, $item->ammo()->first()->facts['stats']['upperTorsoMultiplier']);
+        $this->assertSame(1.2, $item->ammo()->first()->facts['stats']['torsoMultiplier']);
+        $this->assertSame(0.9, $item->ammo()->first()->facts['stats']['armMultiplier']);
+        $this->assertSame(0.8, $item->ammo()->first()->facts['stats']['legMultiplier']);
+        $this->assertArrayNotHasKey('headMultiplier', $item->ammo()->first()->facts['stats']);
+        $this->assertEquals(1.67, $item->stats()->whereHas('definition', fn ($query) => $query->where('key', 'zoom'))->first()->value);
+        $this->assertEquals(145, $item->stats()->whereHas('definition', fn ($query) => $query->where('key', 'damage'))->first()->value);
+        $this->assertEquals(1.8, $item->stats()->whereHas('definition', fn ($query) => $query->where('key', 'cycleTime'))->first()->value);
+        $this->assertEquals(115, $item->stats()->whereHas('definition', fn ($query) => $query->where('key', 'dropRange'))->first()->value);
+        $this->assertSame(20, $item->ammo()->first()->reserve);
+        $this->assertSame(1, EquipmentSourceSnapshot::count());
+        $snapshot = EquipmentSourceSnapshot::first();
+        $this->assertSame('bayou_index', $snapshot->source_key);
+        $this->assertSame('https://bayouindex.com/weapons/1865-carbine/', $snapshot->source_url);
+        $this->assertSame('2026-10-02T12:00:00+00:00', $snapshot->normalized_payload['observed_at']);
+        $this->assertNotNull($snapshot->fetched_at);
+        $this->assertArrayNotHasKey('html', $snapshot->normalized_payload);
+        $this->assertSame(6, EquipmentFieldProvenance::count());
+        $provenance = EquipmentFieldProvenance::where('field_key', 'ammo.basic-Medium.stat.baseDamage')->firstOrFail();
+        $this->assertSame($snapshot->id, $provenance->source_snapshot_id);
+        $this->assertSame('bayou_index', $provenance->source_key);
+        $this->assertEquals(93, $provenance->metadata['source_value']);
+        $this->assertSame(95, $provenance->metadata['confidence']);
+        $this->assertMatchesRegularExpression('/\A[a-f0-9]{64}\z/', $snapshot->payload_hash);
+    }
+
+    public function test_second_apply_is_idempotent_and_does_not_create_another_snapshot(): void
+    {
+        $item = $this->weapon();
+        $page = $this->page();
+        $service = app(BayouBallisticsApplyService::class);
+        $this->assertSame(6, $service->apply($item, $page)['written']);
+        $this->assertSame(0, $service->apply($item, $page)['written']);
+        $this->assertSame(1, EquipmentSourceSnapshot::count());
+        $this->assertSame(6, EquipmentFieldProvenance::count());
+        $this->assertSame(1, $item->stats()->count());
+    }
+
+    public function test_equal_and_conflicting_existing_values_are_never_rewritten(): void
+    {
+        $item = $this->weapon();
+        $this->stat($item, 'zoom', 1.67);
+        $ammo = $item->ammo()->first();
+        $ammo->facts = ['stats' => ['baseDamage' => 91]];
+        $ammo->save();
+        $result = app(BayouBallisticsApplyService::class)->apply($item, $this->page());
+        $rows = collect($result['rows'])->keyBy('field');
+        $this->assertSame('UNCHANGED', $rows['stat.zoom']['result']);
+        $this->assertSame('REVIEW_REQUIRED', $rows['ammo.basic-Medium.stat.baseDamage']['result']);
+        $this->assertSame(4, $result['written']);
+        $this->assertSame(91, $item->ammo()->first()->facts['stats']['baseDamage']);
+        $this->assertSame(1.67, $item->stats()->first()->value);
+    }
+
+    public function test_manual_override_and_missing_source_values_never_write(): void
+    {
+        $item = $this->weapon();
+        EquipmentFieldProvenance::create([
+            'equipment_item_id' => $item->id, 'field_key' => 'stat.zoom',
+            'source_key' => 'manual', 'is_manual_override' => true,
+        ]);
+        $html = str_replace('<div class="rowhead">Arm <b>×0.9</b> mult</div>', '', $this->html());
+        $result = app(BayouBallisticsApplyService::class)->apply($item, $this->page(html: $html));
+        $rows = collect($result['rows'])->keyBy('field');
+        $this->assertSame('BLOCKED_MANUAL', $rows['stat.zoom']['result']);
+        $this->assertSame('SKIP', $rows['ammo.basic-Medium.stat.armMultiplier']['result']);
+        $this->assertSame('SKIP', $rows['ammo.basic-Medium.stat.headMultiplier']['result']);
+        $this->assertSame(4, $result['written']);
+        $this->assertFalse($item->stats()->whereHas('definition', fn ($query) => $query->where('key', 'zoom'))->exists());
+        $this->assertArrayNotHasKey('armMultiplier', $item->ammo()->first()->facts['stats']);
+        $this->assertArrayNotHasKey('headMultiplier', $item->ammo()->first()->facts['stats']);
+    }
+
+    public function test_other_source_provenance_blocks_an_absent_canonical_value(): void
+    {
+        $item = $this->weapon();
+        EquipmentFieldProvenance::create([
+            'equipment_item_id' => $item->id,
+            'field_key' => 'ammo.basic-Medium.stat.baseDamage',
+            'source_key' => 'wiki_gg',
+        ]);
+        $result = app(BayouBallisticsApplyService::class)->apply($item, $this->page());
+        $this->assertSame('BLOCKED_PROVENANCE', collect($result['rows'])->keyBy('field')['ammo.basic-Medium.stat.baseDamage']['result']);
+        $this->assertArrayNotHasKey('baseDamage', $item->ammo()->first()->facts['stats']);
+        $this->assertSame(5, $result['written']);
+    }
+
+    public function test_head_multiplier_remains_unapproved_even_if_a_page_displays_a_number(): void
+    {
+        $item = $this->weapon();
+        $html = str_replace('<div class="rowhead">Head</div>',
+            '<div class="rowhead">Head <b>×4</b> mult</div>', $this->html());
+        $result = app(BayouBallisticsApplyService::class)->apply($item, $this->page(html: $html));
+        $this->assertSame('BLOCKED_SOURCE', collect($result['rows'])->keyBy('field')['ammo.basic-Medium.stat.headMultiplier']['result']);
+        $this->assertSame(6, $result['written']);
+        $this->assertArrayNotHasKey('headMultiplier', $item->ammo()->first()->facts['stats']);
+    }
+
+    public function test_ambiguous_identity_and_unapproved_source_cannot_write(): void
+    {
+        $item = $this->weapon();
+        $service = app(BayouBallisticsApplyService::class);
+        try {
+            $service->apply($item, $this->page(name: 'Different Weapon'));
+            $this->fail('A conflicting page name must be rejected.');
+        } catch (\InvalidArgumentException $exception) {
+            $this->assertStringContainsString('ambiguous', $exception->getMessage());
+        }
+        $changed = $this->page();
+        $changed['fields']['baseDamage'] = 999;
+        try {
+            $service->apply($item, $changed);
+            $this->fail('An altered source payload must be rejected.');
+        } catch (\InvalidArgumentException $exception) {
+            $this->assertStringContainsString('payload changed', $exception->getMessage());
+        }
+        $this->assertSame(0, EquipmentSourceSnapshot::count());
+        $this->assertSame(0, EquipmentFieldProvenance::count());
+        $this->assertSame(0, $item->stats()->count());
+        $this->assertNotSame(0, Artisan::call('arsenal:bayou-ballistics', ['--apply' => true, '--item' => 'unknown']));
+    }
+
+    public function test_drilling_shell_mode_is_not_mixed_with_medium_base_ammo(): void
+    {
+        $item = $this->weapon('drilling', 'Drilling');
+        $shell = $item->ammo()->create(['key' => 'basic-shell', 'name' => 'Basic', 'ammo_type' => 'Shell', 'damage' => 220]);
+        $result = app(BayouBallisticsApplyService::class)->apply($item, $this->page('drilling', 'Drilling'));
+        $this->assertSame(6, $result['written']);
+        $this->assertEquals(93, $item->ammo()->where('key', 'basic-Medium')->first()->facts['stats']['baseDamage']);
+        $this->assertNull($shell->fresh()->facts);
+        $this->assertSame(0, EquipmentFieldProvenance::where('field_key', 'like', 'ammo.basic-shell.%')->count());
+    }
+
+    public function test_missing_definition_blocks_the_specific_write(): void
+    {
+        $item = $this->weapon();
+        EquipmentStatDefinition::where('key', 'zoom')->delete();
+        $result = app(BayouBallisticsApplyService::class)->apply($item, $this->page());
+        $this->assertSame('BLOCKED_DEFINITION', collect($result['rows'])->keyBy('field')['stat.zoom']['result']);
+        $this->assertSame(5, $result['written']);
+        $this->assertSame(0, $item->stats()->count());
+    }
+
+    public function test_apply_command_fetches_once_and_logs_written_values_without_check_only_writes(): void
+    {
+        $item = $this->weapon();
+        $this->stat($item, 'damage', 145);
+        Http::fake(['https://bayouindex.com/*' => Http::response($this->html(), 200, ['Content-Type' => 'text/html'])]);
+        $this->assertSame(0, Artisan::call('arsenal:bayou-ballistics', ['--apply' => true, '--item' => '1865-carbine']));
+        $output = Artisan::output();
+        $this->assertStringContainsString('CREATE only', $output);
+        $this->assertStringContainsString('WRITTEN', $output);
+        $this->assertStringContainsString('canonical values written: 6', $output);
+        $this->assertEquals(145, $item->stats()->whereHas('definition', fn ($query) => $query->where('key', 'damage'))->first()->value);
+        $this->assertSame(0, Artisan::call('arsenal:bayou-ballistics', ['--apply' => true, '--item' => '1865-carbine']));
+        $this->assertStringContainsString('canonical values written: 0', Artisan::output());
+        Http::assertSentCount(2);
+        $this->assertNotSame(0, Artisan::call('arsenal:bayou-ballistics', [
+            '--apply' => true, '--dry-run' => true, '--item' => '1865-carbine',
+        ]));
     }
 }
