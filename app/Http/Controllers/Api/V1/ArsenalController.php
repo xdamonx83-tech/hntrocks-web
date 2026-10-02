@@ -9,6 +9,11 @@ use Illuminate\Validation\ValidationException;
 
 class ArsenalController extends Controller
 {
+    private const MODE_SENSITIVE_STATS = [
+        'damage', 'dropRange', 'effectiveRange', 'rateOfFire', 'cycleTime', 'reload',
+        'muzzleVelocity', 'spread', 'sway', 'recoil', 'magazine', 'reserve',
+    ];
+
     public function index(Request $request): JsonResponse
     {
         $v = $request->validate([
@@ -84,11 +89,44 @@ class ArsenalController extends Controller
         })->filter(fn($s)=>$s['values']->filter(fn($v)=>$v !== null)->isNotEmpty())->values();
         return response()->json(['items'=>$items->map(fn($i)=>$this->compact($i,$request)),'compatible'=>true,
             'comparison_group'=>$items->first()->comparison_group,'stats'=>$stats,
+            'has_multiple_ammo_modes'=>$items->contains(fn($i)=>$this->hasMultipleAmmoModes($i)),
+            'mode_ambiguous_stat_keys'=>$items->flatMap(fn($i)=>$this->modeAmbiguousStatKeys($i))->unique()->values(),
             'stat_definitions'=>$definitions->map(fn($d)=>['key'=>$d->key,'label'=>$d->label,'unit'=>$d->unit,
                 'comparison_direction'=>$d->comparison_direction,'group'=>$d->group,'sort_order'=>$d->sort_order])->values(),
             'ammo'=>$items->mapWithKeys(fn($i)=>[$i->slug=>$this->ammoPayload($i)]),
             'falloff_curves'=>$items->mapWithKeys(fn($i)=>[$i->slug=>$i->ammo->mapWithKeys(fn($a)=>[$a->key=>$a->falloffPoints->map(fn($p)=>$this->pointPayload($p))->values()])]),
             'differences'=>$stats->filter(fn($s)=>$s['values']->filter(fn($v)=>$v !== null)->unique()->count()>1)->pluck('key')->values()]);
+    }
+
+    public function statRanges(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'comparison_group' => 'required|string|max:80',
+            'category' => 'nullable|string|max:80',
+            'class' => 'nullable|string|max:80',
+        ]);
+        $ranges = [];
+        $query = EquipmentItem::query()->where('source_status', 'active')
+            ->where('item_type', 'weapon')->where('comparison_group', $validated['comparison_group']);
+        if (isset($validated['category'])) $query->where('category', $validated['category']);
+        if (isset($validated['class'])) $query->where('equipment_class', $validated['class']);
+        $items = $query->with('stats.definition')->get();
+
+        foreach ($items as $item) {
+            foreach ($item->stats as $stat) {
+                $key = $stat->definition?->key;
+                if ($key === null || $stat->value === null) continue;
+                $value = (float) $stat->value;
+                if (! isset($ranges[$key])) {
+                    $ranges[$key] = ['min' => $value, 'max' => $value, 'count' => 0];
+                }
+                $ranges[$key]['min'] = min($ranges[$key]['min'], $value);
+                $ranges[$key]['max'] = max($ranges[$key]['max'], $value);
+                $ranges[$key]['count']++;
+            }
+        }
+
+        return response()->json(['comparison_group' => $validated['comparison_group'], 'ranges' => $ranges]);
     }
 
     private function compact(EquipmentItem $item, Request $request): array
@@ -116,6 +154,8 @@ class ArsenalController extends Controller
                 'comparison_direction'=>$s->definition?->comparison_direction,
                 'value'=>$s->value,
             ])->values(),
+            'has_multiple_ammo_modes'=>$this->hasMultipleAmmoModes($item),
+            'mode_ambiguous_stat_keys'=>$this->modeAmbiguousStatKeys($item),
             'ammo'=>$this->ammoPayload($item),
             'variants'=>$variants,
             'traits'=>$item->traits->map(fn($trait)=>['id'=>$trait->external_id,'name'=>$trait->name])->values(),
@@ -141,9 +181,38 @@ class ArsenalController extends Controller
 
     private function ammoPayload(EquipmentItem $item): array
     {
+        $definitions = EquipmentStatDefinition::query()->whereIn('key', $item->ammo->flatMap(
+            fn($ammo)=>array_keys($this->ammoRawStats($ammo->facts))
+        )->unique())->get()->keyBy('key');
         return $item->ammo->map(fn($ammo)=>['key'=>$ammo->key,'name'=>$ammo->name,'ammo_type'=>$ammo->ammo_type,
             'damage'=>$ammo->damage,'velocity'=>$ammo->velocity,'loaded'=>$ammo->loaded,'reserve'=>$ammo->reserve,
-            'facts'=>$ammo->facts,'falloff_points'=>$ammo->falloffPoints->map(fn($p)=>$this->pointPayload($p))->values()])->values()->all();
+            'facts'=>$ammo->facts,
+            'mode_stats'=>collect($this->ammoRawStats($ammo->facts))->filter(
+                fn($value,$key)=>is_numeric($value) && is_finite((float)$value) && $definitions->has($key)
+            )->map(fn($value,$key)=>[
+                'key'=>$key,'label'=>$definitions[$key]->label,'unit'=>$definitions[$key]->unit,
+                'value'=>(float)$value,'sort_order'=>$definitions[$key]->sort_order,
+            ])->sortBy('sort_order')->values(),
+            'falloff_points'=>$ammo->falloffPoints->map(fn($p)=>$this->pointPayload($p))->values()])->values()->all();
+    }
+
+    private function ammoRawStats(?array $facts): array
+    {
+        $stats = $facts['stats'] ?? [];
+        return is_array($stats) ? $stats : [];
+    }
+
+    private function hasMultipleAmmoModes(EquipmentItem $item): bool
+    {
+        return $item->ammo->pluck('ammo_type')->filter()->unique()->count() > 1;
+    }
+
+    private function modeAmbiguousStatKeys(EquipmentItem $item): array
+    {
+        if (! $this->hasMultipleAmmoModes($item)) return [];
+        return $item->stats->pluck('definition.key')->filter(
+            fn($key)=>in_array($key, self::MODE_SENSITIVE_STATS, true)
+        )->values()->all();
     }
 
     private function pointPayload($point): array

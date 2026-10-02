@@ -1,9 +1,12 @@
 <?php
 namespace Tests\Feature;
 
-use App\Models\{EquipmentItem,EquipmentSourceSnapshot,EquipmentSyncChange,EquipmentSyncRun};
+use App\Models\{EquipmentItem,EquipmentSkin,EquipmentSourceSnapshot,EquipmentSyncChange,EquipmentSyncRun};
 use App\Services\Equipment\{EquipmentSourceInterface,EquipmentSyncService};
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class ArsenalFoundationTest extends TestCase
@@ -114,6 +117,87 @@ class ArsenalFoundationTest extends TestCase
         $this->getJson('/api/v1/arsenal/compare?items=1865-carbine,pistol')->assertUnprocessable();
         $this->getJson('/api/v1/arsenal/compare?items=1865-carbine,berthier,pistol,frag-bomb')->assertUnprocessable();
         $this->getJson('/api/v1/arsenal/compare?items=1865-carbine,1865-carbine')->assertUnprocessable();
+    }
+
+    public function test_weapon_detail_uses_local_images_and_structured_relations(): void
+    {
+        Storage::fake('public');
+        $this->sync($this->rows());
+        $item = EquipmentItem::where('slug', '1865-carbine')->firstOrFail();
+        $variant = EquipmentItem::where('slug', 'berthier')->firstOrFail();
+        $variant->update(['family_id' => $item->family_id]);
+        Storage::disk('public')->put('arsenal/items/carbine.webp', 'base');
+        Storage::disk('public')->put('arsenal/wiki/skins/1865-carbine/skin.webp', 'skin');
+        $item->update(['local_asset_path' => 'arsenal/items/carbine.webp']);
+        EquipmentSkin::create([
+            'equipment_item_id' => $item->id, 'external_id' => 'local-skin',
+            'name' => 'Local Skin', 'rarity' => 'Legendary',
+            'local_asset_path' => 'arsenal/wiki/skins/1865-carbine/skin.webp',
+            'original_asset_url' => 'https://huntshowdown.wiki.gg/wiki/File:Skin.webp',
+        ]);
+        EquipmentSkin::create([
+            'equipment_item_id' => $item->id, 'external_id' => 'missing-skin',
+            'name' => 'Missing Skin', 'local_asset_path' => null,
+        ]);
+
+        $detail = $this->getJson('/api/v1/arsenal/1865-carbine')->assertOk()->json();
+        $this->assertSame('/storage/arsenal/items/carbine.webp', $detail['image_url']);
+        $this->assertSame('/storage/arsenal/wiki/skins/1865-carbine/skin.webp', $detail['skins'][0]['image_url']);
+        $this->assertNull($detail['skins'][1]['image_url']);
+        $this->assertSame('berthier', $detail['variants'][0]['slug']);
+        $this->assertSame('Iron Eye', $detail['traits'][0]['name']);
+        $this->assertSame('damage', $detail['stats'][0]['key']);
+        $this->assertIsArray($detail['ammo'][0]['falloff_points']);
+        $this->assertIsArray($detail['patch_history']);
+        $this->assertStringNotContainsString('huntshowdown.wiki.gg', json_encode($detail));
+    }
+
+    public function test_weapon_stat_ranges_use_only_active_items_in_same_comparison_group(): void
+    {
+        $this->sync($this->rows());
+        EquipmentItem::where('slug', 'pistol')->update(['comparison_group' => 'weapon:rifle']);
+        $query = '/api/v1/arsenal/stat-ranges?comparison_group=weapon:rifle&category=Rifle&class=Rifle';
+        $response = $this->getJson($query)->assertOk();
+        $response->assertJsonPath('comparison_group', 'weapon:rifle')
+            ->assertJsonPath('ranges.damage.min', 130)
+            ->assertJsonPath('ranges.damage.max', 145)
+            ->assertJsonPath('ranges.damage.count', 2);
+        EquipmentItem::where('slug', 'berthier')->update(['source_status' => 'missing']);
+        $this->getJson($query)->assertOk()
+            ->assertJsonPath('ranges.damage.min', 145)
+            ->assertJsonPath('ranges.damage.count', 1);
+        $this->getJson('/api/v1/arsenal/stat-ranges')->assertUnprocessable();
+    }
+
+    public function test_weapon_detail_url_resolves_to_react_shell_on_direct_load(): void
+    {
+        $route = Route::getRoutes()->match(Request::create('/arsenal/1865-carbine'));
+        $this->assertSame('arsenal.react.detail', $route->getName());
+        $this->assertSame('1865-carbine', $route->parameter('slug'));
+    }
+
+    public function test_multiple_ammo_modes_are_explicit_in_detail_and_comparison(): void
+    {
+        $this->sync($this->rows());
+        $item = EquipmentItem::where('slug', '1865-carbine')->firstOrFail();
+        $item->ammo()->create([
+            'key' => 'shell-1', 'name' => 'Basic', 'ammo_type' => 'Shell',
+            'damage' => 220, 'velocity' => 450,
+            'facts' => ['stats' => ['damage' => 220, 'muzzleVelocity' => 450, 'effectiveRange' => 20]],
+        ]);
+
+        $detail = $this->getJson('/api/v1/arsenal/1865-carbine')->assertOk()->json();
+        $this->assertTrue($detail['has_multiple_ammo_modes']);
+        $this->assertContains('damage', $detail['mode_ambiguous_stat_keys']);
+        $this->assertContains('muzzleVelocity', $detail['mode_ambiguous_stat_keys']);
+        $this->assertSame('damage', $detail['ammo'][1]['mode_stats'][0]['key']);
+        $this->assertEquals(220, $detail['ammo'][1]['mode_stats'][0]['value']);
+        $this->assertSame('Damage', $detail['ammo'][1]['mode_stats'][0]['label']);
+        $this->assertIsArray($detail['ammo'][0]['mode_stats']);
+
+        $compare = $this->getJson('/api/v1/arsenal/compare?items=1865-carbine,berthier')->assertOk()->json();
+        $this->assertTrue($compare['has_multiple_ammo_modes']);
+        $this->assertContains('damage', $compare['mode_ambiguous_stat_keys']);
     }
 
     public function test_comparison_groups_use_structured_source_fields(): void

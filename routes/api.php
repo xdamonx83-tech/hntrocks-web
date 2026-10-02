@@ -71,6 +71,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/arsenal/categories', [ArsenalController::class, 'categories'])->name('arsenal.categories');
     Route::get('/arsenal/classes', [ArsenalController::class, 'classes'])->name('arsenal.classes');
     Route::get('/arsenal/compare', [ArsenalController::class, 'compare'])->name('arsenal.compare');
+    Route::get('/arsenal/stat-ranges', [ArsenalController::class, 'statRanges'])->name('arsenal.stat-ranges');
     Route::get('/arsenal/{slug}/related', [ArsenalController::class, 'related'])->name('arsenal.related');
     Route::get('/arsenal/{slug}', [ArsenalController::class, 'show'])->name('arsenal.show');
     Route::get('/appearance', WebAppearanceController::class)->name('appearance.show');
