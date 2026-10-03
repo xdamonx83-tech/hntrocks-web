@@ -6,9 +6,11 @@ use App\Models\HntMap;
 use App\Models\HntMapMarker;
 use App\Models\User;
 use App\Services\Maps\Imports\MapMarkerImportExecutor;
+use App\Services\Maps\Imports\MapMarkerImportDatabaseFingerprint;
 use App\Services\Maps\Imports\MapMarkerImportProviderInterface;
 use App\Services\Maps\Imports\MapMarkerImportSourcePlan;
 use App\Services\Maps\Imports\StaleMapMarkerImportPreviewException;
+use App\Services\Maps\Imports\StaleMapMarkerImportDatabaseException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Request as HttpRequest;
@@ -121,7 +123,7 @@ class MapMarkerImportExecutorTest extends TestCase
         $this->provider->rows['stillwater-bayou'][0]['x'] = 1800.0;
         $this->expectException(StaleMapMarkerImportPreviewException::class);
         try {
-            app(MapMarkerImportExecutor::class)->execute($this->provider, ['stillwater-bayou'], ['tower:hunting'], 'sync', $fingerprint);
+            app(MapMarkerImportExecutor::class)->execute($this->provider, ['stillwater-bayou'], ['tower:hunting'], 'sync', $fingerprint, $this->databaseFingerprint(['tower:hunting']));
         } finally {
             $this->assertSame(0, HntMapMarker::query()->count());
         }
@@ -223,6 +225,69 @@ class MapMarkerImportExecutorTest extends TestCase
         $this->assertSame(0, HntMapMarker::query()->count());
     }
 
+    public function test_imported_marker_change_after_preview_blocks_execute(): void
+    {
+        $this->execute(['tower:hunting']);
+        $this->fakeKamille(false);
+        $this->actingAs($this->admin());
+        $this->post('/admin/maps/marker-import/preview', [
+            'provider' => 'kamille', 'maps' => ['stillwater-bayou'],
+            'categories' => ['tower:hunting'], 'mode' => 'sync',
+        ])->assertOk();
+        HntMapMarker::query()->where('source_key', 'tower-1')->first()->update(['x' => 888]);
+        $this->post('/admin/maps/marker-import/execute', [
+            'reviewed' => '1', 'confirmation' => 'IMPORT',
+        ])->assertOk()->assertSee('Die betroffenen Kartendaten haben sich seit der Vorschau geändert.');
+        $this->assertSame(888.0, HntMapMarker::query()->where('source_key', 'tower-1')->first()->x);
+        $this->assertSame(1, HntMapMarker::query()->count());
+    }
+
+    public function test_legacy_row_change_after_preview_blocks_replace_even_if_count_is_same(): void
+    {
+        $legacy = $this->marker($this->stillwater, 'tower', 'legacy:tower');
+        $sourceFingerprint = $this->fingerprint(['tower']);
+        $databaseFingerprint = $this->databaseFingerprint(['tower']);
+        $legacy->update(['x' => 777]);
+        $this->expectException(StaleMapMarkerImportDatabaseException::class);
+        try {
+            app(MapMarkerImportExecutor::class)->execute(
+                $this->provider, ['stillwater-bayou'], ['tower'], 'sync',
+                $sourceFingerprint, $databaseFingerprint, ['tower'], ['stillwater-bayou' => ['tower' => 1]],
+            );
+        } finally {
+            $this->assertSame(1, HntMapMarker::query()->count());
+            $this->assertSame(777.0, $legacy->fresh()->x);
+        }
+    }
+
+    public function test_unselected_marker_change_does_not_stale_selected_import(): void
+    {
+        $beetle = $this->marker($this->stillwater, 'beetle', 'external:beetle-other', 'beetle-other', 'kamille');
+        $sourceFingerprint = $this->fingerprint(['tower:hunting']);
+        $databaseFingerprint = $this->databaseFingerprint(['tower:hunting']);
+        $beetle->update(['x' => 333]);
+        $result = app(MapMarkerImportExecutor::class)->execute(
+            $this->provider, ['stillwater-bayou'], ['tower:hunting'], 'sync',
+            $sourceFingerprint, $databaseFingerprint,
+        );
+        $this->assertSame(1, $result['total']['created']);
+        $this->assertSame(333.0, $beetle->fresh()->x);
+    }
+
+    public function test_cash_spot_change_does_not_stale_or_write_cash(): void
+    {
+        $cash = $this->marker($this->stillwater, 'cash', 'submission:22');
+        $sourceFingerprint = $this->fingerprint(['tower:hunting']);
+        $databaseFingerprint = $this->databaseFingerprint(['tower:hunting']);
+        $cash->update(['x' => 321]);
+        $result = app(MapMarkerImportExecutor::class)->execute(
+            $this->provider, ['stillwater-bayou'], ['tower:hunting'], 'sync',
+            $sourceFingerprint, $databaseFingerprint,
+        );
+        $this->assertSame(1, $result['total']['created']);
+        $this->assertSame(321.0, $cash->fresh()->x);
+    }
+
     public function test_non_admin_cannot_execute_even_with_a_valid_confirmation(): void
     {
         $user = new User(['name' => 'User', 'username' => 'user', 'email' => 'user@example.test', 'is_admin' => false]);
@@ -284,7 +349,7 @@ class MapMarkerImportExecutorTest extends TestCase
     {
         return app(MapMarkerImportExecutor::class)->execute(
             $this->provider, ['stillwater-bayou'], $selection, $mode,
-            $this->fingerprint($selection, $mode), $replace,
+            $this->fingerprint($selection, $mode), $this->databaseFingerprint($selection), $replace,
             ['stillwater-bayou' => $legacy],
         );
     }
@@ -292,6 +357,11 @@ class MapMarkerImportExecutorTest extends TestCase
     private function fingerprint(array $selection, string $mode = 'sync'): string
     {
         return app(MapMarkerImportSourcePlan::class)->build($this->provider, ['stillwater-bayou'], $selection, $mode)['fingerprint'];
+    }
+
+    private function databaseFingerprint(array $selection): string
+    {
+        return app(MapMarkerImportDatabaseFingerprint::class)->create('kamille', ['stillwater-bayou'], $selection);
     }
 
     private function marker(HntMap $map, string $type, string $legacyKey, ?string $sourceKey = null, ?string $provider = null): HntMapMarker

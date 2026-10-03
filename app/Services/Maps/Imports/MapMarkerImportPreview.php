@@ -11,6 +11,7 @@ final class MapMarkerImportPreview
     public function __construct(
         private readonly MapMarkerImportSourcePlan $sourcePlan,
         private readonly MapMarkerImportProtection $protection,
+        private readonly MapMarkerImportDatabaseFingerprint $databaseFingerprint,
     )
     {
     }
@@ -37,6 +38,7 @@ final class MapMarkerImportPreview
             'mode' => $mode,
             'identity_columns_ready' => $identityColumnsReady,
             'fingerprint' => $plan['fingerprint'],
+            'database_fingerprint' => $this->databaseFingerprint->create($provider->id(), $mapSlugs, $selections),
             'maps' => [],
             'total' => $this->emptyCounts(),
         ];
@@ -123,6 +125,7 @@ final class MapMarkerImportPreview
                     'bugs' => (int) ($legacy['bugs'] ?? 0),
                     'wild' => (int) ($legacy['wild'] ?? 0),
                 ],
+                'protected_existing' => $this->protection->countsForMap($map->id),
                 'examples' => $examples,
             ];
         }

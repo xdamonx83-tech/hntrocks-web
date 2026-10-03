@@ -76,9 +76,12 @@ class MapMarkerImportPreviewTest extends TestCase
         $result = app(MapMarkerImportPreview::class)->create($this->provider(), ['stillwater-bayou'], ['tower:hunting'], 'sync');
 
         $this->assertSame($before, HntMapMarker::query()->orderBy('id')->get()->toArray());
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $result['database_fingerprint']);
         $this->assertSame(1, $result['total']['new']);
         $this->assertSame(0, $result['total']['removed_external']);
         $this->assertSame(['tower' => 1, 'bugs' => 1, 'wild' => 1], $result['maps']['stillwater-bayou']['legacy']);
+        $this->assertSame(1, $result['maps']['stillwater-bayou']['protected_existing']['cash']);
+        $this->assertSame(1, $result['maps']['stillwater-bayou']['protected_existing']['submission_key']);
         $this->assertSame(111.0, $cash->fresh()->x);
         $this->assertSame('submission:9', $cash->fresh()->legacy_key);
         $this->assertSame(50.0, $otherImported->fresh()->x);
@@ -197,6 +200,28 @@ class MapMarkerImportPreviewTest extends TestCase
         ])->assertOk()->assertSee('Import-Vorschau')->assertSee('HuntingTower')->assertSee('Neu: 9');
 
         $this->assertSame(0, HntMapMarker::query()->count());
+    }
+
+    public function test_artisan_preview_command_is_read_only_and_emits_json(): void
+    {
+        $manifest = [];
+        foreach ([
+            'easter_egg' => 'easter_eggs', 'wild_target' => 'wild_targets', 'brute' => 'brutes',
+            'beetle' => 'beetles', 'tower' => 'towers', 'big_tower' => 'big_towers',
+            'scout_tower' => 'scout_towers', 'workbench' => 'workbenches',
+        ] as $type => $category) {
+            $manifest[$type] = ['categories' => $category];
+        }
+        Http::fake([
+            'hunt.kamille.ovh/maps/cache/poi-types.json' => Http::response($manifest),
+            'hunt.kamille.ovh/maps/cache/data-1.json' => Http::response(json_decode(file_get_contents(base_path('tests/Fixtures/maps/kamille-stillwater-sample.json')), true)),
+        ]);
+        $before = HntMapMarker::query()->count();
+        $this->artisan('hnt:maps:marker-import-preview', [
+            '--provider' => 'kamille', '--map' => ['stillwater-bayou'],
+            '--category' => ['tower:hunting'], '--mode' => 'sync', '--json' => true,
+        ])->assertExitCode(0);
+        $this->assertSame($before, HntMapMarker::query()->count());
     }
 
     private function marker(string $legacyKey, string $type, float $x, float $y, ?string $provider = null, ?string $sourceKey = null, ?string $sourceCategory = null): HntMapMarker

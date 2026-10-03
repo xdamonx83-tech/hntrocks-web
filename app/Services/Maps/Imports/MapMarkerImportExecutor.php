@@ -16,6 +16,7 @@ final class MapMarkerImportExecutor
     public function __construct(
         private readonly MapMarkerImportSourcePlan $sourcePlan,
         private readonly MapMarkerImportProtection $protection,
+        private readonly MapMarkerImportDatabaseFingerprint $databaseFingerprint,
     )
     {
     }
@@ -30,6 +31,7 @@ final class MapMarkerImportExecutor
         array $selections,
         string $mode,
         string $expectedFingerprint,
+        string $expectedDatabaseFingerprint,
         array $replaceLegacy = [],
         array $expectedLegacy = [],
     ): array {
@@ -42,6 +44,11 @@ final class MapMarkerImportExecutor
         $plan = $this->sourcePlan->build($provider, $mapSlugs, $selections, $mode);
         if (! hash_equals($expectedFingerprint, $plan['fingerprint'])) {
             throw new StaleMapMarkerImportPreviewException();
+        }
+        if (! hash_equals($expectedDatabaseFingerprint, $this->databaseFingerprint->create(
+            $provider->id(), array_keys($plan['maps']), $plan['selections'],
+        ))) {
+            throw new StaleMapMarkerImportDatabaseException();
         }
         foreach ($replaceLegacy as $legacyType) {
             $targetType = self::LEGACY_TYPES[$legacyType];

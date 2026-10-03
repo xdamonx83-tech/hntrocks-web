@@ -114,6 +114,7 @@
                         </table>
                     </div>
                     <p class="hh-muted">Bei einem späteren Replace wären folgende bestehende Legacy-HNT-Marker betroffen: tower {{ $mapResult['legacy']['tower'] }}, bugs {{ $mapResult['legacy']['bugs'] }}, wild {{ $mapResult['legacy']['wild'] }}. Hier erfolgt kein Replace.</p>
+                    <p class="hh-muted">Cash-Schutz auf dieser Map: cash {{ $mapResult['protected_existing']['cash'] }}, Submission-Schlüssel {{ $mapResult['protected_existing']['submission_key'] }}, verknüpfte Submissions {{ $mapResult['protected_existing']['linked_submission'] }} ({{ $mapResult['protected_existing']['total_unique'] }} unterschiedliche geschützte Marker).</p>
                     @if(! empty($mapResult['examples']))
                         <details><summary>Beispielpositionen (HNT X/Y)</summary>
                             <ul>

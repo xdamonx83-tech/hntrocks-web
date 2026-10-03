@@ -7,6 +7,7 @@ use App\Services\Maps\Imports\MapMarkerImportPreview;
 use App\Services\Maps\Imports\MapMarkerImportExecutor;
 use App\Services\Maps\Imports\MapMarkerImportProviderRegistry;
 use App\Services\Maps\Imports\StaleMapMarkerImportPreviewException;
+use App\Services\Maps\Imports\StaleMapMarkerImportDatabaseException;
 use App\Services\Maps\Imports\SourceFormatException;
 use App\Services\Maps\Imports\SourceUnavailableException;
 use App\Support\Maps\MapMarkerRegistry;
@@ -49,6 +50,7 @@ final class AdminMapMarkerImportController extends Controller
                 'provider' => $result['provider'], 'maps' => array_keys($result['maps']),
                 'categories' => $validated['categories'], 'mode' => $result['mode'],
                 'fingerprint' => $result['fingerprint'],
+                'database_fingerprint' => $result['database_fingerprint'],
                 'legacy' => array_map(fn ($map) => $map['legacy'], $result['maps']),
                 'created_at' => now()->timestamp,
             ]);
@@ -86,7 +88,7 @@ final class AdminMapMarkerImportController extends Controller
         try {
             $result = $executor->execute(
                 $providers->get($plan['provider']), $plan['maps'], $plan['categories'],
-                $plan['mode'], $plan['fingerprint'], $replace, $plan['legacy'],
+                $plan['mode'], $plan['fingerprint'], $plan['database_fingerprint'], $replace, $plan['legacy'],
             );
             $request->session()->forget('map_marker_import_plan');
             return $this->view($providers, null, null, $result);
@@ -94,6 +96,10 @@ final class AdminMapMarkerImportController extends Controller
             $request->session()->forget('map_marker_import_plan');
             $this->logPreviewFailure($plan, $exception);
             return $this->view($providers, null, 'Die Quelldaten haben sich seit der Vorschau geändert. Bitte erstelle eine neue Vorschau.');
+        } catch (StaleMapMarkerImportDatabaseException $exception) {
+            $request->session()->forget('map_marker_import_plan');
+            $this->logPreviewFailure($plan, $exception);
+            return $this->view($providers, null, 'Die betroffenen Kartendaten haben sich seit der Vorschau geändert. Bitte erstelle eine neue Vorschau.');
         } catch (SourceUnavailableException $exception) {
             $this->logPreviewFailure($plan, $exception);
             return $this->view($providers, null, 'Die externe Markerquelle konnte nicht geladen werden.');

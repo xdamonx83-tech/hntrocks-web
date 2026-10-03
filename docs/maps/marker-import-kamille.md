@@ -81,6 +81,12 @@ The prepared migration remains unchanged. Its nullable identity columns preserve
 
 The separate React map filter already reads dynamic `markerTypes`, but its fallback color lookup still has fixed legacy type values. Before imported markers are displayed in the React redesign, map `easter_egg`, `workbench`, `beast`, `beetle`, `wild_target` and `tower` subtypes to registry/API colors and fallback circles in the verified current React checkout; preserve existing cash details, votes, comments and other map controls. No React repository files were changed in this phase.
 
+## Phase 2B database-state gate and read-only command
+
+The preview also computes a deterministic `database_fingerprint` from selected-provider rows in selected maps/categories and all legacy `tower`, `bugs` and `wild` rows in those maps. It includes row identity, source key/category, type/subtype, payload hash, position, labels, status and raw `updated_at`. Protected cash and submission markers are excluded from this importable state. The session stores this fingerprint alongside the source fingerprint. After reloading and validating the source, execution recalculates the database fingerprint before opening its write transaction and refuses a stale plan. Cash changes and unrelated categories do not invalidate a selected-category preview.
+
+`php artisan hnt:maps:marker-import-preview --provider=kamille --all-maps --all-supported --mode=sync --json` uses only the existing read-only preview service. It never migrates, imports, updates, deletes or replaces markers. The JSON includes `READ ONLY / DRY RUN`, per-map category counts, legacy counts and distinct cash/submission protection counts. `--map` and `--category` can narrow a run. A production run requires an explicitly verified production configuration and the additive migration; neither is initiated by this command.
+
 ## Production gates after Phase 2A
 
 1. Review source usage rights and the seven out-of-bounds entries; keep external attribution visible.
