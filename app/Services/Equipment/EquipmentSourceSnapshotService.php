@@ -84,6 +84,21 @@ class EquipmentSourceSnapshotService
         );
     }
 
+    public function recordBayouCatalog(EquipmentItem $item, array $weapon, array $catalog): EquipmentSourceSnapshot
+    {
+        return $this->record(
+            $item, 'bayou_index', [
+                'name' => $weapon['name'],
+                'source_weapon_id' => $weapon['id'],
+                'source_build_id' => $catalog['build_id'],
+                'data_sha256' => $catalog['data_sha256'],
+                'model_sha256' => $catalog['model_sha256'],
+                'zoom' => $weapon['zoom'],
+                'modes' => $weapon['modes'],
+            ], null, $weapon['id'], $catalog['build_id'], null, $weapon['source_url']
+        );
+    }
+
     public function recordBayouCarbinePilot(EquipmentItem $item, array $source): EquipmentSourceSnapshot
     {
         return $this->record(

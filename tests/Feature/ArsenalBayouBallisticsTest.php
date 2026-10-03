@@ -92,7 +92,7 @@ class ArsenalBayouBallisticsTest extends TestCase
         $this->assertNull($page['fields']['headMultiplier']);
         $this->assertSame(146.0, $page['checks']['dropRange']);
         $this->assertArrayNotHasKey('html', $page);
-        Http::assertSentCount(1);
+        Http::assertSentCount(0);
     }
 
     public function test_matching_requires_unique_exact_identity(): void
@@ -343,20 +343,19 @@ class ArsenalBayouBallisticsTest extends TestCase
         $this->assertSame(0, $item->stats()->count());
     }
 
-    public function test_apply_command_fetches_once_and_logs_written_values_without_check_only_writes(): void
+    public function test_apply_command_uses_reviewed_snapshot_and_logs_create_only_writes(): void
     {
         $item = $this->weapon();
         $this->stat($item, 'damage', 145);
         Http::fake(['https://bayouindex.com/*' => Http::response($this->html(), 200, ['Content-Type' => 'text/html'])]);
         $this->assertSame(0, Artisan::call('arsenal:bayou-ballistics', ['--apply' => true, '--item' => '1865-carbine']));
         $output = Artisan::output();
-        $this->assertStringContainsString('CREATE only', $output);
-        $this->assertStringContainsString('WRITTEN', $output);
-        $this->assertStringContainsString('canonical values written: 6', $output);
+        $this->assertStringContainsString('CREATE-only', $output);
+        $this->assertStringContainsString('DB_WRITES: 6', $output);
         $this->assertEquals(145, $item->stats()->whereHas('definition', fn ($query) => $query->where('key', 'damage'))->first()->value);
         $this->assertSame(0, Artisan::call('arsenal:bayou-ballistics', ['--apply' => true, '--item' => '1865-carbine']));
-        $this->assertStringContainsString('canonical values written: 0', Artisan::output());
-        Http::assertSentCount(2);
+        $this->assertStringContainsString('DB_WRITES: 0', Artisan::output());
+        Http::assertSentCount(0);
         $this->assertNotSame(0, Artisan::call('arsenal:bayou-ballistics', [
             '--apply' => true, '--dry-run' => true, '--item' => '1865-carbine',
         ]));

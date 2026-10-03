@@ -10,6 +10,65 @@ use RuntimeException;
 class BayouIndexBallisticsSource
 {
     private const BASE_URL = 'https://bayouindex.com/weapons/';
+    private ?array $catalog = null;
+
+    /** A reviewed public-build snapshot; normal imports never fetch BayouIndex. */
+    public function catalog(): array
+    {
+        if ($this->catalog !== null) return $this->catalog;
+        $path = resource_path('bayou-ballistics-snapshot.json');
+        $catalog = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+        if (($catalog['source_key'] ?? null) !== 'bayou_index'
+            || ! preg_match('/\A[a-f0-9]{64}\z/', (string) ($catalog['data_sha256'] ?? ''))
+            || ! preg_match('/\A[a-f0-9]{64}\z/', (string) ($catalog['model_sha256'] ?? ''))
+            || ! is_array($catalog['weapons'] ?? null)) {
+            throw new RuntimeException('Invalid reviewed Bayou public snapshot.');
+        }
+        $this->catalog = $catalog;
+        return $catalog;
+    }
+
+    /** @return array<string, array> */
+    public function catalogWeapons(): array
+    {
+        $weapons = [];
+        foreach ($this->catalog()['weapons'] as $weapon) {
+            $slug = (string) ($weapon['id'] ?? '');
+            if (! preg_match('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $slug)
+                || isset($weapons[$slug]) || ! is_array($weapon['modes'] ?? null)) {
+                throw new RuntimeException('Duplicate or invalid weapon in Bayou snapshot.');
+            }
+            $weapons[$slug] = $weapon + [
+                'source_page_slug' => $slug,
+                'source_key' => 'bayou_index',
+                'observed_at' => $this->catalog()['generated_at'],
+                'payload_hash' => hash('sha256', json_encode($weapon, JSON_THROW_ON_ERROR)),
+            ];
+        }
+        return $weapons;
+    }
+
+    public function bulletDropProfile(array $mode, array $weapon): ?array
+    {
+        $flight = $mode['bullet_drop'] ?? null;
+        $catalog = $this->catalog();
+        if (! is_array($flight) || ($mode['projectile_kind'] ?? null) !== 'standard_bullet') return null;
+        return $flight + [
+            'max_distance_m' => $catalog['max_distance_m'],
+            'head_size_m' => $catalog['head_size_m'],
+            'reference_aim' => $catalog['reference_aim'],
+            'zone_offsets_m' => $catalog['zone_offsets_m'],
+            'source_model_verified' => true,
+            'game_rules_verified' => false,
+            'status' => 'available',
+            'source' => [
+                'key' => 'bayou_index', 'url' => $weapon['source_url'],
+                'data_url' => $catalog['data_url'], 'model_url' => $catalog['model_url'],
+                'build_id' => $catalog['build_id'], 'observed_at' => $catalog['generated_at'],
+                'source_ammo_id' => $mode['id'],
+            ],
+        ];
+    }
 
     public function preview(string $slug): array
     {

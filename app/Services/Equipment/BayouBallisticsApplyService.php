@@ -27,7 +27,153 @@ class BayouBallisticsApplyService
         private readonly BayouBallisticsPlanner $planner,
         private readonly BayouWeaponMatcher $matcher,
         private readonly EquipmentSourceSnapshotService $snapshots,
+        private readonly BayouIndexBallisticsSource $catalogSource,
     ) {}
+
+    /** Apply only missing fields from the checked-in public-build snapshot. */
+    public function applyCatalog(EquipmentItem $item): array
+    {
+        return DB::transaction(function () use ($item): array {
+            $locked = EquipmentItem::query()->whereKey($item->getKey())
+                ->where('slug', $item->slug)->where('item_type', 'weapon')
+                ->where('source_status', 'active')->lockForUpdate()->firstOrFail();
+            $source = $this->catalogSource->catalogWeapons()[$locked->slug] ?? null;
+            if ($source === null) throw new InvalidArgumentException('No exact reviewed public weapon ID.');
+            $match = $this->matcher->match($source, EquipmentItem::query()
+                ->where('item_type', 'weapon')->where('source_status', 'active')
+                ->with('family')->get());
+            if ($match['item']?->getKey() !== $locked->getKey() || $match['confidence'] < 95) {
+                throw new InvalidArgumentException('Bayou weapon identity is ambiguous or changed.');
+            }
+            $locked->load(['stats.definition', 'ammo.falloffPoints']);
+            $plan = $this->planner->planCatalog($locked, $source, $match['confidence']);
+            $snapshot = null;
+            $rows = [];
+            $written = 0;
+            foreach ($plan['rows'] as $row) {
+                if ($row['action'] !== 'CREATE') {
+                    $rows[] = $row + ['result' => $row['action']];
+                    continue;
+                }
+                $field = $row['field'];
+                $ammoKey = null;
+                $statKey = null;
+                $profile = false;
+                if ($field === 'stat.zoom') {
+                    $statKey = 'zoom';
+                } elseif (preg_match('/\Aammo\.([a-zA-Z0-9_-]+)\.stat\.([a-zA-Z]+)\z/', $field, $parts)
+                    && in_array($parts[2], self::AMMO_FIELDS, true)) {
+                    $ammoKey = $parts[1]; $statKey = $parts[2];
+                } elseif (preg_match('/\Aammo\.([a-zA-Z0-9_-]+)\.bullet_drop\z/', $field, $parts)) {
+                    $ammoKey = $parts[1]; $profile = true;
+                } else {
+                    $rows[] = $row + ['result' => 'SKIP'];
+                    continue;
+                }
+                $matchMode = $ammoKey === null ? null : ($plan['matches'][$ammoKey] ?? null);
+                if ($ammoKey !== null && ($matchMode === null || $matchMode['confidence'] < 95)) {
+                    $rows[] = array_merge($row, ['result' => 'REVIEW_REQUIRED',
+                        'reason' => 'Ammo mode no longer has a unique source identity.']);
+                    continue;
+                }
+                $mode = $ammoKey === null ? null : collect($source['modes'])
+                    ->firstWhere('id', $matchMode['source_ammo_id']);
+                if ($ammoKey !== null && ($mode === null || ($mode['projectile_kind'] ?? null) !== 'standard_bullet')) {
+                    $rows[] = array_merge($row, ['result' => 'UNSUPPORTED',
+                        'reason' => 'Nonstandard projectile model.']);
+                    continue;
+                }
+                $expected = $profile ? $this->catalogSource->bulletDropProfile($mode, $source)
+                    : ($ammoKey === null ? $source['zoom'] : ($mode['stats'][$statKey] ?? null));
+                if ($expected === null || $expected !== $row['bayou'] || $statKey === 'headMultiplier') {
+                    $rows[] = array_merge($row, ['result' => 'SKIP', 'reason' => 'No approved source CREATE value.']);
+                    continue;
+                }
+                $provenanceKeys = [$field];
+                $isBase = false;
+                $ammo = null;
+                $facts = null;
+                if ($ammoKey !== null) {
+                    $ammo = EquipmentAmmo::query()->where('equipment_item_id', $locked->id)
+                        ->where('key', $ammoKey)->lockForUpdate()->first();
+                    if ($ammo === null) {
+                        $rows[] = $row + ['result' => 'REVIEW_REQUIRED'];
+                        continue;
+                    }
+                    $isBase = in_array(strtolower(trim((string) $ammo->name)), ['basic', 'stock'], true)
+                        && strcasecmp((string) $ammo->ammo_type, (string) $locked->ammo_type) === 0;
+                    if ($isBase && $statKey !== null) $provenanceKeys[] = 'stat.'.$statKey;
+                    $facts = $ammo->facts ?? [];
+                    if (! is_array($facts) || (isset($facts['stats']) && ! is_array($facts['stats']))
+                        || ($profile ? ($facts['bullet_drop'] ?? null) !== null
+                            : ($facts['stats'][$statKey] ?? null) !== null)) {
+                        $rows[] = array_merge($row, ['result' => 'REVIEW_REQUIRED',
+                            'reason' => 'Canonical ammo value appeared before apply.']);
+                        continue;
+                    }
+                }
+                if (EquipmentFieldProvenance::query()->where('equipment_item_id', $locked->id)
+                    ->whereIn('field_key', $provenanceKeys)->lockForUpdate()->exists()) {
+                    $rows[] = array_merge($row, ['result' => 'REVIEW_REQUIRED',
+                        'reason' => 'Existing provenance protects this field.']);
+                    continue;
+                }
+                $definition = null;
+                if ($statKey !== null) {
+                    if (! is_numeric($expected) || ! is_finite((float) $expected) || (float) $expected <= 0) {
+                        $rows[] = $row + ['result' => 'SKIP'];
+                        continue;
+                    }
+                    $definition = EquipmentStatDefinition::query()->where('key', $statKey)->first();
+                    if ($definition === null) {
+                        $rows[] = $row + ['result' => 'SKIP'];
+                        continue;
+                    }
+                    if ($ammoKey === null || $isBase) {
+                        if (EquipmentStat::query()->where('equipment_item_id', $locked->id)
+                            ->where('stat_definition_id', $definition->id)->lockForUpdate()->exists()) {
+                            $rows[] = array_merge($row, ['result' => 'REVIEW_REQUIRED',
+                                'reason' => 'Item-level canonical value appeared before apply.']);
+                            continue;
+                        }
+                    }
+                }
+                $snapshot ??= $this->snapshots->recordBayouCatalog($locked, $source, $this->catalogSource->catalog());
+                if ($ammo !== null) {
+                    if ($profile) $facts['bullet_drop'] = $expected;
+                    else $facts['stats'][$statKey] = (float) $expected;
+                    $ammo->facts = $facts;
+                    $ammo->save();
+                } else {
+                    EquipmentStat::query()->create([
+                        'equipment_item_id' => $locked->id,
+                        'stat_definition_id' => $definition->id,
+                        'value' => $expected,
+                    ]);
+                }
+                EquipmentFieldProvenance::query()->create([
+                    'equipment_item_id' => $locked->id,
+                    'field_key' => $field,
+                    'source_key' => 'bayou_index',
+                    'source_snapshot_id' => $snapshot->id,
+                    'is_manual_override' => false,
+                    'metadata' => [
+                        'source_url' => $source['source_url'],
+                        'source_weapon_id' => $source['id'],
+                        'source_ammo_id' => $mode['id'] ?? null,
+                        'source_build_id' => $this->catalogSource->catalog()['build_id'],
+                        'source_value' => $expected,
+                        'confidence' => $row['confidence'],
+                        'observed_at' => $source['observed_at'],
+                    ],
+                ]);
+                $written++;
+                $rows[] = $row + ['result' => 'WRITTEN'];
+            }
+            return ['item' => $locked->slug, 'rows' => $rows, 'written' => $written,
+                'snapshot_id' => $snapshot?->id];
+        });
+    }
 
     public function apply(EquipmentItem $item, array $source): array
     {
