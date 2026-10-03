@@ -67,12 +67,25 @@ Run with the preview service against a fresh **isolated in-memory SQLite databas
 
 The public HNT Maps API reported current `tower`/`bugs`/`wild` counts of 12/6/18, 16/8/19, 15/5/13 and 6/7/10 for the four maps respectively. These are read-only API counts, not direct production database counts. The preview service queries the current database for its own legacy counts when run in the Admin Center.
 
-Phase 1 has no execution route or command. The additive migration is prepared but must not be run on the production database in this phase. Cash markers, including community-submission markers, are outside all selectable import categories.
+Phase 1 had no execution route or command. The additive migration was prepared but has not been run on the production database. Cash markers, including community-submission markers, are outside all selectable import categories.
 
-## Phase 2 gates
+## Phase 2A write path (code and isolated tests only)
+
+The Admin Center now has a separate POST execution route. After a read-only preview, the server stores the selection, source fingerprint, legacy counts, administrator ID and creation time in the session for at most ten minutes. The form requires a checked preview acknowledgement and the exact word `IMPORT`. Execution fetches the structured source again, rebuilds the normalized source plan and aborts before writing if its fingerprint differs. A failed source fetch or format check also aborts.
+
+`MapMarkerImportExecutor` then writes only selected maps and categories in one database transaction. It identifies external markers by map, provider and source key, creates missing markers, updates changed markers in `sync` mode, leaves changed markers alone in `add_only` mode, and reports externally missing markers without deleting them. Unknown wild-target subtypes and out-of-bounds points remain skipped. The result contains per-map, per-category and total counts. No screenshots, images or descriptions are stored.
+
+`MapMarkerImportProtection` blocks every write or legacy deletion for a marker of type `cash`, a `submission:` legacy key or a marker linked from `HntMapCashSpotSubmission`. The service refuses execution if its identity migration or the cash-submission table is absent. Legacy replacement is a separate optional choice, unchecked by default, requiring its own acknowledgement and `ERSETZEN`. It requires all source subtypes of the chosen target category, checks the legacy count against the confirmed preview, verifies every expected imported marker matches the source, and only then deletes selected-map `tower`, `bugs` or `wild` rows with `source_provider IS NULL` in the same transaction. A failed import or check rolls back the full run.
+
+The prepared migration remains unchanged. Its nullable identity columns preserve legacy rows; the composite unique index prevents duplicates for non-null provider and source key. The key width is 64 + 120 characters plus map ID, within the common 767-byte utf8mb4 index limit (64×4 + 120×4 + 8 = 744 bytes). Rollback drops the index and columns. It has not been applied to production.
+
+The separate React map filter already reads dynamic `markerTypes`, but its fallback color lookup still has fixed legacy type values. Before imported markers are displayed in the React redesign, map `easter_egg`, `workbench`, `beast`, `beetle`, `wild_target` and `tower` subtypes to registry/API colors and fallback circles in the verified current React checkout; preserve existing cash details, votes, comments and other map controls. No React repository files were changed in this phase.
+
+## Production gates after Phase 2A
 
 1. Review source usage rights and the seven out-of-bounds entries; keep external attribution visible.
-2. Review the phase 1 preview against the real production database and explicitly approve the additive migration before running it there.
-3. Build a separate, explicitly gated execution service using the `(hnt_map_id, source_provider, source_key)` unique identity, compare content hashes and enforce selected-category and cash-submission exclusions in the write path.
-4. Review and separately approve any replacement of legacy `tower`, `bugs` and `wild` markers. No automatic legacy deletion belongs to the importer.
-5. Align the separate React map filter's fallback colors with the registry when imported marker display is enabled there. Its current filter reads the backend's dynamic `markerTypes` list, but its color lookup still contains fixed values for legacy types.
+2. Explicitly approve the additive migration, apply it on production only in a separately authorized run, and check the schema/index result.
+3. Create and review a fresh dry run against the production database, including counts, protected markers, skipped points and selected categories.
+4. Separately approve and perform the first import only after that review. Confirm the created/updated/unchanged counts and public/API marker rendering.
+5. Separately review and approve each desired legacy replacement with fresh counts. Keep the replacement options off until this review is complete.
+6. Align the separate React map filter colors and circle fallbacks on its verified current server branch before enabling imported markers there.

@@ -699,6 +699,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/maps', [AdminMapController::class, 'index'])->name('maps.index');
         Route::get('/maps/marker-import', [AdminMapMarkerImportController::class, 'index'])->name('maps.import.index');
         Route::post('/maps/marker-import/preview', [AdminMapMarkerImportController::class, 'preview'])->name('maps.import.preview');
+        Route::post('/maps/marker-import/execute', [AdminMapMarkerImportController::class, 'execute'])->name('maps.import.execute');
         Route::get('/maps/create', [AdminRemoteMapController::class, 'create'])->name('maps.create');
         Route::post('/maps', [AdminRemoteMapController::class, 'store'])->name('maps.store');
         Route::get('/maps/{map:slug}/edit', [AdminRemoteMapController::class, 'edit'])->name('maps.edit');

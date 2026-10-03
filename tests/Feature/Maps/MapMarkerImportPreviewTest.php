@@ -53,6 +53,11 @@ class MapMarkerImportPreviewTest extends TestCase
 
         $migration = require base_path('database/migrations/2026_10_03_000001_add_external_identity_to_hnt_map_markers.php');
         $migration->up();
+        Schema::create('hnt_map_cash_spot_submissions', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('hnt_map_marker_id')->nullable();
+            $table->timestamps();
+        });
 
         $this->map = HntMap::query()->create([
             'slug' => 'stillwater-bayou', 'name' => 'Stillwater Bayou', 'width' => 2048, 'height' => 2048, 'is_active' => true,

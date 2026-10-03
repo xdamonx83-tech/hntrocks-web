@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\Maps\Imports\MapMarkerImportPreview;
+use App\Services\Maps\Imports\MapMarkerImportExecutor;
 use App\Services\Maps\Imports\MapMarkerImportProviderRegistry;
+use App\Services\Maps\Imports\StaleMapMarkerImportPreviewException;
 use App\Services\Maps\Imports\SourceFormatException;
 use App\Services\Maps\Imports\SourceUnavailableException;
 use App\Support\Maps\MapMarkerRegistry;
@@ -12,12 +14,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Illuminate\Validation\Rule;
+use Throwable;
 
 final class AdminMapMarkerImportController extends Controller
 {
     public function index(Request $request, MapMarkerImportProviderRegistry $providers): View
     {
         $this->guardAdmin($request);
+        $request->session()->forget('map_marker_import_plan');
 
         return $this->view($providers, null, null);
     }
@@ -25,6 +30,7 @@ final class AdminMapMarkerImportController extends Controller
     public function preview(Request $request, MapMarkerImportProviderRegistry $providers, MapMarkerImportPreview $preview): View
     {
         $this->guardAdmin($request);
+        $request->session()->forget('map_marker_import_plan');
 
         $validated = $request->validate([
             'provider' => ['required', 'string', 'max:64'],
@@ -38,6 +44,14 @@ final class AdminMapMarkerImportController extends Controller
         try {
             $provider = $providers->get($validated['provider']);
             $result = $preview->create($provider, $validated['maps'], $validated['categories'], $validated['mode']);
+            $request->session()->put('map_marker_import_plan', [
+                'user_id' => $request->user()->id,
+                'provider' => $result['provider'], 'maps' => array_keys($result['maps']),
+                'categories' => $validated['categories'], 'mode' => $result['mode'],
+                'fingerprint' => $result['fingerprint'],
+                'legacy' => array_map(fn ($map) => $map['legacy'], $result['maps']),
+                'created_at' => now()->timestamp,
+            ]);
 
             return $this->view($providers, $result, null);
         } catch (SourceUnavailableException $exception) {
@@ -52,13 +66,54 @@ final class AdminMapMarkerImportController extends Controller
         }
     }
 
-    private function view(MapMarkerImportProviderRegistry $providers, ?array $result, ?string $error): View
+    public function execute(Request $request, MapMarkerImportProviderRegistry $providers, MapMarkerImportExecutor $executor): View
+    {
+        $this->guardAdmin($request);
+        $validated = $request->validate([
+            'reviewed' => ['required', 'accepted'],
+            'confirmation' => ['required', 'string', Rule::in(['IMPORT'])],
+            'replace_legacy' => ['sometimes', 'array', 'min:1'],
+            'replace_legacy.*' => ['required', 'distinct', Rule::in(['tower', 'bugs', 'wild'])],
+            'replace_reviewed' => $request->has('replace_legacy') ? ['required', 'accepted'] : ['sometimes', 'accepted'],
+            'replace_confirmation' => $request->has('replace_legacy') ? ['required', Rule::in(['ERSETZEN'])] : ['sometimes', 'nullable'],
+        ]);
+        $plan = $request->session()->get('map_marker_import_plan');
+        if (! is_array($plan) || ($plan['user_id'] ?? null) !== $request->user()->id
+            || now()->timestamp - ($plan['created_at'] ?? 0) > 600) {
+            return $this->view($providers, null, 'Die Import-Vorschau ist abgelaufen. Bitte erstelle eine neue Vorschau.');
+        }
+        $replace = $validated['replace_legacy'] ?? [];
+        try {
+            $result = $executor->execute(
+                $providers->get($plan['provider']), $plan['maps'], $plan['categories'],
+                $plan['mode'], $plan['fingerprint'], $replace, $plan['legacy'],
+            );
+            $request->session()->forget('map_marker_import_plan');
+            return $this->view($providers, null, null, $result);
+        } catch (StaleMapMarkerImportPreviewException $exception) {
+            $request->session()->forget('map_marker_import_plan');
+            $this->logPreviewFailure($plan, $exception);
+            return $this->view($providers, null, 'Die Quelldaten haben sich seit der Vorschau geändert. Bitte erstelle eine neue Vorschau.');
+        } catch (SourceUnavailableException $exception) {
+            $this->logPreviewFailure($plan, $exception);
+            return $this->view($providers, null, 'Die externe Markerquelle konnte nicht geladen werden.');
+        } catch (SourceFormatException $exception) {
+            $this->logPreviewFailure($plan, $exception);
+            return $this->view($providers, null, 'Das Datenformat der Quelle hat sich möglicherweise geändert.');
+        } catch (Throwable $exception) {
+            $this->logPreviewFailure($plan, $exception);
+            return $this->view($providers, null, 'Der Markerimport wurde abgebrochen; es wurden keine Teiländerungen übernommen.');
+        }
+    }
+
+    private function view(MapMarkerImportProviderRegistry $providers, ?array $result, ?string $error, ?array $executed = null): View
     {
         return view('admin.maps.import', [
             'providers' => $providers->all(),
             'registry' => MapMarkerRegistry::all(),
             'result' => $result,
             'error' => $error,
+            'executed' => $executed,
         ]);
     }
 

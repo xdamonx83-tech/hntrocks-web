@@ -2,15 +2,16 @@
 
 namespace App\Services\Maps\Imports;
 
-use App\Models\HntMap;
 use App\Models\HntMapMarker;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use InvalidArgumentException;
 
 final class MapMarkerImportPreview
 {
-    public function __construct(private readonly ExternalMapCoordinateTransformer $transformer)
+    public function __construct(
+        private readonly MapMarkerImportSourcePlan $sourcePlan,
+        private readonly MapMarkerImportProtection $protection,
+    )
     {
     }
 
@@ -21,20 +22,9 @@ final class MapMarkerImportPreview
      */
     public function create(MapMarkerImportProviderInterface $provider, array $mapSlugs, array $selections, string $mode): array
     {
-        if (! in_array($mode, ['sync', 'add_only'], true) || $mapSlugs === [] || $selections === []) {
-            throw new InvalidArgumentException('Invalid import preview selection.');
-        }
-
-        $mapSlugs = array_values(array_unique($mapSlugs));
-        $selections = array_values(array_unique($selections));
-        $allowedSelections = array_keys($provider->categories());
-        $allowedSelections[] = 'tower';
-        $allowedSelections[] = 'wild_target:rotjaw';
-        $allowedSelections[] = 'wild_target:hellborn';
-
-        if (array_diff($mapSlugs, array_keys($provider->maps())) || array_diff($selections, $allowedSelections)) {
-            throw new InvalidArgumentException('Unknown map or marker category.');
-        }
+        $plan = $this->sourcePlan->build($provider, $mapSlugs, $selections, $mode);
+        $mapSlugs = array_keys($plan['maps']);
+        $selections = $plan['selections'];
 
         $identityColumnsReady = Schema::hasColumn('hnt_map_markers', 'source_provider')
             && Schema::hasColumn('hnt_map_markers', 'source_key')
@@ -46,46 +36,19 @@ final class MapMarkerImportPreview
             'provider_name' => $provider->name(),
             'mode' => $mode,
             'identity_columns_ready' => $identityColumnsReady,
+            'fingerprint' => $plan['fingerprint'],
             'maps' => [],
             'total' => $this->emptyCounts(),
         ];
 
-        foreach ($mapSlugs as $slug) {
-            $map = HntMap::query()->where('slug', $slug)->first();
-
-            if ($map === null) {
-                throw new InvalidArgumentException('Selected HNT map is unavailable.');
-            }
-            $sourceMarkers = $provider->markers($slug);
-            $selected = [];
-            $unknownSubtypeCount = 0;
-
-            foreach ($sourceMarkers as $source) {
-                if (! $this->selected($source, $selections)) {
-                    continue;
-                }
-
-                if ($source['type'] === 'wild_target' && $source['subtype'] === null) {
-                    $unknownSubtypeCount++;
-                    continue;
-                }
-
-                $point = $this->transformer->transform([$source['y'], $source['x']], $map->width, $map->height);
-                $category = $source['subtype'] === null ? $source['type'] : $source['type'].':'.$source['subtype'];
-                $normalized = [
-                    ...$source,
-                    ...$point,
-                    'source_provider' => $provider->id(),
-                    'category' => $category,
-                ];
-                $normalized['source_payload_hash'] = $this->hash($normalized);
-                $selected[$source['source_key']] = $normalized;
-            }
+        foreach ($plan['maps'] as $slug => $mapPlan) {
+            $map = $mapPlan['map'];
+            $selected = $mapPlan['rows'];
+            $unknownSubtypeCount = $mapPlan['unclassified'];
 
             $existing = $identityColumnsReady
                 ? HntMapMarker::query()->where('hnt_map_id', $map->id)
                     ->where('source_provider', $provider->id())
-                    ->where('type', '!=', 'cash')
                     ->get()->keyBy('source_key')
                 : collect();
             $rows = [];
@@ -95,7 +58,7 @@ final class MapMarkerImportPreview
                 $category = $source['category'];
                 $rows[$category] ??= $this->emptyCounts();
                 $current = $existing->get($sourceKey);
-                $outcome = $current === null ? 'new' : ($this->matches($current, $source) ? 'unchanged' : 'changed');
+                $outcome = $current === null ? 'new' : ($this->protection->isProtected($current) ? 'protected' : ($this->matches($current, $source) ? 'unchanged' : 'changed'));
                 $rows[$category][$outcome]++;
 
                 if (count($examples) < 12) {
@@ -109,7 +72,7 @@ final class MapMarkerImportPreview
             }
 
             foreach ($existing as $sourceKey => $marker) {
-                if (isset($selected[$sourceKey]) || in_array($sourceKey, $provider->outOfBoundsKeys($slug), true) || ! $this->selected([
+                if ($this->protection->isProtected($marker) || isset($selected[$sourceKey]) || in_array($sourceKey, $mapPlan['outOfBoundsKeys'], true) || ! MapMarkerImportSourcePlan::selected([
                     'type' => $marker->type,
                     'subtype' => $marker->subtype,
                 ], $selections)) {
@@ -126,17 +89,9 @@ final class MapMarkerImportPreview
                 $rows['wild_target:unclassified']['unclassified'] = $unknownSubtypeCount;
             }
 
-            foreach ($provider->outOfBounds($slug) as $sourceCategory => $count) {
-                foreach ($provider->categories() as $category) {
-                    if ($category['source_category'] !== $sourceCategory || ! $this->selected($category, $selections)) {
-                        continue;
-                    }
-
-                    $categoryKey = $category['subtype'] === null ? $category['type'] : $category['type'].':'.$category['subtype'];
-                    $rows[$categoryKey] ??= $this->emptyCounts();
-                    $rows[$categoryKey]['out_of_bounds'] += $count;
-                    break;
-                }
+            foreach ($mapPlan['outOfBounds'] as $categoryKey => $count) {
+                $rows[$categoryKey] ??= $this->emptyCounts();
+                $rows[$categoryKey]['out_of_bounds'] += $count;
             }
 
             $legacyQuery = HntMapMarker::query()->where('hnt_map_id', $map->id)
@@ -186,29 +141,6 @@ final class MapMarkerImportPreview
     }
 
     /** @param array<string, mixed> $source */
-    private function selected(array $source, array $selections): bool
-    {
-        $type = $source['type'];
-        $subtype = $source['subtype'] ?? null;
-
-        return in_array($type, $selections, true)
-            || ($subtype !== null && in_array($type.':'.$subtype, $selections, true));
-    }
-
-    /** @param array<string, mixed> $source */
-    private function hash(array $source): string
-    {
-        return hash('sha256', json_encode([
-            'type' => $source['type'],
-            'subtype' => $source['subtype'],
-            'x' => $source['x'],
-            'y' => $source['y'],
-            'label_de' => $source['label_de'],
-            'label_en' => $source['label_en'],
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    }
-
-    /** @param array<string, mixed> $source */
     private function matches(HntMapMarker $current, array $source): bool
     {
         return $current->source_payload_hash === $source['source_payload_hash']
@@ -221,9 +153,9 @@ final class MapMarkerImportPreview
             && $current->label_en === $source['label_en'];
     }
 
-    /** @return array{new: int, changed: int, unchanged: int, removed_external: int, unclassified: int, out_of_bounds: int} */
+    /** @return array{new: int, changed: int, unchanged: int, removed_external: int, unclassified: int, out_of_bounds: int, protected: int} */
     private function emptyCounts(): array
     {
-        return ['new' => 0, 'changed' => 0, 'unchanged' => 0, 'removed_external' => 0, 'unclassified' => 0, 'out_of_bounds' => 0];
+        return ['new' => 0, 'changed' => 0, 'unchanged' => 0, 'removed_external' => 0, 'unclassified' => 0, 'out_of_bounds' => 0, 'protected' => 0];
     }
 }

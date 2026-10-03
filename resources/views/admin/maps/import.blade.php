@@ -17,7 +17,7 @@
         <div>
             <p class="hh-kicker"><a href="{{ route('admin.maps.index') }}">← Zurück zu Admin Maps</a></p>
             <h1>Marker importieren</h1>
-            <p>Strukturierte Marker von einer externen Quelle prüfen. Diese Seite zeigt ausschließlich eine Vorschau und verändert keine Marker.</p>
+            <p>Strukturierte Marker von einer externen Quelle prüfen und nach gesonderter Bestätigung importieren.</p>
         </div>
     </section>
 
@@ -79,7 +79,7 @@
             <legend><strong>Importmodus</strong></legend>
             <label><input type="radio" name="mode" value="sync" @checked(request('mode', 'sync') === 'sync')> Synchronisieren</label><br>
             <label><input type="radio" name="mode" value="add_only" @checked(request('mode') === 'add_only')> Nur neue Marker hinzufügen</label>
-            <p class="hh-muted">Beide Modi werden ausschließlich simuliert. Es gibt keinen ausführbaren Import auf dieser Seite.</p>
+            <p class="hh-muted">Die Vorschau verändert keine Marker. Ein Import erfordert anschließend eine eigene Bestätigung.</p>
             <p class="hh-muted">„Nur neue Marker hinzufügen“ würde bestehende Marker auch dann auslassen, wenn die Vorschau sie als geändert erkennt.</p>
         </fieldset>
 
@@ -100,7 +100,7 @@
                     <h3>{{ $mapResult['name'] }}</h3>
                     <div class="hh-admin-map-import-table-wrap">
                         <table class="hh-admin-map-import-table">
-                            <thead><tr><th>Kategorie</th><th>Neu</th><th>Geändert</th><th>Unverändert</th><th>Extern entfernt</th><th>Nicht klassifiziert</th><th>Außerhalb Karte</th></tr></thead>
+                            <thead><tr><th>Kategorie</th><th>Neu</th><th>Geändert</th><th>Unverändert</th><th>Extern entfernt</th><th>Geschützt</th><th>Nicht klassifiziert</th><th>Außerhalb Karte</th></tr></thead>
                             <tbody>
                                 @foreach($mapResult['categories'] as $category => $counts)
                                     @php
@@ -108,7 +108,7 @@
                                         $categoryLabel = $registry[$type]['label_de'] ?? $type;
                                         $subtypeLabel = $subtype === 'unclassified' ? 'Nicht klassifiziert' : ($registry[$type]['subtypes'][$subtype]['de'] ?? $subtype);
                                     @endphp
-                                    <tr><th>{{ $categoryLabel }}{{ $subtype ? ' · '.$subtypeLabel : '' }}</th><td>+ {{ $counts['new'] }}</td><td>~ {{ $counts['changed'] }}</td><td>= {{ $counts['unchanged'] }}</td><td>- {{ $counts['removed_external'] }}</td><td>{{ $counts['unclassified'] ? '! '.$counts['unclassified'] : '0' }}</td><td>{{ $counts['out_of_bounds'] ? '! '.$counts['out_of_bounds'] : '0' }}</td></tr>
+                                    <tr><th>{{ $categoryLabel }}{{ $subtype ? ' · '.$subtypeLabel : '' }}</th><td>+ {{ $counts['new'] }}</td><td>~ {{ $counts['changed'] }}</td><td>= {{ $counts['unchanged'] }}</td><td>- {{ $counts['removed_external'] }}</td><td>{{ $counts['protected'] }}</td><td>{{ $counts['unclassified'] ? '! '.$counts['unclassified'] : '0' }}</td><td>{{ $counts['out_of_bounds'] ? '! '.$counts['out_of_bounds'] : '0' }}</td></tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -126,7 +126,50 @@
                 </div>
             @endforeach
             <h3>Gesamt</h3>
-            <p>Neu: {{ $result['total']['new'] }} · Geändert: {{ $result['total']['changed'] }} · Unverändert: {{ $result['total']['unchanged'] }} · Extern nicht mehr vorhanden: {{ $result['total']['removed_external'] }} · Nicht eindeutig klassifiziert: {{ $result['total']['unclassified'] }} · Außerhalb der Karte übersprungen: {{ $result['total']['out_of_bounds'] }}</p>
+            <p>Neu: {{ $result['total']['new'] }} · Geändert: {{ $result['total']['changed'] }} · Unverändert: {{ $result['total']['unchanged'] }} · Extern nicht mehr vorhanden: {{ $result['total']['removed_external'] }} · Geschützt: {{ $result['total']['protected'] }} · Nicht eindeutig klassifiziert: {{ $result['total']['unclassified'] }} · Außerhalb der Karte übersprungen: {{ $result['total']['out_of_bounds'] }}</p>
+        </section>
+        <section class="hh-card hh-section-space" aria-labelledby="import-prepare-title">
+            <h2 id="import-prepare-title">Import vorbereiten</h2>
+            <p><strong>Quelle:</strong> {{ $result['provider_name'] }}<br>
+                <strong>Maps:</strong> {{ implode(', ', array_map(fn ($slug) => $result['maps'][$slug]['name'], array_keys($result['maps']))) }}<br>
+                <strong>Kategorien:</strong> {{ implode(', ', request('categories', [])) }}<br>
+                <strong>Modus:</strong> {{ $result['mode'] === 'sync' ? 'Synchronisieren' : 'Nur neue Marker hinzufügen' }}</p>
+            <p>Neu: {{ $result['total']['new'] }} · Geändert: {{ $result['total']['changed'] }} · Nicht klassifiziert: {{ $result['total']['unclassified'] }} · Außerhalb Karte: {{ $result['total']['out_of_bounds'] }}</p>
+            @if($result['identity_columns_ready'])
+                <form method="post" action="{{ route('admin.maps.import.execute') }}">
+                    @csrf
+                    <p><label><input type="checkbox" name="reviewed" value="1" required> Ich habe die Import-Vorschau geprüft.</label></p>
+                    <p><label for="import-confirmation">Zur Bestätigung exakt <strong>IMPORT</strong> eingeben:</label><br>
+                        <input id="import-confirmation" type="text" name="confirmation" required autocomplete="off"></p>
+                    <fieldset class="hh-section-space">
+                        <legend><strong>Legacy-Marker ersetzen (separate, optionale Freigabe)</strong></legend>
+                        <p class="hh-muted">Standardmäßig aus. Nur Legacy-Marker der gewählten Maps und Klassen ohne Source-Provider werden nach erfolgreichem Import entfernt.</p>
+                        @foreach(['tower' => 'Alte HNT-Türme', 'bugs' => 'Alte HNT-Käfer', 'wild' => 'Alte HNT-Wildziele'] as $legacyType => $legacyLabel)
+                            @php
+                                $targetType = ['tower' => 'tower', 'bugs' => 'beetle', 'wild' => 'wild_target'][$legacyType];
+                                $newCount = collect($result['maps'])->sum(fn ($map) => collect($map['categories'])->filter(fn ($counts, $key) => $key === $targetType || str_starts_with($key, $targetType.':'))->sum('new'));
+                                $oldCount = collect($result['maps'])->sum(fn ($map) => $map['legacy'][$legacyType]);
+                            @endphp
+                            <label class="hh-admin-map-import-replace"><input type="checkbox" name="replace_legacy[]" value="{{ $legacyType }}"> {{ $legacyLabel }} ersetzen · bestehend: {{ $oldCount }} · neu: {{ $newCount }}</label>
+                        @endforeach
+                        <p><label><input type="checkbox" name="replace_reviewed" value="1"> Ich bestätige das gesonderte Legacy-Replacement.</label></p>
+                        <p><label for="replace-confirmation">Für Legacy-Replacement exakt <strong>ERSETZEN</strong> eingeben:</label><br>
+                            <input id="replace-confirmation" type="text" name="replace_confirmation" autocomplete="off"></p>
+                    </fieldset>
+                    <button class="hh-primary-button" type="submit">Marker importieren</button>
+                </form>
+            @else
+                <p class="hh-alert">Import gesperrt: Die vorbereitende Migration ist in dieser Datenbank noch nicht angewendet.</p>
+            @endif
+        </section>
+    @endif
+    @if($executed)
+        <section class="hh-card hh-section-space" role="status">
+            <h2>Markerimport abgeschlossen</h2>
+            <p>Neu: {{ $executed['total']['created'] }} · Aktualisiert: {{ $executed['total']['updated'] }} · Unverändert: {{ $executed['total']['unchanged'] }} · Nur-hinzufügen übersprungen: {{ $executed['total']['skipped_add_only'] }} · Extern nicht mehr vorhanden: {{ $executed['total']['external_missing'] }} · Geschützt: {{ $executed['total']['protected'] }} · Nicht klassifiziert: {{ $executed['total']['unclassified'] }} · Außerhalb Karte: {{ $executed['total']['out_of_bounds'] }}</p>
+            @foreach($executed['maps'] as $slug => $map)
+                <p><strong>{{ $map['name'] }}:</strong> @foreach($map['legacy_deleted'] as $type => $count) {{ $type }}: {{ $count }} Legacy-Marker ersetzt. @endforeach</p>
+            @endforeach
         </section>
     @endif
 @endsection
@@ -139,6 +182,7 @@
         .hh-admin-map-import-table-wrap{overflow-x:auto}
         .hh-admin-map-import-table{width:100%;border-collapse:collapse;text-align:left}
         .hh-admin-map-import-table th,.hh-admin-map-import-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.12);white-space:nowrap}
+        .hh-admin-map-import-replace{display:block;margin:10px 0}
     </style>
 @endpush
 
