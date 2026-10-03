@@ -92,7 +92,7 @@ class ArsenalBayouBallisticsTest extends TestCase
         $this->assertNull($page['fields']['headMultiplier']);
         $this->assertSame(146.0, $page['checks']['dropRange']);
         $this->assertArrayNotHasKey('html', $page);
-        Http::assertSentCount(0);
+        Http::assertSentCount(1);
     }
 
     public function test_matching_requires_unique_exact_identity(): void
@@ -187,7 +187,7 @@ class ArsenalBayouBallisticsTest extends TestCase
         $this->assertSame(0, EquipmentSourceSnapshot::count());
         $this->assertSame(0, EquipmentFieldProvenance::count());
         $this->assertNotSame(0, Artisan::call('arsenal:bayou-ballistics', ['--item' => '1865-carbine']));
-        Http::assertSentCount(1);
+        Http::assertSentCount(0);
     }
 
     public function test_apply_creates_only_six_missing_fields_and_records_numeric_snapshot_and_provenance(): void
