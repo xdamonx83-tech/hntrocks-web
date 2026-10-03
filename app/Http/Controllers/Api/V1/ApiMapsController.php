@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
+use App\Support\Maps\MapMarkerRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
@@ -12,19 +13,6 @@ use Throwable;
 
 class ApiMapsController extends Controller
 {
-    private const MARKER_TYPES = [
-        'compound',
-        'boss',
-        'spawn',
-        'supply',
-        'extract',
-        'cash',
-        'tower',
-        'bugs',
-        'wild',
-        'tarot',
-    ];
-
     public function index(): JsonResponse
     {
         $maps = HntMap::query()
@@ -34,7 +22,7 @@ class ApiMapsController extends Controller
             ->get()
             ->map(function (HntMap $map): array {
                 $markers = $this->readDatabaseMarkers($map);
-                $markerCounts = array_fill_keys(self::MARKER_TYPES, 0);
+                $markerCounts = array_fill_keys(MapMarkerRegistry::visibleKeys(), 0);
 
                 foreach ($markers as $marker) {
                     $type = $marker['type'] ?? null;
@@ -82,7 +70,7 @@ class ApiMapsController extends Controller
             'height' => $map->height,
             'image_url' => $this->assetUrl($map->image_path),
             'lines_url' => $this->assetUrl($map->lines_path, true),
-            'marker_types' => self::MARKER_TYPES,
+            'marker_types' => MapMarkerRegistry::visibleKeys(),
         ];
     }
 
@@ -121,6 +109,7 @@ class ApiMapsController extends Controller
                     return $this->markerPayload([
                         'id' => $marker->id,
                         'type' => $marker->type,
+                        'subtype' => $marker->subtype,
                         'x' => $marker->x,
                         'y' => $marker->y,
                         'label_de' => $marker->label_de,
@@ -145,7 +134,7 @@ class ApiMapsController extends Controller
      */
     private function markerPayload(array $marker): ?array
     {
-        if (! in_array($marker['type'] ?? null, self::MARKER_TYPES, true)
+        if (! in_array($marker['type'] ?? null, MapMarkerRegistry::visibleKeys(), true)
             || ! is_numeric($marker['x'] ?? null)
             || ! is_numeric($marker['y'] ?? null)) {
             return null;
@@ -160,6 +149,7 @@ class ApiMapsController extends Controller
         return [
             'id' => is_numeric($marker['id'] ?? null) ? (int) $marker['id'] : null,
             'type' => $marker['type'],
+            'subtype' => $marker['subtype'] ?? null,
             'x' => (float) $marker['x'],
             'y' => (float) $marker['y'],
             'label' => $label ?? __('ui.maps_type_'.$marker['type']),

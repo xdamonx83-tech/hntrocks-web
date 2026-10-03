@@ -12,7 +12,13 @@ class HntMapMarker extends Model
         'hnt_map_id',
         'legacy_key',
         'source_id',
+        'source_provider',
+        'source_key',
+        'source_category',
         'type',
+        'subtype',
+        'source_payload_hash',
+        'last_synced_at',
         'x',
         'y',
         'label_de',
@@ -27,6 +33,7 @@ class HntMapMarker extends Model
     {
         return [
             'source_id' => 'integer',
+            'last_synced_at' => 'datetime',
             'x' => 'float',
             'y' => 'float',
             'sort_order' => 'integer',

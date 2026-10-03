@@ -18,6 +18,7 @@
         'width' => $map['width'],
         'height' => $map['height'],
         'markers' => $markers,
+        'markerDefinitions' => $markerDefinitions,
         'typeLabels' => $typeLabels,
         'searchEmptyText' => __('ui.maps_search_empty'),
         'measureStartText' => __('ui.maps_measure_start'),

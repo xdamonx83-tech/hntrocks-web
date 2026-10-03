@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminNavigationController;
 use App\Http\Controllers\Admin\AdminMomentOfWeekController;
 use App\Http\Controllers\Admin\AdminLoadoutChallengeController;
 use App\Http\Controllers\Admin\AdminMapController;
+use App\Http\Controllers\Admin\AdminMapMarkerImportController;
 use App\Http\Controllers\Admin\AdminRemoteMapController;
 use App\Http\Controllers\Admin\AdminWeeklyContractController;
 use App\Http\Controllers\Admin\AdminApprovedOutboundLinkController;
@@ -696,6 +697,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/hunt-news/{item}/publish', [AdminHuntNewsController::class, 'publish'])->name('hunt-news.publish');
         Route::post('/hunt-news/{item}/skip', [AdminHuntNewsController::class, 'skip'])->name('hunt-news.skip');
         Route::get('/maps', [AdminMapController::class, 'index'])->name('maps.index');
+        Route::get('/maps/marker-import', [AdminMapMarkerImportController::class, 'index'])->name('maps.import.index');
+        Route::post('/maps/marker-import/preview', [AdminMapMarkerImportController::class, 'preview'])->name('maps.import.preview');
         Route::get('/maps/create', [AdminRemoteMapController::class, 'create'])->name('maps.create');
         Route::post('/maps', [AdminRemoteMapController::class, 'store'])->name('maps.store');
         Route::get('/maps/{map:slug}/edit', [AdminRemoteMapController::class, 'edit'])->name('maps.edit');

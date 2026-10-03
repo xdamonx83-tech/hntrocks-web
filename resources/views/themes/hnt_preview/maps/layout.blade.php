@@ -13,6 +13,6 @@
     @if($imageAvailable && ! $dataError)
         <script src="{{ asset('assets/vendor/leaflet/leaflet.js') }}?v=1.9.4" defer></script>
     @endif
-    <script src="{{ asset('assets/hnt/maps/maps.js') }}?v=12" defer></script>
+    <script src="{{ asset('assets/hnt/maps/maps.js') }}?v=13" defer></script>
 </body>
 </html>

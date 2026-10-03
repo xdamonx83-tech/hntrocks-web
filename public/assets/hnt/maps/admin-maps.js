@@ -36,15 +36,7 @@
     var selectedReference = null;
     var draftLayer = null;
     var addMode = false;
-    var iconSizes = {
-        boss: 32,
-        spawn: 24,
-        supply: 22,
-        cash: 22,
-        tower: 24,
-        bugs: 24,
-        wild: 24
-    };
+    var markerDefinitions = config.markerDefinitions || {};
 
     var map = window.L.map(mapElement, {
         crs: window.L.CRS.Simple,
@@ -81,12 +73,13 @@
     }
 
     function markerIcon(type) {
-        var size = iconSizes[type];
+        var definition = markerDefinitions[type] || {};
+        var size = Number(definition.size);
 
-        if (size) {
+        if (definition.icon_key && size) {
             return window.L.divIcon({
                 className: 'hh-admin-map-marker hh-admin-map-marker--' + type,
-                html: '<span><img src="/assets/hnt/maps/icons/' + type + '.webp" alt=""></span>',
+                html: '<span><img src="/assets/hnt/maps/icons/' + definition.icon_key + '.webp" alt=""></span>',
                 iconSize: [size, size],
                 iconAnchor: [size / 2, size / 2]
             });
@@ -94,9 +87,9 @@
 
         return window.L.divIcon({
             className: 'hh-admin-map-marker hh-admin-map-marker--fallback',
-            html: '<span>' + (type === 'compound' ? 'C' : '•') + '</span>',
-            iconSize: [26, 26],
-            iconAnchor: [13, 13]
+            html: '<span style="border-color:' + (definition.color || '#d6a84f') + '">' + (type === 'compound' ? 'C' : '•') + '</span>',
+            iconSize: [size || 26, size || 26],
+            iconAnchor: [(size || 26) / 2, (size || 26) / 2]
         });
     }
 

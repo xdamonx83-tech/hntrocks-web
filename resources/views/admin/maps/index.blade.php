@@ -26,7 +26,10 @@
                 <h2>Maps</h2>
                 <p class="hh-muted">Neue Maps werden zunächst inaktiv angelegt. Danach Bild/Lines prüfen, Marker setzen und die Map aktivieren.</p>
             </div>
-            <a class="hh-primary-button" href="{{ route('admin.maps.create') }}">Neue Map anlegen</a>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <a class="hh-secondary-button" href="{{ route('admin.maps.import.index') }}">Marker importieren</a>
+                <a class="hh-primary-button" href="{{ route('admin.maps.create') }}">Neue Map anlegen</a>
+            </div>
         </div>
 
         <div class="hh-admin-map-list hh-section-space">

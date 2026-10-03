@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\HntMap;
 use App\Models\HntMapCashSpotSubmission;
 use App\Models\HntMapMarker;
+use App\Support\Maps\MapMarkerRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -89,6 +90,8 @@ class AdminMapController extends Controller
                 'store_url' => route('admin.maps.markers.store', $map),
             ],
             'markers' => $markers,
+            'markerDefinitions' => MapMarkerRegistry::all(),
+            'markerPresentation' => MapMarkerRegistry::presentation(),
         ]);
     }
 
@@ -260,9 +263,7 @@ class AdminMapController extends Controller
     private function validateMarker(Request $request, HntMap $map): array
     {
         $validated = $request->validate([
-            'type' => ['required', 'string', Rule::in([
-                'compound', 'boss', 'spawn', 'supply', 'extract', 'cash', 'tower', 'bugs', 'wild', 'tarot',
-            ])],
+            'type' => ['required', 'string', Rule::in(MapMarkerRegistry::keys())],
             'x' => ['required', 'numeric', 'min:0', 'max:'.$map->width],
             'y' => ['required', 'numeric', 'min:0', 'max:'.$map->height],
             'label_de' => ['nullable', 'string', 'max:120'],
@@ -317,6 +318,7 @@ class AdminMapController extends Controller
         return [
             'id' => $marker->id,
             'type' => $marker->type,
+            'subtype' => $marker->subtype,
             'x' => $marker->x,
             'y' => $marker->y,
             'label' => $this->markerLabel($marker),

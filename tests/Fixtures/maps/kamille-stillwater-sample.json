@@ -1,0 +1,12 @@
+{
+  "i": 1,
+  "n": "Stillwater Bayou",
+  "easter_eggs": [{"id":"EasterEgg001","c":[3312,2855],"d":"ignored foreign description","u":["ignored.webp"]}],
+  "wild_targets": [{"id":"WildRotjaw01","c":[3686,1748],"boss":"rotjaw"},{"id":"WildHellbor1","c":[2140,1250],"boss":"hellborn"}],
+  "brutes": [{"id":"BruteSource1","c":[1684,3513]}],
+  "beetles": [{"id":"BeetleSource","c":[987,2683]}],
+  "towers": [{"id":"HuntingTower","c":[4003,1556]}],
+  "big_towers": [{"id":"WatchTower01","c":[1737,2431]}],
+  "scout_towers": [{"id":"ScoutTower01","c":[850,1737]}],
+  "workbenches": [{"id":"Workbench001","c":[3394,682]}]
+}

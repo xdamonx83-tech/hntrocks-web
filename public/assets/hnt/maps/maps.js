@@ -74,31 +74,11 @@
     var linesLayer = config.linesUrl
         ? window.L.imageOverlay(config.linesUrl, bounds, {opacity: 0.72, interactive: false}).addTo(map)
         : null;
-    var colors = {
-        compound: '#d6a84f',
-        boss: '#b8463a',
-        spawn: '#6d9dc5',
-        supply: '#69a878',
-        extract: '#d9d2c2',
-        cash: '#c2ad4a',
-        tower: '#9b7653',
-        bugs: '#7d9260',
-        wild: '#9c6f5d',
-        tarot: '#876f9e'
-    };
+    var markerDefinitions = config.markerDefinitions || {};
+    var colors = {};
     var layers = {};
     var markerReferences = [];
     var filterInputs = {};
-    // Marker types without a supplied asset keep the established circle-marker fallback.
-    var iconSizes = {
-        boss: 32,
-        spawn: 24,
-        supply: 18,
-        cash: 18,
-        tower: 24,
-        bugs: 24,
-        wild: 24
-    };
     var activeBossPoint = null;
     var activeBossRings = [];
     var cashDetailModal = null;
@@ -122,20 +102,22 @@
     var cashDetailMarker = null;
     var cashDetailLastFocus = null;
 
-    Object.keys(colors).forEach(function (type) {
+    Object.keys(markerDefinitions).forEach(function (type) {
+        colors[type] = markerDefinitions[type].color;
         layers[type] = window.L.layerGroup().addTo(map);
     });
 
     function markerIcon(type) {
-        var size = iconSizes[type];
+        var definition = markerDefinitions[type] || {};
+        var size = Number(definition.size);
 
-        if (!size) {
+        if (!definition.icon_key || !size) {
             return null;
         }
 
         return window.L.divIcon({
             className: 'hnt-map-icon-marker hnt-map-icon-marker--' + type,
-            html: '<span class="hnt-map-icon-ring"><img src="/assets/hnt/maps/icons/' + type + '.webp" alt=""></span>',
+            html: '<span class="hnt-map-icon-ring"><img src="/assets/hnt/maps/icons/' + definition.icon_key + '.webp" alt=""></span>',
             iconSize: [size, size],
             iconAnchor: [size / 2, size / 2],
             popupAnchor: [0, -(size / 2 + 3)]

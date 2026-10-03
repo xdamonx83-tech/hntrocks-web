@@ -23,7 +23,7 @@
                 <select data-admin-map-filter>
                     <option value="">Alle Typen</option>
                     @foreach($markers->pluck('type')->unique()->sort() as $type)
-                        <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                        <option value="{{ $type }}">{{ $markerDefinitions[$type]['label_de'] ?? $type }}</option>
                     @endforeach
                 </select>
             </label>
@@ -42,6 +42,7 @@
                 'height' => $map['height'],
                 'storeUrl' => $map['store_url'],
                 'markers' => $markers,
+                'markerDefinitions' => $markerPresentation,
             ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
         @endif
     </section>
@@ -60,8 +61,8 @@
                 <label>
                     Typ
                     <select name="type" required>
-                        @foreach(['compound', 'boss', 'spawn', 'supply', 'extract', 'cash', 'tower', 'bugs', 'wild', 'tarot'] as $type)
-                            <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                        @foreach($markerDefinitions as $type => $definition)
+                            <option value="{{ $type }}">{{ $definition['label_de'] }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -113,5 +114,5 @@
 
 @push('scripts')
     <script src="{{ asset('assets/vendor/leaflet/leaflet.js') }}?v=1.9.4"></script>
-    <script src="{{ asset('assets/hnt/maps/admin-maps.js') }}?v=2" defer></script>
+    <script src="{{ asset('assets/hnt/maps/admin-maps.js') }}?v=3" defer></script>
 @endpush

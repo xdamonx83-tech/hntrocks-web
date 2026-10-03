@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Maps;
 use App\Http\Controllers\Controller;
 use App\Models\HntMap;
 use App\Support\MapVoteVisitorIdentity;
+use App\Support\Maps\MapMarkerRegistry;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,31 +17,6 @@ use Throwable;
 
 class MapController extends Controller
 {
-    private const MARKER_TYPES = [
-        'compound',
-        'boss',
-        'spawn',
-        'supply',
-        'extract',
-        'cash',
-        'tower',
-        'bugs',
-        'wild',
-        'tarot',
-    ];
-
-    private const SEO_MARKER_TYPES = [
-        'compound',
-        'boss',
-        'spawn',
-        'supply',
-        'extract',
-        'cash',
-        'tower',
-        'bugs',
-        'wild',
-    ];
-
     public function index(Request $request): View|Response
     {
         $maps = HntMap::query()
@@ -180,7 +156,7 @@ class MapController extends Controller
                 'url' => route('maps.show', $availableMap->slug),
             ])
             ->values();
-        $markerCounts = array_fill_keys(self::SEO_MARKER_TYPES, 0);
+        $markerCounts = array_fill_keys(MapMarkerRegistry::seoKeys(), 0);
         $compounds = [];
 
         foreach ($markers as $marker) {
@@ -218,7 +194,8 @@ class MapController extends Controller
                 'cash_spot_submission_url' => route('maps.cash-spots.store', ['map' => $map->slug]),
             ],
             'markers' => $markers,
-            'markerTypes' => self::MARKER_TYPES,
+            'markerTypes' => MapMarkerRegistry::visibleKeys(),
+            'markerDefinitions' => MapMarkerRegistry::presentation(),
             'availableMaps' => $availableMaps,
             'seo' => [
                 'name' => $map->name,
@@ -287,6 +264,7 @@ class MapController extends Controller
             return $markersQuery->get()->map(function ($marker) use ($votesAvailable, $commentsAvailable): ?array {
                 $safeMarker = $this->safeMarker([
                     'type' => $marker->type,
+                    'subtype' => $marker->subtype,
                     'x' => $marker->x,
                     'y' => $marker->y,
                     'label' => [
@@ -331,7 +309,7 @@ class MapController extends Controller
      */
     private function safeMarker(array $marker): ?array
     {
-        if (! in_array($marker['type'] ?? null, self::MARKER_TYPES, true)
+        if (! in_array($marker['type'] ?? null, MapMarkerRegistry::visibleKeys(), true)
             || ! is_numeric($marker['x'] ?? null)
             || ! is_numeric($marker['y'] ?? null)) {
             return null;
@@ -342,6 +320,7 @@ class MapController extends Controller
         $label = trim((string) ($labels[$locale] ?? $labels['en'] ?? ''));
         $safeMarker = [
             'type' => $marker['type'],
+            'subtype' => $marker['subtype'] ?? null,
             'x' => (float) $marker['x'],
             'y' => (float) $marker['y'],
             'label' => $label !== '' ? $label : __('ui.maps_type_'.$marker['type']),
