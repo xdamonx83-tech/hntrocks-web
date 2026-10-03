@@ -71,7 +71,13 @@ class PreviewArsenalBayouBallistics extends Command
                 'ammo' => [], 'fields' => [],
             ];
             try {
-                $page = $weapons[$item->slug] ?? null;
+                $sourceSlug = match ($item->slug) {
+                    'burgess' => 'burgess-folding',
+                    'burgess-bayonet' => 'burgess-folding-bayonet',
+                    'burgess-trauma' => 'burgess-folding-trauma',
+                    default => $item->slug,
+                };
+                $page = $weapons[$sourceSlug] ?? null;
                 if ($page === null) {
                     $summary['UNMATCHED WEAPONS']++;
                     $summary['UNMATCHED AMMO MODES'] += $item->ammo->count();

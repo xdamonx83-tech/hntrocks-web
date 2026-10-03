@@ -37,7 +37,13 @@ class BayouBallisticsApplyService
             $locked = EquipmentItem::query()->whereKey($item->getKey())
                 ->where('slug', $item->slug)->where('item_type', 'weapon')
                 ->where('source_status', 'active')->lockForUpdate()->firstOrFail();
-            $source = $this->catalogSource->catalogWeapons()[$locked->slug] ?? null;
+            $sourceSlug = match ($locked->slug) {
+                'burgess' => 'burgess-folding',
+                'burgess-bayonet' => 'burgess-folding-bayonet',
+                'burgess-trauma' => 'burgess-folding-trauma',
+                default => $locked->slug,
+            };
+            $source = $this->catalogSource->catalogWeapons()[$sourceSlug] ?? null;
             if ($source === null) throw new InvalidArgumentException('No exact reviewed public weapon ID.');
             $match = $this->matcher->match($source, EquipmentItem::query()
                 ->where('item_type', 'weapon')->where('source_status', 'active')
