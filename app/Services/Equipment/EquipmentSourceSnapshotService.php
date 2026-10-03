@@ -84,6 +84,14 @@ class EquipmentSourceSnapshotService
         );
     }
 
+    public function recordBayouCarbinePilot(EquipmentItem $item, array $source): EquipmentSourceSnapshot
+    {
+        return $this->record(
+            $item, 'bayou_index', $source, null, $source['slug'],
+            $source['source_build_id'], null, $source['source_url']
+        );
+    }
+
     private function record(
         EquipmentItem $item,
         string $sourceKey,

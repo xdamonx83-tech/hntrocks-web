@@ -15,7 +15,10 @@ class WeaponBallisticsPresenter
         'leg' => 'legMultiplier',
     ];
 
-    public function __construct(private readonly WeaponDamageCalculator $calculator) {}
+    public function __construct(
+        private readonly WeaponDamageCalculator $calculator,
+        private readonly WeaponBulletDropCalculator $bulletDrop,
+    ) {}
 
     public function summary(EquipmentItem $item): array
     {
@@ -38,6 +41,7 @@ class WeaponBallisticsPresenter
             $supported = count(array_filter($profiles['150'] ?? [], fn ($profile) => $profile !== null));
 
             return $inputs + [
+                'bullet_drop' => $this->bulletDrop->summary(data_get($ammo->facts, 'bullet_drop')),
                 'status' => $supported === 0 ? 'unsupported' : ($supported === count(self::ZONES) ? 'ready' : 'partial'),
                 'damage_profiles' => $profiles,
             ];
@@ -75,6 +79,7 @@ class WeaponBallisticsPresenter
             'hunter_hp' => $hp,
             'status' => count(array_filter($results)) ? 'available' : 'unsupported',
             'hit_zones' => $results,
+            'bullet_drop' => $this->bulletDrop->atDistance(data_get($ammo->facts, 'bullet_drop'), $distance),
             'model' => 'hnt_piecewise_linear_v1',
             'exact_game_rules_verified' => false,
         ];
