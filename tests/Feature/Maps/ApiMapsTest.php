@@ -47,6 +47,7 @@ class ApiMapsTest extends TestCase
                     'image_url',
                     'lines_url',
                     'marker_types',
+                    'marker_definitions',
                     'marker_count',
                     'marker_counts',
                 ]],
@@ -54,6 +55,7 @@ class ApiMapsTest extends TestCase
 
         $this->assertStringStartsWith('http', $response->json('data.0.image_url'));
         $this->assertNull($response->json('data.0.lines_url'));
+        $this->assertSame('#57d98a', $response->json('data.0.marker_definitions.easter_egg.color'));
     }
 
     public function test_dynamic_database_map_detail_is_public(): void
@@ -84,6 +86,7 @@ class ApiMapsTest extends TestCase
                     'image_url',
                     'lines_url',
                     'marker_types',
+                    'marker_definitions',
                     'markers',
                 ],
             ]);

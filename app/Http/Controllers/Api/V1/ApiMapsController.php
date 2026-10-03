@@ -71,6 +71,7 @@ class ApiMapsController extends Controller
             'image_url' => $this->assetUrl($map->image_path),
             'lines_url' => $this->assetUrl($map->lines_path, true),
             'marker_types' => MapMarkerRegistry::visibleKeys(),
+            'marker_definitions' => MapMarkerRegistry::presentation(),
         ];
     }
 
