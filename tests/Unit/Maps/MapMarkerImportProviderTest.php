@@ -24,7 +24,7 @@ class MapMarkerImportProviderTest extends TestCase
         $first = $provider->parseMap('stillwater-bayou', $this->fixture());
         $second = $provider->parseMap('stillwater-bayou', $this->fixture());
 
-        $this->assertCount(9, $first);
+        $this->assertCount(18, $first);
         $this->assertSame($first, $second);
         $this->assertSame('EasterEgg001', $first[0]['source_key']);
         $this->assertSame('easter_eggs', $first[0]['source_category']);
@@ -37,6 +37,12 @@ class MapMarkerImportProviderTest extends TestCase
         $this->assertSame('hunting', $first[5]['subtype']);
         $this->assertSame('watch', $first[6]['subtype']);
         $this->assertSame('scout', $first[7]['subtype']);
+        $this->assertSame('spawn', $first[9]['type']);
+        $this->assertSame('standard', $first[10]['subtype']);
+        $this->assertSame('extract', $first[11]['type']);
+        $this->assertSame('bounty_clash', $first[11]['subtype']);
+        $this->assertSame('supply', $first[12]['type']);
+        $this->assertSame('military', $first[17]['subtype']);
     }
 
     public function test_provider_map_and_category_mapping_match_current_source(): void
@@ -47,6 +53,8 @@ class MapMarkerImportProviderTest extends TestCase
         $this->assertSame('brutes', $provider->categories()['beast']['source_category']);
         $this->assertSame('wild_targets', $provider->categories()['wild_target']['source_category']);
         $this->assertSame('scout_towers', $provider->categories()['tower:scout']['source_category']);
+        $this->assertSame('extractions', $provider->categories()['extract:standard']['source_category']);
+        $this->assertSame('supply_points', $provider->categories()['supply:standard']['source_category']);
         $this->assertTrue(MapMarkerRegistry::all()['cash']['visible']);
         $this->assertFalse(MapMarkerRegistry::all()['cash']['importable']);
     }
@@ -90,7 +98,7 @@ class MapMarkerImportProviderTest extends TestCase
 
         $markers = $provider->parseMap('stillwater-bayou', $data);
 
-        $this->assertCount(8, $markers);
+        $this->assertCount(17, $markers);
         $this->assertSame(['easter_eggs' => 1], $provider->outOfBounds('stillwater-bayou'));
         $this->assertSame(['EasterEgg001'], $provider->outOfBoundsKeys('stillwater-bayou'));
         Log::shouldHaveReceived('warning')->once();
@@ -104,7 +112,7 @@ class MapMarkerImportProviderTest extends TestCase
 
         $markers = (new KamilleMapMarkerProvider)->parseMap('stillwater-bayou', $data);
 
-        $this->assertCount(9, $markers);
+        $this->assertCount(18, $markers);
         Log::shouldHaveReceived('warning')->once();
     }
 
