@@ -12,6 +12,7 @@ final class MapMarkerImportPreview
         private readonly MapMarkerImportSourcePlan $sourcePlan,
         private readonly MapMarkerImportProtection $protection,
         private readonly MapMarkerImportDatabaseFingerprint $databaseFingerprint,
+        private readonly MapMarkerSpatialDuplicates $spatialDuplicates,
     )
     {
     }
@@ -55,12 +56,20 @@ final class MapMarkerImportPreview
                 : collect();
             $rows = [];
             $examples = [];
+            $spatialCandidates = $this->spatialDuplicates->existing($map->id);
 
             foreach ($selected as $sourceKey => $source) {
                 $category = $source['category'];
                 $rows[$category] ??= $this->emptyCounts();
                 $current = $existing->get($sourceKey);
-                $outcome = $current === null ? 'new' : ($this->protection->isProtected($current) ? 'protected' : ($this->matches($current, $source) ? 'unchanged' : 'changed'));
+                if ($current === null && $this->spatialDuplicates->collides($source, $spatialCandidates)) {
+                    $outcome = 'duplicate';
+                } else {
+                    $outcome = $current === null ? 'new' : ($this->protection->isProtected($current) ? 'protected' : ($this->matches($current, $source) ? 'unchanged' : 'changed'));
+                    if ($current === null) {
+                        $this->spatialDuplicates->remember($spatialCandidates, $source);
+                    }
+                }
                 $rows[$category][$outcome]++;
 
                 if (count($examples) < 12) {
@@ -159,6 +168,6 @@ final class MapMarkerImportPreview
     /** @return array{new: int, changed: int, unchanged: int, removed_external: int, unclassified: int, out_of_bounds: int, protected: int} */
     private function emptyCounts(): array
     {
-        return ['new' => 0, 'changed' => 0, 'unchanged' => 0, 'removed_external' => 0, 'unclassified' => 0, 'out_of_bounds' => 0, 'protected' => 0];
+        return ['new' => 0, 'changed' => 0, 'unchanged' => 0, 'duplicate' => 0, 'removed_external' => 0, 'unclassified' => 0, 'out_of_bounds' => 0, 'protected' => 0];
     }
 }
