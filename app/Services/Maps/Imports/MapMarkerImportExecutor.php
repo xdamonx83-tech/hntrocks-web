@@ -17,6 +17,7 @@ final class MapMarkerImportExecutor
         private readonly MapMarkerImportSourcePlan $sourcePlan,
         private readonly MapMarkerImportProtection $protection,
         private readonly MapMarkerImportDatabaseFingerprint $databaseFingerprint,
+        private readonly MapMarkerSpatialDuplicates $spatialDuplicates,
     )
     {
     }
@@ -89,6 +90,7 @@ final class MapMarkerImportExecutor
                     $categories[$category][$count] += $amount;
                     $result['total'][$count] += $amount;
                 };
+                $spatialCandidates = $this->spatialDuplicates->existing($map->id);
                 foreach ($mapPlan['rows'] as $source) {
                     $category = $source['category'];
                     if ($source['type'] === 'cash') {
@@ -103,6 +105,10 @@ final class MapMarkerImportExecutor
                         $add($category, 'protected');
                         continue;
                     }
+                    if ($current === null && $this->spatialDuplicates->collides($source, $spatialCandidates)) {
+                        $add($category, 'duplicate');
+                        continue;
+                    }
                     if ($current === null) {
                         HntMapMarker::query()->create([
                             'hnt_map_id' => $map->id,
@@ -114,6 +120,7 @@ final class MapMarkerImportExecutor
                             'label_de' => $source['label_de'], 'label_en' => $source['label_en'],
                             'status' => 'approved',
                         ]);
+                        $this->spatialDuplicates->remember($spatialCandidates, $source);
                         $add($category, 'created');
                         continue;
                     }
@@ -203,6 +210,6 @@ final class MapMarkerImportExecutor
 
     private function counts(): array
     {
-        return array_fill_keys(['created', 'updated', 'unchanged', 'skipped_add_only', 'unclassified', 'out_of_bounds', 'external_missing', 'protected', 'errors'], 0);
+        return array_fill_keys(['created', 'updated', 'unchanged', 'duplicate', 'skipped_add_only', 'unclassified', 'out_of_bounds', 'external_missing', 'protected', 'errors'], 0);
     }
 }
