@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\FeedPost;
 use App\Models\User;
+use App\Services\Marketing\LandingDiscoveryService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 
 class LandingSummaryController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function __invoke(LandingDiscoveryService $discovery): JsonResponse
     {
         $visibleUsers = static function (Builder $query): void {
             $query->where('status', 'active')
@@ -79,7 +80,11 @@ class LandingSummaryController extends Controller
             ])
             ->all();
 
+        $publicDiscovery = $discovery->forLocale(app()->getLocale());
+
         return response()->json([
+            'latest_news' => $publicDiscovery['latest_news'],
+            'arsenal_preview' => $publicDiscovery['arsenal_preview'],
             'stats' => [
                 'public_members' => $publicMembers,
                 'public_posts' => (clone $publicPosts)->count(),
