@@ -12,7 +12,7 @@ return [
     'landing_nav_ready' => 'Ready',
     'landing_nav_guides' => 'Гайды',
     'landing_nav_cups' => 'Турниры',
-    'landing_meta_title' => 'Сообщество, карты и инструменты Hunt: Showdown | HNT.ROCKS',
+    'landing_meta_title' => 'Hunt: Showdown Новости, Арсенал и Карты | HNT.ROCKS',
     'landing_news_eyebrow' => 'Новости из болот',
     'landing_news_title' => 'Новости Hunt: Showdown',
     'landing_news_body' => 'Читайте последние новости и обновления Hunt: Showdown 1896.',
