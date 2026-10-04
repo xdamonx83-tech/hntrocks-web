@@ -32,6 +32,7 @@ final class MapMarkerSpatialDuplicates
             ->whereIn('type', array_keys(self::RADII))->get() as $marker) {
             if ($replaceLegacySupply && $marker->type === 'supply'
                 && (! $hasIdentity || $marker->source_provider === null)
+                && $marker->status === 'approved'
                 && ! $this->protection->isProtected($marker)) {
                 continue;
             }
