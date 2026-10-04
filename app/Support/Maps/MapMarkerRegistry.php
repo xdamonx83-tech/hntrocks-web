@@ -10,9 +10,19 @@ final class MapMarkerRegistry
         $definitions = [
             'compound' => self::item('Compound', 'Compound', '#d6a84f', null, 26, false, true),
             'boss' => self::item('Boss', 'Boss', '#b8463a', 'boss', 32, false, true),
-            'spawn' => self::item('Spawn', 'Spawn', '#6d9dc5', 'spawn', 24, false, true),
-            'supply' => self::item('Vorrat', 'Supply', '#69a878', 'supply', 18, false, true),
-            'extract' => self::item('Ausgang', 'Extraction', '#d9d2c2', null, 26, false, true),
+            'spawn' => self::item('Spawn', 'Spawn', '#6d9dc5', 'spawn', 24, true, true),
+            'supply' => self::item('Vorrat', 'Supply', '#69a878', 'supply', 18, true, true, 'supplies', [
+                'standard' => ['de' => 'Vorratsstelle', 'en' => 'Supply Point'],
+                'postal' => ['de' => 'Post', 'en' => 'Postal'],
+                'clockmaker' => ['de' => 'Uhrmacher', 'en' => 'Clockmaker'],
+                'firefighter' => ['de' => 'Feuerwehr', 'en' => 'Firefighter'],
+                'medical' => ['de' => 'Medizin', 'en' => 'Medical'],
+                'military' => ['de' => 'Militär', 'en' => 'Military'],
+            ]),
+            'extract' => self::item('Ausgänge', 'Extractions', '#d9d2c2', null, 26, true, true, 'extractions', [
+                'standard' => ['de' => 'Normale Ausgänge', 'en' => 'Standard Extractions'],
+                'bounty_clash' => ['de' => 'Bounty Clash', 'en' => 'Bounty Clash'],
+            ]),
             'cash' => self::item('Kasse', 'Cash', '#c2ad4a', 'cash', 18, false, true),
             'tower' => self::item('Türme', 'Towers', '#9b7653', 'tower', 24, true, true, 'structures', [
                 'hunting' => ['de' => 'Jagdturm', 'en' => 'Hunting Tower'],
