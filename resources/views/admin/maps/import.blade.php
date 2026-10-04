@@ -117,7 +117,19 @@
                             </tbody>
                         </table>
                     </div>
-                    <p class="hh-muted">Bei einem späteren Replace wären folgende bestehende Legacy-HNT-Marker betroffen: tower {{ $mapResult['legacy']['tower'] }}, bugs {{ $mapResult['legacy']['bugs'] }}, wild {{ $mapResult['legacy']['wild'] }}. Hier erfolgt kein Replace.</p>
+                    <p class="hh-muted">Bestehende Legacy-HNT-Marker: Türme {{ $mapResult['legacy']['tower'] }}, Käferbäume {{ $mapResult['legacy']['bugs'] }}, wilde Ziele {{ $mapResult['legacy']['wild'] }}, alte Vorräte {{ $mapResult['legacy']['supply'] }}. Die normale Vorschau ersetzt noch nichts.</p>
+                    @if($mapResult['supply_replacement'])
+                        <p><strong>Simulation für „Alte HNT-Vorräte ersetzen“:</strong>
+                            + {{ $mapResult['supply_replacement']['new'] }} neue Vorräte,
+                            {{ $mapResult['supply_replacement']['unchanged'] }} unverändert,
+                            {{ $mapResult['supply_replacement']['changed'] }} aktualisiert,
+                            {{ $mapResult['supply_replacement']['duplicate'] }} nahe Quell-Duplikate,
+                            {{ $mapResult['legacy']['supply'] }} alte HNT-Vorräte würden gelöscht.
+                        </p>
+                        @if($mapResult['supply_replacement']['protected_legacy'] || $mapResult['supply_replacement']['protected'])
+                            <p class="hh-alert hh-alert-danger">Geschützte Vorratsmarker gefunden: Altbestand {{ $mapResult['supply_replacement']['protected_legacy'] }}, externe {{ $mapResult['supply_replacement']['protected'] }}. Das Replacement bricht in diesem Zustand sicher ab.</p>
+                        @endif
+                    @endif
                     <p class="hh-muted">Cash-Schutz auf dieser Map: cash {{ $mapResult['protected_existing']['cash'] }}, Submission-Schlüssel {{ $mapResult['protected_existing']['submission_key'] }}, verknüpfte Submissions {{ $mapResult['protected_existing']['linked_submission'] }} ({{ $mapResult['protected_existing']['total_unique'] }} unterschiedliche geschützte Marker).</p>
                     @if(! empty($mapResult['examples']))
                         <details><summary>Beispielpositionen (HNT X/Y)</summary>
@@ -149,14 +161,19 @@
                     <fieldset class="hh-section-space">
                         <legend><strong>Legacy-Marker ersetzen (separate, optionale Freigabe)</strong></legend>
                         <p class="hh-muted">Standardmäßig aus. Nur Legacy-Marker der gewählten Maps und Klassen ohne Source-Provider werden nach erfolgreichem Import entfernt.</p>
-                        @foreach(['tower' => 'Alte HNT-Türme', 'bugs' => 'Alte HNT-Käfer', 'wild' => 'Alte HNT-Wildziele'] as $legacyType => $legacyLabel)
+                        @foreach(['tower' => 'Alte HNT-Türme', 'bugs' => 'Alte HNT-Käfer', 'wild' => 'Alte HNT-Wildziele', 'supply' => 'Alte HNT-Vorräte'] as $legacyType => $legacyLabel)
                             @php
-                                $targetType = ['tower' => 'tower', 'bugs' => 'beetle', 'wild' => 'wild_target'][$legacyType];
+                                $targetType = ['tower' => 'tower', 'bugs' => 'beetle', 'wild' => 'wild_target', 'supply' => 'supply'][$legacyType];
                                 $newCount = collect($result['maps'])->sum(fn ($map) => collect($map['categories'])->filter(fn ($counts, $key) => $key === $targetType || str_starts_with($key, $targetType.':'))->sum('new'));
                                 $oldCount = collect($result['maps'])->sum(fn ($map) => $map['legacy'][$legacyType]);
+                                if ($legacyType === 'supply' && $result['can_replace_supply']) {
+                                    $newCount = collect($result['maps'])->sum(fn ($map) => $map['supply_replacement']['new']);
+                                }
+                                $replaceDisabled = $legacyType === 'supply' && ! $result['can_replace_supply'];
                             @endphp
-                            <label class="hh-admin-map-import-replace"><input type="checkbox" name="replace_legacy[]" value="{{ $legacyType }}"> {{ $legacyLabel }} ersetzen · bestehend: {{ $oldCount }} · neu: {{ $newCount }}</label>
+                            <label class="hh-admin-map-import-replace"><input type="checkbox" name="replace_legacy[]" value="{{ $legacyType }}" @disabled($replaceDisabled)> {{ $legacyLabel }} ersetzen · bestehend: {{ $oldCount }} · neu: {{ $newCount }} @if($replaceDisabled)(nur bei Synchronisieren und Auswahl aller sechs Vorratsarten)@endif</label>
                         @endforeach
+                        <p class="hh-muted">Vorrats-Replacement: Alle sechs Vorratsarten und „Synchronisieren“ erforderlich. Die Markerquelle wird erneut geprüft. Neue Einträge werden zuerst validiert; alte HNT-Vorräte werden nur nach vollständiger Abdeckung und separater Freigabe innerhalb einer einzigen Transaktion gelöscht. Geschützte oder fremde Marker werden nicht gelöscht. Im Zweifel wird alles zurückgerollt.</p>
                         <p><label><input type="checkbox" name="replace_reviewed" value="1"> Ich bestätige das gesonderte Legacy-Replacement.</label></p>
                         <p><label for="replace-confirmation">Für Legacy-Replacement exakt <strong>ERSETZEN</strong> eingeben:</label><br>
                             <input id="replace-confirmation" type="text" name="replace_confirmation" autocomplete="off"></p>
