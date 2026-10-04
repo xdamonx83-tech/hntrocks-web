@@ -95,3 +95,36 @@ The preview also computes a deterministic `database_fingerprint` from selected-p
 4. Separately approve and perform the first import only after that review. Confirm the created/updated/unchanged counts and public/API marker rendering.
 5. Separately review and approve each desired legacy replacement with fresh counts. Keep the replacement options off until this review is complete.
 6. Align the separate React map filter colors and circle fallbacks on its verified current server branch before enabling imported markers there.
+
+
+## Optional import categories (2026-10-04)
+
+The admin importer now also exposes structured source markers for HNT spawn, extraction
+and supply types. These are opt-in by default; all previous category choices remain.
+
+| Source category | HNT type | HNT subtype |
+| --- | --- | --- |
+| `spawns` | `spawn` | — |
+| `extractions` | `extract` | `standard` |
+| `bounty_clash_extractions` | `extract` | `bounty_clash` |
+| `supply_points` | `supply` | `standard` |
+| `postal_supplies` | `supply` | `postal` |
+| `clockmaker_supplies` | `supply` | `clockmaker` |
+| `firefighter_supplies` | `supply` | `firefighter` |
+| `medical_supplies` | `supply` | `medical` |
+| `military_supplies` | `supply` | `military` |
+
+For new source IDs of types `spawn`, `extract` and `supply`, a preexisting same-type
+HNT marker is considered a duplicate if within 7, 7 or 6 HNT map pixels, respectively.
+This includes preexisting manual/legacy markers and imported markers from other
+providers. Duplicates are **counted in the read-only preview** and skipped during
+execution. Multiple nearby source IDs within one run are likewise deduplicated.
+Existing HNT markers are not automatically matched, adopted, moved, overwritten or
+deleted by proximity. Re-importing an already saved source ID continues to use its
+stable source identity. Database fingerprints now include spatial candidate markers
+for the selected types, preventing a stale preview from overriding newly changed
+nearby HNT content. Cash/submission markers remain protected as before.
+
+There is no automatic live import. Execute only after reviewing the selected maps,
+category and duplicate counts in the admin preview, with the normal explicit
+`IMPORT` confirmation; leave all optional legacy replacement boxes unchecked.
