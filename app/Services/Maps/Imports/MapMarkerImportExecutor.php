@@ -11,7 +11,7 @@ use RuntimeException;
 
 final class MapMarkerImportExecutor
 {
-    private const LEGACY_TYPES = ['tower' => 'tower', 'bugs' => 'beetle', 'wild' => 'wild_target'];
+    private const LEGACY_TYPES = ['tower' => 'tower', 'bugs' => 'beetle', 'wild' => 'wild_target', 'supply' => 'supply'];
 
     public function __construct(
         private readonly MapMarkerImportSourcePlan $sourcePlan,
@@ -57,7 +57,11 @@ final class MapMarkerImportExecutor
                 'tower' => ['tower:hunting', 'tower:watch', 'tower:scout'],
                 'wild' => ['wild_target:rotjaw', 'wild_target:hellborn'],
                 'bugs' => ['beetle'],
+                'supply' => MapMarkerImportSourcePlan::SUPPLY_SUBTYPES,
             };
+            if ($legacyType === 'supply' && $mode !== 'sync') {
+                throw new InvalidArgumentException('Supply replacement requires sync mode.');
+            }
             if (! in_array($targetType, $plan['selections'], true)
                 && array_diff($requiredSelections, $plan['selections'])) {
                 throw new InvalidArgumentException('Legacy replacement requires all source subtypes of its category.');
@@ -68,6 +72,13 @@ final class MapMarkerImportExecutor
                 }
                 if (! collect($mapPlan['rows'])->contains(fn ($row) => $row['type'] === $targetType)) {
                     throw new InvalidArgumentException('Legacy replacement requires new source markers on each map.');
+                }
+                if ($legacyType === 'supply') {
+                    foreach ($mapPlan['outOfBounds'] as $key => $count) {
+                        if (str_starts_with($key, 'supply') && $count > 0) {
+                            throw new InvalidArgumentException('Supply replacement requires all source coordinates to be valid.');
+                        }
+                    }
                 }
             }
         }
@@ -90,7 +101,9 @@ final class MapMarkerImportExecutor
                     $categories[$category][$count] += $amount;
                     $result['total'][$count] += $amount;
                 };
-                $spatialCandidates = $this->spatialDuplicates->existing($map->id);
+                $spatialCandidates = $this->spatialDuplicates->existing(
+                    $map->id, in_array('supply', $replaceLegacy, true)
+                );
                 foreach ($mapPlan['rows'] as $source) {
                     $category = $source['category'];
                     if ($source['type'] === 'cash') {
@@ -180,9 +193,18 @@ final class MapMarkerImportExecutor
                         $imported = HntMapMarker::query()->where('hnt_map_id', $map->id)
                             ->where('source_provider', $provider->id())->where('source_key', $source['source_key'])
                             ->where('type', $targetType)->first();
-                        if ($imported === null || $this->protection->isProtected($imported) || ! $this->matches($imported, $source)) {
-                            throw new RuntimeException('Expected imported marker is missing; legacy replacement cancelled.');
+                        if ($imported !== null && ! $this->protection->isProtected($imported)
+                            && $this->matches($imported, $source)) {
+                            continue;
                         }
+                        // Two Kamille supply IDs sometimes identify essentially the
+                        // same spot. Deduplication may keep one verified new marker.
+                        // Unrelated providers and protected HNT rows never satisfy coverage.
+                        if ($legacyType === 'supply' && $imported === null
+                            && $this->hasVerifiedNearbySource($map->id, $provider->id(), $source, $mapPlan['rows'])) {
+                            continue;
+                        }
+                        throw new RuntimeException('Expected imported marker is missing; legacy replacement cancelled.');
                     }
                     foreach ($legacy as $marker) {
                         $marker->delete();
@@ -197,6 +219,30 @@ final class MapMarkerImportExecutor
             ]);
             return $result;
         });
+    }
+
+    /**
+     * Only a verified imported source in the same selected plan can cover a
+     * nearby duplicate source. This never adopts manual or third-party markers.
+     */
+    private function hasVerifiedNearbySource(int $mapId, string $providerId, array $source, array $planRows): bool
+    {
+        foreach ($planRows as $candidate) {
+            if ($candidate['type'] !== 'supply' || $candidate['source_key'] === $source['source_key']) {
+                continue;
+            }
+            if (hypot($candidate['x'] - $source['x'], $candidate['y'] - $source['y']) > 6.0) {
+                continue;
+            }
+            $marker = HntMapMarker::query()->where('hnt_map_id', $mapId)
+                ->where('source_provider', $providerId)
+                ->where('source_key', $candidate['source_key'])->first();
+            if ($marker !== null && ! $this->protection->isProtected($marker)
+                && $this->matches($marker, $candidate)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function matches(HntMapMarker $current, array $source): bool
