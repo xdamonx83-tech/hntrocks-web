@@ -165,7 +165,13 @@ class MapMarkerImportPreviewTest extends TestCase
         $this->actingAs($admin);
         Http::fake(['hunt.kamille.ovh/maps/cache/*' => Http::response('', 503)]);
 
-        $this->get('/admin/maps/marker-import')->assertOk()->assertSee('Marker importieren');
+        $this->get('/admin/maps/marker-import')->assertOk()
+            ->assertSee('Marker importieren')
+            ->assertSee('Normale Ausgänge')
+            ->assertSee('Bounty Clash')
+            ->assertSee('Vorratsstelle')
+            ->assertSee('value="extract:standard"', false)
+            ->assertSee('value="supply:postal"', false);
         $this->post('/admin/maps/marker-import/preview', [
             'provider' => 'kamille', 'maps' => ['stillwater-bayou'], 'categories' => ['tower:hunting'], 'mode' => 'sync',
         ])->assertOk()->assertSee('Die externe Markerquelle konnte nicht geladen werden.');
