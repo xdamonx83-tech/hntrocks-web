@@ -37,6 +37,7 @@ final class MapMarkerImportPreview
             'provider' => $provider->id(),
             'provider_name' => $provider->name(),
             'mode' => $mode,
+            'can_replace_supply' => $mode === 'sync' && MapMarkerImportSourcePlan::completeSupplySelection($selections),
             'identity_columns_ready' => $identityColumnsReady,
             'fingerprint' => $plan['fingerprint'],
             'database_fingerprint' => $this->databaseFingerprint->create($provider->id(), $mapSlugs, $selections),
@@ -106,7 +107,7 @@ final class MapMarkerImportPreview
             }
 
             $legacyQuery = HntMapMarker::query()->where('hnt_map_id', $map->id)
-                ->whereIn('type', ['tower', 'bugs', 'wild']);
+                ->whereIn('type', ['tower', 'bugs', 'wild', 'supply']);
 
             if ($identityColumnsReady) {
                 $legacyQuery->whereNull('source_provider');
@@ -133,7 +134,11 @@ final class MapMarkerImportPreview
                     'tower' => (int) ($legacy['tower'] ?? 0),
                     'bugs' => (int) ($legacy['bugs'] ?? 0),
                     'wild' => (int) ($legacy['wild'] ?? 0),
+                    'supply' => (int) ($legacy['supply'] ?? 0),
                 ],
+                'supply_replacement' => $result['can_replace_supply']
+                    ? $this->supplyReplacementPreview($map->id, $selected, $existing)
+                    : null,
                 'protected_existing' => $this->protection->countsForMap($map->id),
                 'examples' => $examples,
             ];
@@ -150,6 +155,45 @@ final class MapMarkerImportPreview
         ]);
 
         return $result;
+    }
+
+    /**
+     * Additional read-only estimate for explicit legacy supply replacement.
+     * The ordinary preview still shows what an import WITHOUT replacement does.
+     */
+    private function supplyReplacementPreview(int $mapId, array $selected, $existing): array
+    {
+        $candidates = $this->spatialDuplicates->existing($mapId, true);
+        $counts = ['new' => 0, 'duplicate' => 0, 'unchanged' => 0, 'changed' => 0, 'protected' => 0, 'protected_legacy' => 0];
+
+        foreach ($selected as $sourceKey => $source) {
+            if ($source['type'] !== 'supply') {
+                continue;
+            }
+            $current = $existing->get($sourceKey);
+            if ($current === null && $this->spatialDuplicates->collides($source, $candidates)) {
+                $counts['duplicate']++;
+                continue;
+            }
+            if ($current === null) {
+                $counts['new']++;
+                $this->spatialDuplicates->remember($candidates, $source);
+            } elseif ($this->protection->isProtected($current)) {
+                $counts['protected']++;
+            } elseif ($this->matches($current, $source)) {
+                $counts['unchanged']++;
+            } else {
+                $counts['changed']++;
+            }
+        }
+
+        $legacy = HntMapMarker::query()->where('hnt_map_id', $mapId)
+            ->where('type', 'supply')->whereNull('source_provider')->get();
+        $counts['protected_legacy'] = $legacy->filter(
+            fn (HntMapMarker $marker): bool => $this->protection->isProtected($marker)
+        )->count();
+
+        return $counts;
     }
 
     /** @param array<string, mixed> $source */
