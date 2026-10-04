@@ -198,9 +198,14 @@ final class MapMarkerImportExecutor
                             && $this->matches($imported, $source)) {
                             continue;
                         }
-                        // Two Kamille supply IDs sometimes identify essentially the
-                        // same spot. Deduplication may keep one verified new marker.
-                        // Unrelated providers and protected HNT rows never satisfy coverage.
+                        // Never count a protected or unexpectedly changed imported
+                        // identity as successfully replaced, even if another Kamille
+                        // source is very close to it.
+                        if ($imported !== null) {
+                            throw new RuntimeException('Expected imported marker is protected or changed; legacy replacement cancelled.');
+                        }
+                        // Multiple Kamille supply IDs can represent one location.
+                        // Only another verified source in the same selection can cover it.
                         if ($legacyType === 'supply' && $imported === null
                             && $this->hasVerifiedNearbySource($map->id, $provider->id(), $source, $mapPlan['rows'])) {
                             continue;
