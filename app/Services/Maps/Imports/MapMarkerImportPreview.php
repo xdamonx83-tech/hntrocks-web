@@ -37,7 +37,8 @@ final class MapMarkerImportPreview
             'provider' => $provider->id(),
             'provider_name' => $provider->name(),
             'mode' => $mode,
-            'can_replace_supply' => $mode === 'sync' && MapMarkerImportSourcePlan::completeSupplySelection($selections),
+            'can_replace_supply' => $identityColumnsReady && $mode === 'sync'
+                && MapMarkerImportSourcePlan::completeSupplySelection($selections),
             'identity_columns_ready' => $identityColumnsReady,
             'fingerprint' => $plan['fingerprint'],
             'database_fingerprint' => $this->databaseFingerprint->create($provider->id(), $mapSlugs, $selections),
