@@ -329,7 +329,12 @@ class MapMarkerImportExecutorTest extends TestCase
     {
         $manifest = [];
         foreach (['easter_egg' => 'easter_eggs', 'wild_target' => 'wild_targets', 'brute' => 'brutes', 'beetle' => 'beetles',
-            'tower' => 'towers', 'big_tower' => 'big_towers', 'scout_tower' => 'scout_towers', 'workbench' => 'workbenches'] as $type => $category) {
+            'tower' => 'towers', 'big_tower' => 'big_towers', 'scout_tower' => 'scout_towers', 'workbench' => 'workbenches',
+            'spawn' => 'spawns', 'extraction' => 'extractions',
+            'bounty_clash_extraction' => 'bounty_clash_extractions', 'supply_point' => 'supply_points',
+            'postal_supply' => 'postal_supplies', 'clockmaker_supply' => 'clockmaker_supplies',
+            'firefighter_supply' => 'firefighter_supplies', 'medical_supply' => 'medical_supplies',
+            'military_supply' => 'military_supplies'] as $type => $category) {
             $manifest[$type] = ['categories' => $category];
         }
         $fetches = 0;
