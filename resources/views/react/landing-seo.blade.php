@@ -119,6 +119,23 @@
         'locale' => $locale,
         'latest_news' => $latestNews,
         'arsenal_preview' => $featuredArsenal,
+        'labels' => collect(['de', 'en', 'es', 'ru'])->mapWithKeys(fn ($lng) => [
+            $lng => [
+                'nav_news' => __('ui.landing_nav_news', [], $lng),
+                'nav_arsenal' => __('ui.landing_nav_arsenal', [], $lng),
+                'news_eyebrow' => __('ui.landing_news_eyebrow', [], $lng),
+                'news_title' => __('ui.landing_news_title', [], $lng),
+                'news_body' => __('ui.landing_news_body', [], $lng),
+                'news_cta' => __('ui.landing_news_cta', [], $lng),
+                'news_empty' => __('ui.landing_news_empty', [], $lng),
+                'arsenal_eyebrow' => __('ui.landing_arsenal_eyebrow', [], $lng),
+                'arsenal_title' => __('ui.landing_arsenal_title', [], $lng),
+                'arsenal_body' => __('ui.landing_arsenal_body', [], $lng),
+                'arsenal_cta' => __('ui.landing_arsenal_cta', [], $lng),
+                'arsenal_empty' => __('ui.landing_arsenal_empty', [], $lng),
+                'arsenal_details' => __('ui.landing_arsenal_details', [], $lng),
+            ],
+        ])->all(),
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 @else
     <div class="public-landing">
