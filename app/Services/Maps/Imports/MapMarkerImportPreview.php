@@ -191,7 +191,7 @@ final class MapMarkerImportPreview
         $legacy = HntMapMarker::query()->where('hnt_map_id', $mapId)
             ->where('type', 'supply')->whereNull('source_provider')->get();
         $counts['protected_legacy'] = $legacy->filter(
-            fn (HntMapMarker $marker): bool => $this->protection->isProtected($marker)
+            fn (HntMapMarker $marker): bool => $marker->status !== 'approved' || $this->protection->isProtected($marker)
         )->count();
 
         return $counts;
