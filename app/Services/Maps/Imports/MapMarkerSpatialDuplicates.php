@@ -13,25 +13,37 @@ final class MapMarkerSpatialDuplicates
 {
     private const RADII = ['spawn' => 7.0, 'extract' => 7.0, 'supply' => 6.0];
 
-    /** @return array<int, array<string, mixed>> */
-    public function existing(int $mapId): array
+    public function __construct(private readonly MapMarkerImportProtection $protection)
+    {
+    }
+
+    /**
+     * When explicitly preparing a supply replacement, only UNPROTECTED legacy
+     * supplies are excluded as duplicate candidates. Never exclude cash,
+     * submissions or supplies owned by another provider.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function existing(int $mapId, bool $replaceLegacySupply = false): array
     {
         $hasIdentity = Schema::hasColumn('hnt_map_markers', 'source_provider');
-        $columns = ['type', 'x', 'y'];
-        if ($hasIdentity) {
-            array_push($columns, 'source_provider', 'source_key');
-        }
-
-        return HntMapMarker::query()->where('hnt_map_id', $mapId)
-            ->whereIn('type', array_keys(self::RADII))
-            ->get($columns)
-            ->map(fn (HntMapMarker $marker): array => [
+        $rows = [];
+        foreach (HntMapMarker::query()->where('hnt_map_id', $mapId)
+            ->whereIn('type', array_keys(self::RADII))->get() as $marker) {
+            if ($replaceLegacySupply && $marker->type === 'supply'
+                && (! $hasIdentity || $marker->source_provider === null)
+                && ! $this->protection->isProtected($marker)) {
+                continue;
+            }
+            $rows[] = [
                 'type' => $marker->type,
                 'x' => (float) $marker->x,
                 'y' => (float) $marker->y,
                 'source_provider' => $hasIdentity ? $marker->source_provider : null,
                 'source_key' => $hasIdentity ? $marker->source_key : null,
-            ])->all();
+            ];
+        }
+        return $rows;
     }
 
     public function collides(array $source, array $candidates): bool
