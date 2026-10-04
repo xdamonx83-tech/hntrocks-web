@@ -51,6 +51,40 @@
         ],
     ];
 
+    $latestNews = $discovery['latest_news'] ?? [];
+    $featuredArsenal = $discovery['arsenal_preview'] ?? [];
+
+    if ($latestNews !== []) {
+        $structuredData['@graph'][] = [
+            '@type' => 'ItemList',
+            '@id' => $siteUrl.'/#latest-news',
+            'name' => __('ui.landing_news_title'),
+            'itemListElement' => collect($latestNews)->values()->map(
+                fn ($news, $index) => [
+                    '@type' => 'ListItem',
+                    'position' => $index + 1,
+                    'name' => $news['title'],
+                    'url' => $news['url'],
+                ]
+            )->all(),
+        ];
+    }
+    if ($featuredArsenal !== []) {
+        $structuredData['@graph'][] = [
+            '@type' => 'ItemList',
+            '@id' => $siteUrl.'/#featured-arsenal',
+            'name' => __('ui.landing_arsenal_title'),
+            'itemListElement' => collect($featuredArsenal)->values()->map(
+                fn ($weapon, $index) => [
+                    '@type' => 'ListItem',
+                    'position' => $index + 1,
+                    'name' => $weapon['name'],
+                    'url' => $weapon['url'],
+                ]
+            )->all(),
+        ];
+    }
+
     $mapNames = [
         ['slug' => 'stillwater-bayou', 'name' => 'Stillwater Bayou'],
         ['slug' => 'lawson-delta', 'name' => 'Lawson Delta'],
@@ -92,6 +126,8 @@
                 <a href="{{ url('/feed') }}">{{ __('ui.landing_nav_community') }}</a>
                 <a href="{{ url('/moments') }}">{{ __('ui.landing_nav_moments') }}</a>
                 <a href="{{ url('/maps') }}">{{ __('ui.landing_nav_maps') }}</a>
+                <a href="{{ url('/news') }}">{{ __('ui.landing_nav_news') }}</a>
+                <a href="{{ url('/arsenal') }}">{{ __('ui.landing_nav_arsenal') }}</a>
                 <a href="{{ url('/ready-lobbies') }}">{{ __('ui.landing_nav_ready') }}</a>
                 <a href="{{ url('/guides') }}">{{ __('ui.landing_nav_guides') }}</a>
                 <a href="{{ url('/teams') }}">{{ __('ui.landing_teams_title') }}</a>
@@ -269,6 +305,78 @@
                 </div>
             </section>
 
+
+            <section class="public-section public-news-section" aria-labelledby="public-news-title">
+                <div class="public-container">
+                    <div class="public-discovery-heading">
+                        <div>
+                            <span class="public-eyebrow">{{ __('ui.landing_news_eyebrow') }}</span>
+                            <h2 id="public-news-title">{{ __('ui.landing_news_title') }}</h2>
+                            <p>{{ __('ui.landing_news_body') }}</p>
+                        </div>
+                        <a class="public-button secondary" href="{{ url('/news') }}">{{ __('ui.landing_news_cta') }} &rarr;</a>
+                    </div>
+                    <div class="public-news-grid">
+                        @forelse($latestNews as $news)
+                            <article class="public-news-card">
+                                <a class="public-news-image" href="{{ $news['url'] }}" tabindex="-1">
+                                    @if($news['image_url'])
+                                        <img src="{{ $news['image_url'] }}" alt="" loading="lazy">
+                                    @else
+                                        <i class="ph ph-newspaper-clipping" aria-hidden="true"></i>
+                                    @endif
+                                </a>
+                                <div class="public-news-card-copy">
+                                    <div class="public-discovery-meta">
+                                        @if($news['category'])<span>{{ $news['category'] }}</span>@endif
+                                        @if($news['published_at'])
+                                            <time datetime="{{ $news['published_at'] }}">{{ substr($news['published_at'], 0, 10) }}</time>
+                                        @endif
+                                    </div>
+                                    <h3><a href="{{ $news['url'] }}">{{ $news['title'] }}</a></h3>
+                                    @if($news['excerpt'])<p>{{ $news['excerpt'] }}</p>@endif
+                                    <a class="public-card-link" href="{{ $news['url'] }}">{{ __('ui.landing_news_cta') }} &rarr;</a>
+                                </div>
+                            </article>
+                        @empty
+                            <p class="public-discovery-empty">{{ __('ui.landing_news_empty') }}</p>
+                        @endforelse
+                    </div>
+                </div>
+            </section>
+            <section class="public-section public-arsenal-section" aria-labelledby="public-arsenal-title">
+                <div class="public-container">
+                    <div class="public-discovery-heading">
+                        <div>
+                            <span class="public-eyebrow">{{ __('ui.landing_arsenal_eyebrow') }}</span>
+                            <h2 id="public-arsenal-title">{{ __('ui.landing_arsenal_title') }}</h2>
+                            <p>{{ __('ui.landing_arsenal_body') }}</p>
+                        </div>
+                        <a class="public-button primary" href="{{ url('/arsenal') }}">{{ __('ui.landing_arsenal_cta') }} &rarr;</a>
+                    </div>
+                    <div class="public-arsenal-grid">
+                        @forelse($featuredArsenal as $weapon)
+                            <article class="public-arsenal-card">
+                                <a class="public-arsenal-image" href="{{ $weapon['url'] }}" tabindex="-1">
+                                    @if($weapon['image_url'])
+                                        <img src="{{ $weapon['image_url'] }}" alt="" loading="lazy">
+                                    @else
+                                        <i class="ph ph-crosshair" aria-hidden="true"></i>
+                                    @endif
+                                </a>
+                                <div class="public-arsenal-card-copy">
+                                    <span class="public-arsenal-category">{{ $weapon['category'] }}</span>
+                                    <h3><a href="{{ $weapon['url'] }}">{{ $weapon['name'] }}</a></h3>
+                                    @if($weapon['ammo_type'])<span class="public-arsenal-ammo">{{ $weapon['ammo_type'] }}</span>@endif
+                                    <a class="public-card-link" href="{{ $weapon['url'] }}">{{ __('ui.landing_arsenal_details') }} &rarr;</a>
+                                </div>
+                            </article>
+                        @empty
+                            <p class="public-discovery-empty">{{ __('ui.landing_arsenal_empty') }}</p>
+                        @endforelse
+                    </div>
+                </div>
+            </section>
             <section class="public-section public-modules-section" aria-labelledby="public-modules-title">
                 <div class="public-container">
                     <div class="public-section-heading">
@@ -359,6 +467,8 @@
                 <nav aria-label="{{ __('ui.landing_nav_aria') }}">
                     <a href="{{ url('/feed') }}">{{ __('ui.landing_nav_community') }}</a>
                     <a href="{{ url('/maps') }}">{{ __('ui.landing_nav_maps') }}</a>
+                    <a href="{{ url('/news') }}">{{ __('ui.landing_nav_news') }}</a>
+                    <a href="{{ url('/arsenal') }}">{{ __('ui.landing_nav_arsenal') }}</a>
                     <a href="{{ url('/ready-lobbies') }}">{{ __('ui.landing_nav_ready') }}</a>
                     <a href="{{ url('/guides') }}">{{ __('ui.landing_nav_guides') }}</a>
                     <a href="{{ url('/teams') }}">{{ __('ui.landing_teams_title') }}</a>
