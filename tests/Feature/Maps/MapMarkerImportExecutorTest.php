@@ -384,6 +384,160 @@ class MapMarkerImportExecutorTest extends TestCase
         );
     }
 
+    public function test_supply_replacement_imports_near_old_supply_before_deleting_only_legacy(): void
+    {
+        $old = $this->marker($this->stillwater, 'supply', 'legacy:supply');
+        $old->update(['x' => 500, 'y' => 1000]);
+        $foreign = $this->marker($this->stillwater, 'supply', 'other:supply', 'other-supply', 'other');
+        $foreign->update(['x' => 120, 'y' => 140]);
+        $cash = $this->marker($this->stillwater, 'cash', 'submission:88');
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-1', 'supply', 'standard', 1000, 2000),
+        ];
+
+        $selection = ['supply'];
+        $preview = app(\App\Services\Maps\Imports\MapMarkerImportPreview::class)->create(
+            $this->provider, ['stillwater-bayou'], $selection, 'sync'
+        );
+        $this->assertSame(1, $preview['total']['duplicate']);
+        $this->assertSame(0, $preview['total']['new']);
+        $this->assertSame(1, $preview['maps']['stillwater-bayou']['legacy']['supply']);
+        $this->assertSame(1, $preview['maps']['stillwater-bayou']['supply_replacement']['new']);
+        $this->assertSame(0, $preview['maps']['stillwater-bayou']['supply_replacement']['duplicate']);
+        $this->assertNotNull($old->fresh());
+
+        $result = $this->execute($selection, 'sync', ['supply'], ['supply' => 1]);
+        $this->assertSame(1, $result['total']['created']);
+        $this->assertSame(0, $result['total']['duplicate']);
+        $this->assertSame(1, $result['maps']['stillwater-bayou']['legacy_deleted']['supply']);
+        $this->assertNull($old->fresh());
+        $this->assertNotNull($cash->fresh());
+        $this->assertNotNull($foreign->fresh());
+        $this->assertSame(1, HntMapMarker::query()->where('source_key', 'supply-1')->count());
+        $this->assertSame(3, HntMapMarker::query()->count());
+    }
+
+    public function test_supply_replacement_accepts_only_source_source_proximity_duplicates(): void
+    {
+        $old = $this->marker($this->stillwater, 'supply', 'legacy:supply');
+        $old->update(['x' => 500, 'y' => 1000]);
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-a', 'supply', 'standard', 1000, 2000),
+            $this->provider->row('supply-b', 'supply', 'postal', 1008, 2006),
+        ];
+
+        $preview = app(\App\Services\Maps\Imports\MapMarkerImportPreview::class)->create(
+            $this->provider, ['stillwater-bayou'], ['supply'], 'sync'
+        );
+        $this->assertSame(1, $preview['maps']['stillwater-bayou']['supply_replacement']['new']);
+        $this->assertSame(1, $preview['maps']['stillwater-bayou']['supply_replacement']['duplicate']);
+
+        $result = $this->execute(['supply'], 'sync', ['supply'], ['supply' => 1]);
+        $this->assertSame(1, $result['total']['created']);
+        $this->assertSame(1, $result['total']['duplicate']);
+        $this->assertNull($old->fresh());
+        $this->assertSame(1, HntMapMarker::query()->where('type', 'supply')->count());
+        $this->assertSame(1, $result['maps']['stillwater-bayou']['legacy_deleted']['supply']);
+    }
+
+    public function test_supply_replacement_requires_full_source_categories_and_sync(): void
+    {
+        $this->marker($this->stillwater, 'supply', 'legacy:supply');
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-1', 'supply', 'standard', 1000, 2000),
+        ];
+        $this->expectException(\InvalidArgumentException::class);
+        try {
+            $this->execute(['supply:standard'], 'sync', ['supply'], ['supply' => 1]);
+        } finally {
+            $this->assertSame(1, HntMapMarker::query()->count());
+        }
+    }
+
+    public function test_supply_replacement_disallows_add_only_mode(): void
+    {
+        $this->marker($this->stillwater, 'supply', 'legacy:supply');
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-1', 'supply', 'standard', 1000, 2000),
+        ];
+        $this->expectException(\InvalidArgumentException::class);
+        try {
+            $this->execute(['supply'], 'add_only', ['supply'], ['supply' => 1]);
+        } finally {
+            $this->assertSame(1, HntMapMarker::query()->count());
+        }
+    }
+
+    public function test_supply_replacement_rolls_back_when_protected_legacy_is_present(): void
+    {
+        $protected = $this->marker($this->stillwater, 'supply', 'submission:supply');
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-1', 'supply', 'standard', 1000, 2000),
+        ];
+        $preview = app(\App\Services\Maps\Imports\MapMarkerImportPreview::class)->create(
+            $this->provider, ['stillwater-bayou'], ['supply'], 'sync'
+        );
+        $this->assertSame(1, $preview['maps']['stillwater-bayou']['supply_replacement']['protected_legacy']);
+        $this->expectException(\RuntimeException::class);
+        try {
+            $this->execute(['supply'], 'sync', ['supply'], ['supply' => 1]);
+        } finally {
+            $this->assertNotNull($protected->fresh());
+            $this->assertSame(1, HntMapMarker::query()->count());
+        }
+    }
+
+    public function test_supply_replacement_rolls_back_if_unrelated_provider_blocks_source(): void
+    {
+        $old = $this->marker($this->stillwater, 'supply', 'legacy:supply');
+        $old->update(['x' => 500, 'y' => 1000]);
+        $foreign = $this->marker($this->stillwater, 'supply', 'external:other:near', 'other-near', 'other');
+        $foreign->update(['x' => 501, 'y' => 1001]);
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-1', 'supply', 'standard', 1000, 2000),
+        ];
+        $this->expectException(\RuntimeException::class);
+        try {
+            $this->execute(['supply'], 'sync', ['supply'], ['supply' => 1]);
+        } finally {
+            $this->assertNotNull($old->fresh());
+            $this->assertNotNull($foreign->fresh());
+            $this->assertSame(2, HntMapMarker::query()->count());
+        }
+    }
+
+    public function test_supply_replacement_requires_stale_count_to_match(): void
+    {
+        $old = $this->marker($this->stillwater, 'supply', 'legacy:supply');
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-1', 'supply', 'standard', 1000, 2000),
+        ];
+        $this->expectException(StaleMapMarkerImportPreviewException::class);
+        try {
+            $this->execute(['supply'], 'sync', ['supply'], ['supply' => 0]);
+        } finally {
+            $this->assertNotNull($old->fresh());
+            $this->assertSame(1, HntMapMarker::query()->count());
+        }
+    }
+
+    public function test_supply_replacement_requires_separate_admin_confirmation(): void
+    {
+        $this->marker($this->stillwater, 'supply', 'legacy:supply');
+        $this->fakeKamille(false);
+        $this->actingAs($this->admin());
+        $this->post('/admin/maps/marker-import/preview', [
+            'provider' => 'kamille', 'maps' => ['stillwater-bayou'],
+            'categories' => ['supply'], 'mode' => 'sync',
+        ])->assertOk()->assertSee('Alte HNT-Vorräte');
+
+        $this->post('/admin/maps/marker-import/execute', [
+            'reviewed' => '1', 'confirmation' => 'IMPORT',
+            'replace_legacy' => ['supply'],
+        ])->assertSessionHasErrors(['replace_reviewed', 'replace_confirmation']);
+        $this->assertSame(1, HntMapMarker::query()->count());
+    }
+
     private function admin(): User
     {
         $admin = new User(['name' => 'Admin', 'username' => 'admin', 'email' => 'admin@example.test', 'is_admin' => true]);
