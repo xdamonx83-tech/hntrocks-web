@@ -443,7 +443,7 @@ class ApiGuidesController extends Controller
                 'can_reply' => ! $deleted && $comment->parent_id === null,
                 'can_edit' => ! $deleted && $comment->canEdit($viewer),
                 'can_delete' => ! $deleted && $comment->canDelete($viewer),
-                'can_report' => ! $deleted && (int) $comment->user_id !== (int) $viewer->id,
+                'can_report' => ! $deleted && $viewer !== null && (int) $comment->user_id !== (int) $viewer->id,
             ],
             'replies' => $comment->relationLoaded('replies')
                 ? $comment->replies
