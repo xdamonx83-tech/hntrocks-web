@@ -26,6 +26,15 @@ final class KamilleMapMarkerProvider implements MapMarkerImportProviderInterface
     ];
 
     private const CATEGORIES = [
+        'spawn' => ['source_category' => 'spawns', 'type' => 'spawn', 'subtype' => null],
+        'extract:standard' => ['source_category' => 'extractions', 'type' => 'extract', 'subtype' => 'standard'],
+        'extract:bounty_clash' => ['source_category' => 'bounty_clash_extractions', 'type' => 'extract', 'subtype' => 'bounty_clash'],
+        'supply:standard' => ['source_category' => 'supply_points', 'type' => 'supply', 'subtype' => 'standard'],
+        'supply:postal' => ['source_category' => 'postal_supplies', 'type' => 'supply', 'subtype' => 'postal'],
+        'supply:clockmaker' => ['source_category' => 'clockmaker_supplies', 'type' => 'supply', 'subtype' => 'clockmaker'],
+        'supply:firefighter' => ['source_category' => 'firefighter_supplies', 'type' => 'supply', 'subtype' => 'firefighter'],
+        'supply:medical' => ['source_category' => 'medical_supplies', 'type' => 'supply', 'subtype' => 'medical'],
+        'supply:military' => ['source_category' => 'military_supplies', 'type' => 'supply', 'subtype' => 'military'],
         'easter_egg' => ['source_category' => 'easter_eggs', 'type' => 'easter_egg', 'subtype' => null],
         'wild_target' => ['source_category' => 'wild_targets', 'type' => 'wild_target', 'subtype' => null],
         'beast' => ['source_category' => 'brutes', 'type' => 'beast', 'subtype' => null],
@@ -69,9 +78,25 @@ final class KamilleMapMarkerProvider implements MapMarkerImportProviderInterface
 
         foreach (self::CATEGORIES as $category) {
             $sourceKey = $category['source_category'];
-            $typeKey = $category['type'] === 'tower'
-                ? ['towers' => 'tower', 'big_towers' => 'big_tower', 'scout_towers' => 'scout_tower'][$sourceKey]
-                : ['easter_eggs' => 'easter_egg', 'wild_targets' => 'wild_target', 'brutes' => 'brute', 'beetles' => 'beetle', 'workbenches' => 'workbench'][$sourceKey];
+            $typeKey = [
+                'spawns' => 'spawn',
+                'extractions' => 'extraction',
+                'bounty_clash_extractions' => 'bounty_clash_extraction',
+                'supply_points' => 'supply_point',
+                'postal_supplies' => 'postal_supply',
+                'clockmaker_supplies' => 'clockmaker_supply',
+                'firefighter_supplies' => 'firefighter_supply',
+                'medical_supplies' => 'medical_supply',
+                'military_supplies' => 'military_supply',
+                'towers' => 'tower',
+                'big_towers' => 'big_tower',
+                'scout_towers' => 'scout_tower',
+                'easter_eggs' => 'easter_egg',
+                'wild_targets' => 'wild_target',
+                'brutes' => 'brute',
+                'beetles' => 'beetle',
+                'workbenches' => 'workbench',
+            ][$sourceKey];
 
             if (($types[$typeKey]['categories'] ?? null) !== $sourceKey) {
                 throw new SourceFormatException('External category format changed.');
@@ -153,7 +178,7 @@ final class KamilleMapMarkerProvider implements MapMarkerImportProviderInterface
 
         foreach ($data as $key => $value) {
             if (is_array($value) && ! in_array($key, $known, true)
-                && ! in_array($key, ['spawns', 'armories', 'compounds', 'extractions', 'bounty_clash_extractions', 'crashed_balloons', 'melee_weapons', 'cash_registers', 'supply_points', 'postal_supplies', 'clockmaker_supplies', 'firefighter_supplies', 'medical_supplies', 'military_supplies', 'bileweaver_compounds'], true)) {
+                && ! in_array($key, ['armories', 'compounds', 'crashed_balloons', 'melee_weapons', 'cash_registers', 'bileweaver_compounds'], true)) {
                 Log::warning('Map import skipped unknown source category', ['provider' => $this->id(), 'map' => $mapSlug, 'category' => $key]);
             }
         }
