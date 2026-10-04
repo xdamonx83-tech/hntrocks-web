@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Controller;
+use App\Services\Marketing\LandingDiscoveryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -35,13 +36,16 @@ class LandingPageController extends Controller
         $html = File::get($reactIndex);
         $locale = app()->getLocale();
         $title = __('ui.landing_meta_title');
+        $discovery = app(LandingDiscoveryService::class)->forLocale($locale);
 
         $head = view('react.landing-seo', [
             'mode' => 'head',
+            'discovery' => $discovery,
         ])->render();
 
         $fallback = view('react.landing-seo', [
             'mode' => 'fallback',
+            'discovery' => $discovery,
         ])->render();
 
         $html = preg_replace(
