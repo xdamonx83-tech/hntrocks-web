@@ -68,6 +68,17 @@ class GamificationDashboardApiTest extends TestCase
         $this->assertDatabaseCount('quest_user', 1);
     }
 
+    public function test_react_shell_routes_are_outside_legacy_login_middleware(): void
+    {
+        $routes = app('router')->getRoutes();
+
+        foreach (['gamification.index', 'contracts.index'] as $name) {
+            $route = $routes->getByName($name);
+            $this->assertNotNull($route);
+            $this->assertNotContains('auth', $route->gatherMiddleware());
+        }
+    }
+
     private function badge(string $slug, string $de, string $en): Badge
     {
         return Badge::query()->create([
