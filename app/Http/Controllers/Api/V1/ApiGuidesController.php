@@ -82,7 +82,7 @@ class ApiGuidesController extends Controller
             ])
             ->withCount([
                 'bookmarks as viewer_bookmarked' => fn (Builder $bookmarkQuery) => $bookmarkQuery
-                    ->where('user_id', $request->user()->id),
+                    ->where('user_id', $request->user()?->id ?? 0),
             ]);
 
         $search = trim((string) ($validated['search'] ?? ''));
@@ -219,7 +219,7 @@ class ApiGuidesController extends Controller
             ])
             ->withCount([
                 'bookmarks as viewer_bookmarked' => fn (Builder $bookmarkQuery) => $bookmarkQuery
-                    ->where('user_id', $viewer->id),
+                    ->where('user_id', $viewer?->id ?? 0),
             ])
             ->orderByDesc('helpful_count')
             ->orderByDesc('published_at')
