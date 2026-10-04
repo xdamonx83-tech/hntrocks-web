@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\ApiCupTeamsController;
 use App\Http\Controllers\Api\V1\ApiCrownsController;
 use App\Http\Controllers\Api\V1\ApiCupFeedbackController;
 use App\Http\Controllers\Api\V1\ApiContractsController;
+use App\Http\Controllers\Api\V1\ApiGamificationController;
 use App\Http\Controllers\Api\V1\ApiCupIdeasController;
 use App\Http\Controllers\Api\V1\ApiFeedController;
 use App\Http\Controllers\Api\V1\ApiFeedEngagementController;
@@ -290,6 +291,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/loadout-challenges/{challenge:slug}', [ApiLoadoutChallengesController::class, 'show'])->name('loadout-challenges.show');
         Route::post('/loadout-challenges/{challenge:slug}/submissions', [ApiLoadoutChallengesController::class, 'storeSubmission'])->middleware('throttle:6,1')->name('loadout-challenges.submissions.store');
         Route::get('/contracts', [ApiContractsController::class, 'index'])->name('contracts.index');
+        Route::get('/gamification', [ApiGamificationController::class, 'index'])->name('gamification.index');
         Route::get('/hall-of-fame', [ApiHallOfFameController::class, 'index'])->name('hall-of-fame.index');
         Route::get('/moment-of-week', [ApiMomentOfWeekController::class, 'index'])->name('moment-of-week.index');
         Route::get('/crowns', [ApiCrownsController::class, 'index'])->name('crowns.index');
