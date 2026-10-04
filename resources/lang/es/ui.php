@@ -12,7 +12,7 @@ return [
     'landing_nav_ready' => 'Ready',
     'landing_nav_guides' => 'Guías',
     'landing_nav_cups' => 'Torneos',
-    'landing_meta_title' => 'Comunidad, mapas y herramientas de Hunt: Showdown | HNT.ROCKS',
+    'landing_meta_title' => 'Hunt: Showdown Noticias, Arsenal y Mapas | HNT.ROCKS',
     'landing_news_eyebrow' => 'Novedades del pantano',
     'landing_news_title' => 'Noticias de Hunt: Showdown',
     'landing_news_body' => 'Descubre noticias, actualizaciones y novedades de Hunt: Showdown 1896.',
