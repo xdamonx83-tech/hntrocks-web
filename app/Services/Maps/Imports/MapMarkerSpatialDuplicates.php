@@ -3,6 +3,7 @@
 namespace App\Services\Maps\Imports;
 
 use App\Models\HntMapMarker;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Import-only safety gate for already mapped HNT spawns, exits and supplies.
@@ -15,16 +16,21 @@ final class MapMarkerSpatialDuplicates
     /** @return array<int, array<string, mixed>> */
     public function existing(int $mapId): array
     {
+        $hasIdentity = Schema::hasColumn('hnt_map_markers', 'source_provider');
+        $columns = ['type', 'x', 'y'];
+        if ($hasIdentity) {
+            array_push($columns, 'source_provider', 'source_key');
+        }
+
         return HntMapMarker::query()->where('hnt_map_id', $mapId)
             ->whereIn('type', array_keys(self::RADII))
-            ->get(['type', 'subtype', 'x', 'y', 'source_provider', 'source_key'])
+            ->get($columns)
             ->map(fn (HntMapMarker $marker): array => [
                 'type' => $marker->type,
-                'subtype' => $marker->subtype,
                 'x' => (float) $marker->x,
                 'y' => (float) $marker->y,
-                'source_provider' => $marker->source_provider,
-                'source_key' => $marker->source_key,
+                'source_provider' => $hasIdentity ? $marker->source_provider : null,
+                'source_key' => $hasIdentity ? $marker->source_key : null,
             ])->all();
     }
 
