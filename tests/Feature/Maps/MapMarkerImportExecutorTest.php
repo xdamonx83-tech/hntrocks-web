@@ -318,6 +318,72 @@ class MapMarkerImportExecutorTest extends TestCase
         $this->assertSame(1, HntMapMarker::query()->count());
     }
 
+    public function test_spatial_duplicate_with_manual_marker_is_reported_and_not_inserted(): void
+    {
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('spawn-new-1', 'spawn', null, 1000, 2000),
+        ];
+        $manual = $this->marker($this->stillwater, 'spawn', 'manual:spawn');
+        $manual->update(['x' => 501, 'y' => 1002]);
+
+        $selection = ['spawn'];
+        $preview = app(\App\Services\Maps\Imports\MapMarkerImportPreview::class)->create(
+            $this->provider, ['stillwater-bayou'], $selection, 'sync'
+        );
+        $this->assertSame(1, $preview['total']['duplicate']);
+        $this->assertSame(0, $preview['total']['new']);
+
+        $result = $this->execute($selection);
+        $this->assertSame(1, $result['total']['duplicate']);
+        $this->assertSame(0, $result['total']['created']);
+        $this->assertSame(1, HntMapMarker::query()->count());
+        $this->assertSame(501.0, $manual->fresh()->x);
+    }
+
+    public function test_two_nearby_external_exit_ids_only_create_one_exit(): void
+    {
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('exit-1', 'extract', 'standard', 1200, 1900),
+            $this->provider->row('exit-2', 'extract', 'bounty_clash', 1204, 1904),
+        ];
+        $selection = ['extract'];
+        $preview = app(\App\Services\Maps\Imports\MapMarkerImportPreview::class)->create(
+            $this->provider, ['stillwater-bayou'], $selection, 'add_only'
+        );
+        $this->assertSame(1, $preview['total']['new']);
+        $this->assertSame(1, $preview['total']['duplicate']);
+
+        $first = $this->execute($selection, 'add_only');
+        $this->assertSame(1, $first['total']['created']);
+        $this->assertSame(1, $first['total']['duplicate']);
+        $this->assertSame(1, HntMapMarker::query()->count());
+
+        $repeat = $this->execute($selection, 'sync');
+        $this->assertSame(0, $repeat['total']['created']);
+        $this->assertSame(1, $repeat['total']['unchanged']);
+        $this->assertSame(1, $repeat['total']['duplicate']);
+    }
+
+    public function test_moving_manual_supply_after_preview_rejects_stale_import(): void
+    {
+        $this->provider->rows['stillwater-bayou'] = [
+            $this->provider->row('supply-new', 'supply', 'standard', 1600, 1800),
+        ];
+        $manual = $this->marker($this->stillwater, 'supply', 'manual:supply');
+        $manual->update(['x' => 805, 'y' => 905]);
+
+        $selection = ['supply:standard'];
+        $sourceFingerprint = $this->fingerprint($selection);
+        $databaseFingerprint = $this->databaseFingerprint($selection);
+
+        $manual->update(['x' => 500, 'y' => 500]);
+        $this->expectException(StaleMapMarkerImportDatabaseException::class);
+        app(MapMarkerImportExecutor::class)->execute(
+            $this->provider, ['stillwater-bayou'], $selection, 'sync',
+            $sourceFingerprint, $databaseFingerprint
+        );
+    }
+
     private function admin(): User
     {
         $admin = new User(['name' => 'Admin', 'username' => 'admin', 'email' => 'admin@example.test', 'is_admin' => true]);
