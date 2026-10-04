@@ -150,6 +150,10 @@ Route::get('/arsenal/{slug}', ReactAppController::class)
     ->where('slug', '[a-z0-9-]+')
     ->name('arsenal.react.detail');
 Route::get('/rocks', ReactAppController::class)->name('rocks.index');
+// React handles the authentication gate for these SPA pages. Keeping them
+// outside legacy Laravel auth avoids redirecting React-only sessions to /login.
+Route::get('/gamification', ReactAppController::class)->name('gamification.index');
+Route::get('/contracts', ReactAppController::class)->name('contracts.index');
 Route::get('/rocks/{path}', ReactAppController::class)->where('path', '.*')->name('rocks.react');
 Route::get('/arcade', ReactAppController::class)->name('arcade.react.index');
 Route::get('/arcade/{path}', ReactAppController::class)->where('path', '.*')->name('arcade.react');
@@ -598,7 +602,6 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/moments/comments/{comment}', [MomentCommentController::class, 'update'])->name('moments.comments.update');
     Route::post('/moments/comments/{comment}/reaction', [MomentCommentController::class, 'toggleReaction'])->name('moments.comments.reactions.toggle');
     Route::delete('/moments/comments/{comment}', [MomentCommentController::class, 'destroy'])->name('moments.comments.destroy');
-    Route::get('/contracts', ReactAppController::class)->name('contracts.index');
     Route::get('/crowns', [CrownsController::class, 'index'])->name('crowns.index');
     Route::get('/crowns/history', [CrownsController::class, 'history'])->name('crowns.history');
     Route::get('/crowns/shop', [CrownsShopController::class, 'shop'])->name('crowns.shop');
@@ -640,7 +643,6 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/cups/{cup:slug}/submissions/{submission}/reject', [CupSubmissionController::class, 'reject'])->name('cups.submissions.reject');
     Route::post('/cups/{cup:slug}/randomizer/draws', [CupRandomizerDrawController::class, 'store'])->name('cups.randomizer.draws.store');
     Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
-    Route::get('/gamification', ReactAppController::class)->name('gamification.index');
     Route::get('/gamification/achievements/pending', function () {
         $toasts = session()->pull('hunthub_achievement_toasts', []);
 
