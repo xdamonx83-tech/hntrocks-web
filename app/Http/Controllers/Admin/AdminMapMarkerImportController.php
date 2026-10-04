@@ -75,7 +75,7 @@ final class AdminMapMarkerImportController extends Controller
             'reviewed' => ['required', 'accepted'],
             'confirmation' => ['required', 'string', Rule::in(['IMPORT'])],
             'replace_legacy' => ['sometimes', 'array', 'min:1'],
-            'replace_legacy.*' => ['required', 'distinct', Rule::in(['tower', 'bugs', 'wild'])],
+            'replace_legacy.*' => ['required', 'distinct', Rule::in(['tower', 'bugs', 'wild', 'supply'])],
             'replace_reviewed' => $request->has('replace_legacy') ? ['required', 'accepted'] : ['sometimes', 'accepted'],
             'replace_confirmation' => $request->has('replace_legacy') ? ['required', Rule::in(['ERSETZEN'])] : ['sometimes', 'nullable'],
         ]);
