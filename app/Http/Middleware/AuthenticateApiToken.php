@@ -16,7 +16,17 @@ class AuthenticateApiToken
         $token = ApiAccessToken::findValidPlainToken($request->bearerToken());
 
         if (! $token || ! $token->user) {
-            if ($request->isMethod('GET') && $request->is('api/v1/app/remote-config')) {
+            // Read-only public Guide endpoints. All drafts, editor endpoints
+            // and every write operation remain token-protected.
+            if ($request->isMethod('GET') && (
+                $request->is('api/v1/app/remote-config')
+                || $request->routeIs(
+                    'api.v1.guides.index',
+                    'api.v1.guides.show',
+                    'api.v1.guides.comments.index',
+                    'api.v1.guides.media.show',
+                )
+            )) {
                 return $next($request);
             }
 
