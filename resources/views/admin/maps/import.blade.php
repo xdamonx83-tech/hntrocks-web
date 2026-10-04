@@ -48,6 +48,7 @@
                 @endforeach
             </div>
             <button type="button" class="hh-secondary-button" data-import-select-all>Alle auswählen</button>
+            <button type="button" class="hh-secondary-button" data-import-deselect-all>Auswahl aufheben</button>
         </fieldset>
 
         <fieldset class="hh-section-space" data-import-select-group>
@@ -75,6 +76,7 @@
                 @endforeach
             </div>
             <button type="button" class="hh-secondary-button" data-import-select-all>Alle auswählen</button>
+            <button type="button" class="hh-secondary-button" data-import-deselect-all>Auswahl aufheben</button>
         </fieldset>
 
         <fieldset class="hh-section-space">
@@ -194,6 +196,11 @@
         document.querySelectorAll('[data-import-select-all]').forEach(function (button) {
             button.addEventListener('click', function () {
                 button.closest('[data-import-select-group]').querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) { checkbox.checked = true; });
+            });
+        });
+        document.querySelectorAll('[data-import-deselect-all]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                button.closest('[data-import-select-group]').querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) { checkbox.checked = false; });
             });
         });
         document.querySelectorAll('[data-import-parent]').forEach(function (parent) {
