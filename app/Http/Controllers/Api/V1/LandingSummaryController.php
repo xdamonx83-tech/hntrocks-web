@@ -5,15 +5,21 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\FeedPost;
 use App\Models\User;
+use App\Models\NewsArticle;
 use App\Services\Marketing\LandingDiscoveryService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class LandingSummaryController extends Controller
 {
-    public function __invoke(LandingDiscoveryService $discovery): JsonResponse
+    public function __invoke(Request $request, LandingDiscoveryService $discovery): JsonResponse
     {
+        $requestedLocale = strtolower((string) $request->query('locale', app()->getLocale()));
+        $locale = in_array($requestedLocale, NewsArticle::LOCALES, true)
+            ? $requestedLocale : app()->getLocale();
+        app()->setLocale($locale);
         $visibleUsers = static function (Builder $query): void {
             $query->where('status', 'active')
                 ->where(function (Builder $privacy): void {
