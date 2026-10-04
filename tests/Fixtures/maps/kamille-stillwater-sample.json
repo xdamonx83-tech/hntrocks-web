@@ -1,12 +1,170 @@
 {
   "i": 1,
   "n": "Stillwater Bayou",
-  "easter_eggs": [{"id":"EasterEgg001","c":[3312,2855],"d":"ignored foreign description","u":["ignored.webp"]}],
-  "wild_targets": [{"id":"WildRotjaw01","c":[3686,1748],"boss":"rotjaw"},{"id":"WildHellbor1","c":[2140,1250],"boss":"hellborn"}],
-  "brutes": [{"id":"BruteSource1","c":[1684,3513]}],
-  "beetles": [{"id":"BeetleSource","c":[987,2683]}],
-  "towers": [{"id":"HuntingTower","c":[4003,1556]}],
-  "big_towers": [{"id":"WatchTower01","c":[1737,2431]}],
-  "scout_towers": [{"id":"ScoutTower01","c":[850,1737]}],
-  "workbenches": [{"id":"Workbench001","c":[3394,682]}]
+  "easter_eggs": [
+    {
+      "id": "EasterEgg001",
+      "c": [
+        3312,
+        2855
+      ],
+      "d": "ignored foreign description",
+      "u": [
+        "ignored.webp"
+      ]
+    }
+  ],
+  "wild_targets": [
+    {
+      "id": "WildRotjaw01",
+      "c": [
+        3686,
+        1748
+      ],
+      "boss": "rotjaw"
+    },
+    {
+      "id": "WildHellbor1",
+      "c": [
+        2140,
+        1250
+      ],
+      "boss": "hellborn"
+    }
+  ],
+  "brutes": [
+    {
+      "id": "BruteSource1",
+      "c": [
+        1684,
+        3513
+      ]
+    }
+  ],
+  "beetles": [
+    {
+      "id": "BeetleSource",
+      "c": [
+        987,
+        2683
+      ]
+    }
+  ],
+  "towers": [
+    {
+      "id": "HuntingTower",
+      "c": [
+        4003,
+        1556
+      ]
+    }
+  ],
+  "big_towers": [
+    {
+      "id": "WatchTower01",
+      "c": [
+        1737,
+        2431
+      ]
+    }
+  ],
+  "scout_towers": [
+    {
+      "id": "ScoutTower01",
+      "c": [
+        850,
+        1737
+      ]
+    }
+  ],
+  "workbenches": [
+    {
+      "id": "Workbench001",
+      "c": [
+        3394,
+        682
+      ]
+    }
+  ],
+  "spawns": [
+    {
+      "id": "SpawnSource1",
+      "c": [
+        3200,
+        1200
+      ]
+    }
+  ],
+  "extractions": [
+    {
+      "id": "ExitRegular1",
+      "c": [
+        2100,
+        1500
+      ]
+    }
+  ],
+  "bounty_clash_extractions": [
+    {
+      "id": "ExitClash001",
+      "c": [
+        1100,
+        3600
+      ]
+    }
+  ],
+  "supply_points": [
+    {
+      "id": "SupplyMain01",
+      "c": [
+        1900,
+        1700
+      ]
+    }
+  ],
+  "postal_supplies": [
+    {
+      "id": "SupplyPost01",
+      "c": [
+        2200,
+        1400
+      ]
+    }
+  ],
+  "clockmaker_supplies": [
+    {
+      "id": "SupplyClock1",
+      "c": [
+        2600,
+        1100
+      ]
+    }
+  ],
+  "firefighter_supplies": [
+    {
+      "id": "SupplyFire01",
+      "c": [
+        1500,
+        1700
+      ]
+    }
+  ],
+  "medical_supplies": [
+    {
+      "id": "SupplyMedic1",
+      "c": [
+        1200,
+        2600
+      ]
+    }
+  ],
+  "military_supplies": [
+    {
+      "id": "SupplyMilit1",
+      "c": [
+        3100,
+        3100
+      ]
+    }
+  ]
 }
