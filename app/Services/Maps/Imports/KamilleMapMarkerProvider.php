@@ -26,6 +26,14 @@ final class KamilleMapMarkerProvider implements MapMarkerImportProviderInterface
     ];
 
     private const CATEGORIES = [
+        'easter_egg' => ['source_category' => 'easter_eggs', 'type' => 'easter_egg', 'subtype' => null],
+        'wild_target' => ['source_category' => 'wild_targets', 'type' => 'wild_target', 'subtype' => null],
+        'beast' => ['source_category' => 'brutes', 'type' => 'beast', 'subtype' => null],
+        'beetle' => ['source_category' => 'beetles', 'type' => 'beetle', 'subtype' => null],
+        'tower:hunting' => ['source_category' => 'towers', 'type' => 'tower', 'subtype' => 'hunting'],
+        'tower:watch' => ['source_category' => 'big_towers', 'type' => 'tower', 'subtype' => 'watch'],
+        'tower:scout' => ['source_category' => 'scout_towers', 'type' => 'tower', 'subtype' => 'scout'],
+        'workbench' => ['source_category' => 'workbenches', 'type' => 'workbench', 'subtype' => null],
         'spawn' => ['source_category' => 'spawns', 'type' => 'spawn', 'subtype' => null],
         'extract:standard' => ['source_category' => 'extractions', 'type' => 'extract', 'subtype' => 'standard'],
         'extract:bounty_clash' => ['source_category' => 'bounty_clash_extractions', 'type' => 'extract', 'subtype' => 'bounty_clash'],
@@ -35,14 +43,6 @@ final class KamilleMapMarkerProvider implements MapMarkerImportProviderInterface
         'supply:firefighter' => ['source_category' => 'firefighter_supplies', 'type' => 'supply', 'subtype' => 'firefighter'],
         'supply:medical' => ['source_category' => 'medical_supplies', 'type' => 'supply', 'subtype' => 'medical'],
         'supply:military' => ['source_category' => 'military_supplies', 'type' => 'supply', 'subtype' => 'military'],
-        'easter_egg' => ['source_category' => 'easter_eggs', 'type' => 'easter_egg', 'subtype' => null],
-        'wild_target' => ['source_category' => 'wild_targets', 'type' => 'wild_target', 'subtype' => null],
-        'beast' => ['source_category' => 'brutes', 'type' => 'beast', 'subtype' => null],
-        'beetle' => ['source_category' => 'beetles', 'type' => 'beetle', 'subtype' => null],
-        'tower:hunting' => ['source_category' => 'towers', 'type' => 'tower', 'subtype' => 'hunting'],
-        'tower:watch' => ['source_category' => 'big_towers', 'type' => 'tower', 'subtype' => 'watch'],
-        'tower:scout' => ['source_category' => 'scout_towers', 'type' => 'tower', 'subtype' => 'scout'],
-        'workbench' => ['source_category' => 'workbenches', 'type' => 'workbench', 'subtype' => null],
     ];
 
     public function id(): string
