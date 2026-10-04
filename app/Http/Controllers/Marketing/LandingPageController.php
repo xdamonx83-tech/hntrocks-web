@@ -36,7 +36,13 @@ class LandingPageController extends Controller
         $html = File::get($reactIndex);
         $locale = app()->getLocale();
         $title = __('ui.landing_meta_title');
-        $discovery = app(LandingDiscoveryService::class)->forLocale($locale);
+        try {
+            $discovery = app(LandingDiscoveryService::class)->forLocale($locale);
+        } catch (\Throwable $exception) {
+            // Keep the public landing online if content queries are temporarily unavailable.
+            report($exception);
+            $discovery = ['latest_news' => [], 'arsenal_preview' => []];
+        }
 
         $head = view('react.landing-seo', [
             'mode' => 'head',
