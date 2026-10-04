@@ -113,8 +113,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Michroma&display=swap">
     <link rel="stylesheet" href="{{ asset('assets/vikinger/fonts/phosphor/regular/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/socialite/css/public-landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/socialite/css/public-landing.css') }}?v=20261004">
     <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
+    <script id="hnt-landing-discovery" type="application/json">{!! json_encode([
+        'locale' => $locale,
+        'latest_news' => $latestNews,
+        'arsenal_preview' => $featuredArsenal,
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 @else
     <div class="public-landing">
         <header class="public-header">
