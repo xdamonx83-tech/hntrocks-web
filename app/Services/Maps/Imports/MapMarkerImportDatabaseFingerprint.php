@@ -31,19 +31,25 @@ final class MapMarkerImportDatabaseFingerprint
             throw new InvalidArgumentException('Selected HNT map is unavailable.');
         }
         $hasIdentity = Schema::hasColumn('hnt_map_markers', 'source_provider');
+        // Spatial duplicate detection also depends on pre-existing HNT markers and
+        // markers from other sources, not only on this provider's imported rows.
+        $spatialTypes = MapMarkerSpatialDuplicates::selectedTypes($selections);
         $rows = [];
         foreach ($mapSlugs as $slug) {
             $map = $maps[$slug];
             $query = HntMapMarker::query()->where('hnt_map_id', $map->id);
             if ($hasIdentity) {
-                $query->where(function ($query) use ($providerId): void {
+                $query->where(function ($query) use ($providerId, $spatialTypes): void {
                     $query->where('source_provider', $providerId)
                         ->orWhere(function ($query): void {
                             $query->whereNull('source_provider')->whereIn('type', ['tower', 'bugs', 'wild']);
                         });
+                    if ($spatialTypes !== []) {
+                        $query->orWhereIn('type', $spatialTypes);
+                    }
                 });
             } else {
-                $query->whereIn('type', ['tower', 'bugs', 'wild']);
+                $query->whereIn('type', array_unique(array_merge(['tower', 'bugs', 'wild'], $spatialTypes)));
             }
             foreach ($query->get() as $marker) {
                 if ($this->protection->isProtected($marker)) {
