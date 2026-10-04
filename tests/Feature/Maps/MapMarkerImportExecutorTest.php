@@ -464,7 +464,9 @@ final class TestMapMarkerProvider implements MapMarkerImportProviderInterface
     {
         return [
             'source_key' => $key,
-            'source_category' => match ($type) { 'tower' => 'towers', 'beetle' => 'beetles', 'wild_target' => 'wild_targets', default => 'easter_eggs' },
+            'source_category' => match ($type) { 'tower' => 'towers', 'beetle' => 'beetles', 'wild_target' => 'wild_targets',
+                'spawn' => 'spawns', 'extract' => $subtype === 'bounty_clash' ? 'bounty_clash_extractions' : 'extractions',
+                'supply' => $subtype === 'postal' ? 'postal_supplies' : 'supply_points', default => 'easter_eggs' },
             'type' => $type, 'subtype' => $subtype, 'x' => $x, 'y' => $y,
             'label_de' => null, 'label_en' => null,
         ];
@@ -479,6 +481,10 @@ final class TestMapMarkerProvider implements MapMarkerImportProviderInterface
             'beetle' => ['source_category' => 'beetles', 'type' => 'beetle', 'subtype' => null],
             'wild_target' => ['source_category' => 'wild_targets', 'type' => 'wild_target', 'subtype' => null],
             'easter_egg' => ['source_category' => 'easter_eggs', 'type' => 'easter_egg', 'subtype' => null],
+            'spawn' => ['source_category' => 'spawns', 'type' => 'spawn', 'subtype' => null],
+            'extract:standard' => ['source_category' => 'extractions', 'type' => 'extract', 'subtype' => 'standard'],
+            'extract:bounty_clash' => ['source_category' => 'bounty_clash_extractions', 'type' => 'extract', 'subtype' => 'bounty_clash'],
+            'supply:standard' => ['source_category' => 'supply_points', 'type' => 'supply', 'subtype' => 'standard'],
         ];
     }
     public function markers(string $mapSlug): array { return $this->rows[$mapSlug]; }
