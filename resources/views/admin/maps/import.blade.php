@@ -9,7 +9,9 @@
         $selectedProviderId = array_key_exists($selectedProviderId, $providers) ? $selectedProviderId : array_key_first($providers);
         $selectedProvider = $providers[$selectedProviderId];
         $selectedMaps = request()->input('maps', array_keys($selectedProvider->maps()));
-        $selectedCategories = request()->input('categories', array_merge(array_keys($selectedProvider->categories()), ['tower', 'wild_target:rotjaw', 'wild_target:hellborn']));
+        // Newly supported location categories are deliberately opt-in.
+        $defaultCategories = array_keys(array_filter($selectedProvider->categories(), fn ($category) => ! in_array($category['type'], ['spawn', 'extract', 'supply'], true)));
+        $selectedCategories = request()->input('categories', array_merge($defaultCategories, ['tower', 'wild_target:rotjaw', 'wild_target:hellborn']));
         $categoryGroups = collect($selectedProvider->categories())->groupBy('type', true);
     @endphp
 
@@ -54,7 +56,7 @@
                 @foreach($categoryGroups as $type => $entries)
                     @php $definition = $registry[$type]; @endphp
                     <div class="hh-admin-map-import-category">
-                        <label><input type="checkbox" name="categories[]" value="{{ $type }}" @if(in_array($type, ['wild_target', 'tower'], true)) data-import-parent="{{ $type }}" @endif @checked(in_array($type, $selectedCategories, true))> <strong>{{ $definition['label_de'] }}</strong></label>
+                        <label><input type="checkbox" name="categories[]" value="{{ $type }}" @if(in_array($type, ['wild_target', 'tower', 'extract', 'supply'], true)) data-import-parent="{{ $type }}" @endif @checked(in_array($type, $selectedCategories, true))> <strong>{{ $definition['label_de'] }}</strong></label>
                         @if($type === 'wild_target')
                             <div class="hh-admin-map-import-subtypes">
                                 @foreach($definition['subtypes'] as $subtype => $labels)
@@ -62,7 +64,7 @@
                                 @endforeach
                             </div>
                             <small class="hh-muted">Einträge ohne eindeutigen Typ erscheinen separat als „nicht klassifiziert“.</small>
-                        @elseif($type === 'tower')
+                        @elseif(in_array($type, ['tower', 'extract', 'supply'], true))
                             <div class="hh-admin-map-import-subtypes">
                                 @foreach($entries as $entryKey => $entry)
                                     <label><input type="checkbox" name="categories[]" value="{{ $entryKey }}" data-import-child="{{ $type }}" @checked(in_array($entryKey, $selectedCategories, true))> {{ $definition['subtypes'][$entry['subtype']]['de'] }}</label>
@@ -79,7 +81,7 @@
             <legend><strong>Importmodus</strong></legend>
             <label><input type="radio" name="mode" value="sync" @checked(request('mode', 'sync') === 'sync')> Synchronisieren</label><br>
             <label><input type="radio" name="mode" value="add_only" @checked(request('mode') === 'add_only')> Nur neue Marker hinzufügen</label>
-            <p class="hh-muted">Die Vorschau verändert keine Marker. Ein Import erfordert anschließend eine eigene Bestätigung.</p>
+            <p class="hh-muted">Neue Ausgänge, Spawns und Vorratsstellen sind zunächst abgewählt. Bei diesen Kategorien werden Marker innerhalb von 7 Pixeln (Spawn/Ausgang) bzw. 6 Pixeln (Vorrat) zu einem vorhandenen gleichartigen Marker als Duplikat übersprungen. HNT-Originale bleiben unverändert. Die Vorschau verändert keine Marker; der Import benötigt eine eigene Bestätigung.</p>
             <p class="hh-muted">„Nur neue Marker hinzufügen“ würde bestehende Marker auch dann auslassen, wenn die Vorschau sie als geändert erkennt.</p>
         </fieldset>
 
@@ -100,7 +102,7 @@
                     <h3>{{ $mapResult['name'] }}</h3>
                     <div class="hh-admin-map-import-table-wrap">
                         <table class="hh-admin-map-import-table">
-                            <thead><tr><th>Kategorie</th><th>Neu</th><th>Geändert</th><th>Unverändert</th><th>Extern entfernt</th><th>Geschützt</th><th>Nicht klassifiziert</th><th>Außerhalb Karte</th></tr></thead>
+                            <thead><tr><th>Kategorie</th><th>Neu</th><th>Geändert</th><th>Unverändert</th><th>Duplikate</th><th>Extern entfernt</th><th>Geschützt</th><th>Nicht klassifiziert</th><th>Außerhalb Karte</th></tr></thead>
                             <tbody>
                                 @foreach($mapResult['categories'] as $category => $counts)
                                     @php
@@ -108,7 +110,7 @@
                                         $categoryLabel = $registry[$type]['label_de'] ?? $type;
                                         $subtypeLabel = $subtype === 'unclassified' ? 'Nicht klassifiziert' : ($registry[$type]['subtypes'][$subtype]['de'] ?? $subtype);
                                     @endphp
-                                    <tr><th>{{ $categoryLabel }}{{ $subtype ? ' · '.$subtypeLabel : '' }}</th><td>+ {{ $counts['new'] }}</td><td>~ {{ $counts['changed'] }}</td><td>= {{ $counts['unchanged'] }}</td><td>- {{ $counts['removed_external'] }}</td><td>{{ $counts['protected'] }}</td><td>{{ $counts['unclassified'] ? '! '.$counts['unclassified'] : '0' }}</td><td>{{ $counts['out_of_bounds'] ? '! '.$counts['out_of_bounds'] : '0' }}</td></tr>
+                                    <tr><th>{{ $categoryLabel }}{{ $subtype ? ' · '.$subtypeLabel : '' }}</th><td>+ {{ $counts['new'] }}</td><td>~ {{ $counts['changed'] }}</td><td>= {{ $counts['unchanged'] }}</td><td>{{ $counts['duplicate'] }}</td><td>- {{ $counts['removed_external'] }}</td><td>{{ $counts['protected'] }}</td><td>{{ $counts['unclassified'] ? '! '.$counts['unclassified'] : '0' }}</td><td>{{ $counts['out_of_bounds'] ? '! '.$counts['out_of_bounds'] : '0' }}</td></tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -127,7 +129,7 @@
                 </div>
             @endforeach
             <h3>Gesamt</h3>
-            <p>Neu: {{ $result['total']['new'] }} · Geändert: {{ $result['total']['changed'] }} · Unverändert: {{ $result['total']['unchanged'] }} · Extern nicht mehr vorhanden: {{ $result['total']['removed_external'] }} · Geschützt: {{ $result['total']['protected'] }} · Nicht eindeutig klassifiziert: {{ $result['total']['unclassified'] }} · Außerhalb der Karte übersprungen: {{ $result['total']['out_of_bounds'] }}</p>
+            <p>Neu: {{ $result['total']['new'] }} · Geändert: {{ $result['total']['changed'] }} · Unverändert: {{ $result['total']['unchanged'] }} · Duplikate: {{ $result['total']['duplicate'] }} · Extern nicht mehr vorhanden: {{ $result['total']['removed_external'] }} · Geschützt: {{ $result['total']['protected'] }} · Nicht eindeutig klassifiziert: {{ $result['total']['unclassified'] }} · Außerhalb der Karte übersprungen: {{ $result['total']['out_of_bounds'] }}</p>
         </section>
         <section class="hh-card hh-section-space" aria-labelledby="import-prepare-title">
             <h2 id="import-prepare-title">Import vorbereiten</h2>
@@ -135,7 +137,7 @@
                 <strong>Maps:</strong> {{ implode(', ', array_map(fn ($slug) => $result['maps'][$slug]['name'], array_keys($result['maps']))) }}<br>
                 <strong>Kategorien:</strong> {{ implode(', ', request('categories', [])) }}<br>
                 <strong>Modus:</strong> {{ $result['mode'] === 'sync' ? 'Synchronisieren' : 'Nur neue Marker hinzufügen' }}</p>
-            <p>Neu: {{ $result['total']['new'] }} · Geändert: {{ $result['total']['changed'] }} · Nicht klassifiziert: {{ $result['total']['unclassified'] }} · Außerhalb Karte: {{ $result['total']['out_of_bounds'] }}</p>
+            <p>Neu: {{ $result['total']['new'] }} · Geändert: {{ $result['total']['changed'] }} · Duplikate: {{ $result['total']['duplicate'] }} · Nicht klassifiziert: {{ $result['total']['unclassified'] }} · Außerhalb Karte: {{ $result['total']['out_of_bounds'] }}</p>
             @if($result['identity_columns_ready'])
                 <form method="post" action="{{ route('admin.maps.import.execute') }}">
                     @csrf
@@ -167,7 +169,7 @@
     @if($executed)
         <section class="hh-card hh-section-space" role="status">
             <h2>Markerimport abgeschlossen</h2>
-            <p>Neu: {{ $executed['total']['created'] }} · Aktualisiert: {{ $executed['total']['updated'] }} · Unverändert: {{ $executed['total']['unchanged'] }} · Nur-hinzufügen übersprungen: {{ $executed['total']['skipped_add_only'] }} · Extern nicht mehr vorhanden: {{ $executed['total']['external_missing'] }} · Geschützt: {{ $executed['total']['protected'] }} · Nicht klassifiziert: {{ $executed['total']['unclassified'] }} · Außerhalb Karte: {{ $executed['total']['out_of_bounds'] }}</p>
+            <p>Neu: {{ $executed['total']['created'] }} · Aktualisiert: {{ $executed['total']['updated'] }} · Unverändert: {{ $executed['total']['unchanged'] }} · Duplikate: {{ $executed['total']['duplicate'] }} · Nur-hinzufügen übersprungen: {{ $executed['total']['skipped_add_only'] }} · Extern nicht mehr vorhanden: {{ $executed['total']['external_missing'] }} · Geschützt: {{ $executed['total']['protected'] }} · Nicht klassifiziert: {{ $executed['total']['unclassified'] }} · Außerhalb Karte: {{ $executed['total']['out_of_bounds'] }}</p>
             @foreach($executed['maps'] as $slug => $map)
                 <p><strong>{{ $map['name'] }}:</strong> @foreach($map['legacy_deleted'] as $type => $count) {{ $type }}: {{ $count }} Legacy-Marker ersetzt. @endforeach</p>
             @endforeach
