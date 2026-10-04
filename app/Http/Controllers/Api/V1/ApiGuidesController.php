@@ -440,7 +440,7 @@ class ApiGuidesController extends Controller
                 'crown_cosmetics' => $authorPayload['crown_cosmetics'] ?? null,
             ] : null,
             'actions' => [
-                'can_reply' => ! $deleted && $comment->parent_id === null,
+                'can_reply' => ! $deleted && $viewer !== null && $comment->parent_id === null,
                 'can_edit' => ! $deleted && $comment->canEdit($viewer),
                 'can_delete' => ! $deleted && $comment->canDelete($viewer),
                 'can_report' => ! $deleted && $viewer !== null && (int) $comment->user_id !== (int) $viewer->id,
