@@ -128,3 +128,30 @@ nearby HNT content. Cash/submission markers remain protected as before.
 There is no automatic live import. Execute only after reviewing the selected maps,
 category and duplicate counts in the admin preview, with the normal explicit
 `IMPORT` confirmation; leave all optional legacy replacement boxes unchecked.
+
+
+## Optional complete replacement of legacy HNT supplies (2026-10-04)
+
+The admin import preview now separately shows the normal import counts and an
+additional *supply replacement simulation* for each map. This option only
+appears as enabled after selecting **Sync** and all six supply source
+categories (or the parent Supply category). It defaults to **off** and needs
+both the normal `IMPORT` approval and separate `ERSETZEN` confirmation.
+
+If explicitly enabled, spatial duplicate detection excludes **only approved,
+unprotected, provider-less legacy HNT `supply` rows**: these old markers are
+about to be removed, so they must not suppress the Kamille replacements.
+Newer or third-party provider-owned supplies and protected or pending HNT
+markers continue to block nearby duplicates.
+
+Execution then checks fresh source and database fingerprints, revalidates all
+selected Kamille supply IDs (allowing nearby IDs to share a verified imported
+Kamille marker within 6 HNT pixels), checks bounds and the previewed legacy
+counts, and verifies every imported replacement. It refuses deletion if any
+protected or unapproved legacy supply exists, an untrusted competing provider
+blocks coverage, or any validation fails. In those cases the **entire
+transaction rolls back**, including any new marker insertions. Only
+`type=supply` rows with `source_provider IS NULL` on selected maps are
+deleted after all checks. Other marker types, cash and linked community
+submissions are never deleted or replaced. No live import or legacy deletion
+is part of deploying this code.
