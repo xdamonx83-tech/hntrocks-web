@@ -56,9 +56,10 @@ final class MapMarkerImportDatabaseFingerprint
                     continue;
                 }
                 $legacy = ! $hasIdentity || $marker->source_provider === null;
-                if (! $legacy && ! MapMarkerImportSourcePlan::selected([
-                    'type' => $marker->type, 'subtype' => $marker->subtype,
-                ], $selections)) {
+                if (! $legacy && ! in_array($marker->type, $spatialTypes, true)
+                    && ! MapMarkerImportSourcePlan::selected([
+                        'type' => $marker->type, 'subtype' => $marker->subtype,
+                    ], $selections)) {
                     continue;
                 }
                 $rows[] = [
