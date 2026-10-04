@@ -181,8 +181,9 @@ final class MapMarkerImportExecutor
                         throw new StaleMapMarkerImportPreviewException('Legacy marker count changed.');
                     }
                     foreach ($legacy as $marker) {
-                        if ($this->protection->isProtected($marker)) {
-                            throw new RuntimeException('Protected marker found in legacy replacement.');
+                        if ($this->protection->isProtected($marker)
+                            || ($legacyType === 'supply' && $marker->status !== 'approved')) {
+                            throw new RuntimeException('Protected or unapproved marker found in legacy replacement.');
                         }
                     }
                     $targetType = self::LEGACY_TYPES[$legacyType];
