@@ -7,6 +7,18 @@ use InvalidArgumentException;
 
 final class MapMarkerImportSourcePlan
 {
+    public const SUPPLY_SUBTYPES = [
+        'supply:standard', 'supply:postal', 'supply:clockmaker',
+        'supply:firefighter', 'supply:medical', 'supply:military',
+    ];
+
+    /** Only all six source categories together may replace existing HNT supplies. */
+    public static function completeSupplySelection(array $selections): bool
+    {
+        return in_array('supply', $selections, true)
+            || array_diff(self::SUPPLY_SUBTYPES, $selections) === [];
+    }
+
     public function __construct(private readonly ExternalMapCoordinateTransformer $transformer)
     {
     }
