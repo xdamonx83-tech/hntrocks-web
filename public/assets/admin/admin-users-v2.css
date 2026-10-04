@@ -56,7 +56,7 @@
 .acp-u-actions summary::-webkit-details-marker{display:none}
 .acp-u-actions summary svg{width:19px;height:19px}
 .acp-u-actions details[open] summary{border-color:var(--acp-blue)}
-.acp-u-action-menu{position:absolute;z-index:15;top:calc(100% + 7px);right:0;min-width:190px;padding:7px;border-radius:12px;background:#292c37;border:1px solid var(--acp-u-stroke);box-shadow:0 12px 24px rgba(0,0,0,.35)}
+.acp-u-action-menu{position:static;margin-top:8px;min-width:190px;padding:7px;border-radius:12px;background:#292c37;border:1px solid var(--acp-u-stroke);box-shadow:0 12px 24px rgba(0,0,0,.35)}
 .acp-u-action-menu form{margin:0}
 .acp-users-v2 .acp-u-action-menu button{display:block;width:100%;padding:11px 12px;background:transparent;color:#e7e8ed;border:0;border-radius:7px;text-align:left;cursor:pointer;font-size:12px}
 .acp-users-v2 .acp-u-action-menu button:hover{background:#373b48}
@@ -91,3 +91,7 @@
 @media(max-width:1340px){.acp-u-filters{grid-template-columns:minmax(180px,1.6fr) minmax(145px,1fr) auto auto}.acp-u-filters>a:last-child{grid-column:4}}
 @media(max-width:900px){.acp-u-filters{grid-template-columns:minmax(0,1fr) minmax(135px,.6fr)}.acp-u-filter-check{grid-column:1/2}.acp-users-v2 .hh-page-header{align-items:flex-start;flex-direction:column}.acp-u-counter{display:none}}
 @media(max-width:600px){.acp-users-v2{gap:12px}.acp-users-v2 .acp-u-panel,.acp-users-v2 .hh-page-header,.acp-users-v2 .hh-card{padding:17px;border-radius:14px}.acp-u-table-panel{padding:17px 0!important}.acp-u-table-panel .acp-u-section-heading{padding:0 17px 15px}.acp-u-table-footer{padding:16px}.acp-u-filters{grid-template-columns:1fr}.acp-u-filters>*{grid-column:auto!important}.acp-u-heading h1{font-size:22px}.acp-u-profile-heading img{width:44px;height:44px}}
+/* Keep the long edit form readable without changing any nested Laravel forms. */
+.acp-users-v2-edit>form{display:grid;gap:22px;min-width:0}
+.acp-users-v2-edit .hh-admin-table{overflow-x:auto}
+@media(max-width:600px){.acp-users-v2-edit>form{gap:12px}}
