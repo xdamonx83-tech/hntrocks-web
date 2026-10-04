@@ -3040,7 +3040,7 @@ return [
     'landing_nav_ready' => 'Ready',
     'landing_nav_guides' => 'Guides',
     'landing_nav_cups' => 'Cups',
-    'landing_meta_title' => 'Hunt: Showdown Community, Maps & Tools | HNT.ROCKS',
+    'landing_meta_title' => 'Hunt: Showdown News, Arsenal & Maps | HNT.ROCKS',
     'landing_news_eyebrow' => 'Latest from the bayou',
     'landing_news_title' => 'Hunt: Showdown News',
     'landing_news_body' => 'Catch the latest news, updates and developments around Hunt: Showdown 1896.',
