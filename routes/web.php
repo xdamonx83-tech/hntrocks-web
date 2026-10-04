@@ -598,7 +598,7 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/moments/comments/{comment}', [MomentCommentController::class, 'update'])->name('moments.comments.update');
     Route::post('/moments/comments/{comment}/reaction', [MomentCommentController::class, 'toggleReaction'])->name('moments.comments.reactions.toggle');
     Route::delete('/moments/comments/{comment}', [MomentCommentController::class, 'destroy'])->name('moments.comments.destroy');
-    Route::get('/contracts', [WeeklyContractController::class, 'index'])->name('contracts.index');
+    Route::get('/contracts', ReactAppController::class)->name('contracts.index');
     Route::get('/crowns', [CrownsController::class, 'index'])->name('crowns.index');
     Route::get('/crowns/history', [CrownsController::class, 'history'])->name('crowns.history');
     Route::get('/crowns/shop', [CrownsShopController::class, 'shop'])->name('crowns.shop');
@@ -640,7 +640,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/cups/{cup:slug}/submissions/{submission}/reject', [CupSubmissionController::class, 'reject'])->name('cups.submissions.reject');
     Route::post('/cups/{cup:slug}/randomizer/draws', [CupRandomizerDrawController::class, 'store'])->name('cups.randomizer.draws.store');
     Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
-    Route::get('/gamification', [GamificationController::class, 'index'])->name('gamification.index');
+    Route::get('/gamification', ReactAppController::class)->name('gamification.index');
     Route::get('/gamification/achievements/pending', function () {
         $toasts = session()->pull('hunthub_achievement_toasts', []);
 
