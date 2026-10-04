@@ -650,7 +650,7 @@ Route::middleware('auth')->group(function (): void {
             'achievements' => array_values(is_array($toasts) ? $toasts : []),
         ]);
     })->name('gamification.achievements.pending');
-    Route::prefix('admin')->name('admin.')->group(function (): void {
+    Route::prefix('admin')->middleware('hnt.admin')->name('admin.')->group(function (): void {
         Route::get('/arcade-games', [AdminArcadeGameController::class, 'index'])->name('arcade-games.index');
         Route::get('/arcade-games/{game:key}/edit', [AdminArcadeGameController::class, 'edit'])->name('arcade-games.edit');
         Route::put('/arcade-games/{game:key}', [AdminArcadeGameController::class, 'update'])->name('arcade-games.update');

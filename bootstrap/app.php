@@ -40,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'api.token' => \App\Http\Middleware\AuthenticateApiToken::class,
             'news.admin' => \App\Http\Middleware\EnsureNewsAdmin::class,
+            'hnt.admin' => \App\Http\Middleware\EnsureAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
