@@ -79,7 +79,7 @@ class MapMarkerImportPreviewTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $result['database_fingerprint']);
         $this->assertSame(1, $result['total']['new']);
         $this->assertSame(0, $result['total']['removed_external']);
-        $this->assertSame(['tower' => 1, 'bugs' => 1, 'wild' => 1], $result['maps']['stillwater-bayou']['legacy']);
+        $this->assertSame(['tower' => 1, 'bugs' => 1, 'wild' => 1, 'supply' => 0], $result['maps']['stillwater-bayou']['legacy']);
         $this->assertSame(1, $result['maps']['stillwater-bayou']['protected_existing']['cash']);
         $this->assertSame(1, $result['maps']['stillwater-bayou']['protected_existing']['submission_key']);
         $this->assertSame(111.0, $cash->fresh()->x);
