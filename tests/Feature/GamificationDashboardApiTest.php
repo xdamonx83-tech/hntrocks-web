@@ -7,12 +7,124 @@ use App\Models\Badge;
 use App\Models\Quest;
 use App\Models\User;
 use App\Models\XpEvent;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class GamificationDashboardApiTest extends TestCase
 {
-    use RefreshDatabase;
+    /**
+     * Isolated schema: the legacy full migration chain contains a MySQL-only
+     * foreign-key rewrite, unrelated to this API and unsupported by SQLite.
+     * Never access production DB or modify existing migrations from this test.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Schema::create('users', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('username')->unique();
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->string('status')->default('active');
+            $table->unsignedInteger('xp_total')->default(0);
+            $table->unsignedInteger('level')->default(1);
+            $table->unsignedInteger('trust_score')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('user_profiles', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('user_id')->unique();
+            $table->text('bio')->nullable();
+            $table->string('platform')->nullable();
+            $table->string('playstyle')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('api_access_tokens', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('user_id');
+            $table->string('name');
+            $table->string('token_hash');
+            $table->json('abilities')->nullable();
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->timestamp('revoked_at')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('badges', function (Blueprint $table): void {
+            $table->id();
+            $table->string('slug')->unique();
+            $table->string('name');
+            $table->string('name_de')->nullable();
+            $table->string('name_en')->nullable();
+            $table->text('description')->nullable();
+            $table->text('description_de')->nullable();
+            $table->text('description_en')->nullable();
+            $table->string('category');
+            $table->string('rarity')->default('common');
+            $table->string('icon_path')->nullable();
+            $table->unsignedInteger('xp_reward')->default(0);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('badge_user', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('user_id');
+            $table->foreignId('badge_id');
+            $table->timestamp('awarded_at')->nullable();
+            $table->unsignedBigInteger('awarded_by')->nullable();
+            $table->text('award_reason')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('quests', function (Blueprint $table): void {
+            $table->id();
+            $table->string('slug')->unique();
+            $table->string('name');
+            $table->string('name_de')->nullable();
+            $table->string('name_en')->nullable();
+            $table->text('description')->nullable();
+            $table->text('description_de')->nullable();
+            $table->text('description_en')->nullable();
+            $table->string('category');
+            $table->string('action');
+            $table->string('period')->nullable();
+            $table->unsignedInteger('target_count')->default(1);
+            $table->unsignedInteger('xp_reward')->default(0);
+            $table->boolean('is_weekly_contract')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->string('badge_slug')->nullable();
+            $table->string('icon_path')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('quest_user', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('user_id');
+            $table->foreignId('quest_id');
+            $table->unsignedInteger('progress_count')->default(0);
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamp('reward_claimed_at')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('xp_events', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('user_id');
+            $table->string('action');
+            $table->integer('points');
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+    }
 
     public function test_dashboard_shows_real_badges_quests_and_xp_without_mutating_them(): void
     {
