@@ -11,6 +11,7 @@
     @include('partials.favicon')
     <link rel="stylesheet" href="{{ asset('assets/admin/admin.css') }}?v=521">
     <link rel="stylesheet" href="{{ asset('assets/admin/hnt-acp.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('assets/admin/admin-collaboration-v2.css') }}?v=1">
     @stack('head')
 </head>
 <body class="hnt-admin-shell @yield('body_class')">
@@ -68,10 +69,38 @@
                         <svg><use href="{{ asset('assets/admin/iconsax-acp.svg') }}#moon"></use></svg>
                     </span>
                     <span class="hnt-admin-topbar-divider" aria-hidden="true"></span>
-                    <a class="hnt-admin-site-link" href="{{ route('feed.index') }}">
-                        <svg aria-hidden="true"><use href="{{ asset('assets/admin/iconsax-acp.svg') }}#monitor"></use></svg>
-                        WEBSITE
-                    </a>
+                    <details class="hnt-admin-user-dropdown">
+                        <summary aria-label="Admin-Menü öffnen">
+                            <img src="{{ $acpAvatar }}" alt="" loading="lazy">
+                            <span>{{ $acpAdmin?->username ? '@'.$acpAdmin->username : $acpName }}</span>
+                            <svg aria-hidden="true"><use href="{{ asset('assets/admin/iconsax-acp.svg') }}#more"></use></svg>
+                        </summary>
+                        <nav class="hnt-admin-user-dropdown-menu" aria-label="Admin- und Teamwerkzeuge">
+                            <div class="hnt-admin-user-dropdown-identity">
+                                <strong>{{ $acpName }}</strong>
+                                <small>{{ $acpAdmin?->email ?: 'HNT Administration' }}</small>
+                            </div>
+                            <a href="{{ route('admin.collaboration.chat') }}">
+                                <svg aria-hidden="true"><use href="{{ asset('assets/admin/iconsax-acp.svg') }}#message-question"></use></svg>
+                                Interner Admin-Chat
+                                <small>Vorschau</small>
+                            </a>
+                            <a href="{{ route('admin.collaboration.projects') }}">
+                                <svg aria-hidden="true"><use href="{{ asset('assets/admin/iconsax-acp.svg') }}#document-text"></use></svg>
+                                Aufgaben & To-do
+                                <small>Vorschau</small>
+                            </a>
+                            <div class="hnt-admin-user-dropdown-separator" aria-hidden="true"></div>
+                            <a href="{{ route('admin.index') }}">
+                                <svg aria-hidden="true"><use href="{{ asset('assets/admin/iconsax-acp.svg') }}#category"></use></svg>
+                                Bisheriges Admin Center
+                            </a>
+                            <a href="{{ route('feed.index') }}">
+                                <svg aria-hidden="true"><use href="{{ asset('assets/admin/iconsax-acp.svg') }}#monitor"></use></svg>
+                                Zur Website
+                            </a>
+                        </nav>
+                    </details>
                 </div>
             </header>
 
