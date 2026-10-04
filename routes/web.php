@@ -655,6 +655,8 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/arcade-games/{game:key}/edit', [AdminArcadeGameController::class, 'edit'])->name('arcade-games.edit');
         Route::put('/arcade-games/{game:key}', [AdminArcadeGameController::class, 'update'])->name('arcade-games.update');
         Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
+        Route::view('/collaboration/projects', 'admin.collaboration.projects')->name('collaboration.projects');
+        Route::view('/collaboration/chat', 'admin.collaboration.chat')->name('collaboration.chat');
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
