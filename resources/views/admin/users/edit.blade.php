@@ -4,12 +4,20 @@
 
 @section('admin_heading', 'Nutzer bearbeiten')
 
+@push('head')
+<link rel="stylesheet" href="{{ asset('assets/admin/admin-users-v2.css') }}?v=1">
+@endpush
+
 @section('content')
+<div class="acp-users-v2 acp-users-v2-edit">
 <section class="hh-page-header">
-    <div>
-        <p class="hh-kicker">Admin · Nutzer</p>
-        <h1>{{ $editedUser->name }}</h1>
-        <p>{{ '@'.$editedUser->username }} · {{ $editedUser->email }}</p>
+    <div class="acp-u-profile-heading">
+        <img src="{{ method_exists($editedUser, 'avatarUrl') ? $editedUser->avatarUrl() : asset('assets/vikinger/img/default-avatar.svg') }}" alt="">
+        <div>
+            <p class="hh-kicker">Admin · Nutzer</p>
+            <h1>{{ $editedUser->name }}</h1>
+            <p>{{ '@'.$editedUser->username }} · {{ $editedUser->email }}</p>
+        </div>
     </div>
     <div class="hh-admin-actions">
         <a class="hh-secondary-button" href="{{ route('admin.users.index') }}">Zurück</a>
@@ -247,13 +255,13 @@
 <section class="hh-card hh-card-compact">
     <h2>Schnellaktionen</h2>
     <div class="hh-admin-actions">
-        <form method="post" action="{{ route('admin.users.status', $editedUser) }}">
+        <form method="post" action="{{ route('admin.users.status', $editedUser) }}" onsubmit="return confirm('{{ ($editedUser->status ?? 'active') === 'suspended' ? 'Mitglied entsperren?' : 'Mitglied wirklich sperren?' }}');">
             @csrf
             <input type="hidden" name="status" value="{{ ($editedUser->status ?? 'active') === 'suspended' ? 'active' : 'suspended' }}">
             <button class="hh-secondary-button" type="submit">{{ ($editedUser->status ?? 'active') === 'suspended' ? 'Entsperren' : 'Nutzer sperren' }}</button>
         </form>
 
-        <form method="post" action="{{ route('admin.users.admin', $editedUser) }}">
+        <form method="post" action="{{ route('admin.users.admin', $editedUser) }}" onsubmit="return confirm('{{ $editedUser->is_admin ? 'Adminrechte wirklich entfernen?' : 'Diesem Mitglied Adminrechte geben?' }}');">
             @csrf
             <button class="hh-secondary-button" type="submit">{{ $editedUser->is_admin ? 'Adminrechte entfernen' : 'Adminrechte vergeben' }}</button>
         </form>
@@ -320,4 +328,5 @@
     </div>
 </section>
 
+</div>
 @endsection
