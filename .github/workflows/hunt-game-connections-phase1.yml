@@ -1,0 +1,30 @@
+name: Hunt game connections backend tests
+on:
+  push:
+    branches:
+      - feature/hunt-platform-connections-20261005
+  workflow_dispatch:
+
+jobs:
+  steam-backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3
+          coverage: none
+      - name: Install locked dependencies in CI
+        run: composer install --no-interaction --no-progress --prefer-dist --no-scripts --no-plugins
+      - name: Hunt Steam tests (in-memory database, no live access)
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
+        run: vendor/bin/phpunit tests/Feature/HuntSteamGameConnectionTest.php
