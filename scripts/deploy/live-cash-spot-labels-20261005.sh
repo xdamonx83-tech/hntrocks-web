@@ -28,15 +28,15 @@ echo "=== Bereits freigegebene Spots korrigieren ==="
 export HNT_LIVE="$LIVE" HNT_BACKUP="$BACKUP"
 php <<'PHP'
 <?php
-chdir(getenv('HNT_LIVE'));
-require 'vendor/autoload.php';
-$app = require 'bootstrap/app.php';
-$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-
 use App\Models\HntMapCashSpotSubmission as Submission;
 use App\Models\HntMapMarker as Marker;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+
+chdir(getenv('HNT_LIVE'));
+require 'vendor/autoload.php';
+$app = require 'bootstrap/app.php';
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 $rows = Submission::query()
     ->where('status', Submission::STATUS_APPROVED)
