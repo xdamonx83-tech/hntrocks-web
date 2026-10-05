@@ -75,8 +75,9 @@ PY
 curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/api/v1/health >/dev/null
 curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/app/hunt-steam-profile-bridge.js -o "$TMP/live.js"
 grep -q 'hnt-steam-profile-bridge' "$TMP/live.js"
-curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/app/index.html -o "$TMP/live.html"
-grep -q 'hunt-steam-profile-bridge.js' "$TMP/live.html"
+curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/app/hunt-steam-profile-bridge.css -o "$TMP/live.css"
+grep -q 'hnt-steam-bridge' "$TMP/live.css"
+grep -q 'hunt-steam-profile-bridge.js' "$INDEX"
 
 ROLLED_OUT=0
 echo "STEAM-PROFIL-BRIDGE ERFOLGREICH"
