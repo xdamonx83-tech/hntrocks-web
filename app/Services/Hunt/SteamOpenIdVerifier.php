@@ -35,6 +35,23 @@ final class SteamOpenIdVerifier
             throw new RuntimeException('invalid_response');
         }
 
+        // Steam validates only the fields listed in openid.signed. Refuse
+        // any callback where security-critical identity/return fields were
+        // not included in the signature that Steam validates.
+        $signed = $request->query('openid_signed');
+        $signature = $request->query('openid_sig');
+        $nonce = $request->query('openid_response_nonce');
+        if (! is_string($signed) || ! is_string($signature)
+            || $signature === '' || ! is_string($nonce) || $nonce === '') {
+            throw new RuntimeException('invalid_response');
+        }
+        $fields = array_map('trim', explode(',', $signed));
+        foreach (['op_endpoint', 'claimed_id', 'identity', 'return_to', 'response_nonce'] as $field) {
+            if (! in_array($field, $fields, true)) {
+                throw new RuntimeException('invalid_response');
+            }
+        }
+
         $claimed = $request->query('openid_claimed_id');
         $identity = $request->query('openid_identity');
         if (! is_string($claimed) || $identity !== $claimed
