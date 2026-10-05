@@ -48,9 +48,32 @@ git -C "$DIR" switch --detach "$REF"
 test ! -e "$DIR/.env" || {
   echo "STOPP: Test-Worktree enthaelt eine .env."; exit 1;
 }
-php -m | grep -iq '^pdo_sqlite$' || {
-  echo "STOPP: PHP-Erweiterung pdo_sqlite fehlt."; exit 1;
-}
+# Debian 13 / PHP 8.4: use SQLite only within the test process.
+# Download and extract the Debian package; do not install it system-wide.
+EXTRA_PHP=()
+TEMP_EXT_DIR=""
+if ! php -r 'exit(extension_loaded("pdo_sqlite") ? 0 : 1);'; then
+  command -v apt >/dev/null && command -v dpkg-deb >/dev/null || {
+    echo "STOPP: apt oder dpkg-deb nicht vorhanden."; exit 1;
+  }
+  TEMP_EXT_DIR=$(mktemp -d /tmp/hnt-test-sqlite.XXXXXXXX)
+  trap '[ -z "$TEMP_EXT_DIR" ] || rm -rf -- "$TEMP_EXT_DIR"' EXIT
+  PHP_MINOR=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+  echo "=== SQLite-Modul nur in /tmp herunterladen ==="
+  (
+    cd "$TEMP_EXT_DIR"
+    apt download "php${PHP_MINOR}-sqlite3"
+  )
+  PKG=$(find "$TEMP_EXT_DIR" -maxdepth 1 -name '*.deb' -type f -print -quit)
+  test -n "$PKG" || { echo "STOPP: Kein SQLite-Debianpaket."; exit 1; }
+  dpkg-deb -x "$PKG" "$TEMP_EXT_DIR/unpack"
+  SQLITE_MODULE=$(find "$TEMP_EXT_DIR/unpack" -name pdo_sqlite.so -type f -print -quit)
+  test -f "$SQLITE_MODULE" || { echo "STOPP: SQLite-Modul fehlt."; exit 1; }
+  EXTRA_PHP=(-d "extension=$SQLITE_MODULE")
+  php "${EXTRA_PHP[@]}" -r 'exit(extension_loaded("pdo_sqlite") ? 0 : 1);' || {
+    echo "STOPP: Test-Modul passt nicht zur PHP-Version."; exit 1;
+  }
+fi
 command -v composer >/dev/null || {
   echo "STOPP: Composer fehlt."; exit 1;
 }
@@ -95,7 +118,7 @@ echo "=== PHPUnit: SQLite nur im Arbeitsspeicher ==="
   DB_DATABASE=:memory: \
   SESSION_DRIVER=array \
   CACHE_STORE=array \
-    "$DIR/vendor/bin/phpunit" \
+    php "${EXTRA_PHP[@]}" "$DIR/vendor/bin/phpunit" \
       --configuration "$DIR/phpunit.xml" \
       --bootstrap "$DIR/tests/bootstrap-hunt-worktree.php" \
       --filter HuntSteamGameConnectionTest \
