@@ -18,6 +18,19 @@ jobs:
           coverage: none
       - name: Install locked dependencies in CI
         run: composer install --no-interaction --no-progress --prefer-dist --no-scripts --no-plugins
+      - name: Validate guarded release script syntax
+        run: |
+          bash -n scripts/deploy/hunt-game-connections-live-20261005.sh
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path('scripts/deploy/hunt-game-connections-live-20261005.sh').read_text()
+          snippets = s.split("<<'PY'\n")[1:]
+          assert len(snippets) == 3, "Unexpected embedded Python section count"
+          for index, piece in enumerate(snippets):
+              code = piece.split("\nPY\n", 1)[0]
+              compile(code, f"deployment embedded Python #{index + 1}", "exec")
+          print("Bash and Python syntax OK")
+          PY
       - name: Hunt Steam tests (in-memory database, no live access)
         env:
           APP_ENV: testing
