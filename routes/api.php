@@ -112,6 +112,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/appearance', [AppRemoteConfigController::class, 'appearance'])->name('appearance.show');
 
     Route::middleware('api.token')->group(function (): void {
+        require __DIR__.'/api-hunt-accounts.php';
         Route::get('/news/articles/{article}/engagement/viewer', [NewsEngagementController::class, 'viewer'])->whereNumber('article')->name('news.engagement.viewer');
         Route::post('/news/articles/{article}/comments', [NewsEngagementController::class, 'store'])->whereNumber('article')->middleware('throttle:12,1')->name('news.comments.store');
         Route::post('/news/articles/{article}/like', [NewsEngagementController::class, 'toggleLike'])->whereNumber('article')->middleware('throttle:30,1')->name('news.like');
