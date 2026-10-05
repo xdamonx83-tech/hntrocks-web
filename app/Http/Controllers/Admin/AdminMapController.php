@@ -221,7 +221,8 @@ class AdminMapController extends Controller
                 'source_image' => $filename,
                 'status' => 'approved',
                 'sort_order' => ((int) $map->markers()->max('sort_order')) + 1,
-                'meta' => null,
+                'meta' => $lockedSubmission->description
+                    ? ['description' => $lockedSubmission->description] : null,
             ]);
 
             $lockedSubmission->forceFill([
