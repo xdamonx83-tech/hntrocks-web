@@ -44,6 +44,9 @@
                         <div><dt>Eingereicht von</dt><dd>{{ $submitter }}</dd></div>
                         @if($submission->submitter_name)<div><dt>Name</dt><dd>{{ $submission->submitter_name }}</dd></div>@endif
                         @if($submission->submitter_email)<div><dt>E-Mail</dt><dd>{{ $submission->submitter_email }}</dd></div>@endif
+                        @if($submission->description)
+                            <div><dt>Beschreibung</dt><dd style="white-space:pre-wrap">{{ $submission->description }}</dd></div>
+                        @endif
                         <div><dt>Datei</dt><dd>{{ $submission->original_name }}</dd></div>
                         <div><dt>Größe</dt><dd>{{ number_format($submission->size / 1024, 0, ',', '.') }} KB</dd></div>
                         <div><dt>Upload</dt><dd>{{ $submission->created_at?->format('d.m.Y H:i') }}</dd></div>
