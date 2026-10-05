@@ -6,16 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\ApiAccessToken;
 use App\Models\HntMap;
 use App\Models\HntMapCashSpotSubmission;
+use App\Services\Maps\CashSpotImageOptimizer;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 class MapCashSpotSubmissionApiController extends Controller
 {
-    public function store(Request $request, string $slug): JsonResponse
+    public function store(Request $request, string $slug, CashSpotImageOptimizer $optimizer): JsonResponse
     {
         $request->headers->set('Accept', 'application/json');
 
@@ -28,30 +27,14 @@ class MapCashSpotSubmissionApiController extends Controller
         $validated = $request->validate([
             'x' => ['required', 'numeric', 'min:0', 'max:'.$map->width],
             'y' => ['required', 'numeric', 'min:0', 'max:'.$map->height],
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:40960'],
+            'description' => ['nullable', 'string', 'max:1000'],
             'submitter_name' => ['nullable', 'string', 'max:80'],
             'submitter_email' => ['nullable', 'email', 'max:160'],
         ]);
 
         $image = $validated['image'];
-        $realPath = $image->getRealPath();
-        $imageInfo = is_string($realPath) ? @getimagesize($realPath) : false;
-        $mimeType = is_array($imageInfo) ? ($imageInfo['mime'] ?? null) : null;
-        $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-
-        if (! is_string($mimeType) || ! isset($extensions[$mimeType])) {
-            throw ValidationException::withMessages([
-                'image' => 'The file must be a valid JPG, PNG, or WebP image.',
-            ]);
-        }
-
-        $path = $image->storeAs(
-            'maps/cash-spot-submissions',
-            Str::uuid().'.'.$extensions[$mimeType],
-            'local',
-        );
-
-        abort_unless(is_string($path) && $path !== '', 500, 'The upload could not be stored.');
+        $stored = $optimizer->store($image);
 
         $submission = HntMapCashSpotSubmission::query()->create([
             'hnt_map_id' => $map->id,
@@ -60,10 +43,11 @@ class MapCashSpotSubmissionApiController extends Controller
             'y' => (float) $validated['y'],
             'status' => HntMapCashSpotSubmission::STATUS_PENDING,
             'disk' => 'local',
-            'path' => $path,
+            'path' => $stored['path'],
             'original_name' => $image->getClientOriginalName(),
-            'mime_type' => $mimeType,
-            'size' => (int) $image->getSize(),
+            'mime_type' => $stored['mime_type'],
+            'size' => $stored['size'],
+            'description' => $this->nullableTrimmedString($validated['description'] ?? null),
             'submitter_name' => $this->nullableTrimmedString($validated['submitter_name'] ?? null),
             'submitter_email' => $this->nullableTrimmedString($validated['submitter_email'] ?? null),
             'ip_hash' => $this->requestValueHash($request->ip()),
