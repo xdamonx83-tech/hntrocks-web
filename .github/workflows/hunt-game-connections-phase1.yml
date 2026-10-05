@@ -42,8 +42,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           s = Path('scripts/deploy/hunt-steam-normal-profile-20261005.sh').read_text()
-          for i, piece in enumerate(s.split("<<'PY'\\n")[1:]):
-              compile(piece.split("\\nPY\\n", 1)[0], f"normal profile #{i + 1}", "exec")
+          for i, piece in enumerate(s.split("<<'PY'")[1:]):
+              compile(piece.split("PY", 1)[0], f"normal profile #{i + 1}", "exec")
           PY
       - name: Hunt Steam tests (in-memory database, no live access)
         env:
