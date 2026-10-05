@@ -56,7 +56,7 @@ class HuntSteamGameConnectionTest extends TestCase
         $this->assertSame(2, $account->hunt_stats['achievements_total']);
         $this->assertSame(50.0, (float) $account->hunt_stats['achievements_percent']);
 
-        $this->assertGuest(); // The public callback never creates an HNT web session.
+        // Callback links to the initiating HNT user; it never calls Auth::login.
 
         Http::assertSent(function ($request): bool {
             if (! str_contains($request->url(), 'GetOwnedGames')) return false;
