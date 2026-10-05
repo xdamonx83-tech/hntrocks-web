@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-umask 077
+umask 022
 B=/home/users/hunthub/www/hnt.rocks
 R=/home/users/hunthub/react/hntrocks-react-redesign
 WR=/home/users/hunthub/worktrees/hnt-steam-release-react
@@ -12,12 +12,32 @@ done
 test -f "$B/.env" && test -f "$B/public/app/index.html" || {
   echo "STOPP: Live-Pfade fehlen"; exit 1;
 }
-test ! -e "$WR" || { echo "STOPP: Release-Worktree existiert"; exit 1; }
 echo "=== GitHub / React vorbereiten ==="
+# A previous run may have left this detached release worktree behind.
+# Only reuse the exact registered worktree if it has no tracked changes.
+if [ -e "$WR" ]; then
+  git -C "$R" worktree list --porcelain | grep -Fxq "worktree $WR" || {
+    echo "STOPP: Existierender React-Pfad ist kein registrierter Worktree."; exit 1;
+  }
+  test -z "$(git -C "$WR" status --porcelain --untracked-files=no)" || {
+    echo "STOPP: React-Release-Worktree enthaelt Aenderungen."; exit 1;
+  }
+fi
+# Before changing any live code, require an already healthy API.
+# A pre-existing 500 must not be mistaken for a deployment failure.
+if ! curl --fail --silent --show-error --connect-timeout 5 --max-time 12 \
+  https://hnt.rocks/api/v1/health >/dev/null; then
+  echo "STOPP: API /health liefert bereits vor dem Deployment einen Fehler."
+  exit 1
+fi
 git -C "$B" fetch origin "+refs/heads/$BR:refs/remotes/origin/$BR"
 git -C "$R" fetch origin "+refs/heads/$BR:refs/remotes/origin/$BR"
 mkdir -p "$(dirname "$WR")"
-git -C "$R" worktree add --detach "$WR" "origin/$BR"
+if [ -e "$WR" ]; then
+  git -C "$WR" switch --detach "origin/$BR"
+else
+  git -C "$R" worktree add --detach "$WR" "origin/$BR"
+fi
 (
   cd "$WR"
   npm ci --ignore-scripts --no-audit --no-fund
@@ -98,7 +118,11 @@ echo "=== Laravel gezielt einspielen ==="
 for f in "${NEW[@]}"; do
   mkdir -p "$B/$(dirname "$f")"
   git -C "$B" show "origin/$BR:$f" > "$B/$f"
+  chmod 0644 "$B/$f"
 done
+# Old failed run used umask 077. Correct permissions of its new
+# subdirectories too, otherwise PHP-FPM cannot traverse them.
+chmod 0755 "$B/app/Services/Hunt" "$B/app/Http/Controllers/Hunt"
 python3 - "$B" <<'PY'
 from pathlib import Path
 import sys
