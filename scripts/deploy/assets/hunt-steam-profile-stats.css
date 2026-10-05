@@ -1,0 +1,16 @@
+/* Hunt-only normal profile statistics; strictly scoped to avoid sidebar changes. */
+#hnt-hunt-profile-stats { margin-bottom: 14px; }
+#hnt-hunt-profile-stats .profile-card-head { margin-bottom: 12px; }
+#hnt-hunt-profile-stats .profile-card-head h3 { display:flex; align-items:center; gap:8px; }
+#hnt-hunt-profile-stats .profile-card-head i { color:#cfdfdf; font-size:18px; }
+#hnt-hunt-profile-stats .hnt-hunt-profile-stats-values { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+#hnt-hunt-profile-stats .hnt-hunt-profile-stats-value {
+  display:flex; flex-direction:column; gap:5px;
+  border:1px solid rgba(130,155,160,.20);border-radius:9px;
+  padding:13px 16px;background:rgba(12,24,26,.6);
+}
+#hnt-hunt-profile-stats .hnt-hunt-profile-stats-value span {color:#91a1a6;font-size:12px;}
+#hnt-hunt-profile-stats .hnt-hunt-profile-stats-value strong {color:#e5ebec;font-size:18px;font-weight:800;}
+@media(max-width:560px){
+  #hnt-hunt-profile-stats .hnt-hunt-profile-stats-values { grid-template-columns:1fr; }
+}
