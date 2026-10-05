@@ -84,7 +84,9 @@ final class SteamHuntStatsProvider
                 'last_synced_at' => now(),
             ])->save();
         } catch (Throwable $exception) {
-            report($exception);
+            // HTTP exception messages may contain request URLs with the
+            // Steam Web API key. Never log the raw provider exception.
+            report(new RuntimeException('Steam Hunt sync failed ('.get_class($exception).')'));
             $this->failure($account, 'provider_unavailable');
         }
     }
