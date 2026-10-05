@@ -31,6 +31,10 @@ jobs:
               compile(code, f"deployment embedded Python #{index + 1}", "exec")
           print("Bash and Python syntax OK")
           PY
+      - name: Validate minimal Steam profile bridge
+        run: |
+          node --check scripts/deploy/assets/hunt-steam-profile-bridge.js
+          bash -n scripts/deploy/hunt-steam-profile-bridge-20261005.sh
       - name: Hunt Steam tests (in-memory database, no live access)
         env:
           APP_ENV: testing
