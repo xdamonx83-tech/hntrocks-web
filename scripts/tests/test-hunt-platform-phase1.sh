@@ -33,7 +33,8 @@ for f in \
   app/Http/Controllers/Api/V1/HuntGameAccountsController.php \
   app/Console/Commands/SyncHuntGameConnections.php \
   routes/api-hunt-accounts.php \
-  tests/Feature/HuntSteamGameConnectionTest.php
+  tests/Feature/HuntSteamGameConnectionTest.php \
+  tests/bootstrap-hunt-worktree.php
 do
   php -l "$DIR/$f"
 done
@@ -50,6 +51,7 @@ echo "=== Targeted tests with isolated SQLite in-memory ==="
     CACHE_STORE=array \
     "$DIR/vendor/bin/phpunit" \
       --configuration "$DIR/phpunit.xml" \
+      --bootstrap "$DIR/tests/bootstrap-hunt-worktree.php" \
       --filter HuntSteamGameConnectionTest \
       tests/Feature/HuntSteamGameConnectionTest.php
 )
