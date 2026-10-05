@@ -27,6 +27,7 @@ class ApiMapCashSpotSubmissionTest extends TestCase
             'image' => UploadedFile::fake()->image('cash-spot.jpg'),
             'submitter_name' => ' Guest ',
             'submitter_email' => 'guest@example.test',
+            'description' => 'Cash register behind the wooden door',
         ])->assertCreated()
             ->assertJsonPath('ok', true)
             ->assertJsonPath('status', 'pending')
@@ -40,7 +41,33 @@ class ApiMapCashSpotSubmissionTest extends TestCase
         $this->assertNull($submission->user_id);
         $this->assertSame(HntMapCashSpotSubmission::STATUS_PENDING, $submission->status);
         $this->assertSame('Guest', $submission->submitter_name);
+        $this->assertSame('Cash register behind the wooden door', $submission->description);
+        $this->assertSame('image/webp', $submission->mime_type);
+        $this->assertStringEndsWith('.webp', $submission->path);
         Storage::disk('local')->assertExists($submission->path);
+    }
+
+
+    public function test_large_screenshot_over_the_previous_five_megabyte_limit_is_optimized(): void
+    {
+        if (! extension_loaded('gd') || ! function_exists('imagewebp')) {
+            $this->markTestSkipped('GD with WebP is needed to optimize PNG images.');
+        }
+
+        Storage::fake('local');
+        $map = $this->map();
+
+        $file = UploadedFile::fake()->image('large-cash.png', 1800, 1200)->size(6144);
+        $response = $this->postUpload($map->slug, [
+            'x' => 200, 'y' => 400, 'image' => $file,
+            'description' => 'Beside the stairs',
+        ])->assertCreated();
+
+        $submission = HntMapCashSpotSubmission::findOrFail($response->json('submission.id'));
+        Storage::disk('local')->assertExists($submission->path);
+        $this->assertSame('image/webp', $submission->mime_type);
+        $this->assertLessThan(5 * 1024 * 1024, $submission->size);
+        $this->assertSame('Beside the stairs', $submission->description);
     }
 
     public function test_authenticated_user_upload_sets_user_id(): void
