@@ -50,6 +50,7 @@
 
   let pendingUser = null;
   let lastAttempt = "";
+  const cachedCards = new Map();
   function mount() {
     const profile = currentProfile();
     if (!profile) {
@@ -65,6 +66,11 @@
     // Avoid repeating network calls on every mutation if a profile has no
     // linked accounts. Reset automatically on navigation/new profile hero.
     const locationKey = location.pathname + ":" + profile.username;
+    const savedCard = cachedCards.get(locationKey);
+    if (savedCard) {
+      profile.overview.parentNode.insertBefore(savedCard.cloneNode(true), profile.overview);
+      return;
+    }
     if (lastAttempt === locationKey || pendingUser === locationKey) return;
     const session = getSession();
     if (!session) return;
@@ -114,6 +120,7 @@
         stats.append(stat);
       }
       card.append(stats);
+      cachedCards.set(locationKey, card.cloneNode(true));
       now.overview.parentNode.insertBefore(card, now.overview);
     }).catch(() => {
       // Do not expose auth errors or noisy placeholders on public profiles.
