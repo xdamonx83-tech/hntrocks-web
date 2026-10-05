@@ -5,6 +5,9 @@
 .profile-main.hnt-hunt-stats-active .profile-tabs .profile-tab.active:not(#hnt-hunt-stats-tab) {
   color:inherit; background:transparent; border-color:transparent; box-shadow:none;
 }
+.profile-main.hnt-hunt-stats-active .profile-tabs .profile-tab.active:not(#hnt-hunt-stats-tab)::after {
+  display:none;
+}
 .profile-main #hnt-hunt-stats-tab.active { color:#e2a88d; border-color:#dd8667; }
 .profile-main #hnt-hunt-stats-panel .hnt-hunt-stats-intro {
   display:flex;flex-direction:column;gap:7px;margin:0 0 18px;
