@@ -54,6 +54,7 @@ rollback() {
     if [ -f "$BACKUP/bridge.css" ]; then cp -p "$BACKUP/bridge.css" "$CSS"; else rm -f "$CSS"; fi
     echo "ROLLBACK: Frühere Live-index.html wiederhergestellt."
   fi
+  rm -rf -- "$TMP"
 }
 trap rollback EXIT
 
@@ -72,8 +73,10 @@ PY
 
 # Verify the actual published files and API, not just filesystem copies.
 curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/api/v1/health >/dev/null
-curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/app/hunt-steam-profile-bridge.js | grep -q 'hnt-steam-profile-bridge'
-curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/app/ | grep -q 'hunt-steam-profile-bridge.js'
+curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/app/hunt-steam-profile-bridge.js -o "$TMP/live.js"
+grep -q 'hnt-steam-profile-bridge' "$TMP/live.js"
+curl -fsS --connect-timeout 5 --max-time 12 https://hnt.rocks/app/index.html -o "$TMP/live.html"
+grep -q 'hunt-steam-profile-bridge.js' "$TMP/live.html"
 
 ROLLED_OUT=0
 echo "STEAM-PROFIL-BRIDGE ERFOLGREICH"
