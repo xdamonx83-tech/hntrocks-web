@@ -39,6 +39,7 @@ jobs:
         run: |
           node --check scripts/deploy/assets/hunt-steam-profile-stats.js
           bash -n scripts/deploy/hunt-steam-normal-profile-20261005.sh
+          bash -n scripts/deploy/hunt-steam-stats-tab-20261005.sh
           python3 - <<'PY'
           from pathlib import Path
           s = Path('scripts/deploy/hunt-steam-normal-profile-20261005.sh').read_text()
