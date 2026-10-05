@@ -140,7 +140,9 @@ class HuntSteamGameConnectionTest extends TestCase
             'openid_claimed_id' => 'https://steamcommunity.com/openid/id/76561198000000001',
             'openid_identity' => 'https://steamcommunity.com/openid/id/76561198000000001',
             'openid_return_to' => $returnTo,
-            'openid_signed' => 'op_endpoint,claimed_id,identity,return_to',
+            'openid_signed' => 'op_endpoint,claimed_id,identity,return_to,response_nonce',
+            'openid_response_nonce' => '2026-10-05T10:00:00Zmocknonce',
+            'openid_sig' => 'mock_signature_verified_by_fake_steam',
         ]);
     }
 
