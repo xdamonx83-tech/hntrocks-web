@@ -11,6 +11,7 @@ use App\Http\Resources\Api\UserLoadoutResource;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Resources\Api\FeedPostResource;
 use App\Models\Friendship;
+use App\Models\HuntGameConnection;
 use App\Models\LiveLobbyFeedback;
 use App\Models\Quest;
 use App\Models\User;
@@ -190,6 +191,20 @@ class ApiMembersController extends Controller
             'profile_summary' => $this->publicProfileSummary($request, $user, $isOwnProfile),
             'viewer' => $this->viewerState($viewer, $user, $isOwnProfile),
             'twitch' => $twitch->statusForUrl($user->profile?->twitch_url),
+            // Respect existing profile visibility (private profiles abort above).
+            // The flag also prevents querying a table before deployment.
+            'hunt_game_accounts' => config('hunt_platform.steam.enabled')
+                ? HuntGameConnection::query()
+                    ->where('user_id', $user->id)
+                    ->get()
+                    ->map(fn (HuntGameConnection $account): array => [
+                        'provider' => $account->provider,
+                        'provider_name' => $account->provider_name,
+                        'hunt' => $account->hunt_stats,
+                        'sync_status' => $account->sync_status,
+                        'last_synced_at' => $account->last_synced_at?->toIso8601String(),
+                    ])->values()->all()
+                : [],
         ]);
     }
 
