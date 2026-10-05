@@ -829,3 +829,6 @@ Artisan::command('hnt:hunt-news:sync {--limit=16 : Maximale Anzahl geprüfter Ne
 
     return Command::SUCCESS;
 })->purpose('Import official Hunt: Showdown news and optionally publish new items as HuntNews feed posts');
+
+// One shared job for all connected Steam hunters; each link refreshes at most daily.
+Schedule::command('hnt:hunt:steam-sync --limit=50')->hourly()->withoutOverlapping();
