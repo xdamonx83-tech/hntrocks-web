@@ -147,7 +147,7 @@ class HuntSteamGameConnectionTest extends TestCase
 
         $authorize = $response->json('authorize_url');
         parse_str((string) parse_url($authorize, PHP_URL_QUERY), $params);
-        $returnTo = $params['openid.return_to'];
+        $returnTo = $params['openid_return_to'];
 
         parse_str((string) parse_url($returnTo, PHP_URL_QUERY), $returnQuery);
 
