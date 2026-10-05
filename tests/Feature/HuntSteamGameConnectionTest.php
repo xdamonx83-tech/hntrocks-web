@@ -7,15 +7,34 @@ use App\Models\HuntGameConnection;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use Tests\TestCase;
 
 class HuntSteamGameConnectionTest extends TestCase
 {
     use RefreshDatabase;
 
+    // Only migrate tables needed by this isolated feature. The full HNT
+    // migration history contains MySQL-only FK operations incompatible with
+    // SQLite, so it cannot run in memory.
+    protected function migrateFreshUsing(): array
+    {
+        return ['--path' => [
+            'database/migrations/2026_04_29_000001_create_users_table.php',
+            'database/migrations/2026_04_29_000018_create_api_access_tokens_table.php',
+            'database/migrations/2026_10_05_120000_create_hunt_game_connections.php',
+        ]];
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
+        if (! Schema::hasColumn('users', 'status')) {
+            Schema::table('users', function (Blueprint $table): void {
+                $table->string('status', 24)->default('active');
+            });
+        }
         config()->set('hunt_platform.steam.enabled', true);
         config()->set('hunt_platform.steam.api_key', 'test-key');
 
