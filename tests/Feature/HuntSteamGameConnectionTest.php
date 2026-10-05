@@ -19,16 +19,17 @@ class HuntSteamGameConnectionTest extends TestCase
         config()->set('hunt_platform.steam.enabled', true);
         config()->set('hunt_platform.steam.api_key', 'test-key');
 
+        Http::preventStrayRequests();
         Http::fake([
-            'steamcommunity.com/openid/login' => Http::response("ns:http://specs.openid.net/auth/2.0\nis_valid:true\n"),
-            'api.steampowered.com/IPlayerService/GetOwnedGames/*' => Http::response([
+            'https://steamcommunity.com/openid/login' => Http::response("ns:http://specs.openid.net/auth/2.0\nis_valid:true\n"),
+            'https://api.steampowered.com/IPlayerService/GetOwnedGames/*' => Http::response([
                 'response' => [
                     'games' => [
                         ['appid' => 594650, 'playtime_forever' => 1234],
                     ],
                 ],
             ]),
-            'api.steampowered.com/ISteamUserStats/GetPlayerAchievements/*' => Http::response([
+            'https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/*' => Http::response([
                 'playerstats' => [
                     'success' => true,
                     'achievements' => [
