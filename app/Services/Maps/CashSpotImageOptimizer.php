@@ -17,12 +17,6 @@ class CashSpotImageOptimizer
      */
     public function store(UploadedFile $image): array
     {
-        if (! extension_loaded('gd') || ! function_exists('imagewebp')) {
-            throw ValidationException::withMessages([
-                'image' => 'Server image processing (GD/WebP) is unavailable.',
-            ]);
-        }
-
         $realPath = $image->getRealPath();
         $info = is_string($realPath) ? @getimagesize($realPath) : false;
         $mime = is_array($info) ? ($info['mime'] ?? null) : null;
@@ -38,6 +32,25 @@ class CashSpotImageOptimizer
             throw ValidationException::withMessages([
                 'image' => 'Invalid image or excessive image dimensions.',
             ]);
+        }
+
+        // The web client already compresses screenshots to WebP. Servers
+        // without GD may accept that bounded, already normalized format.
+        if (! extension_loaded('gd') || ! function_exists('imagewebp')) {
+            if ($mime !== 'image/webp' || $image->getSize() > 4 * 1024 * 1024) {
+                throw ValidationException::withMessages([
+                    'image' => 'This image must be compressed to WebP before upload.',
+                ]);
+            }
+
+            $path = $image->storeAs(
+                'maps/cash-spot-submissions', Str::uuid().'.webp', 'local',
+            );
+            if (! is_string($path) || $path === '') {
+                throw new \RuntimeException('Could not store cash-spot image.');
+            }
+
+            return ['path' => $path, 'mime_type' => 'image/webp', 'size' => (int) $image->getSize()];
         }
 
         $source = match ($mime) {
