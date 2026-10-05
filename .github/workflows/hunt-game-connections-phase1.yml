@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/hunt-platform-connections-20261005
+      - feature/hunt-xbox-ps-readiness-20261005
   workflow_dispatch:
 
 jobs:
@@ -55,4 +56,6 @@ jobs:
           SESSION_DRIVER: array
           CACHE_STORE: array
           QUEUE_CONNECTION: sync
-        run: vendor/bin/phpunit tests/Feature/HuntSteamGameConnectionTest.php
+        run: |
+          vendor/bin/phpunit tests/Feature/HuntSteamGameConnectionTest.php
+          vendor/bin/phpunit tests/Feature/HuntXboxGameConnectionTest.php
