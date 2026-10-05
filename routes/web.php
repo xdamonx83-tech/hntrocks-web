@@ -121,6 +121,10 @@ Route::middleware('guest')->group(function (): void {
 });
 
 // Separate from HNT login: callback validates one-time game link state.
+Route::get('/game-accounts/xbox/callback', \App\Http\Controllers\Hunt\XboxLinkCallbackController::class)
+    ->middleware('throttle:30,1')
+    ->name('hunt.game.xbox.callback');
+
 Route::get('/game-accounts/steam/callback', \App\Http\Controllers\Hunt\SteamLinkCallbackController::class)
     ->middleware('throttle:30,1')
     ->name('hunt.game.steam.callback');
