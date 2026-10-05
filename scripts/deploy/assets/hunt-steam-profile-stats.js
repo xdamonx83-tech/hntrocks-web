@@ -176,7 +176,8 @@
         activeKey = key;
         setTabState(p.main, button, panel, key);
       });
-      p.nav.append(button);
+      // Put the new tab near Overview, not off-screen after seven tabs.
+      p.nav.insertBefore(button, p.nav.querySelector(".profile-tab:nth-child(3)"));
     }
     let panel = p.main.querySelector("#" + PANEL);
     if (!panel) {
