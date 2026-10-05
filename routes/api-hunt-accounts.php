@@ -12,3 +12,9 @@ Route::post('/me/game-accounts/steam/sync', [HuntGameAccountsController::class, 
     ->middleware('throttle:2,5')->name('game-accounts.steam.sync');
 Route::delete('/me/game-accounts/steam', [HuntGameAccountsController::class, 'disconnectSteam'])
     ->middleware('throttle:6,1')->name('game-accounts.steam.disconnect');
+
+// OAuth is for linking an existing HNT account, never for HNT login.
+Route::post('/me/game-accounts/xbox/start', [HuntGameAccountsController::class, 'startXbox'])
+    ->middleware('throttle:5,1')->name('game-accounts.xbox.start');
+Route::delete('/me/game-accounts/xbox', [HuntGameAccountsController::class, 'disconnectXbox'])
+    ->middleware('throttle:6,1')->name('game-accounts.xbox.disconnect');
