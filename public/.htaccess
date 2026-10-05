@@ -45,6 +45,7 @@ Header always set X-Robots-Tag "noindex, nofollow" "expr=%{THE_REQUEST} =~ m#^[A
     RewriteRule ^cups/[^/]+/?$ app/index.html [L]
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^cups/[^/]+/(?:edit|manage)/?$ app/index.html [L]
+    RewriteRule ^loadout-challenges(?:/[^/]+)?/?$ app/index.html [L]
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
     RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
