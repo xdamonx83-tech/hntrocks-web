@@ -216,8 +216,16 @@ class AdminMapController extends Controller
                 'type' => 'cash',
                 'x' => $lockedSubmission->x,
                 'y' => $lockedSubmission->y,
-                'label_de' => 'Kassenspot',
-                'label_en' => 'Cash spot',
+                // Use the submitted location description as the visible
+                // marker label. Keep the full text in meta for longer notes.
+                // Until manually translated, use the same text in both locales
+                // rather than showing a misleading generic title.
+                'label_de' => $lockedSubmission->description
+                    ? Str::limit(trim($lockedSubmission->description), 120, '')
+                    : 'Kassenspot',
+                'label_en' => $lockedSubmission->description
+                    ? Str::limit(trim($lockedSubmission->description), 120, '')
+                    : 'Cash spot',
                 'source_image' => $filename,
                 'status' => 'approved',
                 'sort_order' => ((int) $map->markers()->max('sort_order')) + 1,
