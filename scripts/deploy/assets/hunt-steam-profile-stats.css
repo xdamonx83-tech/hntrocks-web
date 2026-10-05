@@ -1,16 +1,75 @@
-/* Hunt-only normal profile statistics; strictly scoped to avoid sidebar changes. */
-#hnt-hunt-profile-stats { margin-bottom: 14px; }
-#hnt-hunt-profile-stats .profile-card-head { margin-bottom: 12px; }
-#hnt-hunt-profile-stats .profile-card-head h3 { display:flex; align-items:center; gap:8px; }
-#hnt-hunt-profile-stats .profile-card-head i { color:#cfdfdf; font-size:18px; }
-#hnt-hunt-profile-stats .hnt-hunt-profile-stats-values { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
-#hnt-hunt-profile-stats .hnt-hunt-profile-stats-value {
-  display:flex; flex-direction:column; gap:5px;
-  border:1px solid rgba(130,155,160,.20);border-radius:9px;
-  padding:13px 16px;background:rgba(12,24,26,.6);
+/* Scoped Hunt statistics tab: never alter sidebar, topbar or other pages. */
+.profile-main > #hnt-hunt-stats-panel { display:none; }
+.profile-main.hnt-hunt-stats-active > .profile-tab-panel:not(#hnt-hunt-stats-panel) { display:none !important; }
+.profile-main.hnt-hunt-stats-active > #hnt-hunt-stats-panel { display:block !important; }
+.profile-main.hnt-hunt-stats-active .profile-tabs .profile-tab.active:not(#hnt-hunt-stats-tab) {
+  color:inherit; background:transparent; border-color:transparent; box-shadow:none;
 }
-#hnt-hunt-profile-stats .hnt-hunt-profile-stats-value span {color:#91a1a6;font-size:12px;}
-#hnt-hunt-profile-stats .hnt-hunt-profile-stats-value strong {color:#e5ebec;font-size:18px;font-weight:800;}
-@media(max-width:560px){
-  #hnt-hunt-profile-stats .hnt-hunt-profile-stats-values { grid-template-columns:1fr; }
+.profile-main #hnt-hunt-stats-tab.active { color:#e2a88d; border-color:#dd8667; }
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-stats-intro {
+  display:flex;flex-direction:column;gap:7px;margin:0 0 18px;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-stats-intro h2 {
+  color:#e4e8e8;font-size:19px;font-weight:800;margin:0;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-stats-intro p {
+  color:#8e9ea3;font-size:12.5px;line-height:1.6;margin:0;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-stats-grid {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-card {
+  min-width:0;display:flex;flex-direction:column;gap:14px;
+  border:1px solid rgba(135,160,164,.24);border-radius:12px;padding:19px;
+  background:linear-gradient(165deg,#1b282c 0%,#111a1d 100%);
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-head {
+  display:flex;align-items:center;gap:12px;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-head > i {
+  font-size:25px;color:#c9d4d5;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-name {
+  display:flex;flex-direction:column;gap:4px;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-name strong {
+  color:#e7eded;font-size:16px;font-weight:800;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-name span {
+  color:#90a0a5;font-size:11px;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-metrics {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-metric {
+  min-width:0;display:flex;flex-direction:column;gap:6px;
+  padding:13px 11px;border:1px solid rgba(144,161,165,.16);
+  border-radius:9px;background:rgba(7,13,16,.45);
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-metric span {
+  font-size:11px;color:#91a4a8;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-metric strong {
+  color:#ecedec;font-size:17px;font-weight:800;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-achievement-progress {
+  height:5px;border-radius:6px;background:rgba(150,164,166,.20);overflow:hidden;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-achievement-progress-value {
+  height:100%;border-radius:6px;background:#c47c63;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-note,
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-updated {
+  color:#8e9fa5;font-size:11.5px;line-height:1.5;margin:0;
+}
+.profile-main #hnt-hunt-stats-panel .hnt-hunt-platform-updated { margin-top:auto; }
+@media(max-width:1180px) {
+  .profile-main #hnt-hunt-stats-panel .hnt-hunt-stats-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:700px) {
+  .profile-main #hnt-hunt-stats-panel .hnt-hunt-stats-grid {
+    grid-template-columns:1fr;
+  }
 }
