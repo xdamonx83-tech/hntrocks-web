@@ -15,7 +15,7 @@
 .hnt-steam-bridge-label small{font-size:12px;color:#879a9e}
 .hnt-steam-bridge-button{
   color:#ecc0a7;border:1px solid #895240;background:#312e2d;
-  font:700 12px inherit;border-radius:9px;padding:11px 14px;min-height:36px;cursor:pointer
+  font-size:12px;font-weight:700;font-family:inherit;border-radius:9px;padding:11px 14px;min-height:36px;cursor:pointer
 }
 .hnt-steam-bridge-button:hover{background:#44332d;color:#f8c9aa}
 .hnt-steam-bridge-button:focus-visible{outline:2px solid #e5a381;outline-offset:2px}
