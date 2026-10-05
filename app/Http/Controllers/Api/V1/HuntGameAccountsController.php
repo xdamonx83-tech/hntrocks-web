@@ -7,6 +7,7 @@ use App\Models\HuntGameConnection;
 use App\Models\HuntGameLinkAttempt;
 use App\Services\Hunt\SteamHuntStatsProvider;
 use App\Services\Hunt\SteamOpenIdVerifier;
+use App\Services\Hunt\XboxAccountVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,7 @@ final class HuntGameAccountsController extends Controller
                     'enabled' => (bool) config('hunt_platform.steam.enabled')
                         && filled(config('hunt_platform.steam.api_key')),
                 ],
-                'xbox' => ['enabled' => false],
+                'xbox' => ['enabled' => app(XboxAccountVerifier::class)->isConfigured()],
                 'playstation' => ['enabled' => false],
             ],
         ]);
@@ -57,6 +58,41 @@ final class HuntGameAccountsController extends Controller
             'authorize_url' => $steam->authorizeUrl($state),
             'expires_in' => 600,
         ]);
+    }
+
+    public function startXbox(Request $request, XboxAccountVerifier $xbox): JsonResponse
+    {
+        if (! $xbox->isConfigured()) {
+            return response()->json([
+                'message' => 'Xbox account linking is awaiting Microsoft approval and configuration.',
+            ], 503);
+        }
+
+        $state = bin2hex(random_bytes(32));
+        DB::transaction(function () use ($request, $state): void {
+            HuntGameLinkAttempt::query()->where('user_id', $request->user()->id)->delete();
+            HuntGameLinkAttempt::query()->create([
+                'user_id' => $request->user()->id,
+                'state_hash' => hash('sha256', $state),
+                'expires_at' => now()->addMinutes(10),
+            ]);
+        });
+
+        return response()->json([
+            'authorize_url' => $xbox->authorizeUrl($state),
+            'expires_in' => 600,
+        ]);
+    }
+
+    public function disconnectXbox(Request $request): JsonResponse
+    {
+        HuntGameConnection::query()
+            ->where('user_id', $request->user()->id)
+            ->where('provider', 'xbox')->delete();
+        HuntGameLinkAttempt::query()
+            ->where('user_id', $request->user()->id)->delete();
+
+        return response()->json(['disconnected' => true]);
     }
 
     public function syncSteam(Request $request, SteamHuntStatsProvider $provider): JsonResponse
