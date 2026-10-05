@@ -27,6 +27,7 @@ class HntMapCashSpotSubmission extends Model
         'original_name',
         'mime_type',
         'size',
+        'description',
         'submitter_name',
         'submitter_email',
         'ip_hash',
