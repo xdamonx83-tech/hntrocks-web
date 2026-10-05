@@ -116,6 +116,8 @@ class ApiMapsController extends Controller
                         'label_de' => $marker->label_de,
                         'label_en' => $marker->label_en,
                         'source_image' => $marker->source_image,
+                        'description' => $marker->type === 'cash'
+                            ? ($marker->meta['description'] ?? null) : null,
                         'up_count' => $votesAvailable ? $marker->up_count : 0,
                         'down_count' => $votesAvailable ? $marker->down_count : 0,
                         'comment_count' => $commentsAvailable ? $marker->comments_count : 0,
@@ -156,6 +158,8 @@ class ApiMapsController extends Controller
             'label' => $label ?? __('ui.maps_type_'.$marker['type']),
             'label_de' => $labelDe,
             'label_en' => $labelEn,
+            'description' => $marker['type'] === 'cash'
+                ? ($marker['description'] ?? null) : null,
             'image_url' => $marker['type'] === 'cash'
                 ? $this->cashSpotImageUrl($marker['source_image'] ?? null)
                 : null,
