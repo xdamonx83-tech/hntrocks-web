@@ -85,60 +85,52 @@
                 Die jeweiligen Anbieter verarbeiten Daten eigenverantwortlich nach ihren eigenen Datenschutzbedingungen. Wenn du Social Login nutzt, gelten zusätzlich die Datenschutz- und Nutzungsbedingungen des jeweiligen Anbieters.
             </p>
 
-            <h2>5a. Optionale Spielkonten und Hunt-Spielstatistiken (Steam, Xbox, PlayStation)</h2>
+            <h2>5a. Optionale Spielkonten und Hunt-Spielstatistiken (Steam und Xbox)</h2>
             <p>
-                Im Bereich „Spielkonten verbinden“ kannst du freiwillig Informationen zu deinem Hunt: Showdown-Spielkonto
-                hinterlegen oder ein Konto mit hnt.rocks verknüpfen. Dabei verarbeiten wir je nach Plattform eine
-                externe Nutzerkennung (Steam-ID, Xbox-XUID oder PlayStation-Online-ID), gegebenenfalls den angezeigten
-                Gamertag beziehungsweise Profilnamen, den Verknüpfungs- und Prüfstatus, technische Zeitpunkte des letzten
-                Abrufs sowie verfügbare Hunt-Spielstatistiken wie Spielzeit, freigeschaltete und gesamte Erfolge/Trophäen
-                und Fortschrittswerte. Wir nutzen diese Daten zur Bereitstellung der freiwilligen Profilfunktion und
-                zur Aktualisierung ihrer Anzeige. Je nach Profilsichtbarkeit können der Plattformname, die Kennung
-                beziehungsweise der Nutzername und die Spielstatistiken anderen Nutzern oder auch öffentlich angezeigt werden.
+                Im Bereich „Spielkonten verbinden“ kannst du freiwillig dein Steam- oder Xbox-Konto
+                mit HNT.ROCKS verknüpfen, damit Hunt: Showdown-Statistiken im Profil erscheinen.
+                Dabei speichern wir je nach Plattform die externe Steam-ID beziehungsweise Xbox-XUID,
+                den Gamertag oder Profilnamen, Verknüpfungs- und Prüfstatus, Zeitpunkte der letzten
+                Synchronisierung sowie die verfügbaren Hunt-Spielstunden, Erfolge und Fortschrittswerte.
+                Abhängig von der Sichtbarkeit deines HNT.ROCKS-Profils können diese Informationen
+                auch anderen Besuchern angezeigt werden.
             </p>
             <p>
-                <strong>Steam:</strong> Wenn du eine Steam-Verknüpfung startest, wirst du zur Steam-Anmeldung weitergeleitet
-                und nach erfolgreicher Bestätigung zu hnt.rocks zurückgeführt. Zur Zuordnung speichern wir die bestätigte
-                Steam-ID und rufen Hunt-Spielzeit und Erfolge über Schnittstellen von Steam beziehungsweise Valve ab,
-                soweit diese für den jeweiligen Abruf zugänglich sind.
+                <strong>Steam:</strong> Wenn du die Steam-Verknüpfung startest, leiten wir dich zur
+                Anmeldung bei Steam weiter. Nach erfolgreicher Rückleitung ordnen wir die bestätigte
+                Steam-ID deinem HNT.ROCKS-Konto zu und fragen die jeweils zugänglichen Hunt-Spielstunden
+                und Erfolge über die Steam-Schnittstellen von Valve ab.
             </p>
             <p>
-                <strong>Xbox:</strong> Für die Xbox-Verknüpfung nutzen wir die Microsoft-Kontoanmeldung in Verbindung
-                mit dem externen Anbieter <strong>OpenXBL (xbl.io)</strong>. Nach der Anmeldung und Rückleitung
-                verarbeiten wir insbesondere Xbox-XUID und Gamertag; OpenXBL kann darüber hinaus den Abruf
-                von Hunt-Spielzeit, Erfolgen und Spielinformationen ermöglichen. Die beteiligten Anbieter verarbeiten
-                die für Anmeldung, Kontobestätigung und API-Anfragen benötigten Daten auch eigenverantwortlich.
+                <strong>Xbox:</strong> Die Xbox-Verknüpfung erfolgt mit der Microsoft-Anmeldung und
+                dem externen Anbieter <strong>OpenXBL (xbl.io)</strong>. Wir speichern zur Zuordnung
+                insbesondere deine bestätigte Xbox-XUID und den Gamertag. Über OpenXBL können wir
+                verfügbare Hunt-Spielstunden, Erfolge und weitere spielbezogene Statistiken abfragen.
+                Die beteiligten Anbieter verarbeiten die für Anmeldung und API-Anfragen
+                notwendigen Daten nach ihren eigenen Datenschutzbestimmungen.
             </p>
             <p>
-                <strong>PlayStation:</strong> Hier wird aktuell <strong>keine Sony-Kontoanmeldung und keine Bestätigung
-                der Kontoinhaberschaft</strong> durchgeführt. Stattdessen wird die eingetragene PSN-Online-ID gespeichert
-                und über ein separates HNT.ROCKS-Dienstkonto bei inoffiziellen Sony-/PlayStation-Schnittstellen
-                nach öffentlich beziehungsweise für dieses Dienstkonto zugänglichen Hunt-Spielzeiten und Trophäen gesucht.
-                Dabei können auch Daten einer dritten Person betroffen sein, wenn deren PSN-ID eingegeben wird.
-                <strong>Trage deshalb nur deine eigene PSN-ID oder eine ID mit entsprechender Berechtigung ein.</strong>
-                Dass eine PSN-ID eingetragen ist oder Statistiken erscheinen, beweist nicht, dass der HNT.ROCKS-Nutzer
-                Inhaber des PSN-Kontos ist. Eine Freigabe einzelner Daten durch Sony kann von den
-                Privatsphäre-Einstellungen abhängen; wir ergänzen keine fehlenden Werte durch Schätzungen.
+                Diese freiwilligen Spielkonto-Daten werden zur Bereitstellung der von dir gewünschten
+                Verknüpfungs- und Profilfunktionen auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO
+                verarbeitet. Sicherheits- und Missbrauchsschutzmaßnahmen können auf Art. 6
+                Abs. 1 lit. f DSGVO beruhen. Die Spielstatistiken werden bei Bedarf abgerufen
+                und normalerweise bis zu 24 Stunden zwischengespeichert. Bei einer Trennung der
+                Spielkonto-Verknüpfung löschen wir die aktive Zuordnung einschließlich der dazu
+                gespeicherten Spielstatistiken; hiervon unberührt bleiben technisch
+                notwendige Sicherungen und gesetzlich erforderliche Aufbewahrungen.
             </p>
             <p>
-                Die Datenabrufe erfolgen bei Bedarf und werden üblicherweise bis zu 24 Stunden zwischengespeichert,
-                um unnötige Anfragen an die Anbieter zu vermeiden. Zu technischen Zwecken können auch
-                Synchronisationsstatus und Fehlerkategorien gespeichert werden. Die Verknüpfung kann in
-                „Profil bearbeiten“ getrennt beziehungsweise die PSN-ID entfernt werden; die dafür gespeicherte
-                Konto-Zuordnung und die zugehörigen Spielstatistiken werden dann aus der aktiven Verknüpfung
-                entfernt. Technische Sicherungen und gesetzlich erforderliche Daten können hiervon nach Maßgabe
-                der unten genannten Aufbewahrungsfristen abweichen.
-            </p>
-            <p>
-                Für die von dir gewünschte freiwillige Verknüpfung beziehungsweise Statistikfunktion ist die
-                Rechtsgrundlage grundsätzlich Art. 6 Abs. 1 lit. b DSGVO. Sicherheits- und
-                Missbrauchsschutzmaßnahmen können auf Art. 6 Abs. 1 lit. f DSGVO beruhen. Bei Daten
-                <strong>anderer PSN-Kontoinhaber</strong> reicht die Vertragsbeziehung mit dem
-                eintragenden Mitglied nicht aus; die Zulässigkeit ist gesondert nach den gesetzlichen Voraussetzungen
-                einschließlich Interessenabwägung und Informationspflichten zu prüfen. Wenn Informationen
-                zu deinem Spielkonto unberechtigt angezeigt werden, kannst du unter
-                <a href="mailto:datenschutz@hnt.rocks">datenschutz@hnt.rocks</a> eine Prüfung,
-                Berichtigung oder Entfernung verlangen.
+                <strong>PlayStation:</strong> HNT.ROCKS bietet derzeit <strong>keine
+                PSN-Kontoverknüpfung und keinen automatischen PlayStation-Statistikabruf</strong> an.
+                Für den dafür erforderlichen Zugriff steht uns keine frei nutzbare, offizielle
+                Sony-Schnittstelle zur Verfügung. Ein zuvor testweise eingesetzter inoffizieller
+                Abruf wurde aus Gründen des Datenschutzes, der Verlässlichkeit und der Sicherheit
+                eingestellt. Die dabei gespeicherten PSN-Verknüpfungen und abgerufenen
+                Spielstatistiken wurden aus der aktiven Datenbank entfernt.
+                Die allgemeine Angabe „PlayStation“ als bevorzugte Spielplattform in einem
+                Hunt-Profil ist davon unabhängig und keine Kontoverknüpfung.
+                Für Fragen zu der früheren Testfunktion und zur Löschung von Daten kannst du dich
+                an <a href="mailto:datenschutz@hnt.rocks">datenschutz@hnt.rocks</a> wenden.
             </p>
 
             <h2>6. Cookies, Sessions, CSRF und Remember-Me</h2>
@@ -223,7 +215,7 @@
 
             <h2>16. Empfänger, Dienstleister und Drittanbieter</h2>
             <p>
-                Daten können an technische Dienstleister und Drittanbieter übermittelt werden, insbesondere Hosting-Anbieter, Domain-/DNS-Anbieter, E-Mail-Dienstleister, Social-Login-Anbieter und KI-/Moderationsdienstleister. Bei den freiwilligen Spielkonto-Funktionen sind außerdem Steam/Valve, Microsoft/Xbox, OpenXBL (xbl.io) und Sony/PlayStation beteiligt. Dabei werden die für die jeweilige Verknüpfung oder Statistikabfrage nötigen Kontokennungen und Anfragedaten an die betreffenden Anbieter beziehungsweise deren Schnittstellen übermittelt. Diese Anbieter können Daten nach ihren eigenen Datenschutzbestimmungen verarbeiten; sie sind nicht automatisch unsere Auftragsverarbeiter. Soweit erforderlich, werden geeignete datenschutzrechtliche Vereinbarungen und Garantien geprüft und genutzt.
+                Daten können an technische Dienstleister und Drittanbieter übermittelt werden, insbesondere Hosting-Anbieter, Domain-/DNS-Anbieter, E-Mail-Dienstleister, Social-Login-Anbieter und KI-/Moderationsdienstleister. Bei den angebotenen Spielkonto-Funktionen sind außerdem Steam/Valve, Microsoft/Xbox und OpenXBL (xbl.io) beteiligt. Dabei werden die für Verknüpfung und Statistikabfrage nötigen Kennungen und Anfragedaten an diese Anbieter übermittelt; diese können Daten nach ihren eigenen Datenschutzbestimmungen und in eigener Verantwortung verarbeiten. Ein früherer Test mit inoffiziellen Sony-/PlayStation-Schnittstellen wurde beendet; aktuell findet kein PSN-Statistikabruf mehr statt. Soweit erforderlich, werden geeignete datenschutzrechtliche Vereinbarungen und Garantien geprüft und genutzt.
             </p>
             <p>
                 Bei Social Login, Spielkonten-Abfragen und KI-/Moderationsdiensten sind Übermittlungen in Länder außerhalb des Europäischen Wirtschaftsraums möglich. Soweit für den konkreten Anbieter ein Drittlandtransfer vorliegt, ist dessen Rechtmäßigkeit einschließlich Angemessenheitsbeschluss oder geeigneter Garantien nach Art. 44 ff. DSGVO zu prüfen. Angaben zu den eigenständigen Verarbeitungen der Plattformanbieter findest du auch in deren Datenschutzinformationen.
