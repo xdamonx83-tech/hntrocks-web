@@ -23,6 +23,7 @@ class CashSpotFeedAnnouncement
         $author = User::query()
             ->whereKey(2)
             ->where('username', 'hntrocks')
+            ->where('name', 'HNT.rocks')
             ->where('status', 'active')
             ->first();
 
