@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Services\Maps\CashSpotFeedAnnouncement;
 use App\Services\Translation\FeedTranslationService;
 use App\Services\Twitch\TwitchLiveStatusService;
 use App\Support\FeedTextRenderer;
@@ -12,11 +13,14 @@ class FeedPostResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $cashPreview = app(CashSpotFeedAnnouncement::class)->previewForPost($this->resource, $request->query('locale') ?: $request->header('X-HNT-Locale'));
+
         return [
             'id' => $this->id,
             'body' => $this->body,
             'body_html' => FeedTextRenderer::render($this->body),
-            'internal_link_previews' => FeedTextRenderer::internalLinkPreviews($this->body, 1),
+            'cash_spot_preview' => $cashPreview,
+            'internal_link_previews' => $cashPreview ? [] : FeedTextRenderer::internalLinkPreviews($this->body, 1),
             'source_language' => $this->source_language,
             'translation' => $this->translationPayload($request),
             'background_style' => $this->background_style,
