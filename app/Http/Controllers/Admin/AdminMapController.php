@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\HntMap;
 use App\Models\HntMapCashSpotSubmission;
 use App\Models\HntMapMarker;
+use App\Services\Maps\CashSpotFeedAnnouncement;
 use App\Support\Maps\MapMarkerRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -232,9 +233,12 @@ class AdminMapController extends Controller
                 'reviewed_at' => now(),
                 'rejection_reason' => null,
             ])->save();
+
+            // Same transaction: an unavailable publisher rolls back the approval.
+            app(CashSpotFeedAnnouncement::class)->publish($lockedSubmission, $map, $marker);
         });
 
-        return back()->with('status', 'Kassenspot wurde freigegeben und als neuer Marker angelegt.');
+        return back()->with('status', 'Kassenspot freigegeben. HNT.rocks hat den Fund im Feed veröffentlicht.');
     }
 
     public function rejectCashSpot(Request $request, HntMapCashSpotSubmission $submission): RedirectResponse
