@@ -5,7 +5,7 @@
 - Laravel API: draft branch `feature/community-loadouts-20261011`.
 - Production: **not deployed**; migration **not run**.
 - Current random generator at `/loadout-generator/` is a standalone deployed feature, not the community editor. Saving generated equipment directly to the community is a follow-up.
-- Flutter app parity: **not yet audited**. Do not mark anything absent until actual app source/routes are compared.
+- Flutter audit **started against** `xdamonx83-tech/hntrocks-flutter` (main): the app already manages three profile loadouts but has no community directory API paths or screens. The separate `hntrocks-flutter-rebuild` must be checked against the shipping app before changing it.
 
 ## Shared server endpoints (under /api/v1, authenticated via api.token)
 | Web flow | Method and path |
@@ -22,8 +22,10 @@
 | Delete permitted comment | DELETE `loadouts/{id}/comments/{commentId}` |
 
 ## Flutter gap audit (later)
-- [ ] Locate Flutter app repository and confirm installed version / actual release branch.
-- [ ] Inventory all existing Flutter routes/screens and API clients.
+- [x] Locate Flutter repositories: `hntrocks-flutter`, `hntrocks-flutter-rebuild`; exact shipping release/build still needs verification.
+- [x] Identify existing legacy profile loadout workflow: `lib/core/api/api_paths.dart` defines `meLoadouts`, `lib/features/profile/presentation/loadout_manage_screen.dart` creates/edits/deletes up to 3, `lib/features/profile/data/profile_repository.dart` calls `/me/loadouts`.
+- [x] Check for community API paths in the current `hntrocks-flutter` source: none found in `api_paths.dart`; existing UI is profile-specific.
+- [ ] Verify actual deployed app code is this repository/branch, then inventory all other screens against web.
 - [ ] Compare feature list: community grid/search, three sorts, detail, creation, editing, deletion, ratings, comments, own loadouts.
 - [ ] Compare shared user identity and API auth behavior.
 - [ ] Reuse exact backend DTOs and validation limits; do not create separate app-only storage.
