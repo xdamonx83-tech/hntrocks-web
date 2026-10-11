@@ -102,7 +102,7 @@ class ApiUserLoadoutController extends Controller
                 fn (mixed $value): mixed => is_string($value) ? trim($value) : $value,
                 $request->input($field)
             );
-            $values = array_filter($values, fn (mixed $value): bool => ! is_string($value) || $value !== '');
+            $values = array_filter($values, fn (mixed $value): bool => $value !== null && (! is_string($value) || $value !== ''));
             $normalized[$field] = array_values(array_unique($values, SORT_REGULAR));
         }
 
