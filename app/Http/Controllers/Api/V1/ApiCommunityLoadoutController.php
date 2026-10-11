@@ -165,7 +165,7 @@ class ApiCommunityLoadoutController extends Controller
 
         return response()->json(['data' => [
             'comments' => $page->getCollection()->map(
-                fn (UserLoadoutComment $comment): array => $this->commentPayload($comment, $request)
+                fn (UserLoadoutComment $comment): array => $this->commentPayload($comment, $request, (int) $loadout->user_id)
             )->values(),
             'pagination' => [
                 'current_page' => $page->currentPage(),
@@ -178,6 +178,9 @@ class ApiCommunityLoadoutController extends Controller
     public function storeComment(Request $request, UserLoadout $loadout): JsonResponse
     {
         $this->ensurePublic($loadout);
+        if (is_string($request->input('body'))) {
+            $request->merge(['body' => trim($request->input('body'))]);
+        }
         $data = $request->validate([
             'body' => ['required', 'string', 'min:2', 'max:1000', $this->safeText()],
         ]);
@@ -188,7 +191,7 @@ class ApiCommunityLoadoutController extends Controller
         ]);
 
         return response()->json(['data' => [
-            'comment' => $this->commentPayload($comment->load('user'), $request),
+            'comment' => $this->commentPayload($comment->load('user'), $request, (int) $loadout->user_id),
         ]], 201);
     }
 
@@ -208,6 +211,13 @@ class ApiCommunityLoadoutController extends Controller
 
     private function input(Request $request, bool $updating = false): array
     {
+        $normalized = [];
+        foreach (['title', 'primary_weapon', 'secondary_weapon', 'primary_ammo', 'secondary_ammo', 'note'] as $field) {
+            if (is_string($request->input($field))) {
+                $normalized[$field] = trim($request->input($field));
+            }
+        }
+        $request->merge($normalized);
         $required = $updating ? 'sometimes' : 'required';
         $clean = $this->safeText();
 
@@ -315,7 +325,7 @@ class ApiCommunityLoadoutController extends Controller
         ];
     }
 
-    private function commentPayload(UserLoadoutComment $comment, Request $request): array
+    private function commentPayload(UserLoadoutComment $comment, Request $request, int $loadoutOwnerId): array
     {
         $author = $comment->user;
 
@@ -324,7 +334,7 @@ class ApiCommunityLoadoutController extends Controller
             'body' => $comment->body,
             'created_at' => $comment->created_at?->toISOString(),
             'can_delete' => (int) $comment->user_id === (int) ($request->user()?->id ?? 0) ||
-                (int) ($comment->loadout?->user_id ?? 0) === (int) ($request->user()?->id ?? 0),
+                $loadoutOwnerId === (int) ($request->user()?->id ?? 0),
             'author' => $author ? [
                 'id' => (int) $author->id,
                 'name' => (string) ($author->name ?: $author->username),
