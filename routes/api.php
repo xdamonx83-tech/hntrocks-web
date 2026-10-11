@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\ApiCupTeamsController;
 use App\Http\Controllers\Api\V1\ApiCrownsController;
 use App\Http\Controllers\Api\V1\ApiCupFeedbackController;
 use App\Http\Controllers\Api\V1\ApiContractsController;
+use App\Http\Controllers\Api\V1\ApiCommunityLoadoutController;
 use App\Http\Controllers\Api\V1\ApiCupIdeasController;
 use App\Http\Controllers\Api\V1\ApiFeedController;
 use App\Http\Controllers\Api\V1\ApiFeedEngagementController;
@@ -84,6 +85,17 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/bootstrap', ApiBootstrapController::class)->name('bootstrap');
         Route::get('/me', [ApiAuthController::class, 'me'])->name('me');
         Route::get('/me/profile-sections/{section}', [ApiMembersController::class, 'meSection'])->name('me.profile-sections.show');
+        // Community loadouts: keep profile-featured loadouts and community posts in one model.
+        Route::get('/loadouts', [ApiCommunityLoadoutController::class, 'index'])->name('community-loadouts.index');
+        Route::get('/loadouts/mine', [ApiCommunityLoadoutController::class, 'mine'])->name('community-loadouts.mine');
+        Route::post('/loadouts', [ApiCommunityLoadoutController::class, 'store'])->middleware('throttle:8,1')->name('community-loadouts.store');
+        Route::get('/loadouts/{loadout}', [ApiCommunityLoadoutController::class, 'show'])->name('community-loadouts.show');
+        Route::patch('/loadouts/{loadout}', [ApiCommunityLoadoutController::class, 'update'])->name('community-loadouts.update');
+        Route::delete('/loadouts/{loadout}', [ApiCommunityLoadoutController::class, 'destroy'])->name('community-loadouts.destroy');
+        Route::post('/loadouts/{loadout}/vote', [ApiCommunityLoadoutController::class, 'vote'])->middleware('throttle:30,1')->name('community-loadouts.vote');
+        Route::get('/loadouts/{loadout}/comments', [ApiCommunityLoadoutController::class, 'comments'])->name('community-loadouts.comments');
+        Route::post('/loadouts/{loadout}/comments', [ApiCommunityLoadoutController::class, 'storeComment'])->middleware('throttle:10,1')->name('community-loadouts.comments.store');
+        Route::delete('/loadouts/{loadout}/comments/{comment}', [ApiCommunityLoadoutController::class, 'destroyComment'])->name('community-loadouts.comments.destroy');
         Route::get('/me/loadouts', [ApiUserLoadoutController::class, 'index'])->name('me.loadouts.index');
         Route::post('/me/loadouts', [ApiUserLoadoutController::class, 'store'])->name('me.loadouts.store');
         Route::match(['put', 'patch'], '/me/loadouts/{loadout}', [ApiUserLoadoutController::class, 'update'])->name('me.loadouts.update');
