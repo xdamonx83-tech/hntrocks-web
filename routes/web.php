@@ -131,6 +131,10 @@ Route::get('/out/{link:slug}/go', [ApprovedOutboundLinkController::class, 'go'])
 Route::get('/sitemap.xml', SitemapController::class)->name('seo.sitemap');
 Route::get('/app-beta', [AppBetaController::class, 'index'])->name('app-beta.index');
 Route::post('/app-beta', [AppBetaController::class, 'store'])->middleware('throttle:6,1')->name('app-beta.store');
+Route::get('/loadouts', ReactAppController::class)->name('community-loadouts.react.index');
+Route::get('/loadouts/{path}', ReactAppController::class)
+    ->where('path', '.*')
+    ->name('community-loadouts.react.show');
 Route::get('/rocks', ReactAppController::class)->name('rocks.index');
 Route::get('/rocks/{path}', ReactAppController::class)->where('path', '.*')->name('rocks.react');
 Route::get('/pages/user/{section}', ReactAppController::class)
