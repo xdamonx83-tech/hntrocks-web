@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\AiCommunityCharacter;
 use App\Services\AiCommunityDraftQualityGuard;
 use App\Services\AiCommunityGenerationService;
+use App\Services\AiCommunityPostFormatSelector;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -20,6 +21,26 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $this->assertStringContainsString('near-duplicates', $messages[0]['content']);
         $this->assertStringContainsString('No polished motivational sayings', $messages[0]['content']);
         $this->assertSame(['Alte Frage über Deckung'], json_decode($messages[1]['content'], true)['recent_posts_to_avoid']);
+    }
+
+    public function test_post_formats_are_distinct_and_recent_kinds_are_avoided(): void
+    {
+        $formats = AiCommunityPostFormatSelector::formats();
+        $this->assertGreaterThanOrEqual(7, count($formats));
+        $this->assertContains('open_question', array_keys($formats));
+        $this->assertContains('hunter_styles', array_keys($formats));
+        $this->assertContains('feature_wish', array_keys($formats));
+
+        for ($run = 0; $run < 40; $run++) {
+            $picked = AiCommunityPostFormatSelector::select(['small_opinion', 'open_question']);
+            $this->assertNotContains($picked, ['small_opinion', 'open_question']);
+        }
+        $character = new AiCommunityCharacter(['language' => 'en', 'persona_voice' => 'Dry', 'topics' => 'Maps']);
+        $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
+            ->promptContext($character, [], 'hunter_styles');
+        $data = json_decode($messages[1]['content'], true);
+        $this->assertSame('hunter_styles', $data['post_format']);
+        $this->assertStringContainsString('hunter appearance', $messages[0]['content']);
     }
 
     public function test_near_duplicate_and_repeated_opening_are_rejected(): void
