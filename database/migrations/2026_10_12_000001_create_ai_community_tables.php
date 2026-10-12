@@ -31,6 +31,7 @@ return new class extends Migration {
             $table->text('body');
             $table->char('body_hash', 64)->unique();
             $table->string('status', 16)->default('draft')->index();
+            $table->string('post_kind', 48)->nullable()->index();
             $table->string('model', 80);
             $table->unsignedInteger('input_tokens')->default(0);
             $table->unsignedInteger('output_tokens')->default(0);
