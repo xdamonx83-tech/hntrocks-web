@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Validation\ValidationException;
+
+class AiCommunityDraftQualityGuard
+{
+    /** @param iterable<string> $recentBodies */
+    public function validate(string $body, iterable $recentBodies): void
+    {
+        $body = trim($body);
+        if ($body === '' || mb_strlen($body) > 700 || preg_match('~(?:https?://|www\.|\b[a-z0-9-]+\.(?:com|net|org|gg|de|rocks)\b)~iu', $body)) {
+            $this->reject('Generated post is empty, too long, or contains a link.');
+        }
+        // Reject asserted past play or fabricated audience response, but allow hypotheticals such as "I'd rotate left".
+        if (preg_match('~\b(?:I|we)\s+(?:just\s+)?(?:played|won|lost|queued|extracted|killed|clutched|saw|heard)\b|\b(?:I|we)\s+had\s+(?:a|an|the)\s+(?:match|game|round)\b|\b(?:ich|wir)\s+(?:habe(?:n)?|bin|sind)\s+(?:(?:gerade|gestern|heute)\s+)?(?:gespielt|gewonnen|verloren|extrahiert|gekillt|gesehen|gehört)\b|\b(?:my|our)\s+(?:last|latest)\s+(?:match|game|round)\b|\b(?:in\s+my|in\s+our)\s+(?:match|game|round)\b|\b(?:mein|unser)(?:e|em|en|er|es)?\s+letzte\w*\s+(?:match|runde)\b|\b(?:people|players|everyone)\s+(?:loved|liked|asked|told|agreed)\b~iu', $body)) {
+            $this->reject('Generated post claims firsthand play or audience response.');
+        }
+
+        $tokens = $this->tokens($body);
+        foreach ($recentBodies as $recent) {
+            $other = $this->tokens($recent);
+            if (implode(' ', $tokens) === implode(' ', $other)) {
+                $this->reject('Duplicate draft blocked.');
+            }
+            $intersection = count(array_intersect($tokens, $other));
+            $union = count(array_unique(array_merge($tokens, $other)));
+            if ($union > 0 && $intersection >= 5 && $intersection / $union >= 0.72) {
+                $this->reject('Near-duplicate draft blocked.');
+            }
+            // An identical opening across short posts often means a repeated template.
+            if (count($tokens) >= 7 && count($other) >= 7 && array_slice($tokens, 0, 6) === array_slice($other, 0, 6)) {
+                $this->reject('Repeated draft structure blocked.');
+            }
+        }
+    }
+
+    /** @return list<string> */
+    private function tokens(string $body): array
+    {
+        preg_match_all('/[\p{L}\p{N}]+/u', mb_strtolower($body), $matches);
+        // Keep short tokens: "in", "an", "am" and "of" carry meaning in short DE/EN posts.
+        return array_values(array_unique($matches[0]));
+    }
+
+    private function reject(string $message): never
+    {
+        throw ValidationException::withMessages(['generation' => $message]);
+    }
+}

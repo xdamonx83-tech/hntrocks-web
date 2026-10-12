@@ -13,16 +13,16 @@ class SeedAiCommunityCharacters extends Command
     public function handle(): int
     {
         $definitions = [
-            ['BayouBasti', 'de', 'Ruhig, taktisch und präzise; stellt Fragen zu Rotationen.', 'Matchstrategie, Karten, Extraktion'],
-            ['Nebelkraehe', 'de', 'Atmosphärisch, knapp und neugierig; achtet auf Sichtlinien.', 'Karten, Deckung, Sichtlinien'],
-            ['CashCowboy', 'de', 'Pragmatisch und locker; wägt günstige Ausrüstung ab.', 'Budget-Loadouts, Arsenal'],
-            ['FallenFuchs', 'de', 'Analytisch und vorsichtig; diskutiert Fallenplatzierung.', 'Fallen, Positionierung, Teamtaktik'],
-            ['Schrotkoenig', 'de', 'Direkt und freundlich; interessiert an Nahkampfdistanzen.', 'Schrotflinten, Gebäude, Abstand'],
-            ['MudRunner', 'en', 'Measured and curious, focused on movement choices.', 'Rotations, terrain, extraction'],
-            ['CrowBait', 'en', 'Wry and concise, interested in sound cues.', 'Sound traps, stealth, maps'],
-            ['OldVetterli', 'en', 'Reflective and practical, interested in weapon tradeoffs.', 'Rifles, loadouts, arsenal'],
-            ['BayouMechanic', 'en', 'Methodical and approachable, interested in tools.', 'Tools, consumables, team strategy'],
-            ['LastExtract', 'en', 'Calm and question driven, focused on endgame choices.', 'Extraction, positioning, community discussion'],
+            ['BayouBasti', 'de', 'Gelassen und taktisch. Erklärt Rotationen in zwei bis drei klaren Sätzen; gelegentlich eine offene Abwägung, selten eine Frage.', 'Wege zwischen Deckung, Risiko bei der Extraktion, Teamabstände'],
+            ['Nebelkraehe', 'de', 'Bildhaft, leise und sehr knapp. Eine präzise Beobachtung zu Geräusch oder Sicht genügt; keine gespielte Erlebnisgeschichte.', 'Sichtlinien, Geräuschdisziplin, Deckung und Wetter als allgemeines Prinzip'],
+            ['CashCowboy', 'de', 'Locker, trocken humorvoll und kostenbewusst. Konkrete Trade-offs statt Kaufempfehlungen; auch mal ein Einzeiler.', 'Günstige Loadouts, Werkzeug-Prioritäten, Kosten gegen Nutzen'],
+            ['FallenFuchs', 'de', 'Nüchtern und systematisch. Formuliert Wenn-dann-Gedanken und Gegenargumente, ohne eine konkrete Runde zu behaupten.', 'Fallenplatzierung, sichere Laufwege, Teamkommunikation'],
+            ['Schrotkoenig', 'de', 'Direkt, gesprächig und mit leichter Selbstironie. Kurze Hinweise zu Distanzen; ab und zu eine echte Strategiefrage.', 'Nahdistanz, Gebäudeeingänge, Abstand und Rückzugswege'],
+            ['MudRunner', 'en', 'Measured and spare. State one movement principle with a concrete trade-off; avoid rhetorical questions.', 'Terrain, route choice, extraction timing'],
+            ['CrowBait', 'en', 'Dry wit in one or two tight sentences. Notice sound cues and the cost of rushing; no invented match anecdotes.', 'Noise traps, stealth, listening before crossing'],
+            ['OldVetterli', 'en', 'Reflective, slightly longer, and balanced. Compare weapon roles without claiming a personal loadout or current meta.', 'Rifle roles, range trade-offs, loadout balance'],
+            ['BayouMechanic', 'en', 'Practical checklist voice. Give a compact tool-use heuristic or conditional plan; keep it welcoming.', 'Tools, consumables, team utility'],
+            ['LastExtract', 'en', 'Calm and contemplative. Frame endgame decisions as alternatives; an occasional open question is fine.', 'Extraction choices, patience, positioning'],
         ];
         foreach ($definitions as [$name, $language, $voice, $topics]) {
             if (AiCommunityCharacter::where('name', $name)->exists()) {

@@ -19,12 +19,19 @@ class AdminAiCommunityController extends Controller
 {
     private function guard(Request $request): void { abort_unless($request->user()?->isAdmin(), 403); }
 
-    public function index(Request $request): View
+    public function index(Request $request, AiCommunityGenerationService $generator): View
     {
         $this->guard($request);
+        $characters = AiCommunityCharacter::with('user.profile')->orderBy('id')->get();
+        $previewCharacter = $characters->firstWhere('id', (int) $request->query('preview'));
+        $recentBodies = AiCommunityDraft::latest()->limit(12)->pluck('body')->all();
         return view('admin.ai-community.index', [
-            'characters' => AiCommunityCharacter::with('user.profile')->orderBy('id')->get(),
+            'characters' => $characters,
             'drafts' => AiCommunityDraft::with('character')->latest()->limit(100)->get(),
+            'previewCharacter' => $previewCharacter,
+            'previewMessages' => $previewCharacter ? $generator->promptContext($previewCharacter, $recentBodies) : null,
+            'weekCount' => AiCommunityDraft::where('created_at', '>=', now('Europe/Berlin')->startOfWeek()->utc())->count(),
+            'monthCost' => AiCommunityDraft::where('created_at', '>=', now()->startOfMonth())->sum('estimated_cost_microusd'),
         ]);
     }
 

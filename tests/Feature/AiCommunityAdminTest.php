@@ -41,6 +41,36 @@ class AiCommunityAdminTest extends TestCase
         $this->assertDatabaseCount('ai_community_drafts', 1);
     }
 
+    public function test_missing_key_blocks_generation_without_http_or_draft(): void
+    {
+        config()->set('ai-community.enabled', true);
+        config()->set('ai-community.key', null);
+        Http::fake();
+        $character = $this->character();
+        $character->update(['enabled' => true]);
+
+        $this->actingAs($this->user(['is_admin' => true]))
+            ->post('/admin/ai-community/'.$character->id.'/generate')
+            ->assertSessionHasErrors('generation');
+        Http::assertNothingSent();
+        $this->assertDatabaseCount('ai_community_drafts', 0);
+        $this->assertDatabaseCount('feed_posts', 0);
+    }
+
+    public function test_admin_prompt_preview_is_read_only_and_labeled(): void
+    {
+        config()->set('ai-community.key', null);
+        Http::fake();
+        $character = $this->character();
+        $this->actingAs($this->user())->get('/admin/ai-community?preview='.$character->id)->assertForbidden();
+        $this->actingAs($this->user(['is_admin' => true]))
+            ->get('/admin/ai-community?preview='.$character->id)
+            ->assertOk()->assertSee('Qualitätsvorschau')->assertSee('keine KI-Ausgabe');
+        Http::assertNothingSent();
+        $this->assertDatabaseCount('ai_community_drafts', 0);
+        $this->assertDatabaseCount('feed_posts', 0);
+    }
+
     public function test_approval_and_disclosed_account_are_required_to_publish_once(): void
     {
         $character = $this->character();

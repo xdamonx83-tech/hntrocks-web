@@ -23,7 +23,11 @@ This feature is staged in an isolated branch. It is **not deployed**. The migrat
 | `AI_COMMUNITY_INPUT_COST_PER_MILLION_USD` | `0.40` | Operator maintained estimate; verify current pricing before enabling. |
 | `AI_COMMUNITY_OUTPUT_COST_PER_MILLION_USD` | `1.60` | Operator maintained estimate; verify current pricing before enabling. |
 
-The generator locks requests, rejects duplicate normalized text, limits all generated drafts to eight per Berlin calendar week, and checks estimated monthly spend before and after API response. Cost estimates are not billing records. Generated content is capped at 700 characters. Human review must reject first person match claims, unverified patch or event claims, invented user interactions, or any claim that would mislead readers. No external source is supplied for patch verification, so prompts forbid current patch claims entirely.
+The generator locks requests, checks the most recent 100 draft texts for exact or near duplicates and repeated openings, limits all generated drafts to eight per Berlin calendar week, and checks estimated monthly spend before and after API response. Up to 12 recent texts are included in the prompt as negative examples. The output guard rejects empty or over-700-character text, links, and common fabricated match or audience claims. It is deliberately narrow enough to allow hypothetical first person language. Human review remains necessary for semantic repetition, language quality, factual accuracy, unverified patch or event claims, and subtle invented interactions. No external source is supplied for patch verification, so prompts forbid current patch claims entirely. Cost estimates are not billing records.
+
+## Quality preview
+
+ACP → KI Community → **Qualitätsvorschau** opens a read-only view of the exact prompt context for one persona, including recent draft snippets as negative examples. It performs database reads only: no OpenAI call, draft, account, or post is created. It is a test prompt, **not an AI output preview or evidence of model quality**. Without a configured key, generation is disabled. This staging work used fake OpenAI HTTP only; actual API quality and cost have not been tested. Seed voice changes apply only to newly inserted personas because the seeder intentionally preserves existing admin edits. Review existing persona settings manually if adopting the revised voices.
 
 The optional schedule checks weekdays during 09:00–20:59 Berlin time, with varied eligible hours. It creates drafts only. Production scheduler configuration and cache locking must be checked during rollout; leave auto generation disabled until that review is complete.
 
@@ -35,4 +39,4 @@ Disable both generation flags immediately. Stop scheduling the command. Preserve
 
 ## Local verification
 
-Feature tests cover admin access, fake HTTP generation, duplicate blocking, approval, account disclosure, and single publication. Run on a disposable local test database only: `php artisan test --filter=AiCommunityAdminTest`. Never use production DB credentials for tests.
+Feature tests cover admin access, fake HTTP generation, missing-key behavior, read-only preview, duplicate blocking, approval, account disclosure, and single publication. Unit tests cover prompt content and output quality checks. Run on a disposable local test database only: `php artisan test --filter='AiCommunity(AdminTest|DraftQualityGuardTest)'`. Never use production DB credentials for tests. The current worktree verification uses `php -l` and `git diff --check`; PHPUnit needs a separately configured ephemeral MariaDB and local vendor dependencies.
