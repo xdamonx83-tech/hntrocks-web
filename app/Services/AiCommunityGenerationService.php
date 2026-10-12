@@ -26,7 +26,7 @@ class AiCommunityGenerationService
             throw ValidationException::withMessages(['generation' => 'AI community generation is disabled.']);
         }
         if (! config('ai-community.key')) {
-            throw ValidationException::withMessages(['generation' => 'OPENAI_API_KEY is missing.']);
+            throw ValidationException::withMessages(['generation' => 'Neither OPENAI_API_KEY nor HH_TRANSLATION_OPENAI_API_KEY is configured.']);
         }
 
         return Cache::lock('ai-community-generate', 90)->block(2, function () use ($character): AiCommunityDraft {
