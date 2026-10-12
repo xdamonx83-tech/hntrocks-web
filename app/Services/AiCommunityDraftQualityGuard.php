@@ -13,6 +13,12 @@ class AiCommunityDraftQualityGuard
         if ($body === '' || mb_strlen($body) > 700 || preg_match('~(?:https?://|www\.|\b[a-z0-9-]+\.(?:com|net|org|gg|de|rocks)\b)~iu', $body)) {
             $this->reject('Generated post is empty, too long, or contains a link.');
         }
+        // Reject known generated gibberish and repetitive synthetic sounding slogans.
+        // Keep this list deliberately short: human review remains the main quality gate.
+        if (preg_match('~\\b(?:laschen|überlebenskunst|hollywood[ -]stil)\\b|rückzug ist kein zeichen von schwäche~iu', $body)) {
+            $this->reject('Generated text contains unnatural or inaccurate game wording.');
+        }
+
         // Reject asserted past play or fabricated audience response, but allow hypotheticals such as "I'd rotate left".
         if (preg_match('~\b(?:I|we)\s+(?:just\s+)?(?:played|won|lost|queued|extracted|killed|clutched|saw|heard)\b|\b(?:I|we)\s+had\s+(?:a|an|the)\s+(?:match|game|round)\b|\b(?:ich|wir)\s+(?:habe(?:n)?|bin|sind)\s+(?:(?:gerade|gestern|heute)\s+)?(?:gespielt|gewonnen|verloren|extrahiert|gekillt|gesehen|gehört)\b|\b(?:my|our)\s+(?:last|latest)\s+(?:match|game|round)\b|\b(?:in\s+my|in\s+our)\s+(?:match|game|round)\b|\b(?:mein|unser)(?:e|em|en|er|es)?\s+letzte\w*\s+(?:match|runde)\b|\b(?:people|players|everyone)\s+(?:loved|liked|asked|told|agreed)\b~iu', $body)) {
             $this->reject('Generated post claims firsthand play or audience response.');
