@@ -231,7 +231,7 @@ class ApiCommunityLoadoutController extends Controller
             'tools.*' => ['string', 'max:80', $clean],
             'consumables' => ['sometimes', 'array', 'max:4'],
             'consumables.*' => ['string', 'max:80', $clean],
-            'traits' => ['sometimes', 'array', 'max:6'],
+            'traits' => ['sometimes', 'array', 'max:15'],
             'traits.*' => ['string', 'max:80', $clean],
             'note' => ['sometimes', 'nullable', 'string', 'max:1000', $clean],
             'visibility' => ['sometimes', Rule::in(['public', 'private'])],
