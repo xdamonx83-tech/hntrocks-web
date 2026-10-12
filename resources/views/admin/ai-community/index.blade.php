@@ -64,7 +64,7 @@
         <div class="hnt-ai-drafts">
             @forelse($drafts as $draft)
                 <article class="hnt-ai-draft">
-                    <div class="hnt-ai-draft-top"><h3>#{{ $draft->id }} · {{ $draft->character->name }}</h3><span class="hnt-ai-pill {{ $draft->status === 'approved' ? 'hnt-ai-on' : '' }}">{{ $draft->status }}</span></div>
+                    <div class="hnt-ai-draft-top"><h3>#{{ $draft->id }} · {{ $draft->character->name }}</h3>@if($draft->post_kind)<span class="hnt-ai-pill">{{ \App\Services\AiCommunityPostFormatSelector::formats()[$draft->post_kind]['label'] ?? 'Sonstiges' }}</span>@endif <span class="hnt-ai-pill {{ $draft->status === 'approved' ? 'hnt-ai-on' : '' }}">{{ $draft->status }}</span></div>
                     <p class="hnt-ai-meta">{{ $draft->created_at?->format('d.m.Y H:i') }} · {{ $draft->model }} · {{ $draft->input_tokens }} / {{ $draft->output_tokens }} Tokens · ca. ${{ number_format($draft->estimated_cost_microusd / 1000000, 6) }}</p>
                     @if($draft->status === 'draft')
                         <form class="hnt-ai-edit" method="post" action="{{ route('admin.ai-community.drafts.update', $draft) }}">@csrf @method('put')<label for="hnt-ai-body-{{ $draft->id }}">Entwurfstext</label><textarea id="hnt-ai-body-{{ $draft->id }}" name="body" maxlength="700" required rows="3">{{ $draft->body }}</textarea><button class="hnt-ai-button hnt-ai-secondary" type="submit">Entwurf speichern</button></form>
