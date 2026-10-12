@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AiCommunityDraft extends Model
 {
-    protected $fillable = ['character_id', 'body', 'body_hash', 'status', 'model', 'input_tokens', 'output_tokens', 'estimated_cost_microusd', 'reviewed_by', 'reviewed_at', 'published_feed_post_id'];
+    protected $fillable = ['character_id', 'body', 'body_hash', 'status', 'post_kind', 'model', 'input_tokens', 'output_tokens', 'estimated_cost_microusd', 'reviewed_by', 'reviewed_at', 'published_feed_post_id'];
 
     protected function casts(): array { return ['reviewed_at' => 'datetime']; }
     public function character(): BelongsTo { return $this->belongsTo(AiCommunityCharacter::class, 'character_id'); }
