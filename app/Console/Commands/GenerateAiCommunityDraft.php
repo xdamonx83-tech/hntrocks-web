@@ -17,10 +17,15 @@ class GenerateAiCommunityDraft extends Command
     {
         if (! config('ai-community.enabled') || ! config('ai-community.auto_generate')) { return self::SUCCESS; }
         $time = now('Europe/Berlin');
-        if ($time->hour < 9 || $time->hour >= 21 || $time->isWeekend()) { return self::SUCCESS; }
-        // Vary eligible hours across the week; at most one draft on an eligible hour.
-        if (! in_array($time->hour, [10 + $time->dayOfWeekIso, 17], true)) { return self::SUCCESS; }
+        // Editorial rhythm: occasional daytime/evening drafts, including weekends.
+        // This task NEVER publishes. At most one draft per Berlin calendar day.
+        if ($time->hour < 11 || $time->hour >= 23) { return self::SUCCESS; }
         Cache::lock('ai-community-schedule', 90)->block(2, function () use ($generator, $time): void {
+            $today = $time->copy()->startOfDay()->utc();
+            if (AiCommunityDraft::where('created_at', '>=', $today)->exists()) { return; }
+            // With 12 eligible hours/day this yields sporadic drafts, not hourly spam.
+            // Slightly more likely on weekends, when Hunt communities are often active.
+            if (random_int(1, 100) > ($time->isWeekend() ? 8 : 6)) { return; }
             if (AiCommunityDraft::where('created_at', '>=', $time->copy()->startOfWeek()->utc())->count() >= 8) { return; }
             $characters = AiCommunityCharacter::where('enabled', true)->orderBy('id')->get();
             if ($characters->isEmpty()) { return; }
