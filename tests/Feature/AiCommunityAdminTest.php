@@ -53,6 +53,13 @@ class AiCommunityAdminTest extends TestCase
         $this->actingAs($admin)->post('/admin/ai-community/drafts/'.$draft->id.'/review', ['decision' => 'approved'])->assertRedirect();
         $this->actingAs($admin)->post('/admin/ai-community/drafts/'.$draft->id.'/publish')->assertStatus(409);
         $this->actingAs($admin)->post('/admin/ai-community/'.$character->id.'/provision')->assertRedirect();
+        $character->refresh()->load('user.profile');
+        $this->assertNotNull($character->user, 'Provisioning must assign a user');
+        $this->assertTrue($character->user->is_ai_character, 'Provisioned user must be marked synthetic');
+        $this->assertSame($character->name, $character->user->username);
+        $this->assertNotNull($character->user->profile, 'Provisioning must attach a profile');
+        $this->assertSame('public', $character->user->profile->profile_visibility);
+        $this->assertStringContainsString($character->disclosure(), (string) $character->user->profile->bio);
         $this->actingAs($admin)->post('/admin/ai-community/drafts/'.$draft->id.'/publish')->assertRedirect();
         $this->assertSame(1, FeedPost::count());
         $this->assertTrue(FeedPost::first()->ai_user_declared);
