@@ -36,6 +36,7 @@ class AiCommunityAdminTest extends TestCase
 
         $this->actingAs($admin)->post('/admin/ai-community/'.$character->id.'/generate')->assertRedirect();
         $this->assertDatabaseCount('ai_community_drafts', 1);
+        $this->assertContains(AiCommunityDraft::first()->post_kind, \App\Services\AiCommunityPostFormatSelector::kinds());
         $this->assertDatabaseCount('feed_posts', 0);
         $this->actingAs($admin)->post('/admin/ai-community/'.$character->id.'/generate')->assertSessionHasErrors('generation');
         $this->assertDatabaseCount('ai_community_drafts', 1);
