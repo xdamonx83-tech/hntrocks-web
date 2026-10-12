@@ -16,9 +16,9 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
             ->promptContext($character, ['Alte Frage über Deckung']);
 
-        $this->assertStringContainsString('1-4 sentences', $messages[0]['content']);
+        $this->assertStringContainsString('1-2 brief sentences', $messages[0]['content']);
         $this->assertStringContainsString('near-duplicates', $messages[0]['content']);
-        $this->assertStringContainsString('No artificial engagement bait', $messages[0]['content']);
+        $this->assertStringContainsString('No polished motivational sayings', $messages[0]['content']);
         $this->assertSame(['Alte Frage über Deckung'], json_decode($messages[1]['content'], true)['recent_posts_to_avoid']);
     }
 
@@ -44,7 +44,7 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $guard->validate("I'd rotate left if the open path has no cover.", []);
         $guard->validate('Ich würde erst die Deckung prüfen, bevor ich quere.', []);
 
-        foreach (['', str_repeat('a', 701), 'Visit https://example.com', 'I won my last match.', 'Wir haben gestern gespielt.'] as $body) {
+        foreach (['', str_repeat('a', 701), 'Visit https://example.com', 'I won my last match.', 'Wir haben gestern gespielt.', 'Ein paar Laschen sind ein Pflichtkauf.', 'Immer im Hollywood-Stil nach vorne.', 'Rückzug ist kein Zeichen von Schwäche.'] as $body) {
             try {
                 $guard->validate($body, []);
                 $this->fail('Expected invalid output to be rejected.');
