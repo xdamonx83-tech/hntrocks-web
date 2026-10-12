@@ -16,7 +16,7 @@
     </header>
 
     @if (!config('ai-community.enabled')) <p class="hnt-ai-notice" role="alert">KI Community ist deaktiviert (AI_COMMUNITY_ENABLED=false).</p> @endif
-    @if (!config('ai-community.key')) <p class="hnt-ai-notice" role="alert">OPENAI_API_KEY fehlt. Die Qualitätsvorschau zeigt nur den Prompt, kein generiertes Ergebnis.</p> @endif
+    @if (!config('ai-community.key')) <p class="hnt-ai-notice" role="alert">Weder OPENAI_API_KEY noch HH_TRANSLATION_OPENAI_API_KEY ist gesetzt. Die Qualitätsvorschau zeigt nur den Prompt, kein generiertes Ergebnis.</p> @endif
     @if (session('status')) <p class="hnt-ai-notice hnt-ai-success" role="status">{{ session('status') }}</p> @endif
     @if ($errors->any()) <div class="hnt-ai-notice" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div> @endif
 
