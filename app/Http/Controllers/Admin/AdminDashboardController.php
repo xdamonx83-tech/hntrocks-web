@@ -36,7 +36,7 @@ class AdminDashboardController extends Controller
         $monthStart = $now->copy()->startOfMonth();
         $activityStart = $now->copy()->subDays(30);
 
-        $usersTotal = User::count();
+        $usersTotal = User::where('is_ai_character', false)->count();
         $usersToday = User::where('created_at', '>=', $today)->count();
         $usersThisMonth = User::where('created_at', '>=', $monthStart)->count();
         $activeUsers = Schema::hasColumn('users', 'last_login_at')
@@ -222,6 +222,7 @@ class AdminDashboardController extends Controller
         }
 
         foreach (User::query()
+            ->where('is_ai_character', false)
             ->where('created_at', '>=', $historyStart)
             ->select(['id', 'created_at'])
             ->cursor() as $user) {

@@ -29,6 +29,7 @@ class MembersController extends Controller
         $relationshipFilter = $filters['relationship'] ?? 'all';
 
         $query = User::query()
+            ->where('is_ai_character', false)
             ->with([
                 'profile',
                 'badges' => fn ($badgeQuery) => $badgeQuery->orderBy('badges.sort_order'),
@@ -179,6 +180,7 @@ class MembersController extends Controller
     private function profileOptions(string $field): array
     {
         return User::query()
+            ->where('users.is_ai_character', false)
             ->join('user_profiles', 'users.id', '=', 'user_profiles.user_id')
             ->whereNotNull('user_profiles.' . $field)
             ->where('user_profiles.' . $field, '!=', '')

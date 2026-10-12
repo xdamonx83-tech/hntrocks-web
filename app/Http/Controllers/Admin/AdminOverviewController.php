@@ -43,7 +43,7 @@ class AdminOverviewController extends Controller
         $usersThisMonth = $this->countTableSince('users', $monthStart);
         $usersPreviousMonth = $this->countTableBetween('users', $previousMonthStart, $previousMonthEnd);
         $activeUsersThisMonth = Schema::hasColumn('users', 'last_login_at')
-            ? User::where('last_login_at', '>=', $monthStart)->count()
+            ? User::where('is_ai_character', false)->where('last_login_at', '>=', $monthStart)->count()
             : 0;
         $activeUsersNow = Schema::hasTable('sessions')
             ? DB::table('sessions')->where('last_activity', '>=', $now->copy()->subMinutes(5)->timestamp)->count()
@@ -256,6 +256,10 @@ class AdminOverviewController extends Controller
 
         if (Schema::hasColumn($table, 'deleted_at')) {
             $query->whereNull($table . '.deleted_at');
+        }
+
+        if ($table === 'users' && Schema::hasColumn('users', 'is_ai_character')) {
+            $query->where('users.is_ai_character', false);
         }
 
         return $query;
@@ -475,6 +479,7 @@ class AdminOverviewController extends Controller
         }
 
         return User::query()
+            ->where('is_ai_character', false)
             ->withCount(['feedPosts', 'feedComments', 'badges'])
             ->orderByDesc('xp_total')
             ->orderByDesc('feed_posts_count')

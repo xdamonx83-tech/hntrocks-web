@@ -19,6 +19,8 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'username' => $this->username,
+            'is_ai_character' => (bool) $this->is_ai_character,
+            'ai_character_disclosure' => $this->is_ai_character ? ($this->resource->profile?->language === 'de' ? 'Automatisierter HNT.ROCKS Community-Charakter. Kein echter Spieler.' : 'Automated HNT.ROCKS community character. Not a real player.') : null,
             'email' => $this->when((bool) $request->user() && (int) $request->user()->id === (int) $this->id, $this->email),
             'avatar_url' => $this->avatar_path ? Storage::disk('public')->url($this->avatar_path) : asset('assets/vikinger/img/default-avatar.svg'),
             'cover_url' => $this->cover_path ? Storage::disk('public')->url($this->cover_path) : asset('assets/vikinger/img/default-cover.svg'),
