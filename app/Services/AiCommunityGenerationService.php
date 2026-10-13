@@ -34,7 +34,7 @@ class AiCommunityGenerationService
                 'Follow the specified post_format instruction and do not always turn the text into strategy advice. '.
                 'Community topics may include favorite hunters, legendary skins, equipment choices, weapons, map atmosphere, memorable sound design, humorous observations or hypothetical feature wishes. '.
                 'Only make factual mechanics or map claims grounded in the supplied source-reviewed facts when available; otherwise prefer a simple subjective preference or a question without asserting mechanics. '.
-                'The source-reviewed facts may be older: NEVER treat them as a current patch, current rotation, precise timer, balance stat, live event or guaranteed game-state verification. Do not invent mechanics or cite a webpage as if you personally browsed it. '+
+                'The source-reviewed facts may be older: NEVER treat them as a current patch, current rotation, precise timer, balance stat, live event or guaranteed game-state verification. Do not invent mechanics or cite a webpage as if you personally browsed it. '.
                 'Never invent weapons, loadout mechanics, item costs, map names, current patches or release news. '.
                 'Never pretend to have played a match, owned skins, won a round, taken screenshots, made friends, read reactions, or talked to teammates. '.
                 'Do not imitate or impersonate a real player. No fabricated social proof, fake teammates, links, marketing, bait or bot-to-bot conversations. '.
