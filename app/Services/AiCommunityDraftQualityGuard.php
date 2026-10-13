@@ -21,6 +21,11 @@ class AiCommunityDraftQualityGuard
         if ($expectedEnding === 'question' && ! str_ends_with($body, '?')) {
             $this->reject('Question-style draft does not end in a question.');
         }
+        // Two separate questions in one short post are a recurring V8 pattern:
+        // one useful question, then a redundant "what do you think?".
+        if (substr_count($body, '?') > 1) {
+            $this->reject('Draft repeats questions instead of making one clear point.');
+        }
         if ($expectedEnding === 'statement' && str_contains($body, '?')) {
             $this->reject('Statement-style draft unexpectedly contains a question.');
         }
