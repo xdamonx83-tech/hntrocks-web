@@ -24,7 +24,7 @@ final class AiCommunityEditorialAngles
             ],
             'gear_choice' => [
                 ['id' => 'romero_vetterli', 'focus' => 'Ask which gun people prefer as the MAIN weapon in a budget-friendly loadout, Romero shotgun or Vetterli rifle. Do not assert weapon stats or prices.', 'terms' => ['Romero', 'Vetterli']],
-                ['id' => 'chokes_or_other_tools', 'focus' => 'Ask if players tend to reserve a tool slot for Choke Bombs or prefer another tool. Choke Bomb is a TOOL, not a consumable.', 'terms' => ['Choke Bomb']],
+                ['id' => 'chokes_or_other_tools', 'focus' => 'Ask whether players prioritize a tool slot for Choke Bombs or a different tool. Choke Bomb is a TOOL, not a consumable. Chokes extinguish burning bodies/fires and can briefly obscure or discourage an area; do NOT describe them as explosive damage or generic crowd control.', 'terms' => ['Choke Bomb']],
                 ['id' => 'ammo_box_consumable', 'focus' => 'Discuss Ammo Box as a consumable and ask when players consider taking it. Do not invent UI counters, mechanics, or quantities.', 'terms' => ['Ammo Box']],
             ],
             'hunter_styles' => [
@@ -43,9 +43,9 @@ final class AiCommunityEditorialAngles
                 ['id' => 'romero_fan_club', 'focus' => 'A wry comment about how passionate weapon fans can be when arguing Romero against other weapons; no fake other user quotes.', 'terms' => ['Romero']],
             ],
             'feature_wish' => [
-                ['id' => 'loadout_qol', 'focus' => 'A HYPOTHETICAL wish for easier loadout comparison or saving. Make clear it is a suggestion; do not say a feature already exists or is announced.', 'terms' => ['Loadout']],
+                ['id' => 'loadout_qol', 'focus' => 'A HYPOTHETICAL wish for a more convenient comparison between loadout presets. Do not assert the game currently lacks saved loadouts, preset switching, or UI features; no announcement claims.', 'terms' => ['Loadout']],
                 ['id' => 'favorite_skin_ui', 'focus' => 'A HYPOTHETICAL cosmetic sorting/filtering UI improvement, not a claim that Hunt lacks it today.', 'terms' => ['Hunter-Skins']],
-                ['id' => 'tool_slot_ui', 'focus' => 'A HYPOTHETICAL convenience improvement for selecting tools, not an invented actual tool mechanic.', 'terms' => ['Tools', 'Choke Bomb']],
+                ['id' => 'tool_slot_ui', 'focus' => 'Ask whether users would appreciate a hypothetical small improvement to the existing tool-selection UI. Do not claim the game has no swapping, shortcut, presets, or counters; avoid inventing features.', 'terms' => ['Tools', 'Choke Bomb']],
             ],
             'sound_and_mood' => [
                 ['id' => 'crow_audio', 'focus' => 'One grounded observation that the sound of crows is a recognizable Hunt audio cue; no claims about specific rounds.', 'terms' => ['Krähen', 'crows']],
