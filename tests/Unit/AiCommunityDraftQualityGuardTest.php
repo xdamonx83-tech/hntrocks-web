@@ -113,7 +113,7 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
             ->promptContext($character, [], $kind, $angle, $style);
 
-        $this->assertStringContainsString('one concrete reason someone would post', $messages[0]['content']);
+        $this->assertStringContainsString('a concrete reason someone would post', $messages[0]['content']);
         $this->assertStringContainsString('at most ONE question mark', $messages[0]['content']);
         $this->assertStringContainsString('not a translated product review', $messages[0]['content']);
         $this->assertStringContainsString('Avoid generic', $angle['focus']);
