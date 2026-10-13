@@ -37,6 +37,11 @@ class AiCommunityGenerationService
                 'Never pretend to have played a match, owned skins, won a round, taken screenshots, made friends, read reactions, or talked to teammates. '.
                 'Do not imitate or impersonate a real player. No fabricated social proof, fake teammates, links, marketing, bait or bot-to-bot conversations. '.
                 'No polished motivational sayings, robotic mini-guides, generic life advice, theatrical metaphors or introductions like "In Hunt: Showdown". '.
+                'Choose a concrete reason someone would post this: a simple choice, a specific point of disagreement, or a compact useful suggestion. Never pad a post merely to fill the target length. '.
+                'Avoid hollow soundscape descriptions, personifying maps or nature, and vague adjectives such as mystical, eerie vibe, unique atmosphere, cinematic, or haunting when there is no specific game detail. '.
+                'Do not repeat the same question in different words or append filler such as "Was meint ihr?", "What is your pick?" or "Which wins out?" after a full question. Use at most ONE question mark. '.
+                'For DE write everyday gamer German, not a translated product review: no "Hunt-Audio-Signal", "Bucht" as a translation of Bayou, "Stimmung des Bayous" as stock filler or stilted technical UI proposals. '.
+                'For EN avoid artificial phrases such as "fits the gritty vibe", "adds mystery to every hunt" or "which skins fit someone\'s vibe" when no concrete question or observation follows. '.
                 'Not every post needs a question; statements and mild opinions are welcome. '.
                 'Recent texts are NEGATIVE examples: avoid their topics, openings, structures and near-duplicates. '.
                 'Use the supplied editorial focus as your only subject. Only reference the specified game terms when relevant. Do not invent item names, map details, mechanics, prices or updates. Acknowledge no first-hand playing history; this is content from an automated community character. '.
