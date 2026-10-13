@@ -37,7 +37,7 @@ $cases = [
     ['OldVetterli', 'en', 'One understated personal aesthetic preference without claimed ownership', 'Hunter skins', 'hunter_styles', 'simple_vs_flashy', 'mild_opinion'],
     ['CrowBait', 'en', 'Short dry joke, not a fabricated gameplay moment', 'Romero', 'bayou_banter', 'romero_fan_club', 'casual_one_liner'],
     ['BayouMechanic', 'en', 'One specific hypothetical UI improvement, avoid invented patch', 'Tool selection', 'feature_wish', 'tool_slot_ui', 'wish_question'],
-]
+];
 
 use App\Models\AiCommunityCharacter;
 use App\Services\AiCommunityGenerationService;
