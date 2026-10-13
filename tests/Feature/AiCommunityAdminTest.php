@@ -22,15 +22,22 @@ class AiCommunityAdminTest extends TestCase
         $this->actingAs($this->user())->post('/admin/ai-community/'.$character->id.'/generate')->assertForbidden();
     }
 
-    public function test_fake_generation_creates_only_a_draft_and_blocks_duplicates(): void
+    public function test_fake_generation_creates_draft_and_enforces_budget(): void
     {
         config()->set('ai-community.enabled', true);
         config()->set('ai-community.key', 'test-key');
-        Http::fake(['api.openai.com/*' => Http::response([
-            'model' => 'test-model',
-            'choices' => [['message' => ['content' => '{"body":"Which rifle pairs best with a quiet rotation through Stillwater?"}']]],
-            'usage' => ['prompt_tokens' => 100, 'completion_tokens' => 30],
-        ])]);
+        Http::fake(function ($request) {
+            $ending = str_contains($request['messages'][0]['content'], 'Finish with ordinary punctuation')
+                ? 'statement' : 'question';
+            $body = $ending === 'statement'
+                ? 'The Vetterli still has a lot of character in Hunt.'
+                : 'Romero or Vetterli for a budget loadout?';
+            return Http::response([
+                'model' => 'test-model',
+                'choices' => [['message' => ['content' => json_encode(['body' => $body])]]],
+                'usage' => ['prompt_tokens' => 100, 'completion_tokens' => 30],
+            ]);
+        });
         $character = $this->character();
         $character->update(['enabled' => true]);
         $admin = $this->user(['is_admin' => true]);
@@ -49,6 +56,7 @@ class AiCommunityAdminTest extends TestCase
         $this->assertDatabaseCount('feed_posts', 0);
         $this->actingAs($admin)->get('/admin/ai-community')->assertOk()
             ->assertSee(AiCommunityStyleLibrary::label(AiCommunityDraft::first()->style_key));
+        config()->set('ai-community.monthly_budget_microusd', 1);
         $this->actingAs($admin)->post('/admin/ai-community/'.$character->id.'/generate')->assertSessionHasErrors('generation');
         $this->assertDatabaseCount('ai_community_drafts', 1);
     }
