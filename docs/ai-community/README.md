@@ -17,6 +17,7 @@ This feature is staged in an isolated branch. It is **not deployed**. The migrat
 | --- | --- | --- |
 | `AI_COMMUNITY_ENABLED` | `false` | Master generation switch; manual generation also requires the character to be enabled. |
 | `AI_COMMUNITY_AUTO_GENERATE` | `false` | Optional hourly draft scheduler; never publishes. |
+| `AI_COMMUNITY_REVIEW_ENABLED` | `false` | Optional independent AI editorial score on an admin-selected draft; requires the master switch and an API key. |
 | `OPENAI_API_KEY` | unset | Server side key; never included in views or logs. |
 | `AI_COMMUNITY_MODEL` | `gpt-4.1-mini` | Chat Completions JSON mode model. |
 | `AI_COMMUNITY_MONTHLY_BUDGET_USD` | `5` | Estimated monthly spend ceiling. |
@@ -24,6 +25,12 @@ This feature is staged in an isolated branch. It is **not deployed**. The migrat
 | `AI_COMMUNITY_OUTPUT_COST_PER_MILLION_USD` | `1.60` | Operator maintained estimate; verify current pricing before enabling. |
 
 The generator locks requests, checks the most recent 100 draft texts for exact or near duplicates and repeated openings, limits all generated drafts to eight per Berlin calendar week, and checks estimated monthly spend before and after API response. Up to 12 recent texts are included in the prompt as negative examples. The output guard rejects empty or over-700-character text, links, and common fabricated match or audience claims. It is deliberately narrow enough to allow hypothetical first person language. Human review remains necessary for semantic repetition, language quality, factual accuracy, unverified patch or event claims, and subtle invented interactions. No external source is supplied for patch verification, so prompts forbid current patch claims entirely. Cost estimates are not billing records.
+
+## Optional editorial review
+
+With `AI_COMMUNITY_ENABLED=true`, `AI_COMMUNITY_REVIEW_ENABLED=true`, and a configured key, an admin can click **KI-Qualität prüfen** on an unreviewed draft. A separate low-temperature JSON call returns PASS, REVISE, or REJECT, naturalness and Hunt-accuracy scores from 1–5, and a short reason. The reviewer considers awkward translations, artificial phrasing, invented UI/items/mechanics, tone, and length using the stored editorial angle and style. Draft content is untrusted input. It never rewrites, approves, rejects, or publishes a draft; human approval and a separate publish action remain mandatory. Scores can be mistaken, and the reviewer does not verify facts against external sources.
+
+Each review adds an estimated API charge (up to about 240 output tokens plus prompt tokens, priced using the configured per-million-token estimates). Generation and review share the monthly estimated budget and request lock. Editing a draft clears its displayed decision and scores so it can be checked again, while retaining accumulated token/cost accounting. The estimated costs are not provider billing records. This is an unreleased feature-branch migration change; if the migration has run elsewhere, add a forward migration there before deployment.
 
 ## Editorial variety (v3)
 

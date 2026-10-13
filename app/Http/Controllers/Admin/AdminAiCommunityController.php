@@ -8,9 +8,11 @@ use App\Models\AiCommunityDraft;
 use App\Models\FeedPost;
 use App\Models\User;
 use App\Services\AiCommunityGenerationService;
+use App\Services\AiCommunityEditorialReviewer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -31,7 +33,8 @@ class AdminAiCommunityController extends Controller
             'previewCharacter' => $previewCharacter,
             'previewMessages' => $previewCharacter ? $generator->promptContext($previewCharacter, $recentBodies) : null,
             'weekCount' => AiCommunityDraft::where('created_at', '>=', now('Europe/Berlin')->startOfWeek()->utc())->count(),
-            'monthCost' => AiCommunityDraft::where('created_at', '>=', now()->startOfMonth())->sum('estimated_cost_microusd'),
+            'monthCost' => AiCommunityDraft::where('created_at', '>=', now()->startOfMonth())->sum('estimated_cost_microusd')
+                + AiCommunityDraft::where('quality_reviewed_at', '>=', now()->startOfMonth())->sum('quality_review_cost_microusd'),
         ]);
     }
 
@@ -99,8 +102,23 @@ class AdminAiCommunityController extends Controller
         if (AiCommunityDraft::where('body_hash', $hash)->whereKeyNot($draft->id)->exists()) {
             throw ValidationException::withMessages(['body' => 'Duplicate draft blocked.']);
         }
-        $draft->update(['body' => $body, 'body_hash' => $hash]);
+        Cache::lock('ai-community-generate', 90)->block(30, function () use ($draft, $body, $hash): void {
+            $draft->refresh();
+            abort_unless($draft->status === 'draft', 409);
+            $draft->update([
+                'body' => $body, 'body_hash' => $hash,
+                'quality_review_decision' => null, 'quality_review_naturalness' => null,
+                'quality_review_accuracy' => null, 'quality_review_reason' => null,
+            ]);
+        });
         return back()->with('status', 'Draft saved.');
+    }
+
+    public function qualityReview(Request $request, AiCommunityDraft $draft, AiCommunityEditorialReviewer $reviewer): RedirectResponse
+    {
+        $this->guard($request);
+        $reviewer->review($draft);
+        return back()->with('status', 'KI-Qualitätsprüfung gespeichert. Redaktionelle Freigabe bleibt erforderlich.');
     }
 
     public function review(Request $request, AiCommunityDraft $draft): RedirectResponse

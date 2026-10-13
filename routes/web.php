@@ -608,6 +608,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/ai-community/{character}/provision', [AdminAiCommunityController::class, 'provision'])->name('ai-community.provision');
         Route::post('/ai-community/{character}/generate', [AdminAiCommunityController::class, 'generate'])->name('ai-community.generate');
         Route::put('/ai-community/drafts/{draft}', [AdminAiCommunityController::class, 'editDraft'])->name('ai-community.drafts.update');
+        Route::post('/ai-community/drafts/{draft}/quality-review', [AdminAiCommunityController::class, 'qualityReview'])->name('ai-community.drafts.quality-review');
         Route::post('/ai-community/drafts/{draft}/review', [AdminAiCommunityController::class, 'review'])->name('ai-community.drafts.review');
         Route::post('/ai-community/drafts/{draft}/publish', [AdminAiCommunityController::class, 'publish'])->name('ai-community.drafts.publish');
         Route::get('/', [AdminDashboardController::class, 'index'])->name('index');

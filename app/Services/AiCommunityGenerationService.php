@@ -70,7 +70,8 @@ class AiCommunityGenerationService
         }
 
         return Cache::lock('ai-community-generate', 90)->block(2, function () use ($character): AiCommunityDraft {
-            $spent = AiCommunityDraft::where('created_at', '>=', now()->startOfMonth())->sum('estimated_cost_microusd');
+            $spent = AiCommunityDraft::where('created_at', '>=', now()->startOfMonth())->sum('estimated_cost_microusd')
+                + AiCommunityDraft::where('quality_reviewed_at', '>=', now()->startOfMonth())->sum('quality_review_cost_microusd');
             if ($spent >= config('ai-community.monthly_budget_microusd')) {
                 throw ValidationException::withMessages(['generation' => 'Monthly generation budget reached.']);
             }

@@ -66,8 +66,16 @@
                 <article class="hnt-ai-draft">
                     <div class="hnt-ai-draft-top"><h3>#{{ $draft->id }} · {{ $draft->character->name }}</h3>@if($draft->post_kind)<span class="hnt-ai-pill">{{ \App\Services\AiCommunityPostFormatSelector::formats()[$draft->post_kind]['label'] ?? 'Sonstiges' }}</span>@endif @if($draft->style_key && \App\Services\AiCommunityStyleLibrary::label($draft->style_key))<span class="hnt-ai-pill">{{ \App\Services\AiCommunityStyleLibrary::label($draft->style_key) }}</span>@endif <span class="hnt-ai-pill {{ $draft->status === 'approved' ? 'hnt-ai-on' : '' }}">{{ $draft->status }}</span></div>
                     <p class="hnt-ai-meta">{{ $draft->created_at?->format('d.m.Y H:i') }} · {{ $draft->model }} · {{ $draft->input_tokens }} / {{ $draft->output_tokens }} Tokens · ca. ${{ number_format($draft->estimated_cost_microusd / 1000000, 6) }}</p>
+                    @if($draft->quality_review_decision)
+                        <p class="hnt-ai-meta">KI-Einschätzung: <strong>{{ strtoupper($draft->quality_review_decision) }}</strong> · Natürlichkeit {{ $draft->quality_review_naturalness }}/5 · Hunt-Genauigkeit {{ $draft->quality_review_accuracy }}/5 · ca. ${{ number_format($draft->quality_review_cost_microusd / 1000000, 6) }}</p>
+                        <p class="hnt-ai-body">{{ $draft->quality_review_reason }}</p>
+                        <p class="hnt-ai-meta">Nur ein redaktioneller Hinweis; keine Faktenprüfung oder Freigabe.</p>
+                    @endif
                     @if($draft->status === 'draft')
                         <form class="hnt-ai-edit" method="post" action="{{ route('admin.ai-community.drafts.update', $draft) }}">@csrf @method('put')<label for="hnt-ai-body-{{ $draft->id }}">Entwurfstext</label><textarea id="hnt-ai-body-{{ $draft->id }}" name="body" maxlength="700" required rows="3">{{ $draft->body }}</textarea><button class="hnt-ai-button hnt-ai-secondary" type="submit">Entwurf speichern</button></form>
+                        @if(config('ai-community.enabled') && config('ai-community.review_enabled') && config('ai-community.key') && !$draft->quality_review_decision)
+                            <form method="post" action="{{ route('admin.ai-community.drafts.quality-review', $draft) }}">@csrf <button class="hnt-ai-button hnt-ai-secondary" type="submit">KI-Qualität prüfen</button></form>
+                        @endif
                         <form class="hnt-ai-actions" method="post" action="{{ route('admin.ai-community.drafts.review', $draft) }}">@csrf <button class="hnt-ai-button" name="decision" value="approved" type="submit">Freigeben</button><button class="hnt-ai-button hnt-ai-secondary" name="decision" value="rejected" type="submit">Ablehnen</button></form>
                     @else <p class="hnt-ai-body">{{ $draft->body }}</p> @endif
                     @if($draft->status === 'approved')

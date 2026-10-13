@@ -38,6 +38,14 @@ return new class extends Migration {
             $table->unsignedInteger('input_tokens')->default(0);
             $table->unsignedInteger('output_tokens')->default(0);
             $table->unsignedBigInteger('estimated_cost_microusd')->default(0);
+            $table->string('quality_review_decision', 16)->nullable();
+            $table->unsignedTinyInteger('quality_review_naturalness')->nullable();
+            $table->unsignedTinyInteger('quality_review_accuracy')->nullable();
+            $table->text('quality_review_reason')->nullable();
+            $table->timestamp('quality_reviewed_at')->nullable();
+            $table->unsignedBigInteger('quality_review_cost_microusd')->default(0);
+            $table->unsignedInteger('quality_review_input_tokens')->default(0);
+            $table->unsignedInteger('quality_review_output_tokens')->default(0);
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->foreignId('published_feed_post_id')->nullable()->unique()->constrained('feed_posts')->nullOnDelete();
