@@ -18,9 +18,9 @@ final class AiCommunityEditorialAngles
                 ['id' => 'map_preference', 'focus' => 'Ask which Hunt map people enjoy aesthetically without describing invented locations, weather, geometry or current rotation.', 'terms' => ['Stillwater Bayou', 'Lawson Delta', 'DeSalle']],
             ],
             'small_opinion' => [
-                ['id' => 'sound_identity', 'focus' => 'One short subjective opinion about how audio contributes to the distinctive atmosphere of Hunt, no claimed match.', 'terms' => ['Hunt', 'Sounddesign']],
+                ['id' => 'sound_identity', 'focus' => 'One compact opinion about a recognizable real sound cue in Hunt. Do not write a game-review sentence praising general sound design, or a vague emotional description; no claimed match.', 'terms' => ['Hunt', 'Sounddesign']],
                 ['id' => 'romero_simplicity', 'focus' => 'One mild opinion about the appeal of straightforward equipment choices; Romero may be mentioned but no damage or price claim.', 'terms' => ['Romero']],
-                ['id' => 'hunter_style_matters', 'focus' => 'One short opinion that the visual style of a Hunter is a fun reason to discuss cosmetics; no skin ownership claim.', 'terms' => ['Hunter', 'Skins']],
+                ['id' => 'hunter_style_matters', 'focus' => 'A compact, concrete opinion on understated versus elaborate Hunter visual designs. Avoid vague praise that Hunter visuals add another layer to the game; no ownership claims.', 'terms' => ['Hunter', 'Skins']],
             ],
             'gear_choice' => [
                 ['id' => 'romero_vetterli', 'focus' => 'Ask which gun people prefer as the MAIN weapon in a budget-friendly loadout, Romero shotgun or Vetterli rifle. Do not assert weapon stats or prices.', 'terms' => ['Romero', 'Vetterli']],
@@ -34,7 +34,7 @@ final class AiCommunityEditorialAngles
             ],
             'map_chat' => [
                 ['id' => 'stillwater_vs_desalle', 'focus' => 'Ask which map players prefer, Stillwater Bayou or DeSalle, without describing specific invented terrain or compounds.', 'terms' => ['Stillwater Bayou', 'DeSalle']],
-                ['id' => 'lawson_mood', 'focus' => 'A simple opinion or question about the atmosphere of Lawson Delta; do NOT compare Lawson to itself or invent terrain specifics.', 'terms' => ['Lawson Delta']],
+                ['id' => 'lawson_mood', 'focus' => 'A plain question about liking Lawson Delta compared with other maps, or a very short, grounded subjective preference. Avoid poetic descriptions of silence, the environment waiting, fog, or fictional weather. Do not invent terrain specifics.', 'terms' => ['Lawson Delta']],
                 ['id' => 'favorite_map_audio', 'focus' => 'Ask whether players choose favorite maps for atmosphere or practical gameplay, without claiming a certain map always has a feature.', 'terms' => ['Hunt']],
             ],
             'bayou_banter' => [
@@ -48,9 +48,9 @@ final class AiCommunityEditorialAngles
                 ['id' => 'tool_slot_ui', 'focus' => 'Ask whether users would appreciate a hypothetical small improvement to the existing tool-selection UI. Do not claim the game has no swapping, shortcut, presets, or counters; avoid inventing features.', 'terms' => ['Tools', 'Choke Bomb']],
             ],
             'sound_and_mood' => [
-                ['id' => 'crow_audio', 'focus' => 'One grounded observation that the sound of crows is a recognizable Hunt audio cue; no claims about specific rounds.', 'terms' => ['Krähen', 'crows']],
-                ['id' => 'game_ambience', 'focus' => 'One short opinion on Hunt audio atmosphere in general, no fictional sound source at extraction points.', 'terms' => ['Hunt']],
-                ['id' => 'sound_discussion', 'focus' => 'Ask which kind of recognizable Hunt sound players consider most distinctive; no invented interactions.', 'terms' => ['Hunt']],
+                ['id' => 'crow_audio', 'focus' => 'One brief grounded statement that crow alerts are noticeable in Hunt, without calling them spies, monsters, a symphony, or dramatic metaphors. No claim about any specific round.', 'terms' => ['Krähen', 'crows']],
+                ['id' => 'game_ambience', 'focus' => 'One specific real audio element as the subject of a compact observation or preference. Avoid generic 'dense atmosphere', 'eerie vibe', nature personification, or invented audio/weather.', 'terms' => ['Hunt']],
+                ['id' => 'sound_discussion', 'focus' => 'Ask ONE direct question about a familiar sound cue, optionally comparing two, without listing three atmospheric examples plus a redundant second question.', 'terms' => ['Hunt']],
             ],
         ];
     }
