@@ -104,6 +104,44 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $this->assertSame(['Ammo Box'], $payload['allowed_game_terms']);
     }
 
+    public function test_v5_label_leakage_and_structural_output_are_rejected(): void
+    {
+        $guard = new AiCommunityDraftQualityGuard;
+
+        foreach ([
+            ['Die Krähen sind das Warnsystem im Sumpf. statement', 'statement'],
+            ['Die Romero-Diskussionen sind manchmal lauter als das Spiel. statement', 'statement'],
+            ['The crows are louder than my loadout. statement', 'statement'],
+            ['Would a loadout comparison be useful? statement', 'statement'],
+            ['Do you prefer the Romero?', 'statement'],
+            ['A good rifle choice is always personal.', 'question'],
+            ['Do you take Choke Bombs for crowd control?', 'question'],
+        ] as [$body, $ending]) {
+            try {
+                $guard->validate($body, [], $ending);
+                $this->fail('Expected contaminated or style-incompatible draft to be rejected.');
+            } catch (ValidationException $e) {
+                $this->assertArrayHasKey('generation', $e->errors());
+            }
+        }
+
+        $guard->validate('Romero oder Vetterli?', [], 'question');
+        $guard->validate('Die Atmosphäre in Hunt bleibt ziemlich eigen.', [], 'statement');
+    }
+
+    public function test_model_prompt_does_not_emit_a_literal_ending_label(): void
+    {
+        $character = new AiCommunityCharacter(['language' => 'en', 'persona_voice' => 'Dry', 'topics' => 'Sound']);
+        $angle = AiCommunityEditorialAngles::catalog()['small_opinion'][0];
+        $style = AiCommunityStyleLibrary::styles()['casual_one_liner'];
+        $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
+            ->promptContext($character, [], 'small_opinion', $angle, $style);
+
+        $this->assertStringContainsString('Never add editorial labels', $messages[0]['content']);
+        $this->assertStringContainsString('Finish with ordinary punctuation', $messages[0]['content']);
+        $this->assertStringNotContainsString('End as a statement.', $messages[0]['content']);
+    }
+
     public function test_near_duplicate_and_repeated_opening_are_rejected(): void
     {
         $guard = new AiCommunityDraftQualityGuard;
