@@ -61,6 +61,27 @@ class AiCommunityAdminTest extends TestCase
         $this->assertDatabaseCount('ai_community_drafts', 1);
     }
 
+    public function test_admin_sees_fact_attention_flag_without_auto_review_or_publish(): void
+    {
+        $character = $this->character();
+        $body = 'Die Krähen kreischen oft direkt, wenn man nah an Gegnern ist, ziemlich nützlich.';
+        $draft = $character->drafts()->create([
+            'body' => $body, 'body_hash' => AiCommunityDraft::hashBody($body),
+            'model' => 'test', 'status' => 'draft',
+        ]);
+        Http::fake();
+        $this->actingAs($this->user(['is_admin' => true]))
+            ->get('/admin/ai-community')
+            ->assertOk()
+            ->assertSee('Manuelle Faktenprüfung empfohlen')
+            ->assertSee('Krähen/Gegnernähe')
+            ->assertSee('keine bestätigte Falschinformation');
+        $this->assertSame('draft', $draft->refresh()->status);
+        $this->assertNull($draft->quality_review_decision);
+        $this->assertDatabaseCount('feed_posts', 0);
+        Http::assertNothingSent();
+    }
+
     public function test_missing_key_blocks_generation_without_http_or_draft(): void
     {
         config()->set('ai-community.enabled', true);
