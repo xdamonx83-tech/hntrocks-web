@@ -19,6 +19,11 @@ class AiCommunityDraftQualityGuard
             $this->reject('Generated text contains unnatural or inaccurate game wording.');
         }
 
+        // '1896' is part of the game title, not a standalone weapon name.
+        if (preg_match('~\\b(?:der|den|dem|ein|einen|eine|oder|the|a|an|my|with|vs)\\s+1896\\b|\\b1896\\s+(?:rifle|shotgun|gun|gewehr|schrotflinte)\\b~iu', $body)) {
+            $this->reject('Generated post confuses the Hunt game title with a weapon.');
+        }
+
         // Reject asserted past play or fabricated audience response, but allow hypotheticals such as "I'd rotate left".
         if (preg_match('~\b(?:I|we)\s+(?:just\s+)?(?:played|won|lost|queued|extracted|killed|clutched|saw|heard)\b|\b(?:I|we)\s+had\s+(?:a|an|the)\s+(?:match|game|round)\b|\b(?:ich|wir)\s+(?:habe(?:n)?|bin|sind)\s+(?:(?:gerade|gestern|heute)\s+)?(?:gespielt|gewonnen|verloren|extrahiert|gekillt|gesehen|gehört)\b|\b(?:my|our)\s+(?:last|latest)\s+(?:match|game|round)\b|\b(?:in\s+my|in\s+our)\s+(?:match|game|round)\b|\b(?:mein|unser)(?:e|em|en|er|es)?\s+letzte\w*\s+(?:match|runde)\b|\b(?:people|players|everyone)\s+(?:loved|liked|asked|told|agreed)\b~iu', $body)) {
             $this->reject('Generated post claims firsthand play or audience response.');
