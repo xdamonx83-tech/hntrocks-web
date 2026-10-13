@@ -72,6 +72,8 @@ class AiCommunityGenerationService
             $recentBodies = AiCommunityDraft::latest()->limit(100)->pluck('body')->all();
             $recentFormats = AiCommunityDraft::latest()->limit(12)->pluck('post_kind')->all();
             $selectedFormat = AiCommunityPostFormatSelector::select($recentFormats);
+            $recentAngles = AiCommunityDraft::latest()->limit(20)->pluck('editorial_angle')->all();
+            $selectedAngle = AiCommunityEditorialAngles::select($selectedFormat, $recentAngles);
             try {
                 $response = Http::withToken(config('ai-community.key'))
                     ->timeout(25)->acceptJson()->post('https://api.openai.com/v1/chat/completions', [
@@ -79,7 +81,7 @@ class AiCommunityGenerationService
                         'response_format' => ['type' => 'json_object'],
                         'temperature' => 0.85,
                         'max_tokens' => 190,
-                        'messages' => $this->promptContext($character, $recentBodies, $selectedFormat),
+                        'messages' => $this->promptContext($character, $recentBodies, $selectedFormat, $selectedAngle),
                     ]);
             } catch (\Throwable $e) {
                 throw ValidationException::withMessages(['generation' => 'OpenAI request failed. Please retry later.']);
@@ -103,6 +105,7 @@ class AiCommunityGenerationService
 
             $draft = $character->drafts()->create([
                 'body' => $body, 'body_hash' => $hash, 'status' => 'draft', 'post_kind' => $selectedFormat,
+                'editorial_angle' => $selectedAngle['id'],
                 'model' => (string) data_get($response->json(), 'model', config('ai-community.model')),
                 'input_tokens' => $input, 'output_tokens' => $output, 'estimated_cost_microusd' => $cost,
             ]);
