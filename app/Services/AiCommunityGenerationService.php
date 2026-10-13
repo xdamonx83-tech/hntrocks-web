@@ -35,6 +35,7 @@ class AiCommunityGenerationService
                 'No polished motivational sayings, robotic mini-guides, generic life advice, theatrical metaphors or introductions like "In Hunt: Showdown". '.
                 'Not every post needs a question; statements and mild opinions are welcome. '.
                 'Recent texts are NEGATIVE examples: avoid their topics, openings, structures and near-duplicates. '.
+                'Use the supplied editorial focus as your only subject. Only reference the specified game terms when relevant. Do not invent item names, map details, mechanics, prices or updates. Acknowledge no first-hand playing history; this is content from an automated community character. '.
                 'Specific editorial format: '.AiCommunityPostFormatSelector::instruction($kind)],
             ['role' => 'user', 'content' => json_encode([
                 'language' => $character->language,
@@ -42,6 +43,9 @@ class AiCommunityGenerationService
                 'topics' => $character->topics,
                 'preferences' => $character->prompt_settings,
                 'post_format' => $kind,
+                'editorial_angle' => $angle['id'],
+                'editorial_focus' => $angle['focus'],
+                'allowed_game_terms' => $angle['terms'],
                 'recent_posts_to_avoid' => array_slice($recentBodies, 0, 12),
             ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)],
         ];
