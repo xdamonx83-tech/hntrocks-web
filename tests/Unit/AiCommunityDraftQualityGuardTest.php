@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\AiCommunityCharacter;
 use App\Services\AiCommunityDraftQualityGuard;
+use App\Services\AiCommunityEditorialAngles;
 use App\Services\AiCommunityGenerationService;
 use App\Services\AiCommunityPostFormatSelector;
 use Illuminate\Validation\ValidationException;
@@ -43,6 +44,27 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $this->assertStringContainsString('hunter appearance', $messages[0]['content']);
     }
 
+    public function test_reviewed_editorial_angles_avoid_recent_selections(): void
+    {
+        $catalog = AiCommunityEditorialAngles::catalog();
+        $this->assertCount(8, $catalog);
+        $this->assertCount(3, $catalog['gear_choice']);
+
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $angle = AiCommunityEditorialAngles::select('gear_choice', ['romero_vetterli', 'chokes_or_other_tools']);
+            $this->assertSame('ammo_box_consumable', $angle['id']);
+            $this->assertContains('Ammo Box', $angle['terms']);
+        }
+
+        $character = new AiCommunityCharacter(['language' => 'de', 'persona_voice' => 'Kurz', 'topics' => 'Tools']);
+        $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
+            ->promptContext($character, [], 'gear_choice', $angle);
+        $payload = json_decode($messages[1]['content'], true);
+        $this->assertSame('ammo_box_consumable', $payload['editorial_angle']);
+        $this->assertSame($angle['focus'], $payload['editorial_focus']);
+        $this->assertSame(['Ammo Box'], $payload['allowed_game_terms']);
+    }
+
     public function test_near_duplicate_and_repeated_opening_are_rejected(): void
     {
         $guard = new AiCommunityDraftQualityGuard;
@@ -65,7 +87,7 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $guard->validate("I'd rotate left if the open path has no cover.", []);
         $guard->validate('Ich würde erst die Deckung prüfen, bevor ich quere.', []);
 
-        foreach (['', str_repeat('a', 701), 'Visit https://example.com', 'I won my last match.', 'Wir haben gestern gespielt.', 'Ein paar Laschen sind ein Pflichtkauf.', 'Immer im Hollywood-Stil nach vorne.', 'Rückzug ist kein Zeichen von Schwäche.'] as $body) {
+        foreach (['', str_repeat('a', 701), 'Visit https://example.com', 'I won my last match.', 'Wir haben gestern gespielt.', 'Ein paar Laschen sind ein Pflichtkauf.', 'Immer im Hollywood-Stil nach vorne.', 'Rückzug ist kein Zeichen von Schwäche.', 'Der 1896 ist die beste Schrotflinte.', 'The 1896 shotgun is obviously overpowered.'] as $body) {
             try {
                 $guard->validate($body, []);
                 $this->fail('Expected invalid output to be rejected.');
