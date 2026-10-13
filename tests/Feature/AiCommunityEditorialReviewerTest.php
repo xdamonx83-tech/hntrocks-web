@@ -69,6 +69,52 @@ class AiCommunityEditorialReviewerTest extends TestCase
             ->assertSee('KI-Einschätzung')->assertSee('REVISE')->assertSee('Natürlichkeit 3/5');
     }
 
+    public function test_prompt_uses_strict_calibrated_v6_criteria(): void
+    {
+        $draft = $this->draft();
+        $reviewer = new \App\Services\AiCommunityEditorialReviewer();
+        $messages = $reviewer->promptContext($draft);
+        $this->assertStringContainsString('Naturalness rubric:', $messages[0]['content']);
+        $this->assertStringContainsString('PASS only if both scores >= 4', $messages[0]['content']);
+        $this->assertStringContainsString('ein typisches Hunt-Audio-Signal', $messages[0]['content']);
+        $this->assertStringContainsString('Bucht', $messages[0]['content']);
+        $this->assertStringContainsString('NO browsing', $messages[0]['content']);
+    }
+
+    public function test_an_inconsistent_ai_pass_is_downgraded_to_revise(): void
+    {
+        $this->fakeReviewResponse = [
+            'choices' => [['message' => ['content' => json_encode([
+                'decision' => 'pass', 'naturalness' => 2, 'hunt_accuracy' => 5,
+                'reason' => 'This is an artificial-sounding and stiff line.',
+            ])]]],
+            'usage' => ['prompt_tokens' => 120, 'completion_tokens' => 35],
+        ];
+        $draft = $this->draft();
+        $this->actingAs($this->user(['is_admin' => true]))->post($this->url($draft))->assertRedirect();
+        $draft->refresh();
+        $this->assertSame('revise', $draft->quality_review_decision);
+        $this->assertSame(2, $draft->quality_review_naturalness);
+        $this->assertStringContainsString('Scores below the PASS threshold', $draft->quality_review_reason);
+        $this->assertDatabaseCount('feed_posts', 0);
+    }
+
+    public function test_high_quality_scores_can_remain_an_advisory_pass(): void
+    {
+        $this->fakeReviewResponse = [
+            'choices' => [['message' => ['content' => json_encode([
+                'decision' => 'pass', 'naturalness' => 4, 'hunt_accuracy' => 4,
+                'reason' => 'No significant defects are evident in the draft.',
+            ])]]],
+            'usage' => ['prompt_tokens' => 120, 'completion_tokens' => 35],
+        ];
+        $draft = $this->draft();
+        $this->actingAs($this->user(['is_admin' => true]))->post($this->url($draft))->assertRedirect();
+        $this->assertSame('pass', $draft->refresh()->quality_review_decision);
+        $this->assertSame('draft', $draft->status);
+        $this->assertDatabaseCount('feed_posts', 0);
+    }
+
     public function test_repeat_review_is_blocked_without_second_request(): void
     {
         $draft = $this->draft();
