@@ -35,6 +35,7 @@ require_once $root.'/app/Services/AiCommunityDraftQualityGuard.php';
 // a disposable in-memory Laravel container, never bootstrap the application.
 $container = new \Illuminate\Container\Container();
 \Illuminate\Container\Container::setInstance($container);
+\Illuminate\Support\Facades\Facade::setFacadeApplication($container);
 $translator = new \Illuminate\Translation\Translator(new \Illuminate\Translation\ArrayLoader(), 'en');
 $container->instance('validator', new \Illuminate\Validation\Factory($translator, $container));
 
