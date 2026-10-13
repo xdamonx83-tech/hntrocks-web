@@ -16,9 +16,10 @@ class AiCommunityGenerationService
      * @param list<string> $recentBodies
      * @return array<int, array{role: string, content: string}>
      */
-    public function promptContext(AiCommunityCharacter $character, array $recentBodies, ?string $postKind = null): array
+    public function promptContext(AiCommunityCharacter $character, array $recentBodies, ?string $postKind = null, ?array $editorialAngle = null): array
     {
         $kind = $postKind ?? AiCommunityPostFormatSelector::select([]);
+        $angle = $editorialAngle ?? AiCommunityEditorialAngles::select($kind);
         return [
             ['role' => 'system', 'content' =>
                 'Write one original Hunt: Showdown 1896 community post as JSON {"body":"..."}. '.
