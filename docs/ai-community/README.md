@@ -62,6 +62,14 @@ The Laravel prompt now explains punctuation naturally without a suffix label. Th
 
 For any next live-model benchmark, export and test the **actual** messages from `AiCommunityGenerationService::promptContext()` on an isolated, up-to-date checkout; never duplicate/rewrite the prompt into a standalone Python script. The benchmark must never create members, store drafts in the live DB, or publish feed posts. Use a separate credential-safe test harness and retain a record of the selected `post_kind`, `editorial_angle`, and `style_key`.
 
+## Editorial reviewer calibration (13 October 2026)
+
+An independent private V6 reviewer test scored **all ten posts as PASS and all ten naturalness scores as 5/5** (approximate estimated API spend $0.001993). This conflicts with the manual V6 assessment (2 publishable without revision, 4 needing edits, 4 rejected). The original advisory reviewer was therefore too permissive and **must not be used as an automatic publishing gate**.
+
+The reviewer prompt now grades DE/EN Hunt posts against a concrete five-point naturalness rubric and negative calibration examples (overly instructional Crow commentary, literal Bayou-to-Bucht translation, synthetic atmosphere metaphors). A result of PASS requires both naturalness and Hunt plausibility >=4. The server also conservatively downgrades a model PASS to REVISE when its own scores fail the threshold. No automatic posting or editing is enabled. Its Hunt plausibility score is **not verified game-fact checking**.
+
+**Verification:** 26 isolated Laravel tests passed (416 assertions) including an inconsistent PASS downgrade and the existing generation budget checks. A separate read-only V7 private benchmark runner reuses the ten saved V6 texts and verbatim updated Laravel reviewer prompts. Its exact sample outputs are not yet evaluated. No news source, sample scraping, DB writing or production deployment is involved. Follow the usual root-only script checksum procedure and do not overwrite previous private benchmark files.
+
 ## Quality preview
 
 ACP → KI Community → **Qualitätsvorschau** opens a read-only view of the exact prompt context for one persona, including recent draft snippets as negative examples. It performs database reads only: no OpenAI call, draft, account, or post is created. It is a test prompt, **not an AI output preview or evidence of model quality**. Without a configured key, generation is disabled. This staging work used fake OpenAI HTTP only; actual API quality and cost have not been tested. Seed voice changes apply only to newly inserted personas because the seeder intentionally preserves existing admin edits. Review existing persona settings manually if adopting the revised voices.
