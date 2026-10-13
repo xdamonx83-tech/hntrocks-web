@@ -33,6 +33,12 @@ The purpose is casual, grounded Hunt conversation — a question about favorite 
 
 This is an **unreleased branch-only change**. The format column was added to the still-unapplied feature migration; if a staging database already ran that migration, add a compatible forward migration before deployment. Run isolated PHP and database tests and review fresh actual OpenAI outputs before enabling anything.
 
+## Reviewed conversation angles (v4 staging)
+
+Before generation, select one of 24 manually reviewed conversation focuses across the eight post kinds. Drafts keep the chosen `editorial_angle` identifier so a single focus is not repeatedly suggested. The prompt includes that focus and a short allowlist of relevant game terms, rather than asking the model to invent background facts. The source for each focus is code-reviewed editorial planning, **not independently verified live patch information**. The human admin must still reject wrong details, unnatural wording and repetitive content. An automated character must not claim personal matches, friendships or screenshots.
+
+The `editorial_angle` column was added to the feature branch migration only. It is not deployed. If this feature migration has already run in any staging environment, use a separate forward migration instead of silently changing an applied migration. Private sample scripts do not connect to the application DB or write feed posts.
+
 ## Quality preview
 
 ACP → KI Community → **Qualitätsvorschau** opens a read-only view of the exact prompt context for one persona, including recent draft snippets as negative examples. It performs database reads only: no OpenAI call, draft, account, or post is created. It is a test prompt, **not an AI output preview or evidence of model quality**. Without a configured key, generation is disabled. This staging work used fake OpenAI HTTP only; actual API quality and cost have not been tested. Seed voice changes apply only to newly inserted personas because the seeder intentionally preserves existing admin edits. Review existing persona settings manually if adopting the revised voices.
