@@ -84,6 +84,16 @@ It reads an operator-supplied private review result JSON and computes exact agre
 
 Before trusting any automated advisory scoring, assemble a separate held-out set of new DE/EN posts (including good natural posts, borderline edits, and game-mechanics errors), have a knowledgeable human label it **without seeing AI ratings**, then compare with the scorer. Never calibrate and evaluate on the same examples. Irrespective of scores, generated content remains a disclosed automated draft requiring explicit human approval; no automatic publishing.
 
+## Blind V8 hold-out evaluation (prepared; not run yet)
+
+After V7 scored 9/10 private drafts PASS while the provisional editorial reference accepted only 2/10 without edits, we prepared a **new 20-post blind assessment**. It contains 10 DE and 10 EN examples, 14 distinct editorial angles, and diverse writing structures. The export is built from the **actual** `AiCommunityGenerationService::promptContext()` using `scripts/ai_community_blind_prompt_export.php` without Laravel app bootstrap, production env, DB, or users. The private exported prompt digest is checked before the separate root-only OpenAI generation runner (20 calls maximum, estimated $0.05 limit). No test posts are published.
+
+**Human evaluation must be collected FIRST.** A self-contained offline HTML review file is available on the authorized Windows desktop at `C:\Users\xdamo\Documents\HNT\hnt_v8_blind_review.html`. It loads the generated private JSON locally, allows a human to label each post as PASS/REVISE/REJECT with an optional note and exports a CSV. No remote calls, third-party resources, browser storage, or tracking. Keep results local until intentionally supplied for the benchmark.
+
+The offline `scripts/ai_community_blind_benchmark.py` can also generate the CSV score sheet and subsequently evaluate a **separately obtained** reviewer JSON. It validates exactly 20 IDs, the 10/10 language split, complete human labels, and text SHA-256 identity. It refuses to overwrite existing human labels; its acceptance gate checks >=80% precision among model PASS verdicts and **zero** human-rejected posts with a model PASS. A PASS here is not automatic permission to publish. Five blind-benchmark offline tests pass; the full offline regression suite currently has eight passing tests.
+
+Do not show independent AI review results before human labels are saved. Do not tune the review prompt on V8 and then claim V8 itself is an unbiased evaluation set. Changes live only in the feature branch: no production deploy, schema write, synthetic-account provisioning, or feed activity.
+
 ## Quality preview
 
 ACP → KI Community → **Qualitätsvorschau** opens a read-only view of the exact prompt context for one persona, including recent draft snippets as negative examples. It performs database reads only: no OpenAI call, draft, account, or post is created. It is a test prompt, **not an AI output preview or evidence of model quality**. Without a configured key, generation is disabled. This staging work used fake OpenAI HTTP only; actual API quality and cost have not been tested. Seed voice changes apply only to newly inserted personas because the seeder intentionally preserves existing admin edits. Review existing persona settings manually if adopting the revised voices.
