@@ -66,6 +66,15 @@
                 <article class="hnt-ai-draft">
                     <div class="hnt-ai-draft-top"><h3>#{{ $draft->id }} · {{ $draft->character->name }}</h3>@if($draft->post_kind)<span class="hnt-ai-pill">{{ \App\Services\AiCommunityPostFormatSelector::formats()[$draft->post_kind]['label'] ?? 'Sonstiges' }}</span>@endif @if($draft->style_key && \App\Services\AiCommunityStyleLibrary::label($draft->style_key))<span class="hnt-ai-pill">{{ \App\Services\AiCommunityStyleLibrary::label($draft->style_key) }}</span>@endif <span class="hnt-ai-pill {{ $draft->status === 'approved' ? 'hnt-ai-on' : '' }}">{{ $draft->status }}</span></div>
                     <p class="hnt-ai-meta">{{ $draft->created_at?->format('d.m.Y H:i') }} · {{ $draft->model }} · {{ $draft->input_tokens }} / {{ $draft->output_tokens }} Tokens · ca. ${{ number_format($draft->estimated_cost_microusd / 1000000, 6) }}</p>
+                    @if(!empty($claimWarnings[$draft->id]))
+                        <div class="hnt-ai-notice" role="note">
+                            <strong>Manuelle Faktenprüfung empfohlen</strong>
+                            @foreach($claimWarnings[$draft->id] as $warning)
+                                <p>{{ $warning['reason'] }}</p>
+                            @endforeach
+                            <p class="hnt-ai-meta">Automatischer Hinweis, keine bestätigte Falschinformation und keine Freigabeentscheidung.</p>
+                        </div>
+                    @endif
                     @if($draft->quality_review_decision)
                         <p class="hnt-ai-meta">KI-Einschätzung: <strong>{{ strtoupper($draft->quality_review_decision) }}</strong> · Natürlichkeit {{ $draft->quality_review_naturalness }}/5 · Hunt-Genauigkeit {{ $draft->quality_review_accuracy }}/5 · ca. ${{ number_format($draft->quality_review_cost_microusd / 1000000, 6) }}</p>
                         <p class="hnt-ai-body">{{ $draft->quality_review_reason }}</p>
