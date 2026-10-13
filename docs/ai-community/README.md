@@ -47,6 +47,14 @@ No participant names, exact wording, images, captions, or personal details from 
 
 The nullable `style_key` column is part of the feature-only migration and has not been applied in production. If this migration was already applied to any separate staging database, add a forward migration there before deployment.
 
+## V5 benchmark regression: prompt metadata and factual accuracy (13 Oct 2026)
+
+The fifth private sample batch produced 10 outputs at an estimated $0.003176. Several outputs leaked the literal label `statement` into the body; another inaccurately characterized Choke Bombs as generic `crowd control`. The isolated Python probe had an explicit `Ending: statement` instruction and was **not identical** to the Laravel generation prompt, so its samples do not establish the quality of the production feature.
+
+The Laravel prompt now explains punctuation naturally without a suffix label. The draft quality guard rejects trailing style metadata, endings incompatible with a selected question/statement structure, and a known misleading Choke Bomb description. These are narrow regressions and **not** a complete in-game fact checker. All automatically generated text remains a draft requiring human review.
+
+For any next live-model benchmark, export and test the **actual** messages from `AiCommunityGenerationService::promptContext()` on an isolated, up-to-date checkout; never duplicate/rewrite the prompt into a standalone Python script. The benchmark must never create members, store drafts in the live DB, or publish feed posts. Use a separate credential-safe test harness and retain a record of the selected `post_kind`, `editorial_angle`, and `style_key`.
+
 ## Quality preview
 
 ACP → KI Community → **Qualitätsvorschau** opens a read-only view of the exact prompt context for one persona, including recent draft snippets as negative examples. It performs database reads only: no OpenAI call, draft, account, or post is created. It is a test prompt, **not an AI output preview or evidence of model quality**. Without a configured key, generation is disabled. This staging work used fake OpenAI HTTP only; actual API quality and cost have not been tested. Seed voice changes apply only to newly inserted personas because the seeder intentionally preserves existing admin edits. Review existing persona settings manually if adopting the revised voices.
