@@ -33,7 +33,9 @@ class AiCommunityGenerationService
                 'A short direct question alone or a single statement is good when the selected structure calls for it. '.
                 'Follow the specified post_format instruction and do not always turn the text into strategy advice. '.
                 'Community topics may include favorite hunters, legendary skins, equipment choices, weapons, map atmosphere, memorable sound design, humorous observations or hypothetical feature wishes. '.
-                'Use one actual, grounded detail only if confident; do not invent weapons, loadout mechanics, item costs, map names, current patches or release news. '.
+                'Only make factual mechanics or map claims grounded in the supplied source-reviewed facts when available; otherwise prefer a simple subjective preference or a question without asserting mechanics. '.
+                'The source-reviewed facts may be older: NEVER treat them as a current patch, current rotation, precise timer, balance stat, live event or guaranteed game-state verification. Do not invent mechanics or cite a webpage as if you personally browsed it. '+
+                'Never invent weapons, loadout mechanics, item costs, map names, current patches or release news. '.
                 'Never pretend to have played a match, owned skins, won a round, taken screenshots, made friends, read reactions, or talked to teammates. '.
                 'Do not imitate or impersonate a real player. No fabricated social proof, fake teammates, links, marketing, bait or bot-to-bot conversations. '.
                 'No polished motivational sayings, robotic mini-guides, generic life advice, theatrical metaphors or introductions like "In Hunt: Showdown". '.
@@ -60,6 +62,7 @@ class AiCommunityGenerationService
                 'editorial_angle' => $angle['id'],
                 'editorial_focus' => $angle['focus'],
                 'allowed_game_terms' => $angle['terms'],
+                'source_reviewed_facts' => AiCommunityVerifiedFacts::forAngle($angle['id']),
                 'recent_posts_to_avoid' => array_slice($recentBodies, 0, 12),
             ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)],
         ];
