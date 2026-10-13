@@ -7,6 +7,7 @@ use App\Models\AiCommunityCharacter;
 use App\Models\AiCommunityDraft;
 use App\Models\FeedPost;
 use App\Models\User;
+use App\Services\AiCommunityClaimRiskInspector;
 use App\Services\AiCommunityGenerationService;
 use App\Services\AiCommunityEditorialReviewer;
 use Illuminate\Http\RedirectResponse;
@@ -27,9 +28,14 @@ class AdminAiCommunityController extends Controller
         $characters = AiCommunityCharacter::with('user.profile')->orderBy('id')->get();
         $previewCharacter = $characters->firstWhere('id', (int) $request->query('preview'));
         $recentBodies = AiCommunityDraft::latest()->limit(12)->pluck('body')->all();
+        $drafts = AiCommunityDraft::with('character')->latest()->limit(100)->get();
+        $claimWarnings = $drafts->mapWithKeys(static fn (AiCommunityDraft $draft): array => [
+            $draft->id => AiCommunityClaimRiskInspector::inspect((string) $draft->body),
+        ])->all();
         return view('admin.ai-community.index', [
             'characters' => $characters,
-            'drafts' => AiCommunityDraft::with('character')->latest()->limit(100)->get(),
+            'drafts' => $drafts,
+            'claimWarnings' => $claimWarnings,
             'previewCharacter' => $previewCharacter,
             'previewMessages' => $previewCharacter ? $generator->promptContext($previewCharacter, $recentBodies) : null,
             'weekCount' => AiCommunityDraft::where('created_at', '>=', now('Europe/Berlin')->startOfWeek()->utc())->count(),
