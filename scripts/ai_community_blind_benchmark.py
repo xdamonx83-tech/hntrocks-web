@@ -101,7 +101,7 @@ def evaluate(labels_csv: Path, reviews_json: Path) -> dict:
         expected, actual = row["human_label"], pred["decision"]
         counts["count"] += 1
         counts[f"human_{expected}"] += 1
-        counts[f"model_{actual}"] += 1
+        counts[f"verdict_{actual}"] += 1
         if expected == actual:
             counts["exact"] += 1
         if actual == "pass":
