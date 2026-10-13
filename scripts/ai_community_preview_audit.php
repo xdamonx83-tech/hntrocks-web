@@ -31,6 +31,13 @@ if (!is_file($autoload)) {
 require_once $autoload;
 require_once $root.'/app/Services/AiCommunityDraftQualityGuard.php';
 
+// ValidationException::withMessages() requires a Validator factory. Supply only
+// a disposable in-memory Laravel container, never bootstrap the application.
+$container = new \Illuminate\Container\Container();
+\Illuminate\Container\Container::setInstance($container);
+$translator = new \Illuminate\Translation\Translator(new \Illuminate\Translation\ArrayLoader(), 'en');
+$container->instance('validator', new \Illuminate\Validation\Factory($translator, $container));
+
 use App\Services\AiCommunityDraftQualityGuard;
 use Illuminate\Validation\ValidationException;
 
