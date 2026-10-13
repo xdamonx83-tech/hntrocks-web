@@ -33,6 +33,7 @@ return new class extends Migration {
             $table->string('status', 16)->default('draft')->index();
             $table->string('post_kind', 48)->nullable()->index();
             $table->string('editorial_angle', 80)->nullable()->index();
+            $table->string('style_key', 48)->nullable();
             $table->string('model', 80);
             $table->unsignedInteger('input_tokens')->default(0);
             $table->unsignedInteger('output_tokens')->default(0);

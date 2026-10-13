@@ -6,6 +6,7 @@ use App\Models\AiCommunityCharacter;
 use App\Models\AiCommunityDraft;
 use App\Models\FeedPost;
 use App\Models\User;
+use App\Services\AiCommunityStyleLibrary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -38,7 +39,16 @@ class AiCommunityAdminTest extends TestCase
         $this->assertDatabaseCount('ai_community_drafts', 1);
         $this->assertContains(AiCommunityDraft::first()->post_kind, \App\Services\AiCommunityPostFormatSelector::kinds());
         $this->assertNotEmpty(AiCommunityDraft::first()->editorial_angle);
+        $this->assertArrayHasKey(AiCommunityDraft::first()->style_key, AiCommunityStyleLibrary::styles());
+        $this->assertSame('none', AiCommunityStyleLibrary::styles()[AiCommunityDraft::first()->style_key]['source_requirement']);
+        Http::assertSent(function ($request) {
+            $payload = json_decode($request['messages'][1]['content'], true);
+            return $payload['style_key'] === AiCommunityDraft::first()->style_key
+                && str_contains($request['messages'][0]['content'], AiCommunityStyleLibrary::styles()[$payload['style_key']]['syntax']);
+        });
         $this->assertDatabaseCount('feed_posts', 0);
+        $this->actingAs($admin)->get('/admin/ai-community')->assertOk()
+            ->assertSee(AiCommunityStyleLibrary::label(AiCommunityDraft::first()->style_key));
         $this->actingAs($admin)->post('/admin/ai-community/'.$character->id.'/generate')->assertSessionHasErrors('generation');
         $this->assertDatabaseCount('ai_community_drafts', 1);
     }

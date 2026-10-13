@@ -7,6 +7,7 @@ use App\Services\AiCommunityDraftQualityGuard;
 use App\Services\AiCommunityEditorialAngles;
 use App\Services\AiCommunityGenerationService;
 use App\Services\AiCommunityPostFormatSelector;
+use App\Services\AiCommunityStyleLibrary;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -18,10 +19,48 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
             ->promptContext($character, ['Alte Frage über Deckung']);
 
-        $this->assertStringContainsString('1-2 brief sentences', $messages[0]['content']);
+        $this->assertStringContainsString('20–300 character range', $messages[0]['content']);
         $this->assertStringContainsString('near-duplicates', $messages[0]['content']);
         $this->assertStringContainsString('No polished motivational sayings', $messages[0]['content']);
         $this->assertSame(['Alte Frage über Deckung'], json_decode($messages[1]['content'], true)['recent_posts_to_avoid']);
+    }
+
+    public function test_style_library_has_distinct_safe_lengths_and_avoids_recent_styles(): void
+    {
+        $styles = AiCommunityStyleLibrary::styles();
+        $this->assertGreaterThanOrEqual(6, count($styles));
+        $bands = array_values(array_unique(array_column($styles, 'length_band')));
+        sort($bands);
+        $this->assertSame(['long', 'medium', 'short'], $bands);
+        $this->assertContains('question', array_column($styles, 'ending'));
+        $this->assertContains('statement', array_column($styles, 'ending'));
+        foreach ($styles as $key => $style) {
+            $this->assertSame($key, $style['id']);
+            $this->assertLessThanOrEqual(48, strlen($key));
+            $this->assertSame('none', $style['source_requirement']);
+            $this->assertNotEmpty($style['syntax']);
+        }
+        for ($attempt = 0; $attempt < 30; $attempt++) {
+            $style = AiCommunityStyleLibrary::select('en', 'open_question', ['headline_question', 'preference_question'], 'one_weapon_choice');
+            $this->assertNotContains($style['id'], ['headline_question', 'preference_question']);
+            $this->assertSame('question', $style['ending']);
+            $this->assertSame('none', $style['source_requirement']);
+            $this->assertContains('en', $style['languages']);
+            $this->assertNotSame('german_discussion', $style['id']);
+        }
+        $this->assertSame('hypothetical_feedback', AiCommunityStyleLibrary::select('en', 'feature_wish', ['concise_wish', 'wish_question'], 'loadout_qol')['id']);
+    }
+
+    public function test_prompt_contains_only_selected_style_guidance_and_key(): void
+    {
+        $character = new AiCommunityCharacter(['language' => 'de', 'persona_voice' => 'Kurz', 'topics' => 'Tools']);
+        $style = AiCommunityStyleLibrary::styles()['headline_question'];
+        $angle = AiCommunityEditorialAngles::catalog()['gear_choice'][0];
+        $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
+            ->promptContext($character, [], 'gear_choice', $angle, $style);
+        $this->assertSame('headline_question', json_decode($messages[1]['content'], true)['style_key']);
+        $this->assertStringContainsString($style['syntax'], $messages[0]['content']);
+        $this->assertStringNotContainsString(AiCommunityStyleLibrary::styles()['mild_opinion']['syntax'], $messages[0]['content']);
     }
 
     public function test_post_formats_are_distinct_and_recent_kinds_are_avoided(): void

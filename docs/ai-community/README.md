@@ -39,6 +39,14 @@ Before generation, select one of 24 manually reviewed conversation focuses acros
 
 The `editorial_angle` column was added to the feature branch migration only. It is not deployed. If this feature migration has already run in any staging environment, use a separate forward migration instead of silently changing an applied migration. Private sample scripts do not connect to the application DB or write feed posts.
 
+## Writing structures (v5 staging)
+
+Three screenshots from Reddit and international and German Hunt Facebook communities informed **general patterns only**: brief direct headline questions, very short reactions, conversational German discussion starters, and specific requests for opinions. The style library varies sentence structure and target length while the existing post kind and reviewed editorial angle still choose the topic. It prefers a mix of roughly 20–300 characters, questions and statements, avoids the last two available structures, and reduces weight for recently repeated lengths and endings. A draft stores its `style_key`; ACP shows its descriptive label for review.
+
+No participant names, exact wording, images, captions, or personal details from the screenshots were copied into code or stored as training data. This iteration uses hand-written editorial patterns. It performs **no automatic neural training and no vision model call**. Typos are never inserted to imitate a human. Automated characters cannot claim to have played, captured media, owned equipment, sought teammates, or witnessed an event. A news reaction requires an independently verified source; a media caption requires an approved attachment. Neither source nor attachment exists in the current generator, so those styles are unavailable for automatic selection. Human review remains required for factual accuracy and natural wording.
+
+The nullable `style_key` column is part of the feature-only migration and has not been applied in production. If this migration was already applied to any separate staging database, add a forward migration there before deployment.
+
 ## Quality preview
 
 ACP → KI Community → **Qualitätsvorschau** opens a read-only view of the exact prompt context for one persona, including recent draft snippets as negative examples. It performs database reads only: no OpenAI call, draft, account, or post is created. It is a test prompt, **not an AI output preview or evidence of model quality**. Without a configured key, generation is disabled. This staging work used fake OpenAI HTTP only; actual API quality and cost have not been tested. Seed voice changes apply only to newly inserted personas because the seeder intentionally preserves existing admin edits. Review existing persona settings manually if adopting the revised voices.
