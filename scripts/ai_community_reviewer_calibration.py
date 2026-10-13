@@ -49,7 +49,7 @@ def evaluate(records: list[dict]) -> dict:
             raise ValueError("Unexpected reviewer decision for " + name)
         expected, why = MANUAL_LABELS[name]
         counts["total"] += 1
-        counts["model_" + predicted] += 1
+        counts["verdict_" + predicted] += 1
         counts["manual_" + expected] += 1
         if predicted == expected:
             counts["exact_agreement"] += 1
