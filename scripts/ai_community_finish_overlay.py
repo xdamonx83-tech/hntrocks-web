@@ -29,7 +29,7 @@ def merge(rel:str, callback):
 
 def profile(src:str)->str:
     for signature in ("public function edit(Request $request): View",
-                      "public function update(Request $request, MediaService $mediaService, GamificationService $gamification, ReferralService $referrals): RedirectResponse|JsonResponse"):
+                      "public function update(Request $request, MediaService $mediaService, GamificationService $gamification, ReferralService $referrals, ProfileModerationService $profileModeration): RedirectResponse|JsonResponse"):
         needle=signature+"\n    {\n"
         if src.count(needle)!=1:
             raise RuntimeError("STOP: unexpected live profile method declaration")
