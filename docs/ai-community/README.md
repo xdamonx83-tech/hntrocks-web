@@ -70,6 +70,20 @@ The reviewer prompt now grades DE/EN Hunt posts against a concrete five-point na
 
 **Verification:** 26 isolated Laravel tests passed (416 assertions) including an inconsistent PASS downgrade and the existing generation budget checks. A separate read-only V7 private benchmark runner reuses the ten saved V6 texts and verbatim updated Laravel reviewer prompts. Its exact sample outputs are not yet evaluated. No news source, sample scraping, DB writing or production deployment is involved. Follow the usual root-only script checksum procedure and do not overwrite previous private benchmark files.
 
+## Reviewer calibration benchmark (V7, October 2026)
+
+The V7 reviewer using the stronger rubric still gave **9 of 10 posts PASS** (one REVISE; estimated cost $0.003261). The original, provisional human V6 editorial judgment accepted only **two without changes**, marked four for revision, and found four unsuitable. Seven of the nine model PASS calls are therefore unsupported by this subjective human reference: only **2/9 (22.2%)** of model PASS judgments match human-ready labels. This small, non-blind set is not a statistically reliable measure of overall accuracy; the V7 reviewer prompt also contains examples from this set, so this is *training/calibration* evidence, not a held-out validation score.
+
+The script `scripts/ai_community_reviewer_calibration.py` provides a **strict offline, no-API, no-database comparison** of these ten named *synthetic* character examples against local manual labels. Run it from the feature tree as:
+
+```bash
+python3 scripts/ai_community_reviewer_calibration.py /path/to/private-v7-editorial-results.json --gate
+```
+
+It reads an operator-supplied private review result JSON and computes exact agreement, incorrect PASS count and PASS precision. Gate succeeds only with PASS precision >=80%, zero human-rejected texts with model PASS, and at least one model PASS. It is expected to **fail for V7**. The labels are subjective early editorial assessments and should be reviewed by a human before using them as acceptance standards.
+
+Before trusting any automated advisory scoring, assemble a separate held-out set of new DE/EN posts (including good natural posts, borderline edits, and game-mechanics errors), have a knowledgeable human label it **without seeing AI ratings**, then compare with the scorer. Never calibrate and evaluate on the same examples. Irrespective of scores, generated content remains a disclosed automated draft requiring explicit human approval; no automatic publishing.
+
 ## Quality preview
 
 ACP → KI Community → **Qualitätsvorschau** opens a read-only view of the exact prompt context for one persona, including recent draft snippets as negative examples. It performs database reads only: no OpenAI call, draft, account, or post is created. It is a test prompt, **not an AI output preview or evidence of model quality**. Without a configured key, generation is disabled. This staging work used fake OpenAI HTTP only; actual API quality and cost have not been tested. Seed voice changes apply only to newly inserted personas because the seeder intentionally preserves existing admin edits. Review existing persona settings manually if adopting the revised voices.
