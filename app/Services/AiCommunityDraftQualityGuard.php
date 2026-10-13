@@ -7,12 +7,27 @@ use Illuminate\Validation\ValidationException;
 class AiCommunityDraftQualityGuard
 {
     /** @param iterable<string> $recentBodies */
-    public function validate(string $body, iterable $recentBodies): void
+    public function validate(string $body, iterable $recentBodies, ?string $expectedEnding = null): void
     {
         $body = trim($body);
         if ($body === '' || mb_strlen($body) > 700 || preg_match('~(?:https?://|www\.|\b[a-z0-9-]+\.(?:com|net|org|gg|de|rocks)\b)~iu', $body)) {
             $this->reject('Generated post is empty, too long, or contains a link.');
         }
+        // V5 model benchmark showed raw editorial metadata appended to public text:
+        // "... . statement". Never silently strip it into a publishable draft.
+        if (preg_match('~(?:[.!?]\\s*|\\s+)(?:statement|question|ending|style_key)\\s*[.!?]?\\s*$~iu', $body)) {
+            $this->reject('Model leaked internal writing-style metadata into the draft.');
+        }
+        if ($expectedEnding === 'question' && ! str_ends_with($body, '?')) {
+            $this->reject('Question-style draft does not end in a question.');
+        }
+        if ($expectedEnding === 'statement' && str_contains($body, '?')) {
+            $this->reject('Statement-style draft unexpectedly contains a question.');
+        }
+        if (preg_match('~\\bchoke\\s+bombs?\\b.{0,100}\\b(?:crowd\\s+control|explosive\\s+(?:edge|damage)|blast\\s+damage)\\b~iu', $body)) {
+            $this->reject('Model describes Choke Bomb effects inaccurately.');
+        }
+
         // Reject known generated gibberish and repetitive synthetic sounding slogans.
         // Keep this list deliberately short: human review remains the main quality gate.
         if (preg_match('~\\b(?:laschen|überlebenskunst|hollywood[ -]stil)\\b|rückzug ist kein zeichen von schwäche~iu', $body)) {
