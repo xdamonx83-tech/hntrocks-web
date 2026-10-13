@@ -104,6 +104,37 @@ class AiCommunityDraftQualityGuardTest extends TestCase
         $this->assertSame(['Ammo Box'], $payload['allowed_game_terms']);
     }
 
+    public function test_v8_editorial_prompt_avoids_generic_mood_posts_and_double_questions(): void
+    {
+        $character = new AiCommunityCharacter(['language' => 'de', 'persona_voice' => 'Kurz', 'topics' => 'Hunt']);
+        $kind = 'sound_and_mood';
+        $angle = AiCommunityEditorialAngles::catalog()[$kind][1];
+        $style = AiCommunityStyleLibrary::styles()['casual_one_liner'];
+        $messages = (new AiCommunityGenerationService(new AiCommunityDraftQualityGuard))
+            ->promptContext($character, [], $kind, $angle, $style);
+
+        $this->assertStringContainsString('one concrete reason someone would post', $messages[0]['content']);
+        $this->assertStringContainsString('at most ONE question mark', $messages[0]['content']);
+        $this->assertStringContainsString('not a translated product review', $messages[0]['content']);
+        $this->assertStringContainsString('Avoid generic', $angle['focus']);
+        $this->assertSame(1, AiCommunityPostFormatSelector::formats()['sound_and_mood']['weight']);
+        $this->assertSame(1, AiCommunityPostFormatSelector::formats()['bayou_banter']['weight']);
+    }
+
+    public function test_repeated_questions_are_rejected_but_single_natural_question_is_allowed(): void
+    {
+        $guard = new AiCommunityDraftQualityGuard;
+        try {
+            $guard->validate('Romero oder Vetterli? Was meint ihr?', [], 'question');
+            $this->fail('Expected repeated question to be rejected.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('generation', $e->errors());
+        }
+
+        $guard->validate('Romero oder Vetterli für ein günstiges Loadout?', [], 'question');
+        $guard->validate('Die Romero hat etwas angenehm Einfaches.', [], 'statement');
+    }
+
     public function test_v5_label_leakage_and_structural_output_are_rejected(): void
     {
         $guard = new AiCommunityDraftQualityGuard;
