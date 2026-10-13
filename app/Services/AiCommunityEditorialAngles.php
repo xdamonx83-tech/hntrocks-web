@@ -49,7 +49,7 @@ final class AiCommunityEditorialAngles
             ],
             'sound_and_mood' => [
                 ['id' => 'crow_audio', 'focus' => 'One brief grounded statement that crow alerts are noticeable in Hunt, without calling them spies, monsters, a symphony, or dramatic metaphors. No claim about any specific round.', 'terms' => ['Krähen', 'crows']],
-                ['id' => 'game_ambience', 'focus' => 'One specific real audio element as the subject of a compact observation or preference. Avoid generic 'dense atmosphere', 'eerie vibe', nature personification, or invented audio/weather.', 'terms' => ['Hunt']],
+                ['id' => 'game_ambience', 'focus' => 'One specific real audio element as the subject of a compact observation or preference. Avoid generic dense-atmosphere or eerie-vibe wording, nature personification, or invented audio/weather.', 'terms' => ['Hunt']],
                 ['id' => 'sound_discussion', 'focus' => 'Ask ONE direct question about a familiar sound cue, optionally comparing two, without listing three atmospheric examples plus a redundant second question.', 'terms' => ['Hunt']],
             ],
         ];
