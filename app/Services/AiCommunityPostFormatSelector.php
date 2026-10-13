@@ -17,7 +17,7 @@ final class AiCommunityPostFormatSelector
                 'instruction' => 'Ask ONE direct, casual community question about a preference, favorite hunter, weapon feel, skin, sound design or game mode. No leading advice paragraph, no claims of personal experience.',
             ],
             'small_opinion' => [
-                'weight' => 3, 'label' => 'Kurze Meinung',
+                'weight' => 2, 'label' => 'Kurze Meinung',
                 'instruction' => 'Give a brief, debatable opinion about a Hunt weapon, skin, map atmosphere or mechanic. One or two short conversational sentences. Do NOT ask a question or claim to have played a match.',
             ],
             'gear_choice' => [
@@ -30,19 +30,19 @@ final class AiCommunityPostFormatSelector
             ],
             'map_chat' => [
                 'weight' => 2, 'label' => 'Map-Gespräch',
-                'instruction' => 'A short, everyday thought or question about Hunt maps, atmosphere, weather or environments. Avoid long rotation tutorials, fabricated current map changes, or claims from your own rounds.',
+                'instruction' => 'Make a concrete map comparison or a simple preference question. Avoid vague praise of mood, silence, fog or scenery as a standalone post. Do not invent terrain, weather, current map changes or personal rounds.',
             ],
             'bayou_banter' => [
-                'weight' => 2, 'label' => 'Bayou-Humor',
-                'instruction' => 'One light, witty observation about common Hunt mechanics or audio cues; deadpan humor rather than inspirational writing. No fake firsthand events, quotes from invented teammates or insults.',
+                'weight' => 1, 'label' => 'Bayou-Humor',
+                'instruction' => 'One short, concrete joke about a recognizable Hunt item, weapon debate or sound cue; no abstract Bayou-as-character metaphors, theatrical comparisons or strained punchlines. If the joke needs an invented situation, skip the joke and write a plain observation. No fake firsthand events, quotes from invented teammates or insults.',
             ],
             'feature_wish' => [
                 'weight' => 2, 'label' => 'Feature-Wunsch',
                 'instruction' => 'Suggest ONE modest, hypothetical Hunt quality-of-life change, UI improvement, or feature and perhaps ask whether that would help. Do not pretend the change exists or is confirmed.',
             ],
             'sound_and_mood' => [
-                'weight' => 2, 'label' => 'Sound & Atmosphäre',
-                'instruction' => 'Mention one distinctive Hunt sound, audio-design choice or Bayou mood as a brief observation, without exaggeration, imaginary match scenes or detailed gameplay guide.',
+                'weight' => 1, 'label' => 'Sound & Atmosphäre',
+                'instruction' => 'Prefer one specific real Hunt audio cue and a short grounded question about it. Avoid general praise of the atmosphere, poetic Bayou scenery, invented weather, or a mini game-review sentence. No imaginary match scenes or gameplay guide.',
             ],
         ];
     }
