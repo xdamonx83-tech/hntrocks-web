@@ -21,6 +21,9 @@ class AiCommunityGenerationService
         $kind = $postKind ?? AiCommunityPostFormatSelector::select([]);
         $angle = $editorialAngle ?? AiCommunityEditorialAngles::select($kind);
         $style = $style ?? AiCommunityStyleLibrary::select($character->language, $kind, [], $angle['id']);
+        $punctuationRule = $style['ending'] === 'question'
+            ? 'Finish with one natural question mark; do not add commentary after it.'
+            : 'Finish with ordinary punctuation; do not include any question marks.';
         return [
             ['role' => 'system', 'content' =>
                 'Write one original Hunt: Showdown 1896 community post as JSON {"body":"..."}. '.
@@ -38,8 +41,10 @@ class AiCommunityGenerationService
                 'Recent texts are NEGATIVE examples: avoid their topics, openings, structures and near-duplicates. '.
                 'Use the supplied editorial focus as your only subject. Only reference the specified game terms when relevant. Do not invent item names, map details, mechanics, prices or updates. Acknowledge no first-hand playing history; this is content from an automated community character. '.
                 'No hollow fluff, deliberately inserted typos, invented patch or gear mechanics, unverified event news, or media claims. '.
+                'Output only the post body within the JSON body field. Never add editorial labels, style identifiers, or words like statement/question/ending after the text. '.
+                'Do not invent the game mechanics of Choke Bombs: they are tools used primarily to extinguish burning bodies or fires, not generic explosive crowd-control grenades. '. 
                 'Specific editorial format: '.AiCommunityPostFormatSelector::instruction($kind).'. '.
-                'Selected writing structure ONLY: '.$style['syntax'].' Target length: '.$style['target_length'].'. End as a '.$style['ending'].'.'],
+                'Selected writing structure ONLY: '.$style['syntax'].' Target length: '.$style['target_length'].'. '.$punctuationRule],
             ['role' => 'user', 'content' => json_encode([
                 'language' => $character->language,
                 'voice' => $character->persona_voice,
@@ -97,7 +102,7 @@ class AiCommunityGenerationService
             }
 
             $body = trim((string) data_get(json_decode((string) data_get($response->json(), 'choices.0.message.content'), true), 'body'));
-            $this->qualityGuard->validate($body, $recentBodies);
+            $this->qualityGuard->validate($body, $recentBodies, $selectedStyle['ending']);
             $hash = AiCommunityDraft::hashBody($body);
             if (AiCommunityDraft::where('body_hash', $hash)->exists()) {
                 throw ValidationException::withMessages(['generation' => 'Duplicate draft blocked.']);
