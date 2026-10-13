@@ -66,6 +66,20 @@
                 <article class="hnt-ai-draft">
                     <div class="hnt-ai-draft-top"><h3>#{{ $draft->id }} · {{ $draft->character->name }}</h3>@if($draft->post_kind)<span class="hnt-ai-pill">{{ \App\Services\AiCommunityPostFormatSelector::formats()[$draft->post_kind]['label'] ?? 'Sonstiges' }}</span>@endif @if($draft->style_key && \App\Services\AiCommunityStyleLibrary::label($draft->style_key))<span class="hnt-ai-pill">{{ \App\Services\AiCommunityStyleLibrary::label($draft->style_key) }}</span>@endif <span class="hnt-ai-pill {{ $draft->status === 'approved' ? 'hnt-ai-on' : '' }}">{{ $draft->status }}</span></div>
                     <p class="hnt-ai-meta">{{ $draft->created_at?->format('d.m.Y H:i') }} · {{ $draft->model }} · {{ $draft->input_tokens }} / {{ $draft->output_tokens }} Tokens · ca. ${{ number_format($draft->estimated_cost_microusd / 1000000, 6) }}</p>
+                    @if(!empty($factSources[$draft->id]))
+                        <details class="hnt-ai-details">
+                            <summary>Offizielle Hunt-Quellen zum Thema</summary>
+                            <p class="hnt-ai-meta">Redaktionell geprüfte Grundlagen, kein Nachweis aktueller Patchwerte oder Spielmechanik.</p>
+                            @foreach($factSources[$draft->id] as $fact)
+                                <p class="hnt-ai-meta">
+                                    <a class="hnt-ai-link" href="{{ $fact['source_url'] }}" target="_blank" rel="noopener noreferrer">{{ $fact['source_title'] }}</a>
+                                    · Stand der Quellenprüfung: {{ $fact['checked_on'] }}
+                                </p>
+                                <p class="hnt-ai-body">{{ $fact['fact'] }}</p>
+                                <p class="hnt-ai-meta">{{ $fact['caution'] }}</p>
+                            @endforeach
+                        </details>
+                    @endif
                     @if(!empty($claimWarnings[$draft->id]))
                         <div class="hnt-ai-notice" role="note">
                             <strong>Manuelle Faktenprüfung empfohlen</strong>
