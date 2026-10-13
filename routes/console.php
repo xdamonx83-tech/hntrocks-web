@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('ai-community:scheduled-draft')->hourly()->withoutOverlapping();
 
 Artisan::command('hunthub:status', function (): void {
     $this->info('hnt.rocks Laravel foundation is ready.');
@@ -819,4 +822,3 @@ Artisan::command('hnt:hunt-news:sync {--limit=16 : Maximale Anzahl geprüfter Ne
 
     return Command::SUCCESS;
 })->purpose('Import official Hunt: Showdown news and optionally publish new items as HuntNews feed posts');
-

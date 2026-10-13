@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Admin\AdminContentController;
+use App\Http\Controllers\Admin\AdminAiCommunityController;
 use App\Http\Controllers\Admin\AdminCupFeedbackController;
 use App\Http\Controllers\Admin\AdminCupIdeaController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -601,6 +602,15 @@ Route::middleware('auth')->group(function (): void {
         ]);
     })->name('gamification.achievements.pending');
     Route::prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/ai-community', [AdminAiCommunityController::class, 'index'])->name('ai-community.index');
+        Route::put('/ai-community/{character}', [AdminAiCommunityController::class, 'update'])->name('ai-community.update');
+        Route::post('/ai-community/{character}/toggle', [AdminAiCommunityController::class, 'toggle'])->name('ai-community.toggle');
+        Route::post('/ai-community/{character}/provision', [AdminAiCommunityController::class, 'provision'])->name('ai-community.provision');
+        Route::post('/ai-community/{character}/generate', [AdminAiCommunityController::class, 'generate'])->name('ai-community.generate');
+        Route::put('/ai-community/drafts/{draft}', [AdminAiCommunityController::class, 'editDraft'])->name('ai-community.drafts.update');
+        Route::post('/ai-community/drafts/{draft}/quality-review', [AdminAiCommunityController::class, 'qualityReview'])->name('ai-community.drafts.quality-review');
+        Route::post('/ai-community/drafts/{draft}/review', [AdminAiCommunityController::class, 'review'])->name('ai-community.drafts.review');
+        Route::post('/ai-community/drafts/{draft}/publish', [AdminAiCommunityController::class, 'publish'])->name('ai-community.drafts.publish');
         Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/status', [AdminUserController::class, 'updateStatus'])->name('users.status');

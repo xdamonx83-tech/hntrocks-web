@@ -966,6 +966,7 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
+        abort_if($request->user()?->is_ai_character, 403);
         $user = $request->user();
         $user->loadMissing('profile');
 
@@ -985,6 +986,7 @@ class ProfileController extends Controller
 
     public function update(Request $request, MediaService $mediaService, GamificationService $gamification, ReferralService $referrals): RedirectResponse|JsonResponse
     {
+        abort_if($request->user()?->is_ai_character, 403);
         $user = $request->user();
 
         $validated = $request->validate([

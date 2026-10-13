@@ -51,6 +51,21 @@ class UserProfile extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $profile): void {
+            if (! $profile->user_id || ! User::whereKey($profile->user_id)->where('is_ai_character', true)->exists()) {
+                return;
+            }
+            $disclosure = $profile->language === 'de'
+                ? 'Automatisierter HNT.ROCKS Community-Charakter. Kein echter Spieler.'
+                : 'Automated HNT.ROCKS community character. Not a real player.';
+            $profile->bio = $disclosure;
+            $profile->headline = $disclosure;
+            $profile->profile_visibility = 'public';
+        });
+    }
+
     public function coverDisplayMode(): string
     {
         $mode = (string) ($this->cover_display_mode ?: self::COVER_DISPLAY_AUTO);
