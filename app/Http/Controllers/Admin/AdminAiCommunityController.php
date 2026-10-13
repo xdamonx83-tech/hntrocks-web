@@ -8,6 +8,7 @@ use App\Models\AiCommunityDraft;
 use App\Models\FeedPost;
 use App\Models\User;
 use App\Services\AiCommunityClaimRiskInspector;
+use App\Services\AiCommunityVerifiedFacts;
 use App\Services\AiCommunityGenerationService;
 use App\Services\AiCommunityEditorialReviewer;
 use Illuminate\Http\RedirectResponse;
@@ -32,10 +33,14 @@ class AdminAiCommunityController extends Controller
         $claimWarnings = $drafts->mapWithKeys(static fn (AiCommunityDraft $draft): array => [
             $draft->id => AiCommunityClaimRiskInspector::inspect((string) $draft->body),
         ])->all();
+        $factSources = $drafts->mapWithKeys(static fn (AiCommunityDraft $draft): array => [
+            $draft->id => AiCommunityVerifiedFacts::forAngle($draft->editorial_angle),
+        ])->all();
         return view('admin.ai-community.index', [
             'characters' => $characters,
             'drafts' => $drafts,
             'claimWarnings' => $claimWarnings,
+            'factSources' => $factSources,
             'previewCharacter' => $previewCharacter,
             'previewMessages' => $previewCharacter ? $generator->promptContext($previewCharacter, $recentBodies) : null,
             'weekCount' => AiCommunityDraft::where('created_at', '>=', now('Europe/Berlin')->startOfWeek()->utc())->count(),
