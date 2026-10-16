@@ -2,8 +2,6 @@
 (() => {
   'use strict';
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
-  const palette=['#8fd3a3','#b2e3bf','#71c88e','#a7d7b1','#80b98f'];
-  const brand='HR:\\'; // HNT.ROCKS brand logo, not hearts.
   let layer;
   function getLayer(){
     if(!layer || !layer.isConnected){
@@ -41,8 +39,14 @@
       el.className=ash?'hnt-heart-ember':'hnt-heart-spark';
       if(!ash){
         el.classList.add('hnt-brand-spark');
-        el.style.color=palette[i%palette.length];
-        el.textContent=brand;
+        // HNT logo: HR: in white; only the final backslash in our accent green.
+        const logoText=document.createElement('span');
+        logoText.textContent='HR:';
+        logoText.style.color='#fff';
+        const logoSlash=document.createElement('span');
+        logoSlash.textContent=String.fromCharCode(92);
+        logoSlash.style.color='var(--logo-accent, #8fd3a3)';
+        el.append(logoText,logoSlash);
         const size=[11,13,10,14,12][i];
         el.style.fontFamily='"Exo 2",Arial,sans-serif';
         el.style.fontWeight='800';
