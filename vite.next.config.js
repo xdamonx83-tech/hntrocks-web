@@ -6,7 +6,7 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig({
   plugins: [
     laravel({
-      input: ['resources/css/next/feed.css', 'resources/js/next/feed.js'],
+      input: ['resources/css/next/feed.css', 'resources/js/next/feed.js', 'resources/css/next/hntv3.css', 'resources/js/next/hntv3.js'],
       buildDirectory: 'build/next',
       refresh: false,
     }),
