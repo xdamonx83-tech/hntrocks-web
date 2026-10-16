@@ -36,7 +36,10 @@
     data-post-type="{{ $firstVideo && !$firstImage ? 'clip' : ($isMedia ? 'media' : 'text') }}"
     data-post-category="story"
     data-post-format="{{ $firstVideo && !$firstImage ? 'clip' : ($isMedia ? 'image' : 'text') }}"
-    data-permalink="{{ $postLink }}">
+    data-permalink="{{ $postLink }}"
+    data-post-owner="{{ (int) auth()->id() === (int) $post->user_id ? '1' : '0' }}"
+    data-post-visibility="{{ $post->visibility }}"
+    data-post-body="{{ $post->body ?? '' }}">
     <div class="post-head">
         <span class="post-avatar"><img src="{{ $authorAvatar }}" alt="{{ $authorName }}" loading="lazy"></span>
         <div class="post-author">

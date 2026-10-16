@@ -74,6 +74,20 @@
     }
     decorate(oldSave,'bookmark-simple','Beitrag speichern','Für später in Merkliste sichern','<span class="post-option-check" hidden>'+icon('check')+'</span>');
     decorate(oldShare,'share-fat','Beitrag teilen','Im Feed teilen oder Link kopieren','<span class="post-option-arrow">'+icon('arrow-right')+'</span>');
+    if(card.dataset.nextFeedPost){
+      const own=card.dataset.postOwner==='1';
+      const separator=document.createElement('div');separator.className='hnt-post-option-separator';menu.append(separator);
+      const addAction=(name,label,description,iconName)=>{
+        const action=document.createElement('button');action.type='button';action.setAttribute('data-post-'+name,'');
+        decorate(action,iconName,label,description);
+      };
+      if(own){
+        addAction('edit','Beitrag bearbeiten','Text des Beitrags aktualisieren','pencil-simple');
+        addAction('delete','Beitrag löschen','Dauerhaft aus deinem Feed entfernen','x');
+      } else {
+        addAction('report','Beitrag melden','An die HNT.ROCKS Moderation','shield-check');
+      }
+    }
     const end=document.createElement('div');
     end.className='post-options-foot';
     end.textContent='AUS DER COMMUNITY';
