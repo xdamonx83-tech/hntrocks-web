@@ -43,6 +43,17 @@
 <script defer src="/build/next/hntv3-js/settings-modal.js"></script>
 <script defer src="/build/next/hntv3-js/settings-profile-editor.js"></script>
 <style>
+/* Bayou Focus: show the complete source image at 100% fit, regardless of aspect ratio. */
+.hnt-viewer-stage { min-width:0; min-height:0; }
+.hnt-viewer-picture {
+  display:flex; justify-content:center; align-items:center;
+  min-width:0; min-height:0; width:100%; height:100%;
+}
+.hnt-viewer-picture .hnt-viewer-image {
+  display:block; flex:0 1 auto;
+  width:auto; height:auto; max-width:100%; max-height:100%;
+  object-fit:contain; object-position:center;
+}
 .feed-filters a.feed-filter{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .feed-post .post-caption{white-space:pre-wrap;overflow-wrap:anywhere}
 .feed-post .media-art video{display:block;width:100%;max-height:620px;object-fit:contain;background:#111}
