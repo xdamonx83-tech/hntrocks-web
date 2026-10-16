@@ -387,6 +387,14 @@
     catch{b.textContent='Zum Teilen bereit';}
     setTimeout(()=>{if(b.isConnected)b.textContent='Teilen';},1800);
   });
+  document.addEventListener('hnt:next-comment-saved',event=>{
+    if (!active || event.detail?.postId !== active.id) return;
+    renderComments({keepScroll:true,focusId:event.detail.commentId || null});
+    setCount();
+    textarea.value='';
+    resetReply();
+    updateComposer();
+  });
   // Viewer and inline comments share the same local data store.
   document.addEventListener('hnt:comment-like',event=>{
     if(!active||event.detail?.postId!==active.id)return;

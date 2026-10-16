@@ -20,13 +20,14 @@
 <script defer src="/build/next/hntv3-js/social-dropdowns.js"></script>
 <script defer src="/build/next/hntv3-js/feed.js"></script>
 <script defer src="/build/next/hntv3-js/media-viewer.js"></script>
-<script defer src="/build/next/hntv3-js/media-viewer-comments.js"></script>
-<script defer src="/build/next/hntv3-js/hnt-live-adapter.js?v=brand-20261016"></script>
+<script defer src="/build/next/hntv3-js/media-viewer-comments.js?v=writes-20261016"></script>
+<script defer src="/build/next/hntv3-js/hnt-live-adapter.js?v=writes-20261016"></script>
+<script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=writes-20261016"></script>
 <script defer src="/build/next/hntv3-js/like-embers.js?v=twotone-20261016"></script>
 <script defer src="/build/next/hntv3-js/composer-dispatch.js"></script>
 <script defer src="/build/next/hntv3-js/composer-extras.js"></script>
 <script defer src="/build/next/hntv3-js/feed-discussions.js"></script>
-<script defer src="/build/next/hntv3-js/post-comments-modal.js"></script>
+<script defer src="/build/next/hntv3-js/post-comments-modal.js?v=writes-20261016"></script>
 <script defer src="/build/next/hntv3-js/post-options-menu.js"></script>
 <script defer src="/build/next/hntv3-js/post-type-badges.js"></script>
 <script defer src="/build/next/hntv3-js/share-modal.js"></script>

@@ -118,7 +118,7 @@
 
   document.addEventListener('submit', (event) => {
     const form = event.target;
-    if (!form.matches('#newPostForm,.comment-form,#hntPdCommentForm,#hntMvCommentForm,.hnt-share-form')) return;
+    if (!form.matches('.hnt-share-form')) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     toast('Die Schreibfunktionen sind während der Feed-Umstellung noch deaktiviert.');

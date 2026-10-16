@@ -388,6 +388,10 @@
     textarea.focus({preventScroll:true});
   });
 
+  document.addEventListener('hnt:next-comment-saved',event=>{
+    if(!activeCard || event.detail?.postId !== activeCard.id)return;
+    drawComments({preserveScroll:true});
+  });
   viewer.addEventListener('hnt:viewer-media',event=>{
     activeCard=event.detail?.card||null;
     textarea.value='';
