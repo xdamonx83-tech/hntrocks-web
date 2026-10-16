@@ -689,3 +689,6 @@ Route::get('/cups/{cup:slug}/{section}', [CupController::class, 'showSection'])
     ->whereIn('section', ['rules', 'prizes', 'leaderboard', 'participants', 'submit', 'submissions'])
     ->name('cups.show.section');
 Route::get('/cups/{cup:slug}', [CupController::class, 'show'])->name('cups.show');
+
+// Opt-in HNTv3 preview. Never replace any existing live routes.
+require __DIR__ . '/next.php';
