@@ -1,96 +1,118 @@
 @php
     $author = $post->user;
-    $authorName = $author?->name ?? 'Hunter';
-    $authorAvatar = $author?->avatarUrl() ?: asset('assets/vikinger/img/default-avatar.svg');
-    $postMedia = $post->media ?? collect();
-    $firstMedia = $postMedia->first();
-    $postLink = route('feed.show', $post);
-    $reactionCount = (int) ($post->reactions_count ?? 0);
+    $authorName = $author?->name ?: 'Hunter';
+    $authorAvatar = $author?->avatarUrl() ?: '/build/next/hntv3-assets/avatar-hnt.webp';
+    $attachments = $post->media;
+    $firstImage = $attachments->first(fn ($item) => $item->isImage());
+    $firstVideo = $attachments->first(fn ($item) => $item->isVideo());
+    $previewMedia = $firstImage ?: $firstVideo;
+    $isMedia = $previewMedia !== null;
+    $likeCount = (int) ($post->reactions_count ?? 0);
     $commentCount = (int) ($post->comments_count ?? 0);
-    $isMedia = (bool) $firstMedia;
+    $minutesAgo = max(0, (int) ($post->created_at?->diffInMinutes(now()) ?? 0));
+    $postLink = $post->permalink();
+    $commentsForPreview = $post->comments
+        ->take(100)
+        ->map(fn ($comment) => [
+            'id' => (string) $comment->id,
+            'name' => (string) ($comment->user?->name ?: 'Hunter'),
+            'initials' => mb_strtoupper(mb_substr((string) ($comment->user?->name ?: 'H'), 0, 2)),
+            'time' => $comment->created_at?->diffForHumans() ?: '',
+            'message' => (string) ($comment->body ?: ''),
+            'parentId' => $comment->parent_id ? (string) $comment->parent_id : null,
+        ])->values()->all();
 @endphp
 <article class="feed-post {{ $isMedia ? 'media-post' : 'text-post' }}"
-    id="post-{{ $post->id }}" data-next-feed-post="{{ $post->id }}"
-    data-post-id="{{ $post->id }}"
-    data-likes="{{ $reactionCount }}"
-    data-time="{{ $post->created_at?->timestamp ?? 0 }}"
-    data-share-url="{{ $postLink }}"
-    data-post-type="{{ $isMedia ? 'media' : 'text' }}"
+    id="post-{{ $post->id }}"
+    data-next-feed-post="{{ $post->id }}"
+    data-following="{{ $feedFilter === 'friends' ? '1' : '0' }}"
+    data-likes="{{ $likeCount }}"
+    data-time="{{ $minutesAgo }}"
+    data-post-type="{{ $firstVideo && !$firstImage ? 'clip' : ($isMedia ? 'media' : 'text') }}"
     data-post-category="story"
-    data-post-format="{{ $isMedia ? ($firstMedia->isVideo() ? 'video' : 'image') : 'text' }}">
+    data-post-format="{{ $firstVideo && !$firstImage ? 'clip' : ($isMedia ? 'image' : 'text') }}"
+    data-permalink="{{ $postLink }}">
     <div class="post-head">
-        <span class="post-avatar"><img src="{{ $authorAvatar }}" alt="{{ $authorName }}"></span>
+        <span class="post-avatar"><img src="{{ $authorAvatar }}" alt="{{ $authorName }}" loading="lazy"></span>
         <div class="post-author">
-            <div class="author-line">
-                <strong>{{ $authorName }}</strong>
+            <div class="author-line"><strong>{{ $authorName }}</strong>
                 @if($post->is_pinned)
                     <span class="official-pill">ANGEHEFTET</span>
                 @endif
             </div>
             <span>
                 @if($post->team){{ $post->team->name }} <i class="meta-sep"></i>@endif
-                {{ $post->created_at?->diffForHumans() }}
+                {{ $post->created_at?->diffForHumans() ?: 'Gerade eben' }}
             </span>
         </div>
-        <a class="post-more-btn" href="{{ $postLink }}" title="Originalbeitrag öffnen" aria-label="Beitrag öffnen">
+        <button type="button" class="post-more-btn" data-more aria-label="Beitragsoptionen" aria-expanded="false">
             <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-dots-three"></use></svg>
-        </a>
+        </button>
+        <div class="post-more-menu" hidden>
+            <button type="button" data-save>Beitrag merken (Vorschau)</button>
+            <button type="button" data-share>Link teilen</button>
+            <a href="{{ $postLink }}" class="hnt-live-permalink">Original öffnen</a>
+        </div>
     </div>
-
+    @if($post->sharedPost)
+        <div class="hnt-live-shared">↗ Geteilt von {{ $post->sharedPost->user?->name ?? 'Hunter' }}</div>
+    @endif
     @if($post->body)
         <p class="post-caption">{{ $post->body }}</p>
     @endif
-
-    @if($post->sharedPost)
-        <div class="hnt-next-message">Geteilter Beitrag von {{ $post->sharedPost->user?->name ?? 'Hunter' }} – <a href="{{ route('feed.show',$post->sharedPost) }}">Original ansehen ↗</a></div>
-    @endif
-
-    @if($firstMedia)
-        <div class="media-art">
-            @if($firstMedia->isImage())
-                <button type="button" class="hnt-next-media-btn" data-next-media data-media-type="image" data-media-url="{{ $firstMedia->url() }}">
-                    <img src="{{ $firstMedia->url() }}" loading="lazy" alt="Bild von {{ $authorName }}">
-                </button>
-            @elseif($firstMedia->isVideo())
-                <button type="button" class="hnt-next-media-btn" data-next-media data-media-type="video" data-media-url="{{ $firstMedia->url() }}">
-                    <video src="{{ $firstMedia->url() }}" muted playsinline preload="metadata"></video>
-                </button>
+    @if($previewMedia)
+        @if($firstImage)
+            <div class="media-art">
+                <img src="{{ $firstImage->url() }}" alt="Aufnahme von {{ $authorName }}" loading="lazy">
+                <span class="media-art-tag">
+                    <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-image"></use></svg>
+                    {{ $attachments->count() > 1 ? $attachments->count().' MEDIEN' : 'COMMUNITY CAPTURE' }}
+                </span>
+            </div>
+        @elseif($firstVideo)
+            <div class="media-art hnt-live-video">
+                <video src="{{ $firstVideo->url() }}" controls playsinline preload="metadata"></video>
+                <span class="media-art-tag">
+                    <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-film-strip"></use></svg>
+                    COMMUNITY CLIP
+                </span>
+            </div>
+        @endif
+        @foreach($attachments as $media)
+            @if($firstImage && $media->id !== $firstImage->id && $media->isImage())
+                <div data-post-media hidden><img src="{{ $media->url() }}" loading="lazy" alt="Weiteres Bild von {{ $authorName }}"></div>
             @endif
-            <span class="media-art-tag">
-                <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-image"></use></svg>
-                {{ $postMedia->count() > 1 ? $postMedia->count().' MEDIEN' : 'COMMUNITY CAPTURE' }}
-            </span>
-        </div>
+        @endforeach
     @endif
-
+    @if($post->poll)
+        <div class="hnt-live-shared">Umfrage · Ergebnisse und Abstimmung werden im nächsten Schritt angebunden.</div>
+    @endif
     <div class="post-actions">
         <div class="post-actions-primary">
-            <button type="button" class="post-action like-btn" data-next-like-preview aria-label="Gefällt mir – noch in Vorbereitung">
+            <button type="button" class="post-action like-btn" data-like aria-pressed="{{ $post->viewerReaction ? 'true' : 'false' }}" aria-label="Beitrag gefällt mir">
                 <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-heart"></use></svg>
-                <span class="like-count">{{ $reactionCount }}</span>
+                <span class="like-count">{{ $likeCount }}</span>
             </button>
-            <button type="button" class="post-action" data-next-comments aria-label="Kommentare anzeigen">
+            <button type="button" class="post-action" data-comments-toggle aria-expanded="false" aria-label="Kommentare anzeigen">
                 <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-chat-circle-dots"></use></svg>
                 <span class="comment-count">{{ $commentCount }}</span>
             </button>
-            <button type="button" class="post-action" data-next-share>
+            <button type="button" class="post-action" data-share>
                 <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-share-fat"></use></svg>
                 <span>Teilen</span>
             </button>
         </div>
-        <a href="{{ $postLink }}" class="post-action post-save" aria-label="Zum Originalbeitrag" title="Zum bestehenden Feed">
-            <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg>
-            <span>Original</span>
-        </a>
+        <button type="button" class="post-action post-save" data-save aria-pressed="{{ $post->viewerBookmark ? 'true' : 'false' }}">
+            <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-bookmark-simple"></use></svg><span>Merken</span>
+        </button>
     </div>
-    <template class="hnt-next-comments-template">
-        @forelse($post->comments->take(25) as $comment)
-            <div class="hnt-next-comment">
-                <strong>{{ $comment->user?->name ?? 'Hunter' }}</strong>
-                <p>{{ $comment->body ?? '' }}</p>
-            </div>
-        @empty
-            <div class="hnt-next-no-comments">Zu diesem Beitrag gibt es noch keine Kommentare.</div>
-        @endforelse
-    </template>
+    <div class="post-comment-box" hidden>
+        <div class="comment-preview"><span class="small-avatar avatar-initial">HN</span><span>Kommentare aus HNT.ROCKS ansehen.</span></div>
+        <form class="comment-form">
+            <input aria-label="Kommentar schreiben" maxlength="280" placeholder="Kommentare schreiben folgt später" required>
+            <button type="submit" aria-label="Kommentar senden"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-paper-plane-tilt"></use></svg></button>
+        </form>
+        <div class="comment-feed" aria-live="polite"></div>
+    </div>
+    <script type="application/json" class="hnt-live-comments">@json($commentsForPreview)</script>
 </article>
