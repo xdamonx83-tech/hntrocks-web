@@ -38,21 +38,74 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {e.hidden = true}, 3200);
   }
-  // In the original demo these controls mutate only local memory. On a page
-  // displaying real posts that would be misleading, so keep them read-only
-  // until their real production endpoints are deliberately integrated.
-  document.addEventListener('click', (event) => {
-    const link = event.target.closest('a[data-next-server-filter]');
-    if (link) {
-      event.stopImmediatePropagation();
-      return; // browser follows the legitimate Laravel filter link
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+  const requestsInFlight = new Set();
+
+  async function mutate(post, action, clicked) {
+    const id = post?.dataset.nextFeedPost;
+    if (!id || !csrf) { toast('Anmeldung oder CSRF-Schutz fehlt. Seite neu laden.'); return; }
+    const lock = id + ':' + action;
+    if (requestsInFlight.has(lock)) return;
+    requestsInFlight.add(lock);
+    clicked.disabled = true;
+    const path = action === 'like' ? '/reaction' : '/bookmark';
+    try {
+      const response = await fetch('/feed/' + encodeURIComponent(id) + path, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'X-CSRF-TOKEN':csrf, 'Accept':'application/json',
+          'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'
+        },
+        body: JSON.stringify(action==='like' ? {type:'like'} : {})
+      });
+      if (response.status===401 || response.status===419) throw Error('Sitzung abgelaufen. Bitte neu anmelden.');
+      if (response.status===403) throw Error('Für diesen Beitrag fehlen die Berechtigungen.');
+      if (!response.ok) throw Error('Aktion fehlgeschlagen ('+response.status+').');
+      const payload = await response.json();
+      if(action==='like'){
+        const reacted=Boolean(payload.reacted),count=Number(payload.count);
+        if(!Number.isFinite(count)) throw Error('Unerwartete Serverantwort');
+        post.dataset.likes=String(count);
+        post.classList.toggle('is-liked',reacted);
+        post.querySelectorAll('[data-like]').forEach(b=>{
+          b.classList.toggle('is-liked',reacted);
+          b.setAttribute('aria-pressed',String(reacted));
+          const n=b.querySelector('.like-count');if(n)n.textContent=String(count);
+        });
+        const modalCount=document.querySelector('#hntPdLikes');
+        if(modalCount && !document.querySelector('#hntPostDialog')?.hidden)modalCount.textContent=String(count);
+      } else {
+        const saved=Boolean(payload.bookmarked);
+        post.classList.toggle('user-saved',saved);
+        post.querySelectorAll('[data-save]').forEach(b=>{
+          b.classList.toggle('is-saved',saved);
+          b.setAttribute('aria-pressed',String(saved));
+          const t=b.querySelector('span');if(t && !b.closest('.post-more-menu'))t.textContent=saved?'Gemerkt':'Merken';
+        });
+      }
+    } catch(e) {toast(e?.message || 'Server nicht erreichbar');}
+    finally{clicked.disabled=false;requestsInFlight.delete(lock);}
+  }
+
+  document.addEventListener('click',(event)=>{
+    const filter=event.target.closest('a[data-next-server-filter]');
+    if(filter){event.stopImmediatePropagation();return;}
+    const btn=event.target.closest('.feed-post[data-next-feed-post] [data-like],.feed-post[data-next-feed-post] [data-save]');
+    if(btn){
+      event.preventDefault();event.stopImmediatePropagation();
+      const post=btn.closest('.feed-post[data-next-feed-post]');
+      void mutate(post,btn.hasAttribute('data-like')?'like':'bookmark',btn);
+      return;
     }
-    const action = event.target.closest('[data-like],[data-save],#hntMvLike,#hntMvSave,#hntPdLike,#hntPdSave');
-    if (!action) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    toast('Reaktionen und Merkliste werden als Nächstes mit Laravel verbunden.');
-  }, true);
+    // Dialog controls use the original modal's forwarding click events.
+    // Until the exact active-card contract is verified, keep direct actions
+    // disabled instead of potentially mutating the wrong user's post.
+    if(event.target.closest('#hntMvLike,#hntMvSave,#hntPdLike,#hntPdSave')){
+      event.preventDefault();event.stopImmediatePropagation();
+      toast('Diese Aktion im Medienviewer wird als Nächstes angebunden.');
+    }
+  },true);
 
   document.addEventListener('submit', (event) => {
     const form = event.target;
