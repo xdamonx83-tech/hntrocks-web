@@ -2,8 +2,8 @@
 (() => {
   'use strict';
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
-  const palette=['#a05a62','#bf7376','#8d464f','#c3887d','#74424a'];
-  const heart='<svg aria-hidden="true" viewBox="0 0 256 256"><path d="M128 224 C114 211 30 153 30 94 C30 52 78 38 108 60 C117 67 124 76 128 84 C132 76 139 67 148 60 C178 38 226 52 226 94 C226 153 142 211 128 224 Z"/></svg>';
+  const palette=['#8fd3a3','#b2e3bf','#71c88e','#a7d7b1','#80b98f'];
+  const brand='HR:\\'; // HNT.ROCKS brand logo, not hearts.
   let layer;
   function getLayer(){
     if(!layer || !layer.isConnected){
@@ -34,17 +34,30 @@
     const x=r.left+r.width/2,y=r.top+r.height/2;
     const host=getLayer();
     flicker(button);
-    // Five dark-red floating hearts, two dying cinders — deliberately restrained.
+    // Five rising HNT.ROCKS logos, two subtle green cinders — deliberately restrained.
     for(let i=0;i<7;i++){
       const ash=i>=5;
       const el=document.createElement('span');
       el.className=ash?'hnt-heart-ember':'hnt-heart-spark';
       if(!ash){
+        el.classList.add('hnt-brand-spark');
         el.style.color=palette[i%palette.length];
-        el.innerHTML=heart;
-        const size=[10,13,9,15,11][i];
-        el.style.width=size+'px';
-        el.style.height=size+'px';
+        el.textContent=brand;
+        const size=[11,13,10,14,12][i];
+        el.style.fontFamily='"Exo 2",Arial,sans-serif';
+        el.style.fontWeight='800';
+        el.style.letterSpacing='-0.8px';
+        el.style.fontSize=size+'px';
+        el.style.lineHeight='1';
+        el.style.whiteSpace='nowrap';
+        el.style.display='inline-flex';
+        el.style.justifyContent='center';
+        el.style.width='34px';
+        el.style.height='18px';
+        el.style.filter='drop-shadow(0 0 5px rgba(113,200,142,.55))';
+      } else {
+        el.style.background='#7bc894';
+        el.style.boxShadow='0 0 6px rgba(113,200,142,.5)';
       }
       el.style.left=(x+(i-3)*1.8)+'px';
       el.style.top=(y-(ash?1:6))+'px';
@@ -59,6 +72,12 @@
       motion.finished.then(()=>el.remove()).catch(()=>el.remove());
     }
   }
+  // On the real Laravel feed, animate only after the server confirms a Like.
+  document.addEventListener('hnt:like-confirmed',event=>{
+    const button=event.detail?.button;
+    if(event.detail?.reacted && button instanceof Element)scatter(button);
+  });
+
   // A document-level listener runs after the original like handlers have updated aria-pressed.
   document.addEventListener('click',event=>{
     const button=event.target.closest('#hntMvLike,#hntPdLike,[data-comment-like],.feed-post [data-like]');

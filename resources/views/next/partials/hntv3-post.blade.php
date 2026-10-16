@@ -7,6 +7,7 @@
     $firstVideo = $attachments->first(fn ($item) => $item->isVideo());
     $previewMedia = $firstImage ?: $firstVideo;
     $isMedia = $previewMedia !== null;
+    $isBookmarked = (bool) $post->viewerBookmark;
     $likeCount = (int) ($post->reactions_count ?? 0);
     $commentCount = (int) ($post->comments_count ?? 0);
     $minutesAgo = max(0, (int) ($post->created_at?->diffInMinutes(now()) ?? 0));
@@ -22,7 +23,7 @@
             'parentId' => $comment->parent_id ? (string) $comment->parent_id : null,
         ])->values()->all();
 @endphp
-<article class="feed-post {{ $isMedia ? 'media-post' : 'text-post' }}"
+<article class="feed-post {{ $isMedia ? 'media-post' : 'text-post' }} {{ $isBookmarked ? 'user-saved' : '' }}"
     id="post-{{ $post->id }}"
     data-next-feed-post="{{ $post->id }}"
     data-following="{{ $feedFilter === 'friends' ? '1' : '0' }}"
@@ -102,8 +103,8 @@
                 <span>Teilen</span>
             </button>
         </div>
-        <button type="button" class="post-action post-save" data-save aria-pressed="{{ $post->viewerBookmark ? 'true' : 'false' }}">
-            <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-bookmark-simple"></use></svg><span>Merken</span>
+        <button type="button" class="post-action post-save {{ $isBookmarked ? 'is-saved' : '' }}" data-save aria-pressed="{{ $isBookmarked ? 'true' : 'false' }}">
+            <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-bookmark-simple"></use></svg><span>{{ $isBookmarked ? 'Gemerkt' : 'Merken' }}</span>
         </button>
     </div>
     <div class="post-comment-box" hidden>

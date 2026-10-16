@@ -75,9 +75,18 @@
         });
         const modalCount=document.querySelector('#hntPdLikes');
         if(modalCount && !document.querySelector('#hntPostDialog')?.hidden)modalCount.textContent=String(count);
+        if(reacted){
+          document.dispatchEvent(new CustomEvent('hnt:like-confirmed',{detail:{button:clicked,reacted:true,postId:id}}));
+        }
       } else {
         const saved=Boolean(payload.bookmarked);
         post.classList.toggle('user-saved',saved);
+        const menuLabel=post.querySelector('.post-more-menu [data-save] .post-option-title');
+        const menuHint=post.querySelector('.post-more-menu [data-save] .post-option-description');
+        const menuCheck=post.querySelector('.post-more-menu [data-save] .post-option-check');
+        if(menuLabel)menuLabel.textContent=saved?'Beitrag gemerkt':'Beitrag speichern';
+        if(menuHint)menuHint.textContent=saved?'Aus Merkliste entfernen':'Für später in Merkliste sichern';
+        if(menuCheck)menuCheck.hidden=!saved;
         post.querySelectorAll('[data-save]').forEach(b=>{
           b.classList.toggle('is-saved',saved);
           b.setAttribute('aria-pressed',String(saved));
