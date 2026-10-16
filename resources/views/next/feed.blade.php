@@ -71,6 +71,19 @@
 .hnt-mv-thread-toggle::before,.hnt-pd-replies-toggle::before,.hnt-inline-thread-toggle::before {
   width:10px !important; flex:0 0 10px;
 }
+
+/* HNTv3 real shared posts: reuse the original modal design in feed cards. */
+.feed-post:has(> .hnt-live-share-embed) > .post-caption{white-space:pre-line;}
+.hnt-live-share-embed{margin:12px 0 4px;}
+.hnt-live-share-embed .hnt-live-share-media-link{display:block;text-decoration:none;}
+.hnt-live-share-embed .hnt-share-original-media{height:clamp(165px,27vh,285px);}
+.hnt-live-share-embed .hnt-share-original-media img{object-fit:contain;background:#1c1e1c;}
+.hnt-live-share-embed .hnt-live-share-video video{width:100%;height:100%;display:block;object-fit:contain;background:#171817;}
+.hnt-live-share-embed .hnt-share-original-caption{white-space:pre-line;overflow-wrap:anywhere;}
+.hnt-live-share-embed .hnt-share-original-head{min-width:0;}
+.hnt-live-share-embed .hnt-share-original-author{overflow:hidden;}
+.hnt-live-share-embed .hnt-share-original-author strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hnt-live-share-embed .hnt-share-visit{text-decoration:none;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">

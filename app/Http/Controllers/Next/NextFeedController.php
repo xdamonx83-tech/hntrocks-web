@@ -46,6 +46,7 @@ final class NextFeedController extends Controller
             'team',
             'sharedPost.user.profile',
             'sharedPost.team',
+            'sharedPost.media.mediaAsset',
             'media.mediaAsset',
             'comments.user.profile',
             'viewerReaction',

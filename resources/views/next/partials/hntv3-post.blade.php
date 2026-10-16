@@ -59,11 +59,61 @@
             <a href="{{ $postLink }}" class="hnt-live-permalink">Original öffnen</a>
         </div>
     </div>
-    @if($post->sharedPost)
-        <div class="hnt-live-shared">↗ Geteilt von {{ $post->sharedPost->user?->name ?? 'Hunter' }}</div>
-    @endif
     @if($post->body)
         <p class="post-caption">{{ $post->body }}</p>
+    @endif
+    @if($post->shared_post_id)
+        @php
+            $original = $post->sharedPost;
+            $originalVisible = $original && $original->status === 'published' && $original->canBeViewedBy(auth()->user());
+            $originalAuthor = $originalVisible ? $original->user : null;
+            $originalAttachments = $originalVisible ? $original->media : collect();
+            $originalImage = $originalAttachments->first(fn ($media) => $media->isImage());
+            $originalVideo = $originalAttachments->first(fn ($media) => $media->isVideo());
+            $originalLink = $originalVisible ? $original->permalink() : null;
+        @endphp
+        @if($originalVisible)
+            <div class="hnt-share-embed hnt-live-share-embed" data-original-post="{{ $original->id }}">
+                @if($originalImage)
+                    <a class="hnt-live-share-media-link" href="{{ $originalLink }}" aria-label="Originalaufnahme öffnen">
+                        <div class="hnt-share-original-media">
+                            <img src="{{ $originalImage->url() }}" loading="lazy" alt="Aufnahme von {{ $originalAuthor?->name ?: 'Hunter' }}">
+                            @if($originalAttachments->count() > 1)
+                                <span class="hnt-share-media-stamp">{{ $originalAttachments->count() }} MEDIEN</span>
+                            @endif
+                        </div>
+                    </a>
+                @elseif($originalVideo)
+                    <div class="hnt-share-original-media hnt-live-share-video">
+                        <video controls playsinline preload="metadata" src="{{ $originalVideo->url() }}" aria-label="Clip von {{ $originalAuthor?->name ?: 'Hunter' }}"></video>
+                    </div>
+                @endif
+                <div class="hnt-share-original-body">
+                    <div class="hnt-share-original-head">
+                        <img class="hnt-share-author-avatar" loading="lazy" src="{{ $originalAuthor?->avatarUrl() ?: '/build/next/hntv3-assets/avatar-hnt.webp' }}" alt="">
+                        <div class="hnt-share-original-author">
+                            <strong>{{ $originalAuthor?->name ?: 'Hunter' }}</strong>
+                            <small>{{ $original->created_at?->diffForHumans() ?: 'Originalbeitrag' }}</small>
+                        </div>
+                        <span class="hnt-share-kind">{{ $originalImage ? 'CAPTURE' : ($originalVideo ? 'CLIP' : 'BEITRAG') }}</span>
+                    </div>
+                    @if($original->body)
+                        <p class="hnt-share-original-caption">{{ $original->body }}</p>
+                    @elseif(!$originalImage && !$originalVideo)
+                        <p class="hnt-share-original-caption">Originalbeitrag aus der HNT.ROCKS Community</p>
+                    @endif
+                    <div class="hnt-share-original-meta">
+                        <span>HNT.ROCKS · Community</span><span>ORIGINALBEITRAG</span>
+                    </div>
+                </div>
+                <a class="hnt-share-visit" href="{{ $originalLink }}">
+                    Originalbeitrag ansehen
+                    <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg>
+                </a>
+            </div>
+        @else
+            <div class="hnt-live-shared">Dieser Originalbeitrag ist nicht mehr verfügbar.</div>
+        @endif
     @endif
     @if($previewMedia)
         @if($firstImage)
