@@ -51,6 +51,12 @@
    '</section>'
  ].join('');
  document.body.append(root);
+ if(document.body.hasAttribute('data-hnt-next-live-posts')){
+   const identity=root.querySelector('.hnt-share-target-info strong');
+   const picture=root.querySelector('.hnt-share-own-avatar');
+   if(identity && document.body.dataset.nextViewerName)identity.textContent=document.body.dataset.nextViewerName;
+   if(picture && document.body.dataset.nextViewerAvatar)picture.src=document.body.dataset.nextViewerAvatar;
+ }
  const note=$('#hntShareNote'), original=$('#hntShareOriginal'), copy=$('#hntShareCopy');
  const closeBtn=$('#hntShareClose'), submit=$('#hntShareSubmit');
  const previewImage=(src,alt='')=>{
