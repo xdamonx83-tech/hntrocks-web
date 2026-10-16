@@ -4941,3 +4941,13 @@ body {
 .hnt-next-readonly-btn{opacity:.6;cursor:not-allowed}
 .hnt-next-feedback[hidden]{display:none!important}
 .hnt-next-feedback{position:fixed;z-index:2200;bottom:20px;right:20px;background:var(--widget);padding:13px 18px;border:1px solid var(--accent);border-radius:9px;box-shadow:0 8px 30px #0009;font-size:11px}
+
+/* Compact reply expand/collapse controls (comments and media viewer). */
+.hnt-mv-thread-toggle,.hnt-pd-replies-toggle,.hnt-inline-thread-toggle {
+  font-size:8px !important; font-weight:610 !important; line-height:1.25 !important;
+  letter-spacing:0 !important; gap:5px !important;
+  padding:3px 0 5px 22px !important; min-height:0 !important;
+}
+.hnt-mv-thread-toggle::before,.hnt-pd-replies-toggle::before,.hnt-inline-thread-toggle::before {
+  width:10px !important; flex:0 0 10px;
+}

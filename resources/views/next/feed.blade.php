@@ -22,10 +22,10 @@
 <script defer src="/build/next/hntv3-js/media-viewer.js"></script>
 <script defer src="/build/next/hntv3-js/media-viewer-comments.js?v=writes-20261016"></script>
 <script defer src="/build/next/hntv3-js/hnt-live-adapter.js?v=writes-20261016"></script>
-<script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=writes-20261016"></script>
+<script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=image-only-20261016"></script>
 <script defer src="/build/next/hntv3-js/like-embers.js?v=twotone-20261016"></script>
 <script defer src="/build/next/hntv3-js/composer-dispatch.js"></script>
-<script defer src="/build/next/hntv3-js/composer-extras.js"></script>
+<script defer src="/build/next/hntv3-js/composer-extras.js?v=image-only-20261016"></script>
 <script defer src="/build/next/hntv3-js/feed-discussions.js"></script>
 <script defer src="/build/next/hntv3-js/post-comments-modal.js?v=writes-20261016"></script>
 <script defer src="/build/next/hntv3-js/post-options-menu.js"></script>
@@ -51,6 +51,15 @@
 .hnt-live-load-more{display:block;text-align:center;border:1px solid var(--panel-border);border-radius:10px;background:var(--widget);padding:15px;margin-bottom:14px;color:var(--accent);font-size:11px;font-weight:700;text-decoration:none}
 .hnt-live-load-more:hover{border-color:var(--accent)}
 .hnt-live-action-toast{position:fixed;right:20px;bottom:20px;z-index:2500;background:var(--widget);color:var(--title);border:1px solid var(--accent);border-radius:10px;padding:13px 18px;font-size:11px;box-shadow:0 13px 38px #000a}
+/* Compact reply expand/collapse controls (comments and media viewer). */
+.hnt-mv-thread-toggle,.hnt-pd-replies-toggle,.hnt-inline-thread-toggle {
+  font-size:8px !important; font-weight:610 !important; line-height:1.25 !important;
+  letter-spacing:0 !important; gap:5px !important;
+  padding:3px 0 5px 22px !important; min-height:0 !important;
+}
+.hnt-mv-thread-toggle::before,.hnt-pd-replies-toggle::before,.hnt-inline-thread-toggle::before {
+  width:10px !important; flex:0 0 10px;
+}
 </style>
 </head>
 <body data-hnt-next-live-posts="true">

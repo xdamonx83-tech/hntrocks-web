@@ -54,8 +54,10 @@
   document.getElementById('hntFeelingLabel').textContent=feeling?feeling[0]+' '+feeling[1]:'Gefühl';
   image.disabled=pollOn;
   dialog.querySelector('.composer-upload')?.classList.toggle('is-extra-disabled',pollOn);
-  body.required=!(pollOn||Boolean(clipURL));
+  body.required=!(pollOn||Boolean(clipURL)||Boolean(image.files?.length));
  }
+ image.addEventListener('change',syncButtons);
+ document.getElementById('removePreview')?.addEventListener('click',()=>requestAnimationFrame(syncButtons));
  function show(type){panel=type||'';pollPanel.hidden=panel!=='poll';feelingPanel.hidden=panel!=='feeling';clipPanel.hidden=panel!=='clip';syncButtons();}
  function clearClip(){
   const video=document.getElementById('hntClipPreview');video.pause();video.removeAttribute('src');video.load();
