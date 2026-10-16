@@ -62,13 +62,14 @@
       el.style.left=(x+(i-3)*1.8)+'px';
       el.style.top=(y-(ash?1:6))+'px';
       const dx=[-34,-16,4,24,37,-24,28][i],rise=[-79,-96,-65,-103,-80,-52,-70][i];
-      const duration=ash?590:860+i*67;
+      const duration=ash?1250:1900+i*105;
       host.appendChild(el);
       const motion=el.animate([
-        {transform:'translate(-50%,-20%) scale(.45) rotate(-12deg)',opacity:0,offset:0},
-        {transform:'translate('+Math.round(dx*.15-50)+'%,-42%) scale(1) rotate(1deg)',opacity:ash?.45:.83,offset:.18},
-        {transform:'translate('+Math.round(dx)+'px,'+rise+'px) scale('+(ash?.4:.48)+') rotate('+(-24+i*11)+'deg)',opacity:0,offset:1}
-      ],{duration,delay:i*38,easing:'cubic-bezier(.2,.63,.34,1)',fill:'forwards'});
+        {transform:'translate(-50%,-20%) scale(.6) rotate(-9deg)',opacity:0,offset:0},
+        {transform:'translate('+Math.round(dx*.12)+'px,-14px) scale(1) rotate(0deg)',opacity:ash?.45:.92,offset:.12},
+        {transform:'translate('+Math.round(dx*.68)+'px,'+Math.round(rise*.70)+'px) scale(.88) rotate('+(-10+i*5)+'deg)',opacity:ash?.30:.88,offset:.70},
+        {transform:'translate('+Math.round(dx)+'px,'+rise+'px) scale('+(ash?.4:.58)+') rotate('+(-17+i*7)+'deg)',opacity:0,offset:1}
+      ],{duration,delay:i*95,easing:'cubic-bezier(.2,.63,.34,1)',fill:'forwards'});
       motion.finished.then(()=>el.remove()).catch(()=>el.remove());
     }
   }
