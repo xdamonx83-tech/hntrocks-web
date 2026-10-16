@@ -48,3 +48,16 @@ Local Windows design workspace: `G:\Webseiten C\HNTrocks\Theme\v6\HNTv3`. Follow
 - Removed the temporary public deployment archive; SSH remains limited to the KeyHelp user's scoped rights.
 - URL `https://hnt.rocks/next/feed` is ready for a **logged-in manual browser smoke test**. The complete HNTv3 design has **not** yet replaced the current integration shell; media/interactive post actions are still stubbed/read-only.
 - Next: user checks logged-in rendering; then transplant the existing HNTv3 Feed HTML/CSS/JS components using Laravel data and actual existing backend actions.
+
+
+## Step 2 completed – original HNTv3 cards with real Laravel data (2026-10-16)
+
+- Branch commit `ff51fbb` deployed to live, **only on `/next/feed`**. Original `/feed` and migrations untouched.
+- `NextFeedController` calls existing `FeedController::index()`, using `posts` or `socialitePosts` as resolved by the existing backend. This preserves production post visibility rules, team privacy, friend filtering and eager loading.
+- `resources/views/next/feed.blade.php` retains original HNTv3 Topbar, sidebar, widgets, overlay structure and Vite CSS/JS; it now renders `@forelse($posts)` through `next.partials.hntv3-post` in the existing `#feedList`, replacing **all** sample post markup.
+- `resources/views/next/partials/hntv3-post.blade.php` uses real authors, timestamps, bodies, pinned status, media URLs, reaction/comment counts and existing viewer relationships. Nested comments are serialized for the original HNTv3 modal via `hnt-live-adapter.js`.
+- Original HNTv3 modal/viewer/tooltip/widget code remains intact. Adapter prevents misleading local-only write actions while actual Laravel writes are not integrated, provides server-backed filters and page loading.
+- Server render test (authenticated test user inside DB transaction, rolled back) passed: **10 published posts**, original classes, real author fields, original modal scripts, no demo cards, and `noindex`. Live source and Blade/controller lints passed after deploy.
+- Existing demo saved before step 2 with suffix `20261016-215118` for controller, Blade view and post partial; file-based rollback possible. Candidate render files and temporary code removed.
+- Known remaining demo elements: topbar social dropdown data, sidebar widgets/profile data. Full read/write behavior for likes, bookmarks, creating posts, comments and shares is intentionally **not** enabled in step 2; build and test that against existing Laravel endpoints next.
+- Test with real browser account under `https://hnt.rocks/next/feed`; review actual post images/multi-media, feed load-more, comment counts and filter navigation before starting step 3.
