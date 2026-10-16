@@ -38,3 +38,13 @@ The tested lockfile was captured and committed to the branch. It pins the npm bu
 
 ## Relevant HNTv3 references
 Local Windows design workspace: `G:\Webseiten C\HNTrocks\Theme\v6\HNTv3`. Follow `HNT_DESIGN_LOCK_V1.md`, `HNT_PROJECT_ORIENTATION_20261016.md`, the original `index.html` and feed component JS/CSS.
+
+## Live preview deployment (2026-10-16, after KeyHelp SSH activation)
+
+- Root prepared precisely scoped permissions: `app/Http/Controllers/Next`, `resources/views/next`, `public/build/next`, an empty `routes/next.php`, and a user ACL for the existing live `routes/web.php`; root also saved `routes/web.php.before-next-20261016-194452.bak`.
+- Deployed **only** the compiled Vite `public/build/next` output, `NextFeedController.php`, `routes/next.php` and `next/feed.blade.php` via `hunthub` SSH. Since `resources` itself is root-owned, the Vite source remains in GitHub/staging for now; the browser requires only the compiled manifest/assets.
+- Appended a single `require __DIR__ . '/next.php';` to the end of the existing live routes without replacing any other routes. No changes to composer.json, DB, old Feed views, or frontend were made.
+- Verified controller/routes PHP lint, `php artisan route:list --path=next` (both routes present), `/next/feed` HTTP 302 redirecting unauthenticated requests to login, hashed CSS/JS both HTTP 200, and compiled Blade output PHP lint passed.
+- Removed the temporary public deployment archive; SSH remains limited to the KeyHelp user's scoped rights.
+- URL `https://hnt.rocks/next/feed` is ready for a **logged-in manual browser smoke test**. The complete HNTv3 design has **not** yet replaced the current integration shell; media/interactive post actions are still stubbed/read-only.
+- Next: user checks logged-in rendering; then transplant the existing HNTv3 Feed HTML/CSS/JS components using Laravel data and actual existing backend actions.
