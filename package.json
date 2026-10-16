@@ -1,14 +1,15 @@
 {
-    "private":  true,
-    "type":  "module",
-    "scripts":  {
-                    "dev:next":  "vite --config vite.next.config.js",
-                    "build:next":  "vite build --config vite.next.config.js \u0026\u0026 node scripts/next-copy-assets.cjs",
-                    "build":  "echo \u0027No Vite build configured yet.\u0027",
-                    "dev":  "echo \u0027No Vite dev server configured yet.\u0027"
-                },
-    "devDependencies":  {
-                            "vite":  "^6.3.0",
-                            "laravel-vite-plugin":  "^1.3.0"
-                        }
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev:next": "vite --config vite.next.config.js",
+        "build:next": "vite build --config vite.next.config.js && node scripts/next-copy-assets.cjs",
+        "build": "echo 'No Vite build configured yet.'",
+        "dev": "echo 'No Vite dev server configured yet.'"
+    },
+    "devDependencies": {
+        "@videojs/cdn": "10.1.0",
+        "laravel-vite-plugin": "^1.3.0",
+        "vite": "^6.3.0"
+    }
 }
