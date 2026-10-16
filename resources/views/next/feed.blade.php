@@ -22,7 +22,7 @@
 <script defer src="/build/next/hntv3-js/media-viewer.js"></script>
 <script defer src="/build/next/hntv3-js/media-viewer-comments.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/hnt-live-adapter.js?v=viewer-20261016"></script>
-<script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=viewer-20261016"></script>
+<script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=video-progress-20261016"></script>
 <script defer src="/build/next/hntv3-js/like-embers.js?v=twotone-20261016"></script>
 <script defer src="/build/next/hntv3-js/composer-dispatch.js"></script>
 <script defer src="/build/next/hntv3-js/composer-extras.js?v=image-only-20261016"></script>
@@ -84,6 +84,17 @@
 .hnt-live-share-embed .hnt-share-original-author{overflow:hidden;}
 .hnt-live-share-embed .hnt-share-original-author strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .hnt-live-share-embed .hnt-share-visit{text-decoration:none;}
+/* Playable feed video: the fixed 205px crop previously hid native controls. */
+.feed-post .media-art.hnt-live-video {height:auto;aspect-ratio:16/9;min-height:0;max-height:none;overflow:hidden;display:flex;align-items:stretch;justify-content:center;background:#111413;}
+.feed-post .media-art.hnt-live-video > video {width:100%;height:100%;max-height:none;min-height:0;object-fit:contain;display:block;position:relative;z-index:2;background:#111413;pointer-events:auto;}
+.feed-post .media-art.hnt-live-video .media-art-tag {pointer-events:none;z-index:3;}
+.feed-post .media-art.hnt-live-video::after {pointer-events:none;}
+.hnt-next-upload-progress{margin:14px 0 4px;padding:12px 13px;background:#262f29;border:1px solid #57756180;border-radius:10px;}
+.hnt-next-upload-progress[hidden]{display:none!important;}
+.hnt-next-upload-progress-head{display:flex;gap:10px;justify-content:space-between;align-items:center;color:#c3d5c7;font-size:11px;line-height:1.5;font-weight:600;}
+.hnt-next-upload-progress-head strong{color:#a2d8b1;font-size:11px;font-variant-numeric:tabular-nums;}
+.hnt-next-upload-progress-track{height:6px;overflow:hidden;border-radius:50px;margin-top:9px;background:#1b231e;border:1px solid #62866b40;}
+.hnt-next-upload-progress-track>div{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#568768,#a1ddb3);transition:width .14s ease-out;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">

@@ -55,6 +55,71 @@
     return payload;
   }
 
+
+  // Reports actual bytes sent. Server processing begins after upload completion.
+  function uploadWithProgress(data,onProgress) {
+    return new Promise((resolve,reject)=>{
+      const xhr=new XMLHttpRequest();
+      xhr.open('POST','/feed',true);
+      xhr.withCredentials=true;
+      xhr.timeout=180000;
+      xhr.setRequestHeader('X-CSRF-TOKEN',csrf);
+      xhr.setRequestHeader('Accept','application/json');
+      xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');
+      xhr.upload.addEventListener('progress',event=>{
+        if(event.lengthComputable && event.total>0){
+          const percent=Math.max(0,Math.min(100,Math.round(event.loaded/event.total*100)));
+          onProgress(percent,event.loaded,event.total,false);
+        } else onProgress(null,0,0,false);
+      });
+      xhr.upload.addEventListener('load',()=>onProgress(100,0,0,true));
+      xhr.onerror=()=>reject(new Error('Netzwerkfehler beim Hochladen. Bitte erneut versuchen.'));
+      xhr.ontimeout=()=>reject(new Error('Der Upload hat zu lange gedauert. Prüfe zunächst, ob der Beitrag veröffentlicht wurde.'));
+      xhr.onabort=()=>reject(new Error('Upload abgebrochen.'));
+      xhr.onload=()=>{
+        let response=null;
+        try{response=JSON.parse(xhr.responseText)}catch{}
+        if(xhr.status<200 || xhr.status>=300 || !response?.ok){
+          reject(new Error(messageFor(xhr.status,response)));
+          return;
+        }
+        resolve(response);
+      };
+      try{xhr.send(data)}catch(error){reject(error)}
+    });
+  }
+  function createProgress(form) {
+    let panel=form.querySelector('#hntNextUploadProgress');
+    if(!panel) {
+      panel=document.createElement('div');
+      panel.id='hntNextUploadProgress';panel.className='hnt-next-upload-progress';
+      panel.setAttribute('role','status');panel.setAttribute('aria-live','polite');
+      panel.innerHTML='<div class="hnt-next-upload-progress-head"><span data-upload-stage>Upload wird vorbereitet …</span><strong data-upload-percent>0%</strong></div><div class="hnt-next-upload-progress-track"><div data-upload-fill></div></div>';
+      const before=form.querySelector('.composer-dialog-foot');
+      before?.parentNode.insertBefore(panel,before);
+    }
+    panel.hidden=false;
+    const stage=panel.querySelector('[data-upload-stage]');
+    const number=panel.querySelector('[data-upload-percent]');
+    const fill=panel.querySelector('[data-upload-fill]');
+    const update=(percent,loaded,total,processing)=>{
+      if(processing){
+        stage.textContent='Datei wird auf dem Server verarbeitet …';
+        number.textContent='Upload 100%';
+        fill.style.width='100%';
+      }else if(percent===null){
+        stage.textContent='Hochladen …';
+        number.textContent='…';
+      }else {
+        stage.textContent='Hochladen …';
+        number.textContent=String(percent)+'%';
+        fill.style.width=String(percent)+'%';
+      }
+    };
+    update(0,0,0,false);
+    return {panel,update,stage,number,fill};
+  }
+
   async function loadCard(postId) {
     const response = await fetch('/next/feed/posts/'+encodeURIComponent(postId)+'/card',{
       method:'GET',credentials:'same-origin',
@@ -202,10 +267,12 @@
     const submit=form.querySelector('[type="submit"]');
     pending.add(form);if(submit)submit.disabled=true;
     let published = false;
+    const progress=(image||clip)?createProgress(form):null;
     try {
-      const data = await post('/feed',payload);
+      const data = progress ? await uploadWithProgress(payload,progress.update) : await post('/feed',payload);
       if (!data?.ok || !data?.post_id) throw new Error('Unvollständige Serverantwort.');
       published=true;
+      if(progress){progress.stage.textContent='Beitrag wird geladen …';progress.number.textContent='Upload 100%';}
       const card = await loadCard(data.post_id);
       list.prepend(card);
       document.getElementById('feedEmpty')?.setAttribute('hidden','');
@@ -214,8 +281,10 @@
       form.reset();
       document.getElementById('composerClose')?.click();
       window.scrollTo({top:0,behavior:'smooth'});
+      if(progress)progress.panel.hidden=true;
       notice('Beitrag veröffentlicht.');
     } catch(e) {
+      if(progress){progress.stage.textContent=published?'Beitrag gespeichert – Anzeige noch nicht geladen':'Upload fehlgeschlagen';progress.number.textContent='!';}
       notice(published?'Beitrag gespeichert, konnte aber nicht automatisch angezeigt werden.':e.message,true);
     } finally {
       pending.delete(form);

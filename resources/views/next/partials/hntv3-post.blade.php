@@ -126,7 +126,7 @@
             </div>
         @elseif($firstVideo)
             <div class="media-art hnt-live-video">
-                <video src="{{ $firstVideo->url() }}" controls playsinline preload="metadata"></video>
+                <video controls playsinline preload="metadata" aria-label="Videobeitrag von {{ $authorName }}"><source src="{{ $firstVideo->url() }}" type="{{ $firstVideo->mime_type }}">Dein Browser unterstützt die Videowiedergabe nicht. <a href="{{ $firstVideo->url() }}">Video öffnen</a></video>
                 <span class="media-art-tag">
                     <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-film-strip"></use></svg>
                     COMMUNITY CLIP
