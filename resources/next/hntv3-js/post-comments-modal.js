@@ -387,6 +387,9 @@
     catch{b.textContent='Zum Teilen bereit';}
     setTimeout(()=>{if(b.isConnected)b.textContent='Teilen';},1800);
   });
+  document.addEventListener('hnt:next-comment-reaction',event=>{
+    if (active?.id === event.detail?.postId)renderComments({keepScroll:true});
+  });
   document.addEventListener('hnt:next-comment-saved',event=>{
     if (!active || event.detail?.postId !== active.id) return;
     renderComments({keepScroll:true,focusId:event.detail.commentId || null});

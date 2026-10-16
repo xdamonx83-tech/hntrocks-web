@@ -77,8 +77,8 @@
     }
     const d = e.target.closest('#hntPdComments [data-reply]');
     if (d) replyTo.dialog = d.dataset.reply || null;
-    const v = e.target.closest('#hntMvCommentList [data-reply]');
-    if (v) replyTo.viewer = v.dataset.reply || null;
+    const v = e.target.closest('#hntMvCommentList [data-reply-id]');
+    if (v) replyTo.viewer = v.dataset.replyId || null;
     if (e.target.closest('#hntPdCancelReply')) replyTo.dialog = null;
     if (e.target.closest('#hntMvReplyCancel')) replyTo.viewer = null;
   },true);
@@ -86,6 +86,40 @@
     viewerCard = e.detail?.card || null;
     replyTo.viewer = null;
   });
+
+  const pendingCommentLikes=new Set();
+  async function reactToComment(button,card){
+    const postId=card?.dataset.nextFeedPost;
+    const id=button?.dataset.commentLike;
+    if(!postId || !id || pendingCommentLikes.has(id))return;
+    pendingCommentLikes.add(id);button.disabled=true;
+    try{
+      const data=await post('/feed/comments/'+encodeURIComponent(id)+'/reaction',{type:'like'});
+      if(typeof data?.reacted!=='boolean' || !Number.isFinite(Number(data.count)))
+        throw new Error('Unerwartete Serverantwort.');
+      const json=card.querySelector('script.hnt-live-comments');
+      if(!json)throw new Error('Kommentare konnten nicht aktualisiert werden.');
+      const comments=JSON.parse(json.textContent||'[]');
+      const record=comments.find(c=>String(c.id)===String(id));
+      if(!record)throw new Error('Kommentar nicht mehr vorhanden. Bitte Seite neu laden.');
+      record.viewerLiked=data.reacted;
+      record.reactionsCount=Number(data.count);
+      json.textContent=JSON.stringify(comments);
+      document.dispatchEvent(new CustomEvent('hnt:next-comment-reaction',{
+        detail:{postId:card.id,commentId:String(id),reacted:data.reacted,count:Number(data.count)}
+      }));
+    }catch(error){notice(error.message || 'Like konnte nicht gespeichert werden.',true);}
+    finally{pendingCommentLikes.delete(id);button.disabled=false;}
+  }
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('#hntMvCommentList [data-comment-like],#hntPdComments [data-comment-like]');
+    if(!button)return;
+    const viewer=Boolean(button.closest('#hntMvCommentList'));
+    const card=viewer ? viewerCard : dialogCard;
+    if(!card?.dataset.nextFeedPost)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    void reactToComment(button,card);
+  },true);
 
   async function saveComment(form) {
     const viewer = form.id==='hntMvCommentForm';
@@ -188,6 +222,8 @@
       if(submit)submit.disabled=false;
     }
   }
+
+  window.HNTNextFeedWrites={loadCard,notice};
 
   // Capture phase is essential: the original prototype's bubble handlers
   // would otherwise add a fake local post/comment. Stop them completely.

@@ -12,8 +12,10 @@
     $commentCount = (int) ($post->comments_count ?? 0);
     $minutesAgo = max(0, (int) ($post->created_at?->diffInMinutes(now()) ?? 0));
     $postLink = $post->permalink();
-    $commentsForPreview = $post->comments
-        ->take(100)
+    $previewComments = $post->comments->take(100);
+    $previewComments->loadCount('reactions');
+    $previewComments->load('viewerReaction');
+    $commentsForPreview = $previewComments
         ->map(fn ($comment) => [
             'id' => (string) $comment->id,
             'name' => (string) ($comment->user?->name ?: 'Hunter'),
@@ -21,6 +23,8 @@
             'time' => $comment->created_at?->diffForHumans() ?: '',
             'message' => (string) ($comment->body ?: ''),
             'parentId' => $comment->parent_id ? (string) $comment->parent_id : null,
+            'reactionsCount' => (int) ($comment->reactions_count ?? 0),
+            'viewerLiked' => (bool) $comment->viewerReaction,
         ])->values()->all();
 @endphp
 <article class="feed-post {{ $isMedia ? 'media-post' : 'text-post' }} {{ $isBookmarked ? 'user-saved' : '' }}"
@@ -90,7 +94,7 @@
     @endif
     <div class="post-actions">
         <div class="post-actions-primary">
-            <button type="button" class="post-action like-btn" data-like aria-pressed="{{ $post->viewerReaction ? 'true' : 'false' }}" aria-label="Beitrag gefällt mir">
+            <button type="button" class="post-action like-btn {{ $post->viewerReaction ? 'is-liked' : '' }}" data-like aria-pressed="{{ $post->viewerReaction ? 'true' : 'false' }}" aria-label="Beitrag gefällt mir">
                 <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-heart"></use></svg>
                 <span class="like-count">{{ $likeCount }}</span>
             </button>

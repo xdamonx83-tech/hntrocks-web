@@ -40,6 +40,10 @@
   }
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
   const requestsInFlight = new Set();
+  let activeViewerCard = null;
+  document.getElementById('hntMediaViewer')?.addEventListener('hnt:viewer-media', event=>{
+    activeViewerCard = event.detail?.card || null;
+  });
 
   async function mutate(post, action, clicked) {
     const id = post?.dataset.nextFeedPost;
@@ -78,6 +82,7 @@
         if(reacted){
           document.dispatchEvent(new CustomEvent('hnt:like-confirmed',{detail:{button:clicked,reacted:true,postId:id}}));
         }
+        document.dispatchEvent(new CustomEvent('hnt:next-post-state',{detail:{postId:id,action:'like',count,reacted}}));
       } else {
         const saved=Boolean(payload.bookmarked);
         post.classList.toggle('user-saved',saved);
@@ -87,6 +92,7 @@
         if(menuLabel)menuLabel.textContent=saved?'Beitrag gemerkt':'Beitrag speichern';
         if(menuHint)menuHint.textContent=saved?'Aus Merkliste entfernen':'Für später in Merkliste sichern';
         if(menuCheck)menuCheck.hidden=!saved;
+        queueMicrotask(()=>document.dispatchEvent(new CustomEvent('hnt:next-post-state',{detail:{postId:id,action:'bookmark',bookmarked:saved}})));
         post.querySelectorAll('[data-save]').forEach(b=>{
           b.classList.toggle('is-saved',saved);
           b.setAttribute('aria-pressed',String(saved));
@@ -107,14 +113,37 @@
       void mutate(post,btn.hasAttribute('data-like')?'like':'bookmark',btn);
       return;
     }
-    // Dialog controls use the original modal's forwarding click events.
-    // Until the exact active-card contract is verified, keep direct actions
-    // disabled instead of potentially mutating the wrong user's post.
-    if(event.target.closest('#hntMvLike,#hntMvSave,#hntPdLike,#hntPdSave')){
+    const dialogButton=event.target.closest('#hntMvLike,#hntMvSave,#hntPdLike,#hntPdSave');
+    if(dialogButton){
+      const inViewer=dialogButton.id.startsWith('hntMv');
+      const card=inViewer ? activeViewerCard :
+        document.querySelector('#feedList .feed-post [data-comments-toggle][aria-expanded="true"]')?.closest('.feed-post');
+      if(!card?.dataset.nextFeedPost)return;
       event.preventDefault();event.stopImmediatePropagation();
-      toast('Diese Aktion im Medienviewer wird als Nächstes angebunden.');
+      const action=dialogButton.id.endsWith('Like')?'like':'bookmark';
+      void mutate(card,action,dialogButton);
     }
   },true);
+
+  document.addEventListener('hnt:next-post-state',event=>{
+    const data=event.detail,post=document.getElementById('post-'+data?.postId);
+    if(!post)return;
+    const liked=post.querySelector('[data-like]')?.getAttribute('aria-pressed')==='true';
+    const saved=post.querySelector('.post-save[data-save]')?.getAttribute('aria-pressed')==='true';
+    const count=post.querySelector('.like-count')?.textContent || '0';
+    if(activeViewerCard===post && !document.getElementById('hntMediaViewer')?.hidden){
+      const like=document.getElementById('hntMvLike'),mark=document.getElementById('hntMvSave');
+      if(like){like.classList.toggle('is-active',liked);like.setAttribute('aria-pressed',String(liked));const t=like.querySelector('span');if(t)t.textContent=liked?'Gefällt dir':'Gefällt mir';}
+      if(mark){mark.classList.toggle('is-active',saved);mark.setAttribute('aria-pressed',String(saved));const t=mark.querySelector('span');if(t)t.textContent=saved?'Gemerkt':'Merken';}
+      const n=document.getElementById('hntMvLikes');if(n)n.textContent=count;
+    }
+    if(post.querySelector('[data-comments-toggle]')?.getAttribute('aria-expanded')==='true'){
+      const like=document.getElementById('hntPdLike'),mark=document.getElementById('hntPdSave');
+      if(like){like.classList.toggle('is-liked',liked);like.setAttribute('aria-pressed',String(liked));const t=like.querySelector('span');if(t)t.textContent=liked?'Gefällt dir':'Gefällt mir';}
+      if(mark){mark.classList.toggle('is-saved',saved);mark.setAttribute('aria-pressed',String(saved));const t=mark.querySelector('span');if(t)t.textContent=saved?'Gemerkt':'Merken';}
+      const n=document.getElementById('hntPdLikes');if(n)n.textContent=count;
+    }
+  });
 
   document.addEventListener('submit', (event) => {
     const form = event.target;

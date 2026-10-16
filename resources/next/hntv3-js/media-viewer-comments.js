@@ -138,6 +138,13 @@
       '<button id="hntMvSendComment" type="submit" disabled>'+icon('paper-plane-tilt')+' Senden</button></div>'
   ].join('');
   aside.append(conversation,composer);
+  const liveViewer=document.body.dataset.nextIntegration || document.body.hasAttribute('data-hnt-next-live-posts');
+  if(liveViewer){
+    const identity=$('.hnt-mv-compose-identity strong',composer);
+    const avatar=$('.hnt-mv-compose-identity img',composer);
+    if(identity && document.body.dataset.nextViewerName)identity.textContent=document.body.dataset.nextViewerName;
+    if(avatar && document.body.dataset.nextViewerAvatar)avatar.src=document.body.dataset.nextViewerAvatar;
+  }
 
   const list=$('#hntMvCommentList');
   const textarea=$('#hntMvCommentText');
@@ -167,6 +174,9 @@
   });
 
   function collectComments(){
+    if(activeCard?.dataset.nextFeedPost){
+      return window.HNTCommentBridge?.getComments(activeCard.id) || [];
+    }
     const allComments=[];
     const stored=$$('.comment-line',activeCard);
     stored.forEach((line,i)=>{
@@ -221,8 +231,9 @@
     reply.textContent='Antworten';
     reply.setAttribute('aria-label','Auf '+comment.name+' antworten');
     const key=(activeCard?.id||'post')+':'+comment.id;
-    const base=comment.mine?0:(2+comment.id.split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),0)%8);
-    const liked=commentLikes.get(key)===true;
+    const isReal=Boolean(activeCard?.dataset.nextFeedPost);
+    const base=isReal ? Number(comment.reactionsCount||0) : (comment.mine?0:(2+comment.id.split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),0)%8));
+    const liked=isReal ? Boolean(comment.viewerLiked) : commentLikes.get(key)===true;
     const like=document.createElement('button');
     like.type='button';
     like.className='hnt-mv-comment-like'+(liked?' is-liked':'');
@@ -230,7 +241,7 @@
     like.dataset.initialLikes=String(base);
     like.setAttribute('aria-label',(liked?'Like entfernen: ':'Kommentar liken: ')+comment.name);
     like.setAttribute('aria-pressed',String(liked));
-    like.innerHTML=icon('heart')+'<span>'+String(base+(liked?1:0))+'</span>';
+    like.innerHTML=icon('heart')+'<span>'+String(isReal?base:base+(liked?1:0))+'</span>';
     tools.append(reply,like);
     content.append(head,message,tools);
     node.append(avatar,content);
@@ -390,7 +401,10 @@
 
   document.addEventListener('hnt:next-comment-saved',event=>{
     if(!activeCard || event.detail?.postId !== activeCard.id)return;
-    drawComments({preserveScroll:true});
+    drawComments({freshId:event.detail?.commentId || null,preserveScroll:true});
+  });
+  document.addEventListener('hnt:next-comment-reaction',event=>{
+    if(activeCard?.id === event.detail?.postId)drawComments({preserveScroll:true});
   });
   viewer.addEventListener('hnt:viewer-media',event=>{
     activeCard=event.detail?.card||null;

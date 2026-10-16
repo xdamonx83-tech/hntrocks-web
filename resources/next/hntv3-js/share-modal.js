@@ -150,7 +150,41 @@
      if(!skipFocus&&back?.isConnected)back.focus({preventScroll:true});
    },250);
  }
+ let sharing=false;
+ async function publishRealShare(){
+   const snap=currentSource,postId=snap?.card?.dataset.nextFeedPost;
+   if(!postId || sharing)return;
+   const csrf=document.querySelector('meta[name="csrf-token"]')?.content;
+   if(!csrf){window.HNTNextFeedWrites?.notice('Sitzung abgelaufen. Bitte neu anmelden.',true);return;}
+   sharing=true;submit.disabled=true;
+   try{
+     const response=await fetch('/feed/'+encodeURIComponent(postId)+'/share',{
+       method:'POST',credentials:'same-origin',
+       headers:{'Accept':'application/json','X-CSRF-TOKEN':csrf,'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+       body:JSON.stringify({body:note.value.trim()})
+     });
+     let payload=null;try{payload=await response.json();}catch{}
+     if(!response.ok || !payload?.shared)throw Error(payload?.message || 'Teilen fehlgeschlagen.');
+     if(payload.already_shared){
+       hide({skipFocus:true});
+       window.HNTNextFeedWrites?.notice('Diesen Beitrag hast du bereits geteilt.');
+       return;
+     }
+     if(!payload.share_id)throw Error('Beitrag geteilt, aber keine Bestätigung erhalten.');
+     let newCard=null;
+     try{newCard=await window.HNTNextFeedWrites?.loadCard(payload.share_id);}catch{}
+     if(newCard){
+       feed.prepend(newCard);
+       document.getElementById('feedEmpty')?.setAttribute('hidden','');
+       document.dispatchEvent(new CustomEvent('hnt:composer:posted',{detail:{card:newCard}}));
+     }
+     hide({skipFocus:true});
+     window.HNTNextFeedWrites?.notice(newCard?'Beitrag geteilt.':'Beitrag geteilt. Er erscheint nach dem Neuladen.');
+   }catch(error){window.HNTNextFeedWrites?.notice(error.message||'Teilen fehlgeschlagen.',true);}
+   finally{sharing=false;submit.disabled=false;}
+ }
  function createShared(){
+   if(currentSource?.card?.dataset.nextFeedPost){void publishRealShare();return;}
    if(!currentSource)return;
    const snap=currentSource,ownNote=note.value.trim();
    const card=document.createElement('article');
@@ -202,7 +236,7 @@
    document.body.append(message);
    setTimeout(()=>message.remove(),2400);
  }
- function linkFor(snap){return 'https://hnt.rocks/feed#'+encodeURIComponent(snap.id);}
+ function linkFor(snap){return snap?.card?.dataset.permalink || 'https://hnt.rocks/feed#'+encodeURIComponent(snap.id);}
  async function copyLink(){
    if(!currentSource)return;
    try{
