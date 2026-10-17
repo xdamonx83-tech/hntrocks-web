@@ -5233,3 +5233,8 @@ body {
 
 .account-menu-footer form{display:block;width:100%;margin:0;}
 .account-menu-footer form .account-signout{width:100%;text-align:left;}
+
+/* Real XP journal; the prototype bounty tasks/badge preview are not live rewards. */
+.hnt-journal-panel .hnt-journal-section-title,.hnt-journal-panel .hnt-journal-tasks,.hnt-journal-panel .hnt-journal-feature,.hnt-journal-panel .hnt-journal-note{display:none!important}
+.hnt-prestige-choice.is-unavailable{opacity:.48;cursor:not-allowed}
+.hnt-prestige-choice.is-unavailable input{cursor:not-allowed}

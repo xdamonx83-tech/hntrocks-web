@@ -1,128 +1,138 @@
-/* HNT.ROCKS — Prestige 50 design preview.
-   Only UI simulation. No account, XP, badge or shop mutation. */
+/* HNT.ROCKS Prestige: real status and reward confirmation. */
 (()=>{
-  'use strict';
-  const widget=document.getElementById('hntPrestigeWidget');
-  const start=document.getElementById('hntPrestigeStart');
-  if(!widget||!start)return;
-  const $=selector=>widget.querySelector(selector);
-  const icon=name=>'<svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-'+name+'"></use></svg>';
-
-  const overlay=document.createElement('div');
-  overlay.className='hnt-prestige-overlay';
-  overlay.id='hntPrestigeOverlay';
-  overlay.hidden=true;
-  overlay.innerHTML=`
-    <div class="hnt-prestige-dialog" id="hntPrestigeDialog" role="dialog" aria-modal="true" aria-labelledby="hntPrestigeTitle" aria-describedby="hntPrestigeExplanation" tabindex="-1">
-      <button class="hnt-prestige-close hnt-pd-close" type="button" aria-label="Schließen" title="Schließen (Esc)">${icon('x')}</button>
-      <div class="hnt-prestige-eyebrow">HNT.ROCKS / HUNTER PRESTIGE</div>
-      <div class="hnt-prestige-dialog-title">
-        <img src="/build/next/hntv3-assets/prestige-skull.png" alt="" />
-        <div><h2 id="hntPrestigeTitle">Prestige 16</h2><p>Ein neuer Durchlauf. Eine neue Auszeichnung.</p></div>
-      </div>
-      <div class="hnt-prestige-reset-note" id="hntPrestigeExplanation">Du startest freiwillig wieder bei <strong>Level 1</strong>. Deine bisherigen Cosmetics und Badges bleiben erhalten. Du bekommst den Badge für Prestige 16.</div>
-      <fieldset>
-        <legend>WÄHLE DEINE BELOHNUNG</legend>
-        <div class="hnt-prestige-choices">
-          <label class="hnt-prestige-choice">
-            <input type="radio" name="hntPrestigeReward" value="xp" />
-            <span class="hnt-prestige-choice-icon">${icon('lightning')}</span>
-            <strong>+10 % XP</strong><small>Bonus für den nächsten Prestige-Durchlauf. Nicht stapelbar.</small>
-          </label>
-          <label class="hnt-prestige-choice">
-            <input type="radio" name="hntPrestigeReward" value="cosmetic" />
-            <span class="hnt-prestige-choice-icon">${icon('sparkle')}</span>
-            <strong>Mystery Cosmetic</strong><small>Ein zufälliges kostenloses Cosmetic aus dem HNT.ROCKS Shop.</small>
-          </label>
-        </div>
-      </fieldset>
-      <div class="hnt-prestige-dialog-actions">
-        <button class="hnt-prestige-cancel" type="button">Abbrechen</button>
-        <button class="hnt-prestige-confirm" type="button" disabled>Prestige bestätigen</button>
-      </div>
-      <p class="hnt-prestige-dialog-foot">Designvorschau: Noch keine echte XP-, Badge- oder Shopbuchung.</p>
-    </div>`;
-  document.body.append(overlay);
-  const dialog=overlay.querySelector('.hnt-prestige-dialog');
-  const radios=[...overlay.querySelectorAll('input[name="hntPrestigeReward"]')];
-  const confirm=overlay.querySelector('.hnt-prestige-confirm');
-  const closeButtons=overlay.querySelectorAll('.hnt-prestige-close,.hnt-prestige-cancel');
-  let restoreFocus=null;
-  let closingTimer=0;
-  let oldOverflow='';
-  let state={level:50,prestige:15,reward:null};
-  const isOpen=()=>!overlay.hidden;
-  function close(){
-    if(!isOpen()||closingTimer)return;
-    overlay.classList.remove('is-open');
-    document.removeEventListener('keydown',handleKeys,true);
-    document.body.style.overflow=oldOverflow;
-    closingTimer=window.setTimeout(()=>{
-      overlay.hidden=true;
-      closingTimer=0;
-      const target=restoreFocus?.isConnected&&!restoreFocus.disabled
-        ?restoreFocus:widget.querySelector('.widget-top a');
-      target?.focus({preventScroll:true});
-    },260);
+ 'use strict';
+ const widget=document.getElementById('hntPrestigeWidget');
+ const start=document.getElementById('hntPrestigeStart');
+ const state=window.HNTPrestigeData;
+ const words=window.HNTPrestigeWords||{};
+ if(!widget||!start||!state)return;
+ const t=k=>words[k]||k;
+ const icon=name=>'<svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-'+name+'"></use></svg>';
+ const box=document.createElement('div');
+ box.className='hnt-prestige-overlay';
+ box.id='hntPrestigeOverlay';
+ box.hidden=true;
+ box.innerHTML='<div class="hnt-prestige-dialog" id="hntPrestigeDialog" role="dialog" aria-modal="true" aria-labelledby="hntPrestigeTitle" aria-describedby="hntPrestigeExplanation" tabindex="-1">'
+  +'<button type="button" class="hnt-prestige-close hnt-pd-close">'+icon('x')+'</button>'
+  +'<div class="hnt-prestige-eyebrow">HNT.ROCKS / HUNTER PRESTIGE</div>'
+  +'<div class="hnt-prestige-dialog-title"><img src="/build/next/hntv3-assets/prestige-skull.png" alt=""/><div><h2 id="hntPrestigeTitle"></h2><p id="hntPrestigeSubhead"></p></div></div>'
+  +'<div class="hnt-prestige-reset-note" id="hntPrestigeExplanation"></div>'
+  +'<fieldset><legend id="hntPrestigeRewardLegend"></legend><div class="hnt-prestige-choices">'
+  +'<label class="hnt-prestige-choice"><input type="radio" name="hntPrestigeReward" value="xp"/><span class="hnt-prestige-choice-icon">'+icon('lightning')+'</span><strong id="hntPrestigeXpTitle"></strong><small id="hntPrestigeXpNote"></small></label>'
+  +'<label class="hnt-prestige-choice"><input type="radio" name="hntPrestigeReward" value="cosmetic"/><span class="hnt-prestige-choice-icon">'+icon('sparkle')+'</span><strong id="hntPrestigeCosmeticTitle"></strong><small id="hntPrestigeCosmeticNote"></small></label>'
+  +'</div></fieldset>'
+  +'<div class="hnt-prestige-dialog-actions"><button type="button" class="hnt-prestige-cancel"></button><button type="button" class="hnt-prestige-confirm" disabled></button></div>'
+  +'<p class="hnt-prestige-dialog-foot" id="hntPrestigeFoot" role="status" aria-live="polite"></p></div>';
+ document.body.append(box);
+ const dialog=box.querySelector('.hnt-prestige-dialog');
+ const $=selector=>box.querySelector(selector);
+ const set=(id,value)=>{const el=$(id);if(el)el.textContent=value;};
+ const radios=[...box.querySelectorAll('[name="hntPrestigeReward"]')];
+ const closeBtn=$('.hnt-prestige-close'),cancelBtn=$('.hnt-prestige-cancel'),confirm=$('.hnt-prestige-confirm');
+ closeBtn.setAttribute('aria-label',t('close'));closeBtn.title=t('close')+' (Esc)';
+ set('#hntPrestigeSubhead',t('dialog_intro'));
+ set('#hntPrestigeExplanation',t('dialog_note'));
+ set('#hntPrestigeRewardLegend',t('choose'));
+ set('#hntPrestigeXpTitle',t('xp_choice'));
+ set('#hntPrestigeXpNote',t('xp_explain'));
+ set('#hntPrestigeCosmeticTitle',t('cosmetic_choice'));
+ cancelBtn.textContent=t('cancel');
+ confirm.textContent=t('confirm');
+ let current=state, busy=false, closing=false, oldOverflow='', returnFocus=null;
+ const usable=()=>Boolean(window.HNTPrestigeEnabled);
+ const isOpen=()=>!box.hidden;
+ const refreshConfirm=()=>{
+  const selected=radios.find(r=>r.checked);
+  confirm.disabled=busy||!selected||selected.disabled||!current.can_prestige||!usable();
+ };
+ const renderStatus=data=>{
+  current=data;
+  $('#hntPrestigeTitle').textContent=t('start')+' '+(Number(data.prestige)+1);
+  const cosmetics=Number(data.cosmetics_available||0);
+  const cosmetic=radios.find(r=>r.value==='cosmetic');
+  cosmetic.disabled=cosmetics<=0;
+  if(cosmetic.disabled)cosmetic.checked=false;
+  set('#hntPrestigeCosmeticNote',cosmetics<=0?t('all_owned'):t('cosmetic_explain')+' '+t('available_items').replace(':count',String(cosmetics)));
+  cosmetic.closest('label').classList.toggle('is-unavailable',cosmetics<=0);
+  set('#hntPrestigeFoot',t('modal_footer'));
+  refreshConfirm();
+ };
+ const close=()=>{
+  if(!isOpen()||closing||busy)return;
+  closing=true;box.classList.remove('is-open');document.removeEventListener('keydown',onKey,true);
+  document.body.style.overflow=oldOverflow;
+  window.setTimeout(()=>{
+   box.hidden=true;closing=false;
+   const target=returnFocus?.isConnected&&!returnFocus.disabled?returnFocus:widget.querySelector('.widget-top a');
+   target?.focus({preventScroll:true});
+  },260);
+ };
+ const onKey=event=>{
+  if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close();return;}
+  if(event.key==='Tab'){
+   const all=[...dialog.querySelectorAll('button:not(:disabled),input:not(:disabled)')];
+   if(!all.length)return;
+   const first=all[0],last=all[all.length-1];
+   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
   }
-  function handleKeys(event){
-    if(event.key==='Escape'){
-      event.preventDefault();event.stopImmediatePropagation();close();
-    }
-    if(event.key==='Tab'){
-      const focusables=[...dialog.querySelectorAll('button:not(:disabled),input:not(:disabled)')];
-      const first=focusables[0],last=focusables[focusables.length-1];
-      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
-      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
-    }
+ };
+ const open=async()=>{
+  if(!usable()||!current.can_prestige||!box.hidden||closing)return;
+  busy=true;
+  try{
+   const response=await fetch('/next/prestige',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'});
+   if(!response.ok)throw Error('status');
+   const latest=await response.json();
+   if(!latest.can_prestige)return;
+   renderStatus(latest);
+   returnFocus=document.activeElement;
+   oldOverflow=document.body.style.overflow;
+   radios.forEach(r=>r.checked=false);
+   busy=false;refreshConfirm();box.hidden=false;
+   document.dispatchEvent(new CustomEvent('hnt:dropdown-open',{detail:{origin:'prestige'}}));
+   document.body.style.overflow='hidden';
+   void box.offsetWidth;
+   window.requestAnimationFrame(()=>box.classList.add('is-open'));
+   document.addEventListener('keydown',onKey,true);
+   (radios.find(r=>!r.disabled)||closeBtn).focus({preventScroll:true});
+  }catch(err){
+   widget.querySelector('#hntPrestigeStatus span').textContent=t('error');
+  }finally{busy=false;}
+ };
+ start.addEventListener('click',open);
+ radios.forEach(r=>r.addEventListener('change',refreshConfirm));
+ closeBtn.addEventListener('click',close);cancelBtn.addEventListener('click',close);
+ box.addEventListener('click',e=>{if(e.target===box)close();});
+ confirm.addEventListener('click',async()=>{
+  if(busy||!usable()||!current.can_prestige)return;
+  const selected=radios.find(r=>r.checked&&!r.disabled);
+  if(!selected)return;
+  busy=true;refreshConfirm();closeBtn.disabled=true;cancelBtn.disabled=true;
+  confirm.textContent=t('processing');
+  try{
+   const csrf=document.querySelector('meta[name="csrf-token"]')?.content;
+   if(!csrf)throw Error('csrf');
+   const response=await fetch('/next/prestige',{
+    method:'POST',credentials:'same-origin',
+    headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':csrf},
+    body:JSON.stringify({reward:selected.value})
+   });
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok||!result.success){
+    const message=result.errors?.reward?.[0]||result.errors?.prestige?.[0]||result.message||t('error');
+    throw Error(message);
+   }
+   set('#hntPrestigeFoot',t('success')+(result.reward?.cosmetic?' '+result.reward.cosmetic:''));
+   confirm.textContent=t('success');
+   radios.forEach(r=>r.disabled=true);
+   confirm.disabled=true;
+   window.setTimeout(()=>window.location.reload(),1400);
+  }catch(error){
+   set('#hntPrestigeFoot',error.message||t('error'));
+   confirm.textContent=t('confirm');
+   closeBtn.disabled=false;cancelBtn.disabled=false;
+   busy=false;refreshConfirm();
   }
-  function open(){
-    if(state.level!==50||!overlay.hidden)return;
-    restoreFocus=document.activeElement;
-    oldOverflow=document.body.style.overflow;
-    radios.forEach(r=>r.checked=false);
-    confirm.disabled=true;
-    overlay.hidden=false;
-    document.dispatchEvent(new CustomEvent('hnt:dropdown-open',{detail:{origin:'prestige'}}));
-    document.body.style.overflow='hidden';
-    // Same two-stage backdrop/panel reveal as the post discussion modal.
-    void overlay.offsetWidth;
-    requestAnimationFrame(()=>overlay.classList.add('is-open'));
-    document.addEventListener('keydown',handleKeys,true);
-    radios[0].focus({preventScroll:true});
-  }
-  function render(){
-    $('#hntPrestigeRank').textContent='PRESTIGE '+state.prestige+' · LEVEL '+state.level;
-    $('#hntPrestigeEmblemNumber').textContent=state.prestige;
-    $('.hnt-prestige-emblem').setAttribute('aria-label','Prestige-Badge '+state.prestige);
-    $('#hntPrestigeProgressLabel').textContent='LEVEL '+state.level+' / 50';
-    const capped=state.level===50;
-    $('#hntPrestigeProgressPercent').textContent=capped?'MAX. LEVEL':'0 % ZUM NÄCHSTEN LEVEL';
-    $('#hntPrestigeProgressFill').style.width=capped?'100%':'0%';
-    $('#hntPrestigeProgressBar').setAttribute('aria-valuenow',capped?'100':'0');
-    const message=capped?'Level 50 erreicht. Prestige ist verfügbar.':
-      state.reward==='xp'?'+10 % XP-Boost für Prestige '+state.prestige+' aktiv.':
-      'Prestige '+state.prestige+' aktiv · Cosmetic-Auswahl in der Vorschau.';
-    $('#hntPrestigeStatus span').textContent=message;
-    start.disabled=!capped;
-    start.setAttribute('aria-disabled',String(!capped));
-    $('#hntPrestigeStartText').textContent=capped?'Prestige '+(state.prestige+1)+' starten':'Prestige '+state.prestige+' gestartet';
-    $('#hntPrestigeHint').textContent=capped?'Freiwillig · Level wird auf 1 zurückgesetzt':
-      'Badge erhalten · Nächster Aufstieg bei Level 50';
-  }
-  start.addEventListener('click',open);
-  closeButtons.forEach(button=>button.addEventListener('click',close));
-  overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
-  radios.forEach(input=>input.addEventListener('change',()=>{confirm.disabled=!radios.some(r=>r.checked)}));
-  confirm.addEventListener('click',()=>{
-    const picked=radios.find(r=>r.checked)?.value;
-    if(state.level!==50||!['xp','cosmetic'].includes(picked))return;
-    state={level:1,prestige:state.prestige+1,reward:picked};
-    render();
-    close();
-    document.dispatchEvent(new CustomEvent('hnt:prestige-preview-confirmed',{
-      detail:{prestige:state.prestige,reward:picked,previewOnly:true}
-    }));
-  });
-  render();
+ });
 })();

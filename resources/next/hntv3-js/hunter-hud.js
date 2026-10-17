@@ -3,6 +3,10 @@
 'use strict';
 const onlineToggle=document.getElementById('hunterOnlineToggle'),xpToggle=document.getElementById('hunterXpToggle');
 if(!onlineToggle||!xpToggle)return;
+const prestige=window.HNTPrestigeData||{career_xp:0,level:1,prestige:0,cycle_xp:0,cycle_cap:12250,xp_boost_percent:0};
+const prestigeWords=window.HNTPrestigeWords||{};
+const prestigeProgress=Number(window.HNTPrestigeProgress||0);
+const pw=k=>prestigeWords[k]||k;
 const icon=name=>'<svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-'+name+'"></use></svg>';
 const onlineTexts={
  de:{friends:'Freunde',all:'Alle',team:'Team',online:'Online',intro:'Wer ist gerade in der Community unterwegs?',search:'Hunter suchen ...',teamMember:'Teammitglied',friend:'Freund',you:'Du',nothing:'Keine Online-Hunter gefunden.',loading:'Hunter werden geladen ...',error:'Online-Hunter konnten nicht geladen werden.',members:'Hunter finden',people:'Hunter online',more:'Weitere Hunter in der Mitgliederübersicht'},
@@ -42,9 +46,9 @@ journal.innerHTML=[
 '<div class="hnt-hud-line is-gold"></div><div class="hnt-hud-head">',
 '<div class="hnt-hud-kicker"><i class="hnt-hud-signal"></i> HNT.ROCKS / JOURNAL</div>',
 '<div class="hnt-hud-heading"><div><h2>Deine Jagd. Dein Ruf.</h2><p>Community-Aufträge und Auszeichnungen</p></div><div class="hnt-hud-head-icon is-gold">',icon('crosshair'),'</div></div></div>',
-'<div class="hnt-journal-content"><section class="hnt-journal-rank"><div class="hnt-journal-rank-head"><div><small>HUNTER-RANG 18</small><div class="hnt-journal-xp"><strong id="hntJournalXP">23.245</strong><span>XP</span></div></div>',
+'<div class="hnt-journal-content"><section class="hnt-journal-rank"><div class="hnt-journal-rank-head"><div><small>HUNTER-RANG</small><div class="hnt-journal-xp"><strong id="hntJournalXP">0</strong><span>XP</span></div></div>',
 '<div class="hnt-journal-seal">',icon('crosshair'),'<span>HNT</span></div></div>',
-'<div class="hnt-journal-track"><span id="hntJournalTrack"></span></div><div class="hnt-journal-rank-caption"><span>Rang 18</span><span id="hntNextLevel">Noch 1.755 XP bis Rang 19</span></div></section>',
+'<div class="hnt-journal-track"><span id="hntJournalTrack"></span></div><div class="hnt-journal-rank-caption"><span>Level</span><span id="hntNextLevel">-- XP</span></div></section>',
 '<div class="hnt-journal-section-title"><div><small>TÄGLICHE KOPFGELDER</small><h3>Deine Aufträge</h3></div><span id="hntTasksCount">0 / 3</span></div>',
 '<div id="hntJournalTasks" class="hnt-journal-tasks"></div>',
 '<button type="button" class="hnt-journal-feature" id="hntJournalFeature" aria-label="Badge Sumpfveteran ansehen">',
@@ -125,12 +129,16 @@ function renderBadge(){
  modal.querySelector('#hntBadgeHint').textContent=unlocked?'Du hast die Auszeichnung Sumpfveteran freigeschaltet.':'Noch ein Tag bis zur Freischaltung. Schließe die heutigen Kopfgelder ab.';
 }
 function renderJournal(){
- const xp=23245+tasks.filter(t=>done.has(t[0])).reduce((s,t)=>s+t[3],0);
- const xpFormat=new Intl.NumberFormat('de-DE');
+ const xp=Number(prestige.career_xp||0);
+ const xpFormat=new Intl.NumberFormat(document.documentElement.lang||'de-DE');
+ journal.querySelector('.hnt-journal-rank-head small').textContent=pw('prestige_count')+' '+prestige.prestige+' · '+pw('level')+' '+prestige.level;
+ journal.querySelector('.hnt-journal-rank-caption>span').textContent=pw('level')+' '+prestige.level+' / 50';
+ journal.querySelector('.hnt-hud-heading h2').textContent=pw('journal_title');
+ journal.querySelector('.hnt-hud-heading p').textContent=pw('journal_note');
  journal.querySelector('#hntJournalXP').textContent=xpFormat.format(xp);
  document.getElementById('hunterHudXpValue').textContent=xpFormat.format(xp)+' XP';
- journal.querySelector('#hntJournalTrack').style.width=Math.min(100,(xp-20000)/5000*100)+'%';
- journal.querySelector('#hntNextLevel').textContent='Noch '+xpFormat.format(25000-xp)+' XP bis Rang 19';
+ journal.querySelector('#hntJournalTrack').style.width=Math.max(0,Math.min(100,prestigeProgress))+'%';
+ journal.querySelector('#hntNextLevel').textContent=Number(prestige.level)>=50?pw('journal_ready'):xpFormat.format(Math.max(0,Number(prestige.level)*250-Number(prestige.cycle_xp||0)))+' '+pw('journal_to_next');
  journal.querySelector('#hntTasksCount').textContent=done.size+' / 3';
  const holder=journal.querySelector('#hntJournalTasks');holder.replaceChildren();
  tasks.forEach(t=>{
