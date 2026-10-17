@@ -208,7 +208,15 @@
                 <p class="shop-desc">{{ $item->displayDescription() }}</p>
                 @if($item->type === 'like_effect')
  <button type="button" class="hnt-like-preview-button" data-hnt-like-preview="{{ $item->key }}" aria-label="{{ $likePreviewText }}: {{ $item->displayName() }}">
- <span class="hnt-like-preview-heart" aria-hidden="true">♡</span><span>{{ $likePreviewText }}</span><span aria-hidden="true">↗</span></button>
+ <span class="hnt-like-preview-heart" aria-hidden="true">
+  @if(str_starts_with($item->key, 'like_effect_thumb_'))
+    <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><path d="M8.1 9.6 12.4 3.5c.8-1.1 2.7-.7 2.7 1l-.5 4.6h5.1c1.9 0 2.7 1.4 2.2 3l-2.1 8c-.3 1.1-1.3 1.7-2.3 1.7H8.1Z M2.1 9.7h4.7v12H2.1a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z"/></svg>
+  @elseif(str_starts_with($item->key, 'like_effect_heart_'))
+    <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><path d="M12 21s-9.4-5.8-9.4-12.2a5.1 5.1 0 0 1 9.4-2.9 5.1 5.1 0 0 1 9.4 2.9C21.4 15.2 12 21 12 21Z"/></svg>
+  @else
+    &#9825;
+  @endif
+</span><span>{{ $likePreviewText }}</span><span aria-hidden="true">↗</span></button>
 @endif
 
                 <div class="shop-stats">
@@ -282,7 +290,15 @@
                     <p class="shop-desc">{{ $item->displayDescription() }}</p>
                 @if($item->type === 'like_effect')
  <button type="button" class="hnt-like-preview-button" data-hnt-like-preview="{{ $item->key }}" aria-label="{{ $likePreviewText }}: {{ $item->displayName() }}">
- <span class="hnt-like-preview-heart" aria-hidden="true">♡</span><span>{{ $likePreviewText }}</span><span aria-hidden="true">↗</span></button>
+ <span class="hnt-like-preview-heart" aria-hidden="true">
+  @if(str_starts_with($item->key, 'like_effect_thumb_'))
+    <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><path d="M8.1 9.6 12.4 3.5c.8-1.1 2.7-.7 2.7 1l-.5 4.6h5.1c1.9 0 2.7 1.4 2.2 3l-2.1 8c-.3 1.1-1.3 1.7-2.3 1.7H8.1Z M2.1 9.7h4.7v12H2.1a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z"/></svg>
+  @elseif(str_starts_with($item->key, 'like_effect_heart_'))
+    <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><path d="M12 21s-9.4-5.8-9.4-12.2a5.1 5.1 0 0 1 9.4-2.9 5.1 5.1 0 0 1 9.4 2.9C21.4 15.2 12 21 12 21Z"/></svg>
+  @else
+    &#9825;
+  @endif
+</span><span>{{ $likePreviewText }}</span><span aria-hidden="true">↗</span></button>
 @endif
 
                     <div class="shop-stats">
@@ -314,8 +330,8 @@
 @endsection
 
 @push('rework-head')
-<link rel="stylesheet" href="/build/next/hntv3-js/like-effect-shop.css?v=cosmetics-20261017"/>
+<link rel="stylesheet" href="/build/next/hntv3-js/like-effect-shop.css?v=heart-thumb-20261017"/>
 @endpush
 @push('rework-scripts')
-<script defer src="/build/next/hntv3-js/like-embers.js?v=like-cosmetics-20261017"></script>
+<script defer src="/build/next/hntv3-js/like-embers.js?v=heart-thumb-20261017"></script>
 @endpush

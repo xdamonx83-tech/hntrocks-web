@@ -9,3 +9,11 @@
 .hnt-like-preview-button[data-hnt-like-preview="like_effect_cursed"] .hnt-like-preview-heart{color:#8dda83}
 .hnt-like-preview-button[data-hnt-like-preview="like_effect_moonfire"] .hnt-like-preview-heart{color:#a4d9fb}
 @media(prefers-reduced-motion:reduce){.hnt-like-preview-button{transition:none}}
+
+.hnt-like-preview-heart svg{display:block;fill:currentColor}
+.hnt-like-preview-button[data-hnt-like-preview$="_obsidian"] .hnt-like-preview-heart{color:#14141a;filter:drop-shadow(0 0 2px #c4bed1) drop-shadow(0 0 4px #c4bed1)}
+.hnt-like-preview-button[data-hnt-like-preview$="_blood"] .hnt-like-preview-heart{color:#920c23;filter:drop-shadow(0 0 2px #ff506a) drop-shadow(0 0 4px #ff506a)}
+.hnt-like-preview-button[data-hnt-like-preview$="_neon"] .hnt-like-preview-heart{color:#78ff65;filter:drop-shadow(0 0 2px #e5ffbd) drop-shadow(0 0 4px #e5ffbd)}
+.hnt-like-preview-button[data-hnt-like-preview$="_pink"] .hnt-like-preview-heart{color:#ff39ce;filter:drop-shadow(0 0 2px #ffe0f4) drop-shadow(0 0 4px #ffe0f4)}
+.hnt-like-preview-button[data-hnt-like-preview$="_gold"] .hnt-like-preview-heart{color:#d8a948;filter:drop-shadow(0 0 2px #fff0b6) drop-shadow(0 0 4px #fff0b6)}
+.hnt-like-preview-button[data-hnt-like-preview$="_frost"] .hnt-like-preview-heart{color:#63c4f5;filter:drop-shadow(0 0 2px #e2faff) drop-shadow(0 0 4px #e2faff)}

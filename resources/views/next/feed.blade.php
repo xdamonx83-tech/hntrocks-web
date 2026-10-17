@@ -25,7 +25,7 @@
 <script defer src="/build/next/hntv3-js/media-viewer-comments.js?v=avatars-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-live-adapter.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=poll-20261017"></script>
-<script defer src="/build/next/hntv3-js/like-embers.js?v=like-cosmetics-20261017"></script>
+<script defer src="/build/next/hntv3-js/like-embers.js?v=heart-thumb-20261017"></script>
 <script defer src="/build/next/hntv3-js/composer-dispatch.js"></script>
 <script defer src="/build/next/hntv3-js/composer-extras.js?v=locale-20261017"></script>
 <script defer src="/build/next/hntv3-js/feed-discussions.js"></script>

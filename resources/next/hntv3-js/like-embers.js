@@ -12,6 +12,21 @@
     like_effect_iron_sparks:{tone:'#ffbd77',slash:'#d68854',symbol:'╱',shape:'sparks',glow:'rgba(242,137,67,.75)',rise:1.22},
     like_effect_moonfire:{tone:'#bfecff',slash:'#69bee8',symbol:'✦',shape:'mark',glow:'rgba(77,172,238,.8)',rise:1.15}
   };
+  // Colored SVG hearts and thumbs are collectible, not recolored HR logos.
+  Object.assign(effects,{
+    like_effect_heart_obsidian:{tone:'#14141a',stroke:'#c4bed1',glow:'rgba(156,132,199,.8)',shape:'heart',rise:1.05},
+    like_effect_heart_blood:{tone:'#920c23',stroke:'#ff506a',glow:'rgba(255,43,72,.88)',shape:'heart',rise:1.05},
+    like_effect_heart_neon:{tone:'#78ff65',stroke:'#e5ffbd',glow:'rgba(92,255,71,.9)',shape:'heart',rise:1.05},
+    like_effect_heart_pink:{tone:'#ff39ce',stroke:'#ffe0f4',glow:'rgba(255,56,205,.9)',shape:'heart',rise:1.05},
+    like_effect_heart_gold:{tone:'#d8a948',stroke:'#fff0b6',glow:'rgba(248,184,71,.86)',shape:'heart',rise:1.05},
+    like_effect_heart_frost:{tone:'#63c4f5',stroke:'#e2faff',glow:'rgba(88,194,247,.92)',shape:'heart',rise:1.05},
+    like_effect_thumb_obsidian:{tone:'#14141a',stroke:'#c4bed1',glow:'rgba(156,132,199,.8)',shape:'thumb',rise:1.05},
+    like_effect_thumb_blood:{tone:'#920c23',stroke:'#ff506a',glow:'rgba(255,43,72,.88)',shape:'thumb',rise:1.05},
+    like_effect_thumb_neon:{tone:'#78ff65',stroke:'#e5ffbd',glow:'rgba(92,255,71,.9)',shape:'thumb',rise:1.05},
+    like_effect_thumb_pink:{tone:'#ff39ce',stroke:'#ffe0f4',glow:'rgba(255,56,205,.9)',shape:'thumb',rise:1.05},
+    like_effect_thumb_gold:{tone:'#d8a948',stroke:'#fff0b6',glow:'rgba(248,184,71,.86)',shape:'thumb',rise:1.05},
+    like_effect_thumb_frost:{tone:'#63c4f5',stroke:'#e2faff',glow:'rgba(88,194,247,.92)',shape:'thumb',rise:1.05}
+  });
   const defaultStyle={tone:'#fff',slash:'#8fd3a3',symbol:'·',shape:'mark',glow:'rgba(113,200,142,.55)',rise:1};
   let layer=null;
   function getLayer(){
@@ -47,7 +62,31 @@
       const el=document.createElement('span');
       el.className=secondary?'hnt-heart-ember':'hnt-heart-spark';
       Object.assign(el.style,{position:'absolute',display:'inline-flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',whiteSpace:'nowrap',transformOrigin:'center',willChange:'transform,opacity',left:(x+(i-3)*2)+'px',top:(y-(secondary?1:6))+'px',fontFamily:'"Exo 2",Arial,sans-serif',fontWeight:'800',fontSize:(secondary?12:[11,13,10,14,12][i%5])+'px',lineHeight:'1',filter:'drop-shadow(0 0 5px '+effect.glow+')'});
-      if(secondary){
+      if(effect.shape==='heart'||effect.shape==='thumb'){
+        const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+        const size=secondary?13:(14+(i%3)*2);
+        svg.setAttribute('viewBox','0 0 24 24');
+        svg.setAttribute('width',String(size));
+        svg.setAttribute('height',String(size));
+        svg.setAttribute('aria-hidden','true');
+        svg.style.overflow='visible';
+        svg.style.filter='drop-shadow(0 0 5px '+effect.glow+')';
+        const addShape=d=>{
+          const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+          p.setAttribute('d',d);p.setAttribute('fill',effect.tone);
+          p.setAttribute('stroke',effect.stroke);
+          p.setAttribute('stroke-linejoin','round');
+          p.setAttribute('stroke-width',effect.tone==='#14141a'?'1.5':'0.85');
+          svg.appendChild(p);
+        };
+        if(effect.shape==='heart'){
+          addShape('M12 21s-9.4-5.8-9.4-12.2a5.1 5.1 0 0 1 9.4-2.9 5.1 5.1 0 0 1 9.4 2.9C21.4 15.2 12 21 12 21Z');
+        }else{
+          addShape('M8.1 9.6 12.4 3.5c.8-1.1 2.7-.7 2.7 1l-.5 4.6h5.1c1.9 0 2.7 1.4 2.2 3l-2.1 8c-.3 1.1-1.3 1.7-2.3 1.7H8.1Z');
+          addShape('M2.1 9.7h4.7v12H2.1a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z');
+        }
+        el.appendChild(svg);
+      }else if(secondary){
         if(mist||dust){
           el.style.width=(7+(i%3)*5)+'px';el.style.height='4px';
           el.style.borderRadius='50%';el.style.background=effect.tone;el.style.opacity='.55';
