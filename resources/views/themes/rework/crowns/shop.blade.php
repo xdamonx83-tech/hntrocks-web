@@ -55,10 +55,10 @@
         return match ($key) {
             'avatar_frame', 'avatar-frame', 'avatarrahmen', 'frame' => match(app()->getLocale()) { 'de' => 'Avatarrahmen', 'es' => 'Marco de avatar', 'ru' => 'Рамка аватара', default => 'Avatar frame' },
             'like_effect' => match (app()->getLocale()) { 'de' => 'Like-Effekt', 'es' => 'Efecto de Me gusta', 'ru' => 'Эффект лайка', default => 'Like effect' },
-            'username_glow', 'username-glow', 'username_color', 'username-color', 'username_colour', 'username-colour' => match(app()->getLocale()) { 'de' => 'Namenseffekt', 'es' => 'Efecto de nombre', 'ru' => 'Эффект имени', default => 'Username effect' },
+            'username_glow', 'username-glow', 'username_color', 'username-color', 'username_colour', 'username-colour', 'username_effect', 'username-effect' => match(app()->getLocale()) { 'de' => 'Namenseffekt', 'es' => 'Efecto de nombre', 'ru' => 'Эффект имени', default => 'Username effect' },
             'profile_card', 'profile-card', 'profilkarte' => match(app()->getLocale()) { 'de' => 'Hunter-Karte', 'es' => 'Tarjeta de cazador', 'ru' => 'Карточка охотника', default => 'Hunter card' },
             'profile_banner', 'profile-banner', 'banner', 'cover' => match(app()->getLocale()) { 'de' => 'Profilbanner', 'es' => 'Banner de perfil', 'ru' => 'Баннер профиля', default => 'Profile banner' },
-            'title', 'titel' => match(app()->getLocale()) { 'de' => 'Titel', 'es' => 'Título', 'ru' => 'Титул', default => 'Title' },
+            'title', 'titel', 'profile_title', 'profile-title' => match(app()->getLocale()) { 'de' => 'Titel', 'es' => 'Título', 'ru' => 'Титул', default => 'Title' },
             'boost', 'booster' => 'Boost',
             'badge', 'cup', 'collectible' => $isEnglish ? 'Collectible' : 'Sammleritem',
             default => filled($value) ? \Illuminate\Support\Str::headline(str_replace(['_', '-'], ' ', (string) $value)) : ($isEnglish ? 'Item' : 'Item'),
