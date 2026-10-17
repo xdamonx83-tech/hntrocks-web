@@ -14,6 +14,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&amp;display=swap" rel="stylesheet" data-hnt-standard-font="exo"/>
 @vite(['resources/css/next/hntv3.css'], 'build/next')
+<link rel="stylesheet" href="{{ asset('assets/themes/rework/hnt-cosmetics-v3.css') }}?v=20261017"/>
 <script>window.HNTNextLocaleMoodLabels=@json(\App\Http\Controllers\Next\NextText::moods());</script>
 <script defer src="/build/next/hntv3-js/script.js"></script>
 <script defer src="/build/next/hntv3-js/navigation.js"></script>
