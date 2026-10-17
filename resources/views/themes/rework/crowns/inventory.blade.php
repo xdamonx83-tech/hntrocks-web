@@ -209,6 +209,7 @@
                 <div class="shop-item-icon"><i aria-hidden="true" class="ph {{ $iconClass }} ph-icon"></i></div>
             </div>
 
+            @include('themes.rework.crowns.partials.cosmetic-preview', ['item' => $item, 'viewer' => auth()->user()])
             <h2>{{ $item->displayName() }}</h2>
             <p class="shop-slot">{{ $typeLabel }}</p>
             <p class="shop-desc">{{ $item->displayDescription() }}</p>
@@ -268,6 +269,7 @@
 
 @push('rework-head')
 <link rel="stylesheet" href="/build/next/hntv3-js/like-effect-shop.css?v=heart-thumb-20261017"/>
+<link rel="stylesheet" href="{{ asset('assets/themes/rework/hnt-cosmetics-v3.css') }}?v=20261017"/>
 @endpush
 @push('rework-scripts')
 <script defer src="/build/next/hntv3-js/like-embers.js?v=heart-thumb-20261017"></script>
