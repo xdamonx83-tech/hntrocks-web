@@ -18,11 +18,12 @@ class GamificationService
         'account_created' => 25,
         'profile_updated' => 15,
         'profile_completed' => 75,
-        'feed_post_created' => 20,
-        'feed_comment_created' => 8,
-        'feed_comment_received' => 4,
-        'feed_like_given' => 2,
-        'feed_like_received' => 3,
+        'feed_post_created' => 40,
+        'feed_post_shared' => 15,
+        'feed_comment_created' => 20,
+        'feed_comment_received' => 6,
+        'feed_like_given' => 4,
+        'feed_like_received' => 6,
         'lfg_post_created' => 15,
         'lfg_application_sent' => 10,
         'lfg_application_accepted' => 20,
@@ -35,22 +36,61 @@ class GamificationService
         'media_uploaded' => 10,
         'referral_signup' => 15,
         'referral_profile_completed' => 50,
-        'moment_created' => 25,
-        'moment_comment_created' => 8,
-        'moment_like_given' => 2,
-        'moment_like_received' => 3,
+        'moment_created' => 60,
+        'moment_comment_created' => 20,
+        'moment_like_given' => 4,
+        'moment_like_received' => 6,
         'moment_saved' => 5,
         'cup_created' => 35,
         'cup_team_created' => 25,
         'cup_team_joined' => 15,
-        'cup_submission_created' => 15,
-        'cup_submission_approved' => 40,
+        'cup_submission_created' => 30,
+        'cup_submission_approved' => 50,
         'cup_idea_submitted' => 10,
         'cup_idea_voted' => 2,
         'loadout_challenge_submission_created' => 10,
         'loadout_challenge_submission_accepted' => 40,
         'moment_of_week_selected' => 50,
         'quest_completed' => 0,
+    ];
+
+
+    /**
+     * Caps only repeatable engagement events. Other earned rewards and all
+     * previously recorded career XP stay untouched.
+     */
+    private const DAILY_EVENT_LIMITS = [
+        'feed_post_created' => 6,
+        'feed_comment_created' => 20,
+        'feed_like_given' => 20,
+        'feed_like_received' => 100,
+        'feed_comment_received' => 100,
+        'feed_post_shared' => 8,
+        'moment_created' => 4,
+        'moment_comment_created' => 20,
+        'moment_like_given' => 20,
+        'moment_like_received' => 100,
+    ];
+
+    /**
+     * Repeatable once-a-day challenges, not free login XP.
+     * The variety goal requires activity in three separate categories.
+     */
+    private const DAILY_GOALS = [
+        'daily_first_post' => ['action' => 'feed_post_created', 'count' => 1, 'xp' => 190],
+        'daily_discussion' => ['action' => 'feed_comment_created', 'count' => 3, 'xp' => 170],
+        'daily_reactions' => ['action' => 'feed_like_given', 'count' => 8, 'xp' => 100],
+        'daily_first_moment' => ['action' => 'moment_created', 'count' => 1, 'xp' => 150],
+        'daily_cup_success' => ['action' => 'cup_submission_approved', 'count' => 1, 'xp' => 160],
+        'daily_variety' => ['action' => null, 'count' => 3, 'xp' => 160],
+    ];
+
+    private const DAILY_VARIETY_ACTIONS = [
+        'feed_post_created',
+        'feed_comment_created',
+        'feed_like_given',
+        'moment_created',
+        'cup_submission_approved',
     ];
 
     public function award(User $user, string $action, ?int $points = null, ?Model $source = null, ?string $description = null, array $metadata = [], bool $oncePerSource = true): ?XpEvent
@@ -70,13 +110,16 @@ class GamificationService
                 return null;
             }
 
-            // Carry the rounding remainder so ten 2-XP awards become exactly 22 XP.
-            $awardedPoints = $points;
-            if ($lockedUser->prestige_xp_boost) {
-                $tenths = $points * 11 + (int) $lockedUser->prestige_xp_bonus_remainder;
-                $awardedPoints = intdiv($tenths, 10);
-                $lockedUser->prestige_xp_bonus_remainder = $tenths % 10;
+            if (isset(self::DAILY_EVENT_LIMITS[$action])
+                && XpEvent::query()->where('user_id', $lockedUser->id)
+                    ->where('action', $action)
+                    ->where('created_at', '>=', now()->startOfDay())
+                    ->count() >= self::DAILY_EVENT_LIMITS[$action]) {
+                return null;
             }
+
+            // Preserve fractional 10% prestige boosts across base and daily XP.
+            $awardedPoints = $this->applyPrestigeBoost($lockedUser, $points);
 
             $event = XpEvent::create([
                 'user_id' => $lockedUser->id,
@@ -92,10 +135,14 @@ class GamificationService
                 ]),
             ]);
 
-            $lockedUser->xp_total = max(0, (int) $lockedUser->xp_total + $awardedPoints);
+            // Daily bonuses are logged as individual XP events and never award
+            // additional Crowns or recursively trigger quest progress.
+            $dailyBonusPoints = $this->awardDailyActivityBonuses($lockedUser, $action);
+            $earnedInTransaction = $awardedPoints + $dailyBonusPoints;
+            $lockedUser->xp_total = max(0, (int) $lockedUser->xp_total + $earnedInTransaction);
             $lockedUser->xp_cycle = min(
                 HunterPrestigeService::CYCLE_CAP,
-                max(0, (int) $lockedUser->xp_cycle + $awardedPoints)
+                max(0, (int) $lockedUser->xp_cycle + $earnedInTransaction)
             );
             $lockedUser->level = $this->levelForXp((int) $lockedUser->xp_cycle);
             $lockedUser->trust_score = max(0, (int) $lockedUser->trust_score + max(1, (int) floor($points / 10)));
@@ -119,6 +166,81 @@ class GamificationService
 
             return $event;
         });
+    }
+
+
+    /**
+     * All bonuses are calculated inside the existing locked user transaction.
+     * A second concurrent request cannot claim the same daily goal twice.
+     */
+    private function awardDailyActivityBonuses(User $user, string $trigger): int
+    {
+        if (! in_array($trigger, self::DAILY_VARIETY_ACTIONS, true)) {
+            return 0;
+        }
+
+        $today = now()->startOfDay();
+        $counts = XpEvent::query()
+            ->where('user_id', $user->id)
+            ->where('created_at', '>=', $today)
+            ->whereIn('action', self::DAILY_VARIETY_ACTIONS)
+            ->selectRaw('action, COUNT(*) as total')
+            ->groupBy('action')
+            ->pluck('total', 'action');
+
+        $earned = 0;
+        foreach (self::DAILY_GOALS as $goal => $rule) {
+            if ($rule['action'] !== null && $rule['action'] !== $trigger) {
+                continue;
+            }
+
+            $progress = $rule['action'] === null
+                ? $counts->filter(fn ($count) => (int) $count > 0)->count()
+                : (int) ($counts[$rule['action']] ?? 0);
+
+            if ($progress < $rule['count']) {
+                continue;
+            }
+
+            if (XpEvent::query()
+                ->where('user_id', $user->id)
+                ->where('action', $goal)
+                ->where('created_at', '>=', $today)
+                ->exists()) {
+                continue;
+            }
+
+            $bonusPoints = $this->applyPrestigeBoost($user, $rule['xp']);
+            XpEvent::create([
+                'user_id' => $user->id,
+                'action' => $goal,
+                'points' => $bonusPoints,
+                'description' => 'Tagesziel: '.$goal,
+                'metadata' => [
+                    'source' => 'daily_activity',
+                    'date' => $today->toDateString(),
+                    'base_points' => $rule['xp'],
+                    'prestige' => (int) $user->prestige,
+                    'prestige_boost' => (bool) $user->prestige_xp_boost,
+                ],
+            ]);
+
+            $earned += $bonusPoints;
+        }
+
+        return $earned;
+    }
+
+    private function applyPrestigeBoost(User $user, int $points): int
+    {
+        if (! $user->prestige_xp_boost) {
+            return $points;
+        }
+
+        $tenths = $points * 11 + (int) $user->prestige_xp_bonus_remainder;
+        $user->prestige_xp_bonus_remainder = $tenths % 10;
+
+        return intdiv($tenths, 10);
     }
 
     public function evaluateProfile(User $user): void
