@@ -110,12 +110,30 @@ class GamificationService
                 return null;
             }
 
-            if (isset(self::DAILY_EVENT_LIMITS[$action])
-                && XpEvent::query()->where('user_id', $lockedUser->id)
+            if (isset(self::DAILY_EVENT_LIMITS[$action])) {
+                $todayEvents = XpEvent::query()
+                    ->where('user_id', $lockedUser->id)
                     ->where('action', $action)
-                    ->where('created_at', '>=', now()->startOfDay())
-                    ->count() >= self::DAILY_EVENT_LIMITS[$action]) {
-                return null;
+                    ->where('created_at', '>=', now()->startOfDay());
+
+                // A per-user, zero-XP test reset grants a fresh set of post XP
+                // slots without deleting or changing historical XP events.
+                // The marker only applies to the current calendar day.
+                if ($action === 'feed_post_created') {
+                    $resetId = XpEvent::query()
+                        ->where('user_id', $lockedUser->id)
+                        ->where('action', 'feed_post_daily_cap_reset')
+                        ->where('created_at', '>=', now()->startOfDay())
+                        ->max('id');
+
+                    if ($resetId !== null) {
+                        $todayEvents->where('id', '>', (int) $resetId);
+                    }
+                }
+
+                if ($todayEvents->count() >= self::DAILY_EVENT_LIMITS[$action]) {
+                    return null;
+                }
             }
 
             // Preserve fractional 10% prestige boosts across base and daily XP.
