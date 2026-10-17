@@ -9,6 +9,8 @@
  if(!dialog||!form||!body||!chips)return;
  const icon=name=>'<svg class="ph" aria-hidden="true" viewBox="0 0 256 256"><use href="#ph-'+name+'"></use></svg>';
  const moods=[["😊","Glücklich","happy"],["🔥","Motiviert","excited"],["🎯","Fokussiert","focused"],["🌙","Entspannt","chill"],["😴","Müde","tired"],["🧂","Salzig","salty"]]
+ const translatedMoods=window.HNTNextLocaleMoodLabels;
+ if(translatedMoods)for(const item of moods){if(translatedMoods[item[2]])item[1]=translatedMoods[item[2]];}
  let pollOn=false,feeling=null,clipURL=null,clipName='',panel='',seq=0;
  const polls=new Map();
  const toolbar=document.createElement('div');

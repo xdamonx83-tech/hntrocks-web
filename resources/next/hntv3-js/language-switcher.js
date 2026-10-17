@@ -12,11 +12,13 @@
   const names={de:'Deutsch',en:'English',es:'Español',ru:'Русский'};
   const options=[...menu.querySelectorAll('[data-lang]')];
   const storageKey='hnt-preview-language';
-  let selected='de';
-  try{
-    const previous=localStorage.getItem(storageKey);
-    if(Object.hasOwn(names,previous))selected=previous;
-  }catch(_error){/* local files/private mode may disallow storage */}
+  const live=document.body.hasAttribute('data-hnt-next-live-posts');
+  const initial=document.documentElement.lang;
+  let selected=Object.hasOwn(names,initial)?initial:'de';
+  if(!live){
+    try{const previous=localStorage.getItem(storageKey);if(Object.hasOwn(names,previous))selected=previous;}
+    catch(_error){}
+  }
 
   const isOpen=()=>!menu.hidden;
   const position=()=>{
@@ -54,8 +56,17 @@
       option.setAttribute('aria-checked',String(active));
     });
     if(save){
+      if(live){
+        trigger.disabled=true;
+        const csrf=document.querySelector('meta[name="csrf-token"]')?.content||'';
+        fetch('/next/language/'+encodeURIComponent(code),{method:'POST',credentials:'same-origin',
+          headers:{Accept:'application/json','X-CSRF-TOKEN':csrf,'X-Requested-With':'XMLHttpRequest'}})
+          .then(r=>{if(!r.ok)throw Error('Language update failed');return r.json();})
+          .then(data=>{if(!data?.ok)throw Error('Language not saved');location.reload();})
+          .catch(()=>{trigger.disabled=false;setLocale(initial,false);alert('Language could not be saved.');});
+        return;
+      }
       try{localStorage.setItem(storageKey,code)}catch(_error){}
-      // An integration hook for the eventual Laravel language preference.
       document.dispatchEvent(new CustomEvent('hnt:locale-changed',{detail:{locale:code,previewOnly:true}}));
     }
   }

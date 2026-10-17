@@ -4,15 +4,16 @@
     // Verify identity against the actual HNT.ROCKS account, never admin rights or display name.
     $isOfficialAuthor = (int) ($author?->id ?? 0) === 2 && (string) ($author?->username ?? '') === 'hntrocks';
     $platform = mb_strtolower(trim((string) ($author?->profile?->platform ?? '')));
-    $authorSubtitle = $isOfficialAuthor ? 'Community-Entdeckung' : match ($platform) {
-        'pc' => 'PC Hunter',
-        'xbox' => 'Xbox Hunter',
-        'playstation', 'ps', 'psn' => 'PlayStation Hunter',
-        'crossplay' => 'Crossplay Hunter',
-        default => 'Hunter',
-    };
+    $authorSubtitle = \App\Http\Controllers\Next\NextText::get(
+        $isOfficialAuthor ? 'community_story' : match ($platform) {
+            'pc' => 'platform_pc', 'xbox' => 'platform_xbox',
+            'playstation', 'ps', 'psn' => 'platform_playstation',
+            'crossplay' => 'platform_crossplay', default => 'platform_unknown'
+        }
+    );
     $authorAvatar = $author?->avatarUrl() ?: '/build/next/hntv3-assets/avatar-hnt.webp';
     $liveFeeling = $post->feelingMeta();
+    $localizedFeeling = $liveFeeling ? \App\Http\Controllers\Next\NextText::get($liveFeeling['key']) : null;
     $attachments = $post->media;
     $firstImage = $attachments->first(fn ($item) => $item->isImage());
     $firstVideo = $attachments->first(fn ($item) => $item->isVideo());
@@ -58,21 +59,21 @@
         <div class="post-author">
             <div class="author-line"><strong>{{ $authorName }}</strong>
                 @if($liveFeeling)
-                    <span class="hnt-author-feeling hnt-live-feeling" data-feeling-key="{{ $liveFeeling['key'] }}" title="Fühlt sich {{ $liveFeeling['label'] }}">
+                    <span class="hnt-author-feeling hnt-live-feeling" data-feeling-key="{{ $liveFeeling['key'] }}" title="{{ str_replace(':feeling', (string) $localizedFeeling, \App\Http\Controllers\Next\NextText::get('feeling_title')) }}">
                         <span class="hnt-feed-feeling-emoji" aria-hidden="true">{{ $liveFeeling['emoji'] }}</span>
-                        <span>{{ mb_convert_case((string) $liveFeeling['label'], MB_CASE_TITLE, 'UTF-8') }}</span>
+                        <span>{{ $localizedFeeling }}</span>
                     </span>
                 @endif
                 @if($isOfficialAuthor)
-                    <span class="official-pill"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-seal-check"></use></svg> OFFIZIELL</span>
+                    <span class="official-pill"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-seal-check"></use></svg> {{ \App\Http\Controllers\Next\NextText::get('official') }}</span>
                 @endif
                 @if($post->is_pinned)
-                    <span class="hnt-pinned-pill">ANGEHEFTET</span>
+                    <span class="hnt-pinned-pill">{{ \App\Http\Controllers\Next\NextText::get('pinned') }}</span>
                 @endif
             </div>
             <span>{{ $authorSubtitle }} <i class="meta-sep"></i> {{ $post->created_at?->diffForHumans() ?: 'Gerade eben' }}</span>
         </div>
-        <button type="button" class="post-more-btn" data-more aria-label="Beitragsoptionen" aria-expanded="false">
+        <button type="button" class="post-more-btn" data-more aria-label="{{ \App\Http\Controllers\Next\NextText::get('post_options') }}" aria-expanded="false">
             <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-dots-three"></use></svg>
         </button>
         <div class="post-more-menu" hidden>

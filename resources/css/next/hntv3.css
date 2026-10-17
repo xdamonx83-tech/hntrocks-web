@@ -5134,3 +5134,8 @@ body {
 @media(max-width:520px){
   .feed-post .post-head .author-line .hnt-author-feeling.hnt-live-feeling{padding:3px 7px;font-size:9px;}
 }
+
+/* Next-specific mobile containment; matches original demo breakpoints. */
+@media(max-width:990px){.feed-main .feed-layout,.feed-main .feed-layout.hnt-widgets-collapsed{grid-template-columns:minmax(0,1fr)!important}.feed-main .feed-column,.feed-main .feed-list{min-width:0;max-width:100%}}
+@media(max-width:720px){.game-rail{width:68px}.feed-main{margin-left:85px;width:calc(100% - 85px);max-width:calc(100% - 85px);padding-right:9px}.feed-layout,.feed-column,.feed-post,.feed-composer{min-width:0;max-width:100%}.feed-filters{max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}.feed-filters::-webkit-scrollbar{display:none}.feed-post .post-head,.feed-post .post-author,.feed-post .post-caption{min-width:0;overflow-wrap:anywhere}}
+@media(max-width:520px){.feed-main .feed-page-title{min-width:0;max-width:100%}.feed-main .feed-page-title p{overflow-wrap:anywhere}.feed-composer .composer-prompt{min-width:0;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}}

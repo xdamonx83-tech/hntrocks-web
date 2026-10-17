@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="de">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta name="robots" content="noindex,nofollow,noarchive"/>
 <meta name="csrf-token" content="{{ csrf_token() }}"/>
@@ -14,6 +14,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&amp;display=swap" rel="stylesheet" data-hnt-standard-font="exo"/>
 @vite(['resources/css/next/hntv3.css'], 'build/next')
+<script>window.HNTNextLocaleMoodLabels=@json(\App\Http\Controllers\Next\NextText::moods());</script>
 <script defer src="/build/next/hntv3-js/script.js"></script>
 <script defer src="/build/next/hntv3-js/navigation.js"></script>
 <script defer src="/build/next/hntv3-js/account-menu.js"></script>
@@ -26,7 +27,7 @@
 <script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=poll-20261017"></script>
 <script defer src="/build/next/hntv3-js/like-embers.js?v=twotone-20261016"></script>
 <script defer src="/build/next/hntv3-js/composer-dispatch.js"></script>
-<script defer src="/build/next/hntv3-js/composer-extras.js?v=poll-20261017"></script>
+<script defer src="/build/next/hntv3-js/composer-extras.js?v=locale-20261017"></script>
 <script defer src="/build/next/hntv3-js/feed-discussions.js"></script>
 <script defer src="/build/next/hntv3-js/post-comments-modal.js?v=avatars-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-next-polls.js?v=poll-voters-20261017"></script>
@@ -41,7 +42,7 @@
 <script defer src="/build/next/hntv3-js/widget-focus.js"></script>
 <script defer src="/build/next/hntv3-js/mobile-header.js"></script>
 <script defer src="/build/next/hntv3-js/search-experience.js"></script>
-<script defer src="/build/next/hntv3-js/language-switcher.js"></script>
+<script defer src="/build/next/hntv3-js/language-switcher.js?v=locale-20261017"></script>
 <script defer src="/build/next/hntv3-js/prestige-widget.js"></script>
 <script defer src="/build/next/hntv3-js/settings-modal.js"></script>
 <script defer src="/build/next/hntv3-js/settings-profile-editor.js"></script>
@@ -235,6 +236,10 @@
 @media(max-width:520px){
   .feed-post .post-head .author-line .hnt-author-feeling.hnt-live-feeling{padding:3px 7px;font-size:9px;}
 }
+/* Next-specific mobile containment; matches original demo breakpoints. */
+@media(max-width:990px){.feed-main .feed-layout,.feed-main .feed-layout.hnt-widgets-collapsed{grid-template-columns:minmax(0,1fr)!important}.feed-main .feed-column,.feed-main .feed-list{min-width:0;max-width:100%}}
+@media(max-width:720px){.game-rail{width:68px}.feed-main{margin-left:85px;width:calc(100% - 85px);max-width:calc(100% - 85px);padding-right:9px}.feed-layout,.feed-column,.feed-post,.feed-composer{min-width:0;max-width:100%}.feed-filters{max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}.feed-filters::-webkit-scrollbar{display:none}.feed-post .post-head,.feed-post .post-author,.feed-post .post-caption{min-width:0;overflow-wrap:anywhere}}
+@media(max-width:520px){.feed-main .feed-page-title{min-width:0;max-width:100%}.feed-main .feed-page-title p{overflow-wrap:anywhere}.feed-composer .composer-prompt{min-width:0;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
@@ -370,19 +375,19 @@
 </header>
 
 <main class="main-content feed-main" id="feedTop">
-  <div class="feed-page-title"><div><div class="feed-kicker"><span class="feed-live-signal"></span> HNT.ROCKS / COMMUNITY</div><h1>Feed<span class="title-ember">.</span></h1><p>Neuigkeiten, Fundstücke und Geschichten aus dem Bayou.</p></div>
-  <div class="feed-heading-actions"><button class="btn-compose" type="button" id="headerPostBtn"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-pencil-simple"></use></svg> Beitrag erstellen</button></div></div>
+  <div class="feed-page-title"><div><div class="feed-kicker"><span class="feed-live-signal"></span> HNT.ROCKS / COMMUNITY</div><h1>Feed<span class="title-ember">.</span></h1><p>{{ \App\Http\Controllers\Next\NextText::get('description') }}</p></div>
+  <div class="feed-heading-actions"><button class="btn-compose" type="button" id="headerPostBtn"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-pencil-simple"></use></svg> {{ \App\Http\Controllers\Next\NextText::get('create') }}</button></div></div>
   <div class="feed-layout">
     <div class="feed-column">
       <nav class="feed-filters" aria-label="Beiträge filtern">
-<a class="feed-filter @if($feedFilter === 'all') is-selected @endif" data-next-server-filter href="{{ route('next.feed') }}" aria-current="{{ $feedFilter === 'all' ? 'page' : 'false' }}">Für dich</a>
-<a class="feed-filter @if($feedFilter === 'friends') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'friends']) }}" aria-current="{{ $feedFilter === 'friends' ? 'page' : 'false' }}">Freunde</a>
-<a class="feed-filter @if($feedFilter === 'teams') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'teams']) }}" aria-current="{{ $feedFilter === 'teams' ? 'page' : 'false' }}">Teams</a>
-<a class="feed-filter @if($feedFilter === 'media') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'media']) }}" aria-current="{{ $feedFilter === 'media' ? 'page' : 'false' }}">Medien</a>
-<a class="feed-filter @if($feedFilter === 'mentions') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'mentions']) }}" aria-current="{{ $feedFilter === 'mentions' ? 'page' : 'false' }}">Erwähnungen</a>
-<span class="feed-filter-right"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-sparkle"></use></svg> AUS DER COMMUNITY</span>
+<a class="feed-filter @if($feedFilter === 'all') is-selected @endif" data-next-server-filter href="{{ route('next.feed') }}" aria-current="{{ $feedFilter === 'all' ? 'page' : 'false' }}">{{ \App\Http\Controllers\Next\NextText::get('for_you') }}</a>
+<a class="feed-filter @if($feedFilter === 'friends') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'friends']) }}" aria-current="{{ $feedFilter === 'friends' ? 'page' : 'false' }}">{{ \App\Http\Controllers\Next\NextText::get('friends') }}</a>
+<a class="feed-filter @if($feedFilter === 'teams') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'teams']) }}" aria-current="{{ $feedFilter === 'teams' ? 'page' : 'false' }}">{{ \App\Http\Controllers\Next\NextText::get('teams') }}</a>
+<a class="feed-filter @if($feedFilter === 'media') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'media']) }}" aria-current="{{ $feedFilter === 'media' ? 'page' : 'false' }}">{{ \App\Http\Controllers\Next\NextText::get('media') }}</a>
+<a class="feed-filter @if($feedFilter === 'mentions') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'mentions']) }}" aria-current="{{ $feedFilter === 'mentions' ? 'page' : 'false' }}">{{ \App\Http\Controllers\Next\NextText::get('mentions') }}</a>
+<span class="feed-filter-right"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-sparkle"></use></svg> {{ \App\Http\Controllers\Next\NextText::get('community') }}</span>
 </nav>
-      <div class="feed-composer" id="feedComposer"><img src="{{ $viewer->avatarUrl() }}" alt="Dein Hunter-Avatar"/><button id="composerStart" type="button" class="composer-prompt">Was gibt’s Neues aus dem Bayou?</button><div class="composer-tools"><button id="composerMediaBtn" type="button" title="Medienbeitrag erstellen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-image"></use></svg><span>Bild</span></button><button id="composerMomentBtn" type="button" title="Moments öffnen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-film-strip"></use></svg><span>Moment</span></button></div></div>
+      <div class="feed-composer" id="feedComposer"><img src="{{ $viewer->avatarUrl() }}" alt="Dein Hunter-Avatar"/><button id="composerStart" type="button" class="composer-prompt">{{ \App\Http\Controllers\Next\NextText::get('composer') }}</button><div class="composer-tools"><button id="composerMediaBtn" type="button" title="Medienbeitrag erstellen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-image"></use></svg><span>{{ \App\Http\Controllers\Next\NextText::get('picture') }}</span></button><button id="composerMomentBtn" type="button" title="Moments öffnen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-film-strip"></use></svg><span>{{ \App\Http\Controllers\Next\NextText::get('moment') }}</span></button></div></div>
       <div class="feed-list" id="feedList">
 @forelse($posts as $post)
 @include('next.partials.hntv3-post', ['post'=>$post, 'feedFilter'=>$feedFilter])
@@ -390,10 +395,10 @@
 @endforelse
 </div>
 @if($hasMoreFeedPosts && $nextFeedPage <= 50)
-<a class="hnt-live-load-more" id="hntNextLoadMore" href="{{ route('next.feed', array_filter(['filter'=>$feedFilter === 'all' ? null : $feedFilter, 'page'=>$nextFeedPage])) }}">Weitere Beiträge laden</a>
+<a class="hnt-live-load-more" id="hntNextLoadMore" href="{{ route('next.feed', array_filter(['filter'=>$feedFilter === 'all' ? null : $feedFilter, 'page'=>$nextFeedPage])) }}">{{ \App\Http\Controllers\Next\NextText::get('more') }}</a>
 @endif
-<div class="feed-empty" id="feedEmpty" @unless($posts->isEmpty()) hidden @endunless><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg><h3>Hier ist es gerade still.</h3><p>Für diesen Filter gibt es keine Beiträge.</p><button type="button" id="resetFeed">Alle Beiträge ansehen</button></div>
-      <div class="feed-bottom-note">DU BIST AUF DEM LAUFENDEN <span>·</span> <strong>Bis bald im Bayou.</strong></div>
+<div class="feed-empty" id="feedEmpty" @unless($posts->isEmpty()) hidden @endunless><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg><h3>{{ \App\Http\Controllers\Next\NextText::get('empty_title') }}</h3><p>{{ \App\Http\Controllers\Next\NextText::get('empty') }}</p><button type="button" id="resetFeed">{{ \App\Http\Controllers\Next\NextText::get('reset') }}</button></div>
+      <div class="feed-bottom-note">{{ \App\Http\Controllers\Next\NextText::get('up_to_date') }} <span>·</span> <strong>{{ \App\Http\Controllers\Next\NextText::get('goodbye') }}</strong></div>
     </div>
     <aside class="feed-widgets" aria-label="Community-Widgets">
       <section class="widget hunter-widget hnt-prestige-widget" id="hntPrestigeWidget" aria-label="Dein Hunter-Level und Prestige">
