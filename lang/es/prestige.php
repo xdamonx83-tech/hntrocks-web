@@ -42,4 +42,6 @@ return [
     'journal_ready' => 'Nivel 50 alcanzado',
     'journal_boost' => 'Bonus XP activo',
     'journal_demo' => 'Próximamente habrá más misiones.',
+    'preview' => 'Vista previa del prestigio',
+    'preview_note' => 'Vista previa: La confirmación se desbloquea en el nivel 50.',
 ];

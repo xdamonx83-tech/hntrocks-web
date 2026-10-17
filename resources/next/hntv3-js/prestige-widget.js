@@ -50,11 +50,11 @@
   $('#hntPrestigeTitle').textContent=t('start')+' '+(Number(data.prestige)+1);
   const cosmetics=Number(data.cosmetics_available||0);
   const cosmetic=radios.find(r=>r.value==='cosmetic');
-  cosmetic.disabled=cosmetics<=0;
+  cosmetic.disabled=Boolean(data.can_prestige && usable() && cosmetics<=0);
   if(cosmetic.disabled)cosmetic.checked=false;
-  set('#hntPrestigeCosmeticNote',cosmetics<=0?t('all_owned'):t('cosmetic_explain')+' '+t('available_items').replace(':count',String(cosmetics)));
+  set('#hntPrestigeCosmeticNote',!data.can_prestige?t('cosmetic_explain'):cosmetics<=0?t('all_owned'):t('cosmetic_explain')+' '+t('available_items').replace(':count',String(cosmetics)));
   cosmetic.closest('label').classList.toggle('is-unavailable',cosmetics<=0);
-  set('#hntPrestigeFoot',t('modal_footer'));
+  set('#hntPrestigeFoot',data.can_prestige && usable()?t('modal_footer'):t('preview_note'));
   refreshConfirm();
  };
  const close=()=>{
@@ -78,13 +78,12 @@
   }
  };
  const open=async()=>{
-  if(!usable()||!current.can_prestige||!box.hidden||closing)return;
+  if(!box.hidden||closing)return;
   busy=true;
   try{
    const response=await fetch('/next/prestige',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'});
    if(!response.ok)throw Error('status');
    const latest=await response.json();
-   if(!latest.can_prestige)return;
    renderStatus(latest);
    returnFocus=document.activeElement;
    oldOverflow=document.body.style.overflow;

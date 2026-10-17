@@ -15,9 +15,9 @@
     <div><small><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-lightning"></use></svg> {{ __('prestige.career_xp') }}</small><strong>{{ number_format($prestige['career_xp'], 0, ',', '.') }} <em>XP</em></strong></div>
   </div>
   <div class="hnt-prestige-action">
-    <button type="button" id="hntPrestigeStart" class="hnt-prestige-start" aria-haspopup="dialog" aria-controls="hntPrestigeDialog" @unless($prestige['can_prestige'] && config('hnt_prestige.enabled')) disabled aria-disabled="true" @endunless>
+    <button type="button" id="hntPrestigeStart" class="hnt-prestige-start" aria-haspopup="dialog" aria-controls="hntPrestigeDialog">
       <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-trophy"></use></svg>
-      <span id="hntPrestigeStartText">@if($prestige['can_prestige'] && config('hnt_prestige.enabled')){{ __('prestige.start') }} {{ $prestige['prestige'] + 1 }}@elseif($prestige['can_prestige']){{ __('prestige.coming_soon') }}@else{{ __('prestige.reach_level') }}@endif</span>
+      <span id="hntPrestigeStartText">@if($prestige['can_prestige'] && config('hnt_prestige.enabled')){{ __('prestige.start') }} {{ $prestige['prestige'] + 1 }}@else{{ __('prestige.preview') }}@endif</span>
       <svg aria-hidden="true" class="ph hnt-prestige-arrow" viewBox="0 0 256 256"><use href="#ph-arrow-right"></use></svg>
     </button>
     <small id="hntPrestigeHint">{{ __('prestige.hint') }}</small>

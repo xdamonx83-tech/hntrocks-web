@@ -42,4 +42,6 @@ return [
     'journal_ready' => 'Level 50 erreicht',
     'journal_boost' => 'Aktiver XP-Boost',
     'journal_demo' => 'Weitere Community-Aufträge folgen.',
+    'preview' => 'Prestige ansehen',
+    'preview_note' => 'Vorschau: Die Bestätigung wird ab Level 50 freigeschaltet.',
 ];

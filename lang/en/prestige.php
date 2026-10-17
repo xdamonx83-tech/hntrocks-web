@@ -42,4 +42,6 @@ return [
     'journal_ready' => 'Level 50 reached',
     'journal_boost' => 'Active XP boost',
     'journal_demo' => 'More community quests coming soon.',
+    'preview' => 'Preview Prestige',
+    'preview_note' => 'Preview: Confirmation unlocks at Level 50.',
 ];
