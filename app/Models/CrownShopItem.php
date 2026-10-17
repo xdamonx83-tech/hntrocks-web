@@ -76,6 +76,10 @@ class CrownShopItem extends Model
     public function displayDescription(): string
     {
         $locale = app()->getLocale();
+        $localized = $this->metadata['descriptions'][$locale] ?? null;
+        if (in_array($locale, ['es', 'ru'], true) && is_string($localized) && $localized !== '') {
+            return $localized;
+        }
 
         return (string) ($locale === 'en' ? ($this->description_en ?: $this->description_de) : ($this->description_de ?: $this->description_en));
     }

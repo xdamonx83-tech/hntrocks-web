@@ -7,6 +7,7 @@
 @section('content')
 @php
     $isEnglish = app()->getLocale() === 'en';
+    $likePreviewText = match (app()->getLocale()) { 'de' => 'Effekt ansehen', 'es' => 'Ver efecto', 'ru' => 'Посмотреть эффект', default => 'Preview effect' };
     $inventoryUi = [
         'eyebrow' => 'Bounty Marks',
         'title' => $isEnglish ? 'Inventory' : 'Inventar',
@@ -36,6 +37,7 @@
 
         return match ($key) {
             'avatar_frame', 'avatar-frame', 'avatarrahmen', 'frame' => $isEnglish ? 'Avatar frame' : 'Avatarrahmen',
+            'like_effect' => match (app()->getLocale()) { 'de' => 'Like-Effekt', 'es' => 'Efecto de Me gusta', 'ru' => 'Эффект лайка', default => 'Like effect' },
             'username_glow', 'username-glow', 'username_color', 'username-color', 'username_colour', 'username-colour', 'username_effect', 'username-effect' => $isEnglish ? 'Username color' : 'Username-Farbe',
             'profile_card', 'profile-card', 'profilkarte' => $isEnglish ? 'Profile card' : 'Profilkarte',
             'profile_banner', 'profile-banner', 'banner', 'cover' => $isEnglish ? 'Profile banner' : 'Profilbanner',
@@ -50,6 +52,7 @@
         $key = strtolower(trim((string) $value));
         $key = str_replace([' ', '_'], '-', $key);
 
+        if (str_contains($key, 'like-effect')) { return 'like-effect'; }
         if (str_contains($key, 'avatar') || str_contains($key, 'frame')) {
             return 'avatar-frame';
         }
@@ -84,6 +87,7 @@
     $inventoryIconFor = function ($item): string {
         $key = strtolower((string) ($item->slot ?: $item->type ?: $item->key));
 
+        if (str_contains($key, 'like-effect')) { return 'like-effect'; }
         if (str_contains($key, 'avatar') || str_contains($key, 'frame')) {
             return 'ph-frame-corners';
         }
@@ -208,6 +212,10 @@
             <h2>{{ $item->displayName() }}</h2>
             <p class="shop-slot">{{ $typeLabel }}</p>
             <p class="shop-desc">{{ $item->displayDescription() }}</p>
+                @if($item->type === 'like_effect')
+ <button type="button" class="hnt-like-preview-button" data-hnt-like-preview="{{ $item->key }}" aria-label="{{ $likePreviewText }}: {{ $item->displayName() }}">
+ <span class="hnt-like-preview-heart" aria-hidden="true">♡</span><span>{{ $likePreviewText }}</span><span aria-hidden="true">↗</span></button>
+@endif
 
             <div class="shop-stats inventory-stats inventory-stats-compact">
                 <span>{{ $inventoryUi['bought'] }}</span>
@@ -249,3 +257,10 @@
     @endforelse
 </section>
 @endsection
+
+@push('rework-head')
+<link rel="stylesheet" href="/build/next/hntv3-js/like-effect-shop.css?v=cosmetics-20261017"/>
+@endpush
+@push('rework-scripts')
+<script defer src="/build/next/hntv3-js/like-embers.js?v=like-cosmetics-20261017"></script>
+@endpush

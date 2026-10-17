@@ -5,12 +5,14 @@
 
 @php
     $balance = (int) ($summary['balance'] ?? 0);
+    $likePreviewText = match (app()->getLocale()) { 'de' => 'Effekt ansehen', 'es' => 'Ver efecto', 'ru' => 'Посмотреть эффект', default => 'Preview effect' };
     $ownedLookup = array_flip($ownedItemIds ?? []);
     $slotLabels = [
         'avatar_frame' => __('ui.preview_crowns_slot_avatar_frame'),
         'profile_banner' => __('ui.preview_crowns_slot_profile_banner'),
         'username_effect' => __('ui.preview_crowns_slot_username_effect'),
         'profile_title' => __('ui.preview_crowns_slot_profile_title'),
+        'like_effect' => match (app()->getLocale()) { 'de' => 'Like-Effekt', 'es' => 'Efecto de Me gusta', 'ru' => 'Эффект лайка', default => 'Like effect' },
     ];
     $slotIcons = [
         'avatar_frame' => '◎',
@@ -63,6 +65,9 @@
                 <h2>{{ $item->displayName() }}</h2>
                 <p class="shop-item-type">{{ $slotLabel }}</p>
                 <p class="shop-item-description">{{ $item->displayDescription() }}</p>
+                    @if($item->type === 'like_effect')
+ <button type="button" class="hnt-like-preview-button" data-hnt-like-preview="{{ $item->key }}" aria-label="{{ $likePreviewText }}: {{ $item->displayName() }}"><span class="hnt-like-preview-heart" aria-hidden="true">♡</span><span>{{ $likePreviewText }}</span><span aria-hidden="true">↗</span></button>
+@endif
                 <div class="shop-item-footer">
                     <strong><span>♛</span>{{ number_format((int) $item->price, 0, ',', '.') }}</strong>
                     @if($owned)
@@ -83,3 +88,10 @@
     </section>
 </div>
 @endsection
+
+@push('head')
+<link rel="stylesheet" href="/build/next/hntv3-js/like-effect-shop.css?v=cosmetics-20261017"/>
+@endpush
+@push('scripts')
+<script defer src="/build/next/hntv3-js/like-embers.js?v=like-cosmetics-20261017"></script>
+@endpush

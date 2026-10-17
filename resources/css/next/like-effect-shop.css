@@ -1,0 +1,11 @@
+/* Like effect cosmetics: compact previews within the existing Crowns cards. */
+.hnt-like-preview-button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:41px;margin:10px 0 12px;padding:9px 12px;color:#b6dbc2;background:linear-gradient(115deg,rgba(96,151,116,.14),rgba(27,37,33,.35));border:1px solid rgba(126,180,145,.35);border-radius:9px;font:inherit;font-weight:600;cursor:pointer;transition:background-color .2s,border-color .2s,transform .2s}
+.hnt-like-preview-button:hover{background:rgba(87,151,111,.24);border-color:rgba(162,220,178,.62)}
+.hnt-like-preview-button:focus-visible{outline:2px solid #a7dcb9;outline-offset:3px}
+.hnt-like-preview-button .hnt-like-preview-heart{font-size:22px;line-height:1;color:#db827b}
+.hnt-like-preview-button[data-hnt-like-preview="like_effect_blood_moon"] .hnt-like-preview-heart{color:#ee7473}
+.hnt-like-preview-button[data-hnt-like-preview="like_effect_golden_hunter"] .hnt-like-preview-heart{color:#f0cf86}
+.hnt-like-preview-button[data-hnt-like-preview="like_effect_ashes"] .hnt-like-preview-heart{color:#bab5a9}
+.hnt-like-preview-button[data-hnt-like-preview="like_effect_cursed"] .hnt-like-preview-heart{color:#8dda83}
+.hnt-like-preview-button[data-hnt-like-preview="like_effect_moonfire"] .hnt-like-preview-heart{color:#a4d9fb}
+@media(prefers-reduced-motion:reduce){.hnt-like-preview-button{transition:none}}

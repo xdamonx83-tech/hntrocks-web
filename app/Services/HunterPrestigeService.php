@@ -23,6 +23,7 @@ final class HunterPrestigeService
         'username_effect',
         'title',
         'moment_overlay',
+        'like_effect',
     ];
 
     public function availableCosmetics(User $user): int

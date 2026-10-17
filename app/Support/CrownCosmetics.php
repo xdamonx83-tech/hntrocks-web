@@ -54,12 +54,16 @@ class CrownCosmetics
         $profileBanner = $equipped->get('profile_banner');
         /** @var CrownShopItem|null $profileTitle */
         $profileTitle = $equipped->get('profile_title');
+        /** @var CrownShopItem|null $likeEffect */
+        $likeEffect = $equipped->get('like_effect');
 
         $state = [
             'avatar_frame' => $avatarFrame,
             'username_effect' => $usernameEffect,
             'profile_banner' => $profileBanner,
             'profile_title' => $profileTitle,
+            'like_effect' => $likeEffect,
+            'like_effect_key' => $likeEffect && $likeEffect->type === 'like_effect' && str_starts_with((string) $likeEffect->key, 'like_effect_') ? (string) $likeEffect->key : 'default',
             'avatar_frame_class' => self::classFor($avatarFrame, 'avatar_frame'),
             'username_effect_class' => self::classFor($usernameEffect, 'username_effect'),
             'profile_banner_class' => self::classFor($profileBanner, 'profile_banner'),
@@ -79,6 +83,8 @@ class CrownCosmetics
             'username_effect' => null,
             'profile_banner' => null,
             'profile_title' => null,
+            'like_effect' => null,
+            'like_effect_key' => 'default',
             'avatar_frame_class' => '',
             'username_effect_class' => '',
             'profile_banner_class' => '',
