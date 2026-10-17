@@ -5230,3 +5230,6 @@ body {
 /* Signed-in account avatar: fit any uploaded portrait or landscape image into each round frame. */
 .topbar .account-toggle>img{display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
 .account-menu .account-portrait>img{display:block;box-sizing:border-box;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
+
+.account-menu-footer form{display:block;width:100%;margin:0;}
+.account-menu-footer form .account-signout{width:100%;text-align:left;}

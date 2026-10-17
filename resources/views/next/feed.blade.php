@@ -17,7 +17,7 @@
 <script>window.HNTNextLocaleMoodLabels=@json(\App\Http\Controllers\Next\NextText::moods());</script>
 <script defer src="/build/next/hntv3-js/script.js"></script>
 <script defer src="/build/next/hntv3-js/navigation.js"></script>
-<script defer src="/build/next/hntv3-js/account-menu.js?v=real-user-avatar-20261017"></script>
+<script defer src="/build/next/hntv3-js/account-menu.js?v=account-actions-20261017"></script>
 <script defer src="/build/next/hntv3-js/social-dropdowns.js?v=avatar-scroll-20261017b"></script>
 <script defer src="/build/next/hntv3-js/feed.js"></script>
 <script type="module" src="/build/next/hntv3-js/videojs-neutral.bundle.js?v=videojs10-20261016"></script>
@@ -331,6 +331,8 @@
 .topbar .account-toggle>img{display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
 .account-menu .account-portrait>img{display:block;box-sizing:border-box;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
 
+.account-menu-footer form{display:block;width:100%;margin:0;}
+.account-menu-footer form .account-signout{width:100%;text-align:left;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
@@ -343,18 +345,18 @@
 <a class="game-button icon-btn nav-link" href="https://hnt.rocks/teams" aria-label="Teams" data-tooltip="Teams" data-description="Teams und Gruppen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg></a>
 <a class="game-button icon-btn nav-link" href="https://hnt.rocks/cups" aria-label="Cups" data-tooltip="Cups" data-description="Wettbewerbe und Cups"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-trophy"></use></svg></a>
 <a class="game-button icon-btn nav-link" href="https://hnt.rocks/ready-lobbies" aria-label="Ready Lobbies" data-tooltip="Ready Lobbies" data-description="Mitspieler finden"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-four"></use></svg></a>
-<a class="game-button icon-btn nav-link" href="https://hnt.rocks/rocks" aria-label="Rocks" data-tooltip="Rocks" data-description="Rocks, Level und Belohnungen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-hexagon"></use></svg></a>
+<a class="game-button icon-btn nav-link" href="{{ route('rocks.index') }}" aria-label="Rocks" data-tooltip="Rocks" data-description="Rocks, Level und Belohnungen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-hexagon"></use></svg></a>
 <button type="button" class="game-button add-game icon-btn more-toggle" id="moreMenuToggle" aria-expanded="false" aria-controls="moreMenu" aria-label="Weitere Bereiche" title="Weitere Bereiche" data-tooltip="Weitere Bereiche" data-description="Mitglieder, gespeicherte Beiträge und mehr"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-plus"></use></svg></button>
 </nav>
 <div class="rail-bottom">
 <a class="rail-bottom-link icon-btn nav-link" href="https://hnt.rocks/messages" aria-label="Nachrichten" data-tooltip="Nachrichten" data-description="Private Nachrichten"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-chat-circle-dots"></use></svg></a>
-<a class="rail-bottom-link icon-btn nav-link" href="https://hnt.rocks/settings" aria-label="Einstellungen" data-tooltip="Einstellungen" data-description="Konto und Einstellungen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-gear-six"></use></svg></a>
+<a class="rail-bottom-link icon-btn nav-link" href="{{ route('settings.privacy.edit') }}" aria-label="Einstellungen" data-tooltip="Einstellungen" data-description="Konto und Einstellungen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-gear-six"></use></svg></a>
 </div>
 </aside>
 <nav id="moreMenu" class="more-menu" aria-label="Weitere HNT.ROCKS-Bereiche" hidden>
 <div class="more-menu-heading">MEHR ENTDECKEN</div>
 <a href="https://hnt.rocks/members" class="more-menu-item" title="Mitglieder"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg><span class="more-menu-item-copy"><strong>Mitglieder</strong><small>Hunter-Community</small></span></a>
-<a href="https://hnt.rocks/saved" class="more-menu-item" title="Gespeicherte Beiträge"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-bookmark-simple"></use></svg><span class="more-menu-item-copy"><strong>Gespeicherte Beiträge</strong><small>Deine gespeicherten Posts</small></span></a>
+<a href="{{ route('next.saved') }}" class="more-menu-item" title="Gespeicherte Beiträge"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-bookmark-simple"></use></svg><span class="more-menu-item-copy"><strong>Gespeicherte Beiträge</strong><small>Deine gespeicherten Posts</small></span></a>
 <a href="https://hnt.rocks/hall-of-fame" class="more-menu-item" title="Hall of Fame"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-trophy"></use></svg><span class="more-menu-item-copy"><strong>Hall of Fame</strong><small>Ranglisten und Gewinner</small></span></a>
 <a href="https://hnt.rocks/loadout-challenges" class="more-menu-item" title="Loadout Challenges"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg><span class="more-menu-item-copy"><strong>Loadout Challenges</strong><small>Waffen-Challenges</small></span></a>
 <a href="https://hnt.rocks/lfg" class="more-menu-item" title="Spielersuche"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-target"></use></svg><span class="more-menu-item-copy"><strong>Spielersuche</strong><small>Hunt-Spieler finden</small></span></a>
@@ -426,42 +428,44 @@
     <button type="button" role="menuitemradio" aria-checked="false" class="hnt-language-option" data-lang="ru"><span class="hnt-language-short">RU</span><span>Русский</span><svg class="ph hnt-language-check" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-check"></use></svg></button>
   </div>
 </div>
-<button type="button" id="accountMenuToggle" class="top-user icon-btn account-toggle" aria-label="Kontomenü von {{ $viewer->name }} öffnen" aria-haspopup="true" aria-controls="accountMenu" aria-expanded="false" title="{{ $viewer->name }} – Mein Konto">
+<button type="button" id="accountMenuToggle" class="top-user icon-btn account-toggle" aria-label="{{ \App\Http\Controllers\Next\NextAccountText::get('toggle_open') }} — {{ $viewer->name }}" data-account-open-label="{{ \App\Http\Controllers\Next\NextAccountText::get('toggle_close') }} — {{ $viewer->name }}" aria-haspopup="true" aria-controls="accountMenu" aria-expanded="false" title="{{ $viewer->name }} - {{ \App\Http\Controllers\Next\NextAccountText::get('menu_label') }}">name }} öffnen" aria-haspopup="true" aria-controls="accountMenu" aria-expanded="false" title="{{ $viewer->name }} – Mein Konto">
 <img alt="{{ $viewer->name }} – Profilbild" src="{{ $viewer->avatarUrl() }}"/>
 <span class="account-toggle-ring" aria-hidden="true"></span>
 <span class="account-toggle-caret" aria-hidden="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-caret-down"></use></svg></span>
 </button>
-<section class="account-menu" id="accountMenu" aria-label="Hunter-Kontomenü" hidden>
+<section class="account-menu" id="accountMenu" aria-label="{{ \App\Http\Controllers\Next\NextAccountText::get('menu_label') }}" hidden>
   <div class="account-menu-accent" aria-hidden="true"></div>
   <div class="account-menu-head">
-    <div class="account-menu-eyebrow"><span class="account-menu-eyebrow-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-shield-check"></use></svg></span> DEIN HUNTER-ACCOUNT <span class="account-menu-dot" aria-hidden="true"></span></div>
+    <div class="account-menu-eyebrow"><span class="account-menu-eyebrow-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-shield-check"></use></svg></span> {{ \App\Http\Controllers\Next\NextAccountText::get('account') }} <span class="account-menu-dot" aria-hidden="true"></span></div>
     <div class="account-identity">
       <div class="account-portrait"><img src="{{ $viewer->avatarUrl() }}" alt=""/><i class="account-online-dot" aria-hidden="true"></i></div>
-      <div class="account-identity-copy"><strong>{{ $viewer->name }}</strong><span><i aria-hidden="true" class="status-light"></i> Online · HNT.ROCKS</span></div>
+      <div class="account-identity-copy"><strong>{{ $viewer->name }}</strong><span><i aria-hidden="true" class="status-light"></i> {{ \App\Http\Controllers\Next\NextAccountText::get('online') }}</span></div>
     </div>
-    <a class="account-profile-link" href="/profile" title="Dein Profil auf HNT.ROCKS öffnen">Hunter-Profil ansehen <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
+    <a class="account-profile-link" href="{{ route('profile.show') }}" title="{{ \App\Http\Controllers\Next\NextAccountText::get('profile') }}">{{ \App\Http\Controllers\Next\NextAccountText::get('profile') }} <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
   </div>
   <div class="account-rank">
     <div class="account-rank-title"><span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-trophy"></use></svg> <strong>HUNTER PRESTIGE</strong></span><b>15</b></div>
     <div class="account-rank-track" role="img" aria-label="Illustrativer Prestige-Fortschritt: 64 Prozent"><span></span></div>
     <div class="account-stats"><span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-clock"></use></svg> <strong>1.284 h</strong> <small>Spielzeit</small></span><span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-lightning"></use></svg> <strong>23.245</strong> <small>XP</small></span></div>
   </div>
-  <nav class="account-menu-links" aria-label="Konto-Schnellzugriffe">
-    <a href="https://hnt.rocks/profile/edit" class="account-menu-link" title="Profil bearbeiten"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-pencil-simple"></use></svg></span><span class="account-link-text">Profil bearbeiten<small>Avatar, Bio &amp; Hunter-Daten</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
-    <a href="https://hnt.rocks/saved" class="account-menu-link" title="Gespeicherte Beiträge"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-bookmark-simple"></use></svg></span><span class="account-link-text">Gespeicherte Beiträge<small>Deine gemerkten Posts</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
-    <a href="https://hnt.rocks/profile/friends" class="account-menu-link" title="Freunde"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg></span><span class="account-link-text">Freunde<small>Kontakte &amp; Anfragen</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
-    <a href="https://hnt.rocks/rocks" class="account-menu-link" title="Rocks und Belohnungen"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-sparkle"></use></svg></span><span class="account-link-text">Rocks &amp; Belohnungen<small>Level, Badges &amp; Shop</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
-    <a href="https://hnt.rocks/settings" class="account-menu-link" title="Einstellungen"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-gear-six"></use></svg></span><span class="account-link-text">Einstellungen<small>Privatsphäre &amp; Account</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
-  </nav>
+     <nav class="account-menu-links" aria-label="{{ \App\Http\Controllers\Next\NextAccountText::get('shortcuts') }}">
+     <a href="{{ route('profile.edit') }}" class="account-menu-link" title="{{ \App\Http\Controllers\Next\NextAccountText::get('edit') }}"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-pencil-simple"></use></svg></span><span class="account-link-text">{{ \App\Http\Controllers\Next\NextAccountText::get('edit') }}<small>{{ \App\Http\Controllers\Next\NextAccountText::get('edit_desc') }}</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
+     <a href="{{ route('next.saved') }}" class="account-menu-link" title="{{ \App\Http\Controllers\Next\NextAccountText::get('saved') }}"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-bookmark-simple"></use></svg></span><span class="account-link-text">{{ \App\Http\Controllers\Next\NextAccountText::get('saved') }}<small>{{ \App\Http\Controllers\Next\NextAccountText::get('saved_desc') }}</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
+     <a href="{{ route('profile.friends') }}" class="account-menu-link" title="{{ \App\Http\Controllers\Next\NextAccountText::get('friends') }}"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg></span><span class="account-link-text">{{ \App\Http\Controllers\Next\NextAccountText::get('friends') }}<small>{{ \App\Http\Controllers\Next\NextAccountText::get('friends_desc') }}</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
+     <a href="{{ route('rocks.index') }}" class="account-menu-link" title="{{ \App\Http\Controllers\Next\NextAccountText::get('rocks') }}"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-sparkle"></use></svg></span><span class="account-link-text">{{ \App\Http\Controllers\Next\NextAccountText::get('rocks') }}<small>{{ \App\Http\Controllers\Next\NextAccountText::get('rocks_desc') }}</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
+     <a href="{{ route('settings.privacy.edit') }}" class="account-menu-link" title="{{ \App\Http\Controllers\Next\NextAccountText::get('settings') }}"><span class="account-link-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-gear-six"></use></svg></span><span class="account-link-text">{{ \App\Http\Controllers\Next\NextAccountText::get('settings') }}<small>{{ \App\Http\Controllers\Next\NextAccountText::get('settings_desc') }}</small></span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
+   </nav>
   <div class="account-menu-footer">
-    <button type="button" id="accountLogoutDemo" class="account-signout" title="Abmelden"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-sign-out"></use></svg> <span>Abmelden</span></button>
+    <form id="accountLogoutForm" method="POST" action="{{ route('logout') }}">@csrf
+       <button type="submit" id="accountLogoutSubmit" class="account-signout" title="{{ \App\Http\Controllers\Next\NextAccountText::get('logout') }}"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-sign-out"></use></svg> <span>{{ \App\Http\Controllers\Next\NextAccountText::get('logout') }}</span></button>
+     </form>
     
   </div>
 </section>
 </header>
 
 <main class="main-content feed-main" id="feedTop">
-  <div class="feed-page-title"><div><div class="feed-kicker"><span class="feed-live-signal"></span> HNT.ROCKS / COMMUNITY</div><h1>Feed<span class="title-ember">.</span></h1><p>{{ \App\Http\Controllers\Next\NextText::get('description') }}</p></div>
+  <div class="feed-page-title"><div><div class="feed-kicker"><span class="feed-live-signal"></span> HNT.ROCKS / @if($feedFilter === 'saved') {{ \App\Http\Controllers\Next\NextAccountText::get('saved_kicker') }} @else COMMUNITY @endif</div><h1>@if($feedFilter === 'saved'){{ \App\Http\Controllers\Next\NextAccountText::get('saved_page') }}@else Feed @endif<span class="title-ember">.</span></h1><p>@if($feedFilter === 'saved'){{ \App\Http\Controllers\Next\NextAccountText::get('saved_intro') }}@else{{ \App\Http\Controllers\Next\NextText::get('description') }}@endif</p></div>
   <div class="feed-heading-actions"><button class="btn-compose" type="button" id="headerPostBtn"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-pencil-simple"></use></svg> {{ \App\Http\Controllers\Next\NextText::get('create') }}</button></div></div>
   <div class="feed-layout">
     <div class="feed-column">
@@ -473,7 +477,9 @@
 <a class="feed-filter @if($feedFilter === 'mentions') is-selected @endif" data-next-server-filter href="{{ route('next.feed', ['filter'=>'mentions']) }}" aria-current="{{ $feedFilter === 'mentions' ? 'page' : 'false' }}">{{ \App\Http\Controllers\Next\NextText::get('mentions') }}</a>
 <span class="feed-filter-right"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-sparkle"></use></svg> {{ \App\Http\Controllers\Next\NextText::get('community') }}</span>
 </nav>
-      <div class="feed-composer" id="feedComposer"><img src="{{ $viewer->avatarUrl() }}" alt="Dein Hunter-Avatar"/><button id="composerStart" type="button" class="composer-prompt">{{ \App\Http\Controllers\Next\NextText::get('composer') }}</button><div class="composer-tools"><button id="composerMediaBtn" type="button" title="Medienbeitrag erstellen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-image"></use></svg><span>{{ \App\Http\Controllers\Next\NextText::get('picture') }}</span></button><button id="composerMomentBtn" type="button" title="Moments öffnen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-film-strip"></use></svg><span>{{ \App\Http\Controllers\Next\NextText::get('moment') }}</span></button></div></div>
+      @unless($feedFilter === 'saved')
+<div class="feed-composer" id="feedComposer"><img src="{{ $viewer->avatarUrl() }}" alt="Dein Hunter-Avatar"/><button id="composerStart" type="button" class="composer-prompt">{{ \App\Http\Controllers\Next\NextText::get('composer') }}</button><div class="composer-tools"><button id="composerMediaBtn" type="button" title="Medienbeitrag erstellen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-image"></use></svg><span>{{ \App\Http\Controllers\Next\NextText::get('picture') }}</span></button><button id="composerMomentBtn" type="button" title="Moments öffnen"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-film-strip"></use></svg><span>{{ \App\Http\Controllers\Next\NextText::get('moment') }}</span></button></div></div>
+@endunless
       <div class="feed-list" id="feedList">
 @forelse($posts as $post)
 @include('next.partials.hntv3-post', ['post'=>$post, 'feedFilter'=>$feedFilter])
@@ -481,9 +487,9 @@
 @endforelse
 </div>
 @if($hasMoreFeedPosts && $nextFeedPage <= 50)
-<a class="hnt-live-load-more" id="hntNextLoadMore" href="{{ route('next.feed', array_filter(['filter'=>$feedFilter === 'all' ? null : $feedFilter, 'page'=>$nextFeedPage])) }}">{{ \App\Http\Controllers\Next\NextText::get('more') }}</a>
+<a class="hnt-live-load-more" id="hntNextLoadMore" href="{{ $feedFilter === 'saved' ? route('next.saved', ['page'=>$nextFeedPage]) : route('next.feed', array_filter(['filter'=>$feedFilter === 'all' ? null : $feedFilter, 'page'=>$nextFeedPage])) }}">{{ \App\Http\Controllers\Next\NextText::get('more') }}</a>
 @endif
-<div class="feed-empty" id="feedEmpty" @unless($posts->isEmpty()) hidden @endunless><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg><h3>{{ \App\Http\Controllers\Next\NextText::get('empty_title') }}</h3><p>{{ \App\Http\Controllers\Next\NextText::get('empty') }}</p><button type="button" id="resetFeed">{{ \App\Http\Controllers\Next\NextText::get('reset') }}</button></div>
+<div class="feed-empty" id="feedEmpty" @unless($posts->isEmpty()) hidden @endunless><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg><h3>{{ $feedFilter === 'saved' ? \App\Http\Controllers\Next\NextAccountText::get('saved_empty_title') : \App\Http\Controllers\Next\NextText::get('empty_title') }}</h3><p>{{ $feedFilter === 'saved' ? \App\Http\Controllers\Next\NextAccountText::get('saved_empty') : \App\Http\Controllers\Next\NextText::get('empty') }}</p><button type="button" id="resetFeed">{{ \App\Http\Controllers\Next\NextText::get('reset') }}</button></div>
       <div class="feed-bottom-note">{{ \App\Http\Controllers\Next\NextText::get('up_to_date') }} <span>·</span> <strong>{{ \App\Http\Controllers\Next\NextText::get('goodbye') }}</strong></div>
     </div>
     <aside class="feed-widgets" aria-label="Community-Widgets">

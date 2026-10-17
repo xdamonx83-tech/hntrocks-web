@@ -3,12 +3,11 @@
   'use strict';
   const trigger=document.getElementById('accountMenuToggle');
   const panel=document.getElementById('accountMenu');
-  const logout=document.getElementById('accountLogoutDemo');
   if(!trigger||!panel)return;
   let closeOnReturn=false;
   const isOpen=()=>!panel.hidden;
-  const closedLabel=trigger.getAttribute('aria-label')||'Kontomenü öffnen';
-  const openLabel=closedLabel.replace(/öffnen/i,'schließen');
+  const closedLabel=trigger.getAttribute('aria-label')||'Account';
+  const openLabel=trigger.dataset.accountOpenLabel||closedLabel;
   const close=(focusTrigger=false)=>{
     if(!isOpen())return;
     panel.hidden=true;
@@ -49,11 +48,5 @@
   document.addEventListener('focusin',(e)=>{if(isOpen()&&!panel.contains(e.target)&&!trigger.contains(e.target))close()});
   panel.addEventListener('click',e=>{
     if(e.target.closest('a'))close();
-  });
-  logout?.addEventListener('click',()=>{
-    close();
-    // Sign-out on HNT.ROCKS uses a protected POST request with CSRF, never fake a GET logout.
-    if(typeof window.openModal==='function')window.openModal('Abmelden','Diese lokale HTML-Seite ist nicht mit deinem Konto verbunden. Abmelden ist hier nicht möglich.','sign-out');
-    else alert('Abmelden ist in dieser lokalen HTML-Seite nicht möglich.');
   });
 })();
