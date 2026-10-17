@@ -23,12 +23,13 @@
 <script defer src="/build/next/hntv3-js/media-viewer.js"></script>
 <script defer src="/build/next/hntv3-js/media-viewer-comments.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/hnt-live-adapter.js?v=viewer-20261016"></script>
-<script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=video-progress-20261016"></script>
+<script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=poll-20261017"></script>
 <script defer src="/build/next/hntv3-js/like-embers.js?v=twotone-20261016"></script>
 <script defer src="/build/next/hntv3-js/composer-dispatch.js"></script>
-<script defer src="/build/next/hntv3-js/composer-extras.js?v=image-only-20261016"></script>
+<script defer src="/build/next/hntv3-js/composer-extras.js?v=poll-20261017"></script>
 <script defer src="/build/next/hntv3-js/feed-discussions.js"></script>
 <script defer src="/build/next/hntv3-js/post-comments-modal.js?v=viewer-20261016"></script>
+<script defer src="/build/next/hntv3-js/hnt-next-polls.js?v=poll-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-options-menu.js?v=manage-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-post-management.js?v=manage-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-type-badges.js"></script>
@@ -130,6 +131,14 @@
 .hnt-post-manage-message{font-size:11px;color:#dca9a1;min-height:1px;line-height:1.5;}
 @media(max-width:560px){.hnt-post-manage-panel{padding:16px;}.hnt-post-manage-overlay{align-items:flex-end;padding:10px;}.hnt-post-manage-form textarea{min-height:110px;}}
 .hnt-post-manage-overlay [hidden]{display:none!important;}
+/* Real polls and moods; existing HNTv3 choice styling remains intact. */
+.hnt-live-poll{margin:12px 0 16px;}
+.hnt-live-poll .hnt-feed-poll-option:not(:disabled){cursor:pointer;}
+.hnt-live-poll .hnt-feed-poll-option.is-selected{border-color:#8fcca2;background:#33483a;}
+.hnt-live-poll .hnt-feed-poll-option:disabled{opacity:1;cursor:default;}
+.hnt-live-poll .hnt-feed-poll-bar{pointer-events:none;}
+.hnt-live-feeling{margin:10px 0;display:flex;gap:7px;align-items:center;}
+.hnt-live-poll.is-voting{opacity:.75;pointer-events:none;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">

@@ -65,6 +65,47 @@
     @if($post->body)
         <p class="post-caption">{{ $post->body }}</p>
     @endif
+    @if($post->feelingMeta())
+        @php $liveFeeling = $post->feelingMeta(); @endphp
+        <div class="hnt-feed-feeling hnt-live-feeling" data-feeling-key="{{ $liveFeeling['key'] }}">
+            <span class="hnt-feed-feeling-emoji">{{ $liveFeeling['emoji'] }}</span>
+            <span>Fühlt sich {{ $liveFeeling['label'] }}</span>
+        </div>
+    @endif
+    @if($post->poll)
+        @php
+            $livePoll = $post->poll;
+            $livePoll->loadMissing(['options.votes','votes']);
+            $liveVotesCount = $livePoll->votes->count();
+            $myLiveVote = $livePoll->votes->firstWhere('user_id', auth()->id());
+            $myLiveOption = $myLiveVote?->feed_post_poll_option_id;
+            $isLivePollClosed = $livePoll->isClosed();
+            $liveShowResults = $isLivePollClosed || $myLiveOption !== null;
+        @endphp
+        <section class="hnt-feed-poll hnt-live-poll" data-live-poll-post="{{ $post->id }}" data-poll-closed="{{ $isLivePollClosed ? '1' : '0' }}">
+            <div class="hnt-feed-poll-top">
+                <span class="hnt-feed-poll-label">COMMUNITY-UMFRAGE</span>
+                <span class="hnt-feed-poll-duration">{{ $isLivePollClosed ? 'Abgeschlossen' : ($livePoll->closed_at ? 'Endet '.$livePoll->closed_at->diffForHumans() : 'Offene Umfrage') }}</span>
+            </div>
+            @if($livePoll->question)<h3 class="hnt-feed-poll-question">{{ $livePoll->question }}</h3>@endif
+            <div class="hnt-feed-poll-options">
+                @foreach($livePoll->options as $option)
+                    @php
+                        $optionVotes = $option->votes->count();
+                        $optionPercent = $liveVotesCount > 0 ? (int) round($optionVotes / $liveVotesCount * 100) : 0;
+                        $pickedOption = $myLiveOption !== null && (int)$myLiveOption === (int)$option->id;
+                    @endphp
+                    <button type="button" class="hnt-feed-poll-option {{ $liveShowResults ? 'show-results' : '' }} {{ $pickedOption ? 'is-selected' : '' }}"
+                        data-live-poll-option="{{ $option->id }}" {{ $liveShowResults ? 'disabled' : '' }} aria-label="Abstimmen für {{ $option->body }}">
+                        <span class="hnt-feed-poll-bar" style="width:{{ $liveShowResults ? $optionPercent : 0 }}%"></span>
+                        <span class="hnt-feed-poll-option-line"><span class="hnt-feed-poll-name">{{ $option->body }}</span>
+                            <span class="hnt-feed-poll-percent">{{ $liveShowResults ? $optionPercent.'%' : '' }}</span></span>
+                    </button>
+                @endforeach
+            </div>
+            <div class="hnt-feed-poll-foot">{{ $liveVotesCount }} {{ $liveVotesCount === 1 ? 'Stimme' : 'Stimmen' }} · {{ $isLivePollClosed ? 'Umfrage beendet' : ($myLiveOption !== null ? 'Deine Stimme wurde gezählt' : 'Einmal abstimmen') }}</div>
+        </section>
+    @endif
     @if($post->shared_post_id)
         @php
             $original = $post->sharedPost;

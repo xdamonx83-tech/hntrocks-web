@@ -256,20 +256,23 @@
     if (text.length>5000){notice('Dein Beitrag ist zu lang.',true);return;}
 
     const payload = new FormData();
-    payload.append('visibility','public'); // Composer currently shows public feed
+    payload.append('visibility','public');
+    const extras=window.HNTNextComposerExtras?.read?.();
+    const invalid=window.HNTNextComposerExtras?.validate?.();
+    if(invalid){notice(invalid,true);return;}
+    if(extras?.feelingKey)payload.append('feeling_key',extras.feelingKey);
+    if(extras?.poll){payload.append('poll_question',extras.poll.question);extras.poll.options.forEach(option=>payload.append('poll_options[]',option));payload.append('poll_duration_hours',String(extras.poll.hours));} // Composer currently shows public feed
     if(text) payload.append('body',text);
     if(image) payload.append('media[]',image,image.name);
     if(clip) payload.append('media[]',clip,clip.name);
-    if(pollOn) {
-      payload.append('poll_question',question);
-      options.forEach(option=>payload.append('poll_options[]',option));
-    }
+
     const submit=form.querySelector('[type="submit"]');
     pending.add(form);if(submit)submit.disabled=true;
     let published = false;
     const progress=(image||clip)?createProgress(form):null;
     try {
-      const data = progress ? await uploadWithProgress(payload,progress.update) : await post('/feed',payload);
+      const target=extras?.poll?'/next/feed':'/feed';
+      const data = progress ? await uploadWithProgress(payload,progress.update) : await post(target,payload);
       if (!data?.ok || !data?.post_id) throw new Error('Unvollständige Serverantwort.');
       published=true;
       if(progress){progress.stage.textContent='Beitrag wird geladen …';progress.number.textContent='Upload 100%';}

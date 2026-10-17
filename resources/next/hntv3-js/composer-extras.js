@@ -8,7 +8,7 @@
  const chips=dialog?.querySelector('.hnt-dispatch-chips');
  if(!dialog||!form||!body||!chips)return;
  const icon=name=>'<svg class="ph" aria-hidden="true" viewBox="0 0 256 256"><use href="#ph-'+name+'"></use></svg>';
- const moods=[['😎','Selbstbewusst'],['🥳','Feierlaune'],['😤','Frustriert'],['😨','Nervös'],['😅','Erleichtert'],['😂','Amüsiert'],['🔥','Siegeshungrig'],['😴','Erschöpft']];
+ const moods=[["😊","Glücklich","happy"],["🔥","Motiviert","excited"],["🎯","Fokussiert","focused"],["🌙","Entspannt","chill"],["😴","Müde","tired"],["🧂","Salzig","salty"]]
  let pollOn=false,feeling=null,clipURL=null,clipName='',panel='',seq=0;
  const polls=new Map();
  const toolbar=document.createElement('div');
@@ -120,6 +120,7 @@
   show('clip');
  });
  const pollData=()=>({question:document.getElementById('hntPollQuestion').value.trim(),options:[...optionRows.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean),hours:Number(document.getElementById('hntPollDuration').value)});
+ window.HNTNextComposerExtras={read(){return {poll:pollOn?pollData():null,feelingKey:feeling?.[2]||null}},validate(){const data=pollOn?pollData():null;if(!data)return null;if(data.question.length<5)return 'Bitte eine Umfragefrage mit mindestens 5 Zeichen eingeben.';if(data.options.length<2)return 'Bitte mindestens zwei Antworten eingeben.';if(new Set(data.options.map(x=>x.toLowerCase())).size!==data.options.length)return 'Antworten dürfen sich nicht wiederholen.';return null}};
  document.addEventListener('hnt:composer:validate',e=>{
   if(clipURL)e.detail.hasContent=true;
   if(!pollOn)return;

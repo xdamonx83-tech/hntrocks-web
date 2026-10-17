@@ -7,6 +7,7 @@ use App\Http\Controllers\Feed\FeedController;
 use App\Models\FeedPost;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
 final class NextFeedController extends Controller
 {
@@ -33,6 +34,28 @@ final class NextFeedController extends Controller
         ]);
     }
 
+    /** Create via the canonical feed store, then persist the requested poll expiry. */
+    public function store(Request $request): JsonResponse
+    {
+        $input = $request->validate([
+            'poll_duration_hours' => ['sometimes', 'integer', 'in:24,72,168'],
+        ]);
+        $response = app()->call([app(FeedController::class), 'store'], ['request' => $request]);
+        abort_unless($response instanceof JsonResponse, 500);
+        if ($response->isSuccessful() && $request->has('poll_options')) {
+            $data = $response->getData(true);
+            if (($data['ok'] ?? false) && isset($data['post_id'])) {
+                $post = FeedPost::query()
+                    ->where('user_id', $request->user()->id)
+                    ->findOrFail((int) $data['post_id']);
+                $post->poll()->update([
+                    'closed_at' => now()->addHours((int) ($input['poll_duration_hours'] ?? 24)),
+                ]);
+            }
+        }
+        return $response;
+    }
+
     /**
      * Return a fresh, authorized HTML card after an AJAX comment or new post.
      * This is read-only and uses the same post visibility rules as /feed.
@@ -51,7 +74,8 @@ final class NextFeedController extends Controller
             'comments.user.profile',
             'viewerReaction',
             'viewerBookmark',
-            'poll',
+            'poll.options.votes',
+            'poll.votes',
         ])->loadCount(['comments', 'reactions', 'bookmarks']);
 
         return view('next.partials.hntv3-post', [
