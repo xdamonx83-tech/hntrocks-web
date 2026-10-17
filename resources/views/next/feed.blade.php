@@ -240,6 +240,27 @@
 @media(max-width:990px){.feed-main .feed-layout,.feed-main .feed-layout.hnt-widgets-collapsed{grid-template-columns:minmax(0,1fr)!important}.feed-main .feed-column,.feed-main .feed-list{min-width:0;max-width:100%}}
 @media(max-width:720px){.game-rail{width:68px}.feed-main{margin-left:85px;width:calc(100% - 85px);max-width:calc(100% - 85px);padding-right:9px}.feed-layout,.feed-column,.feed-post,.feed-composer{min-width:0;max-width:100%}.feed-filters{max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}.feed-filters::-webkit-scrollbar{display:none}.feed-post .post-head,.feed-post .post-author,.feed-post .post-caption{min-width:0;overflow-wrap:anywhere}}
 @media(max-width:520px){.feed-main .feed-page-title{min-width:0;max-width:100%}.feed-main .feed-page-title p{overflow-wrap:anywhere}.feed-composer .composer-prompt{min-width:0;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}}
+/* Mobile post metadata and filters: preserve original HNTv3 compact hierarchy. */
+@media(max-width:720px){
+ .feed-main .feed-filters{display:flex;align-items:center;flex-wrap:nowrap;gap:6px;min-height:38px;height:auto;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding-bottom:2px}
+ .feed-main .feed-filters::-webkit-scrollbar{display:none}
+ .feed-main .feed-filters a.feed-filter{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:auto;min-width:0;min-height:33px;max-width:none;padding:7px 12px;line-height:1.1;font-size:10px;white-space:nowrap;overflow-wrap:normal;text-align:center;scroll-snap-align:start}
+ .feed-main .feed-filters .feed-filter-right{flex:0 0 auto}
+ .feed-list .feed-post .post-head{display:grid;grid-template-columns:35px minmax(0,1fr) 28px;grid-template-rows:auto auto;align-items:start;column-gap:8px;row-gap:7px;min-width:0;margin-bottom:11px}
+ .feed-list .feed-post .post-head .post-avatar{grid-column:1;grid-row:1;width:35px;height:35px;align-self:start;justify-self:start;margin:0}
+ .feed-list .feed-post .post-head .post-author{grid-column:2;grid-row:1;min-width:0;width:100%;max-width:100%;justify-self:stretch;align-self:center;margin:0}
+ .feed-list .feed-post .post-author .author-line{min-width:0;column-gap:6px;row-gap:4px;flex-wrap:wrap}
+ .feed-list .feed-post .post-author>span{display:block;min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;font-size:10px;overflow-wrap:normal}
+ .feed-list .feed-post .post-author>span .meta-sep{margin:0 4px}
+ .feed-list .feed-post .post-head .post-type-labels{grid-column:2 / 4;grid-row:2;align-self:start;justify-self:start;width:100%;min-width:0;max-width:100%;margin:0;display:flex;align-items:center;justify-content:flex-start;flex:0 1 auto;flex-wrap:wrap;gap:5px}
+ .feed-list .feed-post .post-head .post-type-labels + .post-more-btn,.feed-list .feed-post .post-head .post-more-btn{grid-column:3;grid-row:1;justify-self:end;align-self:start;width:28px;height:28px;min-width:28px;flex:0 0 auto;margin:0}
+ .feed-list .feed-post .post-head .post-type-pill{white-space:nowrap}
+}
+@media(max-width:370px){
+ .feed-main .feed-filters a.feed-filter{padding:7px 10px;font-size:9.5px}
+ .feed-list .feed-post .post-head{column-gap:6px}
+ .feed-list .feed-post .post-author .author-line{gap:4px}
+}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
