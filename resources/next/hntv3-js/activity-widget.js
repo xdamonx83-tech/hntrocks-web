@@ -8,6 +8,6 @@
     const expanded=button.getAttribute('aria-expanded')==='true';
     button.setAttribute('aria-expanded',String(!expanded));
     more.hidden=expanded;
-    if(label)label.textContent=expanded?'Alle anzeigen':'Weniger anzeigen';
+    if(label)label.textContent=expanded?(button.dataset.moreLabel||'Alle anzeigen'):(button.dataset.lessLabel||'Weniger anzeigen');
   });
 })();

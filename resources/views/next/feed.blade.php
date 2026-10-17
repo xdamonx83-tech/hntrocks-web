@@ -36,7 +36,7 @@
 <script defer src="/build/next/hntv3-js/post-type-badges.js?v=poll-badge-20261017"></script>
 <script defer src="/build/next/hntv3-js/share-modal.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/font-boot.js"></script>
-<script defer src="/build/next/hntv3-js/activity-widget.js"></script>
+<script defer src="/build/next/hntv3-js/activity-widget.js?v=live-20261017"></script>
 <script defer src="/build/next/hntv3-js/latest-loadouts-widget.js"></script>
 <script defer src="/assets/socialite/js/hnt-presence-heartbeat.js?v=172f-a"></script>
 <script defer src="/build/next/hntv3-js/hunter-hud.js?v=live-online-20261017"></script>
@@ -293,6 +293,25 @@
 .hnt-hud-panel .hnt-online-avatar > img{position:absolute;inset:0;display:block;box-sizing:border-box;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
 .hnt-hud-panel .hnt-online-avatar::after{z-index:2;pointer-events:none;}
 
+/* Live widgets retain the demo card shape with real source content. */
+.activity-widget .hnt-widget-activity-link{display:flex;gap:9px;align-items:center;text-decoration:none;color:inherit;width:100%;min-width:0;}
+.activity-widget .hnt-widget-activity-link:hover .activity-item-copy strong{color:var(--accent,#a4d6ad);}
+.activity-widget .activity-avatar{flex:none;display:grid;place-items:center;overflow:hidden;border-radius:50%;}
+.activity-widget .activity-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.activity-widget .hnt-widget-avatar-fallback{display:grid;place-items:center;width:100%;height:100%;font:700 10px "Exo 2",sans-serif;color:#d2e4d7;background:#425647;}
+.feed-widgets .hnt-widget-empty{padding:17px 12px;color:#a5b2a7;font-size:11px;line-height:1.5;list-style:none;}
+.feed-widgets .hnt-widget-spotlight-empty{min-height:92px;display:grid;place-items:center;text-align:center;}
+.feed-widgets .hnt-widget-loadout-link{display:flex;align-items:center;gap:11px;color:inherit;text-decoration:none;padding:10px 12px;}
+.feed-widgets .hnt-widget-loadout-link:hover{background:#39413a;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-art{display:grid;place-items:center;flex:0 0 37px;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-art svg{width:21px;height:21px;fill:#9fc9a8;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-copy{min-width:0;flex:1;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-copy strong,.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.feed-widgets .hnt-widget-cup-art{display:block;text-decoration:none;overflow:hidden;}
+.feed-widgets .hnt-widget-cup-art .cup-copy strong{font-size:21px;line-height:1.15;overflow-wrap:anywhere;}
+.feed-widgets .hnt-widget-guide-intro{padding:13px 15px;color:#bac9bd;font-size:11px;line-height:1.6;}
+.feed-widgets .hnt-widget-guide-action{display:flex;align-items:center;justify-content:space-between;margin:0 14px 15px;padding:11px 12px;background:#3e5042;color:#c4ebcf;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;}
+.feed-widgets .hnt-widget-guide-action svg{height:15px;width:15px;fill:currentColor;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
@@ -474,131 +493,8 @@
           <small id="hntPrestigeHint">Freiwillig · Level wird auf 1 zurückgesetzt</small>
         </div>
       </section>
-      <section class="widget activity-widget" aria-labelledby="activityWidgetTitle">
-        <div class="widget-top activity-widget-head">
-          <h2 id="activityWidgetTitle">Activity</h2>
-          <button class="activity-widget-toggle" type="button" aria-controls="activityWidgetMore" aria-expanded="false" data-activity-toggle>
-            <span>Alle anzeigen</span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-right"></use></svg>
-          </button>
-        </div>
-        <ul class="activity-widget-list" aria-label="Letzte Community-Aktivitäten">
-          <li class="activity-widget-item">
-            <span class="activity-avatar activity-avatar-fallback" aria-hidden="true"><i class="activity-avatar-head"></i><i class="activity-avatar-shoulders"></i><i class="activity-avatar-online"></i></span>
-            <span class="activity-item-copy"><strong>Henry Dricker ist HNT.ROCKS beigetreten</strong><span>Neuer Hunter in der Community</span><time>vor 1 Stunde</time></span>
-          </li>
-          <li class="activity-widget-item">
-            <span class="activity-avatar activity-avatar-fallback" aria-hidden="true"><i class="activity-avatar-head"></i><i class="activity-avatar-shoulders"></i><i class="activity-avatar-online"></i></span>
-            <span class="activity-item-copy"><strong>Kasper ist HNT.ROCKS beigetreten</strong><span>Neuer Hunter in der Community</span><time>vor 3 Stunden</time></span>
-          </li>
-          <li class="activity-widget-item">
-            <span class="activity-avatar activity-avatar-photo"><img src="/build/next/hntv3-assets/avatar-me.webp" alt="" loading="lazy"/></span>
-            <span class="activity-item-copy"><strong>Krispie hat einen Beitrag veröffentlicht</strong><span>Neuer Community-Beitrag</span><time>vor 19 Stunden</time></span>
-          </li>
-        </ul>
-        <ul class="activity-widget-list activity-widget-more" id="activityWidgetMore" aria-label="Weitere Community-Aktivitäten" hidden>
-          <li class="activity-widget-item">
-            <span class="activity-avatar activity-avatar-photo"><img src="/build/next/hntv3-assets/avatar-bayou.webp" alt="" loading="lazy"/></span>
-            <span class="activity-item-copy"><strong>BayouNomad hat einen Moment geteilt</strong><span>Neuer Moment aus dem Bayou</span><time>vor 1 Tag</time></span>
-          </li>
-          <li class="activity-widget-item">
-            <span class="activity-avatar activity-avatar-photo"><img src="/build/next/hntv3-assets/avatar-caldwell.webp" alt="" loading="lazy"/></span>
-            <span class="activity-item-copy"><strong>CaldwellEnjoyer hat ein Loadout geteilt</strong><span>Neuer Community-Beitrag</span><time>vor 2 Tagen</time></span>
-          </li>
-        </ul>
-      </section>
-
-      <section class="widget hnt-weekly-moment-widget" aria-labelledby="hntWeeklyMomentTitle">
-        <div class="widget-top hnt-weekly-moment-head">
-          <h2 id="hntWeeklyMomentTitle"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-film-strip"></use></svg> Moment der Woche</h2>
-          <a href="https://hnt.rocks/moments" aria-label="Alle Moments ansehen">Alle Moments <svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-arrow-up-right"></use></svg></a>
-        </div>
-        <a class="hnt-weekly-moment-preview" href="https://hnt.rocks/moments" aria-label="Moment der Woche – Moments öffnen">
-          <img src="/build/next/hntv3-assets/bloodmoon-bg.webp" alt="Dunkler Bayou mit einem riesigen roten Mond" loading="lazy"/>
-          <span class="hnt-weekly-moment-tag"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-sparkle"></use></svg> COMMUNITY HIGHLIGHT</span>
-          <span class="hnt-weekly-moment-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5a1 1 0 0 1 1.52-.85l10 6.5a1 1 0 0 1 0 1.7l-10 6.5A1 1 0 0 1 8 18.5z"/></svg></span>
-          <span class="hnt-weekly-moment-preview-footer"><span>Moment entdecken</span><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-arrow-up-right"></use></svg></span>
-        </a>
-        <div class="hnt-weekly-moment-info">
-          <div class="hnt-weekly-moment-author">
-            <img src="/build/next/hntv3-assets/avatar-bayou.webp" alt="" loading="lazy"/>
-            <span><strong>Mitten in der Blood-Moon-Nacht</strong><small>von BayouNomad</small></span>
-          </div>
-        </div>
-        <div class="hnt-weekly-moment-foot"><span><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-trophy"></use></svg> DEIN CLIP KÖNNTE HIER STEHEN</span><a href="https://hnt.rocks/moments">Moments entdecken <svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-arrow-right"></use></svg></a></div>
-      </section>
-
-      <section class="widget latest-loadouts-widget" aria-labelledby="latestLoadoutsTitle">
-        <div class="widget-top latest-loadouts-header">
-          <h2 id="latestLoadoutsTitle"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg> Letzte Loadouts</h2>
-          <button type="button" class="latest-loadouts-all" data-loadout-all aria-label="Alle Ausrüstungen anzeigen" aria-expanded="false">
-            <span>Alle anzeigen</span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-right"></use></svg>
-          </button>
-        </div>
-        <div class="latest-loadouts-body">
-          <article class="latest-loadout-feature latest-loadout-entry" data-loadout-entry>
-            <button class="latest-loadout-feature-button" type="button" data-loadout-toggle aria-expanded="false" aria-controls="latestLoadoutDetails1">
-              <span class="latest-loadout-overline"><span class="latest-loadout-status"><i></i> COMMUNITY BUILD</span><span>VOR 1 STD.</span></span>
-              <span class="latest-loadout-feature-heading"><strong>Budget Allrounder</strong><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-caret-down"></use></svg></span>
-              <span class="latest-loadout-author">CaldwellEnjoyer <span class="latest-loadout-divider">·</span> 5 Ausrüstungsteile</span>
-              <span class="latest-loadout-weapons" aria-label="Winfield 1893 und Caldwell Pax">
-                <span class="latest-loadout-weapon"><img src="/build/next/hntv3-assets/weapon-winfield.webp" alt="Winfield 1893" loading="lazy"/></span>
-                <span class="latest-loadout-weapon"><img src="/build/next/hntv3-assets/weapon-pax.webp" alt="Caldwell Pax" loading="lazy"/></span>
-              </span>
-              <span class="latest-loadout-feature-bottom"><span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg> Winfield + Pax</span><em>BUDGET</em></span>
-            </button>
-            <div class="latest-loadout-details" id="latestLoadoutDetails1" hidden>
-              <div class="latest-loadout-details-title">Ausrüstung <span>5 Slots</span></div>
-              <div class="latest-loadout-kit">
-                <span>Winfield 1893</span><span>Caldwell Pax</span><span>First Aid Kit</span><span>Combat Knife</span><span>Fire Bomb</span>
-              </div>
-              <button type="button" class="latest-loadout-source" data-loadout-source="post-loadout">Beitrag ansehen <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></button>
-            </div>
-          </article>
-          <div class="latest-loadout-compact-list">
-            <article class="latest-loadout-compact latest-loadout-entry" data-loadout-entry>
-              <button type="button" class="latest-loadout-compact-button" data-loadout-toggle aria-expanded="false" aria-controls="latestLoadoutDetails2">
-                <span class="latest-loadout-mini-art"><img src="/build/next/hntv3-assets/weapon-pax.webp" alt="" loading="lazy"/></span>
-                <span class="latest-loadout-mini-copy"><strong>Pax &amp; Knife Rush</strong><small>Nahkampf-Fokus <span>·</span> vor 2 Std.</small></span>
-                <svg aria-hidden="true" class="ph latest-loadout-mini-chevron" viewBox="0 0 256 256"><use href="#ph-caret-down"></use></svg>
-              </button>
-              <div class="latest-loadout-details latest-loadout-compact-details" id="latestLoadoutDetails2" hidden>
-                <div class="latest-loadout-details-title">Ausrüstung <span>5 Slots</span></div>
-                <div class="latest-loadout-kit"><span>Winfield 1893</span><span>Caldwell Pax</span><span>Combat Knife</span><span>First Aid Kit</span><span>Fire Bomb</span></div>
-                <button type="button" class="latest-loadout-source" data-loadout-source="post-pax-knife">Beitrag ansehen <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></button>
-              </div>
-            </article>
-            <article class="latest-loadout-compact latest-loadout-entry" data-loadout-entry>
-              <button type="button" class="latest-loadout-compact-button" data-loadout-toggle aria-expanded="false" aria-controls="latestLoadoutDetails3">
-                <span class="latest-loadout-mini-art"><img src="/build/next/hntv3-assets/weapon-winfield.webp" alt="" loading="lazy"/></span>
-                <span class="latest-loadout-mini-copy"><strong>Bayou Survival Kit</strong><small>Überleben <span>·</span> vor 2 Std.</small></span>
-                <svg aria-hidden="true" class="ph latest-loadout-mini-chevron" viewBox="0 0 256 256"><use href="#ph-caret-down"></use></svg>
-              </button>
-              <div class="latest-loadout-details latest-loadout-compact-details" id="latestLoadoutDetails3" hidden>
-                <div class="latest-loadout-details-title">Ausrüstung <span>4 Slots</span></div>
-                <div class="latest-loadout-kit"><span>Winfield 1893</span><span>Caldwell Pax</span><span>First Aid Kit</span><span>Fire Bomb</span></div>
-                <button type="button" class="latest-loadout-source" data-loadout-source="post-survival-kit">Beitrag ansehen <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></button>
-              </div>
-            </article>
-            <article class="latest-loadout-compact latest-loadout-entry" data-loadout-entry>
-              <button type="button" class="latest-loadout-compact-button" data-loadout-toggle aria-expanded="false" aria-controls="latestLoadoutDetails4">
-                <span class="latest-loadout-mini-art"><img src="/build/next/hntv3-assets/weapon-winfield.webp" alt="" loading="lazy"/></span>
-                <span class="latest-loadout-mini-copy"><strong>Silent Solo</strong><small>Solo-Build <span>·</span> vor 3 Std.</small></span>
-                <svg aria-hidden="true" class="ph latest-loadout-mini-chevron" viewBox="0 0 256 256"><use href="#ph-caret-down"></use></svg>
-              </button>
-              <div class="latest-loadout-details latest-loadout-compact-details" id="latestLoadoutDetails4" hidden>
-                <div class="latest-loadout-details-title">Ausrüstung <span>4 Slots</span></div>
-                <div class="latest-loadout-kit"><span>Winfield 1893</span><span>Caldwell Pax</span><span>Combat Knife</span><span>First Aid Kit</span></div>
-                <button type="button" class="latest-loadout-source" data-loadout-source="post-silent-solo">Beitrag ansehen <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></button>
-              </div>
-            </article>
-          </div>
-        </div>
-        <div class="latest-loadout-footer"><span><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-target"></use></svg> HUNTER LOADOUTS</span><span>4 Beiträge</span></div>
-      </section>
-      <section class="widget cup-widget"><div class="widget-top cup-widget-heading"><h2><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-trophy"></use></svg> Last Blood Cup</h2><a href="https://hnt.rocks/cups">Alle Cups <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a></div><div class="cup-art"><img src="/build/next/hntv3-assets/cup-scene.webp" alt="Hunter-Szene bei Abenddämmerung"/><div class="cup-copy"><span class="cup-kicker">AKTUELLER WETTBEWERB</span><strong>LAST <span>BLOOD</span></strong><small>Nur der Beste bleibt stehen.</small></div></div><div class="cup-info"><span>GEWINN</span><strong>100 € <small>Gaming-Guthaben</small></strong></div><a class="cup-join" href="https://hnt.rocks/cups">Zum Wettbewerb <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a></section>
-      <section class="widget guides-widget"><div class="widget-top"><h2>Trending Guides</h2><a href="https://hnt.rocks/guides">Alle Guides <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a></div><div class="guide-list"><a href="https://hnt.rocks/guides" class="guide-item"><img src="/build/next/hntv3-assets/guide-seven-sisters.webp" alt="Seven Sisters Estate Guide"/><span><strong>Seven Sisters Estate</strong><small>Kartenwissen &amp; Rotationen</small><em>MAP GUIDE · 8.4K</em></span></a><a href="https://hnt.rocks/guides" class="guide-item"><img src="/build/next/hntv3-assets/guide-loadouts.webp" alt="Loadout Guide"/><span><strong>Starke Early-Game Loadouts</strong><small>Budget-Builds für jedes Match</small><em>LOADOUTS · 6.1K</em></span></a><a href="https://hnt.rocks/guides" class="guide-item"><img src="/build/next/hntv3-assets/guide-rotations.webp" alt="Hunter-Rotationen"/><span><strong>Rotations &amp; Map Control</strong><small>Immer einen Schritt voraus</small><em>TAKTIK · 4.8K</em></span></a></div></section>
-      <section class="widget lobby-widget"><div class="widget-top"><h2><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg> Ready Lobby</h2><a href="https://hnt.rocks/ready-lobbies">Öffnen <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a></div><div class="lobby-body"><div class="lobby-signal"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg></div><div><strong>Dein nächstes Trio wartet.</strong><p>Schließ dich einem Team an oder starte eine eigene Lobby.</p></div></div><a class="lobby-cta" href="https://hnt.rocks/ready-lobbies">Hunter finden <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a></section>
-      <div class="widget-footer-links"><a href="https://hnt.rocks/impressum">Impressum</a><a href="https://hnt.rocks/datenschutz">Datenschutz</a></div>
+      @include('next.partials.hntv3-widgets')
+<div class="widget-footer-links"><a href="https://hnt.rocks/impressum">Impressum</a><a href="https://hnt.rocks/datenschutz">Datenschutz</a></div>
     </aside>
   </div>
 </main>

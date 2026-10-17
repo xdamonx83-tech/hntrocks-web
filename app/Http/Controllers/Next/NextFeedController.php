@@ -31,6 +31,7 @@ final class NextFeedController extends Controller
             'feedFilter' => $data['feedFilter'] ?? 'all',
             'hasMoreFeedPosts' => $hasMore,
             'nextFeedPage' => $page + 1,
+            'widgets' => NextFeedWidgetData::forViewer($request->user()),
         ]);
     }
 

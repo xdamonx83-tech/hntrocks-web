@@ -5193,3 +5193,23 @@ body {
 .hnt-hud-panel .hnt-online-avatar{position:relative;box-sizing:border-box;flex:0 0 37px;width:37px;min-width:37px;max-width:37px;height:37px;min-height:37px;max-height:37px;aspect-ratio:1/1;border-radius:50%;overflow:visible;isolation:isolate;}
 .hnt-hud-panel .hnt-online-avatar > img{position:absolute;inset:0;display:block;box-sizing:border-box;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
 .hnt-hud-panel .hnt-online-avatar::after{z-index:2;pointer-events:none;}
+
+/* Live widgets retain the demo card shape with real source content. */
+.activity-widget .hnt-widget-activity-link{display:flex;gap:9px;align-items:center;text-decoration:none;color:inherit;width:100%;min-width:0;}
+.activity-widget .hnt-widget-activity-link:hover .activity-item-copy strong{color:var(--accent,#a4d6ad);}
+.activity-widget .activity-avatar{flex:none;display:grid;place-items:center;overflow:hidden;border-radius:50%;}
+.activity-widget .activity-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.activity-widget .hnt-widget-avatar-fallback{display:grid;place-items:center;width:100%;height:100%;font:700 10px "Exo 2",sans-serif;color:#d2e4d7;background:#425647;}
+.feed-widgets .hnt-widget-empty{padding:17px 12px;color:#a5b2a7;font-size:11px;line-height:1.5;list-style:none;}
+.feed-widgets .hnt-widget-spotlight-empty{min-height:92px;display:grid;place-items:center;text-align:center;}
+.feed-widgets .hnt-widget-loadout-link{display:flex;align-items:center;gap:11px;color:inherit;text-decoration:none;padding:10px 12px;}
+.feed-widgets .hnt-widget-loadout-link:hover{background:#39413a;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-art{display:grid;place-items:center;flex:0 0 37px;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-art svg{width:21px;height:21px;fill:#9fc9a8;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-copy{min-width:0;flex:1;}
+.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-copy strong,.feed-widgets .hnt-widget-loadout-link .latest-loadout-mini-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.feed-widgets .hnt-widget-cup-art{display:block;text-decoration:none;overflow:hidden;}
+.feed-widgets .hnt-widget-cup-art .cup-copy strong{font-size:21px;line-height:1.15;overflow-wrap:anywhere;}
+.feed-widgets .hnt-widget-guide-intro{padding:13px 15px;color:#bac9bd;font-size:11px;line-height:1.6;}
+.feed-widgets .hnt-widget-guide-action{display:flex;align-items:center;justify-content:space-between;margin:0 14px 15px;padding:11px 12px;background:#3e5042;color:#c4ebcf;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;}
+.feed-widgets .hnt-widget-guide-action svg{height:15px;width:15px;fill:currentColor;}
