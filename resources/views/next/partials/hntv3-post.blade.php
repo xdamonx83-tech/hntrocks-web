@@ -1,6 +1,16 @@
 @php
     $author = $post->user;
     $authorName = $author?->name ?: 'Hunter';
+    // Verify identity against the actual HNT.ROCKS account, never admin rights or display name.
+    $isOfficialAuthor = (int) ($author?->id ?? 0) === 2 && (string) ($author?->username ?? '') === 'hntrocks';
+    $platform = mb_strtolower(trim((string) ($author?->profile?->platform ?? '')));
+    $authorSubtitle = $isOfficialAuthor ? 'Community-Entdeckung' : match ($platform) {
+        'pc' => 'PC Hunter',
+        'xbox' => 'Xbox Hunter',
+        'playstation', 'ps', 'psn' => 'PlayStation Hunter',
+        'crossplay' => 'Crossplay Hunter',
+        default => 'Hunter',
+    };
     $authorAvatar = $author?->avatarUrl() ?: '/build/next/hntv3-assets/avatar-hnt.webp';
     $attachments = $post->media;
     $firstImage = $attachments->first(fn ($item) => $item->isImage());
@@ -45,14 +55,14 @@
         <span class="post-avatar"><img src="{{ $authorAvatar }}" alt="{{ $authorName }}" loading="lazy"></span>
         <div class="post-author">
             <div class="author-line"><strong>{{ $authorName }}</strong>
+                @if($isOfficialAuthor)
+                    <span class="official-pill"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-seal-check"></use></svg> OFFIZIELL</span>
+                @endif
                 @if($post->is_pinned)
-                    <span class="official-pill">ANGEHEFTET</span>
+                    <span class="hnt-pinned-pill">ANGEHEFTET</span>
                 @endif
             </div>
-            <span>
-                @if($post->team){{ $post->team->name }} <i class="meta-sep"></i>@endif
-                {{ $post->created_at?->diffForHumans() ?: 'Gerade eben' }}
-            </span>
+            <span>{{ $authorSubtitle }} <i class="meta-sep"></i> {{ $post->created_at?->diffForHumans() ?: 'Gerade eben' }}</span>
         </div>
         <button type="button" class="post-more-btn" data-more aria-label="Beitragsoptionen" aria-expanded="false">
             <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-dots-three"></use></svg>

@@ -213,6 +213,9 @@
 .hnt-post-manage-overlay .hnt-post-manage-x):hover{transform:none;}
 }
 
+/* HNTv3 feed author identities: only account #2/hntrocks is official. */
+.feed-post .post-author .hnt-pinned-pill{display:inline-flex;align-items:center;padding:2px 5px;border-radius:4px;background:#454942;color:#c4cfc4;font-size:8px;font-weight:700;letter-spacing:.35px;}
+.feed-post .post-author .official-pill{white-space:nowrap;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
