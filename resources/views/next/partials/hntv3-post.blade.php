@@ -12,6 +12,7 @@
         }
     );
     $authorAvatar = $author?->avatarUrl() ?: '/build/next/hntv3-assets/avatar-hnt.webp';
+    $authorCosmetics = $author ? \App\Support\CrownCosmetics::forUser($author) : \App\Support\CrownCosmetics::emptyState();
     $liveFeeling = $post->feelingMeta();
     $localizedFeeling = $liveFeeling ? \App\Http\Controllers\Next\NextText::get($liveFeeling['key']) : null;
     $attachments = $post->media;
@@ -55,9 +56,12 @@
     data-post-visibility="{{ $post->visibility }}"
     data-post-body="{{ $post->body ?? '' }}">
     <div class="post-head">
-        <span class="post-avatar"><img src="{{ $authorAvatar }}" alt="{{ $authorName }}" loading="lazy"></span>
+        <span class="post-avatar {{ $authorCosmetics['avatar_frame_class'] }}"><img src="{{ $authorAvatar }}" alt="{{ $authorName }}" loading="lazy"></span>
         <div class="post-author">
             <div class="author-line"><strong>{{ $authorName }}</strong>
+                @if($authorCosmetics['profile_title_label'] !== '')
+                    <span class="hnt-author-equipped-title">{{ $authorCosmetics['profile_title_label'] }}</span>
+                @endif
                 @if($liveFeeling)
                     <span class="hnt-author-feeling hnt-live-feeling" data-feeling-key="{{ $liveFeeling['key'] }}" title="{{ str_replace(':feeling', (string) $localizedFeeling, \App\Http\Controllers\Next\NextText::get('feeling_title')) }}">
                         <span class="hnt-feed-feeling-emoji" aria-hidden="true">{{ $liveFeeling['emoji'] }}</span>
