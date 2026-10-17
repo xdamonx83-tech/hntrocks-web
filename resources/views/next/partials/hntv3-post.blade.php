@@ -12,6 +12,7 @@
         default => 'Hunter',
     };
     $authorAvatar = $author?->avatarUrl() ?: '/build/next/hntv3-assets/avatar-hnt.webp';
+    $liveFeeling = $post->feelingMeta();
     $attachments = $post->media;
     $firstImage = $attachments->first(fn ($item) => $item->isImage());
     $firstVideo = $attachments->first(fn ($item) => $item->isVideo());
@@ -56,6 +57,12 @@
         <span class="post-avatar"><img src="{{ $authorAvatar }}" alt="{{ $authorName }}" loading="lazy"></span>
         <div class="post-author">
             <div class="author-line"><strong>{{ $authorName }}</strong>
+                @if($liveFeeling)
+                    <span class="hnt-author-feeling hnt-live-feeling" data-feeling-key="{{ $liveFeeling['key'] }}" title="Fühlt sich {{ $liveFeeling['label'] }}">
+                        <span class="hnt-feed-feeling-emoji" aria-hidden="true">{{ $liveFeeling['emoji'] }}</span>
+                        <span>{{ mb_convert_case((string) $liveFeeling['label'], MB_CASE_TITLE, 'UTF-8') }}</span>
+                    </span>
+                @endif
                 @if($isOfficialAuthor)
                     <span class="official-pill"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-seal-check"></use></svg> OFFIZIELL</span>
                 @endif
@@ -77,13 +84,7 @@
     @if($post->body)
         <p class="post-caption">{{ $post->body }}</p>
     @endif
-    @if($post->feelingMeta())
-        @php $liveFeeling = $post->feelingMeta(); @endphp
-        <div class="hnt-feed-feeling hnt-live-feeling" data-feeling-key="{{ $liveFeeling['key'] }}">
-            <span class="hnt-feed-feeling-emoji">{{ $liveFeeling['emoji'] }}</span>
-            <span>Fühlt sich {{ $liveFeeling['label'] }}</span>
-        </div>
-    @endif
+
     @if($post->poll)
         @php
             $livePoll = $post->poll;
