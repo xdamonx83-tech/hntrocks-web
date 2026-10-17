@@ -42,17 +42,23 @@
         'emptyTitle' => $isEnglish ? 'No shop items available' : 'Keine Shop-Items verfügbar',
         'emptyText' => $isEnglish ? 'New cosmetics will appear here later.' : 'Neue Cosmetics erscheinen später hier.',
     ];
+    $shopUi = array_replace($shopUi, match (app()->getLocale()) {
+        'es' => ['intro' => 'Cosméticos y mejoras para tu perfil en HNT.ROCKS.', 'balance' => 'Tu saldo', 'walletHint' => 'Gana Marks mediante actividad y desafíos.', 'inventory' => 'Inventario', 'history' => 'Historial', 'all' => 'Todos', 'owned' => 'En propiedad', 'active' => 'Activo', 'yes' => 'Sí', 'no' => 'No', 'buy' => 'Comprar', 'equip' => 'Equipar', 'equipped' => 'Equipado', 'notEnough' => 'Marks insuficientes', 'availableTitle' => 'Disponible en la tienda', 'allOwnedText' => 'Ya tienes todos los artículos disponibles.', 'ownedKicker' => 'Inventario', 'ownedTitle' => 'Ya en tu inventario', 'ownedText' => 'Estos artículos son tuyos. Puedes equiparlos aquí o en tu inventario.', 'ownedBadge' => 'En propiedad', 'viewInventory' => 'Ver inventario', 'emptyTitle' => 'No hay artículos disponibles', 'emptyText' => 'Pronto llegarán nuevos cosméticos.'],
+        'ru' => ['intro' => 'Косметика и улучшения профиля HNT.ROCKS.', 'balance' => 'Ваш баланс', 'walletHint' => 'Получайте Marks за активность и задания.', 'inventory' => 'Инвентарь', 'history' => 'История', 'all' => 'Все', 'owned' => 'В наличии', 'active' => 'Активно', 'yes' => 'Да', 'no' => 'Нет', 'buy' => 'Купить', 'equip' => 'Надеть', 'equipped' => 'Надето', 'notEnough' => 'Недостаточно Marks', 'availableTitle' => 'Доступно в магазине', 'allOwnedText' => 'У вас уже есть все доступные товары.', 'ownedKicker' => 'Инвентарь', 'ownedTitle' => 'Уже в инвентаре', 'ownedText' => 'Эти предметы уже ваши. Их можно надеть здесь или в инвентаре.', 'ownedBadge' => 'В наличии', 'viewInventory' => 'Открыть инвентарь', 'emptyTitle' => 'Товаров пока нет', 'emptyText' => 'Скоро появятся новые предметы.'],
+        default => [],
+    });
+
 
     $shopLabelFor = function (?string $value) use ($isEnglish): string {
         $key = strtolower((string) $value);
 
         return match ($key) {
-            'avatar_frame', 'avatar-frame', 'avatarrahmen', 'frame' => $isEnglish ? 'Avatar frame' : 'Avatarrahmen',
+            'avatar_frame', 'avatar-frame', 'avatarrahmen', 'frame' => match(app()->getLocale()) { 'de' => 'Avatarrahmen', 'es' => 'Marco de avatar', 'ru' => 'Рамка аватара', default => 'Avatar frame' },
             'like_effect' => match (app()->getLocale()) { 'de' => 'Like-Effekt', 'es' => 'Efecto de Me gusta', 'ru' => 'Эффект лайка', default => 'Like effect' },
-            'username_glow', 'username-glow', 'username_color', 'username-color', 'username_colour', 'username-colour' => $isEnglish ? 'Username color' : 'Username-Farbe',
-            'profile_card', 'profile-card', 'profilkarte' => $isEnglish ? 'Profile card' : 'Profilkarte',
-            'profile_banner', 'profile-banner', 'banner', 'cover' => $isEnglish ? 'Profile banner' : 'Profilbanner',
-            'title', 'titel' => $isEnglish ? 'Title' : 'Titel',
+            'username_glow', 'username-glow', 'username_color', 'username-color', 'username_colour', 'username-colour' => match(app()->getLocale()) { 'de' => 'Namenseffekt', 'es' => 'Efecto de nombre', 'ru' => 'Эффект имени', default => 'Username effect' },
+            'profile_card', 'profile-card', 'profilkarte' => match(app()->getLocale()) { 'de' => 'Hunter-Karte', 'es' => 'Tarjeta de cazador', 'ru' => 'Карточка охотника', default => 'Hunter card' },
+            'profile_banner', 'profile-banner', 'banner', 'cover' => match(app()->getLocale()) { 'de' => 'Profilbanner', 'es' => 'Banner de perfil', 'ru' => 'Баннер профиля', default => 'Profile banner' },
+            'title', 'titel' => match(app()->getLocale()) { 'de' => 'Titel', 'es' => 'Título', 'ru' => 'Титул', default => 'Title' },
             'boost', 'booster' => 'Boost',
             'badge', 'cup', 'collectible' => $isEnglish ? 'Collectible' : 'Sammleritem',
             default => filled($value) ? \Illuminate\Support\Str::headline(str_replace(['_', '-'], ' ', (string) $value)) : ($isEnglish ? 'Item' : 'Item'),
