@@ -57,6 +57,57 @@ final class NextFeedController extends Controller
     }
 
     /**
+     * Private, view-authorized voter detail data for a real poll.
+     * Identities are only available after the viewer has voted or the poll closed.
+     */
+    public function pollVoters(Request $request, FeedPost $post): JsonResponse
+    {
+        abort_unless($post->status === 'published' && $post->canBeViewedBy($request->user()), 404);
+        $poll = $post->poll()->with('options')->firstOrFail();
+        $viewerHasVoted = $poll->votes()->where('user_id', $request->user()->id)->exists();
+        abort_unless($viewerHasVoted || $poll->isClosed(), 403, 'Bitte zuerst abstimmen.');
+
+        $validated = $request->validate([
+            'option_id' => ['nullable', 'integer'],
+            'offset' => ['nullable', 'integer', 'min:0', 'max:100000'],
+        ]);
+        $requestedOption = $validated['option_id'] ?? null;
+        $offset = (int) ($validated['offset'] ?? 0);
+        $options = $requestedOption !== null
+            ? $poll->options->where('id', (int) $requestedOption)
+            : $poll->options;
+        abort_if($requestedOption !== null && $options->isEmpty(), 404);
+        $total = $poll->votes()->count();
+        $pageSize = 24;
+        $result = $options->map(function ($option) use ($poll, $requestedOption, $offset, $pageSize, $total): array {
+            $votes = $poll->votes()->where('feed_post_poll_option_id', $option->id);
+            $count = (clone $votes)->count();
+            $skip = $requestedOption !== null ? $offset : 0;
+            $entries = $votes->with('user.profile')->orderBy('id')->skip($skip)->take($pageSize)->get();
+            $voters = $entries->filter(fn ($entry) => $entry->user !== null)->map(fn ($entry): array => [
+                'id' => (int) $entry->user->id,
+                'name' => (string) $entry->user->name,
+                'avatar' => (string) $entry->user->avatarUrl(),
+            ])->values()->all();
+            return [
+                'id' => (int) $option->id,
+                'body' => (string) $option->body,
+                'count' => $count,
+                'percent' => $total > 0 ? (int) round($count * 100 / $total) : 0,
+                'voters' => $voters,
+                'next_offset' => $skip + $entries->count() < $count ? $skip + $entries->count() : null,
+            ];
+        })->values();
+        return response()->json([
+            'ok' => true,
+            'post_id' => (int) $post->id,
+            'question' => (string) ($poll->question ?: 'Community-Umfrage'),
+            'total' => $total,
+            'closed' => $poll->isClosed(),
+            'options' => $result,
+        ]);
+    }
+    /**
      * Return a fresh, authorized HTML card after an AJAX comment or new post.
      * This is read-only and uses the same post visibility rules as /feed.
      */

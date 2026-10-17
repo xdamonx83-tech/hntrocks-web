@@ -8,4 +8,5 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/next/feed', NextFeedController::class)->name('next.feed');
     Route::post('/next/feed', [NextFeedController::class, 'store'])->name('next.feed.store');
     Route::get('/next/feed/posts/{post}/card', [NextFeedController::class, 'card'])->name('next.feed.card');
+    Route::get('/next/feed/posts/{post}/poll/voters', [NextFeedController::class, 'pollVoters'])->name('next.feed.poll.voters');
 });

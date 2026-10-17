@@ -103,7 +103,12 @@
                     </button>
                 @endforeach
             </div>
-            <div class="hnt-feed-poll-foot">{{ $liveVotesCount }} {{ $liveVotesCount === 1 ? 'Stimme' : 'Stimmen' }} · {{ $isLivePollClosed ? 'Umfrage beendet' : ($myLiveOption !== null ? 'Deine Stimme wurde gezählt' : 'Einmal abstimmen') }}</div>
+            <div class="hnt-feed-poll-foot">
+                <span>{{ $liveVotesCount }} {{ $liveVotesCount === 1 ? 'Stimme' : 'Stimmen' }} · {{ $isLivePollClosed ? 'Umfrage beendet' : ($myLiveOption !== null ? 'Deine Stimme wurde gezählt' : 'Einmal abstimmen') }}</span>
+                @if($liveShowResults)
+                    <button type="button" class="hnt-poll-voters-trigger" data-poll-voters="{{ $post->id }}" aria-haspopup="dialog">Abstimmungsdetails <svg aria-hidden="true" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 5l7 7-7 7"/></svg></button>
+                @endif
+            </div>
         </section>
     @endif
     @if($post->shared_post_id)
@@ -189,9 +194,7 @@
             @endif
         @endforeach
     @endif
-    @if($post->poll)
-        <div class="hnt-live-shared">Umfrage · Ergebnisse und Abstimmung werden im nächsten Schritt angebunden.</div>
-    @endif
+
     <div class="post-actions">
         <div class="post-actions-primary">
             <button type="button" class="post-action like-btn {{ $post->viewerReaction ? 'is-liked' : '' }}" data-like aria-pressed="{{ $post->viewerReaction ? 'true' : 'false' }}" aria-label="Beitrag gefällt mir">

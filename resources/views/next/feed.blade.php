@@ -29,7 +29,7 @@
 <script defer src="/build/next/hntv3-js/composer-extras.js?v=poll-20261017"></script>
 <script defer src="/build/next/hntv3-js/feed-discussions.js"></script>
 <script defer src="/build/next/hntv3-js/post-comments-modal.js?v=viewer-20261016"></script>
-<script defer src="/build/next/hntv3-js/hnt-next-polls.js?v=poll-20261017"></script>
+<script defer src="/build/next/hntv3-js/hnt-next-polls.js?v=poll-voters-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-options-menu.js?v=manage-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-post-management.js?v=manage-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-type-badges.js"></script>
@@ -139,6 +139,31 @@
 .hnt-live-poll .hnt-feed-poll-bar{pointer-events:none;}
 .hnt-live-feeling{margin:10px 0;display:flex;gap:7px;align-items:center;}
 .hnt-live-poll.is-voting{opacity:.75;pointer-events:none;}
+.hnt-live-poll .hnt-feed-poll-foot{display:flex;align-items:center;gap:8px 14px;justify-content:space-between;flex-wrap:wrap;}
+.hnt-poll-voters-trigger{display:inline-flex;align-items:center;gap:4px;background:transparent;border:0;color:#a6d7ae;font:700 10px "Exo 2",sans-serif;cursor:pointer;padding:5px 0;}
+.hnt-poll-voters-trigger:hover{text-decoration:underline;color:#d2f2d8;}
+.hnt-poll-voters-overlay[hidden]{display:none!important;}
+.hnt-poll-voters-overlay{position:fixed;inset:0;z-index:3900;background:rgba(6,10,7,.79);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:18px;}
+.hnt-poll-voters-dialog{box-sizing:border-box;width:min(100%,540px);max-height:min(82vh,720px);display:flex;flex-direction:column;background:#2e332f;border:1px solid #677b6c88;border-radius:16px;box-shadow:0 24px 90px #000b;color:#e3eae3;overflow:hidden;font-family:"Exo 2",sans-serif;}
+.hnt-poll-voters-head{display:flex;align-items:flex-start;justify-content:space-between;padding:21px 22px 15px;border-bottom:1px solid #ffffff18;gap:16px;}
+.hnt-poll-voters-kicker{font-size:9px;letter-spacing:1.3px;font-weight:700;color:#91c89e;}
+.hnt-poll-voters-title{margin:6px 0 4px;font-size:19px;line-height:1.3;color:#f2f4ef;overflow-wrap:anywhere;}
+.hnt-poll-voters-meta{font-size:11px;color:#98a99d;}
+.hnt-poll-voters-close{display:grid;place-items:center;flex:none;width:33px;height:33px;background:#414a42;border:1px solid #ffffff20;color:#e1e9e1;border-radius:9px;font-size:21px;cursor:pointer;}
+.hnt-poll-voters-body{padding:16px 22px 22px;overflow-y:auto;overscroll-behavior:contain;display:grid;gap:16px;}
+.hnt-poll-voters-option{background:#353e37;border:1px solid #ffffff14;border-radius:11px;overflow:hidden;}
+.hnt-poll-voters-option-top{padding:11px 12px;display:flex;gap:12px;justify-content:space-between;align-items:center;font-size:12px;font-weight:650;}
+.hnt-poll-voters-option-top strong{color:#a6d8b0;font-size:11px;white-space:nowrap;}
+.hnt-poll-voters-progress{height:3px;background:#222b25;}
+.hnt-poll-voters-progress>span{height:100%;display:block;background:#79b888;transition:width .2s;}
+.hnt-poll-voters-users{display:grid;gap:0;padding:5px 12px 9px;}
+.hnt-poll-voters-user{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:11px;color:#dae5dd;border-bottom:1px solid #ffffff0f;}
+.hnt-poll-voters-user:last-child{border-bottom:0;}
+.hnt-poll-voters-user img{height:26px;width:26px;flex:none;border:1px solid #7c9c82;border-radius:50%;object-fit:cover;background:#3b463e;}
+.hnt-poll-voters-empty{font-size:10px;color:#94a799;padding:8px 0;}
+.hnt-poll-voters-more{justify-self:start;border:1px solid #65836d;background:#3b5241;color:#d9f1de;border-radius:8px;padding:7px 10px;margin:4px 0 7px;cursor:pointer;font-size:10px;}
+.hnt-poll-voters-status{font-size:12px;color:#b4c8b9;line-height:1.6;}
+@media(max-width:600px){.hnt-poll-voters-overlay{align-items:flex-end;padding:8px;}.hnt-poll-voters-dialog{max-height:90vh;}.hnt-poll-voters-head{padding:16px;}.hnt-poll-voters-body{padding:14px 16px 18px;}}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
