@@ -31,7 +31,9 @@
  for(const [type,id] of Object.entries(listIds)){
    const list=document.getElementById(id);
    list.classList.add('social-topbar-scroll');list.setAttribute('tabindex','0');
-   const button=text('button','Mehr laden','social-topbar-more');
+   const labels={de:'Mehr laden',en:'Load more',es:'Cargar más',ru:'Загрузить ещё'};
+   const language=(document.documentElement.lang||'de').slice(0,2).toLowerCase();
+   const button=text('button',labels[language]||labels.de,'social-topbar-more');
    button.type='button';button.hidden=true;button.dataset.topbarMore=type;
    list.after(button);
  }

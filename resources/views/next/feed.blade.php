@@ -18,7 +18,7 @@
 <script defer src="/build/next/hntv3-js/script.js"></script>
 <script defer src="/build/next/hntv3-js/navigation.js"></script>
 <script defer src="/build/next/hntv3-js/account-menu.js"></script>
-<script defer src="/build/next/hntv3-js/social-dropdowns.js?v=avatar-scroll-20261017"></script>
+<script defer src="/build/next/hntv3-js/social-dropdowns.js?v=avatar-scroll-20261017b"></script>
 <script defer src="/build/next/hntv3-js/feed.js"></script>
 <script type="module" src="/build/next/hntv3-js/videojs-neutral.bundle.js?v=videojs10-20261016"></script>
 <script defer src="/build/next/hntv3-js/media-viewer.js"></script>
