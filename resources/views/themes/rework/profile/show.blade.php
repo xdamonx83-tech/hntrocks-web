@@ -40,7 +40,7 @@
         && (bool) ($profileCanMessage ?? false)
         && \Illuminate\Support\Facades\Route::has('messages.with-user');
     $profileMessageStartUrl = $profileMessageEnabled ? route('messages.with-user', $profileUser) : '#';
-    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
+    $currentLocale = in_array(app()->getLocale(), ['de', 'en', 'es', 'ru'], true) ? app()->getLocale() : 'de';
 @endphp
 
 <!DOCTYPE html>
