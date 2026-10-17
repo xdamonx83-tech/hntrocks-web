@@ -287,6 +287,12 @@
 .hnt-online-person{color:inherit;text-decoration:none;}
 .hnt-online-person:hover{background:#343d36;border-radius:9px;}
 .hnt-online-person-copy strong,.hnt-online-person-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+
+/* Online avatar: force portrait and landscape uploads inside a real 37px circle. */
+.hnt-hud-panel .hnt-online-avatar{position:relative;box-sizing:border-box;flex:0 0 37px;width:37px;min-width:37px;max-width:37px;height:37px;min-height:37px;max-height:37px;aspect-ratio:1/1;border-radius:50%;overflow:visible;isolation:isolate;}
+.hnt-hud-panel .hnt-online-avatar > img{position:absolute;inset:0;display:block;box-sizing:border-box;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
+.hnt-hud-panel .hnt-online-avatar::after{z-index:2;pointer-events:none;}
+
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
