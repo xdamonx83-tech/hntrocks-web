@@ -1,5 +1,5 @@
 @php
-    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'de';
+    $currentLocale = in_array(app()->getLocale(), ['de', 'en', 'es', 'ru'], true) ? app()->getLocale() : 'de';
     $reworkStyleVersion = $reworkStyleVersion ?? (@filemtime(public_path('assets/themes/rework/styles.css')) ?: time());
     $reworkScriptVersion = $reworkScriptVersion ?? (@filemtime(public_path('assets/themes/rework/script.js')) ?: time());
     $reworkChatTabsVersion = $reworkChatTabsVersion ?? (@filemtime(public_path('assets/socialite/js/hnt-socialite-chat-tabs.js')) ?: time());
