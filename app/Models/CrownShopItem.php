@@ -70,6 +70,16 @@ class CrownShopItem extends Model
     {
         $locale = app()->getLocale();
 
+        // New cosmetics can provide native Spanish and Russian names via metadata
+        // without altering the existing shop table or legacy item translations.
+        if (in_array($locale, ['es', 'ru'], true)) {
+            $localized = $this->metadata['names'][$locale] ?? null;
+
+            if (is_string($localized) && trim($localized) !== '') {
+                return $localized;
+            }
+        }
+
         return (string) ($locale === 'en' ? ($this->name_en ?: $this->name_de) : ($this->name_de ?: $this->name_en));
     }
 
