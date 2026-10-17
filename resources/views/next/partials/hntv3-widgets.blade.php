@@ -114,10 +114,25 @@
 
 <section class="widget guides-widget">
   <div class="widget-top"><h2>{{ $wt::get('guide_title') }}</h2><a href="/guides">{{ $wt::get('all_guides') }} <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a></div>
-  <p class="hnt-widget-guide-intro">{{ $wt::get('guide_intro') }}</p>
-  <a class="hnt-widget-guide-action" href="/guides">{{ $wt::get('all_guides') }} <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>
+  <div class="guide-list">
+    @forelse($widgets['guides'] as $guide)
+      <a class="guide-item" href="{{ $guide['url'] }}">
+        @if($guide['cover_url'])
+          <img src="{{ $guide['cover_url'] }}" alt="" loading="lazy"/>
+        @else
+          <span class="hnt-guide-image-fallback"><svg class="ph" aria-hidden="true" viewBox="0 0 256 256"><use href="#ph-book-open"></use></svg></span>
+        @endif
+        <span>
+          <strong>{{ $guide['title'] }}</strong>
+          <small>{{ \Illuminate\Support\Str::limit(strip_tags($guide['summary']), 62) }}</small>
+          <em>{{ \Illuminate\Support\Str::upper($guide['category']) }}@if($guide['helpful_count']) · {{ $guide['helpful_count'] }} ♥@endif</em>
+        </span>
+      </a>
+    @empty
+      <div class="hnt-widget-empty">{{ $wt::get('guide_intro') }} <a class="hnt-guide-list-empty-link" href="/guides">{{ $wt::get('all_guides') }} →</a></div>
+    @endforelse
+  </div>
 </section>
-
 <section class="widget lobby-widget">
   <div class="widget-top"><h2><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg> {{ $wt::get('lobby') }}</h2><a href="/ready-lobbies">{{ $wt::get('lobby_join') }} <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a></div>
   <div class="lobby-body"><div class="lobby-signal"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-crosshair"></use></svg></div>

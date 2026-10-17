@@ -312,6 +312,20 @@
 .feed-widgets .hnt-widget-guide-intro{padding:13px 15px;color:#bac9bd;font-size:11px;line-height:1.6;}
 .feed-widgets .hnt-widget-guide-action{display:flex;align-items:center;justify-content:space-between;margin:0 14px 15px;padding:11px 12px;background:#3e5042;color:#c4ebcf;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;}
 .feed-widgets .hnt-widget-guide-action svg{height:15px;width:15px;fill:currentColor;}
+
+/* Center the Moment play disc exactly; padding no longer shifts its center. */
+.feed-widgets .hnt-weekly-moment-preview .hnt-weekly-moment-play{box-sizing:border-box;top:50%;left:50%;width:48px;height:48px;padding:0;display:grid;place-items:center;transform:translate(-50%,-50%);}
+.feed-widgets .hnt-weekly-moment-preview .hnt-weekly-moment-play svg{display:block;width:21px;height:21px;transform:translateX(1px);}
+/* Restore the compact three-guide list from the HNTv3 demo. */
+.feed-widgets .guides-widget .guide-list{padding:0 12px 9px;}
+.feed-widgets .guides-widget .guide-item{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 1px;}
+.feed-widgets .guides-widget .guide-item>img,.feed-widgets .guides-widget .hnt-guide-image-fallback{flex:0 0 83px;display:grid;place-items:center;width:83px;height:58px;max-width:83px;min-width:83px;max-height:58px;min-height:58px;border-radius:7px;object-fit:cover;overflow:hidden;}
+.feed-widgets .guides-widget .hnt-guide-image-fallback{background:linear-gradient(145deg,#414b42,#242d29);border:1px solid #4b5d50;color:#abc8ae;}
+.feed-widgets .guides-widget .hnt-guide-image-fallback svg{height:23px;width:23px;fill:currentColor;}
+.feed-widgets .guides-widget .guide-item>span:last-child{flex:1;min-width:0;}
+.feed-widgets .guides-widget .guide-item>span:last-child>strong,.feed-widgets .guides-widget .guide-item>span:last-child>small{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.feed-widgets .guides-widget .hnt-guide-list-empty-link{display:inline-block;margin-left:6px;color:#b0d9b9;text-decoration:none;}
+
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">

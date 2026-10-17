@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Next;
 
 use App\Models\Cup;
 use App\Models\FeedPost;
+use App\Models\Guide;
 use App\Models\LiveLobby;
 use App\Models\Moment;
 use App\Models\MomentSpotlight;
@@ -80,6 +81,26 @@ final class NextFeedWidgetData
             ->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END")
             ->orderBy('starts_at')->first();
 
+        $guides = Guide::query()->published()
+            ->with(['publishedRevision.category', 'publishedRevision.coverMedia'])
+            ->whereHas('publishedRevision', fn ($query) => $query->where('status', 'published'))
+            ->orderByDesc('is_featured')
+            ->orderByRaw('(helpful_count + bookmarks_count + comments_count) DESC')
+            ->orderByDesc('published_at')->limit(3)->get()
+            ->map(function (Guide $guide): array {
+                $rev = $guide->publishedRevision;
+                $cover = $rev?->coverMedia;
+                $lang = app()->getLocale() === 'en' ? 'en' : 'de';
+                return [
+                    'title' => (string) $rev?->title,
+                    'summary' => (string) $rev?->summary,
+                    'category' => (string) ($rev?->category?->label($lang) ?: 'Guide'),
+                    'cover_url' => $cover ? route('api.v1.guides.media.show', ['media' => $cover->id]) : null,
+                    'url' => route('guides.react.show', ['slug' => $guide->slug]),
+                    'helpful_count' => (int) $guide->helpful_count,
+                ];
+            });
+
         $loadouts = UserLoadout::query()->where('visibility', 'public')
             ->where('is_active', true)
             ->with('user.profile')
@@ -91,6 +112,7 @@ final class NextFeedWidgetData
             'spotlight' => $spotlight,
             'cup' => $cup,
             'loadouts' => $loadouts,
+            'guides' => $guides,
             'openLobbies' => LiveLobby::query()->where('status', 'open')->where('expires_at', '>', now())->count(),
         ];
     }
