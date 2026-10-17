@@ -31,7 +31,7 @@
     '<div class="hnt-post-manage-eyebrow">HNT.ROCKS / POST OPTIONS</div>',
     '<h2 class="hnt-post-manage-heading" id="hntPostManageHeading"></h2>',
     '<p class="hnt-post-manage-subtitle" id="hntPostManageSubheading"></p>',
-    '</div><button class="hnt-post-manage-x" type="button" aria-label="Schließen">×</button></header>',
+    '</div><button class="hnt-post-manage-x" type="button" aria-label="Schließen" title="Schließen (Esc)"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-x"></use></svg></button></header>',
     '<form class="hnt-post-manage-form" id="hntPostManageForm">',
     '<label class="hnt-post-manage-label" data-manage-edit>Beitragstext',
     '<textarea id="hntManageBody" maxlength="5000" placeholder="Deinen Beitrag bearbeiten …"></textarea>',

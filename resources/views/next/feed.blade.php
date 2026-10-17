@@ -31,7 +31,7 @@
 <script defer src="/build/next/hntv3-js/post-comments-modal.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/hnt-next-polls.js?v=poll-voters-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-options-menu.js?v=manage-20261017"></script>
-<script defer src="/build/next/hntv3-js/hnt-post-management.js?v=manage-20261017"></script>
+<script defer src="/build/next/hntv3-js/hnt-post-management.js?v=close-unified-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-type-badges.js?v=poll-badge-20261017"></script>
 <script defer src="/build/next/hntv3-js/share-modal.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/font-boot.js"></script>
@@ -164,6 +164,55 @@
 .hnt-poll-voters-more{justify-self:start;border:1px solid #65836d;background:#3b5241;color:#d9f1de;border-radius:8px;padding:7px 10px;margin:4px 0 7px;cursor:pointer;font-size:10px;}
 .hnt-poll-voters-status{font-size:12px;color:#b4c8b9;line-height:1.6;}
 @media(max-width:600px){.hnt-poll-voters-overlay{align-items:flex-end;padding:8px;}.hnt-poll-voters-dialog{max-height:90vh;}.hnt-poll-voters-head{padding:16px;}.hnt-poll-voters-body{padding:14px 16px 18px;}}
+
+/* Close control design lock: the original HNTv3 discussion modal is the
+   reference for composer, discussion, Bayou Focus and post management. */
+:is(.composer-overlay .hnt-dispatch-dialog .hnt-pd-close,
+.hnt-post-dialog .hnt-pd-close,
+.hnt-viewer .hnt-viewer-close,
+.hnt-post-manage-overlay .hnt-post-manage-x) {
+  box-sizing:border-box;
+  display:grid;place-items:center;flex:0 0 var(--hnt-size-close);
+  width:var(--hnt-size-close);height:var(--hnt-size-close);
+  min-width:var(--hnt-size-close);min-height:var(--hnt-size-close);
+  padding:0;
+  border:1px solid var(--control-border);
+  border-radius:var(--hnt-radius-close);
+  background:var(--surface-control);color:var(--control-fg);
+  cursor:pointer;transform:rotate(0deg);
+  transition:var(--hnt-motion-close);
+}
+:is(.composer-overlay .hnt-dispatch-dialog .hnt-pd-close,
+.hnt-post-dialog .hnt-pd-close,
+.hnt-viewer .hnt-viewer-close,
+.hnt-post-manage-overlay .hnt-post-manage-x):hover {
+  background:var(--control-hover-bg);
+  color:var(--control-hover-fg);
+  transform:rotate(90deg);
+}
+:is(.composer-overlay .hnt-dispatch-dialog .hnt-pd-close,
+.hnt-post-dialog .hnt-pd-close,
+.hnt-viewer .hnt-viewer-close,
+.hnt-post-manage-overlay .hnt-post-manage-x):focus-visible {
+  outline:2px solid var(--focus-ring);outline-offset:2px;
+}
+:is(.composer-overlay .hnt-dispatch-dialog .hnt-pd-close,
+.hnt-post-dialog .hnt-pd-close,
+.hnt-viewer .hnt-viewer-close,
+.hnt-post-manage-overlay .hnt-post-manage-x) .ph {
+  display:block;flex:none;width:16px;height:16px;fill:currentColor;
+}
+@media(prefers-reduced-motion:reduce){
+  :is(.composer-overlay .hnt-dispatch-dialog .hnt-pd-close,
+.hnt-post-dialog .hnt-pd-close,
+.hnt-viewer .hnt-viewer-close,
+.hnt-post-manage-overlay .hnt-post-manage-x){transition:none!important;}
+  :is(.composer-overlay .hnt-dispatch-dialog .hnt-pd-close,
+.hnt-post-dialog .hnt-pd-close,
+.hnt-viewer .hnt-viewer-close,
+.hnt-post-manage-overlay .hnt-post-manage-x):hover{transform:none;}
+}
+
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
