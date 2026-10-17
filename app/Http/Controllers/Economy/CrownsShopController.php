@@ -214,8 +214,18 @@ class CrownsShopController extends Controller
     }
     private function themeView(string $view): string
     {
-        return HntTheme::enabled()
-            ? HntTheme::resolve($view)
-            : 'themes.socialite.' . $view;
+        $preferred = HntTheme::enabled()
+            ? [HntTheme::resolve($view), 'themes.rework.' . $view, 'themes.socialite.' . $view]
+            : ['themes.socialite.' . $view, 'themes.rework.' . $view];
+
+        // Some enabled themes lack Crowns templates. Never return
+        // an unresolved "crowns.shop" or "crowns.inventory" base view.
+        foreach (array_unique($preferred) as $candidate) {
+            if (\Illuminate\Support\Facades\View::exists($candidate)) {
+                return $candidate;
+            }
+        }
+
+        abort(500, 'No Crowns view is installed for ' . $view);
     }
 }
