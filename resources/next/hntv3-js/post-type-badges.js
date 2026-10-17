@@ -58,11 +58,12 @@
     const {category,format}=metadata(card);
     if(category==='discovery')return ['discovery'];
     if(category==='loadout')return ['loadout'];
-    if(format==='poll')return ['poll'];
+    const hasPoll=card.dataset.postHasPoll==='1'||format==='poll';
     const categories=['story','question','tip'];
     const types=[];
     if(categories.includes(category))types.push(category);
     if(format==='clip'||format==='image')types.push(format==='clip'?'clip':'media');
+    if(hasPoll)types.push('poll');
     return types.length?types:['story'];
   }
 

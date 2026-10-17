@@ -32,7 +32,7 @@
 <script defer src="/build/next/hntv3-js/hnt-next-polls.js?v=poll-voters-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-options-menu.js?v=manage-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-post-management.js?v=manage-20261017"></script>
-<script defer src="/build/next/hntv3-js/post-type-badges.js"></script>
+<script defer src="/build/next/hntv3-js/post-type-badges.js?v=poll-badge-20261017"></script>
 <script defer src="/build/next/hntv3-js/share-modal.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/font-boot.js"></script>
 <script defer src="/build/next/hntv3-js/activity-widget.js"></script>
