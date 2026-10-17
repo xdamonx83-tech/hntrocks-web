@@ -41,17 +41,30 @@
 .hnt-equipped-card{margin:14px auto 18px;max-width:480px;width:calc(100% - 28px)}
 .hnt-equipped-card .hnt-cosmetic-preview{margin:0;background:none}
 .hnt-hunter-equipped-title{display:inline-block;margin-top:6px;padding:3px 12px;color:#f0d39b;background:rgba(191,137,60,.12);border:1px solid rgba(191,137,60,.3);border-radius:4px;font-size:11px;font-weight:750;letter-spacing:.07em}
-.profile-avatar-badge[class*="hh-crowns-avatar-frame-"]{--hnt-ring-a:#ca9d60;--hnt-ring-b:#6b492d;isolation:isolate;position:relative;border-radius:50%}
+.profile-avatar-badge:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse){--hnt-ring-a:#ca9d60;--hnt-ring-b:#6b492d;isolation:isolate;position:relative;border-radius:50%}
 .profile-avatar-badge.hh-crowns-avatar-frame-ember-wreath{--hnt-ring-a:#ef8b43;--hnt-ring-b:#9f311e}
 .profile-avatar-badge.hh-crowns-avatar-frame-soul-vortex{--hnt-ring-a:#70eaff;--hnt-ring-b:#29617f}
 .profile-avatar-badge.hh-crowns-avatar-frame-venom-bloom{--hnt-ring-a:#90e58a;--hnt-ring-b:#2d6c42}
 .profile-avatar-badge.hh-crowns-avatar-frame-frost-halo{--hnt-ring-a:#acdfff;--hnt-ring-b:#5385d1}
 .profile-avatar-badge.hh-crowns-avatar-frame-gold-ascendant{--hnt-ring-a:#ffe0a0;--hnt-ring-b:#ac7626}
 .profile-avatar-badge.hh-crowns-avatar-frame-blood-eclipse{--hnt-ring-a:#ec545e;--hnt-ring-b:#480b1a}
-.profile-avatar-badge[class*="hh-crowns-avatar-frame-"]::before{content:"";position:absolute;inset:-6px;z-index:-1;border-radius:50%;background:conic-gradient(var(--hnt-ring-a),var(--hnt-ring-b),transparent 40%,var(--hnt-ring-a),var(--hnt-ring-b));animation:hnt-cosmetic-spin 5s linear infinite;box-shadow:0 0 19px -2px var(--hnt-ring-b);pointer-events:none}
-.profile-avatar-badge[class*="hh-crowns-avatar-frame-"]>img{position:relative;z-index:1;border:3px solid #171717;border-radius:50%}
+.profile-avatar-badge:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse)::before{content:"";position:absolute;inset:-6px;z-index:-1;border-radius:50%;background:conic-gradient(var(--hnt-ring-a),var(--hnt-ring-b),transparent 40%,var(--hnt-ring-a),var(--hnt-ring-b));animation:hnt-cosmetic-spin 5s linear infinite;box-shadow:0 0 19px -2px var(--hnt-ring-b);pointer-events:none}
+.profile-avatar-badge:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse)>img{position:relative;z-index:1;border:3px solid #171717;border-radius:50%}
 @keyframes hnt-cosmetic-spin{to{transform:rotate(360deg)}}
 @keyframes hnt-cosmetic-breathe{to{opacity:.2;transform:scale(1.09)}}
 @keyframes hnt-card-sheen{0%,32%{transform:translateX(-60%) rotate(20deg)}55%,100%{transform:translateX(60%) rotate(20deg)}}
 @media(max-width:640px){.hnt-hunter-card__body strong{font-size:16px}.hnt-cosmetic-preview{padding:10px}.hnt-equipped-card{width:100%;max-width:100%}}
-@media(prefers-reduced-motion:reduce){.hnt-cosmetic-ring::before,.hnt-cosmetic-ring::after,.profile-avatar-badge[class*="hh-crowns-avatar-frame-"]::before,.hnt-hunter-card::before{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.hnt-cosmetic-ring::before,.hnt-cosmetic-ring::after,.profile-avatar-badge:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse)::before,.hnt-hunter-card::before{animation:none!important}}
+
+/* The /next/feed post avatars use the same equipped item class as the profile. */
+.post-avatar:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse){--hnt-ring-a:#cfa36d;--hnt-ring-b:#784c32;position:relative!important;isolation:isolate;overflow:visible!important;border-radius:50%}
+.post-avatar.hh-crowns-avatar-frame-ember-wreath{--hnt-ring-a:#ef8b43;--hnt-ring-b:#9f311e}
+.post-avatar.hh-crowns-avatar-frame-soul-vortex{--hnt-ring-a:#70eaff;--hnt-ring-b:#29617f}
+.post-avatar.hh-crowns-avatar-frame-venom-bloom{--hnt-ring-a:#90e58a;--hnt-ring-b:#2d6c42}
+.post-avatar.hh-crowns-avatar-frame-frost-halo{--hnt-ring-a:#acdfff;--hnt-ring-b:#5385d1}
+.post-avatar.hh-crowns-avatar-frame-gold-ascendant{--hnt-ring-a:#ffe0a0;--hnt-ring-b:#ac7626}
+.post-avatar.hh-crowns-avatar-frame-blood-eclipse{--hnt-ring-a:#ec545e;--hnt-ring-b:#480b1a}
+.post-avatar:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse)::before{content:"";position:absolute;inset:-4px;z-index:0;border-radius:50%;background:conic-gradient(var(--hnt-ring-a),var(--hnt-ring-b),transparent 45%,var(--hnt-ring-a));box-shadow:0 0 12px -3px var(--hnt-ring-a);animation:hnt-cosmetic-spin 5s linear infinite;pointer-events:none}
+.post-avatar:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse) img{position:relative;z-index:1;border:2px solid #191919;border-radius:50%}
+.hnt-author-equipped-title{display:inline-flex;align-items:center;max-width:185px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin:0 3px;padding:2px 7px;border:1px solid rgba(202,158,83,.4);border-radius:5px;background:rgba(174,117,50,.12);color:#ead4a3;font-size:10px;font-weight:700;letter-spacing:.03em;vertical-align:middle}
+@media(prefers-reduced-motion:reduce){.post-avatar:is(.hh-crowns-avatar-frame-ember-wreath,.hh-crowns-avatar-frame-soul-vortex,.hh-crowns-avatar-frame-venom-bloom,.hh-crowns-avatar-frame-frost-halo,.hh-crowns-avatar-frame-gold-ascendant,.hh-crowns-avatar-frame-blood-eclipse)::before{animation:none}}
