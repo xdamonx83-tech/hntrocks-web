@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Next\NextFeedController;
 use App\Http\Controllers\Next\NextTopbarController;
+use App\Http\Controllers\Next\NextOnlineController;
 use App\Http\Controllers\Next\NextLocaleMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', NextLocaleMiddleware::class])->group(function (): void {
     Route::redirect('/next', '/next/feed')->name('next.index');
     Route::get('/next/topbar', [NextTopbarController::class, 'show'])->name('next.topbar');
+    Route::get('/next/online', NextOnlineController::class)->name('next.online');
     Route::post('/next/language/{locale}', function (Request $request, string $locale) {
         abort_unless(in_array($locale, ['de','en','es','ru'], true), 404);
         $request->session()->put('hnt_next_locale', $locale);

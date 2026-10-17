@@ -5177,3 +5177,14 @@ body {
 .social-popover .social-topbar-more:disabled{opacity:.6;cursor:wait;}
 @media(max-height:540px){.social-popover .social-items.social-topbar-scroll{max-height:max(100px,calc(100dvh - var(--social-top,88px) - 185px));}}
 @media(prefers-reduced-motion:reduce){.social-popover .social-items.social-topbar-scroll{scroll-behavior:auto;}}
+
+/* Live Hunter Network avatars and inline scrollbar-free online roster. */
+.hnt-online-avatar{overflow:visible;isolation:isolate;}
+.hnt-online-avatar.is-photo{font-size:0;color:transparent;background:#323a34;}
+.hnt-online-avatar img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:50%;}
+.hnt-online-avatar.is-photo::after{z-index:2;}
+.hnt-online-list{scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-y:contain;}
+.hnt-online-list::-webkit-scrollbar{display:none;width:0;}
+.hnt-online-person{color:inherit;text-decoration:none;}
+.hnt-online-person:hover{background:#343d36;border-radius:9px;}
+.hnt-online-person-copy strong,.hnt-online-person-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}

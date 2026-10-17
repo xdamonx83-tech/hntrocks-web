@@ -38,7 +38,8 @@
 <script defer src="/build/next/hntv3-js/font-boot.js"></script>
 <script defer src="/build/next/hntv3-js/activity-widget.js"></script>
 <script defer src="/build/next/hntv3-js/latest-loadouts-widget.js"></script>
-<script defer src="/build/next/hntv3-js/hunter-hud.js"></script>
+<script defer src="/assets/socialite/js/hnt-presence-heartbeat.js?v=172f-a"></script>
+<script defer src="/build/next/hntv3-js/hunter-hud.js?v=live-online-20261017"></script>
 <script defer src="/build/next/hntv3-js/widget-focus.js"></script>
 <script defer src="/build/next/hntv3-js/mobile-header.js"></script>
 <script defer src="/build/next/hntv3-js/search-experience.js"></script>
@@ -276,6 +277,16 @@
 .social-popover .social-topbar-more:disabled{opacity:.6;cursor:wait;}
 @media(max-height:540px){.social-popover .social-items.social-topbar-scroll{max-height:max(100px,calc(100dvh - var(--social-top,88px) - 185px));}}
 @media(prefers-reduced-motion:reduce){.social-popover .social-items.social-topbar-scroll{scroll-behavior:auto;}}
+/* Live Hunter Network avatars and inline scrollbar-free online roster. */
+.hnt-online-avatar{overflow:visible;isolation:isolate;}
+.hnt-online-avatar.is-photo{font-size:0;color:transparent;background:#323a34;}
+.hnt-online-avatar img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:50%;}
+.hnt-online-avatar.is-photo::after{z-index:2;}
+.hnt-online-list{scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-y:contain;}
+.hnt-online-list::-webkit-scrollbar{display:none;width:0;}
+.hnt-online-person{color:inherit;text-decoration:none;}
+.hnt-online-person:hover{background:#343d36;border-radius:9px;}
+.hnt-online-person-copy strong,.hnt-online-person-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
@@ -311,7 +322,7 @@
 <a class="head-icon icon-btn nav-link" href="https://hnt.rocks/moments" aria-label="Moments" data-tooltip="Moments" data-description="Videos und Highlights"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-film-strip"></use></svg></a>
 <a class="head-icon icon-btn nav-link" href="https://hnt.rocks/maps" aria-label="Maps" data-tooltip="Maps" data-description="Interaktive Hunt-Karten"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-map-trifold"></use></svg></a>
 <a class="head-icon icon-btn nav-link" href="https://hnt.rocks/guides" aria-label="Guides" data-tooltip="Guides" data-description="Hunt Guides"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-graduation-cap"></use></svg></a>
-<div aria-label="Hunter-Netzwerk und Erfahrungspunkte" class="user-currency hnt-hud-currency"><button type="button" class="hnt-hud-trigger hnt-hud-online-trigger" id="hunterOnlineToggle" title="Online-Hunter ansehen" aria-label="12 Hunter online – Hunter-Netzwerk öffnen" aria-expanded="false" aria-controls="hunterOnlinePanel" aria-haspopup="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg><span class="hnt-hud-online-led" aria-hidden="true"></span><span>12 Online</span></button><span class="currency-divider" aria-hidden="true"></span><button type="button" class="hnt-hud-trigger hnt-hud-xp-trigger" id="hunterXpToggle" title="Hunter Journal öffnen" aria-label="Hunter Journal – Erfahrungspunkte und Auszeichnungen öffnen" aria-expanded="false" aria-controls="hunterJournalPanel" aria-haspopup="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-lightning"></use></svg><span id="hunterHudXpValue">23.245 XP</span></button></div>
+<div aria-label="Hunter-Netzwerk und Erfahrungspunkte" class="user-currency hnt-hud-currency"><button type="button" class="hnt-hud-trigger hnt-hud-online-trigger" id="hunterOnlineToggle" title="Online-Hunter ansehen" aria-label="12 Hunter online – Hunter-Netzwerk öffnen" aria-expanded="false" aria-controls="hunterOnlinePanel" aria-haspopup="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg><span class="hnt-hud-online-led" aria-hidden="true"></span><span id="hunterOnlineCount">– Online</span></button><span class="currency-divider" aria-hidden="true"></span><button type="button" class="hnt-hud-trigger hnt-hud-xp-trigger" id="hunterXpToggle" title="Hunter Journal öffnen" aria-label="Hunter Journal – Erfahrungspunkte und Auszeichnungen öffnen" aria-expanded="false" aria-controls="hunterJournalPanel" aria-haspopup="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-lightning"></use></svg><span id="hunterHudXpValue">23.245 XP</span></button></div>
 </div>
 <div class="top-center-actions" aria-label="Social Navigation">
 <button type="button" id="socialToggle-notifications" class="head-icon top-mid-icon icon-btn nav-link social-trigger" aria-label="Benachrichtigungen" title="Benachrichtigungen" aria-haspopup="true" aria-controls="socialPanel-notifications" aria-expanded="false" data-tooltip="Benachrichtigungen" data-description="Deine neuen Aktivitäten" data-social="notifications"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-bell"></use></svg><span aria-hidden="true" id="socialBadge-notifications" class="social-badge" hidden>0</span></button>

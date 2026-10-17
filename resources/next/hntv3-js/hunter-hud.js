@@ -4,14 +4,14 @@
 const onlineToggle=document.getElementById('hunterOnlineToggle'),xpToggle=document.getElementById('hunterXpToggle');
 if(!onlineToggle||!xpToggle)return;
 const icon=name=>'<svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-'+name+'"></use></svg>';
-const hunters=[
- ['NightWraith','NW','violet','Community-Feed',true,false],['SwampCrow','SC','gold','Maps',true,true],
- ['MapScout','MS','slate','Guides',true,false],['CaldwellEnjoyer','CE','bronze','Loadouts',true,true],
- ['BayouNomad','BN','green','Moments',true,false],['FogWalker','FW','slate','Feed',true,false],
- ['MireFox','MF','violet','Cups',false,true],['OldCrow','OC','gold','Guides',false,false],
- ['RotjawRookie','RR','bronze','Teams',false,true],['SparksAndCoffee','SA','green','Feed',false,false],
- ['QuietFootsteps','QF','slate','Maps',false,false],['CrookedLantern','CL','bronze','Feed',false,false]
-];
+const onlineTexts={
+ de:{friends:'Freunde',all:'Alle',team:'Team',online:'Online',intro:'Wer ist gerade in der Community unterwegs?',search:'Hunter suchen ...',teamMember:'Teammitglied',friend:'Freund',you:'Du',nothing:'Keine Online-Hunter gefunden.',loading:'Hunter werden geladen ...',error:'Online-Hunter konnten nicht geladen werden.',members:'Hunter finden',people:'Hunter online',more:'Weitere Hunter in der Mitgliederübersicht'},
+ en:{friends:'Friends',all:'All',team:'Team',online:'Online',intro:'Who is exploring the community right now?',search:'Search hunters ...',teamMember:'Team member',friend:'Friend',you:'You',nothing:'No hunters online for this filter.',loading:'Loading hunters ...',error:'Unable to load online hunters.',members:'Find hunters',people:'Hunters online',more:'More hunters in the members directory'},
+ es:{friends:'Amigos',all:'Todos',team:'Equipo',online:'En línea',intro:'¿Quién está en la comunidad ahora?',search:'Buscar cazadores ...',teamMember:'Miembro del equipo',friend:'Amigo',you:'Tú',nothing:'No se encontraron cazadores en línea.',loading:'Cargando cazadores ...',error:'No se pudo cargar la lista.',members:'Buscar cazadores',people:'Cazadores conectados',more:'Más cazadores en el directorio'},
+ ru:{friends:'Друзья',all:'Все',team:'Команда',online:'В сети',intro:'Кто сейчас в сообществе?',search:'Поиск охотников ...',teamMember:'Участник команды',friend:'Друг',you:'Вы',nothing:'Охотников в сети не найдено.',loading:'Загрузка охотников ...',error:'Не удалось загрузить список.',members:'Найти охотников',people:'Охотники в сети',more:'Другие охотники в каталоге'}
+};
+const onlineLang=(document.documentElement.lang||'de').slice(0,2).toLowerCase();
+const ow=onlineTexts[onlineLang]||onlineTexts.de;
 const tasks=[
  ['story','Eine Geschichte teilen','Berichte von deiner letzten Jagd',50,'book-open'],
  ['help','Einem Hunter helfen','Eine hilfreiche Antwort hinterlassen',75,'users-three'],
@@ -26,15 +26,15 @@ const online=document.createElement('section');online.id='hunterOnlinePanel';onl
 online.innerHTML=[
 '<div class="hnt-hud-line"></div><div class="hnt-hud-head">',
 '<div class="hnt-hud-kicker"><i class="hnt-hud-signal"></i> HUNTER NETWORK</div>',
-'<div class="hnt-hud-heading"><div><h2>Hunter online<span>.</span></h2><p>Wer streift gerade durch die Community?</p></div><div class="hnt-hud-head-icon">',icon('users-three'),'</div></div>',
-'<div class="hnt-online-metrics"><span><strong>12</strong> online</span><b></b><span><strong>6</strong> Freunde</span><b></b><span><strong>4</strong> Squad offen</span></div></div>',
-'<div class="hnt-online-controls"><div class="hnt-online-tabs" role="group" aria-label="Online-Hunter filtern">',
-'<button type="button" class="is-active" data-online-tab="friends" aria-pressed="true">Freunde <em>6</em></button>',
-'<button type="button" data-online-tab="all" aria-pressed="false">Alle <em>12</em></button>',
-'<button type="button" data-online-tab="squad" aria-pressed="false">Squad offen <em>4</em></button>',
-'</div><label class="hnt-online-search">',icon('magnifying-glass'),'<input id="hntOnlineSearch" type="search" autocomplete="off" placeholder="Hunter suchen ..." aria-label="Hunter suchen"></label></div>',
-'<div id="hntOnlineList" class="hnt-online-list"></div>',
-'<a href="https://hnt.rocks/members" class="hnt-hud-foot"><span>',icon('crosshair'),' HNT.ROCKS COMMUNITY</span><span>Hunter finden ',icon('arrow-up-right'),'</span></a>'
+'<div class="hnt-hud-heading"><div><h2>'+ow.people+'<span>.</span></h2><p>'+ow.intro+'</p></div><div class="hnt-hud-head-icon">',icon('users-three'),'</div></div>',
+'<div class="hnt-online-metrics"><span><strong id="hntOnlineTotal">0</strong> '+ow.online+'</span><b></b><span><strong id="hntOnlineFriends">0</strong> '+ow.friends+'</span><b></b><span><strong id="hntOnlineTeam">0</strong> '+ow.team+'</span></div></div>',
+'<div class="hnt-online-controls"><div class="hnt-online-tabs" role="group" aria-label="'+ow.people+'">',
+'<button type="button" class="is-active" data-online-tab="friends" aria-pressed="true">'+ow.friends+' <em id="hntOnlineFriendsTab">0</em></button>',
+'<button type="button" data-online-tab="all" aria-pressed="false">'+ow.all+' <em id="hntOnlineAllTab">0</em></button>',
+'<button type="button" data-online-tab="team" aria-pressed="false">'+ow.team+' <em id="hntOnlineTeamTab">0</em></button>',
+'</div><label class="hnt-online-search">',icon('magnifying-glass'),'<input id="hntOnlineSearch" type="search" autocomplete="off" placeholder="'+ow.search+'" aria-label="'+ow.search+'"></label></div>',
+'<div id="hntOnlineList" class="hnt-online-list" tabindex="0" aria-live="polite"></div>',
+'<a href="/members" class="hnt-hud-foot"><span>',icon('crosshair'),' HNT.ROCKS COMMUNITY</span><span>'+ow.members+' ',icon('arrow-up-right'),'</span></a>'
 ].join('');
 
 const journal=document.createElement('section');journal.id='hunterJournalPanel';journal.className='hnt-hud-panel hnt-journal-panel';journal.hidden=true;journal.setAttribute('role','region');journal.setAttribute('aria-label','Hunter Journal');
@@ -70,21 +70,50 @@ modal.innerHTML=[
 ].join('');
 document.body.append(online,journal,modal);
 
-function renderOnline(){
- const holder=online.querySelector('#hntOnlineList');
- holder.replaceChildren();
- const data=hunters.filter(h=>(tab==='friends'?h[4]:tab==='squad'?h[5]:true)&&h[0].toLowerCase().includes(query));
- if(!data.length){holder.innerHTML='<p class="hnt-online-empty">Keine Hunter gefunden. Probiere einen anderen Namen.</p>';return}
- data.forEach(h=>{
-  const row=document.createElement('div');row.className='hnt-online-person';
-  const avatar=document.createElement('span');avatar.className='hnt-online-avatar tone-'+h[2];avatar.textContent=h[1];
+let onlineSerial=0,onlineTimer=null,onlineCounts=null;
+const roster=online.querySelector('#hntOnlineList');
+function onlineAvatar(user){
+ const box=document.createElement('span');box.className='hnt-online-avatar';
+ const initials=(user.name||'H').trim().substring(0,2).toUpperCase();
+ box.textContent=initials;
+ if(user.avatar){const img=document.createElement('img');img.alt='';img.loading='lazy';
+  img.addEventListener('error',()=>{box.classList.remove('is-photo');box.replaceChildren(document.createTextNode(initials));},{once:true});
+  box.classList.add('is-photo');box.replaceChildren(img);img.src=user.avatar;}
+ return box;
+}
+function renderOnline(json){
+ const counts=json.counts||{all:0,friends:0,team:0};onlineCounts=counts;
+ for(const [id,n] of [['hntOnlineTotal',counts.all],['hntOnlineFriends',counts.friends],['hntOnlineTeam',counts.team],
+  ['hntOnlineAllTab',counts.all],['hntOnlineFriendsTab',counts.friends],['hntOnlineTeamTab',counts.team]]){
+  const el=online.querySelector('#'+id);if(el)el.textContent=String(n??0);
+ }
+ const counter=document.getElementById('hunterOnlineCount');
+ if(counter)counter.textContent=String(counts.all||0)+' '+ow.online;
+ onlineToggle.setAttribute('aria-label',String(counts.all||0)+' '+ow.people);
+ roster.replaceChildren();
+ const items=Array.isArray(json.items)?json.items:[];
+ for(const h of items){
+  const row=document.createElement('a');row.className='hnt-online-person';
+  row.href=h.url||'/members';
   const copy=document.createElement('span');copy.className='hnt-online-person-copy';
-  const title=document.createElement('strong');title.textContent=h[0];
-  const where=document.createElement('small');where.textContent=(h[5]?'Squad offen · ':'')+h[3];
-  copy.append(title,where);
-  const status=document.createElement('span');status.className='hnt-online-pill'+(h[5]?' seeking':'');status.textContent=h[5]?'SQUAD':'ONLINE';
-  row.append(avatar,copy,status);holder.append(row);
- });
+  const name=document.createElement('strong');name.textContent=h.name||'Hunter';
+  const desc=document.createElement('small');desc.textContent=h.self?ow.you:h.team?ow.teamMember:h.friend?ow.friend:ow.online;
+  const status=document.createElement('span');status.className='hnt-online-pill'+(h.team?' seeking':'');
+  status.textContent=h.team?ow.team.toUpperCase():ow.online.toUpperCase();
+  copy.append(name,desc);row.append(onlineAvatar(h),copy,status);roster.append(row);
+ }
+ if(!items.length){const empty=document.createElement('p');empty.className='hnt-online-empty';empty.textContent=ow.nothing;roster.append(empty);}
+ if(json.more){const notice=document.createElement('p');notice.className='hnt-online-empty';notice.textContent=ow.more;roster.append(notice);}
+}
+async function loadOnline(){
+ const serial=++onlineSerial;
+ if(!onlineCounts){roster.replaceChildren();const state=document.createElement('p');state.className='hnt-online-empty';state.textContent=ow.loading;roster.append(state);}
+ const params=new URLSearchParams({tab,q:query});
+ try{const r=await fetch('/next/online?'+params.toString(),{credentials:'same-origin',headers:{Accept:'application/json','X-Requested-With':'XMLHttpRequest'}});
+  if(!r.ok)throw Error('Online request failed');
+  const json=await r.json();if(serial!==onlineSerial)return;
+  if(!json.ok)throw Error('Online response invalid');renderOnline(json);
+ }catch(e){if(serial!==onlineSerial)return;roster.replaceChildren();const error=document.createElement('p');error.className='hnt-online-empty';error.textContent=ow.error;roster.append(error);}
 }
 function renderBadge(){
  const unlocked=done.size===3;
@@ -139,7 +168,7 @@ function open(panel,trigger){
  if(active===panel){close();return}
  close();
  document.dispatchEvent(new CustomEvent('hnt:dropdown-open',{detail:{origin:'hunter-hud'}}));
- if(panel===journal)renderJournal();else renderOnline();
+ if(panel===journal)renderJournal();else void loadOnline();
  active=panel;place(panel,trigger);
  trigger.setAttribute('aria-expanded','true');
  panel.classList.add('is-open');
@@ -149,9 +178,9 @@ xpToggle.addEventListener('click',()=>open(journal,xpToggle));
 online.querySelectorAll('[data-online-tab]').forEach(b=>b.addEventListener('click',()=>{
  tab=b.dataset.onlineTab;
  online.querySelectorAll('[data-online-tab]').forEach(t=>{t.classList.toggle('is-active',t===b);t.setAttribute('aria-pressed',String(t===b))});
- renderOnline();
+ void loadOnline();
 }));
-online.querySelector('#hntOnlineSearch').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();renderOnline()});
+online.querySelector('#hntOnlineSearch').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();clearTimeout(onlineTimer);onlineTimer=setTimeout(()=>void loadOnline(),220)});
 journal.querySelector('#hntJournalTasks').addEventListener('click',e=>{
  const btn=e.target.closest('[data-task]');if(!btn)return;
  if(done.has(btn.dataset.task))done.delete(btn.dataset.task);else done.add(btn.dataset.task);
@@ -189,4 +218,6 @@ function reposition(){if(active)place(active,active===online?onlineToggle:xpTogg
 window.addEventListener('resize',reposition);
 window.addEventListener('scroll',reposition,{passive:true});
 renderJournal();
+void loadOnline();
+window.setInterval(()=>{if(!document.hidden)void loadOnline()},45000);
 })();
