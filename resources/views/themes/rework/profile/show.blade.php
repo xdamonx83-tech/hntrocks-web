@@ -10,6 +10,7 @@
     $profileCoverUrl = $profileUser?->coverUrl() ?: $defaultCover;
     $profileDisplayName = trim((string) ($profileUser?->name ?: $profileUser?->username ?: 'Krispie'));
     $profileHandle = $profileUser?->username ? '@'.$profileUser->username : '@Krispie';
+    $profileCosmetics = $profileUser ? \App\Support\CrownCosmetics::forUser($profileUser) : \App\Support\CrownCosmetics::emptyState();
 
     /* HNT static profile real stats vars v1 */
     $staticProfileFormatCount = fn ($count): string => number_format((int) $count, 0, ',', '.');
@@ -56,6 +57,7 @@
 <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css" rel="stylesheet"/>
 <link href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css" rel="stylesheet"/>
 <link href="{{ \App\Support\HntTheme::asset('styles.css', 'rework') }}?v={{ $reworkStyleVersion }}" rel="stylesheet"/>
+<link href="{{ asset('assets/themes/rework/hnt-cosmetics-v3.css') }}?v=20261017" rel="stylesheet"/>
 
 
 
@@ -91,7 +93,7 @@
 <div><strong>{{ $staticProfileFormatCount($profileFriendsCount) }}</strong><span>{{ __('ui.rework_profile_friends') }}</span></div>
 </div>
 <div class="hnt-profile-identity">
-<div class="profile-avatar-badge" data-profile-avatar-upload-wrap>
+<div class="profile-avatar-badge {{ $profileCosmetics['avatar_frame_class'] }}" data-profile-avatar-upload-wrap>
 <img alt="{{ $profileDisplayName }}" data-rework-profile-avatar src="{{ $profileAvatarUrl }}"/>
 <!-- HNT profile avatar upload v1 -->
 @if($isOwnProfile)
@@ -108,6 +110,9 @@
 </div>
 <h1>{{ $profileDisplayName }}</h1>
 <p>{{ $profileHandle }}</p>
+@if($profileCosmetics['profile_title_label'] !== '')
+<span class="hnt-hunter-equipped-title">{{ $profileCosmetics['profile_title_label'] }}</span>
+@endif
 <div class="hnt-profile-actions">
 <!-- HNT profile friend action v1 -->
 @if(! $isOwnProfile)
@@ -165,6 +170,11 @@
 <div class="profile-progress-track"><i style="width: {{ $profileLevelProgress }}%"></i><strong>{{ $profileLevelProgress }}%</strong></div>
 </div>
 </section>
+@if($profileCosmetics['profile_card'])
+<section class="hnt-equipped-card" aria-label="Hunter Card">
+    @include('themes.rework.crowns.partials.cosmetic-preview', ['item' => $profileCosmetics['profile_card'], 'viewer' => $profileUser])
+</section>
+@endif
 <section class="card hnt-profile-tabs-card">
 <div aria-label="{{ __('ui.profile_sections_aria') }}" class="hnt-profile-tabs" role="tablist">
 <a aria-selected="true" class="active" data-profile-tab="posts" href="#profile-posts" role="tab"><i aria-hidden="true" class="ph ph-image ph-icon"></i>Posts <span>{{ $staticProfileFormatCount($profilePostsCount) }}</span></a>
