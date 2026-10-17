@@ -31,17 +31,23 @@
         'emptyText' => $isEnglish ? 'Purchased cosmetics and unlocked items will appear here.' : 'Gekaufte Cosmetics und freigeschaltete Items erscheinen hier.',
         'toShop' => $isEnglish ? 'Go to shop' : 'Zum Shop',
     ];
+    $inventoryUi = array_replace($inventoryUi, match (app()->getLocale()) {
+        'es' => ['title' => 'Inventario', 'intro' => 'Cosméticos comprados y recompensas desbloqueadas.', 'balance' => 'Tu saldo', 'walletHint' => 'Gestiona tus cosméticos y cambia los equipados.', 'history' => 'Historial', 'equipped' => 'Equipado ahora', 'owned' => 'En propiedad', 'equip' => 'Equipar', 'unequip' => 'Quitar', 'active' => 'Activo', 'bought' => 'Adquirido', 'emptyTitle' => 'Tu inventario está vacío', 'emptyText' => 'Aquí aparecerán tus cosméticos y recompensas.', 'toShop' => 'Ir a la tienda'],
+        'ru' => ['title' => 'Инвентарь', 'intro' => 'Купленные предметы и полученные награды.', 'balance' => 'Ваш баланс', 'walletHint' => 'Управляйте своими предметами и активной косметикой.', 'history' => 'История', 'equipped' => 'Сейчас надето', 'owned' => 'В наличии', 'equip' => 'Надеть', 'unequip' => 'Снять', 'active' => 'Активно', 'bought' => 'Получено', 'emptyTitle' => 'Инвентарь пока пуст', 'emptyText' => 'Здесь появятся купленные предметы и награды.', 'toShop' => 'В магазин'],
+        default => [],
+    });
+
 
     $inventoryLabelFor = function (?string $value) use ($isEnglish): string {
         $key = strtolower((string) $value);
 
         return match ($key) {
-            'avatar_frame', 'avatar-frame', 'avatarrahmen', 'frame' => $isEnglish ? 'Avatar frame' : 'Avatarrahmen',
+            'avatar_frame', 'avatar-frame', 'avatarrahmen', 'frame' => match(app()->getLocale()) { 'de' => 'Avatarrahmen', 'es' => 'Marco de avatar', 'ru' => 'Рамка аватара', default => 'Avatar frame' },
             'like_effect' => match (app()->getLocale()) { 'de' => 'Like-Effekt', 'es' => 'Efecto de Me gusta', 'ru' => 'Эффект лайка', default => 'Like effect' },
-            'username_glow', 'username-glow', 'username_color', 'username-color', 'username_colour', 'username-colour', 'username_effect', 'username-effect' => $isEnglish ? 'Username color' : 'Username-Farbe',
-            'profile_card', 'profile-card', 'profilkarte' => $isEnglish ? 'Profile card' : 'Profilkarte',
-            'profile_banner', 'profile-banner', 'banner', 'cover' => $isEnglish ? 'Profile banner' : 'Profilbanner',
-            'title', 'titel', 'profile_title', 'profile-title' => $isEnglish ? 'Title' : 'Titel',
+            'username_glow', 'username-glow', 'username_color', 'username-color', 'username_colour', 'username-colour', 'username_effect', 'username-effect' => match(app()->getLocale()) { 'de' => 'Namenseffekt', 'es' => 'Efecto de nombre', 'ru' => 'Эффект имени', default => 'Username effect' },
+            'profile_card', 'profile-card', 'profilkarte' => match(app()->getLocale()) { 'de' => 'Hunter-Karte', 'es' => 'Tarjeta de cazador', 'ru' => 'Карточка охотника', default => 'Hunter card' },
+            'profile_banner', 'profile-banner', 'banner', 'cover' => match(app()->getLocale()) { 'de' => 'Profilbanner', 'es' => 'Banner de perfil', 'ru' => 'Баннер профиля', default => 'Profile banner' },
+            'title', 'titel', 'profile_title', 'profile-title' => match(app()->getLocale()) { 'de' => 'Titel', 'es' => 'Título', 'ru' => 'Титул', default => 'Title' },
             'boost', 'booster' => 'Boost',
             'badge', 'cup', 'collectible' => $isEnglish ? 'Collectible' : 'Sammleritem',
             default => filled($value) ? \Illuminate\Support\Str::headline(str_replace(['_', '-'], ' ', (string) $value)) : ($isEnglish ? 'Item' : 'Item'),
