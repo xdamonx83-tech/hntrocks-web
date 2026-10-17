@@ -19,6 +19,7 @@ final class HunterPrestigeService
     // by a random prize.
     public const COSMETIC_TYPES = [
         'avatar_frame',
+        'profile_card',
         'profile_banner',
         'username_effect',
         'title',
