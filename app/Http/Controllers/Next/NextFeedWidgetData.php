@@ -25,6 +25,22 @@ final class NextFeedWidgetData
             ->with('user.profile')->whereHas('user', fn ($q) => $q->where('status', '!=', 'suspended'))
             ->latest('published_at')->limit(4)->get();
 
+        // New registrations are visible only when the profile and activity privacy permit it.
+        $newUsers = User::query()
+            ->where('status', 'active')
+            ->where(function ($query): void {
+                $query->whereDoesntHave('privacySettings')
+                    ->orWhereHas('privacySettings', function ($privacy): void {
+                        $privacy->where('profile_visibility', 'public')
+                            ->where('show_activity_feed', true);
+                    });
+            })
+            ->where(function ($query): void {
+                $query->whereDoesntHave('profile')
+                    ->orWhereHas('profile', fn ($profile) => $profile->where('profile_visibility', 'public'));
+            })
+            ->with('profile')->latest('created_at')->limit(8)->get();
+
         $activity = collect();
         foreach ($posts as $post) {
             $activity->push([
@@ -44,6 +60,16 @@ final class NextFeedWidgetData
                 'sort' => ($moment->published_at ?: $moment->created_at)?->timestamp ?? 0,
             ]);
         }
+        foreach ($newUsers as $member) {
+            $activity->push([
+                'type' => 'joined', 'name' => $member->name,
+                'avatar' => $member->avatarUrl(),
+                'url' => route('profile.public', $member),
+                'time' => $member->created_at?->diffForHumans(),
+                'sort' => $member->created_at?->timestamp ?? 0,
+            ]);
+        }
+
         $spotlight = MomentSpotlight::query()->published()
             ->with(['moment.user.profile', 'moment.media', 'moment.cover'])
             ->whereHas('moment', fn ($q) => $q->published()->where('visibility', 'public'))
@@ -61,7 +87,7 @@ final class NextFeedWidgetData
             ->latest('updated_at')->limit(4)->get();
 
         return [
-            'activity' => $activity->sortByDesc('sort')->take(6)->values(),
+            'activity' => $activity->sortByDesc('sort')->take(9)->values(),
             'spotlight' => $spotlight,
             'cup' => $cup,
             'loadouts' => $loadouts,
