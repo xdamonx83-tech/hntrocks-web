@@ -428,7 +428,7 @@
     <button type="button" role="menuitemradio" aria-checked="false" class="hnt-language-option" data-lang="ru"><span class="hnt-language-short">RU</span><span>Русский</span><svg class="ph hnt-language-check" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-check"></use></svg></button>
   </div>
 </div>
-<button type="button" id="accountMenuToggle" class="top-user icon-btn account-toggle" aria-label="{{ \App\Http\Controllers\Next\NextAccountText::get('toggle_open') }} — {{ $viewer->name }}" data-account-open-label="{{ \App\Http\Controllers\Next\NextAccountText::get('toggle_close') }} — {{ $viewer->name }}" aria-haspopup="true" aria-controls="accountMenu" aria-expanded="false" title="{{ $viewer->name }} - {{ \App\Http\Controllers\Next\NextAccountText::get('menu_label') }}">name }} öffnen" aria-haspopup="true" aria-controls="accountMenu" aria-expanded="false" title="{{ $viewer->name }} – Mein Konto">
+<button type="button" id="accountMenuToggle" class="top-user icon-btn account-toggle" aria-label="{{ \App\Http\Controllers\Next\NextAccountText::get('toggle_open') }} — {{ $viewer->name }}" data-account-open-label="{{ \App\Http\Controllers\Next\NextAccountText::get('toggle_close') }} — {{ $viewer->name }}" aria-haspopup="true" aria-controls="accountMenu" aria-expanded="false" title="{{ $viewer->name }} — {{ \App\Http\Controllers\Next\NextAccountText::get('menu_label') }}">
 <img alt="{{ $viewer->name }} – Profilbild" src="{{ $viewer->avatarUrl() }}"/>
 <span class="account-toggle-ring" aria-hidden="true"></span>
 <span class="account-toggle-caret" aria-hidden="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-caret-down"></use></svg></span>
