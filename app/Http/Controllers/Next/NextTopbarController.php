@@ -13,22 +13,33 @@ final class NextTopbarController extends Controller
     public function show(Request $request): JsonResponse
     {
         $viewer = $request->user();
-        $notifications = $viewer->notificationItems()->standard()
-            ->with('actor.profile')->latest()->limit(8)->get();
+        // Expand a single panel in batches of three, never exposing other users' data.
+        $limits = collect(['notifications', 'messages', 'friends'])->mapWithKeys(
+            fn (string $key) => [$key => max(3, min(60, $request->integer($key . '_limit', 3)))]
+        );
+        $notificationQuery = $viewer->notificationItems()->standard();
+        $notificationsTotal = (clone $notificationQuery)->count();
+        $notifications = $notificationQuery
+            ->with('actor.profile')->latest()->limit($limits['notifications'])->get();
 
-        $conversations = Conversation::query()->forUser($viewer)
-            ->whereIn('type', ['private', 'team'])
-            ->with(['users.profile', 'latestMessage'])
-            ->whereHas('messages')->latest('updated_at')->limit(7)->get();
+        $conversationQuery = Conversation::query()->forUser($viewer)
+            ->whereIn('type', ['private', 'team'])->whereHas('messages');
+        $conversationsTotal = (clone $conversationQuery)->count();
+        $conversations = $conversationQuery
+            ->with(['users.profile', 'latestMessage'])->latest('updated_at')
+            ->limit($limits['messages'])->get();
 
-        $pending = Friendship::query()->where('recipient_id', $viewer->id)
-            ->where('status', Friendship::STATUS_PENDING)
-            ->with('requester.profile')->latest('id')->limit(8)->get();
+        $pendingQuery = Friendship::query()->where('recipient_id', $viewer->id)
+            ->where('status', Friendship::STATUS_PENDING);
+        $pendingTotal = (clone $pendingQuery)->count();
+        $pending = $pendingQuery->with('requester.profile')
+            ->latest('id')->limit($limits['friends'])->get();
 
         return response()->json([
             'ok' => true,
             'notifications' => [
                 'unread' => $viewer->notificationItems()->standard()->unread()->count(),
+                'total' => $notificationsTotal,
                 'items' => $notifications->map(fn ($n) => [
                     'id' => $n->id,
                     'title' => $n->displayTitle(),
@@ -41,6 +52,7 @@ final class NextTopbarController extends Controller
             ],
             'messages' => [
                 'unread' => $viewer->unreadMessagesCount(['private','team']),
+                'total' => $conversationsTotal,
                 'items' => $conversations->map(function ($c) use ($viewer) {
                     $other = $c->otherParticipant($viewer);
                     $latest = $c->latestMessage;
@@ -56,8 +68,8 @@ final class NextTopbarController extends Controller
                 })->values(),
             ],
             'friends' => [
-                'pending' => Friendship::query()->where('recipient_id', $viewer->id)
-                    ->where('status', Friendship::STATUS_PENDING)->count(),
+                'pending' => $pendingTotal,
+                'total' => $pendingTotal,
                 'items' => $pending->map(fn ($f) => [
                     'id' => $f->id,
                     'name' => $f->requester?->name ?: 'Hunter',

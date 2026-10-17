@@ -18,7 +18,7 @@
 <script defer src="/build/next/hntv3-js/script.js"></script>
 <script defer src="/build/next/hntv3-js/navigation.js"></script>
 <script defer src="/build/next/hntv3-js/account-menu.js"></script>
-<script defer src="/build/next/hntv3-js/social-dropdowns.js?v=live-topbar-20261017"></script>
+<script defer src="/build/next/hntv3-js/social-dropdowns.js?v=avatar-scroll-20261017"></script>
 <script defer src="/build/next/hntv3-js/feed.js"></script>
 <script type="module" src="/build/next/hntv3-js/videojs-neutral.bundle.js?v=videojs10-20261016"></script>
 <script defer src="/build/next/hntv3-js/media-viewer.js"></script>
@@ -261,6 +261,21 @@
  .feed-list .feed-post .post-head{column-gap:6px}
  .feed-list .feed-post .post-author .author-line{gap:4px}
 }
+
+/* HNTv3 Topbar: truly centered image-only avatars; three-item scroll viewport. */
+.social-popover .social-avatar{position:relative;display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;margin:0;overflow:hidden;border-radius:50%;font-size:11px;line-height:1;isolation:isolate;}
+.social-popover .social-avatar.is-photo{font-size:0;letter-spacing:0;background:#282f2a;}
+.social-popover .social-avatar img{position:absolute;inset:0;display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center;}
+.social-popover .social-entry{align-items:center;}
+.social-popover .social-request .social-avatar{margin-top:2px;}
+.social-popover .social-items.social-topbar-scroll{min-height:0;max-height:min(255px,calc(100dvh - var(--social-top,88px) - 200px));overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-y:contain;scroll-behavior:smooth;}
+.social-popover .social-items.social-topbar-scroll::-webkit-scrollbar{display:none;width:0;height:0;}
+.social-popover .social-topbar-more{display:flex;align-items:center;justify-content:center;width:calc(100% - 24px);margin:4px 12px 12px;padding:10px;border:1px solid #425547;border-radius:9px;background:#344038;color:#b1dabc;font-size:11px;font-weight:700;cursor:pointer;transition:background .2s,color .2s;}
+.social-popover .social-topbar-more:hover{background:#405747;color:#e7f3e7;}
+.social-popover .social-topbar-more[hidden]{display:none!important;}
+.social-popover .social-topbar-more:disabled{opacity:.6;cursor:wait;}
+@media(max-height:540px){.social-popover .social-items.social-topbar-scroll{max-height:max(100px,calc(100dvh - var(--social-top,88px) - 185px));}}
+@media(prefers-reduced-motion:reduce){.social-popover .social-items.social-topbar-scroll{scroll-behavior:auto;}}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
@@ -299,9 +314,9 @@
 <div aria-label="Hunter-Netzwerk und Erfahrungspunkte" class="user-currency hnt-hud-currency"><button type="button" class="hnt-hud-trigger hnt-hud-online-trigger" id="hunterOnlineToggle" title="Online-Hunter ansehen" aria-label="12 Hunter online – Hunter-Netzwerk öffnen" aria-expanded="false" aria-controls="hunterOnlinePanel" aria-haspopup="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-users-three"></use></svg><span class="hnt-hud-online-led" aria-hidden="true"></span><span>12 Online</span></button><span class="currency-divider" aria-hidden="true"></span><button type="button" class="hnt-hud-trigger hnt-hud-xp-trigger" id="hunterXpToggle" title="Hunter Journal öffnen" aria-label="Hunter Journal – Erfahrungspunkte und Auszeichnungen öffnen" aria-expanded="false" aria-controls="hunterJournalPanel" aria-haspopup="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-lightning"></use></svg><span id="hunterHudXpValue">23.245 XP</span></button></div>
 </div>
 <div class="top-center-actions" aria-label="Social Navigation">
-<button type="button" id="socialToggle-notifications" class="head-icon top-mid-icon icon-btn nav-link social-trigger" aria-label="Benachrichtigungen" title="Benachrichtigungen" aria-haspopup="true" aria-controls="socialPanel-notifications" aria-expanded="false" data-tooltip="Benachrichtigungen" data-description="Deine neuen Aktivitäten" data-social="notifications"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-bell"></use></svg><span aria-hidden="true" id="socialBadge-notifications" class="social-badge">3</span></button>
-<button type="button" id="socialToggle-messages" class="head-icon top-mid-icon icon-btn nav-link social-trigger" aria-label="Nachrichten" title="Nachrichten" aria-haspopup="true" aria-controls="socialPanel-messages" aria-expanded="false" data-tooltip="Nachrichten" data-description="Deine privaten Nachrichten" data-social="messages"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-chat-circle-dots"></use></svg><span aria-hidden="true" id="socialBadge-messages" class="social-badge">2</span></button>
-<button type="button" id="socialToggle-friends" class="head-icon top-mid-icon icon-btn nav-link social-trigger" aria-label="Freundschaftsanfragen" title="Freundschaftsanfragen" aria-haspopup="true" aria-controls="socialPanel-friends" aria-expanded="false" data-tooltip="Freundschaftsanfragen" data-description="Neue Kontakte" data-social="friends"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-user-plus"></use></svg><span aria-hidden="true" id="socialBadge-friends" class="social-badge">2</span></button>
+<button type="button" id="socialToggle-notifications" class="head-icon top-mid-icon icon-btn nav-link social-trigger" aria-label="Benachrichtigungen" title="Benachrichtigungen" aria-haspopup="true" aria-controls="socialPanel-notifications" aria-expanded="false" data-tooltip="Benachrichtigungen" data-description="Deine neuen Aktivitäten" data-social="notifications"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-bell"></use></svg><span aria-hidden="true" id="socialBadge-notifications" class="social-badge" hidden>0</span></button>
+<button type="button" id="socialToggle-messages" class="head-icon top-mid-icon icon-btn nav-link social-trigger" aria-label="Nachrichten" title="Nachrichten" aria-haspopup="true" aria-controls="socialPanel-messages" aria-expanded="false" data-tooltip="Nachrichten" data-description="Deine privaten Nachrichten" data-social="messages"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-chat-circle-dots"></use></svg><span aria-hidden="true" id="socialBadge-messages" class="social-badge" hidden>0</span></button>
+<button type="button" id="socialToggle-friends" class="head-icon top-mid-icon icon-btn nav-link social-trigger" aria-label="Freundschaftsanfragen" title="Freundschaftsanfragen" aria-haspopup="true" aria-controls="socialPanel-friends" aria-expanded="false" data-tooltip="Freundschaftsanfragen" data-description="Neue Kontakte" data-social="friends"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-user-plus"></use></svg><span aria-hidden="true" id="socialBadge-friends" class="social-badge" hidden>0</span></button>
 </div>
 
 <section class="social-popover" id="socialPanel-notifications" role="region" aria-label="Benachrichtigungen" data-panel="notifications" hidden>
@@ -312,9 +327,7 @@
   </div>
   <div class="social-panel-tools"><span><i class="social-filter-dot"></i> NEUE AKTIVITÄTEN</span><button id="socialMarkRead" type="button">Alle gelesen</button></div>
   <div class="social-items" id="socialNotices">
-    <a href="https://hnt.rocks/maps" class="social-entry is-unread" data-notice="1"><span class="social-event-icon event-map"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-map-trifold"></use></svg></span><span class="social-entry-copy"><strong>Neuer Kassenspot entdeckt</strong><span>Ein neuer Fund wurde auf der Karte bestätigt.</span><small>Maps <em>·</em> vor 8 Min.</small></span><i class="social-unread-dot"></i></a>
-    <a href="https://hnt.rocks/moments" class="social-entry is-unread" data-notice="1"><span class="social-event-icon event-moment"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-film-strip"></use></svg></span><span class="social-entry-copy"><strong>Dein Moment bekommt Aufmerksamkeit</strong><span>Jemand hat auf einen Moment reagiert.</span><small>Moments <em>·</em> vor 36 Min.</small></span><i class="social-unread-dot"></i></a>
-    <a href="https://hnt.rocks/cups" class="social-entry is-unread" data-notice="1"><span class="social-event-icon event-cup"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-trophy"></use></svg></span><span class="social-entry-copy"><strong>Last Blood Cup</strong><span>Es gibt Neuigkeiten zum Wettbewerb.</span><small>Cups <em>·</em> vor 2 Std.</small></span><i class="social-unread-dot"></i></a>
+    <div class="social-empty">Wird geladen …</div>
   </div>
   <a href="https://hnt.rocks/notifications" class="social-footer-link"><span>Alle Benachrichtigungen</span><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-arrow-up-right"></use></svg></a>
 </section>
@@ -326,9 +339,7 @@
   </div>
   <div class="social-message-tabs" role="group" aria-label="Nachrichtenfilter"><button class="social-tab is-selected" type="button" data-message-filter="all" aria-pressed="true">Alle</button><button class="social-tab" type="button" data-message-filter="unread" aria-pressed="false">Ungelesen <span id="socialUnreadMsgCount">2</span></button></div>
   <div class="social-items social-message-items" id="socialMessagesList">
-    <a class="social-entry social-msg-entry is-unread" data-unread="1" href="https://hnt.rocks/messages"><span class="social-avatar avatar-amber">BN<span class="avatar-online"></span></span><span class="social-entry-copy"><strong>BayouNomad</strong><span>Kommst du heute noch für eine Runde?</span><small>vor 5 Min. <em>·</em> Ready Lobby</small></span><i class="social-unread-dot"></i></a>
-    <a class="social-entry social-msg-entry is-unread" data-unread="1" href="https://hnt.rocks/messages"><span class="social-avatar avatar-violet">RH<span class="avatar-online"></span></span><span class="social-entry-copy"><strong>RavenHunter</strong><span>Ich hab dir den Guide geschickt.</span><small>vor 29 Min. <em>·</em> Privat</small></span><i class="social-unread-dot"></i></a>
-    <a class="social-entry social-msg-entry" data-unread="0" href="https://hnt.rocks/messages"><span class="social-avatar avatar-teal">MS</span><span class="social-entry-copy"><strong>MapScout</strong><span>Danke für den Tipp mit den Spawns!</span><small>Gestern <em>·</em> Privat</small></span></a>
+    <div class="social-empty">Wird geladen …</div>
   </div>
   <div id="socialMessageEmpty" class="social-empty" hidden><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-chat-circle-dots"></use></svg><strong>Alles gelesen</strong><span>Du hast keine ungelesenen Nachrichten.</span></div>
   <a href="https://hnt.rocks/messages" class="social-footer-link"><span>Posteingang öffnen</span><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-arrow-up-right"></use></svg></a>
@@ -341,8 +352,7 @@
   </div>
   <div class="social-panel-tools"><span><i class="social-filter-dot"></i> WARTEN AUF ANTWORT</span></div>
   <div class="social-items social-request-list" id="socialRequests">
-    <div class="social-request" data-request="1"><span class="social-avatar avatar-violet">NW</span><div class="social-request-details"><div class="social-request-info"><strong>NightWraith</strong><small>Prestige 12 <em>·</em> PC</small></div><p>Möchte mit dir befreundet sein</p><div class="social-request-actions"><button class="social-accept" data-respond="accept" type="button"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-shield-check"></use></svg> Annehmen</button><button class="social-decline" data-respond="decline" type="button">Ablehnen</button></div><span class="social-request-status" role="status" aria-live="polite" hidden></span></div></div>
-    <div class="social-request" data-request="1"><span class="social-avatar avatar-amber">SC</span><div class="social-request-details"><div class="social-request-info"><strong>SwampCrow</strong><small>Bloodline 89 <em>·</em> Xbox</small></div><p>Möchte mit dir befreundet sein</p><div class="social-request-actions"><button class="social-accept" data-respond="accept" type="button"><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-shield-check"></use></svg> Annehmen</button><button class="social-decline" data-respond="decline" type="button">Ablehnen</button></div><span class="social-request-status" role="status" aria-live="polite" hidden></span></div></div>
+    <div class="social-empty">Wird geladen …</div>
   </div>
   <div class="social-empty" id="socialFriendEmpty" hidden><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-users-three"></use></svg><strong>Keine offenen Anfragen</strong><span>Dein Posteingang ist aufgeräumt.</span></div>
   <a href="https://hnt.rocks/profile/friends" class="social-footer-link"><span>Freunde verwalten</span><svg class="ph" viewBox="0 0 256 256" aria-hidden="true"><use href="#ph-arrow-up-right"></use></svg></a>
