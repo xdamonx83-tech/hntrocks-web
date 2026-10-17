@@ -44,7 +44,7 @@
 <script defer src="/build/next/hntv3-js/mobile-header.js"></script>
 <script defer src="/build/next/hntv3-js/search-experience.js"></script>
 <script defer src="/build/next/hntv3-js/language-switcher.js?v=locale-20261017"></script>
-<script defer src="/build/next/hntv3-js/prestige-widget.js?v=live-prestige-20261017"></script>
+<script defer src="/build/next/hntv3-js/prestige-widget.js?v=live-prestige-20261017b"></script>
 <script defer src="/build/next/hntv3-js/settings-modal.js"></script>
 <script defer src="/build/next/hntv3-js/settings-profile-editor.js"></script>
 <style>
