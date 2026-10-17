@@ -186,7 +186,7 @@
       allComments.push({
         id:line.dataset.hntId,parentId:line.dataset.hntParentId||null,
         name:$('strong',line)?.textContent||'KrispieArmy',
-        initials:'KA',time:'gerade eben',message,
+        initials:'KA',avatar:document.body.dataset.nextViewerAvatar||null,time:'gerade eben',message,
         mention:line.dataset.hntMention||'',mine:true
       });
     });
@@ -206,6 +206,12 @@
     const avatar=document.createElement('span');
     avatar.className='hnt-mv-comment-avatar';
     avatar.textContent=comment.initials;
+    if(comment.avatar && typeof comment.avatar==='string'){
+      const photo=document.createElement('img');
+      photo.src=comment.avatar;photo.alt='';photo.loading='lazy';photo.decoding='async';
+      photo.addEventListener('error',()=>{photo.remove();avatar.textContent=comment.initials||'HN';},{once:true});
+      avatar.replaceChildren(photo);
+    }
     const content=document.createElement('div');
     content.className='hnt-mv-comment-content';
     const head=document.createElement('div');

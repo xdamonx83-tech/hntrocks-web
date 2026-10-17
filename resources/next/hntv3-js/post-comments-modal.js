@@ -54,6 +54,12 @@
   const name=$('#hntPdName'),meta=$('#hntPdMeta'),avatar=$('#hntPdAvatar'),content=$('#hntPdContent');
   const comments=$('#hntPdComments'),scroll=$('#hntPdScroll'),form=$('#hntPdForm'),textarea=$('#hntPdText');
   const replyBadge=$('#hntPdReply'),send=$('#hntPdSend');
+  if(document.body.hasAttribute('data-hnt-next-live-posts')){
+    const who=$('.hnt-pd-compose-person strong',modal);
+    const photo=$('.hnt-pd-compose-person img',modal);
+    if(who && document.body.dataset.nextViewerName)who.textContent=document.body.dataset.nextViewerName;
+    if(photo && document.body.dataset.nextViewerAvatar)photo.src=document.body.dataset.nextViewerAvatar;
+  }
   const currentlyOpen=()=>!modal.hidden && modal.classList.contains('is-open');
   const safeMedia=(src,alt)=>{const img=document.createElement('img');img.src=src;img.alt=alt||'';img.loading='eager';return img;};
   function setCount(){
@@ -173,7 +179,7 @@
     const local=$$('.comment-feed .comment-line',active).map(line=>({
       id:commentId(line), parentId:line.dataset.hntParentId||null,
       mention:line.dataset.hntMention||'',name:$('strong',line)?.textContent||'KrispieArmy',
-      initials:'KA',time:'gerade eben',message:$('span',line)?.textContent||'',mine:true
+      initials:'KA',avatar:document.body.dataset.nextViewerAvatar||null,time:'gerade eben',message:$('span',line)?.textContent||'',mine:true
     })).filter(x=>x.message.trim());
     return [...local,...(bridge()?.getComments(active.id)||[])];
   }
@@ -189,6 +195,12 @@
     node.dataset.depth=String(depth);
     const iconWrap=document.createElement('span');
     iconWrap.className='hnt-pd-comment-avatar';iconWrap.textContent=c.initials||'HN';
+    if(c.avatar && typeof c.avatar==="string"){
+      const photo=document.createElement("img");
+      photo.src=c.avatar;photo.alt="";photo.loading="lazy";photo.decoding="async";
+      photo.addEventListener("error",()=>{photo.remove();iconWrap.textContent=c.initials||"HN";},{once:true});
+      iconWrap.replaceChildren(photo);
+    }
     const main=document.createElement('div');main.className='hnt-pd-comment-main';
     const top=document.createElement('div');top.className='hnt-pd-comment-head';
     const author=document.createElement('strong');author.textContent=c.name;

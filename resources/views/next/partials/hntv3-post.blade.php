@@ -30,6 +30,7 @@
             'id' => (string) $comment->id,
             'name' => (string) ($comment->user?->name ?: 'Hunter'),
             'initials' => mb_strtoupper(mb_substr((string) ($comment->user?->name ?: 'H'), 0, 2)),
+            'avatar' => $comment->user?->avatarUrl(),
             'time' => $comment->created_at?->diffForHumans() ?: '',
             'message' => (string) ($comment->body ?: ''),
             'parentId' => $comment->parent_id ? (string) $comment->parent_id : null,

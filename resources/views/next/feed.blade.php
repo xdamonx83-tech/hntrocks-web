@@ -21,14 +21,14 @@
 <script defer src="/build/next/hntv3-js/feed.js"></script>
 <script type="module" src="/build/next/hntv3-js/videojs-neutral.bundle.js?v=videojs10-20261016"></script>
 <script defer src="/build/next/hntv3-js/media-viewer.js"></script>
-<script defer src="/build/next/hntv3-js/media-viewer-comments.js?v=viewer-20261016"></script>
+<script defer src="/build/next/hntv3-js/media-viewer-comments.js?v=avatars-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-live-adapter.js?v=viewer-20261016"></script>
 <script defer src="/build/next/hntv3-js/hnt-next-writes.js?v=poll-20261017"></script>
 <script defer src="/build/next/hntv3-js/like-embers.js?v=twotone-20261016"></script>
 <script defer src="/build/next/hntv3-js/composer-dispatch.js"></script>
 <script defer src="/build/next/hntv3-js/composer-extras.js?v=poll-20261017"></script>
 <script defer src="/build/next/hntv3-js/feed-discussions.js"></script>
-<script defer src="/build/next/hntv3-js/post-comments-modal.js?v=viewer-20261016"></script>
+<script defer src="/build/next/hntv3-js/post-comments-modal.js?v=avatars-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-next-polls.js?v=poll-voters-20261017"></script>
 <script defer src="/build/next/hntv3-js/post-options-menu.js?v=manage-20261017"></script>
 <script defer src="/build/next/hntv3-js/hnt-post-management.js?v=close-unified-20261017"></script>
@@ -216,6 +216,10 @@
 /* HNTv3 feed author identities: only account #2/hntrocks is official. */
 .feed-post .post-author .hnt-pinned-pill{display:inline-flex;align-items:center;padding:2px 5px;border-radius:4px;background:#454942;color:#c4cfc4;font-size:8px;font-weight:700;letter-spacing:.35px;}
 .feed-post .post-author .official-pill{white-space:nowrap;}
+
+/* HNTv3 live comment avatars (discussion and Bayou Focus). */
+.hnt-pd-comment-avatar,.hnt-mv-comment-avatar{overflow:hidden;}
+.hnt-pd-comment-avatar img,.hnt-mv-comment-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;flex:none;}
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
