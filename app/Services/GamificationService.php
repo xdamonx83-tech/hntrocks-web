@@ -70,18 +70,34 @@ class GamificationService
                 return null;
             }
 
+            // Carry the rounding remainder so ten 2-XP awards become exactly 22 XP.
+            $awardedPoints = $points;
+            if ($lockedUser->prestige_xp_boost) {
+                $tenths = $points * 11 + (int) $lockedUser->prestige_xp_bonus_remainder;
+                $awardedPoints = intdiv($tenths, 10);
+                $lockedUser->prestige_xp_bonus_remainder = $tenths % 10;
+            }
+
             $event = XpEvent::create([
                 'user_id' => $lockedUser->id,
                 'action' => $action,
-                'points' => $points,
+                'points' => $awardedPoints,
                 'source_type' => $source?->getMorphClass(),
                 'source_id' => $source?->getKey(),
                 'description' => $description ?? $this->defaultDescription($action),
-                'metadata' => $metadata ?: null,
+                'metadata' => array_merge($metadata, [
+                    'base_points' => $points,
+                    'prestige' => (int) $lockedUser->prestige,
+                    'prestige_boost' => (bool) $lockedUser->prestige_xp_boost,
+                ]),
             ]);
 
-            $lockedUser->xp_total = max(0, (int) $lockedUser->xp_total + $points);
-            $lockedUser->level = $this->levelForXp((int) $lockedUser->xp_total);
+            $lockedUser->xp_total = max(0, (int) $lockedUser->xp_total + $awardedPoints);
+            $lockedUser->xp_cycle = min(
+                HunterPrestigeService::CYCLE_CAP,
+                max(0, (int) $lockedUser->xp_cycle + $awardedPoints)
+            );
+            $lockedUser->level = $this->levelForXp((int) $lockedUser->xp_cycle);
             $lockedUser->trust_score = max(0, (int) $lockedUser->trust_score + max(1, (int) floor($points / 10)));
             $lockedUser->last_xp_at = now();
             $lockedUser->save();
@@ -120,7 +136,7 @@ class GamificationService
 
     public function levelForXp(int $xpTotal): int
     {
-        return max(1, min(100, intdiv(max(0, $xpTotal), 250) + 1));
+        return max(1, min(HunterPrestigeService::MAX_LEVEL, intdiv(max(0, $xpTotal), 250) + 1));
     }
 
     public function xpForCurrentLevel(int $level): int
@@ -135,12 +151,16 @@ class GamificationService
 
     public function progressPercent(User $user): int
     {
-        $level = (int) ($user->level ?: 1);
+        $level = min(HunterPrestigeService::MAX_LEVEL, max(1, (int) ($user->level ?: 1)));
+        if ($level >= HunterPrestigeService::MAX_LEVEL) {
+            return 100;
+        }
+
         $current = $this->xpForCurrentLevel($level);
         $next = $this->xpForNextLevel($level);
         $span = max(1, $next - $current);
 
-        return (int) min(100, max(0, round((((int) $user->xp_total - $current) / $span) * 100)));
+        return (int) min(100, max(0, round((((int) $user->xp_cycle - $current) / $span) * 100)));
     }
 
     public function syncBadges(User $user): void

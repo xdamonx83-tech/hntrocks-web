@@ -29,6 +29,10 @@ class User extends Authenticatable
         'cover_path',
         'xp_total',
         'level',
+        'prestige',
+        'xp_cycle',
+        'prestige_xp_boost',
+        'prestige_xp_bonus_remainder',
         'trust_score',
         'last_xp_at',
         'is_admin',
@@ -54,6 +58,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_xp_at' => 'datetime',
+            'prestige_xp_boost' => 'boolean',
+            'prestige' => 'integer',
+            'xp_cycle' => 'integer',
+            'prestige_xp_bonus_remainder' => 'integer',
             'last_seen_at' => 'datetime',
             'is_admin' => 'boolean',
             'suspended_at' => 'datetime',
@@ -152,10 +160,12 @@ class User extends Authenticatable
 
     public function xpToNextLevel(): int
     {
-        $level = max(1, (int) ($this->level ?: 1));
-        $nextLevelXp = $level * 250;
+        $level = min(50, max(1, (int) ($this->level ?: 1)));
+        if ($level >= 50) {
+            return 0;
+        }
 
-        return max(0, $nextLevelXp - (int) $this->xp_total);
+        return max(0, $level * 250 - (int) $this->xp_cycle);
     }
 
     public function conversations(): BelongsToMany
