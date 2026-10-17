@@ -17,7 +17,7 @@
 <script>window.HNTNextLocaleMoodLabels=@json(\App\Http\Controllers\Next\NextText::moods());</script>
 <script defer src="/build/next/hntv3-js/script.js"></script>
 <script defer src="/build/next/hntv3-js/navigation.js"></script>
-<script defer src="/build/next/hntv3-js/account-menu.js"></script>
+<script defer src="/build/next/hntv3-js/account-menu.js?v=real-user-avatar-20261017"></script>
 <script defer src="/build/next/hntv3-js/social-dropdowns.js?v=avatar-scroll-20261017b"></script>
 <script defer src="/build/next/hntv3-js/feed.js"></script>
 <script type="module" src="/build/next/hntv3-js/videojs-neutral.bundle.js?v=videojs10-20261016"></script>
@@ -326,6 +326,11 @@
 .feed-widgets .guides-widget .guide-item>span:last-child>strong,.feed-widgets .guides-widget .guide-item>span:last-child>small{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .feed-widgets .guides-widget .hnt-guide-list-empty-link{display:inline-block;margin-left:6px;color:#b0d9b9;text-decoration:none;}
 
+
+/* Signed-in account avatar: fit any uploaded portrait or landscape image into each round frame. */
+.topbar .account-toggle>img{display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
+.account-menu .account-portrait>img{display:block;box-sizing:border-box;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
+
 </style>
 </head>
 <body data-hnt-next-live-posts="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}">
@@ -422,7 +427,7 @@
   </div>
 </div>
 <button type="button" id="accountMenuToggle" class="top-user icon-btn account-toggle" aria-label="Kontomenü von {{ $viewer->name }} öffnen" aria-haspopup="true" aria-controls="accountMenu" aria-expanded="false" title="{{ $viewer->name }} – Mein Konto">
-<img alt="{{ $viewer->name }} – Profilbild" src="/build/next/hntv3-assets/top-avatar.png"/>
+<img alt="{{ $viewer->name }} – Profilbild" src="{{ $viewer->avatarUrl() }}"/>
 <span class="account-toggle-ring" aria-hidden="true"></span>
 <span class="account-toggle-caret" aria-hidden="true"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-caret-down"></use></svg></span>
 </button>
@@ -431,7 +436,7 @@
   <div class="account-menu-head">
     <div class="account-menu-eyebrow"><span class="account-menu-eyebrow-icon"><svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-shield-check"></use></svg></span> DEIN HUNTER-ACCOUNT <span class="account-menu-dot" aria-hidden="true"></span></div>
     <div class="account-identity">
-      <div class="account-portrait"><img src="/build/next/hntv3-assets/top-avatar.png" alt=""/><i class="account-online-dot" aria-hidden="true"></i></div>
+      <div class="account-portrait"><img src="{{ $viewer->avatarUrl() }}" alt=""/><i class="account-online-dot" aria-hidden="true"></i></div>
       <div class="account-identity-copy"><strong>{{ $viewer->name }}</strong><span><i aria-hidden="true" class="status-light"></i> Online · HNT.ROCKS</span></div>
     </div>
     <a class="account-profile-link" href="/profile" title="Dein Profil auf HNT.ROCKS öffnen">Hunter-Profil ansehen <svg aria-hidden="true" class="ph" viewBox="0 0 256 256"><use href="#ph-arrow-up-right"></use></svg></a>

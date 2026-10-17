@@ -5226,3 +5226,7 @@ body {
 .feed-widgets .guides-widget .guide-item>span:last-child{flex:1;min-width:0;}
 .feed-widgets .guides-widget .guide-item>span:last-child>strong,.feed-widgets .guides-widget .guide-item>span:last-child>small{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .feed-widgets .guides-widget .hnt-guide-list-empty-link{display:inline-block;margin-left:6px;color:#b0d9b9;text-decoration:none;}
+
+/* Signed-in account avatar: fit any uploaded portrait or landscape image into each round frame. */
+.topbar .account-toggle>img{display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}
+.account-menu .account-portrait>img{display:block;box-sizing:border-box;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;border-radius:50%;}

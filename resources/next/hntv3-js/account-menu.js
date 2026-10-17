@@ -7,11 +7,13 @@
   if(!trigger||!panel)return;
   let closeOnReturn=false;
   const isOpen=()=>!panel.hidden;
+  const closedLabel=trigger.getAttribute('aria-label')||'Kontomenü öffnen';
+  const openLabel=closedLabel.replace(/öffnen/i,'schließen');
   const close=(focusTrigger=false)=>{
     if(!isOpen())return;
     panel.hidden=true;
     trigger.setAttribute('aria-expanded','false');
-    trigger.setAttribute('aria-label','Kontomenü von KrispieArmy öffnen');
+    trigger.setAttribute('aria-label',closedLabel);
     if(focusTrigger) trigger.focus();
   };
   const positionMenu=()=>{
@@ -32,7 +34,7 @@
     panel.hidden=false;
     positionMenu();
     trigger.setAttribute('aria-expanded','true');
-    trigger.setAttribute('aria-label','Kontomenü von KrispieArmy schließen');
+    trigger.setAttribute('aria-label',openLabel);
   };
   trigger.addEventListener('click',()=>isOpen()?close():open());
   document.addEventListener('pointerdown',(e)=>{if(isOpen()&&!panel.contains(e.target)&&!trigger.contains(e.target))close();});
