@@ -26,8 +26,12 @@ Disallow: /lfg
 Disallow: /lfg/
 Disallow: /team-lfg
 Disallow: /team-lfg/
+# Keep the authenticated Moments hub private while allowing public moment permalinks listed in the sitemap.
 Disallow: /moments
 Disallow: /moments/
+Allow: /moments/r/
+# Signed Moment media endpoints should not be crawled or indexed.
+Disallow: /moments/r/*/media/
 Disallow: /referrals
 Disallow: /referrals/
 Disallow: /gamification
