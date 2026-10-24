@@ -26,8 +26,13 @@ Header always set X-Robots-Tag "noindex, nofollow" "expr=%{THE_REQUEST} =~ m#^[A
     RewriteRule ^teams/[^/]+/(?:feed|members|requests|manage)/?$ app/index.html [L]
     # Cup overview is React; reserved Laravel cup pages and deeper action sections stay in Laravel.
     RewriteCond %{REQUEST_URI} !^/cups/(?:create|hall-of-fame)/?$ [NC]
-    RewriteRule ^cups/[^/]+/?$ app/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
+    RewriteRule ^cups/[^/]+/?$ index.php [L]
     RewriteRule ^cups/[^/]+/(?:edit|manage)/?$ app/index.html [L]
+    # Public Challenge pages use the same React SPA, routed through Laravel
+    # solely to render unique server-side SEO metadata.
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
+    RewriteRule ^loadout-challenges(?:/[^/]+)?/?$ index.php [L]
     RewriteRule ^feed/posts/[0-9]+/?$ app/index.html [L]
     RewriteRule ^dashboards/default/?$ app/index.html [L]
     RewriteRule ^pages/user/(?:overview|hunter-dna|projects|permissions|friends|social)/?$ app/index.html [L]

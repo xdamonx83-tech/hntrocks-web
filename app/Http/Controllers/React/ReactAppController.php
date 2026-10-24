@@ -4,6 +4,8 @@ namespace App\Http\Controllers\React;
 
 use App\Http\Controllers\Controller;
 use App\Models\Moment;
+use App\Models\Cup;
+use App\Models\LoadoutChallenge;
 use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
@@ -34,6 +36,64 @@ class ReactAppController extends Controller
     private function withPublicPageMetadata(string $html): string
     {
         $route = request()->route();
+        // The challenges listing is a public SEO landing page. It uses the
+        // exact same React application markup as before.
+        if (request()->is('loadout-challenges')) {
+            return $this->replaceHead(
+                $html,
+                'Hunt: Showdown Loadout Challenges | HNT.ROCKS',
+                'Hunt: Showdown Loadout-Challenges entdecken, Regeln ansehen und eigene Runs einreichen. Die Community-Challenges auf HNT.ROCKS.',
+                true
+            );
+        }
+
+        $challenge = $route?->parameter('challenge');
+        if ($challenge instanceof LoadoutChallenge && request()->is('loadout-challenges/*')) {
+            if ($challenge->status !== LoadoutChallenge::STATUS_ACTIVE) {
+                return $this->replaceHead($html, 'Loadout Challenge | HNT.ROCKS',
+                    'Diese Challenge ist nicht öffentlich verfügbar.', false);
+            }
+
+            $title = $this->plainText((string) $challenge->title, 100);
+            $description = $this->plainText((string) ($challenge->summary
+                ?: $challenge->description ?: 'Hunt: Showdown Loadout-Challenge der HNT.ROCKS Community.'), 160);
+            $url = url()->current();
+            return $this->replaceHead($html, $title.' – Loadout Challenge | HNT.ROCKS',
+                $description, true, 'article', [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'CreativeWork',
+                    '@id' => $url.'#challenge',
+                    'url' => $url,
+                    'name' => $title,
+                    'description' => $description,
+                    'about' => ['@type' => 'VideoGame', 'name' => 'Hunt: Showdown'],
+                ]);
+        }
+
+        $cup = $route?->parameter('cup');
+        if ($cup instanceof Cup && request()->is('cups/*')) {
+            if ($cup->visibility !== 'public' ||
+                ! in_array($cup->status, ['planned', 'active', 'finished', 'archived'], true)) {
+                return $this->replaceHead($html, 'Cup | HNT.ROCKS',
+                    'Dieser Cup ist nicht öffentlich verfügbar.', false);
+            }
+
+            $title = $this->plainText((string) $cup->title, 100);
+            $description = $this->plainText((string) ($cup->summary
+                ?: 'Hunt: Showdown Community-Cup auf HNT.ROCKS. Regeln, Ergebnisse und Teilnehmer entdecken.'), 160);
+            $url = url()->current();
+            return $this->replaceHead($html, $title.' – Hunt: Showdown Cup | HNT.ROCKS',
+                $description, true, 'article', [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'CreativeWork',
+                    '@id' => $url.'#cup',
+                    'url' => $url,
+                    'name' => $title,
+                    'description' => $description,
+                    'about' => ['@type' => 'VideoGame', 'name' => 'Hunt: Showdown'],
+                ]);
+        }
+
         $profile = $route?->parameter('user');
 
         if ($profile instanceof User && request()->is('u/*')) {
