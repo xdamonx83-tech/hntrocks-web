@@ -1,0 +1,79 @@
+/* HNT.ROCKS live News integration: retain the HNTv3 demo presentation. */
+body.hnt-news-guest{background:var(--page-bg,#0b1010);color:var(--body-text,#d9e0dc);min-height:100vh}
+body.hnt-news-guest .main-content{margin:0 auto!important;width:100%;max-width:none!important;padding:32px max(18px,calc((100vw - 1650px)/2)) 74px!important}
+.hnt-news-public-top{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:64px;padding:10px max(20px,calc((100vw - 1560px)/2));background:#0d1213;color:#e9eeec;border-bottom:1px solid #25302c;font:600 13px "Exo 2",sans-serif;position:relative;z-index:10}
+.hnt-news-public-top a{color:inherit;text-decoration:none}
+.hnt-news-public-top a:hover{color:#85c89b}
+.hnt-news-guest-brand{font-size:19px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.hnt-news-guest-brand span{color:#7cbf94}
+.hnt-news-public-top nav,.hnt-news-guest-actions{display:flex;gap:21px;align-items:center}
+.hnt-news-guest-actions a:last-child{background:#286a49;color:#fff;padding:9px 12px;border-radius:7px}
+.hnt-news-guest-actions a:last-child:hover{background:#327955;color:#fff}
+.hnt-news-page .news-wrap,.nd-page .nd-wrap{max-width:1525px}
+.news-pagehead .news-kicker,.nd-page-heading .nd-kicker{color:#88b695}
+.news-featured-image,.news-side-image,.news-card-image,.nd-hero{background:#182320}
+.hnt-news-img-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:160px;background:linear-gradient(130deg,#15221e,#0b1517 80%);color:#628872;font-size:14px;font-weight:800;letter-spacing:.13em}
+.news-side-image .hnt-news-img-placeholder{min-height:95px}
+.news-card-image .hnt-news-img-placeholder{min-height:190px}
+.news-featured-image .hnt-news-img-placeholder{min-height:300px}
+.hnt-news-pagination{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:24px;color:var(--subtle-text);font-size:13px}
+.hnt-news-pagination a{padding:10px 16px;border:1px solid var(--panel-border);border-radius:9px;color:var(--body-text);text-decoration:none}
+.hnt-news-pagination a:hover{border-color:var(--accent)}
+.news-empty[hidden],.news-card[hidden],.news-current-filter[hidden]{display:none!important}
+.nd-page .nd-story{overflow:hidden}
+.nd-page .nd-hero{min-height:480px}
+.nd-page .nd-hero.hnt-news-no-photo{min-height:340px;background:linear-gradient(125deg,#223229,#10171a)}
+.nd-page .nd-hero-image{width:100%;height:100%;object-fit:cover}
+.nd-page .nd-hero-glass{margin-top:auto;align-self:flex-end}
+.nd-page .nd-story-inner{overflow-wrap:anywhere}
+.nd-page .nd-article-text{min-width:0}
+.nd-page .nd-article-text :where(img,video){display:block;max-width:100%;height:auto}
+.nd-page .nd-article-text figure{margin:22px 0}
+.nd-page .nd-article-text figcaption{font-size:12px;color:var(--subtle-text);margin-top:10px}
+.nd-page .nd-article-text .news-media-text{display:grid;grid-template-columns:1fr 1fr;gap:17px;align-items:start}
+.nd-page .nd-article-text .news-media-text.ratio-33-67{grid-template-columns:33fr 67fr}
+.nd-page .nd-article-text .news-media-text.ratio-40-60{grid-template-columns:40fr 60fr}
+.nd-page .nd-article-text .news-media-text.ratio-60-40{grid-template-columns:60fr 40fr}
+.nd-page .nd-article-text .news-media-text.ratio-67-33{grid-template-columns:67fr 33fr}
+.nd-page .nd-article-text .news-media-text.right .news-media-text-media{order:2}
+.nd-page .nd-article-text .news-hnt-divider img{width:100%;height:auto;max-width:1100px}
+.nd-page .nd-article-text .hnt-news-compare{display:flex;gap:12px;flex-wrap:wrap}
+.nd-page .nd-article-text .hnt-news-compare img{max-width:calc(50% - 8px);flex:1 1 230px}
+.nd-page .nd-article-text .hnt-news-compare figcaption{width:100%}
+.nd-page .nd-comments{margin-top:23px}
+.nd-page .hnt-news-comment-list{margin:14px 0}
+.nd-page .hnt-news-comment-entry{margin-top:20px}
+.nd-page .hnt-news-reader-comment{padding:16px 0;border-bottom:1px solid var(--panel-border);color:var(--body-text)}
+.nd-page .hnt-news-reader-comment strong{font-size:13px;color:var(--title)}
+.nd-page .hnt-news-reader-comment time{font-size:11px;color:var(--subtle-text);margin-left:10px}
+.nd-page .hnt-news-reader-comment p{white-space:pre-wrap;margin:9px 0 0;line-height:1.5;font-size:13px}
+.nd-page .nd-related-item{text-decoration:none}
+.nd-page .nd-related-item img{object-fit:cover;aspect-ratio:1.3}
+.nd-page .nd-side-footlink{display:inline-flex}
+.hnt-news-page a:focus-visible,.nd-page a:focus-visible{outline:2px solid #9aca9f;outline-offset:3px}
+@media(max-width:850px){
+ body.hnt-news-guest .main-content{padding:23px 18px 60px!important}
+ .hnt-news-public-top{padding:13px 18px;flex-wrap:wrap}
+ .hnt-news-public-top nav{gap:14px}
+ .hnt-news-guest-actions{gap:12px}
+ .nd-page .nd-hero{min-height:370px}
+}
+@media(max-width:560px){
+ .hnt-news-public-top{gap:8px}
+ .hnt-news-guest-brand{font-size:17px}
+ .hnt-news-public-top nav{order:3;width:100%;justify-content:space-between;padding-top:5px}
+ .hnt-news-guest-actions{font-size:11px}
+ .hnt-news-guest-actions a:last-child{padding:7px}
+ .news-featured-image .hnt-news-img-placeholder{min-height:170px}
+ .nd-page .nd-hero .nd-headline{padding:18px 18px 20px}
+ .nd-page .nd-article-text .news-media-text{grid-template-columns:1fr!important}
+ .nd-page .nd-article-text .news-media-text.right .news-media-text-media{order:initial}
+}
+
+.nd-page .hnt-news-comment-form{display:flex;flex-direction:column;gap:9px;max-width:800px}
+.nd-page .hnt-news-comment-form label{font-size:12px;font-weight:650;color:var(--body-text)}
+.nd-page .hnt-news-comment-form textarea{width:100%;resize:vertical;min-height:93px;background:var(--surface-control,#171d1b);border:1px solid var(--control-border,#364137);border-radius:10px;color:var(--body-text);padding:12px;font:inherit;font-size:13px}
+.nd-page .hnt-news-comment-form textarea:focus{outline:1px solid var(--accent)}
+.nd-page .hnt-news-comment-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nd-page .hnt-news-comment-footer [role=status]{font-size:12px;color:#d4a189}
+.nd-page .nd-mini-action.is-active{color:var(--accent);border-color:var(--accent)}
