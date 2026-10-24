@@ -146,3 +146,10 @@ body.hnt-news-guest .main-content{margin:0 auto!important;width:100%;max-width:n
  .nd-page .nd-comment-list-head{flex-wrap:wrap}
  .nd-page .nd-comment-list-head h3{width:100%}
 }
+
+/* Only news administrators see the edit/create shortcuts. */
+.hnt-news-archive-actions{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+.hnt-news-create-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #658670;padding:9px 14px;border-radius:7px;color:#dcf5df;text-decoration:none;background:#34573c;font:700 12px "Exo 2",sans-serif;white-space:nowrap}
+.hnt-news-create-action:hover{border-color:#a4cea9;color:#fff;background:#416e4b}
+.hnt-news-create-action svg{width:16px;height:16px}
+@media(max-width:700px){.hnt-news-archive-actions{justify-content:flex-start}.hnt-news-create-action{font-size:11px}}

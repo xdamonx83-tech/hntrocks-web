@@ -1,0 +1,70 @@
+/* HNTv3 editor skin loaded *inside* the existing React TipTap workspace.
+   Only styles: all existing uploads, API calls, TipTap nodes and workflows are unchanged. */
+:root{--accent:#8aaf92!important;--accent-dim:#25372b!important;--bg:#151a17!important;--panel:linear-gradient(180deg,#242925,#1f2421)!important;--panel-solid:#252b27!important;--panel-2:#2a302b!important;--border:#39453d!important;--border-soft:#343f36!important;--text:#e7eee8!important;--muted:#adb8b0!important}
+html,body,#root{width:100%!important;height:auto!important;min-height:100%!important;overflow:visible!important;background:#1b1f1d!important;overscroll-behavior:auto!important}
+html{scrollbar-width:thin;scrollbar-color:#485a4a #1b1f1d}
+body{position:static!important;font-family:"Exo 2",Rajdhani,Inter,sans-serif!important;color:#e5ebe5!important}
+body:before,body:after{display:none!important}
+.stage-wrapper.news-editor-page,.news-editor-page.stage-wrapper{position:relative!important;inset:auto!important;width:100%!important;min-height:100%!important;height:auto!important;padding:0!important;overflow:visible!important;transform:none!important}
+.news-editor-page .stage{position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr) 317px!important;align-items:start!important;gap:15px!important;width:100%!important;max-width:none!important;min-height:850px!important;height:auto!important;padding:18px!important;margin:0!important;left:auto!important;top:auto!important;transform:none!important;transform-origin:center!important;overflow:visible!important;opacity:1!important;background:transparent!important}
+.news-editor-page .stage>.sidebar,.news-editor-page #hnt-redesign-sidebar-root,.news-editor-page #hnt-redesign-topbar-root,.news-editor-page .redesign-global-topbar{display:none!important}
+.news-editor-page .main-col{position:relative!important;grid-column:1!important;left:auto!important;top:auto!important;width:100%!important;min-width:0!important;height:auto!important;min-height:600px!important;padding:0!important;overflow:visible!important;scrollbar-width:none!important}
+.news-editor-page .right-col{position:relative!important;grid-column:2!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;width:100%!important;min-width:0!important;height:auto!important;display:flex!important;flex-direction:column!important;gap:14px!important;overflow:visible!important}
+.news-editor-page .news-shell{gap:15px!important;width:100%!important;padding:0 0 28px!important}
+.news-editor-page .news-editor-head{align-items:center!important;gap:12px!important;flex-wrap:wrap!important;margin-bottom:4px!important}
+.news-editor-page .news-editor-head h1{font-family:"Exo 2",sans-serif!important;font-size:26px!important;line-height:1.24!important;letter-spacing:-.02em!important;color:#e4ebe5!important}
+.news-editor-page .news-eyebrow{font-family:Rajdhani,"Exo 2",sans-serif!important;color:#8bc19a!important;letter-spacing:.12em!important;font-size:11px!important}
+.news-editor-page .news-editor-status{font-size:12px!important;color:#a8bbb0!important}
+.news-editor-page .news-panel{padding:19px!important;background:#252a26!important;border:1px solid #3b463d!important;border-radius:9px!important;box-shadow:none!important}
+.news-editor-page .news-panel h2,.news-editor-page .news-panel h3{font-family:"Exo 2",sans-serif!important;font-size:17px!important;font-weight:750!important;color:#e6ebe5!important;margin-bottom:15px!important}
+.news-editor-page .news-field label,.news-editor-page .news-label{color:#b9c9bb!important;font:700 12px "Exo 2",sans-serif!important}
+.news-editor-page .news-field input,.news-editor-page .news-field textarea,.news-editor-page .news-field select,.news-editor-page .news-inline-input{background:#1c221e!important;border:1px solid #3b4a3f!important;border-radius:6px!important;color:#ecf2eb!important;min-height:40px!important;font:500 13px "Exo 2",sans-serif!important;line-height:1.55!important}
+.news-editor-page .news-field textarea{min-height:83px!important}
+.news-editor-page input:focus-visible,.news-editor-page textarea:focus-visible,.news-editor-page select:focus-visible{outline:2px solid #87b597!important;outline-offset:1px!important}
+.news-editor-page .news-button,.news-editor-page .news-small-button{font-family:"Exo 2",sans-serif!important;color:#cbdcd0!important;border:1px solid #495b4d!important;background:#303a32!important;border-radius:6px!important;font-size:12px!important;font-weight:650!important;transition:background .15s,border-color .15s!important}
+.news-editor-page .news-button-primary{background:#506e54!important;border-color:#6b946f!important;color:#f0fff1!important;font-weight:750!important}
+.news-editor-page button:hover:not(:disabled){border-color:#7fb28c!important}
+.news-editor-page .news-button:hover{color:#fff!important;background:#415446!important}
+.news-editor-page .news-language-tab{background:#1e2620!important;color:#bfcbc1!important;border-color:#3f4c40!important;font-family:"Exo 2",sans-serif!important;font-size:12px!important}
+.news-editor-page .news-language-tab.active{border-color:#81ae8c!important;background:#364b39!important;color:#e8f9e9!important}
+.news-editor-page .news-language-tab em{background:#cf9d69!important}.news-editor-page .news-language-tab em.complete{background:#7cbd8e!important}
+.news-editor-page .news-translation-tools{background:#1e2520!important;border-radius:8px!important;border-color:#3a493d!important}
+.news-editor-page .news-auto-translate-button{background:#4e7257!important}
+.news-editor-page .news-editor-rail{display:flex;flex-direction:column;gap:13px;position:sticky;top:12px}
+.news-editor-page .news-check-row{color:#cdd8ce!important;font-size:12px!important}
+.news-editor-page .news-check-row input{accent-color:#8fb991!important}
+.news-editor-page .news-inline-help{color:#9fab9f!important;font-size:11px!important}
+.news-editor-page .news-revision-row{color:#d3e1d7!important;border-color:#394539!important}
+.news-editor-page .news-tiptap-editor{background:#1c211d!important;border:1px solid #405044!important;border-radius:8px!important;overflow:hidden}
+.news-editor-page .news-editor-mode{background:#232b25!important;border-bottom:1px solid #394b3d!important}
+.news-editor-page .news-tiptap-toolbar{display:flex!important;flex-wrap:wrap!important;gap:5px!important;padding:11px!important;border-bottom:1px solid #3c493f!important;background:#212921!important}
+.news-editor-page .news-tiptap-toolbar button,.news-editor-page .news-tiptap-toolbar select,.news-editor-page .news-tiptap-labelled{border:1px solid #405043!important;background:#2b382d!important;color:#d2e4d6!important;border-radius:5px!important}
+.news-editor-page .news-tiptap-toolbar button.active{color:#d4f2db!important;border-color:#8eb89b!important;background:#3b5440!important}
+.news-editor-page .news-tiptap-editor .tiptap{background:#202722!important;color:#e6efe7!important;min-height:365px!important;line-height:1.55!important;font-family:"Exo 2",sans-serif!important}
+.news-editor-page .news-tiptap-editor .tiptap :is(p,li){line-height:1.57!important}
+.news-editor-page .news-tiptap-node{max-width:100%!important;border-color:#4b5c4e!important}
+.news-editor-page .news-tiptap-context{display:flex;flex-wrap:wrap;gap:7px;background:#242e26!important;border:1px solid #4a604f!important;padding:10px!important}
+.news-editor-page .news-tiptap-context input,.news-editor-page .news-tiptap-context select{border:1px solid #495949!important;background:#1b241d!important;color:#eaf1e8!important;border-radius:5px!important}
+.news-editor-page .news-tiptap-slash,.news-editor-page .news-media-composer,.news-editor-page .news-json-source{background:#263026!important;color:#e7f0e8!important;border-color:#49634b!important}
+.news-editor-page .news-media-preview,.news-editor-page .news-tiptap-image,.news-editor-page .news-gallery img{max-width:100%!important}
+.news-editor-page .news-upload-progress{background:#37473b!important}
+.news-editor-page .news-upload-progress span,.news-editor-page .news-tiptap-progress span{background:#85b691!important}
+.news-editor-page .news-revision-preview-panel{background:#252c27!important;color:#e3ebdf!important;border-color:#5a705c!important}
+.news-editor-page .news-conflict{border-color:#b0795d!important}
+@media(max-width:1100px){
+ .news-editor-page .stage{grid-template-columns:minmax(0,1fr)!important;padding:12px!important}
+ .news-editor-page .main-col{grid-column:1!important}
+ .news-editor-page .right-col{grid-column:1!important;position:relative!important;display:flex!important}
+ .news-editor-page .news-editor-rail{position:static!important}
+ .news-editor-page .news-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:600px){
+ .news-editor-page .stage{display:flex!important;flex-direction:column!important;padding:9px!important;gap:10px!important}
+ .news-editor-page .main-col,.news-editor-page .right-col{width:100%!important;display:block!important;position:relative!important}
+ .news-editor-page .news-panel{padding:13px!important;margin-bottom:10px}
+ .news-editor-page .news-form-grid{grid-template-columns:1fr!important}
+ .news-editor-page .news-field-wide{grid-column:1!important}
+ .news-editor-page .news-editor-head h1{font-size:21px!important}
+ .news-editor-page .news-tiptap-toolbar{gap:4px!important}
+ .news-editor-page .news-language-tab{flex:1 1 130px!important}
+}

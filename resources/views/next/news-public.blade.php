@@ -112,7 +112,14 @@ window.HNTPrestigeProgress = @json($prestigeProgress);
   <div><div class="feed-kicker news-kicker"><span class="feed-live-signal" aria-hidden="true"></span> HNT.ROCKS / NEWSROOM</div>
   <h1>{{ $labels['title'] }}<span class="title-ember">.</span></h1>
   <p>{{ $labels['description'] }}</p></div>
-  <span class="news-head-edition">{!! $newsSvg('file-text') !!} HUNTER JOURNAL <b>/</b> 1896</span>
+  <div class="hnt-news-archive-actions">
+   @if($viewer?->isAdmin())
+   <a class="hnt-news-create-action" href="{{ route('next.news.editor') }}">
+     {!! $newsSvg('pencil-line') !!} {{ ['de'=>'News erstellen','en'=>'Create news','es'=>'Crear noticia','ru'=>'Создать новость'][$locale] }}
+   </a>
+   @endif
+   <span class="news-head-edition">{!! $newsSvg('file-text') !!} HUNTER JOURNAL <b>/</b> 1896</span>
+  </div>
  </header>
  @if($featured)
  <section class="news-lead-grid" aria-label="{{ $labels['recent'] }}">
@@ -222,6 +229,13 @@ window.HNTPrestigeProgress = @json($prestigeProgress);
       <div class="nd-story-inner">
        <div class="nd-story-toolbar"><span>{!! $newsSvg('book-open') !!} HUNTER JOURNAL <b>/</b> {{ $labels['article'] }}</span>
         <div class="nd-share-actions">
+         @if($viewer?->isAdmin())
+         <a class="nd-mini-action" href="{{ route('next.news.editor.edit', ['articleId'=>$article['id']]) }}"
+            title="{{ ['de'=>'News bearbeiten','en'=>'Edit article','es'=>'Editar artículo','ru'=>'Редактировать статью'][$locale] }}"
+            aria-label="{{ ['de'=>'News bearbeiten','en'=>'Edit article','es'=>'Editar artículo','ru'=>'Редактировать статью'][$locale] }}">
+           {!! $newsSvg('pencil-line') !!}
+         </a>
+         @endif
          @if($viewer)
          <button type="button" class="nd-mini-action" id="newsLike" aria-pressed="false" title="Gefällt mir" aria-label="Artikel gefällt mir">{!! $newsSvg('heart') !!}</button>
          <button type="button" class="nd-mini-action" id="newsSave" aria-pressed="false" title="Merken" aria-label="Artikel merken">{!! $newsSvg('bookmark-simple') !!}</button>
