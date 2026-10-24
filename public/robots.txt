@@ -30,6 +30,8 @@ Disallow: /team-lfg/
 Disallow: /moments
 Disallow: /moments/
 Allow: /moments/r/
+# Signed Moment media endpoints should not be crawled or indexed.
+Disallow: /moments/r/*/media/
 Disallow: /referrals
 Disallow: /referrals/
 Disallow: /gamification
