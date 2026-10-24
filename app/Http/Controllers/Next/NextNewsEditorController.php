@@ -13,9 +13,17 @@ final class NextNewsEditorController extends Controller
      * The editor remains the established authenticated React module,
      * including its News API, versioning, media upload and publish actions.
      */
+    /** Only the HNT.ROCKS owner's main account may open this editor. */
+    public static function canAccess(?\App\Models\User $user): bool
+    {
+        return $user !== null && $user->isAdmin()
+            && (int) $user->id === 49
+            && (string) $user->username === 'Krispie';
+    }
+
     public function __invoke(Request $request, ?int $articleId = null): View
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless(self::canAccess($request->user()), 403);
         abort_if($articleId !== null && $articleId < 1, 404);
 
         app('translation.loader')->addPath(base_path('lang'));
