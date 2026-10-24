@@ -113,7 +113,7 @@ window.HNTPrestigeProgress = @json($prestigeProgress);
   <h1>{{ $labels['title'] }}<span class="title-ember">.</span></h1>
   <p>{{ $labels['description'] }}</p></div>
   <div class="hnt-news-archive-actions">
-   @if($viewer?->isAdmin())
+   @if(\App\Http\Controllers\Next\NextNewsEditorController::canAccess($viewer))
    <a class="hnt-news-create-action" href="{{ route('next.news.editor') }}">
      {!! $newsSvg('pencil-line') !!} {{ ['de'=>'News erstellen','en'=>'Create news','es'=>'Crear noticia','ru'=>'Создать новость'][$locale] }}
    </a>
@@ -229,7 +229,7 @@ window.HNTPrestigeProgress = @json($prestigeProgress);
       <div class="nd-story-inner">
        <div class="nd-story-toolbar"><span>{!! $newsSvg('book-open') !!} HUNTER JOURNAL <b>/</b> {{ $labels['article'] }}</span>
         <div class="nd-share-actions">
-         @if($viewer?->isAdmin())
+         @if(\App\Http\Controllers\Next\NextNewsEditorController::canAccess($viewer))
          <a class="nd-mini-action" href="{{ route('next.news.editor.edit', ['articleId'=>$article['id']]) }}"
             title="{{ ['de'=>'News bearbeiten','en'=>'Edit article','es'=>'Editar artículo','ru'=>'Редактировать статью'][$locale] }}"
             aria-label="{{ ['de'=>'News bearbeiten','en'=>'Edit article','es'=>'Editar artículo','ru'=>'Редактировать статью'][$locale] }}">
