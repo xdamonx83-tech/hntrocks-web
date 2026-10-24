@@ -15,6 +15,13 @@ class ReactAppController extends Controller
 {
     public function __invoke(): Response
     {
+        // Authenticated hunters keep their familiar interactive React pages.
+        // Guests and search engines receive genuinely readable public content,
+        // not an SPA auth-guard that renders the old sign-in screen.
+        if (auth()->guest() && ($publicPage = $this->guestPublicPage())) {
+            return $publicPage;
+        }
+
         $reactIndex = public_path('app/index.html');
 
         abort_unless(
@@ -30,6 +37,179 @@ class ReactAppController extends Controller
         return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
             'Cache-Control' => 'no-cache, private',
+        ]);
+    }
+
+
+    /**
+     * Server-rendered, read-only public information for anonymous visitors.
+     * Member-only interactions stay behind the existing authentication flow.
+     */
+    private function guestPublicPage(): ?Response
+    {
+        $path = trim(request()->path(), '/');
+        $route = request()->route();
+        $schema = static function (string $type, string $title, string $description): array {
+            return [
+                '@context' => 'https://schema.org',
+                '@type' => $type,
+                'name' => $title,
+                'description' => $description,
+                'url' => url()->current(),
+                'isAccessibleForFree' => true,
+                'about' => ['@type' => 'VideoGame', 'name' => 'Hunt: Showdown'],
+            ];
+        };
+        $safe = fn (?string $s, int $limit = 360): string =>
+            $this->plainText((string) $s, $limit);
+
+        $page = null;
+        if ($path === 'loadout-challenges') {
+            $challenges = LoadoutChallenge::query()
+                ->publicVisible()
+                ->orderByDesc('is_featured')
+                ->orderBy('sort_order')
+                ->limit(100)
+                ->get(['title', 'slug', 'summary']);
+            $title = 'Hunt: Showdown Loadout Challenges';
+            $description = 'Öffentliche Hunt: Showdown Loadout-Challenges der HNT.ROCKS Community. Entdecke Herausforderungen und ihre Regeln.';
+            $page = [
+                'name' => $title,
+                'title' => $title,
+                'description' => $description,
+                'parent' => 'Challenges',
+                'parent_url' => url('/loadout-challenges'),
+                'kicker' => 'HNT.ROCKS / CHALLENGES',
+                'facts' => [$challenges->count().' öffentliche Challenges'],
+                'sections' => [],
+                'links_title' => 'Öffentliche Loadout-Challenges',
+                'links' => $challenges->map(fn (LoadoutChallenge $item): array => [
+                    'url' => route('loadout-challenges.show', $item),
+                    'title' => $safe($item->title, 100),
+                    'summary' => $safe($item->summary, 120),
+                    'kicker' => 'LOADOUT CONTRACT',
+                ])->all(),
+                'schema' => $schema('CollectionPage', $title, $description),
+            ];
+        } elseif (preg_match('~^loadout-challenges/[^/]+$~', $path)) {
+            $param = $route?->parameter('challenge');
+            $challenge = $param instanceof LoadoutChallenge
+                ? $param
+                : LoadoutChallenge::query()->where('slug', (string) $param)->firstOrFail();
+            abort_unless($challenge->status === LoadoutChallenge::STATUS_ACTIVE, 404);
+            $title = $safe($challenge->title, 100);
+            $description = $safe($challenge->summary ?: $challenge->description, 190)
+                ?: 'Hunt: Showdown Loadout-Challenge auf HNT.ROCKS.';
+            $links = LoadoutChallenge::query()
+                ->publicVisible()->whereKeyNot($challenge->id)->limit(8)
+                ->get(['slug', 'title', 'summary']);
+            $page = [
+                'name' => $title,
+                'title' => $title.' – Loadout Challenge',
+                'description' => $description,
+                'parent' => 'Challenges',
+                'parent_url' => url('/loadout-challenges'),
+                'kicker' => 'HNT.ROCKS / LOADOUT CONTRACT',
+                'facts' => array_values(array_filter([
+                    $challenge->runtimeStatusLabel(),
+                    $challenge->xp_reward ? $challenge->xp_reward.' XP Belohnung' : null,
+                ])),
+                'sections' => [
+                    ['heading' => 'Die Challenge', 'body' => $safe($challenge->description, 5000)],
+                    ['heading' => 'Regeln', 'body' => $safe($challenge->rules, 5000)],
+                    ['heading' => 'Loadout', 'body' => $safe($challenge->loadout_notes, 5000)],
+                ],
+                'links_title' => 'Weitere Challenges',
+                'links' => $links->map(fn (LoadoutChallenge $item): array => [
+                    'url' => route('loadout-challenges.show', $item),
+                    'title' => $safe($item->title, 100),
+                    'summary' => $safe($item->summary, 120),
+                    'kicker' => 'LOADOUT CONTRACT',
+                ])->all(),
+                'schema' => $schema('CreativeWork', $title, $description),
+            ];
+        } elseif (preg_match('~^cups/[^/]+$~', $path)) {
+            $param = $route?->parameter('cup');
+            $cup = $param instanceof Cup
+                ? $param
+                : Cup::query()->where('slug', (string) $param)->firstOrFail();
+            abort_unless($cup->visibility === 'public'
+                && in_array($cup->status, ['planned', 'active', 'finished', 'archived'], true), 404);
+            $title = $safe($cup->title, 110);
+            $description = $safe($cup->summary, 250)
+                ?: 'Öffentlicher Hunt: Showdown Community-Cup auf HNT.ROCKS.';
+            $related = Cup::query()->visible()->whereKeyNot($cup->id)
+                ->whereIn('status', ['planned', 'active', 'finished', 'archived'])
+                ->latest('id')->limit(6)->get(['slug', 'title', 'summary']);
+            $page = [
+                'name' => $title,
+                'title' => $title.' – Hunt: Showdown Cup',
+                'description' => $description,
+                'parent' => 'Community Cups',
+                'parent_url' => url('/'),
+                'kicker' => 'HNT.ROCKS / COMMUNITY CUP',
+                'facts' => [$safe($cup->status, 30), $safe($cup->platform, 60)],
+                'sections' => [
+                    ['heading' => 'Cup-Informationen', 'body' => $description],
+                    ['heading' => 'Regeln', 'body' => $safe($cup->rules, 7000)],
+                ],
+                'links_title' => 'Weitere öffentliche Cups',
+                'links' => $related->map(fn (Cup $item): array => [
+                    'url' => route('cups.show', $item),
+                    'title' => $safe($item->title, 100),
+                    'summary' => $safe($item->summary, 120),
+                    'kicker' => 'COMMUNITY CUP',
+                ])->all(),
+                'schema' => $schema('CreativeWork', $title, $description),
+            ];
+        } elseif (preg_match('~^u/[^/]+$~', $path)) {
+            $param = $route?->parameter('user');
+            $profile = $param instanceof User
+                ? $param
+                : User::query()->where('username', (string) $param)->firstOrFail();
+            $profile->loadMissing('profile');
+            abort_unless($profile->status === 'active'
+                && $profile->profile?->profile_visibility === 'public', 404);
+            $name = $safe($profile->name ?: $profile->username, 100);
+            $description = $safe($profile->profile?->headline
+                ?: $profile->profile?->bio, 250)
+                ?: 'Öffentliches Hunt: Showdown Hunter-Profil von '.$name.' auf HNT.ROCKS.';
+            $page = [
+                'name' => $name,
+                'title' => $name.' (@'.$profile->username.') – Hunter-Profil',
+                'description' => $description,
+                'parent' => 'Hunter',
+                'parent_url' => url('/'),
+                'kicker' => 'HNT.ROCKS / HUNTER',
+                'facts' => array_values(array_filter([
+                    $safe($profile->profile?->platform, 40),
+                    $safe($profile->profile?->region, 40),
+                ])),
+                'sections' => [
+                    ['heading' => 'Über diesen Hunter', 'body' => $safe($profile->profile?->bio, 3500)],
+                ],
+                'links' => [
+                    ['url' => url('/maps'), 'title' => 'Hunt Maps', 'summary' => 'Alle Jagdgebiete erkunden'],
+                    ['url' => url('/loadout-challenges'), 'title' => 'Loadout-Challenges', 'summary' => 'Community-Herausforderungen entdecken'],
+                ],
+                'schema' => [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'ProfilePage',
+                    'url' => url()->current(),
+                    'mainEntity' => ['@type' => 'Person', 'name' => $name],
+                ],
+            ];
+        }
+
+        if (! $page) {
+            return null;
+        }
+
+        $page['canonical'] = url()->current();
+
+        return response()->view('seo.public-spa', ['page' => $page], 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=60',
         ]);
     }
 
