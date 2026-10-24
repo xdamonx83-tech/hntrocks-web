@@ -48,6 +48,11 @@ class ReactAppController extends Controller
         }
 
         $challenge = $route?->parameter('challenge');
+        if (is_string($challenge) && request()->is('loadout-challenges/*')) {
+            // Implicit model binding does not resolve controller parameters that
+            // are absent from __invoke(); look up public SPA permalinks here.
+            $challenge = LoadoutChallenge::query()->where('slug', $challenge)->firstOrFail();
+        }
         if ($challenge instanceof LoadoutChallenge && request()->is('loadout-challenges/*')) {
             if ($challenge->status !== LoadoutChallenge::STATUS_ACTIVE) {
                 return $this->replaceHead($html, 'Loadout Challenge | HNT.ROCKS',
@@ -71,6 +76,9 @@ class ReactAppController extends Controller
         }
 
         $cup = $route?->parameter('cup');
+        if (is_string($cup) && request()->is('cups/*')) {
+            $cup = Cup::query()->where('slug', $cup)->firstOrFail();
+        }
         if ($cup instanceof Cup && request()->is('cups/*')) {
             if ($cup->visibility !== 'public' ||
                 ! in_array($cup->status, ['planned', 'active', 'finished', 'archived'], true)) {
@@ -95,6 +103,9 @@ class ReactAppController extends Controller
         }
 
         $profile = $route?->parameter('user');
+        if (is_string($profile) && request()->is('u/*')) {
+            $profile = User::query()->where('username', $profile)->firstOrFail();
+        }
 
         if ($profile instanceof User && request()->is('u/*')) {
             $profile->loadMissing('profile');
