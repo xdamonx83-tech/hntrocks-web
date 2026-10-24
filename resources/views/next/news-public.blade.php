@@ -76,9 +76,12 @@
 <link rel="stylesheet" href="/build/next/hntv3-js/{{ $mode === 'article' ? 'news-detail' : 'news-hub' }}.css?v=hntv3-news-reader-v2-20261024">
 <link rel="stylesheet" href="/build/next/hntv3-js/hnt-news-live.css?v=hntv3-news-reader-v2-20261024">
 <script defer src="/build/next/hntv3-js/hnt-news-live.js?v=hntv3-news-reader-v2-20261024"></script>
+@if($viewer)
+<script defer src="/build/next/hntv3-js/hnt-news-language.js?v=locale-20261024b"></script>
+@endif
 </head>
 <body class="{{ $viewer ? 'hnt-news-signed' : 'hnt-news-guest' }} {{ $mode === 'article' ? 'hnt-news-detail-shell' : 'hnt-news-shell' }}"
-@if($viewer) data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}"
+@if($viewer) data-hnt-next-news="true" data-next-viewer-name="{{ $viewer->name }}" data-next-viewer-avatar="{{ $viewer->avatarUrl() }}"
 data-next-viewer-profile="{{ $viewer->username ? url('/u/'.$viewer->username) : '' }}"
 data-next-like-effect="{{ \App\Support\CrownCosmetics::forUser($viewer)['like_effect_key'] }}" @endif>
 @include('next.partials.shell.icons')
@@ -130,7 +133,7 @@ window.HNTPrestigeProgress = @json($prestigeProgress);
  </article>
  <aside class="news-lead-sidebar">
   <section class="news-brief-list">
-   <div class="news-rail-heading"><div><span class="news-eyebrow">AUS DEM BAYOU</span><h2>{{ $labels['recent'] }}<span class="title-ember">.</span></h2></div><span class="news-count">{{ str_pad((string)$articles->count(), 2, '0', STR_PAD_LEFT) }}</span></div>
+   <div class="news-rail-heading"><div><span class="news-eyebrow">{{ $locale === 'de' ? 'AUS DEM BAYOU' : ($locale === 'es' ? 'DESDE EL BAYOU' : ($locale === 'ru' ? 'ИЗ БАЙУ' : 'FROM THE BAYOU')) }}</span><h2>{{ $labels['recent'] }}<span class="title-ember">.</span></h2></div><span class="news-count">{{ str_pad((string)$articles->count(), 2, '0', STR_PAD_LEFT) }}</span></div>
    @foreach($briefs as $story)
     <article class="news-side-story">
      <a class="news-side-image" href="{{ $story['url'] }}">

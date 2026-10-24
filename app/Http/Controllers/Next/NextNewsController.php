@@ -17,6 +17,8 @@ final class NextNewsController extends Controller
     {
         $preview = $request->is('next/news*');
         $locale = $this->locale($request, $locale);
+        // News routes bypass NextLocaleMiddleware: load the HNTv3 shell translations explicitly.
+        app('translation.loader')->addPath(base_path('lang'));
         app()->setLocale($locale);
         $request->merge([
             'locale' => $locale,
@@ -58,6 +60,8 @@ final class NextNewsController extends Controller
     {
         abort_unless(in_array($locale, self::LOCALES, true), 404);
         $preview = $request->is('next/news*');
+        // News routes bypass NextLocaleMiddleware: load the HNTv3 shell translations explicitly.
+        app('translation.loader')->addPath(base_path('lang'));
         app()->setLocale($locale);
         $raw = app(NewsPublicController::class)->apiShow($locale, $slug)->getData(true);
         $article = $this->displayArticle($raw['data'] ?? [], $preview);
