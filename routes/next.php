@@ -214,6 +214,7 @@ Route::middleware(['auth', NextLocaleMiddleware::class])->group(function (): voi
 // after routes/web.php (which still contains the older root-owned React
 // route). Do not duplicate the old SPA for signed-in visitors.
 Route::get('/cups/{cup:slug}', \App\Http\Controllers\Next\CanonicalCupDetailController::class)
+    ->middleware(NextLocaleMiddleware::class)
     ->name('cups.show');
 
 // Preview URLs are historical. Redirect all visitors, including search bots,
