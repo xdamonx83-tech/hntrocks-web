@@ -384,8 +384,8 @@ Route::get('/design/socialite-profile/{user:username}', [ProfileController::clas
 Route::get('/hall-of-fame', [CupController::class, 'hallOfFame'])->name('hall-of-fame.index');
 Route::get('/cups', [CupController::class, 'index'])->name('cups.index');
 Route::get('/cups/{cup:slug}/chat', [CupChatMessageController::class, 'index'])->name('cups.chat.index');
-Route::get('/loadout-challenges', [LoadoutChallengeController::class, 'index'])->name('loadout-challenges.index');
-Route::get('/loadout-challenges/{challenge:slug}', [LoadoutChallengeController::class, 'show'])->name('loadout-challenges.show');
+Route::get('/loadout-challenges', ReactAppController::class)->name('loadout-challenges.index');
+Route::get('/loadout-challenges/{challenge:slug}', ReactAppController::class)->name('loadout-challenges.show');
 Route::get('/moment-of-week', [MomentOfWeekController::class, 'index'])->name('moment-of-week.index');
 Route::get('/cup-ideas', [CupIdeaController::class, 'index'])->name('cup-ideas.index');
 Route::get('/u/{user:username}/about', [ProfileController::class, 'about'])->name('profile.about.public');
@@ -688,4 +688,4 @@ Route::middleware('auth')->group(function (): void {
 Route::get('/cups/{cup:slug}/{section}', [CupController::class, 'showSection'])
     ->whereIn('section', ['rules', 'prizes', 'leaderboard', 'participants', 'submit', 'submissions'])
     ->name('cups.show.section');
-Route::get('/cups/{cup:slug}', [CupController::class, 'show'])->name('cups.show');
+Route::get('/cups/{cup:slug}', ReactAppController::class)->name('cups.show');
