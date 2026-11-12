@@ -24,6 +24,7 @@ class Report extends Model
         'assigned_to',
         'resolved_by',
         'resolution_note',
+        'public_response',
         'resolved_at',
     ];
 
