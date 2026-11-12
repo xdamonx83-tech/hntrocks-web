@@ -118,6 +118,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/search', ApiSearchController::class)->name('search');
 
         Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:8,1')->name('reports.store');
+        Route::get('/reports/mine', [\App\Http\Controllers\Api\V1\ApiMyReportsController::class, 'index'])
+            ->middleware('throttle:60,1')->name('reports.mine.index');
+        Route::get('/reports/mine/{report}', [\App\Http\Controllers\Api\V1\ApiMyReportsController::class, 'show'])
+            ->middleware('throttle:60,1')->name('reports.mine.show');
         Route::post('/feedback-tickets', [ApiFeedbackTicketController::class, 'store'])->middleware('throttle:6,1')->name('feedback-tickets.store');
 
         Route::get('/feed', [ApiFeedController::class, 'index'])->name('feed.index');
