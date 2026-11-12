@@ -84,8 +84,14 @@
                     </select>
                 </div>
                 <div>
-                    <label>Notiz</label>
-                    <input type="text" name="resolution_note" value="{{ $report->resolution_note }}" placeholder="Moderationsnotiz">
+                    <label>Interne Notiz (nicht öffentlich)</label>
+                    <input type="text" name="resolution_note" value="{{ $report->resolution_note }}" placeholder="Nur für Moderatoren">
+                </div>
+                <div>
+                    <label for="report-public-response-{{ $report->id }}">Rückmeldung an meldenden Nutzer</label>
+                    <textarea id="report-public-response-{{ $report->id }}"
+                        name="public_response" rows="3" maxlength="2000"
+                        placeholder="Öffentliche Rückmeldung. Keine persönlichen Daten oder internen Notizen angeben.">{{ old('public_response', $report->public_response) }}</textarea>
                 </div>
                 <button class="hh-primary-button" type="submit">Speichern</button>
             </form>
