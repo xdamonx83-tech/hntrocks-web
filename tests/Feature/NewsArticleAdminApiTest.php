@@ -161,6 +161,33 @@ class NewsArticleAdminApiTest extends TestCase
         ])->assertOk()->assertJsonPath('data.status', 'published');
     }
 
+    public function test_publication_date_can_be_backdated_and_is_not_overwritten_on_republish(): void
+    {
+        $admin = $this->user(['is_admin' => true]);
+        $token = $this->token($admin);
+        $article = $this->createDraft($admin, $token);
+        $historical = now()->subDays(13)->startOfHour();
+
+        $first = $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
+            'action' => 'publish',
+            'lock_version' => 1,
+            'published_at' => $historical->toIso8601String(),
+        ])->assertOk()->assertJsonPath('data.status', 'published');
+        $this->assertSame($historical->getTimestamp(), \Carbon\Carbon::parse($first->json('data.published_at'))->getTimestamp());
+
+        $again = $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
+            'action' => 'publish',
+            'lock_version' => 2,
+        ])->assertOk();
+        $this->assertSame($historical->getTimestamp(), \Carbon\Carbon::parse($again->json('data.published_at'))->getTimestamp());
+
+        $this->withToken($token)->postJson('/api/v1/admin/news/articles/'.$article->id.'/workflow', [
+            'action' => 'publish',
+            'lock_version' => 3,
+            'published_at' => now()->addDay()->toIso8601String(),
+        ])->assertUnprocessable()->assertJsonValidationErrors('published_at');
+    }
+
     public function test_paragraph_rich_text_accepts_safe_runs_and_rejects_unsafe_links(): void
     {
         $admin = $this->user(['is_admin' => true]);
