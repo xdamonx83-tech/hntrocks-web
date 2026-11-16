@@ -85,8 +85,9 @@ class NewsArticleEditorService
         int $expectedVersion,
         string $action,
         ?string $scheduledAt = null,
+        ?string $publishedAt = null,
     ): NewsArticle {
-        return DB::transaction(function () use ($routeArticle, $editor, $expectedVersion, $action, $scheduledAt): NewsArticle {
+        return DB::transaction(function () use ($routeArticle, $editor, $expectedVersion, $action, $scheduledAt, $publishedAt): NewsArticle {
             $article = NewsArticle::query()->lockForUpdate()->findOrFail($routeArticle->id);
             $this->assertVersion($article, $expectedVersion);
 
@@ -123,10 +124,18 @@ class NewsArticleEditorService
 
                 case 'publish':
                     $this->assertPublishable($article);
+                    $publicationTime = $publishedAt !== null
+                        ? Carbon::parse($publishedAt)
+                        : ($article->status === NewsArticle::STATUS_PUBLISHED && $article->published_at
+                            ? $article->published_at
+                            : now());
+                    if ($publicationTime->isFuture()) {
+                        throw ValidationException::withMessages(['published_at' => 'Publication date cannot be in the future.']);
+                    }
                     $attributes += [
                         'status' => NewsArticle::STATUS_PUBLISHED,
                         'scheduled_at' => null,
-                        'published_at' => now(),
+                        'published_at' => $publicationTime,
                         'archived_at' => null,
                         'published_by_user_id' => $editor?->id,
                     ];
