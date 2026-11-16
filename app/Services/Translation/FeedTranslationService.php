@@ -306,7 +306,13 @@ class FeedTranslationService
                     'status' => $response->status(),
                     'body' => substr((string) $response->body(), 0, 500),
                 ]);
-                throw new RuntimeException('Translation API error.');
+                if (in_array($response->status(), [401, 403], true)) {
+                    throw new RuntimeException('Translation API authentication failed. Check the configured API key.');
+                }
+                if ($response->status() === 429) {
+                    throw new RuntimeException('Translation API limit or quota reached. Check API billing and rate limits.');
+                }
+                throw new RuntimeException('Translation API error (HTTP '.$response->status().').');
             }
 
             $raw = trim((string) data_get($response->json(), 'choices.0.message.content', ''));
