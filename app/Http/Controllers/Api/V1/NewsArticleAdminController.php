@@ -80,6 +80,7 @@ class NewsArticleAdminController extends Controller
             'action' => ['required', Rule::in(['draft', 'schedule', 'publish', 'archive'])],
             'lock_version' => ['required', 'integer', 'min:1'],
             'scheduled_at' => ['required_if:action,schedule', 'prohibited_unless:action,schedule', 'date', 'after:now'],
+            'published_at' => ['sometimes', 'prohibited_unless:action,publish', 'date', 'before_or_equal:now'],
         ]);
 
         $updated = $editor->transition(
@@ -88,6 +89,7 @@ class NewsArticleAdminController extends Controller
             (int) $data['lock_version'],
             $data['action'],
             $data['scheduled_at'] ?? null,
+            $data['published_at'] ?? null,
         );
 
         return NewsArticleResource::make($updated->load(['translations', 'heroMedia'])->loadCount('revisions'));
